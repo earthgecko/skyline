@@ -63,6 +63,23 @@ def alert_hipchat(alert, metric):
         hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'Skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': 'Anomaly: <a href="%s">%s</a> : %s' % (link, metric[1], metric[0])})
 
 
+def alert_syslog(alert, metric):
+    import sys
+    import syslog
+    import time
+    syslog_ident = settings.SYSLOG_OPTS['ident']
+    message = str("Anomalous metric: %s (value: %s)" % (metric[1], metric[0]))
+    if sys.version_info[:2] == (2, 6):
+        syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
+    elif sys.version_info[:2] == (2, 7):
+        syslog.openlog(ident="skyline", logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
+    elif sys.version_info[:1] == (3):
+        syslog.openlog(ident="skyline", logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
+    else:
+        syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
+    syslog.syslog(4, message)
+
+
 def trigger_alert(alert, metric):
 
     if '@' in alert[1]:
