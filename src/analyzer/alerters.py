@@ -66,7 +66,6 @@ def alert_hipchat(alert, metric):
 def alert_syslog(alert, metric):
     import sys
     import syslog
-    import time
     syslog_ident = settings.SYSLOG_OPTS['ident']
     message = str("Anomalous metric: %s (value: %s)" % (metric[1], metric[0]))
     if sys.version_info[:2] == (2, 6):
