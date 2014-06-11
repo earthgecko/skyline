@@ -209,8 +209,11 @@ MAX_RESOLUTION = 1000
 # in Skyline. The Listener will check to see if each incoming metrics
 # contains anything in the skip list. It is generally wise to skip entire
 # namespaces by adding a '.' at the end of the skipped item - otherwise
-# you might skip things you don't intend to.
+# you might skip things you don't intend to.  For example the default
+# skyline.analyzer.anomaly_breakdown. which MUST be skipped to prevent crazy
+# feedback.
 SKIP_LIST = [
+    'skyline.analyzer.anomaly_breakdown.',
     'example.statsd.metric',
     'another.example.metric',
     # if you use statsd, these can result in many near-equal series
