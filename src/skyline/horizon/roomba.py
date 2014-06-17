@@ -7,7 +7,7 @@ from types import TupleType
 from time import time, sleep
 
 import logging
-import settings
+from skyline import settings
 
 logger = logging.getLogger("HorizonLog")
 

@@ -7,7 +7,7 @@ from time import time, sleep
 
 import logging
 import socket
-import settings
+from skyline import settings
 
 logger = logging.getLogger("HorizonLog")
 

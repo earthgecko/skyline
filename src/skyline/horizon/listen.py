@@ -6,7 +6,7 @@ from struct import Struct, unpack
 from msgpack import unpackb
 
 import logging
-import settings
+from skyline import settings
 
 logger = logging.getLogger("HorizonLog")
 
