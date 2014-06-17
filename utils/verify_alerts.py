@@ -11,11 +11,10 @@ __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
 # Add the shared settings file to namespace.
 sys.path.insert(0, join(__location__, '..', 'src'))
-import settings
+from skyline import settings
 
 # Add the analyzer file to namespace.
-sys.path.insert(0, join(__location__, '..', 'src', 'analyzer'))
-from alerters import trigger_alert
+from skyline.analyzer.alerters import trigger_alert
 
 parser = OptionParser()
 parser.add_option("-t", "--trigger", dest="trigger", default=False,

@@ -1,0 +1,2 @@
+recursive-include src/skyline/webapp/static *
+recursive-include src/skyline/webapp/templates *

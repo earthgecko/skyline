@@ -6,7 +6,7 @@ from os.path import dirname, abspath
 
 # add the shared settings file to namespace
 sys.path.insert(0, ''.join((dirname(dirname(abspath(__file__))), "/src")))
-import settings
+from skyline import settings
 
 metric = 'horizon.test.udp'
 

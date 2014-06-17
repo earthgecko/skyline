@@ -38,7 +38,7 @@ var handle_data = function(data) {
 // The callback to this function is handle_data()
 var pull_data = function() {
     $.ajax({
-        url: "/static/dump/anomalies.json",
+        url: "/anomalies.json",
         dataType: 'jsonp'
     });
 }

@@ -2,14 +2,8 @@ import unittest2 as unittest
 from mock import Mock, patch
 from time import time
 
-import sys
-from os.path import dirname, abspath
-
-sys.path.insert(0, dirname(dirname(abspath(__file__))) + '/src')
-sys.path.insert(0, dirname(dirname(abspath(__file__))) + '/src/analyzer')
-
-import algorithms
-import settings
+from skyline.analyzer import algorithms
+from skyline import settings
 
 
 class TestAlgorithms(unittest.TestCase):

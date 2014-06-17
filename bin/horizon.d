@@ -5,9 +5,17 @@
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
 RETVAL=0
 
+# Determine the script to run depending on whether this script is in the source
+# tree or installed
+SCRIPT="${BASEDIR}/bin/horizon-agent"
+if [ -e "${BASEDIR}/setup.py" ]
+then
+    SCRIPT="${BASEDIR}/src/skyline/horizon/agent.py"
+fi
+
 start () {
     rm $BASEDIR/src/horizon/*.pyc
-    /usr/bin/env python $BASEDIR/src/horizon/horizon-agent.py start
+    /usr/bin/env python $SCRIPT start
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
             echo "started horizon-agent"
@@ -20,7 +28,7 @@ start () {
 stop () {
     # TODO: write a real kill script
     ps aux | grep 'horizon-agent.py start' | grep -v grep | awk '{print $2 }' | xargs sudo kill -9
-    /usr/bin/env python $BASEDIR/src/horizon/horizon-agent.py stop
+    /usr/bin/env python $SCRIPT stop
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
             echo "stopped horizon-agent"
@@ -32,7 +40,7 @@ stop () {
 
 run () {
     echo "running horizon"
-    /usr/bin/env python $BASEDIR/src/horizon/horizon-agent.py run
+    /usr/bin/env python $SCRIPT run
 }
 
 # See how we were called.

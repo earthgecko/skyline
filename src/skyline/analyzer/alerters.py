@@ -3,7 +3,7 @@ from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
 from smtplib import SMTP
 import alerters
-import settings
+from skyline import settings
 
 
 """

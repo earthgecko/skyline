@@ -8,7 +8,7 @@ from time import time
 from msgpack import unpackb, packb
 from redis import StrictRedis
 
-from settings import (
+from skyline.settings import (
     ALGORITHMS,
     CONSENSUS,
     FULL_DURATION,

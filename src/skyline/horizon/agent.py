@@ -16,6 +16,7 @@ from worker import Worker
 
 # TODO: http://stackoverflow.com/questions/6728236/exception-thrown-in-multiprocessing-pool-not-detected
 
+logger = logging.getLogger("HorizonLog")
 
 class Horizon():
     def __init__(self):
@@ -60,7 +61,8 @@ class Horizon():
         while 1:
             time.sleep(100)
 
-if __name__ == "__main__":
+
+def run():
     """
     Start the Horizon agent.
     """
@@ -74,7 +76,6 @@ if __name__ == "__main__":
 
     horizon = Horizon()
 
-    logger = logging.getLogger("HorizonLog")
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     handler = logging.FileHandler(settings.LOG_PATH + '/horizon.log')
@@ -87,3 +88,6 @@ if __name__ == "__main__":
         daemon_runner = runner.DaemonRunner(horizon)
         daemon_runner.daemon_context.files_preserve = [handler.stream]
         daemon_runner.do_action()
+
+if __name__ == "__main__":
+    run()

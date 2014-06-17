@@ -1,6 +1,10 @@
 *.pyc
 *.swp
 *.log
-settings.py
 dump.rdb
 nohup.out
+/build
+/dist
+*.egg
+/nosetests.xml
+*.egg-info

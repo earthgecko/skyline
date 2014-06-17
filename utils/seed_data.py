@@ -19,7 +19,7 @@ __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
 # Add the shared settings file to namespace.
 sys.path.insert(0, join(__location__, '..', 'src'))
-import settings
+from skyline import settings
 
 
 class NoDataException(Exception):

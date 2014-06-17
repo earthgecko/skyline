@@ -5,9 +5,17 @@
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
 RETVAL=0
 
+# Determine the script to run depending on whether this script is in the source
+# tree or installed
+SCRIPT="${BASEDIR}/bin/skyline-webapp"
+if [ -e "${BASEDIR}/setup.py" ]
+then
+    SCRIPT="${BASEDIR}/src/skyline/webapp/webapp.py"
+fi
+
 start () {
     rm -f $BASEDIR/src/webapp/*.pyc
-    /usr/bin/env python $BASEDIR/src/webapp/webapp.py start
+    /usr/bin/env python $SCRIPT start
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
             echo "started webapp"
@@ -18,7 +26,7 @@ start () {
 }
 
 stop () {
-    /usr/bin/env python $BASEDIR/src/webapp/webapp.py stop
+    /usr/bin/env python $SCRIPT stop
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
             echo "stopped webapp"
@@ -30,7 +38,7 @@ stop () {
 
 restart () {
     rm -f $BASEDIR/src/webapp/*.pyc
-    /usr/bin/env python $BASEDIR/src/webapp/webapp.py restart
+    /usr/bin/env python $SCRIPT restart
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
             echo "restarted webapp"
@@ -42,7 +50,7 @@ restart () {
 
 run () {
     echo "running webapp"
-    /usr/bin/env python $BASEDIR/src/webapp/webapp.py run
+    /usr/bin/env python $SCRIPT run
 }
 
 # See how we were called.

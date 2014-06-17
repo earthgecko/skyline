@@ -2,15 +2,14 @@ import logging
 import sys
 import traceback
 from os import getpid
-from os.path import dirname, abspath, isdir
+from os.path import isdir
 from daemon import runner
 from time import sleep, time
 
-# add the shared settings file to namespace
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
-import settings
+from skyline import settings
+from skyline.analyzer.analyzer import Analyzer
 
-from analyzer import Analyzer
+logger = logging.getLogger("AnalyzerLog")
 
 
 class AnalyzerAgent():
@@ -28,7 +27,8 @@ class AnalyzerAgent():
         while 1:
             sleep(100)
 
-if __name__ == "__main__":
+
+def run():
     """
     Start the Analyzer agent.
     """
@@ -42,9 +42,9 @@ if __name__ == "__main__":
 
     # Make sure we can run all the algorithms
     try:
-        from algorithms import *
+        from skyline.analyzer import algorithms
         timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
-        ensemble = [globals()[algorithm](timeseries) for algorithm in settings.ALGORITHMS]
+        ensemble = [getattr(algorithms, algorithm)(timeseries) for algorithm in settings.ALGORITHMS]
     except KeyError as e:
         print "Algorithm %s deprecated or not defined; check settings.ALGORITHMS" % e
         sys.exit(1)
@@ -55,7 +55,6 @@ if __name__ == "__main__":
 
     analyzer = AnalyzerAgent()
 
-    logger = logging.getLogger("AnalyzerLog")
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     handler = logging.FileHandler(settings.LOG_PATH + '/analyzer.log')
@@ -68,3 +67,6 @@ if __name__ == "__main__":
         daemon_runner = runner.DaemonRunner(analyzer)
         daemon_runner.daemon_context.files_preserve = [handler.stream]
         daemon_runner.do_action()
+
+if __name__ == "__main__":
+    run()

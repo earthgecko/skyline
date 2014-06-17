@@ -7,19 +7,25 @@ from flask import Flask, request, render_template
 from daemon import runner
 from os.path import dirname, abspath
 
-# add the shared settings file to namespace
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
-import settings
+from skyline import settings
 
 REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
 app = Flask(__name__)
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
+logger = logging.getLogger("AppLog")
+
 
 @app.route("/")
 def index():
     return render_template('index.html'), 200
+
+
+@app.route("/anomalies.json")
+def anomalies():
+    with open(settings.ANOMALY_DUMP, 'r') as f:
+        return f.read(), 200
 
 
 @app.route("/app_settings")
@@ -70,14 +76,14 @@ class App():
 
         app.run(settings.WEBAPP_IP, settings.WEBAPP_PORT)
 
-if __name__ == "__main__":
+
+def run():
     """
     Start the server
     """
 
     webapp = App()
 
-    logger = logging.getLogger("AppLog")
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     handler = logging.FileHandler(settings.LOG_PATH + '/webapp.log')
@@ -90,3 +96,6 @@ if __name__ == "__main__":
         daemon_runner = runner.DaemonRunner(webapp)
         daemon_runner.daemon_context.files_preserve = [handler.stream]
         daemon_runner.do_action()
+
+if __name__ == "__main__":
+    run()

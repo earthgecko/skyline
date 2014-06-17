@@ -18,6 +18,11 @@ except:
   import pickle
   USING_CPICKLE = False
 
+try:
+  from cStringIO import StringIO
+except:
+  from StringIO import StringIO
+
 # This whole song & dance is due to pickle being insecure
 # yet performance critical for carbon. We leave the insecure
 # mode (which is faster) as an option (USE_INSECURE_UNPICKLER).

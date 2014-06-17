@@ -11,7 +11,7 @@ from math import ceil
 import traceback
 import operator
 import socket
-import settings
+from skyline import settings
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
