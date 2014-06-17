@@ -6,9 +6,7 @@ from os.path import dirname, abspath, isdir
 from multiprocessing import Queue
 from daemon import runner
 
-# add the shared settings file to namespace
-sys.path.insert(0, dirname(dirname(abspath(__file__))))
-import settings
+from skyline import settings
 
 from listen import Listen
 from roomba import Roomba
