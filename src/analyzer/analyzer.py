@@ -12,6 +12,7 @@ import traceback
 import operator
 import socket
 import settings
+import re
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -191,7 +192,11 @@ class Analyzer(Thread):
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
                     for metric in self.anomalous_metrics:
-                        if alert[0] in metric[1]:
+                        ALERT_MATCH_PATTERN = alert[0]
+                        METRIC_PATTERN = metric[1]
+                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                        if pattern_match:
                             cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
                             try:
                                 last_alert = self.redis_conn.get(cache_key)

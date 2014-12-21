@@ -84,8 +84,9 @@ start analyzing for anomalies!
 ### Alerts
 Skyline can alert you! In your settings.py, add any alerts you want to the ALERTS
 list, according to the schema `(metric keyword, strategy, expiration seconds)` where
-`strategy` is one of `smtp`, `hipchat`, or `pagerduty`. You can also add your own
-alerting strategies. For every anomalous metric, Skyline will search for the given
+`strategy` is one of `smtp`, `hipchat`, or `pagerduty`.  Wildcards can be used in
+the `metric keyword` as well. You can also add your own alerting strategies.
+For every anomalous metric, Skyline will search for the given
 keyword and trigger the corresponding alert(s). To prevent alert fatigue, Skyline
 will only alert once every <expiration seconds> for any given metric/strategy
 combination. To enable Hipchat integration, uncomment the python-simple-hipchat
