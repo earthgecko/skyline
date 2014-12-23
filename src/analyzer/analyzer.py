@@ -19,6 +19,10 @@ from algorithm_exceptions import *
 
 logger = logging.getLogger("AnalyzerLog")
 
+try:
+  SERVER_METRIC_PATH = settings.SERVER_METRICS_NAME + '.'
+except:
+  SERVER_METRIC_PATH = ''
 
 class Analyzer(Thread):
     def __init__(self, parent_pid):
@@ -219,8 +223,8 @@ class Analyzer(Thread):
             logger.info('anomaly breakdown :: %s' % anomaly_breakdown)
 
             # Log to Graphite
-            self.send_graphite_metric('skyline.analyzer.run_time', '%.2f' % (time() - now))
-            self.send_graphite_metric('skyline.analyzer.total_analyzed', '%.2f' % (len(unique_metrics) - sum(exceptions.values())))
+            self.send_graphite_metric('skyline.analyzer.' + SERVER_METRIC_PATH + 'run_time', '%.2f' % (time() - now))
+            self.send_graphite_metric('skyline.analyzer.' + SERVER_METRIC_PATH + 'total_analyzed', '%.2f' % (len(unique_metrics) - sum(exceptions.values())))
 
             # Check canary metric
             raw_series = self.redis_conn.get(settings.FULL_NAMESPACE + settings.CANARY_METRIC)
@@ -232,8 +236,8 @@ class Analyzer(Thread):
                 projected = 24 * (time() - now) / time_human
 
                 logger.info('canary duration   :: %.2f' % time_human)
-                self.send_graphite_metric('skyline.analyzer.duration', '%.2f' % time_human)
-                self.send_graphite_metric('skyline.analyzer.projected', '%.2f' % projected)
+                self.send_graphite_metric('skyline.analyzer.' + SERVER_METRIC_PATH + 'duration', '%.2f' % time_human)
+                self.send_graphite_metric('skyline.analyzer.' + SERVER_METRIC_PATH + 'projected', '%.2f' % projected)
 
             # Reset counters
             self.anomalous_metrics[:] = []

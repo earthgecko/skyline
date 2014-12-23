@@ -11,6 +11,10 @@ import settings
 
 logger = logging.getLogger("HorizonLog")
 
+try:
+  SERVER_METRIC_PATH = settings.SERVER_METRICS_NAME + '.'
+except:
+  SERVER_METRIC_PATH = ''
 
 class Worker(Process):
     """
@@ -111,7 +115,7 @@ class Worker(Process):
                 # Log progress
                 if self.canary:
                     logger.info('queue size at %d' % self.q.qsize())
-                    self.send_graphite_metric('skyline.horizon.queue_size', self.q.qsize())
+                    self.send_graphite_metric('skyline.horizon.' + SERVER_METRIC_PATH + 'queue_size', self.q.qsize())
 
             except Empty:
                 logger.info('worker queue is empty and timed out')
