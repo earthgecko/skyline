@@ -120,6 +120,7 @@ ENABLE_ALERTS = True
 #          ("metric1", "smtp", EXPIRATION_TIME),
 #          ("metric2", "pagerduty", EXPIRATION_TIME),
 #          ("metric3", "hipchat", EXPIRATION_TIME),
+#          ("stats", "syslog", EXPIRATION_TIME),
 #         )
 ALERTS = (
     ("skyline", "smtp", 1800),
@@ -156,6 +157,14 @@ PAGERDUTY_OPTS = {
     "auth_token": "your_pagerduty_auth_token",
     # Service API key (shown on the detail page of a "Generic API" service)
     "key": "your_pagerduty_service_api_key",
+}
+
+# syslog alerts requires an ident
+# Adds a LOG_WARNING message to the LOG_LOCAL4 which is local and will ship to
+# any syslog or rsyslog down the line. The EXPIRATION_TIME for the syslog alert
+# method should be set to 1 to fire every anomaly into the syslog
+SYSLOG_OPTS = {
+    "ident": "skyline",
 }
 
 
