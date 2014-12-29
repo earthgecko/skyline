@@ -121,6 +121,8 @@ ENABLE_ALERTS = True
 #          ("metric2", "pagerduty", EXPIRATION_TIME),
 #          ("metric3", "hipchat", EXPIRATION_TIME),
 #          ("stats", "syslog", EXPIRATION_TIME),
+# Wildcard namespaces can be used as well
+#          ("metric4.thing.*.requests", "stmp", EXPIRATION_TIME),
 #         )
 ALERTS = (
     ("skyline", "smtp", 1800),
