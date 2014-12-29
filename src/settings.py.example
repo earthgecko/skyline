@@ -47,6 +47,13 @@ CARBON_PORT = 2003
 # will occur when Oculus support is disabled.
 OCULUS_HOST = 'http://your_oculus_host.com'
 
+# This is to allow for multiple skyline nodes to send metrics to a graphite
+# instance on the skyline namespace sharded by this setting, like carbon.relays.
+# If you want multiple skyline hosts, set the hostname of the skyline here e.g.
+# skyline.analyzer.run_time
+# skyline.analyzer.skyline-01.run_time
+SERVER_METRICS_NAME = ''
+
 """
 Analyzer settings
 """
