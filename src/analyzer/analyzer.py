@@ -221,6 +221,14 @@ class Analyzer(Thread):
             # Log to Graphite
             self.send_graphite_metric('skyline.analyzer.run_time', '%.2f' % (time() - now))
             self.send_graphite_metric('skyline.analyzer.total_analyzed', '%.2f' % (len(unique_metrics) - sum(exceptions.values())))
+            self.send_graphite_metric('skyline.analyzer.total_anomalies', '%d' % len(self.anomalous_metrics))
+            self.send_graphite_metric('skyline.analyzer.total_metrics', '%d' % len(unique_metrics))
+            for key, value in exceptions.items():
+                send_metric = 'skyline.analyzer.exceptions.%s' % key
+                self.send_graphite_metric(send_metric, '%d' % value)
+            for key, value in anomaly_breakdown.items():
+                send_metric = 'skyline.analyzer.anomaly_breakdown.%s' % key
+                self.send_graphite_metric(send_metric, '%d' % value)
 
             # Check canary metric
             raw_series = self.redis_conn.get(settings.FULL_NAMESPACE + settings.CANARY_METRIC)
