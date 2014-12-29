@@ -137,6 +137,7 @@ SMTP_OPTS = {
     "recipients": {
         "skyline": ["abe@etsy.com", "you@yourcompany.com"],
     },
+    "embed-images": False
 }
 
 # HipChat alerts require python-simple-hipchat

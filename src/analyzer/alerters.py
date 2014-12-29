@@ -4,7 +4,7 @@ from email.MIMEImage import MIMEImage
 from smtplib import SMTP
 import alerters
 import settings
-
+import urllib2
 
 """
 Create any alerter you want here. The function will be invoked from trigger_alert.
@@ -34,14 +34,36 @@ def alert_smtp(alert, metric):
     if type(recipients) is str:
         recipients = [recipients]
 
+    link = '%s/render/?width=588&height=308&target=%s' % (settings.GRAPHITE_HOST, metric[1])
+    content_id = metric[1]
+    image_data = None
+    if settings.SMTP_OPTS.get('embed-images'):
+        try:
+            image_data = urllib2.urlopen(link).read()
+        except urllib2.URLError:
+            image_data = None
+
+    # If we failed to get the image or if it was explicitly disabled,
+    # use the image URL instead of the content.
+    if image_data is None:
+        img_tag = '<img src="%s"/>' % link
+    else:
+        img_tag = '<img src="cid:%s"/>' % content_id
+
+    body = 'Anomalous value: %s <br> Next alert in: %s seconds <br> <a href="%s">%s</a>' % (metric[0], alert[2], link, img_tag)
+
     for recipient in recipients:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = '[skyline alert] ' + metric[1]
         msg['From'] = sender
         msg['To'] = recipient
-        link = settings.GRAPH_URL % (metric[1])
-        body = 'Anomalous value: %s <br> Next alert in: %s seconds <a href="%s"><img src="%s"/></a>' % (metric[0], alert[2], link, link)
+
         msg.attach(MIMEText(body, 'html'))
+        if image_data is not None:
+            msg_attachment = MIMEImage(image_data)
+            msg_attachment.add_header('Content-ID', '<%s>' % content_id)
+            msg.attach(msg_attachment)
+
         s = SMTP('127.0.0.1')
         s.sendmail(sender, recipient, msg.as_string())
         s.quit()
