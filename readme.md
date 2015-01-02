@@ -83,8 +83,11 @@ start analyzing for anomalies!
 
 ### Alerts
 Skyline can alert you! In your settings.py, add any alerts you want to the ALERTS
-list, according to the schema `(metric keyword, strategy, expiration seconds)` where
-`strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards can be used in
+list, according to the schema (<optional>):
+
+* `(metric keyword, strategy, expiration seconds, <SECOND_ORDER_RESOLUTION_HOURS>)`
+
+where `strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards can be used in
 the `metric keyword` as well. You can also add your own alerting strategies. For
 every anomalous metric, Skyline will search for the given
 keyword and trigger the corresponding alert(s). To prevent alert fatigue, Skyline
@@ -94,9 +97,64 @@ line in the requirements.txt file.  If using syslog then the `EXPIRATION_TIME`
 should be set to 1 for this to be effective in catching every anomaly, e.g.
 `("stats", "syslog", 1)`
 
+
 ### How do you actually detect anomalies?
 An ensemble of algorithms vote. Majority rules. Batteries __kind of__ included.
 See [wiki](https://github.com/etsy/skyline/wiki/Analyzer)
+
+### mirage
+mirage is an extension of skyline analyzer that enables second order resolution 
+analysis of metrics that have a `SECOND_ORDER_RESOLUTION_HOURS` defined in the 
+alert tuple.
+Skyline's `FULL_DURATION` somewhat limits Skyline's usefulness for metrics 
+that have a seasonality / periodicity > `FULL_DURATION`. mirage uses the 
+user defined seasonality for a metric (`SECOND_ORDER_RESOLUTION_HOURS`) 
+and if analyzer finds a metric to be anomalous at `FULL_DURATION` and the 
+metric alert tuple has `SECOND_ORDER_RESOLUTION_HOURS` and `ENABLE_MIRAGE` 
+is 'True', analyzer will push the metric variables to the mirage check dir for 
+mirage to surface the metric timeseries at its proper seasonality, in realtime 
+from graphite in json format and then analyze the timeseries to determine if the 
+datapoint that triggered analyzer, is anomalous at the metric's true seasonality.
+
+By default mirage is disabled, various mirage options can be configured in the 
+settings.py file and analyzer and mirage can be configured as approriate for your 
+environment.
+
+mirage requires some directories: 
+
+``` 
+sudo mkdir -p $MIRAGE_CHECK_PATH
+sudo mkdir -p $MIRAGE_DATA_FOLDER
+```
+
+Configure settings.py with some alert tuples that have the ```SECOND_ORDER_RESOLUTION_HOURS```
+defined, e.g.:
+
+```
+ALERTS = (
+           ("skyline", "smtp", 1800),
+           ("stats_counts.http.rpm.publishers.*", "smtp", 300, 168),
+)
+```
+
+And ensure that settings.py has mirage options enabled:
+
+```
+ENABLE_MIRAGE = True
+
+MIRAGE_ENABLE_ALERTS = True
+```
+
+Start mirage:
+
+* `cd skyline/bin`
+* `sudo ./mirage.d start`
+
+mirage allows for testing of realtime data and algorithms in parallel to analyzer 
+allowing for comparisons of different timeseries and/or algorithms.  mirage was 
+inspired by crucible and the desire to extend the temporal data pools available 
+to analyzer in an attempt to handle seasonality better and reduce noise and 
+increase signals specfically on metrics with seasonality.
 
 ### Architecture
 See the rest of the
