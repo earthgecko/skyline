@@ -156,8 +156,8 @@ Start mirage:
 mirage allows for testing of realtime data and algorithms in parallel to analyzer 
 allowing for comparisons of different timeseries and/or algorithms.  mirage was 
 inspired by crucible and the desire to extend the temporal data pools available 
-to analyzer in an attempt to handle seasonality better and reduce noise and 
-increase signals specfically on metrics with seasonality.
+to analyzer in an attempt to handle seasonality better, reduce noise and increase 
+signal, specfically on seasonal metrics.
 
 ### Architecture
 See the rest of the
