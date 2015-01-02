@@ -163,7 +163,7 @@ class Mirage(Thread):
         int_metric_timestamp = int(metric_vars.metric_timestamp)
         int_run_timestamp = int(run_timestamp)
         metric_timestamp_age = int_run_timestamp - int_metric_timestamp
-        if metric_timestamp_age > 300:
+        if metric_timestamp_age > settings.MIRAGE_STALE_SECONDS:
             logger.info('stale check       :: %s check request is %s seconds old - discarding' % (metric_vars.metric, metric_timestamp_age))
             # Remove metric check file
             try:

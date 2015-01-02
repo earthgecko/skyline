@@ -290,6 +290,9 @@ MIRAGE_ALGORITHMS = [
                       'ks_test',
                      ]
 
+# The number of seconds after which a check is considered stale and discarded.
+MIRAGE_STALE_SECONDS = 120
+
 # This is the number of algorithms that must return True before a metric is
 # classified as anomalous.
 MIRAGE_CONSENSUS = 6

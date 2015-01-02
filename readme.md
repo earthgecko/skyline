@@ -106,7 +106,7 @@ An ensemble of algorithms vote. Majority rules. Batteries __kind of__ included.
 See [wiki](https://github.com/etsy/skyline/wiki/Analyzer)
 
 ### mirage
-mirage is an extension of skyline analyzer that enables second order resolution 
+mirage is an extension of skyline that enables second order resolution 
 analysis of metrics that have a `SECOND_ORDER_RESOLUTION_HOURS` defined in the 
 alert tuple.
 Skyline's `FULL_DURATION` somewhat limits Skyline's usefulness for metrics 
@@ -158,6 +158,13 @@ allowing for comparisons of different timeseries and/or algorithms.  mirage was
 inspired by crucible and the desire to extend the temporal data pools available 
 to analyzer in an attempt to handle seasonality better, reduce noise and increase 
 signal, specfically on seasonal metrics.
+
+mirage is rate limited to analyse 30 metrics per minute, this is by design and
+desired. Surfacing data from graphite and analysing ~1000 datapoints in a timeseries 
+takes less than 1 second and is much less CPU intensive than analyzer, but it is 
+probably sufficient to have 30 calls to graphite per minute and if a large number 
+of metrics went anomalous, even with mirage discarding `MIRAGE_STALE_SECONDS` 
+checks due to processing limit, signals would still be sent.
 
 ### Architecture
 See the rest of the
