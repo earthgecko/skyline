@@ -42,8 +42,8 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
     if type(recipients) is str:
         recipients = [recipients]
 
-    graph_title = '&title=Mirage%%20negation%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (second_order_resolution_in_hours, metric[1], metric[0])
-    analyzer_graph_title = '&title=Analyzer%%20alert%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (full_duration_in_hours, metric[1], metric_value)
+    graph_title = '&title=skyline%%20mirage%%20negation%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (second_order_resolution_in_hours, metric[1], metric[0])
+    analyzer_graph_title = '&title=skyline%%20analyzer%%20alert%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (full_duration_in_hours, metric[1], metric_value)
 
     if settings.GRAPHITE_PORT != '':
         link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)

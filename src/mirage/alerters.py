@@ -42,12 +42,12 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
     if type(recipients) is str:
         recipients = [recipients]
 
-    graph_title = '&title=mirage%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (second_order_resolution_in_hours, metric[1], metric[0])
+    graph_title = '&title=skyline%%20mirage%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (second_order_resolution_in_hours, metric[1], metric[0])
 
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shour&target=%s%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        link = '%s://%s/render/?from=-%shour&target=%s%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
     image_data = None
