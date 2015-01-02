@@ -12,9 +12,6 @@ import traceback
 import operator
 import socket
 import settings
-
-# @added 20141221 - Feature #20429: skyline - wildcard alert patterns
-# Import python regular expression
 import re
 
 from alerters import trigger_alert

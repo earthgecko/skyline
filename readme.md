@@ -110,8 +110,13 @@ mirage is an extension of skyline that enables second order resolution
 analysis of metrics that have a `SECOND_ORDER_RESOLUTION_HOURS` defined in the 
 alert tuple.
 Skyline's `FULL_DURATION` somewhat limits Skyline's usefulness for metrics 
-that have a seasonality / periodicity > `FULL_DURATION`. mirage uses the 
-user defined seasonality for a metric (`SECOND_ORDER_RESOLUTION_HOURS`) 
+that have a seasonality / periodicity that is greater than `FULL_DURATION`.  
+Increasing skyline's `FULL_DURATION` to anything above 24 hours (86400) is not 
+necessarily realistic or useful, because the greater the `FULL_DURATION`, the 
+greater redis memory and the longer `skyline.analyzer.run_time` and if you to 
+analyze all your metrics within as close to a 60 second period as possible, lag 
+begins to inhabits efficiency.
+mirage uses the user-defined seasonality for a metric (`SECOND_ORDER_RESOLUTION_HOURS`) 
 and if analyzer finds a metric to be anomalous at `FULL_DURATION` and the 
 metric alert tuple has `SECOND_ORDER_RESOLUTION_HOURS` and `ENABLE_MIRAGE` 
 is 'True', analyzer will push the metric variables to the mirage check dir for 
@@ -123,7 +128,7 @@ By default mirage is disabled, various mirage options can be configured in the
 settings.py file and analyzer and mirage can be configured as approriate for your 
 environment.
 
-mirage requires some directories: 
+mirage requires some directories as per settings.py defines (these require absolute path): 
 
 ``` 
 sudo mkdir -p $MIRAGE_CHECK_PATH

@@ -70,7 +70,7 @@ Analyzer settings
 ANOMALY_DUMP = 'webapp/static/dump/anomalies.json'
 
 # This is the location the Skyline agent will write the second order resolution
-# anomalies to check to file on disk.
+# anomalies to check to file on disk - absolute path
 MIRAGE_CHECK_PATH = '/opt/skyline/mirage/check'
 
 # This is the number of processes that the Skyline analyzer will spawn.
@@ -273,7 +273,7 @@ Mirage settings
 """
 
 # This is the path for the Mirage data folder where timeseries data that has
-# been surfaced will be written.
+# been surfaced will be written - absolute path
 MIRAGE_DATA_FOLDER = '/opt/skyline/mirage/data'
 
 # These are the algorithms that the Analyzer will run. To add a new algorithm,
