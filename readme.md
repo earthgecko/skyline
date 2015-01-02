@@ -83,20 +83,19 @@ start analyzing for anomalies!
 
 ### Alerts
 Skyline can alert you! In your settings.py, add any alerts you want to the ALERTS
-list, according to the schema (<optional>):
-
+list, according to the schema (`<optional>`):
 * `(metric keyword, strategy, expiration seconds, <SECOND_ORDER_RESOLUTION_HOURS>)`
-
-where `strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards can be used in
-the `metric keyword` as well. You can also add your own alerting strategies. For
-every anomalous metric, Skyline will search for the given
+where `strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards 
+can be used in the `metric keyword` as well. You can also add your own alerting 
+strategies. For every anomalous metric, Skyline will search for the given 
 keyword and trigger the corresponding alert(s). To prevent alert fatigue, Skyline
 will only alert once every <expiration seconds> for any given metric/strategy
 combination. To enable Hipchat integration, uncomment the python-simple-hipchat
 line in the requirements.txt file.  If using syslog then the `EXPIRATION_TIME`
 should be set to 1 for this to be effective in catching every anomaly, e.g.
-`("stats", "syslog", 1)`
-
+* `("stats", "syslog", 1)`
+The optional `SECOND_ORDER_RESOLUTION_HOURS` settings is only required should 
+you want to send any metrics to mirage.
 
 ### How do you actually detect anomalies?
 An ensemble of algorithms vote. Majority rules. Batteries __kind of__ included.
