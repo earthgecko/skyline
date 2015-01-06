@@ -110,6 +110,14 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
         s.quit()
 
 
+def negate_hipchat(alert, metric, second_order_resolution_seconds, metric_value):
+
+    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the 
+    # relevant timeseries data in the graph
+    second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
+    # not really required
+
+
 def negate_syslog(alert, metric, second_order_resolution_seconds, metric_value):
     import sys
     import syslog
@@ -139,7 +147,7 @@ def trigger_negater(alert, metric, second_order_resolution_seconds, metric_value
 
     if alert[1] == 'smtp':
         strategy = 'negate_analyzer_alert'
-    else:
+    else:        
         strategy = 'negate_' + alert[1]
 
     getattr(negaters, strategy)(alert, metric, second_order_resolution_seconds, metric_value)

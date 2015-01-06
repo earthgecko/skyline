@@ -369,10 +369,10 @@ class Mirage(Thread):
                                 if not last_alert:
                                     self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
                                     trigger_alert(alert, metric, second_order_resolution_seconds)
-                                    logger.info("Sent alert: For %s" % (metric[1]))
+                                    logger.info("Sent %s alert: For %s" % (alert[1], metric[1]))
 
                             except Exception as e:
-                                logger.error("couldn't send alert: %s" % e)
+                                logger.error("could not send %s alert for %s: %s" % (alert[1], metric[1], e))
 
 
             if settings.NEGATE_ANALYZER_ALERTS:
@@ -393,7 +393,7 @@ class Mirage(Thread):
             # Log progress
 
             if len(self.anomalous_metrics) > 0:
-              logger.info('seconds to run    :: %.2f' % (time() - now))
+              logger.info('seconds since last anomaly :: %.2f' % (time() - now))
               logger.info('total anomalies   :: %d' % len(self.anomalous_metrics))
               logger.info('exception stats   :: %s' % exceptions)
               logger.info('anomaly breakdown :: %s' % anomaly_breakdown)

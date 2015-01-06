@@ -221,6 +221,7 @@ def ks_test(timeseries, second_order_resolution_seconds):
 
     return False
 
+# RUN ON DISK
 
 def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     """
@@ -231,9 +232,9 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     new_trigger = [time(), datapoint]
 
     # Get the old history
-    raw_trigger_history = redis_conn.get('trigger_history.' + metric_name)
+    raw_trigger_history = redis_conn.get('mirage_trigger_history.' + metric_name)
     if not raw_trigger_history:
-        redis_conn.set('trigger_history.' + metric_name, packb([(time(), datapoint)]))
+        redis_conn.set('mirage_trigger_history.' + metric_name, packb([(time(), datapoint)]))
         return True
 
     trigger_history = unpackb(raw_trigger_history)
@@ -245,7 +246,7 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 
     # Update the history
     trigger_history.append(new_trigger)
-    redis_conn.set('trigger_history.' + metric_name, packb(trigger_history))
+    redis_conn.set('mirage_trigger_history.' + metric_name, packb(trigger_history))
 
     # Should we surface the anomaly?
     trigger_times = [x[0] for x in trigger_history]

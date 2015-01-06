@@ -19,6 +19,10 @@ metric: information about the anomaly itself
     metric[1]: The full name of the anomalous metric
 """
 
+# FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
+# in the graph
+full_duration_in_hours = int(settings.FULL_DURATION) / 3600
+
 def alert_smtp(alert, metric):
 
     # FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
@@ -85,13 +89,21 @@ def alert_pagerduty(alert, metric):
 
 
 def alert_hipchat(alert, metric):
+
+    sender = settings.HIPCHAT_OPTS['sender']
     import hipchat
     hipster = hipchat.HipChat(token=settings.HIPCHAT_OPTS['auth_token'])
     rooms = settings.HIPCHAT_OPTS['rooms'][alert[0]]
-    link = settings.GRAPH_URL % (metric[1])
+
+    graph_title = '&title=skyline%%20analyzer%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (full_duration_in_hours, metric[1], metric[0])
+    if settings.GRAPHITE_PORT != '':
+        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    else:
+        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
     for room in rooms:
-        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'Skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': 'Anomaly: <a href="%s">%s</a> : %s' % (link, metric[1], metric[0])})
+        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - analyzer - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, metric[1], metric[0], full_duration_in_hours, embed_graph)})
 
 
 def alert_syslog(alert, metric):

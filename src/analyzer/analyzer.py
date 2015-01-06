@@ -216,15 +216,15 @@ class Analyzer(Thread):
                                         with open(anomaly_check_file, 'w') as fh:
                                             # metric_name, anomalous datapoint, hours to resolve, timestamp
                                             fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], metric_timestamp))
-                                            logger.info('add mirage check  :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
+                                            logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
+                                        if settings.ENABLE_FULL_DURATION_ALERTS:
+                                            self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                            trigger_alert(alert, metric)
                                     except:
-                                        no_mirage_alert_defined = 1
-                                    if settings.ENABLE_FULL_DURATION_ALERTS:
                                         self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
                                         trigger_alert(alert, metric)
                             except Exception as e:
-                                if settings.ENABLE_FULL_DURATION_ALERTS:
-                                    logger.error("couldn't send alert: %s" % e)
+                                logger.error("couldn't send alert: %s" % e)
 
             # Write anomalous_metrics to static webapp directory
             filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))

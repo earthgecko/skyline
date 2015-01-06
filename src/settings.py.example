@@ -129,7 +129,7 @@ CONSENSUS = 6
 # it's turned off by default.
 ENABLE_SECOND_ORDER = False
 
-# This enables alerting.
+# This enables analyzer alerting.
 ENABLE_ALERTS = True
 
 # This enables analyzer to output for mirage
@@ -150,7 +150,7 @@ ENABLE_FULL_DURATION_ALERTS = True
 # Wildcard namespaces can be used as well
 #          ("metric4.thing.*.requests", "stmp", EXPIRATION_TIME),
 # mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and mirage is enabled
-#          ("metric5.thing.*.rpm", "stmp", EXPIRATION_TIME, SECOND_ORDER_RESOLUTION_HOURS),
+#          ("metric5.thing.*.rpm", "smtp", EXPIRATION_TIME, SECOND_ORDER_RESOLUTION_HOURS),
 #         )
 ALERTS = (
     ("skyline", "smtp", 1800),
@@ -170,7 +170,8 @@ SMTP_OPTS = {
 
 # HipChat alerts require python-simple-hipchat
 HIPCHAT_OPTS = {
-    "auth_token": "pagerduty_auth_token",
+    "auth_token": "hipchat_auth_token",
+    "sender": "hostname or identifier",
     # list of hipchat room_ids to notify about each anomaly
     # (similar to SMTP_OPTS['recipients'])
     "rooms": {

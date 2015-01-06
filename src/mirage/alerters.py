@@ -90,13 +90,24 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds):
 
 
 def alert_hipchat(alert, metric, second_order_resolution_seconds):
+
+    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the 
+    # relevant timeseries data in the graph
+    second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
+
+    sender = settings.HIPCHAT_OPTS['sender']
     import hipchat
     hipster = hipchat.HipChat(token=settings.HIPCHAT_OPTS['auth_token'])
     rooms = settings.HIPCHAT_OPTS['rooms'][alert[0]]
-    link = settings.GRAPH_URL % (metric[1])
+    graph_title = '&title=skyline%%20mirage%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (second_order_resolution_in_hours, metric[1], metric[0])
+    if settings.GRAPHITE_PORT != '':
+        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    else:
+        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
     for room in rooms:
-        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'Skyline - mirage', 'color': settings.HIPCHAT_OPTS['color'], 'message': 'Anomalous metric: %s (value: %s) - %s' % (metric[1], metric[0], link, metric[1])})
+        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - mirage - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, metric[1], metric[0], second_order_resolution_in_hours, embed_graph)})
 
 
 def alert_syslog(alert, metric, second_order_resolution_seconds):
