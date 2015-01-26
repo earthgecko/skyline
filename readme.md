@@ -79,7 +79,7 @@ service is properly set up and can receive data. For real data, you have some
 options - see [wiki](https://github.com/etsy/skyline/wiki/Getting-Data-Into-Skyline)
 
 Once you get real data flowing through your system, the Analyzer will be able
-start analyzing for anomalies!
+start analyzing for anomalies!  But be aware, analyzer it will only start to really analyzing timeseries when redis has `FULL_DURATION` (e.g. 86400 seconds) worth of data, otherwise it is too short aka less than `MIN_TOLERABLE_LENGTH`.
 
 ### Alerts
 Skyline can alert you! In your settings.py, add any alerts you want to the ALERTS
