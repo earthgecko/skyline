@@ -109,9 +109,14 @@ class Listen(Process):
         """
         data = ''
         while n > 0:
-            buf = sock.recv(n)
-            n -= len(buf)
-            data += buf
+            chunk = sock.recv(n)
+            count = len(chunk)
+
+            if count == 0:
+                break
+
+            n -= count
+            data += chunk
         return data
 
     def check_if_parent_is_alive(self):
