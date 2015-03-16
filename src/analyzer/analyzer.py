@@ -52,7 +52,15 @@ class Analyzer(Thread):
     def send_graphite_metric(self, name, value):
         if settings.GRAPHITE_HOST != '':
             sock = socket.socket()
-            sock.connect((settings.GRAPHITE_HOST, settings.CARBON_PORT))
+
+            try:
+                sock.connect((settings.GRAPHITE_HOST, settings.CARBON_PORT))
+            except socket.error:
+                endpoint = '%s:%d' % (settings.GRAPHITE_HOST,
+                                      settings.CARBON_PORT)
+                logger.error("Can't connect to Graphite at %s" % endpoint)
+                return False
+
             sock.sendall('%s %s %i\n' % (name, value, time()))
             sock.close()
             return True
