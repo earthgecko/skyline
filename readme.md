@@ -83,20 +83,93 @@ start analyzing for anomalies!
 
 ### Alerts
 Skyline can alert you! In your settings.py, add any alerts you want to the ALERTS
-list, according to the schema `(metric keyword, strategy, expiration seconds)` where
-`strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards can be used in
-the `metric keyword` as well. You can also add your own alerting strategies. For
-every anomalous metric, Skyline will search for the given
+list, according to the schema:
+
+* `(metric keyword, strategy, expiration seconds, <SECOND_ORDER_RESOLUTION_HOURS>)`
+
+Where `strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards 
+can be used in the `metric keyword` as well. You can also add your own alerting 
+strategies. For every anomalous metric, Skyline will search for the given 
 keyword and trigger the corresponding alert(s). To prevent alert fatigue, Skyline
 will only alert once every <expiration seconds> for any given metric/strategy
 combination. To enable Hipchat integration, uncomment the python-simple-hipchat
 line in the requirements.txt file.  If using syslog then the `EXPIRATION_TIME`
 should be set to 1 for this to be effective in catching every anomaly, e.g.
-`("stats", "syslog", 1)`
+
+* `("stats", "syslog", 1)`
+
+The optional `SECOND_ORDER_RESOLUTION_HOURS` setting is only required should 
+you want to send any metrics to mirage at a different time resolution period.
 
 ### How do you actually detect anomalies?
 An ensemble of algorithms vote. Majority rules. Batteries __kind of__ included.
 See [wiki](https://github.com/etsy/skyline/wiki/Analyzer)
+
+### mirage
+mirage is an extension of skyline that enables second order resolution 
+analysis of metrics that have a `SECOND_ORDER_RESOLUTION_HOURS` defined in the 
+alert tuple.
+Skyline's `FULL_DURATION` somewhat limits Skyline's usefulness for metrics 
+that have a seasonality / periodicity that is greater than `FULL_DURATION`.  
+Increasing skyline's `FULL_DURATION` to anything above 24 hours (86400) is not 
+necessarily realistic or useful, because the greater the `FULL_DURATION`, the 
+greater redis memory and the longer `skyline.analyzer.run_time` and if you do not 
+analyze all your metrics within as close to a 60 second period as possible, lag 
+begins to inhibits efficiency.
+mirage uses the user-defined seasonality for a metric (`SECOND_ORDER_RESOLUTION_HOURS`) 
+and if analyzer finds a metric to be anomalous at `FULL_DURATION` and the 
+metric alert tuple has `SECOND_ORDER_RESOLUTION_HOURS` and `ENABLE_MIRAGE` 
+is 'True', analyzer will push the metric variables to the mirage check dir for 
+mirage to surface the metric timeseries at its proper seasonality, in realtime 
+from graphite in json format and then analyze the timeseries to determine if the 
+datapoint that triggered analyzer, is anomalous at the metric's true seasonality.
+
+By default mirage is disabled, various mirage options can be configured in the 
+settings.py file and analyzer and mirage can be configured as approriate for your 
+environment.
+
+mirage requires some directories as per settings.py defines (these require absolute path): 
+
+``` 
+sudo mkdir -p $MIRAGE_CHECK_PATH
+sudo mkdir -p $MIRAGE_DATA_FOLDER
+```
+
+Configure settings.py with some alert tuples that have the ```SECOND_ORDER_RESOLUTION_HOURS```
+defined, e.g.:
+
+```
+ALERTS = (
+           ("skyline", "smtp", 1800),
+           ("stats_counts.http.rpm.publishers.*", "smtp", 300, 168),
+)
+```
+
+And ensure that settings.py has mirage options enabled:
+
+```
+ENABLE_MIRAGE = True
+
+MIRAGE_ENABLE_ALERTS = True
+```
+
+Start mirage:
+
+* `cd skyline/bin`
+* `sudo ./mirage.d start`
+
+mirage allows for testing of realtime data and algorithms in parallel to analyzer 
+allowing for comparisons of different timeseries and/or algorithms.  mirage was 
+inspired by crucible and the desire to extend the temporal data pools available 
+to analyzer in an attempt to handle seasonality better, reduce noise and increase 
+signal, specfically on seasonal metrics.
+
+mirage is rate limited to analyse 30 metrics per minute, this is by design and
+desired. Surfacing data from graphite and analysing ~1000 datapoints in a timeseries 
+takes less than 1 second and is much less CPU intensive than analyzer, but it is 
+probably sufficient to have 30 calls to graphite per minute and if a large number 
+of metrics went anomalous, even with mirage discarding `MIRAGE_STALE_SECONDS` 
+checks due to processing limit, signals would still be sent.
 
 ### Architecture
 See the rest of the
