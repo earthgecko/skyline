@@ -6,6 +6,9 @@ from os.path import dirname, abspath, isdir
 from daemon import runner
 from time import sleep, time
 
+# @added 20150914 - added log rotation and appending
+from logging.handlers import TimedRotatingFileHandler
+
 # add the shared settings file to namespace
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 import settings
@@ -59,7 +62,13 @@ if __name__ == "__main__":
     logger = logging.getLogger("MirageLog")
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    handler = logging.FileHandler(settings.LOG_PATH + '/mirage.log')
+# @modified 20150914 - added log rotation and appending
+#    handler = logging.FileHandler(settings.LOG_PATH + '/mirage.log')
+    handler = logging.handdlers.TimedRotatingFileHandler(settings.LOG_PATH + '/mirage.log',
+                                       when="midnight",
+                                       interval=1,
+                                       backupCount=5)
+
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 

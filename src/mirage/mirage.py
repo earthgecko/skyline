@@ -120,6 +120,7 @@ class Mirage(Thread):
         """
         Assign a metric for a process to analyze.
         """
+
         # Discover metric to analyze
         metric_var_files = [ f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH,f)) ]
 
@@ -133,7 +134,7 @@ class Mirage(Thread):
         # Load metric variables
         self.load_metric_vars(metric_check_file)
 
-        # Test metric variables 
+        # Test metric variables
         if len(metric_vars.metric) == 0:
             return
         else:
@@ -163,11 +164,16 @@ class Mirage(Thread):
         if metric_timestamp_age > settings.MIRAGE_STALE_SECONDS:
             logger.info('stale check       :: %s check request is %s seconds old - discarding' % (metric_vars.metric, metric_timestamp_age))
             # Remove metric check file
-            try:
+#            try:
+#                os.remove(metric_check_file)
+#            except OSError:
+#                pass
+#            return
+            if os.path.exists(metric_check_file):
                 os.remove(metric_check_file)
-            except OSError:
-                pass
-            return
+                logger.info('removed %s' % (metric_check_file))
+            else:
+                logger.info('could not remove %s' % (metric_check_file))
 
         # Calculate hours second order resolution to seconds
         second_order_resolution_seconds = int(metric_vars.hours_to_resolve) * 3600
@@ -287,8 +293,29 @@ class Mirage(Thread):
             Determine if any metric to analyze
             """
             while True:
-                logger.info('sleeping no metrics...')
-                sleep(10)
+
+                metric_var_files = [ f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH,f)) ]
+                if len(metric_var_files) == 0:
+                    logger.info('sleeping no metrics...')
+                    sleep(10)
+                else:
+                    sleep(1)
+
+#                logger.info('sleeping no metrics...')
+#                sleep(10)
+
+                # Clean up old files
+                now_timestamp = time()
+                stale_age = now_timestamp - settings.MIRAGE_STALE_SECONDS
+                for current_file in listdir(settings.MIRAGE_CHECK_PATH):
+                    if os.path.isfile(settings.MIRAGE_CHECK_PATH + "/" + current_file):
+                        t = os.stat(settings.MIRAGE_CHECK_PATH + "/" + current_file)
+                        c = t.st_ctime
+                        # delete file if older than a week
+                        if c < stale_age:
+                                os.remove(settings.MIRAGE_CHECK_PATH + "/" + current_file)
+                                logger.info('removed %s' % (current_file))
+
                 # Discover metric to analyze
                 metric_var_files = ''
                 metric_var_files = [ f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH,f)) ]
@@ -406,7 +433,7 @@ class Mirage(Thread):
             self.metric_variables[:] = []
 
             # Sleep if it went too fast
-            if time() - now < 2:
+            if time() - now < 1:
                 logger.info('sleeping due to low run time...')
-                sleep(10)
-
+#                sleep(10)
+                sleep(1)

@@ -6,6 +6,9 @@ from os.path import dirname, abspath, isdir
 from daemon import runner
 from time import sleep, time
 
+# @added 20150914 - added log rotation
+from logging.handlers import TimedRotatingFileHandler
+
 # add the shared settings file to namespace
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 import settings
@@ -58,7 +61,15 @@ if __name__ == "__main__":
     logger = logging.getLogger("AnalyzerLog")
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    handler = logging.FileHandler(settings.LOG_PATH + '/analyzer.log')
+# @modified 20150914 - added log rotation
+#    handler = logging.FileHandler(settings.LOG_PATH + '/analyzer.log')
+    handler = logging.handlers.TimedRotatingFileHandler(settings.LOG_PATH + '/analyzer.log',
+                                       when="midnight",
+                                       interval=1,
+                                       backupCount=5)
+
+    logger.addHandler(handler)
+
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
