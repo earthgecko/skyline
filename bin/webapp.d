@@ -16,15 +16,26 @@ start () {
         RETVAL=$?
         if [[ $RETVAL -eq 0 ]]; then
           echo "started webapp"
+            cat "/var/log/skyline/${SERVICE_NAME}.log.last" "/var/log/skyline/${SERVICE_NAME}.log" > "/var/log/skyline/${SERVICE_NAME}.log.new"
+            cat "/var/log/skyline/${SERVICE_NAME}.log.new" > "/var/log/skyline/${SERVICE_NAME}.log"
+            rm -f "/var/log/skyline/${SERVICE_NAME}.log.last"
+            rm -f "/var/log/skyline/${SERVICE_NAME}.log.new"
         else
           echo "failed to start webapp"
+            cat "/var/log/skyline/${SERVICE_NAME}.log.last" "/var/log/skyline/${SERVICE_NAME}.log" > "/var/log/skyline/${SERVICE_NAME}.log.new"
+            cat "/var/log/skyline/${SERVICE_NAME}.log.new" > "/var/log/skyline/${SERVICE_NAME}.log"
+            rm -f "/var/log/skyline/${SERVICE_NAME}.log.last"
+            rm -f "/var/log/skyline/${SERVICE_NAME}.log.new"
         fi
         return $RETVAL
 }
 
 stop () {
     if [ -f "/var/log/skyline/${SERVICE_NAME}.log" ]; then
-      mv "/var/log/skyline/${SERVICE_NAME}.log" "/var/log/skyline/${SERVICE_NAME}.log.last"
+# @modified 20151014 - Feature #20451: skyline mirage
+# Preserve logs - the mv operation does not change the file handle
+#      mv "/var/log/skyline/${SERVICE_NAME}.log" "/var/log/skyline/${SERVICE_NAME}.log.last"
+      cat "/var/log/skyline/${SERVICE_NAME}.log" > "/var/log/skyline/${SERVICE_NAME}.log.last"
     fi
     /usr/bin/env python "$BASEDIR/src/${SERVICE_NAME}/${SERVICE_NAME}.py stop"
         RETVAL=$?
@@ -45,7 +56,8 @@ stop () {
 restart () {
     rm -f $BASEDIR/src/webapp/*.pyc
     if [ -f "/var/log/skyline/${SERVICE_NAME}.log" ]; then
-      mv "/var/log/skyline/${SERVICE_NAME}.log" "/var/log/skyline/${SERVICE_NAME}.log.last"
+#      mv "/var/log/skyline/${SERVICE_NAME}.log" "/var/log/skyline/${SERVICE_NAME}.log.last"
+      cat "/var/log/skyline/${SERVICE_NAME}.log" > "/var/log/skyline/${SERVICE_NAME}.log.last"
     fi
     /usr/bin/env python "$BASEDIR/src/${SERVICE_NAME}/${SERVICE_NAME}.py" restart
         RETVAL=$?
