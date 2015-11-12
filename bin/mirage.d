@@ -34,6 +34,8 @@ stop () {
     # TODO: write a real kill script
     ps aux | grep "${SERVICE_NAME}-agent.py start" | grep -v grep | awk '{print $2 }' | xargs sudo kill -9
     if [ -f "/var/log/skyline/${SERVICE_NAME}.log" ]; then
+# Preserve logs - the mv operation does not change the file handle
+#      mv "/var/log/skyline/${SERVICE_NAME}.log" "/var/log/skyline/${SERVICE_NAME}.log.last"
       cat "/var/log/skyline/${SERVICE_NAME}.log" > "/var/log/skyline/${SERVICE_NAME}.log.last"
     fi
     /usr/bin/env python "$BASEDIR/src/${SERVICE_NAME}/${SERVICE_NAME}-agent.py" stop

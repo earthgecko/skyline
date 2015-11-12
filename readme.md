@@ -1,8 +1,6 @@
 ## Skyline
 
-[![Build Status](https://travis-ci.org/etsy/skyline.svg)](https://travis-ci.org/etsy/skyline)
-
-![x](https://raw.github.com/etsy/skyline/master/screenshot.png)
+![skyline web app](screenshot.png)
 
 Skyline is a real-time* anomaly detection* system*, built to enable passive
 monitoring of hundreds of thousands of metrics, without the need to configure a
@@ -35,9 +33,9 @@ trick. If not, hit the Googles, yo.
 
 3. `cp src/settings.py.example src/settings.py`
 
-4. Add directories: 
+4. Add directories:
 
-``` 
+```
 sudo mkdir /var/log/skyline
 sudo mkdir /var/run/skyline
 sudo mkdir /var/log/redis
@@ -68,14 +66,14 @@ restart using the configuration settings provided in bin/redis.conf
 * Be sure to create the log directories.
 
 ### Hey! Nothing's happening!
-Of course not. You've got no data! For a quick and easy test of what you've 
+Of course not. You've got no data! For a quick and easy test of what you've
 got, run this:
 ```
 cd utils
 python seed_data.py
 ```
 This will ensure that the Horizon
-service is properly set up and can receive data. For real data, you have some 
+service is properly set up and can receive data. For real data, you have some
 options - see [wiki](https://github.com/etsy/skyline/wiki/Getting-Data-Into-Skyline)
 
 Once you get real data flowing through your system, the Analyzer will be able
@@ -87,9 +85,9 @@ list, according to the schema:
 
 * `(metric keyword, strategy, expiration seconds, <SECOND_ORDER_RESOLUTION_HOURS>)`
 
-Where `strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards 
-can be used in the `metric keyword` as well. You can also add your own alerting 
-strategies. For every anomalous metric, Skyline will search for the given 
+Where `strategy` is one of `smtp`, `hipchat`, `pagerduty` or `syslog`.  Wildcards
+can be used in the `metric keyword` as well. You can also add your own alerting
+strategies. For every anomalous metric, Skyline will search for the given
 keyword and trigger the corresponding alert(s). To prevent alert fatigue, Skyline
 will only alert once every <expiration seconds> for any given metric/strategy
 combination. To enable Hipchat integration, uncomment the python-simple-hipchat
@@ -98,7 +96,7 @@ should be set to 1 for this to be effective in catching every anomaly, e.g.
 
 * `("stats", "syslog", 1)`
 
-The optional `SECOND_ORDER_RESOLUTION_HOURS` setting is only required should 
+The optional `SECOND_ORDER_RESOLUTION_HOURS` setting is only required should
 you want to send any metrics to mirage at a different time resolution period.
 
 ### How do you actually detect anomalies?
@@ -106,31 +104,31 @@ An ensemble of algorithms vote. Majority rules. Batteries __kind of__ included.
 See [wiki](https://github.com/etsy/skyline/wiki/Analyzer)
 
 ### mirage
-mirage is an extension of skyline that enables second order resolution 
-analysis of metrics that have a `SECOND_ORDER_RESOLUTION_HOURS` defined in the 
+mirage is an extension of skyline that enables second order resolution
+analysis of metrics that have a `SECOND_ORDER_RESOLUTION_HOURS` defined in the
 alert tuple.
-Skyline's `FULL_DURATION` somewhat limits Skyline's usefulness for metrics 
-that have a seasonality / periodicity that is greater than `FULL_DURATION`.  
-Increasing skyline's `FULL_DURATION` to anything above 24 hours (86400) is not 
-necessarily realistic or useful, because the greater the `FULL_DURATION`, the 
-greater redis memory and the longer `skyline.analyzer.run_time` and if you do not 
-analyze all your metrics within as close to a 60 second period as possible, lag 
+Skyline's `FULL_DURATION` somewhat limits Skyline's usefulness for metrics
+that have a seasonality / periodicity that is greater than `FULL_DURATION`. 
+Increasing skyline's `FULL_DURATION` to anything above 24 hours (86400) is not
+necessarily realistic or useful, because the greater the `FULL_DURATION`, the
+greater redis memory and the longer `skyline.analyzer.run_time` and if you do not
+analyze all your metrics within as close to a 60 second period as possible, lag
 begins to inhibits efficiency.
-mirage uses the user-defined seasonality for a metric (`SECOND_ORDER_RESOLUTION_HOURS`) 
-and if analyzer finds a metric to be anomalous at `FULL_DURATION` and the 
-metric alert tuple has `SECOND_ORDER_RESOLUTION_HOURS` and `ENABLE_MIRAGE` 
-is 'True', analyzer will push the metric variables to the mirage check dir for 
-mirage to surface the metric timeseries at its proper seasonality, in realtime 
-from graphite in json format and then analyze the timeseries to determine if the 
+mirage uses the user-defined seasonality for a metric (`SECOND_ORDER_RESOLUTION_HOURS`)
+and if analyzer finds a metric to be anomalous at `FULL_DURATION` and the
+metric alert tuple has `SECOND_ORDER_RESOLUTION_HOURS` and `ENABLE_MIRAGE`
+is 'True', analyzer will push the metric variables to the mirage check dir for
+mirage to surface the metric timeseries at its proper seasonality, in realtime
+from graphite in json format and then analyze the timeseries to determine if the
 datapoint that triggered analyzer, is anomalous at the metric's true seasonality.
 
-By default mirage is disabled, various mirage options can be configured in the 
-settings.py file and analyzer and mirage can be configured as approriate for your 
+By default mirage is disabled, various mirage options can be configured in the
+settings.py file and analyzer and mirage can be configured as approriate for your
 environment.
 
-mirage requires some directories as per settings.py defines (these require absolute path): 
+mirage requires some directories as per settings.py defines (these require absolute path):
 
-``` 
+```
 sudo mkdir -p $MIRAGE_CHECK_PATH
 sudo mkdir -p $MIRAGE_DATA_FOLDER
 ```
@@ -158,18 +156,75 @@ Start mirage:
 * `cd skyline/bin`
 * `sudo ./mirage.d start`
 
-mirage allows for testing of realtime data and algorithms in parallel to analyzer 
-allowing for comparisons of different timeseries and/or algorithms.  mirage was 
-inspired by crucible and the desire to extend the temporal data pools available 
-to analyzer in an attempt to handle seasonality better, reduce noise and increase 
+mirage allows for testing of realtime data and algorithms in parallel to analyzer
+allowing for comparisons of different timeseries and/or algorithms.  mirage was
+inspired by crucible and the desire to extend the temporal data pools available
+to analyzer in an attempt to handle seasonality better, reduce noise and increase
 signal, specfically on seasonal metrics.
 
 mirage is rate limited to analyse 30 metrics per minute, this is by design and
-desired. Surfacing data from graphite and analysing ~1000 datapoints in a timeseries 
-takes less than 1 second and is much less CPU intensive than analyzer, but it is 
-probably sufficient to have 30 calls to graphite per minute and if a large number 
-of metrics went anomalous, even with mirage discarding `MIRAGE_STALE_SECONDS` 
+desired. Surfacing data from graphite and analysing ~1000 datapoints in a timeseries
+takes less than 1 second and is much less CPU intensive than analyzer, but it is
+probably sufficient to have 30 calls to graphite per minute and if a large number
+of metrics went anomalous, even with mirage discarding `MIRAGE_STALE_SECONDS`
 checks due to processing limit, signals would still be sent.
+
+### detect_drop_off_cliff algorithm - EXPERIMENTAL
+The detect_drop_off_cliff algorithm provides a method for analysing a timeseries
+to determine is the timeseries "dropped off a cliff".  The standard skyline
+analyzer algorithms do not detect the drop off cliff pattern very well at all,
+testing with crucible has proven.  Further to this, the `CONSENSUS` methodology
+used to determine whether a timeseries deemed anomalous or not, means that even
+if one or two algorithms did detect a drop of cliff type event in a timeseries,
+it would not be flagged as anomalous if the `CONSENSUS` threshold was not breached.
+
+The detect_drop_off_cliff algorithm - does just what it says on the tin. Although
+this may seem like setting and matching a threshold, it is more effective than a
+threshold as it is dynamically set depending on the data range.
+
+Some things to note about analysing a timeseries with the algorithm are:
+* The `detect_drop_off_cliff` algorithm takes __precedence__ over __all__ other
+algorithms in the analyzer/algorithms.py context, if `detect_drop_off_cliff` 
+fires on a timeseries, the timeseries is anomalous and no other algorithms are 
+run on the metric data set in that analysis run.
+* This algorithm is most suited (accurate) with timeseries where there is a 
+large range in the timeseries most datapoints are > 100 (e.g high rate). Arbitrary 
+`trigger` values in the algorithm do filter peaky low rate timeseries, but they 
+can become more noisy with lower value datapoints, as significant cliff drops 
+are from a lower height, however it still generally matches drops off cliffs on 
+low range metrics.
+* The trigger tuning based on the timeseries sample range is fairly arbitrary, 
+but has been tested and does filter peaky noise in low range timeseries, which 
+filters most/lots of noise.
+* The alogrithm is more suited to datasets which come from multiple sources, 
+e.g. an aggregation of a count from all servers, rather than from individual 
+sources, e.g. a single server's metric.  The many are less likely to experience 
+false positive cliff drops, whereas the individual is more likely to experience 
+true cliff drops.
+* __ONLY TESTED WITH__:
+** positive, whole number timeseries data
+** Does __not__ currently work with negative integers in the timeseries values (although it will not break, will just skip if a negative integer is encountered)
+** For more info see [detect_drop_off_cliff](https://github.com/earthgecko/crucible/tree/master/examples/detect_drop_off_cliff)
+To configure `DROP_OFF_CLIFF_METRICS` declare the metric namespaces in settings.py 
+with that you want to analyse with the `detect_drop_off_cliff` algorithm, similar 
+to the ALERT config block:
+```
+    ("metric", "alerter", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS),
+```
+with:
+* `MIN_AVERAGE` - being the minimum average value to evaluate 
+* `MIN_AVERAGE_SECONDS` - the seconds to calculate the minimum average value over
+So if `MIN_AVERAGE` is set to 100 and `MIN_AVERAGE_SECONDS` to 3600 a metric will only 
+be analysed to determine if it is anomalous if the average value of the metric 
+over 3600 seconds is greater than 100.
+To evalute a metric at any range set these to 0, 0 or do not declare them in the tuple.
+
+```
+DROP_OFF_CLIFF_METRICS = (
+    ("skyline", "smtp", 1800),
+    ("stats_counts.http.requests.total", "smtp", 300, 100, 1800),
+)
+```
 
 ### Architecture
 See the rest of the
@@ -189,9 +244,11 @@ checking out the [issue list](https://github.com/etsy/skyline/issues) and
 fixing up the place. Or, you can add an algorithm - a goal of this project
 is to have a very robust set of algorithms to choose from.
 
-Also, feel free to join the 
+Also, feel free to join the
 [skyline-dev](https://groups.google.com/forum/#!forum/skyline-dev) mailing list
 for support and discussions of new features.
 
 (*depending on your data throughput, *you might need to write your own
 algorithms to handle your exact data, *it runs on one box)
+
+

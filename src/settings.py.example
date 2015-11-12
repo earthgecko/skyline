@@ -156,6 +156,38 @@ ALERTS = (
     ("skyline", "smtp", 1800),
 )
 
+# This is the config for metrics to analyse with the detect_drop_off_cliff
+# algorithm.  It is advisable that you only specify high rate metrics and global
+# metrics here, although the algoritm does work with low rate metrics, the
+# smaller the range, the smaller a cliff drop is, which means more noise,
+# however the algorithm is pre-tuned to use different trigger values on
+# different ranges to pre-filter some noise.  This is a seperate alert tuple
+# section and not mutually exclusive, it just enables the metric to be analysed
+# by the detect_drop_off_cliff alogrithm which does not need CONSENSUS to fire,
+# if drop off cliff is detected this algorithm takes precedence over all, it is
+# run before all other algorithms and if returns True no other algorithms are
+# evluated in that run.
+# detect_drop_off_cliff alerts will not fire twice within EXPIRATION_TIME, even
+# if they trigger again.
+# MIN_AVERAGE - the minimum average value to evaluate
+# MIN_AVERAGE_SECONDS - the seconds to calculate the minimum average value over
+# So if MIN_AVERAGE set to 100 and MIN_AVERAGE_SECONDS to 3600 a metric will
+# only be analysed if the average value of the metric over 3600 seconds is
+# greater than 100.
+# To evalute a metric at any range set these to 0, 0 or do not declare them
+# in the tuple
+# Schema: (
+#          ("metric1", "smtp", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS),
+#          ("metric2", "pagerduty", EXPIRATION_TIME),
+#          ("metric3", "hipchat", EXPIRATION_TIME),
+#          ("stats", "syslog", EXPIRATION_TIME),
+# Wildcard namespaces can be used as well
+#          ("metric4.thing.*.requests", "stmp", EXPIRATION_TIME),
+#         )
+DROP_OFF_CLIFF_METRICS = (
+    ("skyline", "smtp", 1800),
+)
+
 # Each alert module requires additional information.
 SMTP_OPTS = {
     # This specifies the sender of email alerts.
@@ -308,7 +340,7 @@ MIRAGE_ENABLE_ALERTS = False
 # This is to enables mirage to negate analyzer alerts, mirage will send out an
 # alert for every anomaly that analyzer sends to mirage that is NOT anomalous at
 # the SECOND_ORDER_RESOLUTION_HOURS with a SECOND_ORDER_RESOLUTION_HOURS graph
-# and the analyzer FULL_DURATION graph embedded. Mostly for testing and 
+# and the analyzer FULL_DURATION graph embedded. Mostly for testing and
 # comparison of analysis at different time ranges and/or algorithms
 NEGATE_ANALYZER_ALERTS = False
 

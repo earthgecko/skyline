@@ -221,7 +221,6 @@ def ks_test(timeseries, second_order_resolution_seconds):
 
     return False
 
-# RUN ON DISK
 
 def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     """
