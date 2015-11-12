@@ -34,9 +34,16 @@ MINI_DURATION = 3600
 # Skyline and Horizon. Don't include http:// since this is used for carbon host as well.
 GRAPHITE_HOST = 'your_graphite_host.com'
 
-# The Graph url used to link to Graphite (Or another graphite dashboard)
-# %s will be replaced by the metric name
-GRAPH_URL = 'http://' + GRAPHITE_HOST + '/render/?width=1400&from=-1hour&target=%s'
+# Graphite host protocol - http or https
+GRAPHITE_PROTOCOL = 'http'
+
+# Graphite host port - for a specific port if graphite runs on a port other than
+# 80, e.g. '8888'
+GRAPHITE_PORT = ''
+
+# These are graphite settings in terms of alert graphs - this is defaulted to a
+# format that is more colourblind friendly than the default graphite graphs
+GRAPHITE_GRAPH_SETTINGS = '&width=588&height=308&bgcolor=000000&fontBold=true&fgcolor=C0C0C0'
 
 # If you have a Graphite host set up, set its Carbon port.
 CARBON_PORT = 2003
@@ -61,6 +68,10 @@ Analyzer settings
 # This is the location the Skyline agent will write the anomalies file to disk.
 # It needs to be in a location accessible to the webapp.
 ANOMALY_DUMP = 'webapp/static/dump/anomalies.json'
+
+# This is the location the Skyline agent will write the second order resolution
+# anomalies to check to file on disk - absolute path
+MIRAGE_CHECK_PATH = '/opt/skyline/mirage/check'
 
 # This is the number of processes that the Skyline analyzer will spawn.
 # Analysis is a very CPU-intensive procedure. You will see optimal results
@@ -118,8 +129,16 @@ CONSENSUS = 6
 # it's turned off by default.
 ENABLE_SECOND_ORDER = False
 
-# This enables alerting.
+# This enables analyzer alerting.
 ENABLE_ALERTS = True
+
+# This enables analyzer to output for mirage
+ENABLE_MIRAGE = False
+
+# This enables FULL_DURATION alerting - if True analyzer will send alerts on
+# any alert tuple that have a SECOND_ORDER_RESOLUTION_HOURS defined, if False
+# analyzer will only add a mirage check and allow mirage to do the alerting
+ENABLE_FULL_DURATION_ALERTS = True
 
 # This is the config for which metrics to alert on and which strategy to use for each.
 # Alerts will not fire twice within EXPIRATION_TIME, even if they trigger again.
@@ -130,6 +149,8 @@ ENABLE_ALERTS = True
 #          ("stats", "syslog", EXPIRATION_TIME),
 # Wildcard namespaces can be used as well
 #          ("metric4.thing.*.requests", "stmp", EXPIRATION_TIME),
+# mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and mirage is enabled
+#          ("metric5.thing.*.rpm", "smtp", EXPIRATION_TIME, SECOND_ORDER_RESOLUTION_HOURS),
 #         )
 ALERTS = (
     ("skyline", "smtp", 1800),
@@ -144,12 +165,13 @@ SMTP_OPTS = {
     "recipients": {
         "skyline": ["abe@etsy.com", "you@yourcompany.com"],
     },
-    "embed-images": False
+    "embed-images": True,
 }
 
 # HipChat alerts require python-simple-hipchat
 HIPCHAT_OPTS = {
-    "auth_token": "pagerduty_auth_token",
+    "auth_token": "hipchat_auth_token",
+    "sender": "hostname or identifier",
     # list of hipchat room_ids to notify about each anomaly
     # (similar to SMTP_OPTS['recipients'])
     "rooms": {
@@ -235,6 +257,8 @@ SKIP_LIST = [
     'skyline.analyzer.anomaly_breakdown.',
     'example.statsd.metric',
     'another.example.metric',
+# Skip anomaly_breakdown
+   'skyline.analyzer.*.anomaly_breakdown',
     # if you use statsd, these can result in many near-equal series
     #'_90',
     #'.lower',
@@ -243,6 +267,50 @@ SKIP_LIST = [
     #'.count_ps',
     #'.sum',
 ]
+
+
+"""
+Mirage settings
+"""
+
+# This is the path for the Mirage data folder where timeseries data that has
+# been surfaced will be written - absolute path
+MIRAGE_DATA_FOLDER = '/opt/skyline/mirage/data'
+
+# These are the algorithms that the Analyzer will run. To add a new algorithm,
+# you must both define the algorithm in algorithms.py and add its name here.
+MIRAGE_ALGORITHMS = [
+                      'first_hour_average',
+                      'mean_subtraction_cumulation',
+                      'stddev_from_average',
+                      'stddev_from_moving_average',
+                      'least_squares',
+                      'grubbs',
+                      'histogram_bins',
+                      'median_absolute_deviation',
+                      'ks_test',
+                     ]
+
+# The number of seconds after which a check is considered stale and discarded.
+MIRAGE_STALE_SECONDS = 120
+
+# This is the number of algorithms that must return True before a metric is
+# classified as anomalous.
+MIRAGE_CONSENSUS = 6
+
+# This is to enable second order anomalies. This is an experimental feature, so
+# it's turned off by default.
+ENABLE_SECOND_ORDER = False
+
+# This enables mirage alerting.
+MIRAGE_ENABLE_ALERTS = False
+
+# This is to enables mirage to negate analyzer alerts, mirage will send out an
+# alert for every anomaly that analyzer sends to mirage that is NOT anomalous at
+# the SECOND_ORDER_RESOLUTION_HOURS with a SECOND_ORDER_RESOLUTION_HOURS graph
+# and the analyzer FULL_DURATION graph embedded. Mostly for testing and 
+# comparison of analysis at different time ranges and/or algorithms
+NEGATE_ANALYZER_ALERTS = False
 
 
 """
