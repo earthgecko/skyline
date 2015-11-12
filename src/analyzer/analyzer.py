@@ -200,6 +200,29 @@ class Analyzer(Thread):
                 except Empty:
                     break
 
+            # Send detect_drop_off_cliff alert first
+            if settings.DROP_OFF_CLIFF_METRICS:
+                for alert in settings.DROP_OFF_CLIFF_METRICS:
+                    for metric in self.anomalous_metrics:
+                        ALERT_MATCH_PATTERN = alert[0]
+                        METRIC_PATTERN = metric[1]
+                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                        if pattern_match:
+                            cache_key = 'detect_drop_off_cliff_last_alert.%s.%s' % (alert[1], metric[1])
+                            try:
+                                last_alert = self.redis_conn.get(cache_key)
+                                if not last_alert:
+                                    context = "drop_off_cliff detected"
+                                    try:
+                                        self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                        trigger_alert(alert, metric, context)
+                                        logger.info('alert sent :: %s - %s - via %s - %s' % (metric[1], metric[0], alert[1], context))
+                                    except Exception as e:
+                                        logger.error("couldn't send alert: %s" % e)
+                            except Exception as e:
+                                logger.error("couldn't send alert: %s" % e)
+
             # Send alerts
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
@@ -213,9 +236,28 @@ class Analyzer(Thread):
                             try:
                                 last_alert = self.redis_conn.get(cache_key)
                                 if not last_alert:
-                                    self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                    trigger_alert(alert, metric)
-
+                                    try:
+                                        SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                                        logger.info('mirage check      :: %s' % (metric[1]))
+                                        # Write anomalous metric to test at second
+                                        # order resolution by crucible to the check
+                                        # file
+                                        metric_timestamp = int(time())
+                                        anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
+                                        with open(anomaly_check_file, 'w') as fh:
+                                            # metric_name, anomalous datapoint, hours to resolve, timestamp
+                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], metric_timestamp))
+                                            logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
+                                        if settings.ENABLE_FULL_DURATION_ALERTS:
+                                            self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                            context = "analyzer anomaly"
+                                            trigger_alert(alert, metric, context)
+                                            logger.info('alert sent :: %s - %s - via %s - %s' % (metric[1], metric[0], alert[1], context))
+                                    except:
+                                        self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                        context = "analyzer anomaly"
+                                        trigger_alert(alert, metric, context)
+                                        logger.info('alert sent :: %s - %s - via %s - %s' % (metric[1], metric[0], alert[1], context))
                             except Exception as e:
                                 logger.error("couldn't send alert: %s" % e)
 
