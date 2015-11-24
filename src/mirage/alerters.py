@@ -24,12 +24,13 @@ metric: information about the anomaly itself
 # for analyzer comparison in the graph
 full_duration_in_hours = int(settings.FULL_DURATION) / 60 / 60
 
+
 def alert_smtp(alert, metric, second_order_resolution_seconds):
 
-    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the 
+    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the
     # relevant timeseries data in the graph
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
-    
+
     # For backwards compatibility
     if '@' in alert[1]:
         sender = settings.ALERT_SENDER
@@ -91,7 +92,7 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds):
 
 def alert_hipchat(alert, metric, second_order_resolution_seconds):
 
-    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the 
+    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the
     # relevant timeseries data in the graph
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
 

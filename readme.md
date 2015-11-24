@@ -103,12 +103,12 @@ you want to send any metrics to mirage at a different time resolution period.
 An ensemble of algorithms vote. Majority rules. Batteries __kind of__ included.
 See [wiki](https://github.com/etsy/skyline/wiki/Analyzer)
 
-### mirage
+## mirage
 mirage is an extension of skyline that enables second order resolution
 analysis of metrics that have a `SECOND_ORDER_RESOLUTION_HOURS` defined in the
 alert tuple.
 Skyline's `FULL_DURATION` somewhat limits Skyline's usefulness for metrics
-that have a seasonality / periodicity that is greater than `FULL_DURATION`. 
+that have a seasonality / periodicity that is greater than `FULL_DURATION`.
 Increasing skyline's `FULL_DURATION` to anything above 24 hours (86400) is not
 necessarily realistic or useful, because the greater the `FULL_DURATION`, the
 greater redis memory and the longer `skyline.analyzer.run_time` and if you do not
@@ -169,13 +169,74 @@ probably sufficient to have 30 calls to graphite per minute and if a large numbe
 of metrics went anomalous, even with mirage discarding `MIRAGE_STALE_SECONDS`
 checks due to processing limit, signals would still be sent.
 
+## boundary
+boundary is an extension of skyline that enables very specific analysis of
+specified metrics with specified algorithms, with specified alerts.
+
+boundary was added to allow for threshold-like monitoring to the skyline model,
+it was specifically added to enable the detect_drop_off_cliff algorithm which
+could not be bolted nicely into analyzer (although it was attempted, it was ugly).
+While analyzer allows for the passive analysis of 1000s of metrics, its algorithms
+are not perfect.  boundary allows for the use of the skyline data and model as a
+scapel, not just a sword.  Just like analyzer, boundary has its own algorithms
+and importantly, boundary is *not* `CONSENSUS` based.  This means that you can
+match key metrics on "thresholds/limits" and somewhat dynamically too.
+
+The boundary concept is quite like skyline backwards, enilyks.  This is because
+where analyzer is almost all to one configuration, boundary is more one
+configuration to one or many.  Where analyzer is all metrics through all algorithms,
+boundary is each metric through one algorithm.  analyzer uses a large range of
+the timeseries data, boundary uses the most recent (the now) portion of the
+timeseries data.
+
+boundary currently has 3 defined algorithms:
+* detect_drop_off_cliff
+* less_than
+* greater_than
+
+boundary is run as a separate process just like analyzer, horizon and mirage.  It
+was not envisaged to analyse all your metrics, but rather your key metrics in an
+additional dimension/s.   If it was run across all of your metrics it would probably
+be a) VERY noisy, b) VERY CPU intensive; if deployed only key metrics it has a
+very low footprint (9 seconds on 150 metrics with 2 processes assigned) and a
+high return.  If deployed as intended it should be able to easily coexist with
+an existing skyline analyzer/mirage setup, with adding minimal load.  This also
+allows one to implement boundary independently without changing, modifying or
+impacting on a running analyzer.
+
+boundary alerting is similar to analyzer alerting, but a bit more featureful and
+introduces the ability to rate limit alerts per alerter channel, as it is not
+beyond the realms of possibility that at some point all your key metrics may drop
+off a cliff, but maybe 15 pagerduty alerts every 30 minutes is sufficient, so
+alert rates are configurable.
+
+### Configuration and running boundary
+settings.py has an independent setting blocks and the `settings.py.example` has
+the detailed information on each setting, the main difference from analyzer being
+in terms of number of variables that have to be declared in the alert tuples,
+e.g:
+
+```
+BOUNDARY_METRICS = (
+    # ("metric", "algorithm", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, "ALERT_VIAS"),
+    ("nometrics", "detect_drop_off_cliff", 1800, 500, 3600, 0, 2, "smtp"),
+    ("nometrics.either", "less_than", 3600, 0, 0, 15, 2, "smtp"),
+    ("nometrics.other", "greater_than", 3600, 0, 0, 100000, 1, "smtp|hipchat|pagerduty"),
+)
+```
+
+Once settings.py has all the boundary configuration done, start boundary:
+
+* `cd skyline/bin`
+* `sudo ./boundary.d start`
+
 ### detect_drop_off_cliff algorithm - EXPERIMENTAL
 The detect_drop_off_cliff algorithm provides a method for analysing a timeseries
 to determine is the timeseries "dropped off a cliff".  The standard skyline
 analyzer algorithms do not detect the drop off cliff pattern very well at all,
 testing with crucible has proven.  Further to this, the `CONSENSUS` methodology
 used to determine whether a timeseries deemed anomalous or not, means that even
-if one or two algorithms did detect a drop of cliff type event in a timeseries,
+if one or two algorithms did detect a drop off cliff type event in a timeseries,
 it would not be flagged as anomalous if the `CONSENSUS` threshold was not breached.
 
 The detect_drop_off_cliff algorithm - does just what it says on the tin. Although
@@ -183,48 +244,24 @@ this may seem like setting and matching a threshold, it is more effective than a
 threshold as it is dynamically set depending on the data range.
 
 Some things to note about analysing a timeseries with the algorithm are:
-* The `detect_drop_off_cliff` algorithm takes __precedence__ over __all__ other
-algorithms in the analyzer/algorithms.py context, if `detect_drop_off_cliff` 
-fires on a timeseries, the timeseries is anomalous and no other algorithms are 
-run on the metric data set in that analysis run.
-* This algorithm is most suited (accurate) with timeseries where there is a 
-large range in the timeseries most datapoints are > 100 (e.g high rate). Arbitrary 
-`trigger` values in the algorithm do filter peaky low rate timeseries, but they 
-can become more noisy with lower value datapoints, as significant cliff drops 
-are from a lower height, however it still generally matches drops off cliffs on 
+* This algorithm is most suited (accurate) with timeseries where there is a
+large range in the timeseries most datapoints are > 100 (e.g high rate). Arbitrary
+`trigger` values in the algorithm do filter peaky low rate timeseries, but they
+can become more noisy with lower value datapoints, as significant cliff drops
+are from a lower height, however it still generally matches drops off cliffs on
 low range metrics.
-* The trigger tuning based on the timeseries sample range is fairly arbitrary, 
-but has been tested and does filter peaky noise in low range timeseries, which 
+* The trigger tuning based on the timeseries sample range is fairly arbitrary,
+but has been tested and does filter peaky noise in low range timeseries, which
 filters most/lots of noise.
-* The alogrithm is more suited to datasets which come from multiple sources, 
-e.g. an aggregation of a count from all servers, rather than from individual 
-sources, e.g. a single server's metric.  The many are less likely to experience 
-false positive cliff drops, whereas the individual is more likely to experience 
+* The alogrithm is more suited to datasets which come from multiple sources,
+e.g. an aggregation of a count from all servers, rather than from individual
+sources, e.g. a single server's metric.  The many are less likely to experience
+false positive cliff drops, whereas the individual is more likely to experience
 true cliff drops.
 * __ONLY TESTED WITH__:
 ** positive, whole number timeseries data
 ** Does __not__ currently work with negative integers in the timeseries values (although it will not break, will just skip if a negative integer is encountered)
 ** For more info see [detect_drop_off_cliff](https://github.com/earthgecko/crucible/tree/master/examples/detect_drop_off_cliff)
-To configure `DROP_OFF_CLIFF_METRICS` declare the metric namespaces in settings.py 
-with that you want to analyse with the `detect_drop_off_cliff` algorithm, similar 
-to the ALERT config block:
-```
-    ("metric", "alerter", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS),
-```
-with:
-* `MIN_AVERAGE` - being the minimum average value to evaluate 
-* `MIN_AVERAGE_SECONDS` - the seconds to calculate the minimum average value over
-So if `MIN_AVERAGE` is set to 100 and `MIN_AVERAGE_SECONDS` to 3600 a metric will only 
-be analysed to determine if it is anomalous if the average value of the metric 
-over 3600 seconds is greater than 100.
-To evalute a metric at any range set these to 0, 0 or do not declare them in the tuple.
-
-```
-DROP_OFF_CLIFF_METRICS = (
-    ("skyline", "smtp", 1800),
-    ("stats_counts.http.requests.total", "smtp", 300, 100, 1800),
-)
-```
 
 ### Architecture
 See the rest of the
@@ -250,5 +287,3 @@ for support and discussions of new features.
 
 (*depending on your data throughput, *you might need to write your own
 algorithms to handle your exact data, *it runs on one box)
-
-

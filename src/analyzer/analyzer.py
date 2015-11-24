@@ -21,9 +21,10 @@ from algorithm_exceptions import *
 logger = logging.getLogger("AnalyzerLog")
 
 try:
-  SERVER_METRIC_PATH = settings.SERVER_METRICS_NAME + '.'
+    SERVER_METRIC_PATH = settings.SERVER_METRICS_NAME + '.'
 except:
-  SERVER_METRIC_PATH = ''
+    SERVER_METRIC_PATH = ''
+
 
 class Analyzer(Thread):
     def __init__(self, parent_pid):
@@ -31,7 +32,7 @@ class Analyzer(Thread):
         Initialize the Analyzer
         """
         super(Analyzer, self).__init__()
-        self.redis_conn = StrictRedis(unix_socket_path = settings.REDIS_SOCKET_PATH)
+        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -76,8 +77,8 @@ class Analyzer(Thread):
         if i == settings.ANALYZER_PROCESSES:
             assigned_max = len(unique_metrics)
         else:
-            assigned_max = i * keys_per_processor
-        assigned_min = assigned_max - keys_per_processor
+            assigned_max = min(len(unique_metrics), i * keys_per_processor)
+        assigned_min = (i - 1) * keys_per_processor
         assigned_keys = range(assigned_min, assigned_max)
 
         # Compile assigned metrics
@@ -100,7 +101,7 @@ class Analyzer(Thread):
 
             try:
                 raw_series = raw_assigned[i]
-                unpacker = Unpacker(use_list = False)
+                unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
 
@@ -151,7 +152,7 @@ class Analyzer(Thread):
             except:
                 logger.error('skyline can\'t connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 sleep(10)
-                self.redis_conn = StrictRedis(unix_socket_path = settings.REDIS_SOCKET_PATH)
+                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
             # Discover unique metrics
@@ -200,29 +201,6 @@ class Analyzer(Thread):
                 except Empty:
                     break
 
-            # Send detect_drop_off_cliff alert first
-            if settings.DROP_OFF_CLIFF_METRICS:
-                for alert in settings.DROP_OFF_CLIFF_METRICS:
-                    for metric in self.anomalous_metrics:
-                        ALERT_MATCH_PATTERN = alert[0]
-                        METRIC_PATTERN = metric[1]
-                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                        if pattern_match:
-                            cache_key = 'detect_drop_off_cliff_last_alert.%s.%s' % (alert[1], metric[1])
-                            try:
-                                last_alert = self.redis_conn.get(cache_key)
-                                if not last_alert:
-                                    context = "drop_off_cliff detected"
-                                    try:
-                                        self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                        trigger_alert(alert, metric, context)
-                                        logger.info('alert sent :: %s - %s - via %s - %s' % (metric[1], metric[0], alert[1], context))
-                                    except Exception as e:
-                                        logger.error("couldn't send alert: %s" % e)
-                            except Exception as e:
-                                logger.error("couldn't send alert: %s" % e)
-
             # Send alerts
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
@@ -250,24 +228,21 @@ class Analyzer(Thread):
                                             logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
                                         if settings.ENABLE_FULL_DURATION_ALERTS:
                                             self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                            context = "analyzer anomaly"
-                                            trigger_alert(alert, metric, context)
-                                            logger.info('alert sent :: %s - %s - via %s - %s' % (metric[1], metric[0], alert[1], context))
+                                            trigger_alert(alert, metric)
                                     except:
                                         self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                        context = "analyzer anomaly"
-                                        trigger_alert(alert, metric, context)
-                                        logger.info('alert sent :: %s - %s - via %s - %s' % (metric[1], metric[0], alert[1], context))
+                                        trigger_alert(alert, metric)
                             except Exception as e:
                                 logger.error("couldn't send alert: %s" % e)
 
             # Write anomalous_metrics to static webapp directory
-            filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
-            with open(filename, 'w') as fh:
-                # Make it JSONP with a handle_data() function
-                anomalous_metrics = list(self.anomalous_metrics)
-                anomalous_metrics.sort(key=operator.itemgetter(1))
-                fh.write('handle_data(%s)' % anomalous_metrics)
+            if len(self.anomalous_metrics) > 0:
+                filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
+                with open(filename, 'w') as fh:
+                    # Make it JSONP with a handle_data() function
+                    anomalous_metrics = list(self.anomalous_metrics)
+                    anomalous_metrics.sort(key=operator.itemgetter(1))
+                    fh.write('handle_data(%s)' % anomalous_metrics)
 
             # Log progress
             logger.info('seconds to run    :: %.2f' % (time() - now))
@@ -292,7 +267,7 @@ class Analyzer(Thread):
             # Check canary metric
             raw_series = self.redis_conn.get(settings.FULL_NAMESPACE + settings.CANARY_METRIC)
             if raw_series is not None:
-                unpacker = Unpacker(use_list = False)
+                unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
                 time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
