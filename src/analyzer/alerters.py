@@ -17,15 +17,14 @@ alert: the tuple specified in your settings:
 metric: information about the anomaly itself
     metric[0]: the anomalous value
     metric[1]: The full name of the anomalous metric
-context: what is the context of the alert
-    context: string
 """
 
 # FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
 # in the graph
 full_duration_in_hours = int(settings.FULL_DURATION) / 3600
 
-def alert_smtp(alert, metric, context):
+
+def alert_smtp(alert, metric):
 
     # FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
     # in the graph
@@ -65,11 +64,11 @@ def alert_smtp(alert, metric, context):
     else:
         img_tag = '<img src="cid:%s"/>' % content_id
 
-    body = 'skyline analyzer alert - %s <br> % <br> Anomalous value: %s <br> Next alert in: %s seconds <br> <a href="%s">%s</a>' % (context, metric[1], metric[0], alert[2], link, img_tag)
+    body = 'skyline analyzer alert <br> Anomalous value: %s <br> Next alert in: %s seconds <br> <a href="%s">%s</a>' % (metric[0], alert[2], link, img_tag)
 
     for recipient in recipients:
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = '[skyline alert] ' + metric[1] + ' - ' + context
+        msg['Subject'] = '[skyline alert] ' + metric[1]
         msg['From'] = sender
         msg['To'] = recipient
 
@@ -84,13 +83,13 @@ def alert_smtp(alert, metric, context):
         s.quit()
 
 
-def alert_pagerduty(alert, metric, context):
+def alert_pagerduty(alert, metric):
     import pygerduty
     pager = pygerduty.PagerDuty(settings.PAGERDUTY_OPTS['subdomain'], settings.PAGERDUTY_OPTS['auth_token'])
-    pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], "Anomalous metric: %s (value: %s) - %s" % (metric[1], metric[0], context))
+    pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], "Anomalous metric: %s (value: %s)" % (metric[1], metric[0]))
 
 
-def alert_hipchat(alert, metric, context):
+def alert_hipchat(alert, metric):
 
     sender = settings.HIPCHAT_OPTS['sender']
     import hipchat
@@ -105,10 +104,10 @@ def alert_hipchat(alert, metric, context):
     embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
     for room in rooms:
-        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - analyzer - %s - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, context, metric[1], metric[0], full_duration_in_hours, embed_graph)})
+        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - analyzer - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, metric[1], metric[0], full_duration_in_hours, embed_graph)})
 
 
-def alert_syslog(alert, metric, context):
+def alert_syslog(alert, metric):
     import sys
     import syslog
     syslog_ident = settings.SYSLOG_OPTS['ident']
@@ -124,11 +123,11 @@ def alert_syslog(alert, metric, context):
     syslog.syslog(4, message)
 
 
-def trigger_alert(alert, metric, context):
+def trigger_alert(alert, metric):
 
     if '@' in alert[1]:
         strategy = 'alert_smtp'
     else:
         strategy = 'alert_' + alert[1]
 
-    getattr(alerters, strategy)(alert, metric, context)
+    getattr(alerters, strategy)(alert, metric)

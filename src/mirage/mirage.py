@@ -13,14 +13,6 @@ import operator
 import socket
 import settings
 import re
-
-from alerters import trigger_alert
-from negaters import trigger_negater
-from algorithms import run_selected_algorithm
-from algorithm_exceptions import *
-
-logger = logging.getLogger("MirageLog")
-
 # imports required for surfacing graphite JSON formatted timeseries for use in
 # mirage
 import json
@@ -28,17 +20,24 @@ import sys
 import requests
 import urlparse
 import os
-from os.path import dirname, join, abspath, isfile
-
 import errno
 import imp
 from os import listdir
 import datetime
 
+from alerters import trigger_alert
+from negaters import trigger_negater
+from algorithms import run_selected_algorithm
+from algorithm_exceptions import *
+from os.path import dirname, join, abspath, isfile
+
+logger = logging.getLogger("MirageLog")
+
 try:
-  SERVER_METRIC_PATH = settings.SERVER_METRICS_NAME + '.'
+    SERVER_METRIC_PATH = settings.SERVER_METRICS_NAME + '.'
 except:
-  SERVER_METRIC_PATH = ''
+    SERVER_METRIC_PATH = ''
+
 
 class Mirage(Thread):
     def __init__(self, parent_pid):
@@ -69,10 +68,12 @@ class Mirage(Thread):
         try:
             os.makedirs(path)
             return True
-        except OSError as exc: # Python >2.5
+        # Python >2.5
+        except OSError as exc:
             if exc.errno == errno.EEXIST and os.path.isdir(path):
                 pass
-            else: raise
+            else:
+                raise
 
     def surface_graphite_metric_data(self, metric_name, graphite_from, graphite_until):
         # We use absolute time so that if there is a lag in mirage the correct
@@ -89,8 +90,8 @@ class Mirage(Thread):
         converted = []
         for datapoint in datapoints:
             try:
-            	new_datapoint = [float(datapoint[1]), float(datapoint[0])]
-            	converted.append(new_datapoint)
+                new_datapoint = [float(datapoint[1]), float(datapoint[0])]
+                converted.append(new_datapoint)
             except:
                 continue
 
@@ -122,7 +123,7 @@ class Mirage(Thread):
         """
 
         # Discover metric to analyze
-        metric_var_files = [ f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH,f)) ]
+        metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
 
         # Check if this process is unnecessary
         if len(metric_var_files) == 0:
@@ -139,22 +140,22 @@ class Mirage(Thread):
             return
         else:
             metric = metric_vars.metric
-            metric_name = [ 'metric_name', metric_vars.metric ]
+            metric_name = ['metric_name', metric_vars.metric]
             self.metric_variables.append(metric_name)
         if len(metric_vars.value) == 0:
             return
         else:
-            metric_value = [ 'metric_value', metric_vars.value ]
+            metric_value = ['metric_value', metric_vars.value]
             self.metric_variables.append(metric_value)
         if len(metric_vars.hours_to_resolve) == 0:
             return
         else:
-            hours_to_resolve = [ 'hours_to_resolve', metric_vars.hours_to_resolve ]
+            hours_to_resolve = ['hours_to_resolve', metric_vars.hours_to_resolve]
             self.metric_variables.append(hours_to_resolve)
         if len(metric_vars.metric_timestamp) == 0:
             return
         else:
-            metric_timestamp = [ 'metric_timestamp', metric_vars.metric_timestamp ]
+            metric_timestamp = ['metric_timestamp', metric_vars.metric_timestamp]
             self.metric_variables.append(metric_timestamp)
 
         # Ignore any metric check with a timestamp greater than 10 minutes ago
@@ -286,7 +287,7 @@ class Mirage(Thread):
                 logger.info('skyline can not connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 sleep(10)
                 logger.info('connecting to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
-                self.redis_conn = StrictRedis(unix_socket_path = settings.REDIS_SOCKET_PATH)
+                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
             """
@@ -294,7 +295,7 @@ class Mirage(Thread):
             """
             while True:
 
-                metric_var_files = [ f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH,f)) ]
+                metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
                 if len(metric_var_files) == 0:
                     logger.info('sleeping no metrics...')
                     sleep(10)
@@ -318,7 +319,7 @@ class Mirage(Thread):
 
                 # Discover metric to analyze
                 metric_var_files = ''
-                metric_var_files = [ f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH,f)) ]
+                metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
                 if len(metric_var_files) > 0:
                     break
 
@@ -326,7 +327,6 @@ class Mirage(Thread):
             metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
 
             logger.info('processing %s' % metric_var_files_sorted[0])
-
 
             # Spawn processes
             pids = []
@@ -401,7 +401,6 @@ class Mirage(Thread):
                             except Exception as e:
                                 logger.error("could not send %s alert for %s: %s" % (alert[1], metric[1], e))
 
-
             if settings.NEGATE_ANALYZER_ALERTS:
                 if len(self.anomalous_metrics) == 0:
                     for negate_alert in settings.ALERTS:
@@ -420,10 +419,10 @@ class Mirage(Thread):
             # Log progress
 
             if len(self.anomalous_metrics) > 0:
-              logger.info('seconds since last anomaly :: %.2f' % (time() - now))
-              logger.info('total anomalies   :: %d' % len(self.anomalous_metrics))
-              logger.info('exception stats   :: %s' % exceptions)
-              logger.info('anomaly breakdown :: %s' % anomaly_breakdown)
+                logger.info('seconds since last anomaly :: %.2f' % (time() - now))
+                logger.info('total anomalies   :: %d' % len(self.anomalous_metrics))
+                logger.info('exception stats   :: %s' % exceptions)
+                logger.info('anomaly breakdown :: %s' % anomaly_breakdown)
 
             # Reset counters
             self.anomalous_metrics[:] = []

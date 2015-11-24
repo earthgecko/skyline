@@ -65,6 +65,7 @@ def median_absolute_deviation(timeseries, second_order_resolution_seconds):
     else:
         return False
 
+
 def grubbs(timeseries, second_order_resolution_seconds):
     """
     A timeseries is anomalous if the Z score is greater than the Grubb's score.
@@ -278,5 +279,5 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
 
         return False, ensemble, timeseries[-1][1]
     except:
-        logging.error("Algorithm error: " + traceback.format_exc())
+        logger.error("Algorithm error: " + traceback.format_exc())
         return False, [], 1

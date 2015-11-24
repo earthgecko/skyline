@@ -20,13 +20,14 @@ metric: information about the anomaly itself
     metric[1]: The full name of the anomalous metric
 """
 
+
 def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric_value):
 
     # FULL_DURATION to hours so that mirage can surface the relevant timeseries data
     # for analyzer comparison in the graph
     full_duration_in_hours = int(settings.FULL_DURATION) / 3600
 
-    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the 
+    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the
     # relevant timeseries data in the graph
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
 
@@ -112,7 +113,7 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
 
 def negate_hipchat(alert, metric, second_order_resolution_seconds, metric_value):
 
-    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the 
+    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the
     # relevant timeseries data in the graph
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
     # not really required
@@ -126,7 +127,7 @@ def negate_syslog(alert, metric, second_order_resolution_seconds, metric_value):
     # for analyzer comparison in the graph
     full_duration_in_hours = int(settings.FULL_DURATION) / 3600
 
-    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the 
+    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the
     # relevant timeseries data in the graph
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
 
@@ -147,7 +148,7 @@ def trigger_negater(alert, metric, second_order_resolution_seconds, metric_value
 
     if alert[1] == 'smtp':
         strategy = 'negate_analyzer_alert'
-    else:        
+    else:
         strategy = 'negate_' + alert[1]
 
     getattr(negaters, strategy)(alert, metric, second_order_resolution_seconds, metric_value)

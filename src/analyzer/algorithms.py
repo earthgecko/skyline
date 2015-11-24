@@ -20,15 +20,6 @@ from settings import (
     BOREDOM_SET_SIZE,
 )
 
-try:
-    from settings import (
-        DROP_OFF_CLIFF_METRICS,
-    )
-    DETECT_DROP_OFF_CLIFF_METRICS=True
-    import re
-except:
-    DETECT_DROP_OFF_CLIFF_METRICS=False
-
 from algorithm_exceptions import *
 
 logger = logging.getLogger("AnalyzerLog")
@@ -277,124 +268,6 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 
     return abs(intervals[-1] - mean) > 3 * stdDev
 
-def detect_drop_off_cliff(timeseries, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds):
-    """
-    A timeseries is anomalous if the average of the last 10 datapoints is 
-    <trigger> times greater than the last data point AND if has not experienced
-    frequent cliff drops in the last 10 datapoints.  If the timeseries has 
-    experienced 2 or more datapoints of equal or less values in the last 10 or
-    EXPIRATION_TIME datapoints or is less than a MIN_AVERAGE if set the
-    algorithm determines the datapoint as NOT anomalous but normal.
-    This algorithm is most suited to timeseries with most datapoints being > 100
-    (e.g high rate).  The arbitrary <trigger> values become more noisy with
-    lower value datapoints, but it still matches drops off cliffs.
-    """
-
-    if len(timeseries) < 60:
-        return False
-
-    int_end_timestamp = int(timeseries[-1][0])
-    # Determine resolution of the data set
-    int_second_last_end_timestamp = int(timeseries[-2][0])
-    resolution = int_end_timestamp - int_second_last_end_timestamp
-    ten_data_point_seconds = resolution * 10
-    ten_datapoints_ago = int_end_timestamp - ten_data_point_seconds
-
-    ten_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > ten_datapoints_ago])
-    ten_datapoint_array_len = len(ten_datapoint_array)
-    if ten_datapoint_array_len > 3:
-
-        ten_datapoint_min_value = np.amin(ten_datapoint_array)
-
-        # DO NOT handle if negative integers are in the range, where is the
-        # bottom of the cliff if a range goes negative?  Testing with a noisy
-        # sine wave timeseries that had a drop off cliff introduced to the
-        # postive data side, proved that this algorithm does work on timeseries
-        # with data values in the negative range
-        if ten_datapoint_min_value < 0:
-            return False
-
-        ten_datapoint_max_value = np.amax(ten_datapoint_array)
-
-        # The algorithm should have already fired in 10 datapoints if the
-        # timeseries dropped off a cliff, these are all zero
-        if ten_datapoint_max_value == 0:
-            return False
-
-        # If the lowest is equal to the highest, no drop off cliff
-        if ten_datapoint_min_value == ten_datapoint_max_value:
-            return False
-
-#        if ten_datapoint_max_value < 10:
-#            return False
-
-        ten_datapoint_array_sum = np.sum(ten_datapoint_array)
-        ten_datapoint_value = int(ten_datapoint_array[-1])
-        ten_datapoint_average = ten_datapoint_array_sum / ten_datapoint_array_len
-        ten_datapoint_value = int(ten_datapoint_array[-1])
-
-        # if a metric goes up and down a lot and falls off a cliff frequently
-        # it is normal, not anomalous
-        number_of_similar_datapoints = len(np.where(ten_datapoint_array <= ten_datapoint_min_value))
-
-        # Detect once only - to make this useful and not noisy the first one
-        # would have already fired and detected the drop
-        if number_of_similar_datapoints > 2:
-            return False
-
-        # evaluate against 20 datapoints as well, reduces chatter on peaky ones
-        # tested with 60 as well and 20 is sufficient to filter noise
-        twenty_data_point_seconds = resolution * 20
-        twenty_datapoints_ago = int_end_timestamp - twenty_data_point_seconds
-        twenty_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > twenty_datapoints_ago])
-        number_of_similar_datapoints_in_twenty = len(np.where(twenty_datapoint_array <= ten_datapoint_min_value))
-        if number_of_similar_datapoints_in_twenty > 2:
-            return False
-
-        # Check if there is a similar data point in EXPIRATION_TIME
-        # Disabled as redis alert cache will filter on this
-#        if metric_expiration_time > twenty_data_point_seconds:
-#            expiration_time_data_point_seconds = metric_expiration_time
-#            expiration_time_datapoints_ago = int_end_timestamp - metric_expiration_time
-#            expiration_time_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > expiration_time_datapoints_ago])
-#            number_of_similar_datapoints_in_expiration_time = len(np.where(expiration_time_datapoint_array <= ten_datapoint_min_value))
-#            if number_of_similar_datapoints_in_expiration_time > 2:
-#                return False
-
-        if metric_min_average > 0 and metric_min_average_seconds > 0:
-            min_average = metric_min_average
-            min_average_seconds = metric_min_average_seconds
-            min_average_data_point_seconds = resolution * min_average_seconds
-            min_average_datapoints_ago = int_end_timestamp - (resolution * min_average_seconds)
-            min_average_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > min_average_datapoints_ago])
-            min_average_array_average = np.sum(min_average_array) / len(min_average_array)
-            if min_average_array_average < min_average:
-                return False
-
-        if ten_datapoint_max_value < 101:
-            trigger = 15
-        if ten_datapoint_max_value < 20:
-            trigger = ten_datapoint_average / 2
-        if ten_datapoint_max_value > 100:
-            trigger = 100
-        if ten_datapoint_value == 0:
-            # Cannot divide by 0, so set to 0.1 to prevent error
-            ten_datapoint_value = 0.1
-        if ten_datapoint_value == 1:
-            trigger = 1
-        if ten_datapoint_value == 1 and ten_datapoint_max_value < 10:
-            trigger = 0.1
-        if ten_datapoint_value == 0.1 and ten_datapoint_average < 1 and ten_datapoint_array_sum < 7:
-            trigger = 7
-
-        ten_datapoint_result = ten_datapoint_average / ten_datapoint_value
-        if int(ten_datapoint_result) > trigger:
-            log_event_string = join("detect_drop_off_cliff - " + str(int_end_timestamp) + ", ten_datapoint_value = " + str(ten_datapoint_value) + ", ten_datapoint_array_sum = " + str(ten_datapoint_array_sum)  + ", ten_datapoint_average = " + str(ten_datapoint_average) + ", trigger = " + str(trigger) + ", ten_datapoint_result = " + str(ten_datapoint_result))
-            logger.info(log_event_string)
-            return True
-
-    return False
-
 
 def run_selected_algorithm(timeseries, metric_name):
     """
@@ -411,30 +284,6 @@ def run_selected_algorithm(timeseries, metric_name):
     # Get rid of boring series
     if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
         raise Boring()
-
-    # detect_drop_off_cliff first as CONSENSUS is not required
-    if DETECT_DROP_OFF_CLIFF_METRICS == True:
-        if DROP_OFF_CLIFF_METRICS:
-            for metric in DROP_OFF_CLIFF_METRICS:
-                CHECK_MATCH_PATTERN = metric[0]
-                check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-                pattern_match = check_match_pattern.match(metric_name)
-                if pattern_match:
-                    metric_expiration_time = 0
-                    metric_min_average = 0
-                    metric_min_average_seconds = 1200
-                    if metric[2]:
-                        metric_expiration_time = metric[2]
-                    if metric[3]:
-                        metric_min_average = metric[3]
-                    if metric[4]:
-                        metric_min_average_seconds = metric[4]
-                    try:
-                        ensemble = [globals()[detect_drop_off_cliff](timeseries, metric[0], metric_expiration_time, metric_min_average, metric_min_average_seconds)]
-                        if ensemble.count(True) == 1:
-                            return True, ensemble, timeseries[-1][1]
-                    except:
-                        logging.error("Algorithm error: detect_drop_off_cliff - " + traceback.format_exc())
 
     try:
         ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]

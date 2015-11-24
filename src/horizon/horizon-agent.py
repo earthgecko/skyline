@@ -5,8 +5,6 @@ from os import getpid
 from os.path import dirname, abspath, isdir
 from multiprocessing import Queue
 from daemon import runner
-
-# @added 20150914 - added log rotation
 from logging.handlers import TimedRotatingFileHandler
 
 # add the shared settings file to namespace
@@ -33,7 +31,7 @@ class Horizon():
         listen_queue = Queue(maxsize=settings.MAX_QUEUE_SIZE)
         pid = getpid()
 
-        #If we're not using oculus, don't bother writing to mini
+        # If we're not using oculus, don't bother writing to mini
         try:
             skip_mini = True if settings.OCULUS_HOST == '' else False
         except Exception:
@@ -80,12 +78,11 @@ if __name__ == "__main__":
     logger = logging.getLogger("HorizonLog")
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-# @modified 20150914 - added log rotation
-#    handler = logging.FileHandler(settings.LOG_PATH + '/horizon.log')
-    handler = logging.handlers.TimedRotatingFileHandler(settings.LOG_PATH + '/horizon.log',
-                                       when="midnight",
-                                       interval=1,
-                                       backupCount=5)
+    handler = logging.handlers.TimedRotatingFileHandler(
+        settings.LOG_PATH + '/horizon.log',
+        when="midnight",
+        interval=1,
+        backupCount=5)
 
     handler.setFormatter(formatter)
     logger.addHandler(handler)

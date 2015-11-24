@@ -18,7 +18,7 @@ class Roomba(Thread):
     """
     def __init__(self, parent_pid, skip_mini):
         super(Roomba, self).__init__()
-        self.redis_conn = StrictRedis(unix_socket_path = settings.REDIS_SOCKET_PATH)
+        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         self.daemon = True
         self.parent_pid = parent_pid
         self.skip_mini = skip_mini
@@ -66,7 +66,7 @@ class Roomba(Thread):
                 # comes in. If your data has a very small resolution (<.1s),
                 # this technique may not suit you.
                 raw_series = pipe.get(key)
-                unpacker = Unpacker(use_list = False)
+                unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = sorted([unpacked for unpacked in unpacker])
 
@@ -99,9 +99,9 @@ class Roomba(Thread):
                 delta = now - duration
                 trimmed = [
                     tuple for tuple in timeseries
-                    if tuple[0] > delta
-                    and tuple[0] not in temp
-                    and not temp_add(tuple[0])
+                    if tuple[0] > delta and
+                    tuple[0] not in temp and not
+                    temp_add(tuple[0])
                 ]
 
                 # Purge if everything was deleted, set key otherwise
@@ -160,7 +160,7 @@ class Roomba(Thread):
             except:
                 logger.error('roomba can\'t connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 sleep(10)
-                self.redis_conn = StrictRedis(unix_socket_path = settings.REDIS_SOCKET_PATH)
+                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
             # Spawn processes
