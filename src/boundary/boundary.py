@@ -78,7 +78,7 @@ class Boundary(Thread):
             except socket.error:
                 endpoint = '%s:%d' % (settings.GRAPHITE_HOST,
                                       settings.CARBON_PORT)
-                logger.error("Can't connect to Graphite at %s" % endpoint)
+                logger.error('Cannot connect to Graphite at %s' % endpoint)
                 return False
 
             sock.sendall('%s %s %i\n' % (name, value, time()))
@@ -91,6 +91,8 @@ class Boundary(Thread):
         seen = set()
         return [x for x in seq if str(x) not in seen and not seen.add(str(x))]
 
+    # This is to make a dump directory in /tmp if ENABLE_BOUNDARY_DEBUG is True
+    # for dumping the metric timeseries data into for debugging purposes
     def mkdir_p(self, path):
         try:
             os.makedirs(path)
@@ -134,6 +136,7 @@ class Boundary(Thread):
         for i in assigned_metrics_and_algos:
             assigned_metrics.append(i[0])
 
+        # unique unhashed things
         def unique_noHash(seq):
             seen = set()
             return [x for x in seq if str(x) not in seen and not seen.add(str(x))]
@@ -166,6 +169,7 @@ class Boundary(Thread):
         for metric in BOUNDARY_METRICS:
             all_boundary_algorithms.append(metric[1])
 
+        # The unique algorithms that are being used
         boundary_algorithms = unique_noHash(all_boundary_algorithms)
         if ENABLE_BOUNDARY_DEBUG:
             logger.info('debug - boundary_algorithms - %s' % str(boundary_algorithms))
@@ -190,6 +194,7 @@ class Boundary(Thread):
 
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
 
+            # Determine the metrics BOUNDARY_METRICS metric tuple settings
             for metrick in BOUNDARY_METRICS:
                 CHECK_MATCH_PATTERN = metrick[0]
                 check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
@@ -254,6 +259,7 @@ class Boundary(Thread):
                 logger.info('debug - discover_run_metrics - %s' % str(discover_run_metric))
             logger.info('debug - build unique boundary metrics to analyze')
 
+        # Determine the unique set of metrics to run
         run_metrics = unique_noHash(discover_run_metrics)
 
         if ENABLE_BOUNDARY_DEBUG:
@@ -261,13 +267,14 @@ class Boundary(Thread):
             for run_metric in run_metrics:
                 logger.info('debug - run_metrics - %s' % str(run_metric))
 
-        # Distill timeseries strings into lists
+        # Distill timeseries strings and submit to run_selected_algorithm
         for metric_and_algo in run_metrics:
             self.check_if_parent_is_alive()
 
             try:
                 raw_assigned_id = metric_and_algo[0]
                 metric_name = metric_and_algo[1]
+                base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
                 metric_expiration_time = metric_and_algo[2]
                 metric_min_average = metric_and_algo[3]
                 metric_min_average_seconds = metric_and_algo[4]
@@ -290,6 +297,7 @@ class Boundary(Thread):
                 autoaggregate = False
                 autoaggregate_value = 0
 
+                # Determine if the namespace is to be aggregated
                 if BOUNDARY_AUTOAGGRERATION:
                     for autoaggregate_metric in BOUNDARY_AUTOAGGRERATION_METRICS:
                         autoaggregate = False
@@ -315,6 +323,7 @@ class Boundary(Thread):
                             metric_alerters, autoaggregate,
                             autoaggregate_value, algorithm)
                     )
+                    # Dump the the timeseries data to a file
                     timeseries_dump_dir = "/tmp/skyline/boundary/" + algorithm
                     self.mkdir_p(timeseries_dump_dir)
                     timeseries_dump_file = timeseries_dump_dir + "/" + metric_name + ".json"
@@ -322,21 +331,65 @@ class Boundary(Thread):
                         f.write(str(timeseries))
                         f.close()
 
-                anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm = run_selected_algorithm(
-                    timeseries, metric_name,
-                    metric_expiration_time,
-                    metric_min_average,
-                    metric_min_average_seconds,
-                    metric_trigger,
-                    alert_threshold,
-                    metric_alerters,
-                    autoaggregate,
-                    autoaggregate_value,
-                    algorithm
-                )
+                # Check if a metric has its own unique BOUNDARY_METRICS alert
+                # tuple, this allows us to paint an entire metric namespace with
+                # the same brush AND paint a unique metric or namespace with a
+                # different brush or scapel
+                has_unique_tuple = False
+                run_tupple = False
+                boundary_metric_tuple = (base_name, algorithm, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters)
+                wildcard_namespace = True
+                for metric_tuple in BOUNDARY_METRICS:
+                    if not has_unique_tuple:
+                        CHECK_MATCH_PATTERN = metric_tuple[0]
+                        check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+                        pattern_match = check_match_pattern.match(base_name)
+                        if pattern_match:
+                            if metric_tuple[0] == base_name:
+                                wildcard_namespace = False
+                            if not has_unique_tuple:
+                                if boundary_metric_tuple == metric_tuple:
+                                    has_unique_tuple = True
+                                    run_tupple = True
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.info('unique_tuple:')
+                                        logger.info('boundary_metric_tuple: %s' % str(boundary_metric_tuple))
+                                        logger.info('metric_tuple: %s' % str(metric_tuple))
+
+                if not has_unique_tuple:
+                    if wildcard_namespace:
+                        if ENABLE_BOUNDARY_DEBUG:
+                            logger.info('wildcard_namespace:')
+                            logger.info('boundary_metric_tuple: %s' % str(boundary_metric_tuple))
+                        run_tupple = True
+                    else:
+                        if ENABLE_BOUNDARY_DEBUG:
+                            logger.info('wildcard_namespace: BUT WOULD NOT RUN')
+                            logger.info('boundary_metric_tuple: %s' % str(boundary_metric_tuple))
 
                 if ENABLE_BOUNDARY_DEBUG:
-                    logger.info('debug - analysed - %s' % (metric_name))
+                    logger.info('WOULD RUN run_selected_algorithm = %s' % run_tupple)
+
+                if run_tupple:
+                    # Submit the timeseries and settings to run_selected_algorithm
+                    anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm = run_selected_algorithm(
+                        timeseries, metric_name,
+                        metric_expiration_time,
+                        metric_min_average,
+                        metric_min_average_seconds,
+                        metric_trigger,
+                        alert_threshold,
+                        metric_alerters,
+                        autoaggregate,
+                        autoaggregate_value,
+                        algorithm
+                    )
+                    if ENABLE_BOUNDARY_DEBUG:
+                        logger.info('debug - analysed - %s' % (metric_name))
+                else:
+                    anomalous = False
+                    if ENABLE_BOUNDARY_DEBUG:
+                        logger.info('debug - more unique metric tuple not analysed - %s' % (metric_name))
 
                 # If it's anomalous, add it to list
                 if anomalous:
@@ -468,7 +521,8 @@ class Boundary(Thread):
                         logger.info("debug - anomalous_metric - " + str(anomalous_metric))
 
                     # Determine how many times has the anomaly been seen if the
-                    # ALERT_THRESHOLD is set to > 1
+                    # ALERT_THRESHOLD is set to > 1 and create a cache key in
+                    # redis to keep count so that alert_threshold can be honored
                     if alert_threshold == 0:
                         times_seen = 1
                         if ENABLE_BOUNDARY_DEBUG:
@@ -593,6 +647,7 @@ class Boundary(Thread):
                                         logger.info("debug - alerts_sent %s is less than alerter_limit %s" % (str(alerts_sent), str(alerter_limit)))
                                         logger.info("debug - send_alert set to %s" % str(send_alert))
 
+                            # Send alert
                             alerter_alert_sent = False
                             if send_alert:
                                 cache_key = 'last_alert.boundary.%s.%s.%s' % (alerter, base_name, algorithm)
@@ -626,6 +681,8 @@ class Boundary(Thread):
                                 trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm)
                                 logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
 
+                            # Update the alerts sent for the alerter cache key,
+                            # to allow for alert limiting
                             if alerter_alert_sent and alerter_limit_set:
                                 try:
                                     alerter_sent_count_key = 'alerts_sent.%s' % (alerter)
