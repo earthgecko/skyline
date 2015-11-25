@@ -51,14 +51,14 @@ if __name__ == "__main__":
 
                 if not valid:
                     configuration_error = True
-                    print "configuration error in tuple, expected: str"
-                    print "configuration error in BOUNDARY_ALGORITHMS tuple: %s" % str(algorithm)
+                    print 'configuration error in tuple, expected: str'
+                    print('configuration error in BOUNDARY_ALGORITHMS tuple: %s' % str(algorithm))
     except:
         try:
             if configuration_error:
-                print "There are configuration issues in BOUNDARY_ALGORITHMS in settings.py"
+                print 'There are configuration issues in BOUNDARY_ALGORITHMS in settings.py'
         except:
-            print "There are no BOUNDARY_ALGORITHMS in settings.py. try adding some, nothing to do"
+            print 'There are no BOUNDARY_ALGORITHMS in settings.py. try adding some, nothing to do'
         sys.exit(1)
 
     # Make sure we can run all the algorithms
@@ -66,13 +66,13 @@ if __name__ == "__main__":
         from algorithms import *
         timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
         ensemble = [globals()[algorithm](
-            timeseries, "test", 3600, 100, 300, 1
+            timeseries, 'test', 3600, 100, 300, 1
         ) for algorithm in settings.BOUNDARY_ALGORITHMS]
     except KeyError as e:
-        print "Algorithm %s deprecated or not defined; check settings.BOUNDARY_ALGORITHMS" % e
+        print 'Algorithm %s deprecated or not defined; check settings.BOUNDARY_ALGORITHMS' % e
         sys.exit(1)
     except Exception as e:
-        print "Algorithm test run failed."
+        print 'Algorithm test run failed.'
         traceback.print_exc()
         sys.exit(1)
 
@@ -107,13 +107,13 @@ if __name__ == "__main__":
 
                 if not valid:
                     configuration_error = True
-                    print "configuration error in tuple, expected: str, str, int, int, int, int, str"
-                    print "configuration error in BOUNDARY_METRICS tuple: %s" % str(metric)
+                    print 'configuration error in tuple, expected: str, str, int, int, int, int, str'
+                    print('configuration error in BOUNDARY_METRICS tuple: %s' % str(metric))
     except:
         if configuration_error:
-            print "There are configuration issues in BOUNDARY_METRICS in settings.py"
+            print 'There are configuration issues in BOUNDARY_METRICS in settings.py'
         else:
-            print "There are no BOUNDARY_METRICS in settings.py. try adding some, nothing to do"
+            print 'There are no BOUNDARY_METRICS in settings.py. try adding some, nothing to do'
 
         sys.exit(1)
 
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     handler = logging.handlers.TimedRotatingFileHandler(
         settings.LOG_PATH + '/boundary.log',
-        when="midnight",
+        when='midnight',
         interval=1,
         backupCount=5)
 

@@ -25,7 +25,7 @@ except:
 try:
     graphite_graph_line_color = int(settings.BOUNDARY_SMTP_OPTS['graphite_graph_line_color'])
 except:
-    graphite_graph_line_color = "pink"
+    graphite_graph_line_color = 'pink'
 
 
 def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
@@ -109,7 +109,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
 def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
     import pygerduty
     pager = pygerduty.PagerDuty(settings.BOUNDARY_PAGERDUTY_OPTS['subdomain'], settings.BOUNDARY_PAGERDUTY_OPTS['auth_token'])
-    pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], "Anomalous metric: %s (value: %s) - %s" % (metric_name, datapoint, algortihm))
+    pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algortihm))
 
 
 def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
@@ -146,13 +146,13 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
     import sys
     import syslog
     syslog_ident = settings.SYSLOG_OPTS['ident']
-    message = str("boundary - Anomalous metric: %s (value: %s) - %s" % (metric_name, datapoint, algorithm))
+    message = str('boundary - Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
     if sys.version_info[:2] == (2, 6):
         syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
     elif sys.version_info[:2] == (2, 7):
-        syslog.openlog(ident="skyline", logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
+        syslog.openlog(ident='skyline', logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
     elif sys.version_info[:1] == (3):
-        syslog.openlog(ident="skyline", logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
+        syslog.openlog(ident='skyline', logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
     else:
         syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
     syslog.syslog(4, message)
@@ -160,7 +160,7 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
 
 def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm):
 
-    if alerter == "smtp":
+    if alerter == 'smtp':
         strategy = 'alert_smtp'
     else:
         strategy = 'alert_' + alerter

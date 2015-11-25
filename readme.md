@@ -218,10 +218,10 @@ e.g:
 
 ```
 BOUNDARY_METRICS = (
-    # ("metric", "algorithm", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, "ALERT_VIAS"),
-    ("nometrics", "detect_drop_off_cliff", 1800, 500, 3600, 0, 2, "smtp"),
-    ("nometrics.either", "less_than", 3600, 0, 0, 15, 2, "smtp"),
-    ("nometrics.other", "greater_than", 3600, 0, 0, 100000, 1, "smtp|hipchat|pagerduty"),
+    # ('metric', 'algorithm', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
+    ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp'),
+    ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'),
+    ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
 )
 ```
 

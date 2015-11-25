@@ -147,52 +147,52 @@ ENABLE_FULL_DURATION_ALERTS = True
 # This is the config for which metrics to alert on and which strategy to use for each.
 # Alerts will not fire twice within EXPIRATION_TIME, even if they trigger again.
 # Schema: (
-#          ("metric1", "smtp", EXPIRATION_TIME),
-#          ("metric2", "pagerduty", EXPIRATION_TIME),
-#          ("metric3", "hipchat", EXPIRATION_TIME),
-#          ("stats", "syslog", EXPIRATION_TIME),
+#          ('metric1', 'smtp', EXPIRATION_TIME),
+#          ('metric2', 'pagerduty', EXPIRATION_TIME),
+#          ('metric3', 'hipchat', EXPIRATION_TIME),
+#          ('stats', 'syslog', EXPIRATION_TIME),
 # Wildcard namespaces can be used as well
-#          ("metric4.thing.*.requests", "stmp", EXPIRATION_TIME),
+#          ('metric4.thing.*.requests', 'stmp', EXPIRATION_TIME),
 # mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and mirage is enabled
-#          ("metric5.thing.*.rpm", "smtp", EXPIRATION_TIME, SECOND_ORDER_RESOLUTION_HOURS),
+#          ('metric5.thing.*.rpm', 'smtp', EXPIRATION_TIME, SECOND_ORDER_RESOLUTION_HOURS),
 #         )
 ALERTS = (
-    ("skyline", "smtp", 1800),
+    ('skyline', 'smtp', 1800),
 )
 
 # Each alert module requires additional information.
 SMTP_OPTS = {
     # This specifies the sender of email alerts.
-    "sender": "skyline-alerts@etsy.com",
+    'sender': 'skyline-alerts@etsy.com',
     # recipients is a dictionary mapping metric names
     # (exactly matching those listed in ALERTS) to an array of e-mail addresses
-    "recipients": {
-        "skyline": ["abe@etsy.com", "you@yourcompany.com"],
+    'recipients': {
+        'skyline': ['abe@etsy.com', 'you@yourcompany.com'],
     },
-    "embed-images": True,
+    'embed-images': True,
 }
 
 # HipChat alerts require python-simple-hipchat
 HIPCHAT_OPTS = {
-    "auth_token": "hipchat_auth_token",
-    "sender": "hostname or identifier",
+    'auth_token': 'hipchat_auth_token',
+    'sender': 'hostname or identifier',
     # list of hipchat room_ids to notify about each anomaly
     # (similar to SMTP_OPTS['recipients'])
-    "rooms": {
-        "skyline": (12345,),
+    'rooms': {
+        'skyline': (12345,),
     },
     # Background color of hipchat messages
-    # (One of "yellow", "red", "green", "purple", "gray", or "random".)
-    "color": "purple",
+    # (One of 'yellow', 'red', 'green', 'purple', 'gray', or 'random'.)
+    'color': 'purple',
 }
 
 # PagerDuty alerts require pygerduty
 PAGERDUTY_OPTS = {
     # Your pagerduty subdomain and auth token
-    "subdomain": "example",
-    "auth_token": "your_pagerduty_auth_token",
-    # Service API key (shown on the detail page of a "Generic API" service)
-    "key": "your_pagerduty_service_api_key",
+    'subdomain': 'example',
+    'auth_token': 'your_pagerduty_auth_token',
+    # Service API key (shown on the detail page of a 'Generic API' service)
+    'key': 'your_pagerduty_service_api_key',
 }
 
 # syslog alerts requires an ident
@@ -200,7 +200,7 @@ PAGERDUTY_OPTS = {
 # any syslog or rsyslog down the line. The EXPIRATION_TIME for the syslog alert
 # method should be set to 1 to fire every anomaly into the syslog
 SYSLOG_OPTS = {
-    "ident": "skyline",
+    'ident': 'skyline',
 }
 
 
@@ -349,22 +349,11 @@ BOUNDARY_ENABLE_ALERTS = False
 # however some algorithms are pre-tuned to use different trigger values on
 # different ranges to pre-filter some noise.
 # Schema: (
-#          ("metric1", "algorithm1", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, "ALERT_VIAS"),
-#          ("metric1", "algorithm2", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, "ALERT_VIAS"),
+#          ('metric1', 'algorithm1', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
+#          ('metric2', 'algorithm2', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
 # Wildcard namespaces can be used as well
-#          ("metric.thing.*.requests", "algorithm1", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, "ALERT_VIAS"),
+#          ('metric.thing.*.requests', 'algorithm1', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
 #         )
-# NOTE: ORDER MATTERS
-# due to this being regex based, the last pattern match wins so if you
-# want to check an entire namespace with an EXPIRATION_TIME of 1800 but a
-# you want a specific namespace within the namespace with different values,
-# ensure the specific namespace is lowest down the list, e.g.
-# BOUNDARY_METRICS = (
-#    ("skyline", "detect_drop_off_cliff", 1800, 500, 3600, 0, 1, "smtp|hipchat"),
-#    ("skyline.analyzer", "less_than", 3600, 0, 0, 1, 1, "smtp"),
-#    ("skyline.analyzer", "detect_drop_off_cliff", 600, 10, 300, 0, 1, "smtp|pagerduty"),
-#    ("skyline.analyzer.*.duration", "greater_than", 3600, 0, 0, 60, 0, "smtp"),
-# )
 # Algorithm variables (all are required):
 # EXPIRATION_TIME: Alerts will not fire twice within this amount of seconds,
 #                  even if they trigger again.
@@ -390,11 +379,20 @@ BOUNDARY_ENABLE_ALERTS = False
 #                  this as 1.
 # ALERT_VIAS: pipe separated alerters to send to.
 #
+# Wildcard and absolute metric paths.  Currently the only supported metric
+# namespaces are a parent namespace and an absolute metric path e.g.
+#    ('stats_counts.someapp.things', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp'),
+#    ('stats_counts.someapp.things.an_important_thing.requests', 'detect_drop_off_cliff', 600, 100, 3600, 0, 2, 'smtp|pagerduty'),
+#    ('stats_counts.otherapp.things.*.requests', 'detect_drop_off_cliff', 600, 500, 3600, 0, 2, 'smtp|hipchat'),
+# In the above all stats_counts.someapp.things* would be painted with a 1800
+# EXPIRATION_TIME and 500 MIN_AVERAGE, but those values would be overridden by
+# 600 and 100 stats_counts.someapp.things.an_important_thing.requests and
+# pagerduty added.
 BOUNDARY_METRICS = (
-    # ("metric", "algorithm", EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, "ALERT_VIAS"),
-    ("nometrics", "detect_drop_off_cliff", 1800, 500, 3600, 0, 2, "smtp"),
-    ("nometrics.either", "less_than", 3600, 0, 0, 15, 2, "smtp"),
-    ("nometrics.other", "greater_than", 3600, 0, 0, 100000, 1, "smtp"),
+    # ('metric', 'algorithm', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
+    ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp'),
+    ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'),
+    ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
 )
 
 # The BOUNDARY_AUTOAGGRERATION function used to autoaggregate a timeseries.
@@ -407,7 +405,7 @@ BOUNDARY_AUTOAGGRERATION = False
 # To aggregate a timeseries to minutely values use 60 as the AGGREGATION_VALUE
 # e.g. sum metric datapoints by minute
 BOUNDARY_AUTOAGGRERATION_METRICS = (
-    ("nometrics.either", 60),
+    ('nometrics.either', 60),
 )
 
 # boundary Alerting
@@ -420,62 +418,62 @@ BOUNDARY_AUTOAGGRERATION_METRICS = (
 BOUNDARY_ALERTER_OPTS = {
     # When an alert is sent as key is set with in the alert namespaces with an
     # expiration value
-    "alerter_expiration_time": {
-        "smtp": 60,
-        "pagerduty": 1800,
-        "hipchat": 1800,
+    'alerter_expiration_time': {
+        'smtp': 60,
+        'pagerduty': 1800,
+        'hipchat': 1800,
     },
     # If alerter keys >= limit in the above alerter_expiration_time do not alert
     # to this channel until keys < limit
-    "alerter_limit": {
-        "smtp": 100,
-        "pagerduty": 15,
-        "hipchat": 30,
+    'alerter_limit': {
+        'smtp': 100,
+        'pagerduty': 15,
+        'hipchat': 30,
     },
 }
 
 # Each alert module requires additional information.
 BOUNDARY_SMTP_OPTS = {
     # This specifies the sender of email alerts.
-    "sender": "skyline-boundary@example.com",
+    'sender': 'skyline-boundary@example.com',
     # recipients is a dictionary mapping metric names
     # (exactly matching those listed in ALERTS) to an array of e-mail addresses
-    "recipients": {
-        "nometrics": ["me@example.com", "you@some-company.com"],
-        "nometrics.either": ["you@example.com", "another@some-company.com"],
+    'recipients': {
+        'nometrics': ['me@example.com', 'you@some-company.com'],
+        'nometrics.either': ['you@example.com', 'another@some-company.com'],
     },
-    "embed-images": True,
+    'embed-images': True,
     # Send graphite graphs at the most meaningful resolution if different from
     # FULL_DURATION
-    "graphite_previous_hours": 7,
-    "graphite_graph_line_color": "pink",
+    'graphite_previous_hours': 7,
+    'graphite_graph_line_color': 'pink',
 }
 
 # HipChat alerts require python-simple-hipchat
 BOUNDARY_HIPCHAT_OPTS = {
-    "auth_token": "hipchat_auth_token",
-    "sender": "hostname or identifier",
+    'auth_token': 'hipchat_auth_token',
+    'sender': 'hostname or identifier',
     # list of hipchat room_ids to notify about each anomaly
     # (similar to SMTP_OPTS['recipients'])
-    "rooms": {
-        "nometrics": (12345,),
+    'rooms': {
+        'nometrics': (12345,),
     },
     # Background color of hipchat messages
-    # (One of "yellow", "red", "green", "purple", "gray", or "random".)
-    "color": "purple",
+    # (One of 'yellow', 'red', 'green', 'purple', 'gray', or 'random'.)
+    'color': 'purple',
     # Send graphite graphs at the most meaningful resolution if different from
     # FULL_DURATION
-    "graphite_previous_hours": 7,
-    "graphite_graph_line_color": "pink",
+    'graphite_previous_hours': 7,
+    'graphite_graph_line_color': 'pink',
 }
 
 # PagerDuty alerts require pygerduty
 BOUNDARY_PAGERDUTY_OPTS = {
     # Your pagerduty subdomain and auth token
-    "subdomain": "example",
-    "auth_token": "your_pagerduty_auth_token",
-    # Service API key (shown on the detail page of a "Generic API" service)
-    "key": "your_pagerduty_service_api_key",
+    'subdomain': 'example',
+    'auth_token': 'your_pagerduty_auth_token',
+    # Service API key (shown on the detail page of a 'Generic API' service)
+    'key': 'your_pagerduty_service_api_key',
 }
 
 

@@ -33,20 +33,6 @@ To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
 """
 
 
-def tail_avg(timeseries):
-    """
-    This is a utility function used to calculate the average of the last three
-    datapoints in the series as a measure, instead of just the last datapoint.
-    It reduces noise, but it also reduces sensitivity and increases the delay
-    to detection.
-    """
-    try:
-        t = (timeseries[-1][1] + timeseries[-2][1] + timeseries[-3][1]) / 3
-        return t
-    except IndexError:
-        return timeseries[-1][1]
-
-
 def autoaggregate_ts(timeseries, autoaggregate_value):
     """
     This is a utility function used to autoaggregate a timeseries.  If a
@@ -54,13 +40,13 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
     every minute then autoaggregate will aggregate every autoaggregate_value.
     """
     if ENABLE_BOUNDARY_DEBUG:
-        logger.info("debug - autoaggregate_ts at %s seconds" % str(autoaggregate_value))
+        logger.info('debug - autoaggregate_ts at %s seconds' % str(autoaggregate_value))
 
     aggregated_timeseries = []
 
     if len(timeseries) < 60:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info("debug - autoaggregate_ts - timeseries less than 60 datapoints, TooShort")
+            logger.info('debug - autoaggregate_ts - timeseries less than 60 datapoints, TooShort')
         raise TooShort()
 
     int_end_timestamp = int(timeseries[-1][0])
@@ -70,7 +56,7 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
     start_timestamp = last_hour
 
     if ENABLE_BOUNDARY_DEBUG:
-        logger.info("debug - autoaggregate_ts - aggregating from %s to %s" % (str(start_timestamp), str(int_end_timestamp)))
+        logger.info('debug - autoaggregate_ts - aggregating from %s to %s' % (str(start_timestamp), str(int_end_timestamp)))
 
     valid_timestamps = False
     try:
@@ -78,8 +64,8 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
         if valid_timeseries == 3600:
             valid_timestamps = True
     except Exception as e:
-        logger.error("Algorithm error: " + traceback.format_exc())
-        logger.error("error: %e" % e)
+        logger.error('Algorithm error: ' + traceback.format_exc())
+        logger.error('error: %e' % e)
         aggregated_timeseries = []
         return aggregated_timeseries
 
@@ -94,12 +80,12 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
             aggregated_timeseries.reverse()
             return aggregated_timeseries
         except Exception as e:
-            logger.error("Algorithm error: " + traceback.format_exc())
-            logger.error("error: %e" % e)
+            logger.error('Algorithm error: ' + traceback.format_exc())
+            logger.error('error: %e' % e)
             aggregated_timeseries = []
             return aggregated_timeseries
     else:
-        logger.error("could not aggregate - timestamps not valid for aggregation")
+        logger.error('could not aggregate - timestamps not valid for aggregation')
         aggregated_timeseries = []
         return aggregated_timeseries
 
@@ -116,7 +102,7 @@ def less_than(timeseries, metric_name, metric_expiration_time, metric_min_averag
 
     if timeseries[-1][1] < metric_trigger:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info("debug - less_than - " + str(timeseries[-1][1]) + " less than " + str(metric_trigger))
+            logger.info('debug - less_than - ' + str(timeseries[-1][1]) + ' less than ' + str(metric_trigger))
         return True
 
     return False
@@ -132,7 +118,7 @@ def greater_than(timeseries, metric_name, metric_expiration_time, metric_min_ave
 
     if timeseries[-1][1] > metric_trigger:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info("debug - grater_than - " + str(timeseries[-1][1]) + " greater than " + str(metric_trigger))
+            logger.info('debug - grater_than - ' + str(timeseries[-1][1]) + ' greater than ' + str(metric_trigger))
         return True
 
     return False
@@ -258,7 +244,7 @@ def detect_drop_off_cliff(timeseries, metric_name, metric_expiration_time, metri
         if int(ten_datapoint_result) > trigger:
             if ENABLE_BOUNDARY_DEBUG:
                 logger.info(
-                    "detect_drop_off_cliff - %s, ten_datapoint_value = %s, ten_datapoint_array_sum = %s, ten_datapoint_average = %s, trigger = %s, ten_datapoint_result = %s" % (
+                    'detect_drop_off_cliff - %s, ten_datapoint_value = %s, ten_datapoint_array_sum = %s, ten_datapoint_average = %s, trigger = %s, ten_datapoint_result = %s' % (
                         str(int_end_timestamp),
                         str(ten_datapoint_value),
                         str(ten_datapoint_array_sum),
@@ -302,29 +288,31 @@ def run_selected_algorithm(
 
     if autoaggregate:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info("debug - auto aggregating " + metric_name + " for " + algorithm)
+            logger.info('debug - auto aggregating ' + metric_name + ' for ' + algorithm)
         try:
             agg_timeseries = autoaggregate_ts(timeseries, autoaggregate_value)
             aggregatation_failed = False
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info("debug - aggregated_timeseries returned " + metric_name + " for " + algorithm)
+                logger.info('debug - aggregated_timeseries returned ' + metric_name + ' for ' + algorithm)
         except Exception as e:
-            logger.error("Algorithm error: " + traceback.format_exc())
-            logger.error("error: %e" % s)
+            agg_timeseries = []
+            aggregatation_failed = True
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info("debug error - autoaggregate excpection " + metric_name + " for " + algorithm)
+                logger.info('debug error - autoaggregate excpection ' + metric_name + ' for ' + algorithm)
+                logger.error('Algorithm error: ' + traceback.format_exc())
+                logger.error('error: %e' % e)
 
         if len(agg_timeseries) > 10:
             timeseries = agg_timeseries
         else:
-            timeseries = agg_timeseries
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info("debug - auto aggregation failed for " + metric_name + " with resultant timeseries being length of " + str(len(agg_timeseries)))
+                logger.info('debug - TooShort - %s, %s' % (metric_name, algorithm))
+            raise TooShort()
 
     if len(timeseries) < 10:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info("debug - timeseries too short - " + metric_name + " - timeseries length - " + str(len(timeseries)))
-        return False, [], 1, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm
+            logger.info('debug - timeseries too short - ' + metric_name + ' - timeseries length - ' + str(len(timeseries)))
+        raise TooShort()
 
     try:
         ensemble = [globals()[algorithm](timeseries, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger)]
@@ -353,5 +341,5 @@ def run_selected_algorithm(
                 )
             return False, ensemble, timeseries[-1][1], metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm
     except:
-        logger.error("Algorithm error: " + traceback.format_exc())
+        logger.error('Algorithm error: ' + traceback.format_exc())
         return False, [], 1, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm
