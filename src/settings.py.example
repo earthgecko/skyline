@@ -455,6 +455,7 @@ BOUNDARY_HIPCHAT_OPTS = {
     'sender': 'hostname or identifier',
     # list of hipchat room_ids to notify about each anomaly
     # (similar to SMTP_OPTS['recipients'])
+    # Wildcard metric namespacing is allowed
     'rooms': {
         'nometrics': (12345,),
     },

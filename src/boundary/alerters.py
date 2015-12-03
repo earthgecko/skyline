@@ -117,7 +117,28 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
     sender = settings.BOUNDARY_HIPCHAT_OPTS['sender']
     import hipchat
     hipster = hipchat.HipChat(token=settings.BOUNDARY_HIPCHAT_OPTS['auth_token'])
-    rooms = settings.BOUNDARY_HIPCHAT_OPTS['rooms'][metric_name]
+
+    # Allow for absolute path metric namespaces but also allow for and match
+    # match wildcard namepaces if there is not an absolute path metric namespace
+    rooms = 'unknown'
+    notify_rooms = []
+    matched_rooms = []
+    try:
+        rooms = settings.BOUNDARY_HIPCHAT_OPTS['rooms'][metric_name]
+        notify_rooms.append(rooms)
+    except:
+        for room in settings.BOUNDARY_HIPCHAT_OPTS['rooms']:
+            print(room)
+            CHECK_MATCH_PATTERN = room
+            check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+            pattern_match = check_match_pattern.match(metric_name)
+            if pattern_match:
+                matched_rooms.append(room)
+
+    if matched_rooms != []:
+        for i_metric_name in matched_rooms:
+            rooms = settings.BOUNDARY_HIPCHAT_OPTS['rooms'][i_metric_name]
+            notify_rooms.append(rooms)
 
     alert_algo = str(algorithm)
     alert_context = alert_algo.upper()
@@ -138,8 +159,9 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
 
     embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric_name + "</a>"
 
-    for room in rooms:
-        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.BOUNDARY_HIPCHAT_OPTS['color'], 'message': '%s - analyzer - %s - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, algorithm, metric_name, datapoint, graphite_previous_hours, embed_graph)})
+    for rooms in notify_rooms:
+        for room in rooms:
+            hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.BOUNDARY_HIPCHAT_OPTS['color'], 'message': '%s - boundary - %s - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, algorithm, metric_name, datapoint, graphite_previous_hours, embed_graph)})
 
 
 def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
