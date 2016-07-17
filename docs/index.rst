@@ -48,7 +48,7 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. |docs| image:: http://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
     :scale: 100%
     :target: http://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest
