@@ -28,7 +28,9 @@ sys.path.insert(0, os.path.abspath('../skyline'))
 #
 #######
 # sys.path.insert(0, os.path.abspath('/usr/local/lib/python2.7/dist-packages'))
-sys.path.insert(0, os.path.abspath('/opt/python_virtualenv/projects/skyline2711/lib/python2.7/site-packages'))
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if not on_rtd:
+    sys.path.insert(0, os.path.abspath('/opt/python_virtualenv/projects/skyline2711/lib/python2.7/site-packages'))
 
 # -- General configuration ------------------------------------------------
 
