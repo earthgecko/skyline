@@ -1,0 +1,28 @@
+/*
+<link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+*/
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Montserrat-Regular'), url(/static/fonts/montserrat-regular.woff) format('woff');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Montserrat-Bold'), url(/static/fonts/montserrat-bold.woff) format('woff');
+}
+
+.skyblue {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+	color: #6698FF;
+}
+.red {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+	color: #dd3023;
+}
+
+.brow {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+}

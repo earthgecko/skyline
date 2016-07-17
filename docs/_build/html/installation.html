@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="next" title="Upgrading" href="upgrading.html"/>
+        <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#intended-audience">Intended audience</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sudo"><code class="docutils literal"><span class="pre">sudo</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Installation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/installation.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="intended-audience">
+<h2>Intended audience<a class="headerlink" href="#intended-audience" title="Permalink to this headline">¶</a></h2>
+<p>Skyline is not really a <code class="docutils literal"><span class="pre">localhost</span></code> application, it needs lots of data, unless
+you have a <code class="docutils literal"><span class="pre">localhost</span></code> Graphite or pickle Graphite to your localhost.</p>
+<p>Given the specific nature of Skyline, it is assumed that the audience will have
+a certain level of technical knowledge, e.g. it is assumed that the user will be
+familiar with the installation, configuration, operation and security practices
+and considerations relating to the following components:</p>
+<ul class="simple">
+<li>Graphite</li>
+<li>Redis</li>
+<li>MySQL</li>
+<li>Apache</li>
+</ul>
+<p>This installation document is specifically related to the required installs and
+configurations of things that are directly related Skyline.  For notes regarding
+automation and configuration management see the section at the end of this page.</p>
+<div class="section" id="sudo">
+<h3><code class="docutils literal"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h3>
+<p>Use <code class="docutils literal"><span class="pre">sudo</span></code> appropriately for your environment wherever necessary.</p>
+</div>
+</div>
+<div class="section" id="steps">
+<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
+<p><strong>NOTE</strong>: all the documentation and testing is based on running Skyline in a
+Python-2.7.12 virtualenv, if you choose to deploy Skyline another way, you are
+on your own.  Although it is possible to run Skyline in a different type of
+environment, it does not lend itself to repeatability or a common known state.</p>
+<ul class="simple">
+<li>Create a python-2.7.12 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
+Python virtualenv</a></li>
+<li>Setup firewall rules to restrict access to the following:</li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_IP</span></code></a> - default is 127.0.0.1</li>
+<li><a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_PORT</span></code></a> - default 1500</li>
+<li>The IP address and port being used to reverse proxy the Webapp (if implementing) e.g. &lt;YOUR_SERVER_IP_ADDRESS&gt;:8080</li>
+<li>The IP address and port being used by MySQL (if implementing)</li>
+<li>The IP address and ports 2024 and 2025</li>
+<li>The IP address and port being used by Redis</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li>Install Redis - see <a class="reference external" href="http://redis.io/">Redis.io</a></li>
+<li>Ensure Redis has socket enabled <strong>with the following permissions</strong> in your
+redis.conf</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">unixsocket</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">redis</span><span class="o">.</span><span class="n">sock</span>
+<span class="n">unixsocketperm</span> <span class="mi">777</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Start Redis</li>
+<li>Make the required directories</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir /var/log/skyline
+mkdir /var/run/skyline
+mkdir /var/dump/
+
+mkdir -p /opt/skyline/panorama/check
+mkdir -p /opt/skyline/mirage/check
+mkdir -p /opt/skyline/crucible/check
+mkdir -p /opt/skyline/crucible/data
+mkdir /etc/skyline
+mkdir /tmp/skyline
+</pre></div>
+</div>
+<ul class="simple">
+<li>git clone Skyline</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p /opt/skyline/github
+<span class="nb">cd</span> /opt/skyline/github
+git clone https://github.com/earthgecko/skyline.git
+</pre></div>
+</div>
+<ul class="simple">
+<li>Once again using the Python-2.7.12 virtualenv,  install the requirements using
+the virtualenv pip, this can take a long time, the pandas install takes quite
+a while.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
+
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+
+<span class="c1"># Install the mysql-connector-python package first on its own as due to it</span>
+<span class="c1"># having to be downloaded and installed from MySQL, if it is not installed</span>
+<span class="c1"># an install -r will fail as pip cannot find mysql-connector-python</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5<span class="o">=</span>6d42998cfec6e85b902d4ffa5a35ce86
+
+<span class="c1"># The MySQL download source can now be commented it out of requirements.txt</span>
+<span class="c1"># vi /opt/skyline/github/skyline/requirements.txt</span>
+
+<span class="c1"># This can take lots and lots of minutes...</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/requirements.txt
+</pre></div>
+</div>
+<ul class="simple">
+<li>Copy the <code class="docutils literal"><span class="pre">skyline.conf</span></code> and edit the <code class="docutils literal"><span class="pre">USE_PYTHON</span></code> as appropriate to your
+setup if it is not using PATH
+<code class="docutils literal"><span class="pre">/opt/python_virtualenv/projects/skyline-py2712/bin/python2.7</span></code></li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cp /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
+vi /etc/skyline/skyline.conf <span class="c1"># Set USE_PYTHON as appropriate to your setup</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>OPTIONAL but <strong>recommended</strong>, serving the Webapp via gunicorn with an Apache
+reverse proxy.<ul>
+<li>Setup Apache (httpd) and see the example configuration file in your cloned
+directory <code class="docutils literal"><span class="pre">/opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example</span></code>
+modify all the <code class="docutils literal"><span class="pre">&lt;YOUR_</span></code> variables as appropriate for you environment - see
+<a class="reference external" href="webapp.html#apache-and-gunicorn">Apache and gunicorn</a></li>
+<li>Add a user and password for HTTP authentication, e.g.</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>htpasswd -c /etc/httpd/conf.d/.skyline_htpasswd admin
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Ensure that the user and password for Apache match the user and
+password that you provide in <cite>settings.py</cite> for
+<a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a> and <a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a></p>
+</div>
+<ul class="simple">
+<li>Deploy your Skyline Apache configuration file and restart httpd.</li>
+<li>Create the Skyline MySQL database for Panorama (see
+<a class="reference external" href="panorama.html">Panorama</a>).  Although this is optional, it is
+<strong>recommended</strong> as Panorama does give you a full historical view of all the
+triggered anomalies, which is very useful for providing insight into what, how
+and when metrics are triggering as anomalous.</li>
+<li>Edit the <code class="docutils literal"><span class="pre">settings.py</span></code> file and enter your appropriate settings,
+specifically ensure you set the following variables to the correct
+setting for your environment, see the documentation links and docstrings in
+the <cite>settings.py</cite> file forthe full descriptions of each variable:<ul>
+<li><a class="reference internal" href="skyline.html#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_HOST</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.GRAPHITE_PROTOCOL" title="settings.GRAPHITE_PROTOCOL"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_PROTOCOL</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.GRAPHITE_PORT" title="settings.GRAPHITE_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_PORT</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.SERVER_METRICS_NAME" title="settings.SERVER_METRICS_NAME"><code class="xref py py-mod docutils literal"><span class="pre">settings.SERVER_METRICS_NAME</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><code class="xref py py-mod docutils literal"><span class="pre">settings.CANARY_METRIC</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.HIPCHAT_OPTS" title="settings.HIPCHAT_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.HIPCHAT_OPTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.PAGERDUTY_OPTS</span></code></a> if to be
+used,  if so ensure that <a class="reference internal" href="skyline.html#settings.HIPCHAT_ENABLED" title="settings.HIPCHAT_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.HIPCHAT_ENABLED</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.PAGERDUTY_ENABLED</span></code></a> are set to <code class="docutils literal"><span class="pre">True</span></code></li>
+<li>If you are deploying with a Skyline MySQL Panorama DB straight away ensure
+that <a class="reference internal" href="skyline.html#settings.PANORAMA_ENABLED" title="settings.PANORAMA_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_ENABLED</span></code></a> is set to <code class="docutils literal"><span class="pre">True</span></code> and set all the
+other Panorama related variables as appropriate.</li>
+<li><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /opt/skyline/github/skyline/skyline
+vi settings.py
+</pre></div>
+</div>
+<ul class="simple">
+<li>If you are <strong>upgrading</strong>, at this point return to the
+<a class="reference external" href="webapp.html#apache-and-gunicorn">Upgrading</a> page.</li>
+<li>Before you test Skyline by seeding Redis with some test data, ensure
+that you have configured the firewall/iptables with the appropriate restricted
+access.</li>
+<li>Start the Skyline apps</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/horizon.d start
+/opt/skyline/github/skyline/bin/analyzer.d start
+/opt/skyline/github/skyline/bin/webapp.d start
+<span class="c1"># And Panorama if you have setup in the DB at this stage</span>
+/opt/skyline/github/skyline/bin/panorama.d start
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check the log files to ensure things are running and there are no
+errors.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>tail /var/log/skyline/*.log
+</pre></div>
+</div>
+<ul class="simple">
+<li>Seed Redis with some test data</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+bin/python2.7 /opt/skyline/github/skyline/utils/seed_data.py
+deactivate
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check the Skyline Webapp frontend on the Skyline machine&#8217;s IP address and the
+appropriate port depending whether you are serving it proxied or direct, e.g
+<code class="docutils literal"><span class="pre">http://YOUR_SKYLINE_IP:8080</span></code> or <code class="docutils literal"><span class="pre">http://YOUR_SKYLINE_IP:1500</span></code>.  The
+<code class="docutils literal"><span class="pre">horizon.test.udp</span></code> metric anomaly should be in the dashboard after the
+seed_data.py is complete.  If Panorama is set up you will be able to see that
+in the /panorama view and in the <span class="red">re</span><span class="brow">brow</span> view as well.</li>
+<li>Check the log files again to ensure things are running and there are
+no errors.</li>
+<li>This will ensure that the Horizon service is properly set up and can
+receive data. For real data, you have some options relating to
+getting a data pickle from Graphite see <a class="reference external" href="getting-data-into-skyline.html">Getting data into
+Skyline</a></li>
+<li>Once you have your ALERTS configured to test them see
+<a class="reference external" href="alert-testing.html">Alert testing</a></li>
+<li>If you have opted to not setup Panorama, later see setup
+<a class="reference external" href="panorama.html">Panorama</a></li>
+<li>For Mirage setup see <a class="reference external" href="mirage.html">Mirage</a></li>
+<li>For Boundary setup see <a class="reference external" href="boundary.html">Boundary</a></li>
+</ul>
+<p>The installation of packages in the <code class="docutils literal"><span class="pre">requirements.txt</span></code> can take a long time,
+specifically the pandas build.  This will usually take longer than the default
+timeouts in most configuration management.</p>
+<p>That said, <code class="docutils literal"><span class="pre">requirements.txt</span></code> can be run in an idempotent manner, <strong>however</strong>
+a few things need to be highlighted:</p>
+<ol class="arabic simple">
+<li>A first time execution of <code class="docutils literal"><span class="pre">bin/&quot;pip${PYTHON_MAJOR_VERSION}&quot;</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">/opt/skyline/github/skyline/requirements.txt</span></code>
+will timeout on configuration management.  Therefore consider running this
+manually first.  Once pip has installed all the packages, the
+<code class="docutils literal"><span class="pre">requirements.txt</span></code> will run idempotent with no issue and be used to
+upgrade via a configuration management run when the <code class="docutils literal"><span class="pre">requirements.txt</span></code> is
+updated with any new versions of packages (with the possible exception of
+pandas).  It is obviously possible to provision each requirement individually
+directly in configuration management and not use pip to <code class="docutils literal"><span class="pre">install</span> <span class="pre">-r</span></code> the
+<code class="docutils literal"><span class="pre">requirements.txt</span></code>, however remember the the virtualenv pip needs to be used
+and pandas needs a LONG timeout value, which not all package classes provide,
+if you use an exec of any sort, ensure the pandas install has a long timeout.</li>
+<li>The mysql-connector-python package is pulled directly from MySQL as no pip
+version exists.  Therefore during the build process it is recommended to pip
+install the MySQL source package first and then the line out comment in
+<code class="docutils literal"><span class="pre">requirements.txt</span></code>.  The <code class="docutils literal"><span class="pre">mysql-connector-python==1.2.3</span></code> line then ensures
+the dependency is fulfilled.</li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="upgrading.html" class="btn btn-neutral float-right" title="Upgrading" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="running-in-python-virtualenv.html" class="btn btn-neutral" title="Running Skyline in a Python virtualenv" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<!-- BEGIN /docs block -->
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/docs">docs</a></li>
+		<li class="active"><span class="logo"><span class="sky">Sky</span><span class="re">line documentation</span></li>
+	</ol>
+
+<!--
+  <div class="container main_container">
+    <iframe src="static/docs/index.html" name="docs_iframe" width="100%" height="1000"></iframe>
+    {% include '/static/docs/index.html' ignore missing %}
+    <iframe src="static/docs/index.html" name="docs_iframe"></iframe>
+    <iframe src="static/docs/index.html" name="docs_iframe" width="1200" height="1000"></iframe>
+  </div>
+-->
+
+  <div class='embed-docs'>
+      <iframe src='static/docs/index.html' style='border:0;'></iframe>
+  </div>
+
+<!-- END /docs block -->
+{% endblock %}

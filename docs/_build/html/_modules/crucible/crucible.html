@@ -1,0 +1,1156 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>crucible.crucible &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>crucible.crucible</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for crucible.crucible</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isfile</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">getcwd</span><span class="p">,</span> <span class="n">listdir</span><span class="p">,</span> <span class="n">makedirs</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="nb">exit</span><span class="p">,</span> <span class="n">version_info</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urlparse</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urllib.parse</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urllib2</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urllib.request</span>
+    <span class="kn">import</span> <span class="nn">urllib.error</span>
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">imp</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="c1"># sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))</span>
+<span class="c1"># sys.path.insert(0, os.path.dirname(__file__))</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">load_metric_vars</span><span class="p">,</span> <span class="n">fail_check</span>
+
+<span class="kn">from</span> <span class="nn">crucible_algorithms</span> <span class="kn">import</span> <span class="n">run_algorithms</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;crucible&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="s1">&#39;.log&#39;</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="n">skyline_app_logfile</span> <span class="o">+</span> <span class="s1">&#39;.lock&#39;</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="n">skyline_app_logfile</span> <span class="o">+</span> <span class="s1">&#39;.wait&#39;</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.&#39;</span> <span class="o">+</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="n">SERVER_METRIC_PATH</span>
+
+<span class="n">FULL_NAMESPACE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
+<span class="n">ENABLE_CRUCIBLE_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span>
+<span class="n">crucible_data_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">)</span>
+<span class="n">failed_checks_dir</span> <span class="o">=</span> <span class="n">crucible_data_folder</span> <span class="o">+</span> <span class="s1">&#39;/failed_checks&#39;</span>
+
+
+<div class="viewcode-block" id="Crucible"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible.Crucible">[docs]</a><span class="k">class</span> <span class="nc">Crucible</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize Crucible</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Crucible</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_list</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric_variables</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Crucible.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible.Crucible.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the parent process is alive</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Crucible.spin_process"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible.Crucible.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign a metric for a process to analyze.</span>
+
+<span class="sd">        :param i: python process id</span>
+<span class="sd">        :param run_timestamp: the epoch timestamp at which this process was called</span>
+<span class="sd">        :param metric_check_file: full path to the metric check file</span>
+
+<span class="sd">        :return: returns True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;child_process_pid - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing metric check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file not found - metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)))</span>
+            <span class="k">return</span>
+
+        <span class="n">check_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_file_name - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">check_file_name</span><span class="p">)</span>
+        <span class="n">check_file_timestamp</span> <span class="o">=</span> <span class="n">check_file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_file_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_file_timestamp</span><span class="p">))</span>
+        <span class="n">check_file_metricname_txt</span> <span class="o">=</span> <span class="n">check_file_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_file_metricname_txt - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">check_file_metricname_txt</span><span class="p">)</span>
+        <span class="n">check_file_metricname</span> <span class="o">=</span> <span class="n">check_file_metricname_txt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_file_metricname - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">check_file_metricname</span><span class="p">)</span>
+        <span class="n">check_file_metricname_dir</span> <span class="o">=</span> <span class="n">check_file_metricname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_file_metricname_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">check_file_metricname_dir</span><span class="p">)</span>
+
+        <span class="n">metric_failed_check_dir</span> <span class="o">=</span> <span class="n">failed_checks_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">check_file_metricname_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">check_file_timestamp</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_failed_check_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_failed_check_dir</span><span class="p">)</span>
+
+        <span class="c1"># failed_check_file = failed_checks_dir + &#39;/&#39; + check_file_name</span>
+        <span class="n">failed_check_file</span> <span class="o">=</span> <span class="n">metric_failed_check_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">check_file_name</span>
+
+        <span class="c1"># Load and validate metric variables</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to import metric variables from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="c1"># TBD - a failed check Panorama update will go here, perhaps txt</span>
+            <span class="c1">#       files are not the only &quot;queue&quot; that will be used, both, but</span>
+            <span class="c1">#       Panorama, may be just a part of Skyline Flux, the flux DB</span>
+            <span class="c1">#       would allow for a very nice, distributed &quot;queue&quot; and a</span>
+            <span class="c1">#       distributed Skyline workforce...</span>
+            <span class="c1">#       Any Skyline node could just have one role, e.g. lots of</span>
+            <span class="c1">#       Skyline nodes running crucible only and instead of reading</span>
+            <span class="c1">#       the local filesystem for input, they could read the Flux DB</span>
+            <span class="c1">#       queue or both...</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Test metric variables</span>
+        <span class="c1"># We use a pythonic methodology to test if the variables are defined,</span>
+        <span class="c1"># this ensures that if any of the variables are not set for some reason</span>
+        <span class="c1"># we can handle unexpected data or situations gracefully and try and</span>
+        <span class="c1"># ensure that the process does not hang.</span>
+
+        <span class="c1"># if len(str(metric_vars.metric)) == 0:</span>
+        <span class="c1"># if not metric_vars.metric:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read metric variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+
+        <span class="c1"># if len(metric_vars.value) == 0:</span>
+        <span class="c1"># if not metric_vars.value:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read value variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - value - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+        <span class="c1"># if len(metric_vars.from_timestamp) == 0:</span>
+        <span class="c1"># if not metric_vars.from_timestamp:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">from_timestamp</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read from_timestamp variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">from_timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - from_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">from_timestamp</span><span class="p">)</span>
+
+        <span class="c1"># if len(metric_vars.metric_timestamp) == 0:</span>
+        <span class="c1"># if not metric_vars.metric_timestamp:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric_timestamp</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read metric_timestamp variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric_timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - metric_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_timestamp</span><span class="p">)</span>
+
+        <span class="c1"># if len(metric_vars.algorithms) == 0:</span>
+        <span class="c1"># if not metric_vars.algorithms:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">algorithms</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read algorithms variable from check file setting to all&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">algorithms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">algorithms</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i_algorithm</span> <span class="ow">in</span> <span class="n">metric_vars</span><span class="o">.</span><span class="n">algorithms</span><span class="p">:</span>
+                <span class="n">algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_algorithm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">algorithms</span><span class="p">)</span>
+
+        <span class="c1"># if len(metric_vars.anomaly_dir) == 0:</span>
+        <span class="c1"># if not metric_vars.anomaly_dir:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">anomaly_dir</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read anomaly_dir variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">anomaly_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - anomaly_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_dir</span><span class="p">)</span>
+
+        <span class="c1"># if len(str(metric_vars.graphite_metric)) == 0:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">graphite_metric</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read graphite_metric variable from check file setting to False&#39;</span><span class="p">)</span>
+            <span class="c1"># yes this is a string</span>
+            <span class="n">graphite_metric</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">graphite_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">graphite_metric</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - graphite_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_metric</span><span class="p">)</span>
+
+        <span class="c1"># if len(str(metric_vars.run_crucible_tests)) == 0:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">run_crucible_tests</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read run_crucible_tests variable from check file setting to False&#39;</span><span class="p">)</span>
+            <span class="c1"># yes this is a string</span>
+            <span class="n">run_crucible_tests</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">run_crucible_tests</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">run_crucible_tests</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_crucible_tests - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_crucible_tests</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">added_by</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read added_by variable from check file setting to crucible - set to crucible&#39;</span><span class="p">)</span>
+            <span class="n">added_by</span> <span class="o">=</span> <span class="s1">&#39;crucible&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">added_by</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">added_by</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - added_by - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span><span class="o">.</span><span class="n">run_script</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">run_script</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_script - not present set to False&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">run_script</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">run_script</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_script - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_script</span><span class="p">)</span>
+
+        <span class="c1"># Only check if the metric does not a EXPIRATION_TIME key set, crucible</span>
+        <span class="c1"># uses the alert EXPIRATION_TIME for the relevant alert setting contexts</span>
+        <span class="c1"># whether that be analyzer, mirage, boundary, etc and sets its own</span>
+        <span class="c1"># cache_keys in redis.  This prevents large amounts of data being added</span>
+        <span class="c1"># in terms of tieseries json and image files, crucible samples at the</span>
+        <span class="c1"># same EXPIRATION_TIME as alerts.</span>
+
+        <span class="n">source_app</span> <span class="o">=</span> <span class="s1">&#39;crucible&#39;</span>
+        <span class="n">expiration_timeout</span> <span class="o">=</span> <span class="mi">1800</span>
+        <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">check_expired</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">check_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;analyzer&#39;</span> <span class="ow">or</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;mirage&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Will check </span><span class="si">%s</span><span class="s1"> ALERTS&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALERTS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Checking </span><span class="si">%s</span><span class="s1"> ALERTS&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
+                    <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">metric</span>
+                    <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
+                    <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                        <span class="n">source_app</span> <span class="o">=</span> <span class="n">added_by</span>
+                        <span class="n">expiration_timeout</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;matched - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - EXPIRATION_TIME is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">expiration_timeout</span><span class="p">)))</span>
+                        <span class="n">check_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_time</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_age</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">expiration_timeout</span><span class="p">):</span>
+                            <span class="n">check_expired</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the check is older than EXPIRATION_TIME for the metric - not checking - check_expired&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;boundary&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ENABLE_ALERTS</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
+                    <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">metric</span>
+                    <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
+                    <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                        <span class="n">source_app</span> <span class="o">=</span> <span class="s1">&#39;boundary&#39;</span>
+                        <span class="n">expiration_timeout</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;matched - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - EXPIRATION_TIME is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">expiration_timeout</span><span class="p">)))</span>
+                        <span class="n">check_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_time</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_age</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">expiration_timeout</span><span class="p">):</span>
+                            <span class="n">check_expired</span> <span class="o">=</span> <span class="bp">True</span>
+                            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the check is older than EXPIRATION_TIME for the metric - not checking - check_expired&#39;</span><span class="p">)</span>
+
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;crucible.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cache_key - crucible.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+
+        <span class="c1"># Only use the cache_key EXPIRATION_TIME if this is not a request to</span>
+        <span class="c1"># run_crucible_tests on a timeseries</span>
+        <span class="k">if</span> <span class="n">run_crucible_tests</span> <span class="o">==</span> <span class="s1">&#39;False&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">check_expired</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_expired - not checking Redis key&#39;</span><span class="p">)</span>
+                <span class="n">last_check</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Checking if cache_key exists&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">last_check</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query cache_key for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;all anomaly files will be removed&#39;</span><span class="p">)</span>
+                    <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">last_check</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">expiration_timeout</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set cache_key for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> with timeout of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">expiration_timeout</span><span class="p">)))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query cache_key for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;all anomaly files will be removed&#39;</span><span class="p">)</span>
+                    <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">check_expired</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_expired - all anomaly files will be removed&#39;</span><span class="p">)</span>
+                    <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cache_key is set and not expired for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - all anomaly files will be removed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+                    <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c1"># anomaly dir</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;created anomaly dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create anomaly_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">)):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: anomaly_dir does not exist&#39;</span><span class="p">)</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly dir exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
+
+        <span class="n">failed_check_file</span> <span class="o">=</span> <span class="n">anomaly_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric_timestamp</span> <span class="o">+</span> <span class="s1">&#39;.failed.check.&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">))</span>
+
+        <span class="c1"># Retrieve data from graphite is necessary</span>
+        <span class="n">anomaly_graph</span> <span class="o">=</span> <span class="n">anomaly_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+        <span class="n">anomaly_json</span> <span class="o">=</span> <span class="n">anomaly_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span>
+        <span class="n">anomaly_json_gz</span> <span class="o">=</span> <span class="n">anomaly_json</span> <span class="o">+</span> <span class="s1">&#39;.gz&#39;</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json_gz - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">))</span>
+
+        <span class="c1"># Some things added to crucible may not be added by a skyline app per se</span>
+        <span class="c1"># and if run_crucible_tests is string True then no anomaly files should</span>
+        <span class="c1"># be removed.</span>
+        <span class="k">if</span> <span class="n">run_crucible_tests</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+            <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c1"># Remove check and anomaly files if the metric has a EXPIRATION_TIME</span>
+        <span class="c1"># cache_key set</span>
+        <span class="k">if</span> <span class="n">remove_all_anomaly_files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_graph removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json_gz removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="n">anomaly_txt_file</span> <span class="o">=</span> <span class="n">anomaly_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.txt&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_txt_file</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_txt_file</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_txt_file removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_txt_file</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="c1"># TBD - this data would have to be added to the panaorama DB before</span>
+            <span class="c1">#       it is removed</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_check_file removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_dir removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check and anomaly files removed&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Check if the image exists</span>
+        <span class="k">if</span> <span class="n">graphite_metric</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_metric</span><span class="p">))</span>
+
+            <span class="c1"># Graphite timeouts</span>
+            <span class="n">connect_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_CONNECT_TIMEOUT</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connect_timeout - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">))</span>
+
+            <span class="n">read_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_READ_TIMEOUT</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;read_timeout - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+
+            <span class="n">graphite_until</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">graphite_from</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># graphite URL</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span> <span class="o">+</span> <span class="s1">&#39;://&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">+</span> <span class="s1">&#39;/render/?from=&#39;</span> <span class="o">+</span> <span class="n">graphite_from</span> <span class="o">+</span> <span class="s1">&#39;&amp;until=&#39;</span> <span class="o">+</span> <span class="n">graphite_until</span> <span class="o">+</span> <span class="s1">&#39;&amp;target=&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;&amp;format=json&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span> <span class="o">+</span> <span class="s1">&#39;://&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span> <span class="o">+</span> <span class="s1">&#39;/render/?from=&#39;</span> <span class="o">+</span> <span class="n">graphite_from</span> <span class="o">+</span> <span class="s1">&#39;&amp;until=&#39;</span> <span class="o">+</span> <span class="n">graphite_until</span> <span class="o">+</span> <span class="s1">&#39;&amp;target=&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;&amp;format=json&#39;</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieving png - surfacing </span><span class="si">%s</span><span class="s1"> graph from graphite from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">))</span>
+
+                <span class="n">image_url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;format=json&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">graphite_image_file</span> <span class="o">=</span> <span class="n">anomaly_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+                <span class="k">if</span> <span class="s1">&#39;width&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">image_url</span><span class="p">:</span>
+                    <span class="n">image_url</span> <span class="o">+=</span> <span class="s1">&#39;&amp;width=586&#39;</span>
+                <span class="k">if</span> <span class="s1">&#39;height&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">image_url</span><span class="p">:</span>
+                    <span class="n">image_url</span> <span class="o">+=</span> <span class="s1">&#39;&amp;height=308&#39;</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite image url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+                <span class="n">image_url_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">)</span>
+
+                <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">image_url_timeout</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;url OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+                <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+                    <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: url bad - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_graph file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: retrieve failed to surface </span><span class="si">%s</span><span class="s1"> graph from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graph image exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+
+            <span class="c1"># Check if the json exists</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;surfacing timeseries data for </span><span class="si">%s</span><span class="s1"> from graphite from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">requests</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s1">&#39;2.4.0&#39;</span><span class="p">:</span>
+                        <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">use_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;use_timeout - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">use_timeout</span><span class="p">)))</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+                        <span class="n">js</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                        <span class="n">datapoints</span> <span class="o">=</span> <span class="n">js</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;datapoints&#39;</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data retrieved OK&#39;</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">)]]</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: data retrieval failed&#39;</span><span class="p">)</span>
+
+                    <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">new_datapoint</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                            <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">continue</span>
+
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">converted</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to surface </span><span class="si">%s</span><span class="s1"> json from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                    <span class="c1"># Move metric check file</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                        <span class="k">pass</span>
+                    <span class="k">return</span>
+
+        <span class="c1"># Check timeseries json exists - raw or gz</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: no json data found&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                <span class="c1"># Move metric check file</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                    <span class="k">pass</span>
+                <span class="k">return</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timeseries json gzip exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timeseries json exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">))</span>
+
+        <span class="c1"># If timeseries json and run_crucible_tests is str(False) gzip and</span>
+        <span class="c1"># return here as there is nothing further to do</span>
+        <span class="k">if</span> <span class="n">run_crucible_tests</span> <span class="o">==</span> <span class="s1">&#39;False&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;run_crucible_tests - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_crucible_tests</span><span class="p">)</span>
+            <span class="c1"># gzip the json timeseries data</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzipping - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">f_in</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="n">f_out</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+                    <span class="n">f_out</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">f_in</span><span class="p">)</span>
+                    <span class="n">f_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzipped - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json_gz</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">return</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Failed to gzip data file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">return</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzip exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">return</span>
+            <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="s1">&#39;true - for debug only&#39;</span>
+
+        <span class="c1"># self.check_if_parent_is_alive()</span>
+        <span class="c1"># Run crucible algorithms</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;running crucible tests - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+
+        <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ungzipping - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json_gz</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># with gzip.open(anomaly_json_gz, &#39;rb&#39;) as fr:</span>
+                    <span class="n">fr</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+                    <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">fr</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">fr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not ungzip </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ungzipped&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;writing to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fw</span><span class="p">:</span>
+                    <span class="n">fw</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json done&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No gzip - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json_gz</span><span class="p">)</span>
+            <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="s1">&#39;true - for debug only&#39;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;loading timeseries from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;loaded timeseries from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                <span class="k">pass</span>
+            <span class="k">return</span>
+
+        <span class="n">start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;start_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_timestamp</span><span class="p">))</span>
+        <span class="n">end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;end_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_timestamp</span><span class="p">))</span>
+
+        <span class="n">full_duration</span> <span class="o">=</span> <span class="n">end_timestamp</span> <span class="o">-</span> <span class="n">start_timestamp</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;full_duration - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
+
+        <span class="n">run_algorithms_start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;run_algorithms_start_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_algorithms_start_timestamp</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;run_algorithms - </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="n">anomaly_json</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms</span><span class="p">)))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span> <span class="o">=</span> <span class="n">run_algorithms</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">),</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: run_algorithms failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
+
+        <span class="n">run_algorithms_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">run_algorithms_seconds</span> <span class="o">=</span> <span class="n">run_algorithms_end_timestamp</span> <span class="o">-</span> <span class="n">run_algorithms_start_timestamp</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous, ensemble - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">))</span>
+            <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="s1">&#39;true - for debug only&#39;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;run_algorithms took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_algorithms_seconds</span><span class="p">))</span>
+
+        <span class="c1"># Update anomaly file</span>
+        <span class="n">crucible_data</span> <span class="o">=</span> <span class="s1">&#39;crucible_tests_run = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                        <span class="s1">&#39;crucible_triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                        <span class="s1">&#39;tested_by = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> \
+            <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">run_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ensemble</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">this_host</span><span class="p">))</span>
+        <span class="n">crucible_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">crucible_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated crucible anomaly file - </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+
+        <span class="c1"># gzip the json timeseries data after analysis</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">f_in</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="n">f_out</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+                    <span class="n">f_out</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">f_in</span><span class="p">)</span>
+                    <span class="n">f_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzipped - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Failed to gzip data file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">run_script</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">run_script</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;running - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">run_script</span><span class="p">))</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">run_script</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">)))</span>
+
+        <span class="c1"># Remove metric check file</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;complete removed check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Crucible.run"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible.Crucible.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the process intializes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process intialized&#39;</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process started - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">))</span>
+
+            <span class="c1"># Make sure check_dir exists and has not been removed</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking check dir exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: check dir did not exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o755</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check dir created - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
+                <span class="c1"># continue</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connected to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline can not connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connecting to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Determine if any metric has been added to test</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+
+                <span class="c1"># Report app up</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+
+                <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+<span class="c1">#                if len(metric_var_files) == 0:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_var_files</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping 10 no metric check files&#39;</span><span class="p">)</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+                <span class="c1"># Discover metric to analyze</span>
+                <span class="n">metric_var_files</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+<span class="c1">#                if len(metric_var_files) &gt; 0:</span>
+                <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
+            <span class="n">metric_check_file</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;assigning check for processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+            <span class="c1"># Reset process_list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Spawn processes</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">run_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">CRUCIBLE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)))</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> spin_process/es&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span><span class="p">)))</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+            <span class="c1"># Send wait signal to zombie processes</span>
+            <span class="c1"># for p in pids:</span>
+            <span class="c1">#     p.join()</span>
+            <span class="c1"># Self monitor processes and terminate if any spin_process has run</span>
+            <span class="c1"># for longer than CRUCIBLE_TESTS_TIMEOUT</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_TESTS_TIMEOUT</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> spin_process/es completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span><span class="p">),</span> <span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all spin_process processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+            <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

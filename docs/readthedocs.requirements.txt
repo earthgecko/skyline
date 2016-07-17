@@ -1,0 +1,79 @@
+setuptools
+wheel
+redis>=2.10.5
+hiredis>=0.2.0
+
+# python-daemon and deps
+docutils>=0.12
+lockfile>=0.12.2
+python-daemon>=2.1.1
+
+# Flask and deps
+itsdangerous>=0.24
+Jinja2>=2.8
+MarkupSafe>=0.23
+Werkzeug>=0.11.10
+click>=6.6
+Flask>=0.11.1
+
+
+simplejson>=3.8.2
+six>=1.10.0
+
+# unittest2 and deps
+argparse>=1.4.0
+traceback2>=1.4.0
+linecache2>=1.0.0
+unittest2>=1.1.0
+
+# mock and deps
+funcsigs>=1.0.2
+pbr>=1.10.0
+mock>=2.0.0
+
+# If python-2.6 is being used, distribute is probably still required
+#distribute
+
+numpy>=1.11.1
+
+scipy>=0.17.1
+
+# matplotlib and co
+python-dateutil>=2.5.3
+pytz>=2016.4
+cycler>=0.10.0
+pyparsing>=2.1.5
+matplotlib>=1.5.1
+
+# rtd does not need pandas takes so long to build
+#pandas>=0.18.1
+
+patsy>=0.4.1
+
+statsmodels>=0.6.1
+
+msgpack-python>=0.4.7
+requests>=2.10.0
+
+#pytest
+
+# ALERTERS - uncomment any alerters you want to enable
+python-simple-hipchat>=0.4.0
+pygerduty>=0.35.0
+
+# for panorama - direct from MySQL as the package has broken in the context of
+# pip and virtualenv - NOTE: once you have installed this once, if it is run in
+# terms of configuration management, feel free to comment out the direct
+# download from MySQL as it is only required once, but will run every time.
+# It provides the mysql-connector-python reference below, that can be left
+# uncommented.
+#http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86
+#mysql-connector-python>=1.2.3
+
+# For a production WSGI HTTP Server for the Webapp
+gunicorn>=19.6.0
+
+# For dependencies management and helpful for debugging
+pipdeptree>=0.6.0
+
+recommonmark

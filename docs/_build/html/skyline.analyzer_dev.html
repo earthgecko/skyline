@@ -1,0 +1,520 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>skyline.analyzer_dev package &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="up" title="skyline package" href="skyline.html"/>
+        <link rel="next" title="skyline.boundary package" href="skyline.boundary.html"/>
+        <link rel="prev" title="skyline.analyzer package" href="skyline.analyzer.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="skyline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer.html">skyline.analyzer package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.analyzer_dev package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-analyzer_dev.agent">skyline.analyzer_dev.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-analyzer_dev.alerters">skyline.analyzer_dev.alerters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-analyzer_dev.algorithms_dev">skyline.analyzer_dev.algorithms_dev module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-analyzer_dev.analyzer_dev">skyline.analyzer_dev.analyzer_dev module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-analyzer_dev">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="skyline.html">skyline package</a> &raquo;</li>
+      
+    <li>skyline.analyzer_dev package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/skyline.analyzer_dev.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="skyline-analyzer-dev-package">
+<h1>skyline.analyzer_dev package<a class="headerlink" href="#skyline-analyzer-dev-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-analyzer_dev.agent">
+<span id="skyline-analyzer-dev-agent-module"></span><h2>skyline.analyzer_dev.agent module<a class="headerlink" href="#module-analyzer_dev.agent" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="analyzer_dev.agent.AnalyzerAgent">
+<em class="property">class </em><code class="descname">AnalyzerAgent</code><a class="reference internal" href="_modules/analyzer_dev/agent.html#AnalyzerAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.agent.AnalyzerAgent" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="analyzer_dev.agent.AnalyzerAgent.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/agent.html#AnalyzerAgent.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.agent.AnalyzerAgent.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.agent.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/agent.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.agent.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that all the <cite>ALGORITHMS</cite> can be run.</p>
+<p>Start the AnalyzerAgent.</p>
+<p>Start the logger.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-analyzer_dev.alerters">
+<span id="skyline-analyzer-dev-alerters-module"></span><h2>skyline.analyzer_dev.alerters module<a class="headerlink" href="#module-analyzer_dev.alerters" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="analyzer_dev.alerters.alert_smtp">
+<code class="descname">alert_smtp</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <a class="reference internal" href="#analyzer_dev.alerters.trigger_alert" title="analyzer_dev.alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert via smtp to the
+recipients that are configured for the metric.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.alerters.alert_pagerduty">
+<code class="descname">alert_pagerduty</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/alerters.html#alert_pagerduty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.alerters.alert_pagerduty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <a class="reference internal" href="#analyzer_dev.alerters.trigger_alert" title="analyzer_dev.alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert via PagerDuty</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.alerters.alert_hipchat">
+<code class="descname">alert_hipchat</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/alerters.html#alert_hipchat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.alerters.alert_hipchat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <a class="reference internal" href="#analyzer_dev.alerters.trigger_alert" title="analyzer_dev.alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert the hipchat room that is
+configured in settings.py.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.alerters.alert_syslog">
+<code class="descname">alert_syslog</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/alerters.html#alert_syslog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.alerters.alert_syslog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <a class="reference internal" href="#analyzer_dev.alerters.trigger_alert" title="analyzer_dev.alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and log anomalies to syslog.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.alerters.trigger_alert">
+<code class="descname">trigger_alert</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">run</span></code> to trigger an alert, analyzer passes
+two arguments, both of them tuples.  The alerting strategy is determined and
+the approriate alert def is then called and passed the tuples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>alert</strong> &#8211; <p>The alert tuple specified in settings.py.</p>
+<p>alert[0]: The matched substring of the anomalous metric</p>
+<p>alert[1]: the name of the strategy being used to alert</p>
+<p>alert[2]: The timeout of the alert that was triggered</p>
+</li>
+<li><strong>meric</strong> &#8211; <p>The metric tuple.</p>
+<p>metric[0]: the anomalous value
+metric[1]: The full name of the anomalous metric</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-analyzer_dev.algorithms_dev">
+<span id="skyline-analyzer-dev-algorithms-dev-module"></span><h2>skyline.analyzer_dev.algorithms_dev module<a class="headerlink" href="#module-analyzer_dev.algorithms_dev" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.get_function_name">
+<code class="descname">get_function_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#get_function_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.get_function_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.tail_avg">
+<code class="descname">tail_avg</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#tail_avg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.tail_avg" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a utility function used to calculate the average of the last three
+datapoints in the series as a measure, instead of just the last datapoint.
+It reduces noise, but it also reduces sensitivity and increases the delay
+to detection.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.median_absolute_deviation">
+<code class="descname">median_absolute_deviation</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#median_absolute_deviation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.median_absolute_deviation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the deviation of its latest datapoint with
+respect to the median is X times larger than the median of deviations.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.grubbs">
+<code class="descname">grubbs</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#grubbs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.grubbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the Z score is greater than the Grubb&#8217;s score.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.first_hour_average">
+<code class="descname">first_hour_average</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#first_hour_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.first_hour_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcuate the simple average over one hour, FULL_DURATION seconds ago.
+A timeseries is anomalous if the average of the last three datapoints
+are outside of three standard deviations of this value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.stddev_from_average">
+<code class="descname">stddev_from_average</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#stddev_from_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.stddev_from_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the absolute value of the average of the latest
+three datapoint minus the moving average is greater than three standard
+deviations of the average. This does not exponentially weight the MA and so
+is better for detecting anomalies with respect to the entire series.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.stddev_from_moving_average">
+<code class="descname">stddev_from_moving_average</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#stddev_from_moving_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.stddev_from_moving_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the absolute value of the average of the latest
+three datapoint minus the moving average is greater than three standard
+deviations of the moving average. This is better for finding anomalies with
+respect to the short term trends.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.mean_subtraction_cumulation">
+<code class="descname">mean_subtraction_cumulation</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#mean_subtraction_cumulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.mean_subtraction_cumulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the value of the next datapoint in the
+series is farther than three standard deviations out in cumulative terms
+after subtracting the mean from each data point.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.least_squares">
+<code class="descname">least_squares</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#least_squares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.least_squares" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the average of the last three datapoints
+on a projected least squares model is greater than three sigma.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.histogram_bins">
+<code class="descname">histogram_bins</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#histogram_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.histogram_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the average of the last three datapoints falls
+into a histogram bin with less than 20 other datapoints (you&#8217;ll need to tweak
+that number depending on your data)</p>
+<p>Returns: the size of the bin which contains the tail_avg. Smaller bin size
+means more anomalous.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.ks_test">
+<code class="descname">ks_test</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#ks_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.ks_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
+that data distribution for last 10 minutes is different from last hour.
+It produces false positives on non-stationary series so Augmented
+Dickey-Fuller test applied to check for stationarity.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.determine_median">
+<code class="descname">determine_median</code><span class="sig-paren">(</span><em>array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#determine_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.determine_median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the median in an array of values</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.is_anomalously_anomalous">
+<code class="descname">is_anomalously_anomalous</code><span class="sig-paren">(</span><em>metric_name</em>, <em>ensemble</em>, <em>datapoint</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#is_anomalously_anomalous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.is_anomalously_anomalous" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method runs a meta-analysis on the metric to determine whether the
+metric has a past history of triggering. TODO: weight intervals based on datapoint</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer_dev.algorithms_dev.run_selected_algorithm">
+<code class="descname">run_selected_algorithm</code><span class="sig-paren">(</span><em>timeseries</em>, <em>metric_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#run_selected_algorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.run_selected_algorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter timeseries and run selected algorithm.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-analyzer_dev.analyzer_dev">
+<span id="skyline-analyzer-dev-analyzer-dev-module"></span><h2>skyline.analyzer_dev.analyzer_dev module<a class="headerlink" href="#module-analyzer_dev.analyzer_dev" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="analyzer_dev.analyzer_dev.Analyzer">
+<em class="property">class </em><code class="descname">Analyzer</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<p>The Analyzer class which controls the analyzer thread and spawned processes.</p>
+<dl class="method">
+<dt id="analyzer_dev.analyzer_dev.Analyzer.check_if_parent_is_alive">
+<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Self explanatory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="analyzer_dev.analyzer_dev.Analyzer.send_graphite_metric">
+<code class="descname">send_graphite_metric</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.send_graphite_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.send_graphite_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the skyline_app metrics to the <cite>GRAPHITE_HOST</cite> if a graphite
+host is defined.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="analyzer_dev.analyzer_dev.Analyzer.spin_process">
+<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>unique_metrics</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.spin_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign a bunch of metrics for a process to analyze.</p>
+<p>Multiple get the assigned_metrics to the process from Redis.</p>
+<p>For each metric:</p>
+<ul>
+<li><p class="first">unpack the <cite>raw_timeseries</cite> for the metric.</p>
+</li>
+<li><p class="first">Analyse each timeseries against <cite>ALGORITHMS</cite> to determine if it is</p>
+<p>anomalous.</p>
+</li>
+<li><p class="first">If anomalous add it to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomalous_metrics</span></code> list</p>
+</li>
+<li><p class="first">Add what algorithms triggered to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomaly_breakdown_q</span></code> queue</p>
+</li>
+</ul>
+<p>Add keys and values to the queue so the parent process can collate for:</p>
+<ul class="simple">
+<li><code class="xref py py-obj docutils literal"><span class="pre">self.anomaly_breakdown_q</span></code></li>
+<li><code class="xref py py-obj docutils literal"><span class="pre">self.exceptions_q</span></code></li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="analyzer_dev.analyzer_dev.Analyzer.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the process intializes.</p>
+<p>Determine if Redis is up and discover the number of <cite>unique metrics</cite>.</p>
+<p>Divide the <cite>unique_metrics</cite> between the number of <cite>ANALYZER_PROCESSES</cite>
+and assign each process a set of metrics to analyse for anomalies.</p>
+<p>Wait for the processes to finish.</p>
+<p>Process the Determine whether if any anomalous metrics require:</p>
+<ul class="simple">
+<li>alerting on (and set <cite>EXPIRATION_TIME</cite> key in Redis for alert).</li>
+<li>feeding to another module e.g. mirage.</li>
+</ul>
+<p>Populated the webapp json the anomalous_metrics details.</p>
+<p>Log the details about the run to the skyline log.</p>
+<p>Send skyline.analyzer metrics to <cite>GRAPHITE_HOST</cite>,</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-analyzer_dev">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-analyzer_dev" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="skyline.boundary.html" class="btn btn-neutral float-right" title="skyline.boundary package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="skyline.analyzer.html" class="btn btn-neutral" title="skyline.analyzer package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

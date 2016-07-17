@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="/static/images/favicon.ico" rel="icon" type="image/x-icon" />
+  </head>
+    <body>
+        <title>Skyline</title>
+
+
+        <script src="/static/js/mousetrap.min.js"></script>
+<!-- @added 20160703 - Feature #1464: Webapp rebrow
+Updated bootstrap, dygraph and jquery (only to 2.2.4 as bootstrap needs < 3.0)
+bootstrap was update for the rebrow (https://github.com/marians/rebrow) layout
+elements.
+jquery was just updated - live() deprecated, changed to move
+dygraph was just updated.
+The strftime js (https://github.com/samsonjs/strftime/tree/v0.9.2) was added as
+dygraph-1.1.1 no longer includes the strftime library.
+fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v4.6.3
+-->
+        <script src="/static/jquery-2.2.4/dist/jquery.min.js"></script>
+        <script src="/static/strftime-0.9.2/strftime-min.js"></script>
+        <script src="/static/dygraph-1.1.1/dygraph-combined.js"></script>
+        <script src="/static/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" href="/static/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap-3.3.6-dist/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="/static/fontawesome-4.6.3/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/static/css/skyline.styles.css">
+
+  <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/now"><span class="sky">Sky</span><span class="re">line</span></a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+        		<li
+          	{% if request.path == "" %}
+          	class="active"
+          	{% endif %}
+          	{% if url_for("now") in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/now">now</a></li>
+          	<li
+          	{% if url_for("panorama") in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/panorama">Panorama</a></li>
+            <li
+            {% if url_for("rebrow") in request.path %}
+            class="active"
+            {% endif %}
+            ><a href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></a></li>
+            <li
+            {% if url_for("docs") in request.path %}
+            class="active"
+            {% endif %}
+            ><a href="/docs">docs</a></li>
+            <li><a href="/app_settings">app_settings</a></li>
+            <li><a href="/api">api</a></li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </div>
+
+  <div class="container">
+    {% block body %}{% endblock %}
+  </div>
+
+  <div class="footer">
+    <div class="container">
+    	<div class="row">
+<!--
+        <div class="col-xs-6 col-md-4">
+-->
+        <div class="col-xs-6 col-md-4">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> is free software under the terms of the MIT license. Contribute :: <a href="https://github.com/earthgecko/skyline/" target="_blank">GitHub</a>.
+        </div>
+        <div class="col-xs-6 col-md-4">
+{% if duration %}
+      		<p class="text-right">Page render took :: {{ "%.3f"|format(duration*1000) }} milliseconds</p>
+{% else %}
+      		<p class="text-right">Page render took :: unknown</p>
+{% endif %}
+      	</div>
+        <div class="col-xs-6 col-md-4">
+{% if version %}
+      		<a href='/version' href='/version'><p class="text-right">version :: {{ version }}</a></p>
+{% else %}
+      		<a href='/version' href='/version'><p class="text-right">version :: unkwown</a></p>
+{% endif %}
+      	</div>
+    </div>
+{% if url_for("rebrow") in request.path %}
+    	<div class="row">
+        <div class="col-md-9">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> uses a modified port of Marian Steinbach's excellent <span class="logo"><span class="re">re</span>brow</span> Redis browser :: <a href="https://github.com/marians/rebrow/" target="_blank">GitHub - https://github.com/marians/rebrow</a>.
+        </div>
+        <div class="col-md-3">
+      		<p class="text-right"></p>
+      	</div>
+    </div>
+{% endif %}
+
+
+  </div>
+
+    </body>
+</html>

@@ -1,0 +1,610 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>webapp.backend &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>webapp.backend</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for webapp.backend</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span>
+<span class="kn">import</span> <span class="nn">mysql.connector</span>
+<span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="kn">import</span> <span class="n">errorcode</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_graphite_metric</span><span class="p">,</span> <span class="n">mysql_select</span>
+
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
+<span class="n">REQUEST_ARGS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;from_date&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;from_time&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;until_date&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;until_time&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;until_timestamp&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;target&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;like_target&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;source&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;host&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;algorithm&#39;</span><span class="p">,</span>
+                <span class="p">]</span>
+
+<span class="c1"># Converting one settings variable into a local variable, just because it is a</span>
+<span class="c1"># long string otherwise.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_PANORAMA_DEBUG from settings&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<div class="viewcode-block" id="panorama_request"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.panorama_request">[docs]</a><span class="k">def</span> <span class="nf">panorama_request</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the details of anomalies from the database, using the URL arguments</span>
+<span class="sd">    that are passed in by the :obj:`request.args` to build the MySQL select</span>
+<span class="sd">    query string and queries the database, parse the results and creates an</span>
+<span class="sd">    array of the anomalies that matched the query and creates the</span>
+<span class="sd">    ``panaroma.json`` file, then returns the array.  The Webapp needs both the</span>
+<span class="sd">    array and the JSONP file to serve to the browser for the client side</span>
+<span class="sd">    ``panaroma.js``.</span>
+
+<span class="sd">    :param None: determined from :obj:`request.args`</span>
+<span class="sd">    :return: array</span>
+<span class="sd">    :rtype: array</span>
+
+<span class="sd">    .. note:: And creates ``panaroma.js`` for client side javascript</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determining request args&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_ids_from_rows</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">rows</span><span class="p">):</span>
+        <span class="n">found_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">found_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">found_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">found_id</span><span class="p">))</span>
+
+        <span class="n">ids_first</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">found_ids</span><span class="p">),</span> <span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">in_ids</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ids_first</span><span class="p">),</span> <span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">in_ids</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">request_args_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">request_args_len</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">latest_anomalies</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">request_args_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">request_args_len</span> <span class="o">=</span> <span class="s1">&#39;No request arguments passed&#39;</span>
+        <span class="c1"># return str(request_args_len)</span>
+        <span class="n">latest_anomalies</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="n">metric</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">metric</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Getting db id for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id from metrics WHERE metric=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get id from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;metric id not found in database&#39;</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">search_request</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">count_request</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">latest_anomalies</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Getting latest anomalies&#39;</span><span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies ORDER BY id DESC LIMIT 10&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get anomalies from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">latest_anomalies</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Determining search parameters&#39;</span><span class="p">)</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies&#39;</span>
+        <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c1"># If we have to &#39;&#39; a string we cannot escape the query it seems...</span>
+        <span class="n">do_not_escape</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="s1">&#39;metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">and</span> <span class="n">metric</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;select id from metrics WHERE metric=&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get app ids from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">if</span> <span class="n">found_id</span><span class="p">:</span>
+                    <span class="n">target_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">found_id</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND metric_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;metric_like&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">metric_like</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric_like&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">metric_like</span> <span class="ow">and</span> <span class="n">metric_like</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id from metrics WHERE metric LIKE </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_like</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rows</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metric ids from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+
+                <span class="n">ids</span> <span class="o">=</span> <span class="n">get_ids_from_rows</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;count_by_metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">count_by_metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;count_by_metric&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">count_by_metric</span> <span class="ow">and</span> <span class="n">count_by_metric</span> <span class="o">!=</span> <span class="s1">&#39;false&#39;</span><span class="p">:</span>
+                <span class="n">search_request</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">count_request</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="c1"># query_string = &#39;SELECT metric_id, COUNT(*) FROM anomalies GROUP BY metric_id ORDER BY COUNT(*) DESC&#39;</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT metric_id, COUNT(*) FROM anomalies&#39;</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="s1">&#39;from_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">from_timestamp</span> <span class="ow">and</span> <span class="n">from_timestamp</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">from_timestamp</span><span class="p">:</span>
+                    <span class="kn">import</span> <span class="nn">time</span>
+                    <span class="kn">import</span> <span class="nn">datetime</span>
+                    <span class="n">new_from_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
+                    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">new_from_timestamp</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND anomaly_timestamp &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE anomaly_timestamp &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;until_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">until_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;until_timestamp&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">until_timestamp</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">until_timestamp</span><span class="p">:</span>
+                    <span class="kn">import</span> <span class="nn">time</span>
+                    <span class="kn">import</span> <span class="nn">datetime</span>
+                    <span class="n">new_until_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
+                    <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">new_until_timestamp</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND anomaly_timestamp &lt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">)</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE anomaly_timestamp &lt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">)</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;app&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">app</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">app</span> <span class="ow">and</span> <span class="n">app</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id from apps WHERE app=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get app ids from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">if</span> <span class="n">found_id</span><span class="p">:</span>
+                    <span class="n">target_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">found_id</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND app_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE app_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;source&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span> <span class="ow">and</span> <span class="n">source</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id from sources WHERE source=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get source id from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">if</span> <span class="n">found_id</span><span class="p">:</span>
+                    <span class="n">target_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">found_id</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND source_id=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE source_id=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;algorithm&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">algorithm</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;algorithm&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="c1"># DISABLED as it is difficult match algorithm_id in the</span>
+            <span class="c1"># triggered_algorithms csv list</span>
+            <span class="n">algorithm</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+            <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">and</span> <span class="n">algorithm</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id from algorithms WHERE algorithm LIKE </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rows</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get algorithm ids from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="n">ids</span> <span class="o">=</span> <span class="n">get_ids_from_rows</span><span class="p">(</span><span class="s1">&#39;algorithm&#39;</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND algorithm_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE algorithm_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;host&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">host</span> <span class="ow">and</span> <span class="n">host</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id from hosts WHERE host=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">host</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get host id from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">found_id</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">if</span> <span class="n">found_id</span><span class="p">:</span>
+                    <span class="n">target_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">found_id</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND host_id=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE host_id=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">target_id</span><span class="p">)</span>
+                    <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="s1">&#39;limit&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="s1">&#39;10&#39;</span>
+
+        <span class="k">if</span> <span class="s1">&#39;order&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;DESC&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="s1">&#39;DESC&#39;</span>
+
+        <span class="n">search_query</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ORDER BY id </span><span class="si">%s</span><span class="s1"> LIMIT </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">query_string</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;count_by_metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">count_by_metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;count_by_metric&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">count_by_metric</span> <span class="ow">and</span> <span class="n">count_by_metric</span> <span class="o">!=</span> <span class="s1">&#39;false&#39;</span><span class="p">:</span>
+                <span class="c1"># query_string = &#39;SELECT metric_id, COUNT(*) FROM anomalies GROUP BY metric_id ORDER BY COUNT(*) DESC&#39;</span>
+                <span class="n">search_query</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> GROUP BY metric_id ORDER BY COUNT(*) </span><span class="si">%s</span><span class="s1"> LIMIT </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">query_string</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">search_query</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get anomalies from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">search_request</span><span class="p">:</span>
+        <span class="n">anomalies_json</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
+        <span class="n">panorama_json</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomalies_json</span><span class="p">),</span> <span class="s1">&#39;anomalies.json&#39;</span><span class="p">,</span> <span class="s1">&#39;panorama.json&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ENABLE_WEBAPP_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug ::  panorama_json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">panorama_json</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">search_request</span><span class="p">:</span>
+            <span class="n">anomaly_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">count_request</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">anomaly_count</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select metric from metrics WHERE id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get id from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="k">continue</span>
+
+        <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">search_request</span><span class="p">:</span>
+            <span class="n">anomalous_datapoint</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">created_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">anomaly_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">anomaly_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">anomalous_datapoint</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span> <span class="n">created_timestamp</span><span class="p">)</span>
+            <span class="n">anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">anomalous_datapoint</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span> <span class="n">created_timestamp</span><span class="p">])</span>
+            <span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">count_request</span><span class="p">:</span>
+            <span class="n">limit_argument</span> <span class="o">=</span> <span class="n">anomaly_count</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_count</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">limit_argument</span> <span class="o">=</span> <span class="mi">200</span>
+            <span class="n">anomaly_data</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_count</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit_argument</span><span class="p">))</span>
+            <span class="n">anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit_argument</span><span class="p">)])</span>
+
+    <span class="n">anomalies</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">search_request</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">panorama_json</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Write anomalous_metrics to static webapp directory</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">panorama_json</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="c1"># Make it JSONP with a handle_data() function</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;handle_data(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">anomalies</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">latest_anomalies</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">anomalies</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">search_query</span><span class="p">,</span> <span class="n">anomalies</span></div>
+
+
+<div class="viewcode-block" id="get_list"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.get_list">[docs]</a><span class="k">def</span> <span class="nf">get_list</span><span class="p">(</span><span class="n">thing</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a list of names for things in a database table.</span>
+
+<span class="sd">    :param thing: the thing, e.g. &#39;algorithm&#39;</span>
+<span class="sd">    :type thing: str</span>
+<span class="sd">    :return: array</span>
+<span class="sd">    :rtype: array, boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">thing</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;select </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">table</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get list of </span><span class="si">%s</span><span class="s1">s from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">table</span><span class="p">))</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+    <span class="n">things</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="n">things</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;things: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">things</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">things</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

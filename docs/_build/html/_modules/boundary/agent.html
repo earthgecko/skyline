@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>boundary.agent &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>boundary.agent</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for boundary.agent</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">daemon</span> <span class="kn">import</span> <span class="n">runner</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+
+<span class="kn">from</span> <span class="nn">boundary</span> <span class="kn">import</span> <span class="n">Boundary</span>
+<span class="kn">from</span> <span class="nn">boundary_algorithms</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;boundary&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BoundaryAgent"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.agent.BoundaryAgent">[docs]</a><span class="k">class</span> <span class="nc">BoundaryAgent</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdin_path</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pidfile_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.pid&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pidfile_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+
+<div class="viewcode-block" id="BoundaryAgent.run"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.agent.BoundaryAgent.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;agent starting skyline </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="n">Boundary</span><span class="p">(</span><span class="n">getpid</span><span class="p">())</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="run"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.agent.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start the Boundary agent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">):</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;pid directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">):</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;log directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Make sure all the BOUNDARY_ALGORITHMS are valid</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ALGORITHMS</span><span class="p">:</span>
+            <span class="n">configuration_error</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ALGORITHMS</span><span class="p">:</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">valid</span> <span class="o">=</span> <span class="bp">False</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+                    <span class="n">configuration_error</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;configuration error in tuple, expected: str&#39;</span><span class="p">)</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;configuration error in BOUNDARY_ALGORITHMS tuple: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">configuration_error</span><span class="p">:</span>
+                <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;There are configuration issues in BOUNDARY_ALGORITHMS in settings.py&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;There are no BOUNDARY_ALGORITHMS in settings.py. try adding some, nothing to do&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Make sure we can run all the algorithms</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="mi">86400</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">86401</span><span class="p">))</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span>
+            <span class="n">timeseries</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ALGORITHMS</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Algorithm </span><span class="si">%s</span><span class="s1"> deprecated or not defined; check settings.BOUNDARY_ALGORITHMS&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Algorithm test run failed.&#39;</span><span class="p">)</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Make sure all the BOUNDARY_METRICS are valid</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
+            <span class="n">configuration_error</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">strings</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">valid</span> <span class="o">=</span> <span class="bp">False</span>
+
+                <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                        <span class="n">valid</span> <span class="o">=</span> <span class="bp">False</span>
+
+                <span class="n">alert_via</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">alerter</span> <span class="ow">in</span> <span class="n">alert_via</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">valid</span> <span class="o">=</span> <span class="bp">False</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+                    <span class="n">configuration_error</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;configuration error in tuple, expected: str, str, int, int, int, int, str&#39;</span><span class="p">)</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;configuration error in BOUNDARY_METRICS tuple: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">configuration_error</span><span class="p">:</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;There are configuration issues in BOUNDARY_METRICS in settings.py&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;There are no BOUNDARY_METRICS in settings.py. try adding some, nothing to do&#39;</span><span class="p">)</span>
+
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> :: </span><span class="si">%(process)s</span><span class="s2"> :: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">TimedRotatingFileHandler</span><span class="p">(</span>
+        <span class="n">logfile</span><span class="p">,</span>
+        <span class="n">when</span><span class="o">=</span><span class="s2">&quot;midnight&quot;</span><span class="p">,</span>
+        <span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">backupCount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">memory_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">MemoryHandler</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span>
+                                                    <span class="n">flushLevel</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+                                                    <span class="n">target</span><span class="o">=</span><span class="n">handler</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">memory_handler</span><span class="p">)</span>
+
+    <span class="n">boundary</span> <span class="o">=</span> <span class="n">BoundaryAgent</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;run&#39;</span><span class="p">:</span>
+        <span class="n">boundary</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">daemon_runner</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">DaemonRunner</span><span class="p">(</span><span class="n">boundary</span><span class="p">)</span>
+        <span class="n">daemon_runner</span><span class="o">.</span><span class="n">daemon_context</span><span class="o">.</span><span class="n">files_preserve</span> <span class="o">=</span> <span class="p">[</span><span class="n">handler</span><span class="o">.</span><span class="n">stream</span><span class="p">]</span>
+        <span class="n">daemon_runner</span><span class="o">.</span><span class="n">do_action</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,961 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>analyzer.analyzer &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>analyzer.analyzer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for analyzer.analyzer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">system</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span>
+
+<span class="kn">from</span> <span class="nn">alerters</span> <span class="kn">import</span> <span class="n">trigger_alert</span>
+<span class="kn">from</span> <span class="nn">algorithms</span> <span class="kn">import</span> <span class="n">run_selected_algorithm</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALGORITHM_RUN_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">if</span> <span class="n">send_algorithm_run_metrics</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">algorithms</span> <span class="kn">import</span> <span class="n">determine_median</span>
+
+<span class="c1"># TODO if settings.ENABLE_CRUCIBLE: and ENABLE_PANORAMA</span>
+<span class="c1">#    from spectrum import push_to_crucible</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;analyzer&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Analyzer"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer">[docs]</a><span class="k">class</span> <span class="nc">Analyzer</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Analyzer class which controls the analyzer thread and spawned processes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the Analyzer</span>
+
+<span class="sd">        Create the :obj:`self.anomalous_metrics` list</span>
+
+<span class="sd">        Create the :obj:`self.exceptions_q` queue</span>
+
+<span class="sd">        Create the :obj:`self.anomaly_breakdown_q` queue</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Analyzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mirage_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Analyzer.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Analyzer.spin_process"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">unique_metrics</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign a bunch of metrics for a process to analyze.</span>
+
+<span class="sd">        Multiple get the assigned_metrics to the process from Redis.</span>
+
+<span class="sd">        For each metric:</span>
+
+<span class="sd">        - unpack the `raw_timeseries` for the metric.</span>
+<span class="sd">        - Analyse each timeseries against `ALGORITHMS` to determine if it is</span>
+<span class="sd">          anomalous.</span>
+<span class="sd">        - If anomalous add it to the :obj:`self.anomalous_metrics` list</span>
+<span class="sd">        - Add what algorithms triggered to the :obj:`self.anomaly_breakdown_q`</span>
+<span class="sd">          queue</span>
+<span class="sd">        - If :mod:`settings.ENABLE_CRUCIBLE` is ``True``:</span>
+
+<span class="sd">          - Add a crucible data file with the details about the timeseries and</span>
+<span class="sd">            anomaly.</span>
+<span class="sd">          - Write the timeseries to a json file for crucible.</span>
+
+<span class="sd">        Add keys and values to the queue so the parent process can collate for:\n</span>
+<span class="sd">        * :py:obj:`self.anomaly_breakdown_q`</span>
+<span class="sd">        * :py:obj:`self.exceptions_q`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">spin_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process started&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Discover assigned metrics</span>
+        <span class="n">keys_per_processor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_PROCESSES</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_PROCESSES</span><span class="p">:</span>
+            <span class="n">assigned_max</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">assigned_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">),</span> <span class="n">i</span> <span class="o">*</span> <span class="n">keys_per_processor</span><span class="p">)</span>
+        <span class="c1"># Fix analyzer worker metric assignment #94</span>
+        <span class="c1"># https://github.com/etsy/skyline/pull/94 @languitar:worker-fix</span>
+        <span class="n">assigned_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">keys_per_processor</span>
+        <span class="n">assigned_keys</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">assigned_min</span><span class="p">,</span> <span class="n">assigned_max</span><span class="p">)</span>
+
+        <span class="c1"># Compile assigned metrics</span>
+        <span class="n">assigned_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">unique_metrics</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">assigned_keys</span><span class="p">]</span>
+
+        <span class="c1"># Check if this process is unnecessary</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Multi get series</span>
+        <span class="n">raw_assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">mget</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span>
+
+        <span class="c1"># Make process-specific dicts</span>
+        <span class="n">exceptions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">anomaly_breakdown</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># Distill timeseries strings into lists</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">raw_series</span> <span class="o">=</span> <span class="n">raw_assigned</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+
+                <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+
+                <span class="c1"># If it&#39;s anomalous, add it to list</span>
+                <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+                    <span class="c1"># Get the anomaly breakdown - who returned True?</span>
+                    <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ensemble</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                            <span class="n">algorithm</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                            <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">triggered_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+
+                    <span class="c1"># If Crucible or Panorama are enabled determine details</span>
+                    <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_CRUCIBLE_ENABLED</span><span class="p">:</span>
+                        <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
+                        <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="bp">True</span>
+
+                    <span class="k">if</span> <span class="n">determine_anomaly_details</span><span class="p">:</span>
+                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># If Panorama is enabled - create a Panorama check</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                                <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o755</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+
+                        <span class="c1"># Note:</span>
+                        <span class="c1"># The values are enclosed is single quoted intentionally</span>
+                        <span class="c1"># as the imp.load_source used results in a shift in the</span>
+                        <span class="c1"># decimal position when double quoted, e.g.</span>
+                        <span class="c1"># value = &quot;5622.0&quot; gets imported as</span>
+                        <span class="c1"># 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2</span>
+                        <span class="c1"># single quoting results in the desired,</span>
+                        <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
+                        <span class="n">added_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                        <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;graphite&#39;</span>
+                        <span class="n">panaroma_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;app = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;source = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                            <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
+                               <span class="n">metric_timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span>
+                               <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span>
+                               <span class="n">this_host</span><span class="p">,</span> <span class="n">added_at</span><span class="p">)</span>
+
+                        <span class="c1"># Create an anomaly file with details about the anomaly</span>
+                        <span class="n">panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span>
+                            <span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">write_data_to_file</span><span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                                <span class="n">panaroma_anomaly_data</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                    <span class="c1"># If Crucible is enabled - save timeseries and create a</span>
+                    <span class="c1"># Crucible check</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_CRUCIBLE_ENABLED</span><span class="p">:</span>
+                        <span class="n">crucible_anomaly_dir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">timeseries_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric_timestamp</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                                <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o755</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+
+                        <span class="c1"># Note:</span>
+                        <span class="c1"># The values are enclosed is single quoted intentionally</span>
+                        <span class="c1"># as the imp.load_source used in crucible results in a</span>
+                        <span class="c1"># shift in the decimal position when double quoted, e.g.</span>
+                        <span class="c1"># value = &quot;5622.0&quot; gets imported as</span>
+                        <span class="c1"># 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2</span>
+                        <span class="c1"># single quoting results in the desired,</span>
+                        <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
+
+                        <span class="n">crucible_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;anomaly_dir = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;graphite_metric = True</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;run_crucible_tests = False</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                            <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
+                               <span class="n">metric_timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span>
+                               <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">crucible_anomaly_dir</span><span class="p">,</span>
+                               <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
+
+                        <span class="c1"># Create an anomaly file with details about the anomaly</span>
+                        <span class="n">crucible_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">write_data_to_file</span><span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                                <span class="n">crucible_anomaly_data</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add crucible anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                        <span class="c1"># Create timeseries json file with the timeseries</span>
+                        <span class="n">json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">timeseries_json</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;(&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">timeseries_json</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">json_file</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add crucible timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">json_file</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                        <span class="c1"># Create a crucible check file</span>
+                        <span class="n">crucible_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">write_data_to_file</span><span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                                <span class="n">crucible_anomaly_data</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add crucible check file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_check_file</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+            <span class="c1"># It could have been deleted by the Roomba</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;DeletedByRoomba&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="n">TooShort</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;TooShort&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="n">Stale</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Stale&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="n">Boring</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Boring&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Other&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+        <span class="c1"># Add values to the queue so the parent process can collate</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="n">spin_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spin_start</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process took </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">spin_end</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Analyzer.run"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Called when the process intializes.</span>
+
+<span class="sd">        - Determine if Redis is up and discover the number of `unique metrics`.</span>
+
+<span class="sd">        - Divide the `unique_metrics` between the number of `ANALYZER_PROCESSES`</span>
+<span class="sd">          and assign each process a set of metrics to analyse for anomalies.</span>
+
+<span class="sd">        - Wait for the processes to finish.</span>
+
+<span class="sd">        - Determine whether if any anomalous metrics require:</span>
+
+<span class="sd">            - Alerting on (and set `EXPIRATION_TIME` key in Redis for alert).</span>
+<span class="sd">            - Feed to another module e.g. mirage.</span>
+<span class="sd">            - Alert to syslog.</span>
+
+<span class="sd">        - Populate the webapp json with the anomalous_metrics details.</span>
+
+<span class="sd">        - Log the details about the run to the skyline analyzer log.</span>
+
+<span class="sd">        - Send skyline.analyzer metrics to `GRAPHITE_HOST`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o755</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+
+        <span class="c1"># Initiate the algorithm timings if Analyzer is configured to send the</span>
+        <span class="c1"># algorithm_breakdown metrics with ENABLE_ALGORITHM_RUN_METRICS</span>
+        <span class="n">algorithm_tmp_file_prefix</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+        <span class="n">algorithms_to_time</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">send_algorithm_run_metrics</span><span class="p">:</span>
+            <span class="n">algorithms_to_time</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;skyline can</span><span class="se">\&#39;</span><span class="s1">t connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Report app up</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+
+            <span class="c1"># Discover unique metrics</span>
+            <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no metrics in redis. try adding some - see README&#39;</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Using count files rather that multiprocessing.Value to enable metrics for</span>
+            <span class="c1"># metrics for algorithm run times, etc</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">algorithms_to_time</span><span class="p">:</span>
+                <span class="n">algorithm_count_file</span> <span class="o">=</span> <span class="n">algorithm_tmp_file_prefix</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s1">&#39;.count&#39;</span>
+                <span class="n">algorithm_timings_file</span> <span class="o">=</span> <span class="n">algorithm_tmp_file_prefix</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s1">&#39;.timings&#39;</span>
+                <span class="c1"># with open(algorithm_count_file, &#39;a&#39;) as f:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_count_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_timings_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="c1"># Remove any existing algorithm.error files from any previous runs</span>
+            <span class="c1"># that did not cleanup for any reason</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.*.algorithm.error&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cleaning up old error file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)))</span>
+                        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                            <span class="k">pass</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to cleanup algorithm.error files &#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+            <span class="c1"># Spawn processes</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;WARNING: skyline is set for more cores than needed.&#39;</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">unique_metrics</span><span class="p">))</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> spin_process/es&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_PROCESSES</span><span class="p">)))</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+            <span class="c1"># Send wait signal to zombie processes</span>
+            <span class="c1"># for p in pids:</span>
+            <span class="c1">#     p.join()</span>
+            <span class="c1"># Self monitor processes and terminate if any spin_process has run</span>
+            <span class="c1"># for longer than 180 seconds - 20160512 @earthgecko</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MAX_ANALYZER_PROCESS_RUNTIME</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> spin_process/es completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_PROCESSES</span><span class="p">),</span> <span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all spin_process processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+            <span class="c1"># Log the last reported error by any algorithms that errored in the</span>
+            <span class="c1"># spawned processes from algorithms.py</span>
+            <span class="k">for</span> <span class="n">completed_pid</span> <span class="ow">in</span> <span class="n">spawned_pids</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process with pid </span><span class="si">%s</span><span class="s1"> completed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">completed_pid</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">:</span>
+                    <span class="n">algorithm_error_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.algorithm.error&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">completed_pid</span><span class="p">),</span> <span class="n">algorithm</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;error - spin_process with pid </span><span class="si">%s</span><span class="s1"> has reported an error with the </span><span class="si">%s</span><span class="s1"> algorithm&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">completed_pid</span><span class="p">),</span> <span class="n">algorithm</span><span class="p">))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                                <span class="n">error_string</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">error_string</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to read </span><span class="si">%s</span><span class="s1"> error file&#39;</span> <span class="o">%</span> <span class="n">algorithm</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                            <span class="k">pass</span>
+
+            <span class="c1"># Grab data from the queue and populate dictionaries</span>
+            <span class="n">exceptions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">anomaly_breakdown</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+                <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">exceptions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">exceptions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+                <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># Send alerts</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALERTS</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">:</span>
+                        <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
+                        <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;last_alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">last_alert</span><span class="p">:</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">SECOND_ORDER_RESOLUTION_FULL_DURATION</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage check      :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                        <span class="c1"># Write anomalous metric to test at second</span>
+                                        <span class="c1"># order resolution by crucible to the check</span>
+                                        <span class="c1"># file</span>
+                                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                                        <span class="n">anomaly_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                                            <span class="c1"># metric_name, anomalous datapoint, hours to resolve, timestamp</span>
+                                            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;metric = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">value = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">hours_to_resolve = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">metric_timestamp = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">metric_timestamp</span><span class="p">))</span>
+                                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                                            <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                                            <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
+                                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added mirage check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                                        <span class="c1"># Add to the mirage_metrics list</span>
+                                        <span class="n">base_name</span> <span class="o">=</span> <span class="n">METRIC_PATTERN</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                        <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base_name</span><span class="p">]</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">mirage_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                                        <span class="c1"># Alert for analyzer if enabled</span>
+                                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_FULL_DURATION_ALERTS</span><span class="p">:</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                                        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not send alert: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="c1"># Push to crucible</span>
+<span class="c1">#            if len(self.crucible_anomalous_metrics) &gt; 0:</span>
+<span class="c1">#                logger.info(&#39;to do - push to crucible&#39;)</span>
+
+            <span class="c1"># Write anomalous_metrics to static webapp directory</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                    <span class="c1"># Make it JSONP with a handle_data() function</span>
+                    <span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">)</span>
+                    <span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;handle_data(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">anomalous_metrics</span><span class="p">)</span>
+
+            <span class="c1"># Using count files rather that multiprocessing.Value to enable metrics for</span>
+            <span class="c1"># metrics for algorithm run times, etc</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">algorithms_to_time</span><span class="p">:</span>
+                <span class="n">algorithm_count_file</span> <span class="o">=</span> <span class="n">algorithm_tmp_file_prefix</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s1">&#39;.count&#39;</span>
+                <span class="n">algorithm_timings_file</span> <span class="o">=</span> <span class="n">algorithm_tmp_file_prefix</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s1">&#39;.timings&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">algorithm_count_array</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_count_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">value_string</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">unquoted_value_string</span> <span class="o">=</span> <span class="n">value_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">float_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">unquoted_value_string</span><span class="p">)</span>
+                            <span class="n">algorithm_count_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">float_value</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">algorithm_count_array</span> <span class="o">=</span> <span class="bp">False</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_count_array</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">number_of_times_algorithm_run</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">algorithm_count_array</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;algorithm run count - </span><span class="si">%s</span><span class="s1"> run </span><span class="si">%s</span><span class="s1"> times&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_of_times_algorithm_run</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">number_of_times_algorithm_run</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">algorithm_timings_array</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_timings_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">value_string</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">unquoted_value_string</span> <span class="o">=</span> <span class="n">value_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">float_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">unquoted_value_string</span><span class="p">)</span>
+                            <span class="n">algorithm_timings_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">float_value</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">algorithm_timings_array</span> <span class="o">=</span> <span class="bp">False</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_timings_array</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">number_of_algorithm_timings</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">algorithm_timings_array</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;algorithm timings count - </span><span class="si">%s</span><span class="s1"> has </span><span class="si">%s</span><span class="s1"> timings&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_of_algorithm_timings</span><span class="p">)))</span>
+
+                <span class="k">if</span> <span class="n">number_of_algorithm_timings</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_sum_of_algorithm_timings</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">algorithm_timings_array</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;sum error: &quot;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">_sum_of_algorithm_timings</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - sum_of_algorithm_timings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="n">sum_of_algorithm_timings</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">_sum_of_algorithm_timings</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="c1"># logger.info(&#39;sum_of_algorithm_timings - %s - %.16f seconds&#39; % (algorithm, sum_of_algorithm_timings))</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_median_algorithm_timing</span> <span class="o">=</span> <span class="n">determine_median</span><span class="p">(</span><span class="n">algorithm_timings_array</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">_median_algorithm_timing</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - _median_algorithm_timing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">median_algorithm_timing</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">_median_algorithm_timing</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+                <span class="c1"># logger.info(&#39;median_algorithm_timing - %s - %.16f seconds&#39; % (algorithm, median_algorithm_timing))</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;algorithm timing - </span><span class="si">%s</span><span class="s1"> - total: </span><span class="si">%.6f</span><span class="s1"> - median: </span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm</span><span class="p">,</span> <span class="n">sum_of_algorithm_timings</span><span class="p">,</span>
+                        <span class="n">median_algorithm_timing</span><span class="p">))</span>
+                <span class="n">use_namespace</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="s1">&#39;.algorithm_breakdown.&#39;</span> <span class="o">+</span> <span class="n">algorithm</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">use_namespace</span> <span class="o">+</span> <span class="s1">&#39;.timing.times_run&#39;</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_of_algorithm_timings</span><span class="p">))</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">use_namespace</span> <span class="o">+</span> <span class="s1">&#39;.timing.total_time&#39;</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sum_of_algorithm_timings</span><span class="p">))</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">use_namespace</span> <span class="o">+</span> <span class="s1">&#39;.timing.median_time&#39;</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">median_algorithm_timing</span><span class="p">))</span>
+
+            <span class="n">run_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+            <span class="n">total_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">))</span>
+            <span class="n">total_analyzed</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">))</span>
+
+            <span class="c1"># Log progress</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;seconds to run    :: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_time</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total metrics     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_metrics</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total analyzed    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_analyzed</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total anomalies   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_anomalies</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exception stats   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">exceptions</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly breakdown :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_breakdown</span><span class="p">)</span>
+
+            <span class="c1"># Log to Graphite</span>
+            <span class="n">graphite_run_time</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_time</span>
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="s1">&#39;.run_time&#39;</span>
+            <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">graphite_run_time</span><span class="p">)</span>
+
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="s1">&#39;.total_analyzed&#39;</span>
+            <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">total_analyzed</span><span class="p">)</span>
+
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="s1">&#39;.total_anomalies&#39;</span>
+            <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">total_anomalies</span><span class="p">)</span>
+
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="s1">&#39;.total_metrics&#39;</span>
+            <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">total_metrics</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.exceptions.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app_graphite_namespace</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.anomaly_breakdown.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app_graphite_namespace</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+            <span class="c1"># Check canary metric</span>
+            <span class="n">raw_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">CANARY_METRIC</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">raw_series</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+                <span class="n">time_human</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3600</span>
+                <span class="n">projected</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span><span class="p">)</span> <span class="o">/</span> <span class="n">time_human</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;canary duration   :: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time_human</span><span class="p">)</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="s1">&#39;.duration&#39;</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_human</span><span class="p">))</span>
+
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="s1">&#39;.projected&#39;</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">projected</span><span class="p">))</span>
+
+            <span class="c1"># Reset counters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Sleep if it went too fast</span>
+            <span class="c1"># if time() - now &lt; 5:</span>
+            <span class="c1">#    logger.info(&#39;sleeping due to low run time...&#39;)</span>
+            <span class="c1">#    sleep(10)</span>
+            <span class="c1"># @modified 20160504 - @earthgecko - development internal ref #1338, #1340)</span>
+            <span class="c1"># Etsy&#39;s original for this was a value of 5 seconds which does</span>
+            <span class="c1"># not make skyline Analyzer very efficient in terms of installations</span>
+            <span class="c1"># where 100s of 1000s of metrics are being analyzed.  This lead to</span>
+            <span class="c1"># Analyzer running over several metrics multiple time in a minute</span>
+            <span class="c1"># and always working.  Therefore this was changed from if you took</span>
+            <span class="c1"># less than 5 seconds to run only then sleep.  This behaviour</span>
+            <span class="c1"># resulted in Analyzer analysing a few 1000 metrics in 9 seconds and</span>
+            <span class="c1"># then doing it again and again in a single minute.  Therefore the</span>
+            <span class="c1"># ANALYZER_OPTIMUM_RUN_DURATION setting was added to allow this to</span>
+            <span class="c1"># self optimise in cases where skyline is NOT deployed to analyze</span>
+            <span class="c1"># 100s of 1000s of metrics.  This relates to optimising performance</span>
+            <span class="c1"># for any deployments in the few 1000s and 60 second resolution</span>
+            <span class="c1"># area, e.g. smaller and local deployments.</span>
+            <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+            <span class="n">analyzer_optimum_run_duration</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_OPTIMUM_RUN_DURATION</span>
+            <span class="k">if</span> <span class="n">process_runtime</span> <span class="o">&lt;</span> <span class="n">analyzer_optimum_run_duration</span><span class="p">:</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">analyzer_optimum_run_duration</span> <span class="o">-</span> <span class="n">process_runtime</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping for </span><span class="si">%.2f</span><span class="s1"> seconds due to low run time...&#39;</span> <span class="o">%</span> <span class="n">sleep_for</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

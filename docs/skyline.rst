@@ -1,0 +1,60 @@
+skyline package
+===============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    skyline.analyzer
+    skyline.analyzer_dev
+    skyline.boundary
+    skyline.crucible
+    skyline.horizon
+    skyline.mirage
+    skyline.panorama
+    skyline.webapp
+
+Submodules
+----------
+
+skyline.algorithm_exceptions module
+-----------------------------------
+
+.. automodule:: algorithm_exceptions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.settings module
+-----------------------
+
+.. automodule:: settings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.skyline_functions module
+--------------------------------
+
+.. automodule:: skyline_functions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.skyline_version module
+------------------------------
+
+.. automodule:: skyline_version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: skyline
+    :members:
+    :undoc-members:
+    :show-inheritance:

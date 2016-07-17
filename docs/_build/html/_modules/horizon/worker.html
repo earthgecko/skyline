@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>horizon.worker &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>horizon.worker</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for horizon.worker</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">system</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span><span class="p">,</span> <span class="n">WatchError</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">packb</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
+
+<span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;horizon&#39;</span>
+<span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;worker&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">parent_skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">child_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">parent_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+    <span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">,</span> <span class="n">child_skyline_app</span><span class="p">)</span>
+
+<span class="n">WORKER_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<div class="viewcode-block" id="Worker"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker">[docs]</a><span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The worker processes chunks from the queue and appends</span>
+<span class="sd">    the latest datapoints to their respective timesteps in Redis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">skip_mini</span><span class="p">,</span> <span class="n">canary</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Worker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canary</span> <span class="o">=</span> <span class="n">canary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skip_mini</span> <span class="o">=</span> <span class="n">skip_mini</span>
+
+<div class="viewcode-block" id="Worker.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Worker.in_skip_list"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.in_skip_list">[docs]</a>    <span class="k">def</span> <span class="nf">in_skip_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the metric is in SKIP_LIST.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKIP_LIST</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="Worker.run"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the process intializes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: started worker&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">FULL_NAMESPACE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
+        <span class="n">MINI_NAMESPACE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MINI_NAMESPACE</span>
+        <span class="n">MAX_RESOLUTION</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MAX_RESOLUTION</span>
+        <span class="n">full_uniques</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="n">FULL_NAMESPACE</span>
+        <span class="n">mini_uniques</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="n">MINI_NAMESPACE</span>
+        <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+
+        <span class="n">last_send_to_graphite</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">queue_sizes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># python-2.x and python3.x had while 1 and while True differently</span>
+        <span class="c1"># while 1:</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">while</span> <span class="n">running</span><span class="p">:</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: can</span><span class="se">\&#39;</span><span class="s1">t connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Get a chunk from the queue with a 15 second timeout</span>
+                <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
+
+                    <span class="c1"># Check if we should skip it</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_skip_list</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Bad data coming in</span>
+                    <span class="k">if</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">MAX_RESOLUTION</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Append to messagepack main namespace</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">full_uniques</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_mini</span><span class="p">:</span>
+                        <span class="c1"># Append to mini namespace</span>
+                        <span class="n">mini_key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">MINI_NAMESPACE</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">pipe</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mini_key</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                        <span class="n">pipe</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">mini_uniques</span><span class="p">,</span> <span class="n">mini_key</span><span class="p">)</span>
+
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+
+            <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: worker queue is empty and timed out&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">WatchError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: WatchError - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
+            <span class="c1"># Log progress</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canary</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: queue size at </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">qsize</span><span class="p">()))</span>
+                <span class="n">queue_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">qsize</span><span class="p">())</span>
+                <span class="c1"># Only send average queue mertics to graphite once per 10 seconds</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">last_sent_graphite</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_send_to_graphite</span>
+                <span class="k">if</span> <span class="n">last_sent_graphite</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                    <span class="n">number_queue_sizes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue_sizes</span><span class="p">)</span>
+                    <span class="n">total_of_queue_sizes</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">queue_sizes</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">total_of_queue_sizes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">average_queue_size</span> <span class="o">=</span> <span class="n">total_of_queue_sizes</span> <span class="o">/</span> <span class="n">number_queue_sizes</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">average_queue_size</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: total queue size for the last 10 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_of_queue_sizes</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: total queue values known for the last 10 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_queue_sizes</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: average queue size for the last 10 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">average_queue_size</span><span class="p">)))</span>
+                    <span class="c1"># self.send_graphite_metric(&#39;skyline.horizon.&#39; + SERVER_METRIC_PATH + &#39;queue_size&#39;, self.q.qsize())</span>
+<span class="c1">#                    self.send_graphite_metric(&#39;queue_size&#39;, average_queue_size)</span>
+                    <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.queue_size&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">average_queue_size</span><span class="p">)</span>
+
+                    <span class="c1"># reset queue_sizes and last_sent_graphite</span>
+                    <span class="n">queue_sizes</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">last_send_to_graphite</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
