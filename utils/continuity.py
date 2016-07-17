@@ -5,13 +5,13 @@ import time
 from os.path import dirname, abspath
 
 # add the shared settings file to namespace
-sys.path.insert(0, ''.join((dirname(dirname(abspath(__file__))), "/src")))
-import settings
+sys.path.insert(0, ''.join((dirname(dirname(abspath(__file__))), "")))
+from skyline import settings
 
 metric = 'horizon.test.udp'
 
 
-def check_continuity(metric, mini = False):
+def check_continuity(metric, mini=False):
     r = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     if mini:
         raw_series = r.get(settings.MINI_NAMESPACE + metric)

@@ -1,14 +1,18 @@
 import unittest2 as unittest
 from mock import Mock, patch
 from time import time
-
+import os.path
 import sys
-from os.path import dirname, abspath
 
-sys.path.insert(0, dirname(dirname(abspath(__file__))) + '/src')
-sys.path.insert(0, dirname(dirname(abspath(__file__))) + '/src/analyzer')
+#from skyline.analyzer import algorithms
+#from skyline import settings
 
-import algorithms
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.join(os.path.dirname(os.path.realpath(current_dir)))
+skyline_dir = parent_dir + '/skyline'
+sys.path.append(skyline_dir)
+
+from analyzer import algorithms
 import settings
 
 
@@ -17,7 +21,7 @@ class TestAlgorithms(unittest.TestCase):
     Test all algorithms with a common, simple/known anomalous data set
     """
 
-    def _addSkip(self, test, reason):
+    def _addSkip(self, test, tail_avg, reason):
         print reason
 
     def data(self, ts):
