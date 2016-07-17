@@ -45,7 +45,8 @@ cycler>=0.10.0
 pyparsing>=2.1.5
 matplotlib>=1.5.1
 
-pandas>=0.18.1
+# rtd does not need pandas takes so long to build
+#pandas>=0.18.1
 
 patsy>=0.4.1
 
