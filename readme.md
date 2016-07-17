@@ -1,5 +1,9 @@
 ## Skyline
 
+<a href='http://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest'>
+  <img src='http://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest' alt='Documentation Status' />
+</a>
+
 ![skyline web app](skyline.png)
 
 Skyline is a near real-time anomaly detection system, built to enable
