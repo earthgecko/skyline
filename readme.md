@@ -21,4 +21,3 @@ metric to be anomalous.
 All the Skyline documentation is available in a clone locally in your
 browser at `file://<PATH_TO_YOUR_CLONE>/docs/_build/html/index.html`, via
 the Skyline Webapp frontend and online at http://earthgecko-skyline.readthedocs.io/en/latest/
-(maybe if it is set up)
