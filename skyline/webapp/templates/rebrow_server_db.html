@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+{% block body %}
+
+  <script>
+  $(function () {
+  	$('#serverstatus-tabs a').click(function (e) {
+		  e.preventDefault()
+		  $(this).tab('show');
+		});
+  });
+  </script>
+
+<!--
+	<div class="breadcrumb">
+		<a href="/rebrow">Home</a> /rebrow/
+		{{ host}}:{{port}} DB {{ db }}
+	</div>
+-->
+
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+		<li class="active"><span class="logo"><span class="sky">{{ host }}:{{ port}}</span> <span class="re">DB {{ db }}</span></li>
+	</ol>
+
+      <div class="navbar-header" role="navigation">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+        		<li
+        		{% if url_for("rebrow_server_db", host=host, port=port, db=db) == request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/">Server Status</a></li>
+
+          	<li
+          	{% if url_for("rebrow_keys", host=host, port=port, db=db) in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/">Keys</a></li>
+        </ul>
+      </div><!-- /.nav-collapse -->
+
+	<div class="row">
+
+		<div class="col-md-3 col-md-push-9">
+
+			<p>Used Memory: {{ info["used_memory_human"] }}, peak: {{ info["used_memory_peak_human"] }}</p>
+
+			<p><strong>{{ dbsize }} Keys available.</strong></p>
+
+			<form action="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/" method="get">Find keys matching pattern: <input name="pattern" value="*" /></form>
+			<div>or <a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/">list all keys</a></div>
+
+
+		</div>
+
+		<div class="col-md-9 col-md-pull-3">
+
+			<ul class="nav nav-tabs" role="tablist" id="serverstatus-tabs">
+			  <li class="active"><a href="#overall">Overall Status</a></li>
+			  <li><a href="#commands">Command Statistics</a></li>
+			</ul>
+
+			<div class="tab-content">
+			  <div class="tab-pane active" id="overall">
+
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Key</th>
+								<th>Value</th>
+								<th>Description</h>
+							</tr>
+						</thead>
+						<tbody>
+						{% for item in info|dictsort %}
+							{% if "cmdstat_" not in item[0] %}
+							<tr>
+								<td><code>{{ item[0] }}</code></td>
+								<td><code>{{ item[1] }}</code></td>
+								<td>
+									{% if item[0] in serverinfo_meta and serverinfo_meta[item[0]] != None %}
+									{{ serverinfo_meta[item[0]]|safe }}
+									{% endif%}
+								</td>
+							</tr>
+							{% endif%}
+						{% endfor %}
+						</tbody>
+					</table>
+
+				</div>
+			  <div class="tab-pane" id="commands">
+
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Command</th>
+								<th>Calls</th>
+								<th>Call Share</th>
+								<th>Duration (Microseconds)</h>
+								<th>Duration/Call</h>
+							</tr>
+						</thead>
+						<tbody>
+						{% for item in info|dictsort %}
+							{% if item[1]["calls"] %}
+								<tr>
+									<td><code>{{ item[0]|replace("cmdstat_", "") }}</code></td>
+									<td class="text-right">{{ item[1]["calls"] }}</td>
+									<td class="text-right">{{ "%.2f"|format(item[1]["calls"] / info["total_commands_processed"] * 100) }} %</td>
+									<td class="text-right">{{ item[1]["usec"] }}</td>
+									<td class="text-right">{{ "%.1f"|format(item[1]["usec_per_call"]) }}</td>
+								</tr>
+							{% endif%}
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+{% endblock %}

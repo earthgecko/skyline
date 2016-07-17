@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="next" title="Requirements" href="requirements.html"/>
+        <link rel="prev" title="Skyline documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-brief-history">A brief history</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-as-a-work-in-progress">Skyline - as a work in progress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-new-look-skyline-apps">The new look Skyline apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-new">What&#8217;s new</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-old">What&#8217;s old</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-architecture-in-a-nutshell">The architecture in a nutshell</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Overview</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/overview.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="a-brief-history">
+<h2>A brief history<a class="headerlink" href="#a-brief-history" title="Permalink to this headline">¶</a></h2>
+<p>Skyline was originally open sourced by <a class="reference external" href="https://www.etsy.com/">Etsy</a> as a real-time anomaly detection
+system. It was originally built to enable passive monitoring of hundreds of
+thousands of metrics, without the need to configure a model/thresholds for each
+one, as you might do with Nagios.  It was designed to be used wherever there are
+a large quantity of high-resolution timeseries which need constant monitoring.
+Once a metric stream was set up (from statsd, graphite or other), additional
+metrics are automatically added to Skyline for analysis, anomaly detection,
+alerting and briefly publishing in the Webapp frontend.  <a class="reference external" href="https://github.com/etsy/skyline">github/etsy</a> stopped
+actively maintaining Skyline in 2014.</p>
+</div>
+<div class="section" id="skyline-as-a-work-in-progress">
+<h2>Skyline - as a work in progress<a class="headerlink" href="#skyline-as-a-work-in-progress" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://www.etsy.com/">Etsy</a> found the &#8220;one size fits all approach&#8221; to anomaly detection wasn&#8217;t
+actually proving all that useful to them.</p>
+<p>There is some truth in that in terms of the one size fits all methodology that
+Skyline was framed around.  With hundreds of thousands of metrics this does make
+Skyline fairly hard to tame, in terms of how useful it is and tuning the noise
+is difficult.  Tuning the noise to make it constantly useful and not just noisy,
+removes the &#8220;without the need to configure a model/thresholds&#8221; element somewhat.</p>
+<p>So why continue developing Skyline?</p>
+<p>Because it works and because it is Python.  Being Python based allows Skyline to
+integrate with a lot of other awesome things in the machine learning and
+scientific Python ecosystem.  It&#8217;s modularity makes it is very flexible.</p>
+<p>With some time and tuning, Skyline works!</p>
+<p>The architecture/pipeline works very well at doing what it does, it is based on
+solid, battle tested components, Python and Redis.</p>
+</div>
+<div class="section" id="the-new-look-skyline-apps">
+<h2>The new look Skyline apps<a class="headerlink" href="#the-new-look-skyline-apps" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Horizon - feed metrics to Redis via a pickle input</li>
+<li>Analyzer - analyze metrics</li>
+<li>Mirage - analyze specific metrics at a custom time range</li>
+<li>Boundary - analyze specific timeseries for specific conditions</li>
+<li>Crucible - store anomalous timeseries resources and ad-hoc analysis of any
+timeseries</li>
+<li>Panorama - anomalies database and historical views</li>
+<li>Webapp - frontend to view current and histroical anomalies and browse Redis
+with <span class="red">re</span><span class="brow">brow</span></li>
+</ul>
+<p>Skyline is still a near real-time anomaly detection system, however it has
+various modes of operation that are modular and self contained, so that only the
+desired apps need to be enabled.</p>
+<p>Skyline can now be feed/query and analyze timeseries on an ad-hoc basis, on the
+fly.  This means Skyline can now be used to analyze and process static data too,
+it is no longer just a machine/app metric fed system.</p>
+</div>
+<div class="section" id="what-s-new">
+<h2>What&#8217;s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="whats-new.html">whats-new</a> for a comprehensive overview and description
+of the latest version/s of Skyline.</p>
+</div>
+<div class="section" id="what-s-old">
+<h2>What&#8217;s old<a class="headerlink" href="#what-s-old" title="Permalink to this headline">¶</a></h2>
+<p>It must be stated the original core of Skyline has not been altered in any way,
+other than some fairly minimal Pythonic performance improvements, a bit of
+optimization in terms of the logic used to reach <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> and a
+package restructure.  In terms of the original Skyline Analyzer, it does the
+same things just a little differently, hopefully better and a bit more.</p>
+<p>There is little point in trying to improve something as simple and elegant in
+methodology and design as Skyline, which has worked so outstandingly well to
+date.  This is a testament to a number of things, in fact the sum of all it&#8217;s
+parts, <a class="reference external" href="https://www.etsy.com/">Etsy</a>, Abe and co. did a great job in the conceptual design,
+methodology and actual implementation of Skyline and they did it with very good
+building blocks from the scientific community.</p>
+</div>
+<div class="section" id="the-architecture-in-a-nutshell">
+<h2>The architecture in a nutshell<a class="headerlink" href="#the-architecture-in-a-nutshell" title="Permalink to this headline">¶</a></h2>
+<p>Skyline uses to following technologies and libraries at its core:</p>
+<ol class="arabic simple">
+<li><strong>Python</strong> - the main skyline application language - <a class="reference external" href="https://www.python.org/">Python</a></li>
+<li><strong>Redis</strong> - <a class="reference external" href="http://Redis.io/">Redis</a> an in-memory data structure store</li>
+<li><strong>numpy</strong> - <a class="reference external" href="http://www.numpy.org/">NumPy</a> is the fundamental package for scientific computing with Python</li>
+<li><strong>scipy</strong> - <a class="reference external" href="http://scipy.org/">SciPy</a> Library - Fundamental library for scientific computing</li>
+<li><strong>pandas</strong> - <a class="reference external" href="http://pandas.pydata.org/">pandas</a> - Python Data Analysis Library</li>
+<li><strong>mysql/mariadb</strong> - a database - <a class="reference external" href="https://www.mysql.com/">MySQL</a> or <a class="reference external" href="https://mariadb.org/">MariaDB</a></li>
+<li><strong>:red:`re`:brow:`brow`</strong> - Skyline uses a modified port of Marian
+Steinbach&#8217;s excellent <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="requirements.html" class="btn btn-neutral float-right" title="Requirements" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Skyline documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

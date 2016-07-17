@@ -1,0 +1,394 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Roadmap &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="next" title="skyline package" href="skyline.html"/>
+        <link rel="prev" title="Development - Webapp" href="development/webapp.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Roadmap</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#further-performance-improvements-and-python-3-5">Further performance improvements and Python-3.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ionosphere">Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#meteor">Meteor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constellations">Constellations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-and-nasa-fits-data">Skyline and NASA/FITS data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nupic">NuPIC</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nupic-predictions-and-graphite-timeseries">NuPIC predictions and Graphite timeseries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#original-requests-timeseries">Original requests timeseries</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nupic-predicted-timeseries">NuPIC predicted timeseries</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#percentage-error-positive-and-negative">percentage error - positive and negative</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overlaid">Overlaid</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#update-the-nab-scoreboard">Update the NAB Scoreboard</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#machine-learning">Machine learning</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Roadmap</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/roadmap.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="roadmap">
+<h1>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this headline">¶</a></h1>
+<p>Things on the horizon :)</p>
+<p>This is not really a roadmap per se it is more just a collection of
+ideas at the moment, in no particular order.</p>
+<div class="section" id="further-performance-improvements-and-python-3-5">
+<h2>Further performance improvements and Python-3.5<a class="headerlink" href="#further-performance-improvements-and-python-3-5" title="Permalink to this headline">¶</a></h2>
+<p>Further performance improvements where possible with the use of cython.
+pypy is unfortunately not an overall viable route due to no real support
+for scipy and limited numpy support. pypy would be a quick win if it
+were possible, so cython where applicable is the obvious choice.</p>
+<p>Continue updating the code base to ensure that everything can be run on
+&gt;= Python-3.5.x</p>
+</div>
+<div class="section" id="ionosphere">
+<h2>Ionosphere<a class="headerlink" href="#ionosphere" title="Permalink to this headline">¶</a></h2>
+<p>Functionality to allow the operator to flag false positives, with a view
+to using machine learning to train Skyline on anomalies.  Using the entire data
+set for training it, perhaps even using an entire namespace to increase the
+accuracy of the anomaly detection via multiple avenues of analysis.</p>
+</div>
+<div class="section" id="meteor">
+<h2>Meteor<a class="headerlink" href="#meteor" title="Permalink to this headline">¶</a></h2>
+<p>Add the ability to inject data into a data set and test a metric, the workflow,
+algorithms, alerters and the apps themselves,etc.</p>
+</div>
+<div class="section" id="constellations">
+<h2>Constellations<a class="headerlink" href="#constellations" title="Permalink to this headline">¶</a></h2>
+<p>A pure Python implementation of the Oculus functionality, but not
+necessarily exactly the same, but similar. Calculating in realtime using
+the redis data and fingerprinting the slope/gradient/alphabet of the
+last x datapoints of each timeseries on the fly and correlating /
+finding similarities in the timeseries in terms of patterns. Perhaps
+some inplementation of Cosine Similarity could be used. A pure Python
+implementation of Oculus functionality within Skyline would remove the
+requirement for the additional overheads of ruby and Elasticsearch.</p>
+<p>This would allow for the correlations to be determined for any metrics
+at any point within the <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> period.</p>
+</div>
+<div class="section" id="skyline-and-nasa-fits-data">
+<h2>Skyline and NASA/FITS data<a class="headerlink" href="#skyline-and-nasa-fits-data" title="Permalink to this headline">¶</a></h2>
+<p>There is a Skyline module in development that is specifically designed
+for analysing Kepler FITS timeseries data. Although it specifically
+focus at extracting lightcurve data from the Kepler llc.fits data files,
+that in itself has added the functionality to convert any relevant FITS
+based data file that has a timeseries element in it. This should extend
+to other data types that the FITS data format (Flexible Image Transport
+System) handles:</p>
+<ul class="simple">
+<li>Much more than just another image format (such as JPEG or GIF)</li>
+<li>Used for the transport, analysis, and archival storage of scientific
+data sets</li>
+<li>Multi-dimensional arrays: 1D spectra, 2D images, 3D+ data cubes</li>
+<li>Tables containing rows and columns of information</li>
+<li>Header keywords provide descriptive information about the data</li>
+</ul>
+<p>It should be possible for Skyline to be able to ingest any FITS data
+file or ingest an image file from a FITS file and feed it to scikit-image,
+etc.</p>
+</div>
+<div class="section" id="nupic">
+<h2>NuPIC<a class="headerlink" href="#nupic" title="Permalink to this headline">¶</a></h2>
+<p>Last year <a class="reference external" href="https://github.com/numenta/nupic/">NuPIC</a> was assessed in terms of
+use in Internet advertising for an additional monitoring dimension.  Although
+the assessment was fairly brief, it&#8217;s predictive capabilities were quite
+impressive.  Working with a 14 month data set for one advertising service it was
+able to predict the service&#8217;s ad_requests per 10 minutes for the 14 month
+period remarkably well given the nature of the specific domain.  The result was
+a little peaky, with a few large peaks. Evaluation of the event streams from the
+timeframes around the large peaks in question, identified known causes for
+those peaks, with a &#8220;noise filter&#8221; applied to <code class="docutils literal"><span class="pre">exclude</span> <span class="pre">&gt;</span> <span class="pre">x</span></code> to reduce
+those now known few noisy events and the result were indeed remarkable. In fact
+NuPIC predicted our requests for 14 months within the bounds of ~5% error margin
+and when it made and error, it learned.</p>
+<p>Truly remarkable given this is adtech data, 6.5 million request per
+minute peaks, low troughs with sparse seasonalities (if there is such
+a thing) at times. NuPIC and the Cortical Learning Algorithm are really
+amazing, if not a little difficult upfront.</p>
+<div class="section" id="nupic-predictions-and-graphite-timeseries">
+<h3>NuPIC predictions and Graphite timeseries<a class="headerlink" href="#nupic-predictions-and-graphite-timeseries" title="Permalink to this headline">¶</a></h3>
+<p>Feeding NuPIC prediction data back into Graphite helps our own Neocortex
+to visually analyse the results too (data courtesy of
+<a class="reference external" href="http://coull.com/">Coull</a>).</p>
+<div class="section" id="original-requests-timeseries">
+<h4>Original requests timeseries<a class="headerlink" href="#original-requests-timeseries" title="Permalink to this headline">¶</a></h4>
+<div class="figure" id="id1">
+<img alt="Original requests timeseries data" src="_images/radar.real.14.month.requests.png" />
+<p class="caption"><span class="caption-text">Original requests timeseries data</span></p>
+</div>
+</div>
+<div class="section" id="nupic-predicted-timeseries">
+<h4>NuPIC predicted timeseries<a class="headerlink" href="#nupic-predicted-timeseries" title="Permalink to this headline">¶</a></h4>
+<div class="figure" id="id2">
+<img alt="NuPIC predicted data" src="_images/nupic.radar.predicted.14.month.requests.png" />
+<p class="caption"><span class="caption-text">NuPIC predicted data</span></p>
+</div>
+</div>
+<div class="section" id="percentage-error-positive-and-negative">
+<h4>percentage error - positive and negative<a class="headerlink" href="#percentage-error-positive-and-negative" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>positive - under predicted (we did more than predicted)</li>
+<li>negative - over predicted (we did less than predicted)</li>
+</ul>
+<p>asPercent(diffSeries(stats_counts.radar.varnish.rpm.total,stats.nupic.predictions.radar.varnish.rpm.total),stats_counts.radar.varnish.rpm.total)</p>
+<p>Drop the noisy for an average representation</p>
+<div class="figure" id="id3">
+<img alt="NuPIC percentage error" src="_images/nupic.radar.real.predicted.difference.14.month.requests.png" />
+<p class="caption"><span class="caption-text">NuPIC percentage error</span></p>
+</div>
+</div>
+<div class="section" id="overlaid">
+<h4>Overlaid<a class="headerlink" href="#overlaid" title="Permalink to this headline">¶</a></h4>
+<p>Real data, NuPIC predictions and percentage error (on the 2nd unticked y
+axis as above)</p>
+<div class="figure" id="id4">
+<img alt="Real data, NuPIC predictions and percentage error" src="_images/nupic.radar.real.predicted.difference.14.month.requests.overlayed.png" />
+<p class="caption"><span class="caption-text">Real data, NuPIC predictions and percentage error</span></p>
+</div>
+<p>Quite amazing.  It a not beyond the realms of possibility to have a Horizon
+feeding specific metrics to various NuPIC HTM Cortical Learning
+Algorithms models...</p>
+</div>
+</div>
+<div class="section" id="update-the-nab-scoreboard">
+<h3>Update the NAB Scoreboard<a class="headerlink" href="#update-the-nab-scoreboard" title="Permalink to this headline">¶</a></h3>
+<p>Look at the automated running of the Numenta Anomaly Benchmark (NAB)
+data and frequently determine the Standard Profile, Reward Low FP and
+Reward Low FN scores (metrics). This will only aid and improve the
+evaluation of any additional algorithms, methods or techniques that are
+added or applied to Skyline in the future, e.g:</p>
+<ul class="simple">
+<li>Does Mirage change the score?</li>
+<li>Does Boundary?</li>
+<li>Would the addition of pyculiarity as an &#8220;algorithm&#8221;?
+(<a class="reference external" href="https://github.com/nicolasmiller/pyculiarity">https://github.com/nicolasmiller/pyculiarity</a>)</li>
+</ul>
+<p>Automated NAB benchmark metrics would be a nice thing to have :)</p>
+</div>
+</div>
+<div class="section" id="machine-learning">
+<h2>Machine learning<a class="headerlink" href="#machine-learning" title="Permalink to this headline">¶</a></h2>
+<p>Bring additional dimensions of machine learning capabilities into Skyline, too
+many avenues to mention...</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="skyline.html" class="btn btn-neutral float-right" title="skyline package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="development/webapp.html" class="btn btn-neutral" title="Development - Webapp" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

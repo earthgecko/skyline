@@ -1,0 +1,593 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>boundary.boundary_algorithms &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>boundary.boundary_algorithms</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for boundary.boundary_algorithms</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="kn">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+<span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FULL_DURATION</span><span class="p">,</span>
+    <span class="n">MAX_TOLERABLE_BOREDOM</span><span class="p">,</span>
+    <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">,</span>
+    <span class="n">STALE_PERIOD</span><span class="p">,</span>
+    <span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+    <span class="n">BOREDOM_SET_SIZE</span><span class="p">,</span>
+    <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;boundary&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="boundary_no_mans_land"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.boundary_no_mans_land">[docs]</a><span class="k">def</span> <span class="nf">boundary_no_mans_land</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is no man&#39;s land. Do anything you want in here, as long as you return a</span>
+<span class="sd">    boolean that determines whether the input timeseries is anomalous or not.</span>
+
+<span class="sd">    To add an algorithm, define it here, and add its name to</span>
+<span class="sd">    :mod:`settings.BOUNDARY_ALGORITHMS`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<div class="viewcode-block" id="autoaggregate_ts"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.autoaggregate_ts">[docs]</a><span class="k">def</span> <span class="nf">autoaggregate_ts</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">autoaggregate_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility function used to autoaggregate a timeseries.  If a</span>
+<span class="sd">    timeseries data set has 6 datapoints per minute but only one data value</span>
+<span class="sd">    every minute then autoaggregate will aggregate every autoaggregate_value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: autoaggregate_ts at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">autoaggregate_value</span><span class="p">))</span>
+
+    <span class="n">aggregated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: autoaggregate_ts - timeseries less than 60 datapoints, TooShort&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
+
+    <span class="n">int_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">last_hour</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="mi">3600</span>
+    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">int_end_timestamp</span>
+    <span class="n">next_timestamp</span> <span class="o">=</span> <span class="n">last_timestamp</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">autoaggregate_value</span><span class="p">)</span>
+    <span class="n">start_timestamp</span> <span class="o">=</span> <span class="n">last_hour</span>
+
+    <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: autoaggregate_ts - aggregating from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">start_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_end_timestamp</span><span class="p">)))</span>
+
+    <span class="n">valid_timestamps</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">valid_timeseries</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">start_timestamp</span>
+        <span class="k">if</span> <span class="n">valid_timeseries</span> <span class="o">==</span> <span class="mi">3600</span><span class="p">:</span>
+            <span class="n">valid_timestamps</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error: </span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">aggregated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">aggregated_timeseries</span>
+
+    <span class="k">if</span> <span class="n">valid_timestamps</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Check sane variables otherwise we can just hang here in a while loop</span>
+            <span class="k">while</span> <span class="nb">int</span><span class="p">(</span><span class="n">next_timestamp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_timestamp</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">last_timestamp</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">next_timestamp</span><span class="p">]))</span>
+                <span class="n">aggregated_timeseries</span> <span class="o">+=</span> <span class="p">((</span><span class="n">last_timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">),)</span>
+                <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">next_timestamp</span>
+                <span class="n">next_timestamp</span> <span class="o">=</span> <span class="n">last_timestamp</span> <span class="o">-</span> <span class="n">autoaggregate_value</span>
+            <span class="n">aggregated_timeseries</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">aggregated_timeseries</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error: </span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="n">aggregated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">return</span> <span class="n">aggregated_timeseries</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;could not aggregate - timestamps not valid for aggregation&#39;</span><span class="p">)</span>
+        <span class="n">aggregated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">aggregated_timeseries</span></div>
+
+
+<div class="viewcode-block" id="less_than"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.less_than">[docs]</a><span class="k">def</span> <span class="nf">less_than</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
+        <span class="c1"># timeseries, metric_name, metric_expiration_time, metric_min_average,</span>
+        <span class="c1"># metric_min_average_seconds, metric_trigger, autoaggregate,</span>
+        <span class="c1"># autoaggregate_value):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the datapoint is less than metric_trigger</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">metric_trigger</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: less_than - </span><span class="si">%s</span><span class="s1"> less_than </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="greater_than"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.greater_than">[docs]</a><span class="k">def</span> <span class="nf">greater_than</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the datapoint is greater than metric_trigger</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">metric_trigger</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: grater_than - </span><span class="si">%s</span><span class="s1"> grater_than </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="detect_drop_off_cliff"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.detect_drop_off_cliff">[docs]</a><span class="k">def</span> <span class="nf">detect_drop_off_cliff</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the average of the last 10 datapoints is</span>
+<span class="sd">    &lt;trigger&gt; times greater than the last data point AND if has not experienced</span>
+<span class="sd">    frequent cliff drops in the last 10 datapoints.  If the timeseries has</span>
+<span class="sd">    experienced 2 or more datapoints of equal or less values in the last 10 or</span>
+<span class="sd">    EXPIRATION_TIME datapoints or is less than a MIN_AVERAGE if set the</span>
+<span class="sd">    algorithm determines the datapoint as NOT anomalous but normal.</span>
+<span class="sd">    This algorithm is most suited to timeseries with most datapoints being &gt; 100</span>
+<span class="sd">    (e.g high rate).  The arbitrary &lt;trigger&gt; values become more noisy with</span>
+<span class="sd">    lower value datapoints, but it still matches drops off cliffs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">int_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># Determine resolution of the data set</span>
+        <span class="n">int_second_last_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">int_second_last_end_timestamp</span>
+        <span class="n">ten_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mi">10</span>
+        <span class="n">ten_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">ten_data_point_seconds</span>
+
+        <span class="n">ten_datapoint_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">int_end_timestamp</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ten_datapoints_ago</span><span class="p">])</span>
+        <span class="n">ten_datapoint_array_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ten_datapoint_array</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="n">ten_datapoint_array_len</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+
+        <span class="n">ten_datapoint_min_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">ten_datapoint_array</span><span class="p">)</span>
+
+        <span class="c1"># DO NOT handle if negative integers are in the range, where is the</span>
+        <span class="c1"># bottom of the cliff if a range goes negative?  Testing with a noisy</span>
+        <span class="c1"># sine wave timeseries that had a drop off cliff introduced to the</span>
+        <span class="c1"># postive data side, proved that this algorithm does work on timeseries</span>
+        <span class="c1"># with data values in the negative range</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_min_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c1"># autocorrect if there are there are 0s in the data, like graphite expects</span>
+        <span class="c1"># 1 datapoint every 10 seconds, but the timeseries only has 1 every 60 seconds</span>
+
+        <span class="n">ten_datapoint_max_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">ten_datapoint_array</span><span class="p">)</span>
+
+        <span class="c1"># The algorithm should have already fired in 10 datapoints if the</span>
+        <span class="c1"># timeseries dropped off a cliff, these are all zero</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_max_value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c1"># If the lowest is equal to the highest, no drop off cliff</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_min_value</span> <span class="o">==</span> <span class="n">ten_datapoint_max_value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+<span class="c1">#        if ten_datapoint_max_value &lt; 10:</span>
+<span class="c1">#            return False</span>
+
+        <span class="n">ten_datapoint_array_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ten_datapoint_array</span><span class="p">)</span>
+        <span class="n">ten_datapoint_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ten_datapoint_array</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ten_datapoint_average</span> <span class="o">=</span> <span class="n">ten_datapoint_array_sum</span> <span class="o">/</span> <span class="n">ten_datapoint_array_len</span>
+        <span class="n">ten_datapoint_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ten_datapoint_array</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># if a metric goes up and down a lot and falls off a cliff frequently</span>
+        <span class="c1"># it is normal, not anomalous</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">number_of_similar_datapoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ten_datapoint_array</span> <span class="o">&lt;=</span> <span class="n">ten_datapoint_min_value</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c1"># Detect once only - to make this useful and not noisy the first one</span>
+        <span class="c1"># would have already fired and detected the drop</span>
+        <span class="k">if</span> <span class="n">number_of_similar_datapoints</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c1"># evaluate against 20 datapoints as well, reduces chatter on peaky ones</span>
+        <span class="c1"># tested with 60 as well and 20 is sufficient to filter noise</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">twenty_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mi">20</span>
+            <span class="n">twenty_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">twenty_data_point_seconds</span>
+            <span class="n">twenty_datapoint_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">int_end_timestamp</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">twenty_datapoints_ago</span><span class="p">])</span>
+            <span class="n">number_of_similar_datapoints_in_twenty</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">twenty_datapoint_array</span> <span class="o">&lt;=</span> <span class="n">ten_datapoint_min_value</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">number_of_similar_datapoints_in_twenty</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c1"># Check if there is a similar data point in EXPIRATION_TIME</span>
+        <span class="c1"># Disabled as redis alert cache will filter on this</span>
+<span class="c1">#        if metric_expiration_time &gt; twenty_data_point_seconds:</span>
+<span class="c1">#            expiration_time_data_point_seconds = metric_expiration_time</span>
+<span class="c1">#            expiration_time_datapoints_ago = int_end_timestamp - metric_expiration_time</span>
+<span class="c1">#            expiration_time_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] &lt;= int_end_timestamp and x[0] &gt; expiration_time_datapoints_ago])</span>
+<span class="c1">#            number_of_similar_datapoints_in_expiration_time = len(np.where(expiration_time_datapoint_array &lt;= ten_datapoint_min_value))</span>
+<span class="c1">#            if number_of_similar_datapoints_in_expiration_time &gt; 2:</span>
+<span class="c1">#                return False</span>
+
+        <span class="k">if</span> <span class="n">metric_min_average</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">metric_min_average_seconds</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">min_average</span> <span class="o">=</span> <span class="n">metric_min_average</span>
+                <span class="n">min_average_seconds</span> <span class="o">=</span> <span class="n">metric_min_average_seconds</span>
+                <span class="n">min_average_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="n">min_average_seconds</span>
+    <span class="c1">#            min_average_datapoints_ago = int_end_timestamp - (resolution * min_average_seconds)</span>
+                <span class="n">min_average_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">min_average_seconds</span>
+                <span class="n">min_average_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">int_end_timestamp</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_average_datapoints_ago</span><span class="p">])</span>
+                <span class="n">min_average_array_average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">min_average_array</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">min_average_array</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">min_average_array_average</span> <span class="o">&lt;</span> <span class="n">min_average</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">ten_datapoint_max_value</span> <span class="o">&lt;</span> <span class="mi">101</span><span class="p">:</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_max_value</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="n">ten_datapoint_average</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_max_value</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Cannot divide by 0, so set to 0.1 to prevent error</span>
+            <span class="n">ten_datapoint_value</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_value</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ten_datapoint_max_value</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="k">if</span> <span class="n">ten_datapoint_value</span> <span class="o">==</span> <span class="mf">0.1</span> <span class="ow">and</span> <span class="n">ten_datapoint_average</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ten_datapoint_array_sum</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="n">trigger</span> <span class="o">=</span> <span class="mi">7</span>
+
+        <span class="n">ten_datapoint_result</span> <span class="o">=</span> <span class="n">ten_datapoint_average</span> <span class="o">/</span> <span class="n">ten_datapoint_value</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ten_datapoint_result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">trigger</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;detect_drop_off_cliff - </span><span class="si">%s</span><span class="s1">, ten_datapoint_value = </span><span class="si">%s</span><span class="s1">, ten_datapoint_array_sum = </span><span class="si">%s</span><span class="s1">, ten_datapoint_average = </span><span class="si">%s</span><span class="s1">, trigger = </span><span class="si">%s</span><span class="s1">, ten_datapoint_result = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">int_end_timestamp</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">ten_datapoint_value</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">ten_datapoint_array_sum</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">ten_datapoint_average</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">trigger</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ten_datapoint_result</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span>
+        <span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span>
+        <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span>
+        <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">autoaggregate</span><span class="p">,</span> <span class="n">autoaggregate_value</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter timeseries and run selected algorithm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;debug :: assigning in algoritms.py - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+
+    <span class="c1"># Get rid of short series</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: TooShort - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
+
+    <span class="c1"># Get rid of stale series</span>
+    <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">STALE_PERIOD</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Stale - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">Stale</span><span class="p">()</span>
+
+    <span class="c1"># Get rid of boring series</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">MAX_TOLERABLE_BOREDOM</span><span class="p">:]))</span> <span class="o">==</span> <span class="n">BOREDOM_SET_SIZE</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Boring - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">Boring</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">autoaggregate</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: auto aggregating </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">agg_timeseries</span> <span class="o">=</span> <span class="n">autoaggregate_ts</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">autoaggregate_value</span><span class="p">)</span>
+            <span class="n">aggregatation_failed</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;debug :: aggregated_timeseries returned </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">agg_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">aggregatation_failed</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug error - autoaggregate excpection </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error: </span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agg_timeseries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">agg_timeseries</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: TooShort - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;debug :: timeseries too short - </span><span class="si">%s</span><span class="s1"> - timeseries length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+        <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;debug :: anomalous datapoint = </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average_seconds</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_alerters</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;debug :: not anomalous datapoint = </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average_seconds</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_alerters</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Requirements &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="next" title="Getting started" href="getting-started.html"/>
+        <link rel="prev" title="Overview" href="overview.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements-txt"><code class="docutils literal"><span class="pre">requirements.txt</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#recent-changes-in-the-pip-environment">Recent changes in the pip environment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pandas">pandas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#python-2-6">Python-2.6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#redhat-family-6-x">RedHat family 6.x</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Requirements</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/requirements.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<p>The ideal requirements are:</p>
+<ul class="simple">
+<li>Linux (and probably any environment that supports Python virtualenv
+and bash)</li>
+<li>virtualenv</li>
+<li>Python-2.7.11 or Python-2.7.12 (running in an isolated vitualenv)</li>
+<li>Redis</li>
+<li>MySQL or mariadb [optional - required for Panorama]</li>
+<li>A Graphite implementation sending data would help :)</li>
+</ul>
+<div class="section" id="requirements-txt">
+<h2><code class="docutils literal"><span class="pre">requirements.txt</span></code><a class="headerlink" href="#requirements-txt" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">requirements.txt</span></code> file lists the required packages and the last
+verified as working version with Python-2.7 within a virtaulenv.</p>
+<div class="section" id="recent-changes-in-the-pip-environment">
+<h3>Recent changes in the pip environment<a class="headerlink" href="#recent-changes-in-the-pip-environment" title="Permalink to this headline">¶</a></h3>
+<p>The new pip, setuptools, distribute and virtualenv methodology that the
+pypa community has adopted is in a bit of a state of flux in terms of
+the setuptools version and virtualenv implementation of making the
+<code class="docutils literal"><span class="pre">--distribute</span></code> and <code class="docutils literal"><span class="pre">--setuptools</span></code> legacy parameters has caused pip
+8.1.1 and setuptools 20.9.0 and virtualenv 15.0.1 to complain if
+distribute is one of the requirements on packages that pip tries to
+install. However, it is needed for Mirage if you are trying to
+run/upgrade on Python-2.6</p>
+<div class="section" id="pandas">
+<h4>pandas<a class="headerlink" href="#pandas" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal"><span class="pre">PANDAS_VERSION</span></code> variable was added to settings.py to handle
+backwards compatability with any instances of Skyline that are run older
+versions that perhaps cannot upgrade to a later version due to any
+mainstream packaging restrictions. This <code class="docutils literal"><span class="pre">PANDAS_VERSION</span></code> is required
+to run the applicable panda functions dependent on the version that is
+use.</p>
+<ul class="simple">
+<li>pandas 0.17.0 deprecated the pandas.Series.iget in favour of
+<code class="docutils literal"><span class="pre">.iloc[i]</span></code> or <code class="docutils literal"><span class="pre">.iat[i]</span></code></li>
+<li>pandas 0.18.0 introduced a change in the Exponentially-weighted
+moving average function used in a number of algorithms</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.18.0&#39;</span><span class="p">:</span>
+    <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
+</pre></div>
+</div>
+<p>Skyline should be able to run on pandas versions 0.12.0 - 0.18.0 (or
+later)</p>
+</div>
+<div class="section" id="python-2-6">
+<h4>Python-2.6<a class="headerlink" href="#python-2-6" title="Permalink to this headline">¶</a></h4>
+<p>Skyline can still run on Python-2.6. However deploying Skyline on
+Python-2.6 requires jumping through some hoops. This is because of the
+dependencies and pip packages moving a lot. At some point some older pip
+package is not going to be available any longer and it will no longer be
+possible, unless you are packaging the pip packages into your own packages, e.g.
+with fpm or such.</p>
+</div>
+<div class="section" id="redhat-family-6-x">
+<h4>RedHat family 6.x<a class="headerlink" href="#redhat-family-6-x" title="Permalink to this headline">¶</a></h4>
+<p>If you are locked into mainstream versions of things and cannot run
+Skyline in an isolated virtualenv, but have to use the system Python and
+pip. The following pip installs and versions are known to working, with
+a caveat on the scipy needs to be installed via yum NOT pip and you need
+to do the following:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install <span class="nv">numpy</span><span class="o">==</span>1.8.0
+yum install scipy
+pip install --force-reinstall --ignore-installed <span class="nv">numpy</span><span class="o">==</span>1.8.0
+</pre></div>
+</div>
+<p>Known working scipy rpm - scipy-0.7.2-8.el6.x86_64</p>
+<p>pip packages (these are the requirements and their dependencies), it is
+possible that some of these pip packages will no longer exist or may not
+exist in the future, this is documented here for info ONLY.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">argparse</span> <span class="p">(</span><span class="mf">1.2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">backports</span><span class="o">.</span><span class="n">ssl</span><span class="o">-</span><span class="n">match</span><span class="o">-</span><span class="n">hostname</span> <span class="p">(</span><span class="mf">3.4</span><span class="o">.</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">cycler</span> <span class="p">(</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">distribute</span> <span class="p">(</span><span class="mf">0.7</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">Flask</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
+<span class="n">hiredis</span> <span class="p">(</span><span class="mf">0.1</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">iniparse</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">iotop</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Jinja2</span> <span class="p">(</span><span class="mf">2.7</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">lockfile</span> <span class="p">(</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">MarkupSafe</span> <span class="p">(</span><span class="mf">0.23</span><span class="p">)</span>
+<span class="n">matplotlib</span> <span class="p">(</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">mock</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">msgpack</span><span class="o">-</span><span class="n">python</span> <span class="p">(</span><span class="mf">0.4</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">nose</span> <span class="p">(</span><span class="mf">0.10</span><span class="o">.</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">numpy</span> <span class="p">(</span><span class="mf">1.7</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ordereddict</span> <span class="p">(</span><span class="mf">1.2</span><span class="p">)</span>
+<span class="n">pandas</span> <span class="p">(</span><span class="mf">0.12</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">patsy</span> <span class="p">(</span><span class="mf">0.2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pip</span> <span class="p">(</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">pycurl</span> <span class="p">(</span><span class="mf">7.19</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">pygerduty</span> <span class="p">(</span><span class="mf">0.29</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pygpgme</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">pyparsing</span> <span class="p">(</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">python</span><span class="o">-</span><span class="n">daemon</span> <span class="p">(</span><span class="mf">1.6</span><span class="p">)</span>
+<span class="n">python</span><span class="o">-</span><span class="n">dateutil</span> <span class="p">(</span><span class="mf">2.3</span><span class="p">)</span>
+<span class="n">python</span><span class="o">-</span><span class="n">simple</span><span class="o">-</span><span class="n">hipchat</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">pytz</span> <span class="p">(</span><span class="mf">2014.4</span><span class="p">)</span>
+<span class="n">redis</span> <span class="p">(</span><span class="mf">2.7</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">requests</span> <span class="p">(</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">scipy</span> <span class="p">(</span><span class="mf">0.7</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">setuptools</span> <span class="p">(</span><span class="mf">11.3</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">simplejson</span> <span class="p">(</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">six</span> <span class="p">(</span><span class="mf">1.6</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">statsmodels</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">tornado</span> <span class="p">(</span><span class="mf">2.2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">unittest2</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">urlgrabber</span> <span class="p">(</span><span class="mf">3.9</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Werkzeug</span> <span class="p">(</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">yum</span><span class="o">-</span><span class="n">metadata</span><span class="o">-</span><span class="n">parser</span> <span class="p">(</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

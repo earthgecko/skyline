@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>skyline.crucible package &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="up" title="skyline package" href="skyline.html"/>
+        <link rel="next" title="skyline.horizon package" href="skyline.horizon.html"/>
+        <link rel="prev" title="skyline.boundary package" href="skyline.boundary.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="skyline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer.html">skyline.analyzer package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.crucible package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-crucible.agent">skyline.crucible.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-crucible.crucible">skyline.crucible.crucible module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-crucible.crucible_algorithms">skyline.crucible.crucible_algorithms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-crucible">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="skyline.html">skyline package</a> &raquo;</li>
+      
+    <li>skyline.crucible package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/skyline.crucible.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="skyline-crucible-package">
+<h1>skyline.crucible package<a class="headerlink" href="#skyline-crucible-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-crucible.agent">
+<span id="skyline-crucible-agent-module"></span><h2>skyline.crucible.agent module<a class="headerlink" href="#module-crucible.agent" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="crucible.agent.CrucibleAgent">
+<em class="property">class </em><code class="descname">CrucibleAgent</code><a class="reference internal" href="_modules/crucible/agent.html#CrucibleAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.agent.CrucibleAgent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize CrucibleAgent</p>
+<dl class="method">
+<dt id="crucible.agent.CrucibleAgent.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/agent.html#CrucibleAgent.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.agent.CrucibleAgent.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.agent.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/agent.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.agent.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the Crucible agent and ensure all the required directories exist,
+creating the crucible directories if they do not exist</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-crucible.crucible">
+<span id="skyline-crucible-crucible-module"></span><h2>skyline.crucible.crucible module<a class="headerlink" href="#module-crucible.crucible" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="crucible.crucible.Crucible">
+<em class="property">class </em><code class="descname">Crucible</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible.html#Crucible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible.Crucible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<dl class="method">
+<dt id="crucible.crucible.Crucible.check_if_parent_is_alive">
+<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible.html#Crucible.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible.Crucible.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the parent process is alive</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="crucible.crucible.Crucible.spin_process">
+<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>run_timestamp</em>, <em>metric_check_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible.html#Crucible.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible.Crucible.spin_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign a metric for a process to analyze.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> &#8211; python process id</li>
+<li><strong>run_timestamp</strong> &#8211; the epoch timestamp at which this process was called</li>
+<li><strong>metric_check_file</strong> &#8211; full path to the metric check file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">returns True</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="crucible.crucible.Crucible.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible.html#Crucible.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible.Crucible.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the process intializes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-crucible.crucible_algorithms">
+<span id="skyline-crucible-crucible-algorithms-module"></span><h2>skyline.crucible.crucible_algorithms module<a class="headerlink" href="#module-crucible.crucible_algorithms" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="crucible.crucible_algorithms.python_version">
+<code class="descname">python_version</code><em class="property"> = 2</em><a class="headerlink" href="#crucible.crucible_algorithms.python_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is no man&#8217;s land. Do anything you want in here,
+as long as you return a boolean that determines whether the input
+timeseries is anomalous or not.</p>
+<p>To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
+It must be defined required parameters (even if your algorithm/function does not
+need them), as the run_algorithms function passes them to all ALGORITHMS defined
+in settings.ALGORITHMS.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.tail_avg">
+<code class="descname">tail_avg</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#tail_avg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.tail_avg" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a utility function used to calculate the average of the last three
+datapoints in the series as a measure, instead of just the last datapoint.
+It reduces noise, but it also reduces sensitivity and increases the delay
+to detection.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.median_absolute_deviation">
+<code class="descname">median_absolute_deviation</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#median_absolute_deviation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.median_absolute_deviation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the deviation of its latest datapoint with
+respect to the median is X times larger than the median of deviations.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.grubbs">
+<code class="descname">grubbs</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#grubbs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.grubbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the Z score is greater than the Grubb&#8217;s score.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.first_hour_average">
+<code class="descname">first_hour_average</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#first_hour_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.first_hour_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcuate the simple average over 60 datapoints (maybe one hour),
+FULL_DURATION seconds ago.
+A timeseries is anomalous if the average of the last three datapoints
+are outside of three standard deviations of this value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.stddev_from_average">
+<code class="descname">stddev_from_average</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#stddev_from_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.stddev_from_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the absolute value of the average of the latest
+three datapoint minus the moving average is greater than one standard
+deviation of the average. This does not exponentially weight the MA and so
+is better for detecting anomalies with respect to the entire series.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.stddev_from_moving_average">
+<code class="descname">stddev_from_moving_average</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#stddev_from_moving_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.stddev_from_moving_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the absolute value of the average of the latest
+three datapoint minus the moving average is greater than three standard
+deviations of the moving average. This is better for finding anomalies with
+respect to the short term trends.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.mean_subtraction_cumulation">
+<code class="descname">mean_subtraction_cumulation</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#mean_subtraction_cumulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.mean_subtraction_cumulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the value of the next datapoint in the
+series is farther than three standard deviations out in cumulative terms
+after subtracting the mean from each data point.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.least_squares">
+<code class="descname">least_squares</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#least_squares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.least_squares" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the average of the last three datapoints
+on a projected least squares model is greater than three sigma.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.histogram_bins">
+<code class="descname">histogram_bins</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#histogram_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.histogram_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the average of the last three datapoints falls
+into a histogram bin with less than 20 other datapoints (you&#8217;ll need to tweak
+that number depending on your data)</p>
+<p>Returns: the size of the bin which contains the tail_avg. Smaller bin size
+means more anomalous.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.ks_test">
+<code class="descname">ks_test</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#ks_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.ks_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
+that data distribution for last 10 datapoints (might be 10 minutes) is
+different from the last 60 datapoints (might be an hour).
+It produces false positives on non-stationary series so Augmented
+Dickey-Fuller test applied to check for stationarity.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.detect_drop_off_cliff">
+<code class="descname">detect_drop_off_cliff</code><span class="sig-paren">(</span><em>timeseries</em>, <em>end_timestamp</em>, <em>full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#detect_drop_off_cliff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.detect_drop_off_cliff" title="Permalink to this definition">¶</a></dt>
+<dd><p>A timeseries is anomalous if the average of the last ten datapoints is &lt;trigger&gt;
+times greater than the last data point.  This algorithm is most suited to
+timeseries with most datapoints being &gt; 100 (e.g high rate).  The arbitrary
+&lt;trigger&gt; values become more noisy with lower value datapoints, but it still
+matches drops off cliffs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="crucible.crucible_algorithms.run_algorithms">
+<code class="descname">run_algorithms</code><span class="sig-paren">(</span><em>timeseries</em>, <em>timeseries_name</em>, <em>end_timestamp</em>, <em>full_duration</em>, <em>timeseries_file</em>, <em>skyline_app</em>, <em>algorithms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#run_algorithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.run_algorithms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iteratively run algorithms.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-crucible">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-crucible" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="skyline.horizon.html" class="btn btn-neutral float-right" title="skyline.horizon package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="skyline.boundary.html" class="btn btn-neutral" title="skyline.boundary package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

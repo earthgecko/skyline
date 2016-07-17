@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Webapp &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="next" title="Redis integration" href="redis-integration.html"/>
+        <link rel="prev" title="Panorama" href="panorama.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Webapp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#deploying-the-webapp">Deploying the Webapp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-a-production-grade-http-application">Using a production grade HTTP application</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#production-infrastructure">Production infrastructure</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#apache-and-gunicorn">Apache and gunicorn</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#securing-the-webapp">Securing the Webapp</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#firewall-rules">Firewall rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-security">Basic security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ip-restricted-access">IP restricted access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psuedo-basic-http-auth">psuedo basic HTTP auth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#restricted-by-default">Restricted by default</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#logging">Logging</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#panorama-web-ui">Panorama web UI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-function">Basic function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#closest-approximations">Closest approximations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rebrow"><span class="red">re</span><span class="brow">brow</span></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Basic function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Webapp</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/webapp.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="webapp">
+<h1>Webapp<a class="headerlink" href="#webapp" title="Permalink to this headline">¶</a></h1>
+<p>The Webapp service is a simple gunicorn/Flask based frontend that provides a web
+UI to:</p>
+<ul class="simple">
+<li>Visualise the latest anomalies that have been triggered.</li>
+<li>Visualise historic anomalies that have been recorded by Panorama.</li>
+<li>An api to query Redis for a metric timeseries which returns the timeseries in
+json e.g. <code class="docutils literal"><span class="pre">/api?metric=skyline.analyzer.hostname.total_metrics</span></code></li>
+<li>An api to query Graphite for a metric timeseries which returns the timeseries in
+json that takes the following parameters:<ul>
+<li><code class="docutils literal"><span class="pre">graphite_metric</span></code> - metric name</li>
+<li><code class="docutils literal"><span class="pre">from_timestamp</span></code> - unix timestamp</li>
+<li><code class="docutils literal"><span class="pre">until_timestamp</span></code> - unix timestamp</li>
+<li>e.g. <code class="docutils literal"><span class="pre">/api?graphite_metric=skyline.analyzer.hostname.total_metrics&amp;from_timestamp=1370975198&amp;until_timestamp=1403204156</span></code></li>
+</ul>
+</li>
+<li>Publish the Skyline docs.</li>
+<li>Browse the Redis DB with a port of Marian Steinbach&#8217;s excellent <span class="red">re</span><span class="brow">brow</span>
+<a class="reference external" href="https://github.com/marians/rebrow">https://github.com/marians/rebrow</a></li>
+</ul>
+<div class="section" id="deploying-the-webapp">
+<h2>Deploying the Webapp<a class="headerlink" href="#deploying-the-webapp" title="Permalink to this headline">¶</a></h2>
+<p>Originally the Webapp was deployed behind the simple Flask development server,
+however for numerous reasons, this is less than ideal.  Although the Webapp can
+still be run with Flask only, the recommended way to run the Webapp is via
+gunicorn, which can be HTTP proxied by Apache or nginx, etc.  The gunicorn
+Webapp can be exposed just like the Flask Webapp, but it is recommended to run
+it HTTP proxied.</p>
+<div class="section" id="using-a-production-grade-http-application">
+<h3>Using a production grade HTTP application<a class="headerlink" href="#using-a-production-grade-http-application" title="Permalink to this headline">¶</a></h3>
+<p>It must be noted and stated that you <strong>should</strong> consider running the Skyline
+Webapp behind a production grade HTTP application, regardless of the
+implemented basic security measures.  Something like Apache or nginx serving the
+Webapp via gunicorn.</p>
+<p>This may seem like overkill, however there are a number of valid reasons for
+this.</p>
+<div class="section" id="production-infrastructure">
+<h4>Production infrastructure<a class="headerlink" href="#production-infrastructure" title="Permalink to this headline">¶</a></h4>
+<p>It is highly probable that Skyline will often be run on cloud based
+infrastructure which is public and should therefore really be considered
+production.</p>
+<p>Flask has a Deploying Options sections that covers running Flask apps in
+production environments.  See <a class="reference external" href="http://flask.pocoo.org/docs/0.11/deploying/">http://flask.pocoo.org/docs/0.11/deploying/</a></p>
+<p>In addition to that, considering that the Webapp now has MySQL in the mix, this
+element adds further reason to properly secure the environment.</p>
+</div>
+</div>
+<div class="section" id="apache-and-gunicorn">
+<h3>Apache and gunicorn<a class="headerlink" href="#apache-and-gunicorn" title="Permalink to this headline">¶</a></h3>
+<p>Although there are a number of options to run a production grade wsgi frontend,
+the example here will document serving gunicorn via Apache reverse proxy with
+authentication.  Although Apache mod_wsgi may seem like the natural fit here, in
+terms of virtualenv and Python <code class="docutils literal"><span class="pre">make_altinstall</span></code>, gunicorn has much less
+external dependencies.  gunicorn can be easily installed and run in any
+virtualenv, therefore it keeps it within the Skyline Python environment, rather
+than offloading very complex Python and mod_wsgi compiles to the user,
+orchestration and package management.</p>
+<p>Apache is a common enough pattern and gunicorn can be handled within the Skyline
+package and requirements.txt</p>
+<p>See <code class="docutils literal"><span class="pre">etc/skyline.httpd.conf.d.example</span></code> for an example of an Apache conf.d
+configuration file to serve the Webapp via gunicorn and reverse proxy on port
+8080 with basic HTTP authentication and restricted IP access.  Note that your
+username and password must match in both the Apache htpasswd and the
+<a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a>/<a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a>
+contexts as Apache will authenticate the user and forward on the authentication
+details to gunicorn for the Webapp to also authenticate the user.
+Authentication is enabled by default in <code class="docutils literal"><span class="pre">settings.py</span></code>.</p>
+<p>Feel free to use nginx, lighttpd, et al.</p>
+</div>
+</div>
+<div class="section" id="securing-the-webapp">
+<h2>Securing the Webapp<a class="headerlink" href="#securing-the-webapp" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="firewall-rules">
+<h3>Firewall rules<a class="headerlink" href="#firewall-rules" title="Permalink to this headline">¶</a></h3>
+<p>The Webapp <strong>should</strong> be secured with proper firewall rules that restrict access
+to the <a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_IP</span></code></a> and <a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_PORT</span></code></a> (and/or just
+the reverse proxy port for gunicorn if being used) from trusted IP
+addresses only.</p>
+</div>
+<div class="section" id="basic-security">
+<h3>Basic security<a class="headerlink" href="#basic-security" title="Permalink to this headline">¶</a></h3>
+<p>There are some simple and basic security measures implemented with the Webapp.</p>
+</div>
+<div class="section" id="ip-restricted-access">
+<h3>IP restricted access<a class="headerlink" href="#ip-restricted-access" title="Permalink to this headline">¶</a></h3>
+<p>The default <a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a> only allows from 127.0.0.1, add
+your desired allowed IPs.</p>
+</div>
+<div class="section" id="psuedo-basic-http-auth">
+<h3>psuedo basic HTTP auth<a class="headerlink" href="#psuedo-basic-http-auth" title="Permalink to this headline">¶</a></h3>
+<p>There is single user that can access the web UI all access must be authenticated.</p>
+</div>
+<div class="section" id="restricted-by-default">
+<h3>Restricted by default<a class="headerlink" href="#restricted-by-default" title="Permalink to this headline">¶</a></h3>
+<p>These simple measures are an attempt to ensure that the Skyline web UI is not
+totally open by default, but rather totally restricted by default.  This adds a
+bit of defense in depth and hopefully will mitigate against unauthorized access
+in the event that some day, someone may have their firewall misconfigured in
+some way, either through error or accident.</p>
+<p>These basic restrictions <strong>DO NOT</strong> replace the need for proper firewall rules
+or a production grade HTTP application.</p>
+<div class="section" id="logging">
+<h4>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h4>
+<p>Flask&#8217;s development server is based on werkzeug, whose WSGIRequestHandler is,
+in turn, based in the BaseHTTPServer from the standard lib.  This means that
+WSGIRequestHandler overrides the logging methods, log_request, log_error and
+log_message, to use it&#8217;s own logging.Logger.  So there is no access logging in
+Skyline Webapp log.  It is possible to hack this around a bit, but this means
+application error logging would get shifted from the Webapp log to the access
+log, which is not ideal.</p>
+</div>
+</div>
+</div>
+<div class="section" id="panorama-web-ui">
+<h2>Panorama web UI<a class="headerlink" href="#panorama-web-ui" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic-function">
+<h3>Basic function<a class="headerlink" href="#basic-function" title="Permalink to this headline">¶</a></h3>
+<p>The Panorama web UI allows you to search the anomalies recorded by Panorama in
+the database.  It currently allows you to search through the anomaly records by
+various filters, which are converted into MySQL <code class="docutils literal"><span class="pre">SELECT</span></code> queries which
+return the details regarding the anomalies found from the search criteria.  The
+Webapp then returns these to the browser and the client side javascript then
+passes the relevant metric details to the Webapp api endpoint to surface the
+metric timeseries from Graphite and the api returns the timeseries json to the
+browser to graph the timeseries.</p>
+</div>
+<div class="section" id="closest-approximations">
+<h3>Closest approximations<a class="headerlink" href="#closest-approximations" title="Permalink to this headline">¶</a></h3>
+<p>The Panorama anomaly records only hold the details regarding the anomaly, not
+the data.  The Panorama UI takes the returned anomalies from a search and
+retrieves the timeseries for the time period relevant to the anomaly from
+Graphite on demand.  The UI graphs the timeseries to visualise the context of
+the anomaly, as best possible.  Due to the fact that Panorama is storing anomaly
+details in real time and the Panorama web UI is surfacing timeseries
+historically, any Graphite aggregations in timeseries can result in the specific
+anomalous datapoint not being present in the related timeseries.  In these
+instances the Panorama graphs will indicate this and visually present a closest
+approximation of where the anomalous line would be, using a thicker, orange
+horizontal line as the indicator, rather than the thinner, normal red horizontal
+line.</p>
+<img alt="_images/panorama.closest.approximation.aggregrated.png" src="_images/panorama.closest.approximation.aggregrated.png" />
+</div>
+</div>
+<div class="section" id="rebrow">
+<h2><span class="red">re</span><span class="brow">brow</span><a class="headerlink" href="#rebrow" title="Permalink to this headline">¶</a></h2>
+<p>Skyline uses a modified port of Marian Steinbach&#8217;s excellent
+<span class="red">re</span><span class="brow">brow</span> Flask Redis browser - <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a>.  A modified port was used
+for a number of reasons:</p>
+<ul class="simple">
+<li><span class="red">re</span><span class="brow">brow</span> does not handle msg-pack encoded keys.</li>
+<li>The pubsub functionality was unneeded.</li>
+<li>Serving it in an iframe was bothersome.</li>
+<li>Having an additional dependency, app and service for another Flask app seemed
+to be a bit of overkill.</li>
+<li>Having it native in the Skyline Webapp UI was neater and prettier.</li>
+</ul>
+<p>Please do clone <a class="reference external" href="https://github.com/marians/rebrow">https://github.com/marians/rebrow</a>, just so Marian gets some
+clones.</p>
+<p>With the addition of a number of Panorama and other app related keys,
+<span class="red">re</span><span class="brow">brow</span> adds a window into Redis, to allow for the verification of
+key creation and providing a view of <code class="docutils literal"><span class="pre">*last_alert.*</span></code> and
+<code class="docutils literal"><span class="pre">panorama.mysql_ids.*</span></code> keys.</p>
+<div class="section" id="id1">
+<h3>Basic function<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>The Panorama web UI allows you to search the anomalies recorded by Panorama in
+the database.  It currently allows you to search through the anomaly records by
+various filters, which are converted into MySQL <code class="docutils literal"><span class="pre">SELECT</span></code> queries which
+return the details regarding the anomalies found from the search criteria.  The
+Webapp then returns these to the browser and the client side javascript then
+passes the relevant metric details to the Webapp api endpoint to surface the
+metric timeseries from Graphite and the api returns the timeseries json to the
+browser to graph the timeseries.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="redis-integration.html" class="btn btn-neutral float-right" title="Redis integration" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="panorama.html" class="btn btn-neutral" title="Panorama" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

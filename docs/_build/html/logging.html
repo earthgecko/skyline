@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Logging &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="next" title="Tuning tips" href="tuning-tips.html"/>
+        <link rel="prev" title="Skyline and friends" href="skyline-and-friends.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-modified-logging-methodology">A modified logging methodology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-app-logs">Skyline app logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-app-log-preservation">Skyline app log preservation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#syslog">syslog</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Logging</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/logging.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="logging">
+<span id="logging"></span><h1>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h1>
+<p>A few considerations to note about logging.</p>
+<ol class="simple">
+<li>Logging Python multiprocessing threads is not easy.</li>
+<li>Rotating Python TimedRotatingFileHandler logs in not easy.</li>
+<li>logrotate on Python multiprocessing threads is not easy.</li>
+<li>Logging something that eats through as much data and does as many things as
+Skyline does is not easy.</li>
+</ol>
+<p>Skyline logging can be viewed as having 2 contexts:</p>
+<ol class="simple">
+<li>Logging the Skyline application operations - Skyline app log</li>
+<li>Logging the details of anomalous timeseries - syslog</li>
+</ol>
+<p>Any long time users of Skyline will have undoubtedly run into a logging pain
+with Skyline at  some point.  Whether that be in terms of logs being overwritten
+or no errors being logged but a Skyline module broken or hung.
+Although logging is very mature, especially in an ecosystem as mature as Python
+and one may be led to believe it should be easy, however in reality it is
+non-trivial.</p>
+<div class="section" id="a-modified-logging-methodology">
+<span id="a-modified-logging-methodology"></span><h2>A modified logging methodology<a class="headerlink" href="#a-modified-logging-methodology" title="Permalink to this headline">¶</a></h2>
+<p>The logging implementation in Skyline is quite complicated due to the
+abovementioned reasons.  It is important to note that some optimisations have
+had to be added to the logging process which could be described as unintuitive AND
+simply as un-log like.</p>
+<p>Therefore it is important to explain why it is necessary to use a modified
+logging methodology and so that the user understands conceptually what is being
+logged and what is not being logged.</p>
+<p>In terms of Analyzer if errors are encountered in any algorithms, we sample the
+errors.  This achieves a balance between reporting errors useful and not using
+lots of I/O and disk space if something goes wrong.  Skyline has the potential
+to do a runaway log, but not reporting errors is not useful when you are trying
+to pinpoint what is wrong.</p>
+<p>However, it is right that algorithms should just True or False and not impact on
+the performance or operation of Skyline in anyway.</p>
+<p>This achieves a balance.</p>
+</div>
+<div class="section" id="skyline-app-logs">
+<span id="skyline-app-logs"></span><h2>Skyline app logs<a class="headerlink" href="#skyline-app-logs" title="Permalink to this headline">¶</a></h2>
+<p>Each Skyline app has its own log.  These logs are important from a Skyline
+perspective in terms of monitoring the Skyline processes.
+See <a class="reference external" href="(monitoring-skyline.html)">Monitoring Skyline</a></p>
+<p>It is recommended to NOT stream the Skyline app logs through any logging
+pipeline e.g. rsyslog, logstash, elasticsearch, etc.  The syslog alert trigger
+was added for this purpose.  If you wish to parse and rate anomalies do so via
+syslog (see below).</p>
+<p>Log rotation is handled by the Python TimedRotatingFileHandler and by default
+keeps the 5 last logs:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">TimedRotatingFileHandler</span><span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="s1">&#39;.log&#39;</span><span class="p">,</span>
+            <span class="n">when</span><span class="o">=</span><span class="s2">&quot;midnight&quot;</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">backupCount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The Skyline app logs and the rotation is relatively cheap on disk space even on
+production machines handling 10s of 1000s of metrics each.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">===============================================================</span>
+<span class="n">HOST</span><span class="p">:</span><span class="n">skyline</span><span class="o">-</span><span class="n">prod</span><span class="o">-</span><span class="mi">4</span><span class="o">-</span><span class="mi">96</span><span class="n">g</span><span class="o">-</span><span class="n">luk1</span> <span class="n">EXITCODE</span><span class="p">:</span><span class="mi">0</span> <span class="n">STDOUT</span><span class="p">:</span>
+<span class="o">===============================================================</span>
+<span class="mi">38</span><span class="n">M</span>     <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
+<span class="o">===============================================================</span>
+<span class="o">===============================================================</span>
+<span class="n">HOST</span><span class="p">:</span><span class="n">skyline</span><span class="o">-</span><span class="n">prod</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="mi">40</span><span class="n">g</span><span class="o">-</span><span class="n">ruk2</span> <span class="n">EXITCODE</span><span class="p">:</span><span class="mi">0</span> <span class="n">STDOUT</span><span class="p">:</span>
+<span class="o">===============================================================</span>
+<span class="mi">22</span><span class="n">M</span>     <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
+<span class="o">===============================================================</span>
+<span class="o">===============================================================</span>
+<span class="n">HOST</span><span class="p">:</span><span class="n">skyline</span><span class="o">-</span><span class="n">prod</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="mi">96</span><span class="n">g</span><span class="o">-</span><span class="n">luk1</span> <span class="n">EXITCODE</span><span class="p">:</span><span class="mi">0</span> <span class="n">STDOUT</span><span class="p">:</span>
+<span class="o">===============================================================</span>
+<span class="mi">52</span><span class="n">M</span>     <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
+<span class="o">===============================================================</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="skyline-app-log-preservation">
+<span id="skyline-app-log-preservation"></span><h2>Skyline app log preservation<a class="headerlink" href="#skyline-app-log-preservation" title="Permalink to this headline">¶</a></h2>
+<p>It should be noted that the bin/ bash scripts are used to ensure logs are
+preserved and not overwritten by any Python multiprocessing processes or the
+lack of <code class="docutils literal"><span class="pre">mode='a'</span></code> in the Python TimedRotatingFileHandler.  It is for this
+reason that the Skyline app logs should not be streamed through a logging
+pipeline as logstash, et al as this in a logging pipeline with say rsyslog can
+result in the log being pushed multiple times due to the following scenario:</p>
+<ul class="simple">
+<li>Skyline app bin is called to start</li>
+<li>Skyline app bin makes a last log from the Skyline app log</li>
+<li>Skyline Python app is started, creates log with <code class="docutils literal"><span class="pre">mode=w</span></code></li>
+<li>Skyline Python app pauses and the app bin script contenates last log and new
+log file</li>
+<li>Skyline bin script exits and Skyline Python app continues writing to the log</li>
+</ul>
+<p>In terms of rsyslog pipelining this would result in the log being fully
+submitted again on every restart.</p>
+</div>
+<div class="section" id="syslog">
+<span id="syslog"></span><h2>syslog<a class="headerlink" href="#syslog" title="Permalink to this headline">¶</a></h2>
+<p>With this in mind a syslog alert trigger was added to Skyline apps to handle the
+logging the details of anomalous timeseries to syslog,  groking the syslog for
+Skyline logs and rates etc is the way to go.  Bearing in mind that only
+anomalies from metrics with set alert tuples are logged.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tuning-tips.html" class="btn btn-neutral float-right" title="Tuning tips" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="skyline-and-friends.html" class="btn btn-neutral" title="Skyline and friends" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<!-- BEGIN /now block -->
+  <script src="/static/js/panorama.js"></script>
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/panorama">Panorama</a></li>
+  		<li class="active"><span class="logo"><span class="sky">search</span> <span class="re">anomalies</span></li>
+    </div>
+	</ol>
+
+        <div class="container main_container"></p>
+          <div class="container search_container"></p>
+            <h4>Anomaly Search</h4>
+            <form action="panorama">
+              <label>metric:</label><input type="text" name="metric" value="all" /><br>
+              <label>Anomaly count by metric:</label>
+              <select name="count_by_metric">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)<br><br>
+              <label>metric_like:</label><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.%)<br>
+              <label>from_timestamp:</label><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)<br>
+              <label>until_timestamp:</label><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)<br>
+{% if app_list %}
+              <label>app:</label>
+              <select name="app">
+                <option value="all">all</option>
+          {% for item in app_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select>
+              <br>
+{% endif %}
+{% if source_list %}
+              <label>source:</label>
+              <select name="source">
+                <option value="all">all</option>
+          {% for item in source_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select>
+              <br>
+{% endif %}
+{% if algorithm_list %}
+              <label>algorithm:</label>
+              <select name="algorithm">
+                <option value="all">all</option>
+          {% for item in algorithm_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select> (currently DISABLED as it is difficult to match id in the triggered_algorithms csv list)
+              <br>
+{% endif %}
+{% if host_list %}
+              <label>host:</label>
+              <select name="host">
+                <option value="all">all</option>
+          {% for item in host_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select>
+              <br>
+{% endif %}
+              <label>limit:</label><input type="number" name="limit" min="1" max="100" value="10" /><br>
+              <br>
+              <label>order:</label>
+              <select name="order">
+                <option value="DESC">DESC</option>
+                <option value="ASC">ASC</option>
+              </select>
+              <br>
+              <input type="submit" value="Search">
+            </form>
+          </div>
+          <p>
+{% if anomalies %}
+          <div class="container search_results_container"></p>
+            <table>
+                <caption><b>{{ results }}</b></caption>
+                <tr>
+  {% if count_request == 'true' %}
+                    <th>anomaly count</th>
+                    <th>Panorama metric link</th>
+  {% else %}
+                    <th>anomaly id</th>
+                    <th>metric</th>
+                    <th>datapoint</th>
+                    <th>timestamp</th>
+                    <th>full_duration</th>
+                    <th>created</th>
+  {% endif %}
+                </tr>
+            {% for item in anomalies %}
+                <tr>
+                    <td> {{ item[0] }} </td>
+  {% if count_request == 'true' %}
+                    <td onclick="window.location='?metric={{ item[1] }}&limit={{ item[2] }}&order=DESC'">
+                      <a href="?metric={{ item[1] }}&limit={{ item[2] }}&order=DESC">{{ item[1] }}</a>
+                    </td>
+  {% else %}
+                    <td> {{ item[1] }} </td>
+                    <td> {{ item[2] }} </td>
+                    <td> {{ item[3] }} </td>
+                    <td> {{ item[4] }} </td>
+                    <td> {{ item[5] }} </td>
+  {% endif %}
+                </tr>
+          {% endfor %}
+          </table>
+        </div>
+          <p>
+  {% if count_request != 'true' %}
+          <div class="container panorama_graph_container">
+            <div id="graph_title_container">
+                <span id="graph_title">anomaly id: </span>
+            </div>
+            <div id="graph_subtitle_container">
+                <span id="graph_subtitle">metric: </span>
+            </div>
+
+            <div id="graph_subtitle_anomalous_datapoint_container">
+                <span id="graph_subtitle_anomalous_datapoint">anomalous data point: </span>
+            </div>
+            <div id="graph_subtitle_full_duration_container">
+                <br><span id="graph_subtitle_full_duration">full duration: </span>
+            </div>
+            <div id="graph_subtitle_created_date_container">
+                <br><span id="graph_subtitle_created_date">created date: </span>
+            </div>
+
+<!--            <div id="graph_container">-->
+            <div id="p_graph_container">
+                <div id="big_label"></div>
+                <div id="graph"></div>
+                <div id="time_shift">
+                    <span id="time_shift">time shifted (hours): </span>
+                </div>
+                <div class="duration">Timeseries at full duration (time shifted) for the anomalous datapoint</div>
+            </div>
+            <br>
+            <span class="logo"><span class="sky">Found</span> <span class="re">anomalies</span></span></span>
+            <div id="metrics_main">
+<!--
+                <div id="legend">
+                    <span id="legend_name">anomaly_id graphite_link | metric | anomaly_id</span>
+                    <span id="legend_coefficient">Original, unaggregated anomalous datapoint</span>
+                </div>
+-->
+                <div class="col-xs-6 col-md-4">anomaly_id graphite_link</div>
+                <div class="col-xs-6 col-md-4" align="left">metric</div>
+                <div class="col-xs-6 col-md-4" align="right">Original, unaggregated anomalous datapoint</div>
+                <div id="metrics_listings"></div>
+            </div>
+          </div>
+  {% endif %}
+{% endif %}
+          <br>
+      </div>
+      </div>
+
+<!-- END /panorama block -->
+{% endblock %}

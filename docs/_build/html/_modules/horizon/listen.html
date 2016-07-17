@@ -1,0 +1,525 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>horizon.listen &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>horizon.listen</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for horizon.listen</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Full</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Full</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">Struct</span><span class="p">,</span> <span class="n">unpack</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">unpackb</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
+
+<span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;horizon&#39;</span>
+<span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;listen&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">parent_skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">child_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">parent_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+    <span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">,</span> <span class="n">child_skyline_app</span><span class="p">)</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># SafeUnpickler taken from Carbon: https://github.com/graphite-project/carbon/blob/master/lib/carbon/util.py</span>
+<span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">StringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">io</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
+    <span class="n">USING_CPICKLE</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+    <span class="n">USING_CPICKLE</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="c1"># This whole song &amp; dance is due to pickle being insecure</span>
+<span class="c1"># yet performance critical for carbon. We leave the insecure</span>
+<span class="c1"># mode (which is faster) as an option (USE_INSECURE_UNPICKLER).</span>
+<span class="c1"># The SafeUnpickler classes were largely derived from</span>
+<span class="c1"># http://nadiana.com/python-pickle-insecure</span>
+<span class="k">if</span> <span class="n">USING_CPICKLE</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">SafeUnpickler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="n">PICKLE_SAFE</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;copy_reg&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;_reconstructor&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;__builtin__&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;object&#39;</span><span class="p">]),</span>
+        <span class="p">}</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">find_class</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">module</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">PICKLE_SAFE</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">(</span><span class="s1">&#39;Attempting to unpickle unsafe module </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">module</span><span class="p">)</span>
+            <span class="nb">__import__</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">PICKLE_SAFE</span><span class="p">[</span><span class="n">module</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">(</span><span class="s1">&#39;Attempting to unpickle unsafe class </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="nd">@classmethod</span>
+        <span class="k">def</span> <span class="nf">loads</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">pickle_string</span><span class="p">):</span>
+            <span class="n">pickle_obj</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">Unpickler</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">pickle_string</span><span class="p">))</span>
+            <span class="n">pickle_obj</span><span class="o">.</span><span class="n">find_global</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">find_class</span>
+            <span class="k">return</span> <span class="n">pickle_obj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+<span class="k">else</span><span class="p">:</span>
+<div class="viewcode-block" id="SafeUnpickler"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler">[docs]</a>    <span class="k">class</span> <span class="nc">SafeUnpickler</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">Unpickler</span><span class="p">):</span>
+        <span class="n">PICKLE_SAFE</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;copy_reg&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;_reconstructor&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;__builtin__&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;object&#39;</span><span class="p">]),</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="SafeUnpickler.find_class"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler.find_class">[docs]</a>        <span class="k">def</span> <span class="nf">find_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">module</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PICKLE_SAFE</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">(</span><span class="s1">&#39;Attempting to unpickle unsafe module </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">module</span><span class="p">)</span>
+            <span class="nb">__import__</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PICKLE_SAFE</span><span class="p">[</span><span class="n">module</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">(</span><span class="s1">&#39;Attempting to unpickle unsafe class </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+        <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="SafeUnpickler.loads"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.SafeUnpickler.loads">[docs]</a>        <span class="k">def</span> <span class="nf">loads</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">pickle_string</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">pickle_string</span><span class="p">))</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div></div>
+<span class="c1"># //SafeUnpickler</span>
+
+
+<div class="viewcode-block" id="Listen"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen">[docs]</a><span class="k">class</span> <span class="nc">Listen</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The listener is responsible for listening on a port.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;pickle&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Listen</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">HORIZON_IP</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="c1"># Default for backwards compatibility</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+
+        <span class="c1"># Use the safe unpickler that comes with carbon rather than standard python pickle/cpickle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unpickler</span> <span class="o">=</span> <span class="n">SafeUnpickler</span>
+
+<div class="viewcode-block" id="Listen.gen_unpickle"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.gen_unpickle">[docs]</a>    <span class="k">def</span> <span class="nf">gen_unpickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a pickle from a stream</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bunch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpickler</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">bunch</span>
+        <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
+            <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Listen.read_all"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.read_all">[docs]</a>    <span class="k">def</span> <span class="nf">read_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sock</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read n bytes from a stream</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Break the loop when connection closes. #8 @earthgecko</span>
+            <span class="c1"># https://github.com/earthgecko/skyline/pull/8/files</span>
+            <span class="c1"># @earthgecko merged 1 commit into earthgecko:master from</span>
+            <span class="c1"># mlowicki:fix_infinite_loop on 16 Mar 2015</span>
+            <span class="c1"># Break the loop when connection closes. #115 @etsy</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">sock</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">n</span> <span class="o">-=</span> <span class="n">count</span>
+            <span class="n">data</span> <span class="o">+=</span> <span class="n">chunk</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="Listen.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Listen.listen_pickle"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.listen_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">listen_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Listen for pickles over tcp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Set up the TCP listening socket</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: listening over tcp for pickles on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+
+                <span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: connection from </span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+
+                <span class="n">chunk</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">length</span> <span class="o">=</span> <span class="n">Struct</span><span class="p">(</span><span class="s1">&#39;!I&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_all</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+                        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_all</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">length</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                        <span class="c1"># Iterate and chunk each individual datapoint</span>
+                        <span class="k">for</span> <span class="n">bunch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_unpickle</span><span class="p">(</span><span class="n">body</span><span class="p">):</span>
+                            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">bunch</span><span class="p">:</span>
+                                <span class="n">chunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+                                <span class="c1"># Queue the chunk and empty the variable</span>
+                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">:</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chunk</span><span class="p">),</span> <span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                                        <span class="n">chunk</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+                                    <span class="c1"># Drop chunk if queue is full</span>
+                                    <span class="k">except</span> <span class="n">Full</span><span class="p">:</span>
+                                        <span class="n">chunks_dropped</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: pickle queue is full, dropping </span><span class="si">%s</span><span class="s1"> datapoints&#39;</span>
+                                            <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">chunks_dropped</span><span class="p">))</span>
+<span class="c1">#                                        self.send_graphite_metric(</span>
+<span class="c1">#                                            &#39;skyline.horizon.&#39; + SERVER_METRIC_PATH + &#39;pickle_chunks_dropped&#39;,</span>
+<span class="c1">#                                            chunks_dropped)</span>
+                                        <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.pickle_chunks_dropped&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                                        <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">chunks_dropped</span><span class="p">)</span>
+                                        <span class="n">chunk</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: incoming pickle connection dropped, attempting to reconnect&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                        <span class="k">break</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: can not connect to socket: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                <span class="k">break</span></div>
+
+<div class="viewcode-block" id="Listen.listen_udp"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.listen_udp">[docs]</a>    <span class="k">def</span> <span class="nf">listen_udp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Listen over udp for MessagePack strings</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_DGRAM</span><span class="p">)</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: listening over udp for messagepack on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">))</span>
+
+                <span class="n">chunk</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
+                    <span class="n">data</span><span class="p">,</span> <span class="n">addr</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">recvfrom</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="n">unpackb</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">chunk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+                    <span class="c1"># Queue the chunk and empty the variable</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">CHUNK_SIZE</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chunk</span><span class="p">),</span> <span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                            <span class="n">chunk</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+                        <span class="c1"># Drop chunk if queue is full</span>
+                        <span class="k">except</span> <span class="n">Full</span><span class="p">:</span>
+                            <span class="n">chunks_dropped</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: UDP queue is full, dropping </span><span class="si">%s</span><span class="s1"> datapoints&#39;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">chunks_dropped</span><span class="p">))</span>
+                            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.udp_chunks_dropped&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                            <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">chunks_dropped</span><span class="p">)</span>
+                            <span class="n">chunk</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: cannot connect to socket: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                <span class="k">break</span></div>
+
+<div class="viewcode-block" id="Listen.run"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.listen.Listen.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when process intializes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: started listener&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;pickle&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">listen_pickle</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;udp&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">listen_udp</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: unknown listener format&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

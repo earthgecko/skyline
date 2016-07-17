@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="/static/images/favicon.ico" rel="icon" type="image/x-icon" />
+  </head>
+    <body>
+        <title>Skyline</title>
+        <script src="/static/js/mousetrap.min.js"></script>
+        <script src="/static/js/jquery.min.js"></script>
+
+        <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/static/css/skyline.css">
+
+        <div id="navbar">
+            <div class='container'>
+                <a href='/' id="logo" class='brand' href='/'>Skyline &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                <a href='/' id="menu_item" href='/'> | now</a>
+                <a href='/panorama' id="menu_item" href='/panorama'> | panorama</a>
+                <a href='/docs' id="menu_item" href='/docs'> | docs</a>
+                <a href='/app_settings' id="menu_item" href='/app_settings'> | app_settings</a>
+                <a href='/api' id="menu_item" href='/api'> | api</a>
+{% if version %}
+                <div align="right">
+                <a href='/version' id="version" href='/version'>version :: {{ version }}</a>
+                </div>
+{% endif %}
+            </div>
+        </div>
+{% if message %}
+        <div class="container main_container">
+            <div id="title_container">
+                <span id="graph_title">uh oh there is a problem...</span><br><br>
+                <span id="graph_title">Message: {{ message }}</span>
+            </div>
+        </div>
+{% endif %}
+    </body>
+</html>

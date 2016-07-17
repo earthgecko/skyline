@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mirage.negaters &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>mirage.negaters</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for mirage.negaters</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">smtplib</span> <span class="kn">import</span> <span class="n">SMTP</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">email.MIMEMultipart</span> <span class="kn">import</span> <span class="n">MIMEMultipart</span>
+    <span class="kn">from</span> <span class="nn">email.MIMEText</span> <span class="kn">import</span> <span class="n">MIMEText</span>
+    <span class="kn">from</span> <span class="nn">email.MIMEImage</span> <span class="kn">import</span> <span class="n">MIMEImage</span>
+<span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">email.mime.multipart</span> <span class="kn">import</span> <span class="n">MIMEMultipart</span>
+    <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="kn">import</span> <span class="n">MIMEText</span>
+    <span class="kn">from</span> <span class="nn">email.mime.image</span> <span class="kn">import</span> <span class="n">MIMEImage</span>
+<span class="kn">import</span> <span class="nn">negaters</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urllib2</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urllib.request</span>
+    <span class="kn">import</span> <span class="nn">urllib.error</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+
+<span class="c1"># from skyline import settings</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Create any alerter you want here. The function will be invoked from trigger_alert.</span>
+<span class="sd">Two arguments will be passed, both of them tuples: alert and metric.</span>
+
+<span class="sd">alert: the tuple specified in your settings:</span>
+<span class="sd">    alert[0]: The matched substring of the anomalous metric</span>
+<span class="sd">    alert[1]: the name of the strategy being used to alert</span>
+<span class="sd">    alert[2]: The timeout of the alert that was triggered</span>
+<span class="sd">    alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</span>
+<span class="sd">metric: information about the anomaly itself</span>
+<span class="sd">    metric[0]: the anomalous value</span>
+<span class="sd">    metric[1]: The full name of the anomalous metric</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="negate_analyzer_alert"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.negaters.negate_analyzer_alert">[docs]</a><span class="k">def</span> <span class="nf">negate_analyzer_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">):</span>
+
+    <span class="c1"># FULL_DURATION to hours so that mirage can surface the relevant timeseries data</span>
+    <span class="c1"># for analyzer comparison in the graph</span>
+    <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+
+    <span class="c1"># SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the</span>
+    <span class="c1"># relevant timeseries data in the graph</span>
+    <span class="n">second_order_resolution_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+
+    <span class="c1"># For backwards compatibility</span>
+    <span class="k">if</span> <span class="s1">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERT_SENDER</span>
+        <span class="n">recipient</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
+        <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;recipients&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="c1"># Backwards compatibility</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">recipients</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">recipients</span> <span class="o">=</span> <span class="p">[</span><span class="n">recipients</span><span class="p">]</span>
+
+    <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=skyline</span><span class="si">%%</span><span class="s1">20mirage</span><span class="si">%%</span><span class="s1">20negation</span><span class="si">%%</span><span class="s1">20at</span><span class="si">%%</span><span class="s1">20</span><span class="si">%s%%</span><span class="s1">20hours</span><span class="si">%%</span><span class="s1">0A</span><span class="si">%s%%</span><span class="s1">20-</span><span class="si">%%</span><span class="s1">20</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">analyzer_graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=skyline</span><span class="si">%%</span><span class="s1">20analyzer</span><span class="si">%%</span><span class="s1">20alert</span><span class="si">%%</span><span class="s1">20at</span><span class="si">%%</span><span class="s1">20</span><span class="si">%s%%</span><span class="s1">20hours</span><span class="si">%%</span><span class="s1">0A</span><span class="si">%s%%</span><span class="s1">20-</span><span class="si">%%</span><span class="s1">20</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_value</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=purple&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+        <span class="n">analyzer_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">analyzer_graph_title</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=purple&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">graphite_settings</span><span class="p">)</span>
+        <span class="n">analyzer_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">analyzer_graphite_settings</span><span class="p">)</span>
+
+    <span class="n">content_id</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;embed-images&#39;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">link</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+            <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c1"># If we failed to get the image or if it was explicitly disabled,</span>
+    <span class="c1"># use the image URL instead of the content.</span>
+    <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">link</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;cid:</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">content_id</span>
+
+    <span class="n">analyzer_content_id</span> <span class="o">=</span> <span class="s1">&#39;analyzer&#39;</span>
+    <span class="n">analyzer_image_data</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;embed-images&#39;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">analyzer_image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">analyzer_link</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+            <span class="n">analyzer_image_data</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c1"># If we failed to get the image or if it was explicitly disabled,</span>
+    <span class="c1"># use the image URL instead of the content.</span>
+    <span class="k">if</span> <span class="n">analyzer_image_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">analyzer_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">analyzer_link</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">analyzer_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;cid:</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">analyzer_content_id</span>
+
+    <span class="n">mirage_body</span> <span class="o">=</span> <span class="s1">&#39;mirage alert NEGATION &lt;br&gt; analyzer reported </span><span class="si">%s</span><span class="s1"> as anomalous at </span><span class="si">%s</span><span class="s1"> over </span><span class="si">%s</span><span class="s1"> hours &lt;br&gt; &lt;br&gt; This metric is NOT anomalous at </span><span class="si">%s</span><span class="s1"> hours &lt;br&gt; &lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_value</span><span class="p">,</span> <span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
+    <span class="n">analyzer_body</span> <span class="o">=</span> <span class="s1">&#39; &lt;br&gt; &lt;br&gt; &lt;br&gt; Analyzer graph at </span><span class="si">%s</span><span class="s1"> hours for anomalous value: </span><span class="si">%s</span><span class="s1">&lt;br&gt; &lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">,</span> <span class="n">analyzer_link</span><span class="p">,</span> <span class="n">analyzer_img_tag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">analyzer_image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">mirage_body</span> <span class="o">+</span> <span class="n">analyzer_body</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">mirage_body</span>
+
+    <span class="k">for</span> <span class="n">recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;alternative&#39;</span><span class="p">)</span>
+        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;mirage alert NEGATION - &#39;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
+        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">msg_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
+            <span class="n">msg_attachment</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-ID&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="n">content_id</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">msg_attachment</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">analyzer_image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">analyzer_msg_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">analyzer_image_data</span><span class="p">)</span>
+            <span class="n">analyzer_msg_attachment</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-ID&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="n">analyzer_content_id</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">analyzer_msg_attachment</span><span class="p">)</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">recipient</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="negate_hipchat"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.negaters.negate_hipchat">[docs]</a><span class="k">def</span> <span class="nf">negate_hipchat</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">):</span>
+
+    <span class="c1"># SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the</span>
+    <span class="c1"># relevant timeseries data in the graph</span>
+    <span class="n">second_order_resolution_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span></div>
+    <span class="c1"># not really required</span>
+
+
+<div class="viewcode-block" id="negate_syslog"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.negaters.negate_syslog">[docs]</a><span class="k">def</span> <span class="nf">negate_syslog</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">syslog</span>
+
+    <span class="c1"># FULL_DURATION to hours so that mirage can surface the relevant timeseries data</span>
+    <span class="c1"># for analyzer comparison in the graph</span>
+    <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+
+    <span class="c1"># SECOND_ORDER_RESOLUTION_SECONDS to hours so that mirage surfaces the</span>
+    <span class="c1"># relevant timeseries data in the graph</span>
+    <span class="n">second_order_resolution_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+
+    <span class="n">syslog_ident</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_OPTS</span><span class="p">[</span><span class="s1">&#39;ident&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;-mirage&#39;</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;not anomalous at </span><span class="si">%s</span><span class="s2"> hours: </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2"> hours value: </span><span class="si">%s</span><span class="s2">) - (</span><span class="si">%s</span><span class="s2"> hours value: </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+        <span class="n">syslog</span><span class="o">.</span><span class="n">openlog</span><span class="p">(</span><span class="n">syslog_ident</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_PID</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_LOCAL4</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+        <span class="n">syslog</span><span class="o">.</span><span class="n">openlog</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span><span class="p">,</span> <span class="n">logoption</span><span class="o">=</span><span class="n">syslog</span><span class="o">.</span><span class="n">LOG_PID</span><span class="p">,</span> <span class="n">facility</span><span class="o">=</span><span class="n">syslog</span><span class="o">.</span><span class="n">LOG_LOCAL4</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">syslog</span><span class="o">.</span><span class="n">openlog</span><span class="p">(</span><span class="n">ident</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span><span class="p">,</span> <span class="n">logoption</span><span class="o">=</span><span class="n">syslog</span><span class="o">.</span><span class="n">LOG_PID</span><span class="p">,</span> <span class="n">facility</span><span class="o">=</span><span class="n">syslog</span><span class="o">.</span><span class="n">LOG_LOCAL4</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">syslog</span><span class="o">.</span><span class="n">openlog</span><span class="p">(</span><span class="n">syslog_ident</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_PID</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_LOCAL4</span><span class="p">)</span>
+    <span class="n">syslog</span><span class="o">.</span><span class="n">syslog</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="trigger_negater"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.negaters.trigger_negater">[docs]</a><span class="k">def</span> <span class="nf">trigger_negater</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;negate_analyzer_alert&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;negate_&#39;</span> <span class="o">+</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nb">getattr</span><span class="p">(</span><span class="n">negaters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

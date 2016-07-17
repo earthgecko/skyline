@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+{% block body %}
+
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+		<li><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys"><span class="logo"><span class="re">re</span>brow</span>_keys</a></li>
+		<li><a href="/rebrow_key/{{ host }}:{{ port }}/{{ db }}/keys/{{ key|urlsafe_base64 }}"><span class="logo"><span class="re">re</span>brow</span>_key</a></li>
+		<li class="active"><span class="logo"><span class="sky">{{ host }}:{{ port}}</span> <span class="re">DB {{ db }} / keys / key / {{ key }}</span></li>
+	</ol>
+
+	<h2>key :: {{ key }}</h2>
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>key</th>
+<!--				<td><input type="text" value="{{ key }}" readonly="readonly" style="border: none; width: 100%; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;" /></td>-->
+				<td>{{ key }}</td>
+			</tr>
+			<tr>
+				<th>base64 encoded key</th>
+				<td>{{ key|urlsafe_base64 }}</td>
+			</tr>
+			<tr>
+				<th>Type</th>
+				<td><code>{{ type }}</code></td>
+			</tr>
+			<tr>
+				<th>msg-pack encoded</th>
+				<td><code>{{ msg_packed_key }}</code></td>
+			</tr>
+			<tr>
+				<th>Size</th>
+				<td>{{ size }} Bytes
+
+				{% if size > (1024*1024) %}
+				({{ "%.1f"|format(size / 1024.0 / 1024.0) }} MB)
+				{% elif size > 1024 %}
+				({{ "%.1f"|format(size / 1024.0) }} KB)
+				{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<th>Expiration</th>
+				<td>
+					{% if ttl < 0 %}
+						<span class="label label-warning">No expiration set</span>
+					{% else %}
+						<code>{{ ttl }}</code> Seconds from now (<code>{{ expiration }}</code>)
+					{% endif %}
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	{% if type == "string" %}
+
+		<h2>String Value</h2>
+		<code>{{ value }}</code>
+
+	{% elif type == "list" %}
+
+		<h2>Values</h2>
+		<ol>
+		{% for item in value %}
+			<li><code>{{ item }}</code></li>
+		{% endfor %}
+		</ol>
+
+	{% elif type == "set" %}
+
+		<h2>Values</h2>
+		<ul>
+		{% for item in value|sort %}
+			<li><code>{{ item }}</code></li>
+		{% endfor %}
+		</ul>
+
+	{% elif type == "hash" %}
+
+		<h2>Hash keys and values</h2>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th></th>
+					<th>Key</th>
+					<th>Value</th>
+				</tr>
+			</thead>
+			<tbody>
+		{% for item in value|dictsort %}
+			<tr>
+				<td></td>
+				<td><code>{{ item[0] }}</code></td>
+				<td><code>{{ item[1] }}</code></td>
+			</tr>
+		{% endfor %}
+			</tbody>
+		</table>
+
+	{% elif type == "zset" %}
+
+		<h2>Sorted set entries</h2>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>Rank</th>
+					<th>Score</th>
+					<th>Value</th>
+				</tr>
+			</thead>
+			<tbody>
+		{% for item in value %}
+			<tr>
+				<td>{{ loop.index0 }}</td>
+				<td><code>{{ item[1] }}</code></td>
+				<td><code>{{ item[0] }}</code></td>
+			</tr>
+		{% endfor %}
+			</tbody>
+		</table>
+
+	{% endif %}
+
+{% endblock %}

@@ -1,0 +1,1030 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>webapp.webapp &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>webapp.webapp</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for webapp.webapp</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">redis</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">simplejson</span> <span class="kn">as</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">abort</span>
+<span class="kn">from</span> <span class="nn">daemon</span> <span class="kn">import</span> <span class="n">runner</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+
+<span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="c1"># flask things for rebrow</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">session</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span> <span class="n">Markup</span><span class="p">,</span> <span class="n">json</span>
+
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span>
+
+<span class="kn">from</span> <span class="nn">backend</span> <span class="kn">import</span> <span class="n">panorama_request</span><span class="p">,</span> <span class="n">get_list</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+<span class="c1"># werkzeug access log</span>
+<span class="n">access_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;werkzeug&#39;</span><span class="p">)</span>
+
+<span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+
+<span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PROPAGATE_EXCEPTIONS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">graph_url_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">)</span>
+<span class="n">PANORAMA_GRAPH_URL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\/render\/.*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">graph_url_string</span><span class="p">)</span>
+
+
+<span class="nd">@app.before_request</span>
+<div class="viewcode-block" id="limit_remote_addr"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.limit_remote_addr">[docs]</a><span class="k">def</span> <span class="nf">limit_remote_addr</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is called to check if the requesting IP address is in the</span>
+<span class="sd">    settings.WEBAPP_ALLOWED_IPS array, if not 403.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ip_allowed</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">web_allowed_ip</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_ALLOWED_IPS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">remote_addr</span> <span class="o">==</span> <span class="n">web_allowed_ip</span><span class="p">:</span>
+            <span class="n">ip_allowed</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_IP_RESTRICTED</span><span class="p">:</span>
+        <span class="n">ip_allowed</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ip_allowed</span><span class="p">:</span>
+        <span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>  <span class="c1"># Forbidden</span></div>
+
+
+<div class="viewcode-block" id="check_auth"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.check_auth">[docs]</a><span class="k">def</span> <span class="nf">check_auth</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function is called to check if a username /</span>
+<span class="sd">    password combination is valid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">username</span> <span class="o">==</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span> <span class="ow">and</span> <span class="n">password</span> <span class="o">==</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<div class="viewcode-block" id="authenticate"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.authenticate">[docs]</a><span class="k">def</span> <span class="nf">authenticate</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Sends a 401 response that enables basic auth&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="s1">&#39;Forbidden&#39;</span><span class="p">,</span> <span class="mi">401</span><span class="p">,</span>
+        <span class="p">{</span><span class="s1">&#39;WWW-Authenticate&#39;</span><span class="p">:</span> <span class="s1">&#39;Basic realm=&quot;Login Required&quot;&#39;</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="requires_auth"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.requires_auth">[docs]</a><span class="k">def</span> <span class="nf">requires_auth</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">decorated</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+            <span class="n">auth</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">authorization</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">auth</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">check_auth</span><span class="p">(</span><span class="n">auth</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">auth</span><span class="o">.</span><span class="n">password</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">authenticate</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="n">decorated</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="nd">@requires_auth</span>
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.index">[docs]</a><span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;uh_oh&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+                <span class="s1">&#39;uh_oh.html&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+                <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Testing uh_oh&quot;</span><span class="p">),</span> <span class="mi">200</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">error_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to render uh_oh.html: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">error_string</span><span class="p">))</span>
+            <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+            <span class="s1">&#39;now.html&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">)),</span> <span class="mi">200</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">error_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to render index.html: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">error_string</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/now&quot;</span><span class="p">)</span>
+<span class="nd">@requires_auth</span>
+<div class="viewcode-block" id="now"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.now">[docs]</a><span class="k">def</span> <span class="nf">now</span><span class="p">():</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+            <span class="s1">&#39;now.html&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">)),</span> <span class="mi">200</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">error_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to render now.html: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">error_string</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/anomalies.json&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.anomalies">[docs]</a><span class="k">def</span> <span class="nf">anomalies</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomalies_json</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalies_json</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get anomalies.json: &#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span>
+    <span class="k">return</span> <span class="n">json_data</span><span class="p">,</span> <span class="mi">200</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/panorama.json&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="panorama_anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama_anomalies">[docs]</a><span class="k">def</span> <span class="nf">panorama_anomalies</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomalies_json</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
+        <span class="n">panorama_json</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomalies_json</span><span class="p">),</span> <span class="s1">&#39;anomalies.json&#39;</span><span class="p">,</span> <span class="s1">&#39;panorama.json&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;opening - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">panorama_json</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">panorama_json</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get panorama.json: &#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span>
+    <span class="k">return</span> <span class="n">json_data</span><span class="p">,</span> <span class="mi">200</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/app_settings&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="app_settings"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.app_settings">[docs]</a><span class="k">def</span> <span class="nf">app_settings</span><span class="p">():</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">app_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;GRAPH_URL&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">,</span>
+                        <span class="s1">&#39;OCULUS_HOST&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">OCULUS_HOST</span><span class="p">,</span>
+                        <span class="s1">&#39;FULL_NAMESPACE&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span>
+                        <span class="s1">&#39;SKYLINE_VERSION&#39;</span><span class="p">:</span> <span class="n">skyline_version</span><span class="p">,</span>
+                        <span class="s1">&#39;PANORAMA_ENABLED&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">,</span>
+                        <span class="s1">&#39;PANORAMA_DATABASE&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">,</span>
+                        <span class="s1">&#39;PANORAMA_DBHOST&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span>
+                        <span class="s1">&#39;PANORAMA_DBPORT&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">,</span>
+                        <span class="s1">&#39;PANORAMA_DBUSER&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
+                        <span class="s1">&#39;PANORAMA_DBUSERPASS&#39;</span><span class="p">:</span> <span class="s1">&#39;redacted&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;PANORAMA_GRAPH_URL&#39;</span><span class="p">:</span> <span class="n">PANORAMA_GRAPH_URL</span>
+                        <span class="p">}</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;error: &quot;</span> <span class="o">+</span> <span class="n">e</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;app_settings&#39;</span><span class="p">:</span> <span class="n">error</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">500</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">app_settings</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">200</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/version&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="version"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.version">[docs]</a><span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">version_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SKYLINE_VERSION&#39;</span><span class="p">:</span> <span class="n">skyline_version</span><span class="p">}</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">version_settings</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">200</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Not Found&quot;</span><span class="p">,</span> <span class="mi">404</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/api&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="data"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.data">[docs]</a><span class="k">def</span> <span class="nf">data</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_series</span> <span class="o">=</span> <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_series</span><span class="p">:</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: No metric by that name - try /api?metric=&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;metric_namespace&#39;</span><span class="p">})</span>
+                <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">unpacker</span><span class="p">]</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">})</span>
+                <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">200</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: &quot;</span> <span class="o">+</span> <span class="n">e</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">500</span>
+
+    <span class="k">if</span> <span class="s1">&#39;graphite_metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing graphite_metric api request&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
+        <span class="n">valid_request</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">missing_arguments</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;graphite_metric&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;until_timestamp&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
+            <span class="n">valid_request</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">missing_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;graphite_metric&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;graphite_metric argument not found&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">from_timestamp</span><span class="p">:</span>
+            <span class="n">valid_request</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">missing_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;from_timestamp argument not found&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;from_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">until_timestamp</span><span class="p">:</span>
+            <span class="n">valid_request</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">missing_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;until_timestamp&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;until_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_request</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Error: not all arguments where passed, missing &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">missing_arguments</span><span class="p">)</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;requesting data from graphite for </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">get_graphite_metric</span><span class="p">(</span>
+                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: &quot;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">500</span>
+
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">})</span>
+        <span class="n">cleaned_resp</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">format_resp_1</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="s1">&#39;&quot;[[&#39;</span><span class="p">,</span> <span class="s1">&#39;[[&#39;</span><span class="p">)</span>
+            <span class="n">cleaned_resp</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">format_resp_1</span><span class="p">),</span> <span class="s1">&#39;]]&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;]]&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed string replace resp: &#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">cleaned_resp</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cleaned_resp</span><span class="p">,</span> <span class="mi">200</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: failed to generate timeseries&#39;</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+        <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: No argument passed - try /api?metric= or /api?graphite_metric=&#39;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/docs&quot;</span><span class="p">)</span>
+<span class="nd">@requires_auth</span>
+<div class="viewcode-block" id="docs"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.docs">[docs]</a><span class="k">def</span> <span class="nf">docs</span><span class="p">():</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+            <span class="s1">&#39;docs.html&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">)),</span> <span class="mi">200</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/panorama&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="nd">@requires_auth</span>
+<div class="viewcode-block" id="panorama"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama">[docs]</a><span class="k">def</span> <span class="nf">panorama</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+                <span class="s1">&#39;uh_oh.html&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+                <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Panorama is not enabled, please see the Panorama section in the docs and settings.py&quot;</span><span class="p">),</span> <span class="mi">200</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">apps</span> <span class="o">=</span> <span class="n">get_list</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+        <span class="n">apps</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="n">get_list</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+        <span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">algorithms</span> <span class="o">=</span> <span class="n">get_list</span><span class="p">(</span><span class="s1">&#39;algorithm&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+        <span class="n">algorithms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hosts</span> <span class="o">=</span> <span class="n">get_list</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+        <span class="n">hosts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">request_args_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">request_args_len</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">latest_anomalies</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">request_args_len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">latest_anomalies</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">panorama_data</span> <span class="o">=</span> <span class="n">panorama_request</span><span class="p">()</span>
+            <span class="c1"># logger.info(&#39;panorama_data - %s&#39; % str(panorama_data))</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+                <span class="s1">&#39;panorama.html&#39;</span><span class="p">,</span> <span class="n">anomalies</span><span class="o">=</span><span class="n">panorama_data</span><span class="p">,</span> <span class="n">app_list</span><span class="o">=</span><span class="n">apps</span><span class="p">,</span>
+                <span class="n">source_list</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span> <span class="n">algorithm_list</span><span class="o">=</span><span class="n">algorithms</span><span class="p">,</span>
+                <span class="n">host_list</span><span class="o">=</span><span class="n">hosts</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;Latest anomalies&#39;</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">)),</span> <span class="mi">200</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get panorama: &#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">search_request</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">count_request</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;count_by_metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">count_by_metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;count_by_metric&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">count_by_metric</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="n">count_request</span> <span class="o">=</span> <span class="s1">&#39;true&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">panorama_data</span> <span class="o">=</span> <span class="n">panorama_request</span><span class="p">()</span>
+            <span class="c1"># logger.info(&#39;panorama_data - %s&#39; % str(panorama_data))</span>
+            <span class="n">results_string</span> <span class="o">=</span> <span class="s1">&#39;Found anomalies for &#39;</span> <span class="o">+</span> <span class="n">query</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+                <span class="s1">&#39;panorama.html&#39;</span><span class="p">,</span> <span class="n">anomalies</span><span class="o">=</span><span class="n">panorama_data</span><span class="p">,</span> <span class="n">app_list</span><span class="o">=</span><span class="n">apps</span><span class="p">,</span>
+                <span class="n">source_list</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span> <span class="n">algorithm_list</span><span class="o">=</span><span class="n">algorithms</span><span class="p">,</span>
+                <span class="n">host_list</span><span class="o">=</span><span class="n">hosts</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n">results_string</span><span class="p">,</span> <span class="n">count_request</span><span class="o">=</span><span class="n">count_request</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">)),</span> <span class="mi">200</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get panorama: &#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
+
+
+<span class="c1"># Feature #1448: Crucible web UI - @earthgecko</span>
+<span class="c1"># Branch #868: crucible - @earthgecko</span>
+<span class="c1"># This may actually need Django, perhaps this is starting to move outside the</span>
+<span class="c1"># realms of Flask..</span>
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/crucible&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="nd">@requires_auth</span>
+<div class="viewcode-block" id="crucible"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.crucible">[docs]</a><span class="k">def</span> <span class="nf">crucible</span><span class="p">():</span>
+    <span class="n">crucible_web_ui_implemented</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">crucible_web_ui_implemented</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+                <span class="s1">&#39;uh_oh.html&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+                <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Sorry the Crucible web UI is not completed yet&quot;</span><span class="p">),</span> <span class="mi">200</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+                <span class="s1">&#39;uh_oh.html&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+                <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Sorry the Crucible web UI is not completed yet&quot;</span><span class="p">),</span> <span class="mi">200</span></div>
+
+<span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>
+<span class="c1"># A port of Marian Steinbach&#39;s rebrow - https://github.com/marians/rebrow</span>
+<span class="c1"># Description of info keys</span>
+<span class="c1"># TODO: to be continued.</span>
+<span class="n">serverinfo_meta</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;aof_current_rewrite_time_sec&#39;</span><span class="p">:</span> <span class="s2">&quot;Duration of the on-going &lt;abbr title=&#39;Append-Only File&#39;&gt;AOF&lt;/abbr&gt; rewrite operation if any&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;aof_enabled&#39;</span><span class="p">:</span> <span class="s2">&quot;Flag indicating &lt;abbr title=&#39;Append-Only File&#39;&gt;AOF&lt;/abbr&gt; logging is activated&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;aof_last_bgrewrite_status&#39;</span><span class="p">:</span> <span class="s2">&quot;Status of the last &lt;abbr title=&#39;Append-Only File&#39;&gt;AOF&lt;/abbr&gt; rewrite operation&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;aof_last_rewrite_time_sec&#39;</span><span class="p">:</span> <span class="s2">&quot;Duration of the last &lt;abbr title=&#39;Append-Only File&#39;&gt;AOF&lt;/abbr&gt; rewrite operation in seconds&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;aof_last_write_status&#39;</span><span class="p">:</span> <span class="s2">&quot;Status of last &lt;abbr title=&#39;Append-Only File&#39;&gt;AOF&lt;/abbr&gt; write operation&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;aof_rewrite_in_progress&#39;</span><span class="p">:</span> <span class="s2">&quot;Flag indicating a &lt;abbr title=&#39;Append-Only File&#39;&gt;AOF&lt;/abbr&gt; rewrite operation is on-going&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;aof_rewrite_scheduled&#39;</span><span class="p">:</span> <span class="s2">&quot;Flag indicating an &lt;abbr title=&#39;Append-Only File&#39;&gt;AOF&lt;/abbr&gt; rewrite operation will be scheduled once the on-going RDB save is complete&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;arch_bits&#39;</span><span class="p">:</span> <span class="s1">&#39;Architecture (32 or 64 bits)&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;blocked_clients&#39;</span><span class="p">:</span> <span class="s1">&#39;Number of clients pending on a blocking call (BLPOP, BRPOP, BRPOPLPUSH)&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;client_biggest_input_buf&#39;</span><span class="p">:</span> <span class="s1">&#39;biggest input buffer among current client connections&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;client_longest_output_list&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_client&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the client command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_config&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the config command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_dbsize&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the dbsize command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_del&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the del command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_dump&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the dump command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_expire&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the expire command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_flushall&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the flushall command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_get&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the get command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_hgetall&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the hgetall command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_hkeys&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the hkeys command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_hmset&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the hmset command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_info&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the info command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_keys&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the keys command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_llen&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the llen command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_ping&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the ping command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_psubscribe&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the psubscribe command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_pttl&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the pttl command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_sadd&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the sadd command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_scan&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the scan command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_select&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the select command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_set&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the set command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_smembers&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the smembers command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_sscan&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the sscan command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_ttl&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the ttl command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the type command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_zadd&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the zadd command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_zcard&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the zcard command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_zrange&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the zrange command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_zremrangebyrank&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the zremrangebyrank command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_zrevrange&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the zrevrange command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cmdstat_zscan&#39;</span><span class="p">:</span> <span class="s1">&#39;Statistics for the zscan command&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;config_file&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;connected_clients&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;connected_slaves&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;db0&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;evicted_keys&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;expired_keys&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;gcc_version&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;hz&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;instantaneous_ops_per_sec&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;keyspace_hits&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;keyspace_misses&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;latest_fork_usec&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;loading&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;lru_clock&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;master_repl_offset&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;mem_allocator&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;mem_fragmentation_ratio&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;multiplexing_api&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;os&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;process_id&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;pubsub_channels&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;pubsub_patterns&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;rdb_bgsave_in_progress&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;rdb_changes_since_last_save&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;rdb_current_bgsave_time_sec&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;rdb_last_bgsave_status&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;rdb_last_bgsave_time_sec&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;rdb_last_save_time&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;redis_build_id&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;redis_git_dirty&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;redis_git_sha1&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;redis_mode&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;redis_version&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;rejected_connections&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;repl_backlog_active&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;repl_backlog_first_byte_offset&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;repl_backlog_histlen&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;repl_backlog_size&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;role&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;run_id&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;sync_full&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;sync_partial_err&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;sync_partial_ok&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;tcp_port&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;total_commands_processed&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;total_connections_received&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;uptime_in_days&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;uptime_in_seconds&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_cpu_sys&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_cpu_sys_children&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_cpu_user&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_cpu_user_children&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_memory&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_memory_human&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_memory_lua&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_memory_peak&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_memory_peak_human&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="s1">&#39;used_memory_rss&#39;</span><span class="p">:</span> <span class="bp">None</span>
+<span class="p">}</span>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/rebrow&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="c1"># def login():</span>
+<div class="viewcode-block" id="rebrow"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow">[docs]</a><span class="k">def</span> <span class="nf">rebrow</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start page</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="c1"># TODO: test connection, handle failures</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;host&#39;</span><span class="p">]</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;port&#39;</span><span class="p">])</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;db&#39;</span><span class="p">])</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;rebrow_server_db&#39;</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+            <span class="s1">&#39;rebrow_login.html&#39;</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">))</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/rebrow_server_db/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="rebrow_server_db"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_server_db">[docs]</a><span class="k">def</span> <span class="nf">rebrow_server_db</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List all databases and show info on server</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+    <span class="n">dbsize</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">dbsize</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s1">&#39;rebrow_server_db.html&#39;</span><span class="p">,</span>
+        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+        <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+        <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span>
+        <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span>
+        <span class="n">dbsize</span><span class="o">=</span><span class="n">dbsize</span><span class="p">,</span>
+        <span class="n">serverinfo_meta</span><span class="o">=</span><span class="n">serverinfo_meta</span><span class="p">,</span>
+        <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">))</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/rebrow_keys/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="rebrow_keys"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_keys">[docs]</a><span class="k">def</span> <span class="nf">rebrow_keys</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List keys for one database</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;action&#39;</span><span class="p">]</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;delkey&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;Key </span><span class="si">%s</span><span class="s1"> has been deleted.&#39;</span> <span class="o">%</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;info&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">flash</span><span class="p">(</span><span class="s1">&#39;Key </span><span class="si">%s</span><span class="s1"> could not be deleted.&#39;</span> <span class="o">%</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;offset&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">))</span>
+        <span class="n">perpage</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;perpage&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">))</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pattern&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+        <span class="n">dbsize</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">dbsize</span><span class="p">()</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span>
+        <span class="n">limited_keys</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="n">offset</span><span class="p">:(</span><span class="n">perpage</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)]</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">limited_keys</span><span class="p">:</span>
+            <span class="n">types</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+            <span class="s1">&#39;rebrow_keys.html&#39;</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span>
+            <span class="n">dbsize</span><span class="o">=</span><span class="n">dbsize</span><span class="p">,</span>
+            <span class="n">keys</span><span class="o">=</span><span class="n">limited_keys</span><span class="p">,</span>
+            <span class="n">types</span><span class="o">=</span><span class="n">types</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+            <span class="n">perpage</span><span class="o">=</span><span class="n">perpage</span><span class="p">,</span>
+            <span class="n">pattern</span><span class="o">=</span><span class="n">pattern</span><span class="p">,</span>
+            <span class="n">num_keys</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">),</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">))</span></div>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/rebrow_key/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&lt;key&gt;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="rebrow_key"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_key">[docs]</a><span class="k">def</span> <span class="nf">rebrow_key</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Show a specific key.</span>
+<span class="sd">    key is expected to be URL-safe base64 encoded</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>
+<span class="c1"># metrics encoded with msgpack</span>
+    <span class="n">original_key</span> <span class="o">=</span> <span class="n">key</span>
+    <span class="n">msg_pack_key</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="c1"># if key.startswith(&#39;metrics.&#39;):</span>
+    <span class="c1">#     msg_packed_key = True</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">urlsafe_b64decode</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">))</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+    <span class="n">dump</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dump</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">abort</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+    <span class="c1"># if t is None:</span>
+    <span class="c1">#    abort(404)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dump</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">dump</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">ttl</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">pttl</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+        <span class="c1"># @modified 20160703 - Feature #1464: Webapp Redis browser</span>
+        <span class="c1"># metrics encoded with msgpack</span>
+        <span class="c1"># val = r.get(key)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">abort</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+        <span class="n">test_string</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">test_string</span><span class="p">:</span>
+            <span class="n">raw_result</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_result</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+            <span class="n">msg_pack_key</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;list&#39;</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">lrange</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;hash&#39;</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;set&#39;</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;zset&#39;</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">zrange</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">withscores</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s1">&#39;rebrow_key.html&#39;</span><span class="p">,</span>
+        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+        <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+        <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">val</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+        <span class="n">ttl</span><span class="o">=</span><span class="n">ttl</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">,</span>
+        <span class="n">now</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">(),</span>
+        <span class="n">expiration</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">ttl</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">),</span>
+        <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="p">),</span>
+        <span class="n">msg_packed_key</span><span class="o">=</span><span class="n">msg_pack_key</span><span class="p">)</span></div>
+
+
+<span class="nd">@app.template_filter</span><span class="p">(</span><span class="s1">&#39;urlsafe_base64&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="urlsafe_base64_encode"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.urlsafe_base64_encode">[docs]</a><span class="k">def</span> <span class="nf">urlsafe_base64_encode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Markup&#39;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unescape</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">urlsafe_b64encode</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Markup</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+<span class="c1"># END rebrow</span>
+
+
+<div class="viewcode-block" id="App"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.App">[docs]</a><span class="k">class</span> <span class="nc">App</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdin_path</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pidfile_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.pid&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pidfile_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+
+<div class="viewcode-block" id="App.run"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.App.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+<span class="c1">#        log_wait_for = now + 5</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">skyline_version</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> - version UNKNOWN&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;hosted at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_IP</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;running on port </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_PORT</span><span class="p">)</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_PORT</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="run"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start the Webapp server</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">):</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;pid directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">):</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;log directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> :: </span><span class="si">%(process)s</span><span class="s2"> :: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">TimedRotatingFileHandler</span><span class="p">(</span>
+        <span class="n">logfile</span><span class="p">,</span>
+        <span class="n">when</span><span class="o">=</span><span class="s2">&quot;midnight&quot;</span><span class="p">,</span>
+        <span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">backupCount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">memory_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">MemoryHandler</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span>
+                                                    <span class="n">flushLevel</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+                                                    <span class="n">target</span><span class="o">=</span><span class="n">handler</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">memory_handler</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_SERVER</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_SERVER&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_SERVER&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_IP</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_IP&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_IP&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_PORT</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_PORT&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_PORT&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_AUTH_ENABLED&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_AUTH_ENABLED&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_IP_RESTRICTED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_IP_RESTRICTED&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_IP_RESTRICTED&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_AUTH_USER&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_AUTH_USER&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_AUTH_USER_PASSWORD&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_AUTH_USER_PASSWORD&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_ALLOWED_IPS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_ALLOWED_IPS&#39;</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Failed to determine </span><span class="si">%s</span><span class="s1"> from settings.py&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;WEBAPP_ALLOWED_IPS&#39;</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">webapp</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;run&#39;</span><span class="p">:</span>
+        <span class="n">webapp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">daemon_runner</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">DaemonRunner</span><span class="p">(</span><span class="n">webapp</span><span class="p">)</span>
+        <span class="n">daemon_runner</span><span class="o">.</span><span class="n">daemon_context</span><span class="o">.</span><span class="n">files_preserve</span> <span class="o">=</span> <span class="p">[</span><span class="n">handler</span><span class="o">.</span><span class="n">stream</span><span class="p">]</span>
+        <span class="n">daemon_runner</span><span class="o">.</span><span class="n">do_action</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

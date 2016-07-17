@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<!-- BEGIN /now block -->
+  <script src="/static/js/skyline.js"></script>
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/now">now</a></li>
+		<li class="active"><span class="logo"><span class="sky">latest</span> <span class="re">anomalies</span></li>
+	</ol>
+
+<!--  <div class="container main_container">-->
+  <div class="container main_container">
+      <div id="title_container">
+          <span id="graph_title">Select a metric</span>
+      </div>
+      <div id="graph_container">
+          <div class="duration">1 hour:</div>
+          <div id="mini_label"></div>
+          <div id="mini"></div>
+          <div class="duration">24 hours:</div>
+          <div id="big_label"></div>
+          <div id="graph"></div>
+      </div>
+      <div id="metrics_main">
+          <div id="legend">
+              <span id="legend_name">metric name</span>
+              <span id="legend_coefficient">anomalous datapoint</span>
+          </div>
+          <div id="metrics_listings"></div>
+      </div>
+      </div>
+<!--  </div>-->
+<!-- END /now block -->
+{% endblock %}

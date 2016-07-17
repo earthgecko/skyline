@@ -1,0 +1,516 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>horizon.roomba &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>horizon.roomba</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for horizon.roomba</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span><span class="p">,</span> <span class="n">WatchError</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">packb</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TupleType</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">eliminated_in_python3</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+
+<span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;horizon&#39;</span>
+<span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;roomba&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">parent_skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">child_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">parent_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="Roomba"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.roomba.Roomba">[docs]</a><span class="k">class</span> <span class="nc">Roomba</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Roomba is responsible for deleting keys older than DURATION.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">skip_mini</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Roomba</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skip_mini</span> <span class="o">=</span> <span class="n">skip_mini</span>
+
+<div class="viewcode-block" id="Roomba.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.roomba.Roomba.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Roomba.vacuum"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.roomba.Roomba.vacuum">[docs]</a>    <span class="k">def</span> <span class="nf">vacuum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trim metrics that are older than settings.FULL_DURATION and purge old</span>
+<span class="sd">        metrics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">begin</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: started vacuum&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+
+        <span class="c1"># Discover assigned metrics</span>
+        <span class="n">namespace_unique_metrics</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">))</span>
+        <span class="n">keys_per_processor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_PROCESSES</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_PROCESSES</span><span class="p">:</span>
+            <span class="n">assigned_max</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">assigned_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">),</span> <span class="n">i</span> <span class="o">*</span> <span class="n">keys_per_processor</span><span class="p">)</span>
+        <span class="n">assigned_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">keys_per_processor</span>
+        <span class="n">assigned_keys</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">assigned_min</span><span class="p">,</span> <span class="n">assigned_max</span><span class="p">)</span>
+
+        <span class="c1"># Compile assigned metrics</span>
+        <span class="n">assigned_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">unique_metrics</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">assigned_keys</span><span class="p">]</span>
+
+        <span class="n">euthanized</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">blocked</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">trimmed_keys</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">active_keys</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
+
+            <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">assigned_metrics</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># WATCH the key</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">watch</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+                <span class="c1"># Everything below NEEDS to happen before another datapoint</span>
+                <span class="c1"># comes in. If your data has a very small resolution (&lt;.1s),</span>
+                <span class="c1"># this technique may not suit you.</span>
+                <span class="n">raw_series</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">unpacked</span> <span class="k">for</span> <span class="n">unpacked</span> <span class="ow">in</span> <span class="n">unpacker</span><span class="p">])</span>
+
+                <span class="c1"># Put pipe back in multi mode</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">multi</span><span class="p">()</span>
+
+                <span class="c1"># There&#39;s one value. Purge if it&#39;s too old</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">TupleType</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">duration</span><span class="p">:</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                                <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">duration</span><span class="p">:</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                                <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">continue</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Check if the last value is too old and purge</span>
+                <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">duration</span><span class="p">:</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                    <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Remove old datapoints and duplicates from timeseries</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="n">temp_add</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">add</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">duration</span>
+                <span class="n">trimmed</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">tuple</span> <span class="k">for</span> <span class="nb">tuple</span> <span class="ow">in</span> <span class="n">timeseries</span>
+                    <span class="k">if</span> <span class="nb">tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">delta</span> <span class="ow">and</span>
+                    <span class="nb">tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">temp</span> <span class="ow">and</span> <span class="ow">not</span>
+                    <span class="n">temp_add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="p">]</span>
+
+                <span class="c1"># Purge if everything was deleted, set key otherwise</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Serialize and turn key back into not-an-array</span>
+                    <span class="n">btrimmed</span> <span class="o">=</span> <span class="n">packb</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">btrimmed</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">btrimmed</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+                        <span class="n">trimmed_keys</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">btrimmed</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+                        <span class="n">trimmed_keys</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="n">active_keys</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                    <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+
+            <span class="k">except</span> <span class="n">WatchError</span><span class="p">:</span>
+                <span class="n">blocked</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">assigned_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># If something bad happens, zap the key and hope it goes away</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vacuum Euthanizing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vacuum operated on </span><span class="si">%s</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> keys in </span><span class="si">%f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">),</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">begin</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vaccum </span><span class="si">%s</span><span class="s1"> keyspace is now </span><span class="si">%d</span><span class="s1"> keys&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span> <span class="o">-</span> <span class="n">euthanized</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vaccum blocked </span><span class="si">%d</span><span class="s1"> times&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">blocked</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vacuum euthanized </span><span class="si">%d</span><span class="s1"> geriatric keys&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">euthanized</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vacuum processed </span><span class="si">%d</span><span class="s1"> active keys&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">active_keys</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vacuum potentially trimmed </span><span class="si">%d</span><span class="s1"> keys&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">trimmed_keys</span><span class="p">))</span></div>
+
+        <span class="c1"># sleeping in the main process is more CPU efficient than sleeping</span>
+        <span class="c1"># in the vacuum def</span>
+        <span class="c1"># if (time() - begin &lt; 30):</span>
+        <span class="c1">#     logger.info(skyline_app + &#39; :: sleeping due to low run time...&#39;)</span>
+        <span class="c1">#     sleep(10)</span>
+
+<div class="viewcode-block" id="Roomba.run"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.roomba.Roomba.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when process initializes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: started roomba&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: roomba can</span><span class="se">\&#39;</span><span class="s1">t connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                    <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Spawn processes</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_mini</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: starting vacuum process on mini namespace&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vacuum</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MINI_NAMESPACE</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MINI_DURATION</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_GRACE_TIME</span><span class="p">))</span>
+                    <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: starting vacuum process&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vacuum</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_GRACE_TIME</span><span class="p">))</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="c1"># Send wait signal to zombie processes</span>
+            <span class="c1"># for p in pids:</span>
+            <span class="c1">#     p.join()</span>
+            <span class="c1"># deroomba - kill any lingering vacuum processes</span>
+            <span class="c1"># Changed to manage Roomba processes as edge cases related to I/O</span>
+            <span class="c1"># wait have been experienced that resulted in Roomba stalling so a</span>
+            <span class="c1"># ROOMBA_TIMEOUT setting was added and here we use the pattern</span>
+            <span class="c1"># described by http://stackoverflow.com/users/2073595/dano at</span>
+            <span class="c1"># http://stackoverflow.com/a/26064238 to monitor and kill any</span>
+            <span class="c1"># stalled processes rather than using p.join(TIMEOUT) - 20160505</span>
+            <span class="c1"># @earthgecko ref 1342</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: allowing vacuum process/es </span><span class="si">%s</span><span class="s1"> seconds to run&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_TIMEOUT</span><span class="p">)))</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&lt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_TIMEOUT</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: vacuum processes completed in </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all Roomba processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+            <span class="c1"># sleeping in the main process is more CPU efficient than sleeping</span>
+            <span class="c1"># in the vacuum def also roomba is quite CPU intensive so we only</span>
+            <span class="c1"># what to run roomba once every minute</span>
+            <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+            <span class="n">roomba_optimum_run_duration</span> <span class="o">=</span> <span class="mi">60</span>
+            <span class="k">if</span> <span class="n">process_runtime</span> <span class="o">&lt;</span> <span class="n">roomba_optimum_run_duration</span><span class="p">:</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">roomba_optimum_run_duration</span> <span class="o">-</span> <span class="n">process_runtime</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: sleeping </span><span class="si">%.2f</span><span class="s1"> for due to low run time&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">sleep_for</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,351 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Analyzer &mdash; Skyline 1.0.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+        <link rel="next" title="Analyzer Optimizations" href="analyzer-optimizations.html"/>
+        <link rel="prev" title="Horizon" href="horizon.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Analyzer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithm-philosophy">Algorithm philosophy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#explanation-of-exceptions">Explanation of Exceptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#push-to-mirage">Push to Mirage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-analyzer-does">What <strong>Analyzer</strong> does</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Analyzer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/analyzer.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="analyzer">
+<h1>Analyzer<a class="headerlink" href="#analyzer" title="Permalink to this headline">¶</a></h1>
+<p>The Analyzer service is responsible for analyzing collected data. It has
+a very simple divide-and-conquer strategy. It first checks Redis to get
+the total number of metrics stored, and then it fires up a number of
+processes equal to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a>, assigning each
+processes a number of metrics. Analyzing a metric is a very
+CPU-intensive process, because each timeseries must be decoded from
+Messagepack and then run through the algorithms. As such, it is
+advisable to set <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> to about the number of cores
+you have - leaving a few for the Horizon service and for Redis.</p>
+<p>The original documentation and settings for skyline were based on:</p>
+<blockquote>
+<div>a flow of about 5k metrics coming in every second on average (with
+250k distinct metrics). We use a 32 core Sandy Bridge box, with 64
+gb of memory. We experience bursts of up to 70k TPS on Redis</div></blockquote>
+<p>Skyline runs OK on much less. It can handle ~45000 metrics per minute on
+a 4 vCore, 4GB RAM cloud SSD server, even before the introduction of the
+<a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a> methodology.</p>
+<p>Do read the notes in <code class="docutils literal"><span class="pre">settings.py</span></code> related to the
+<a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> <a class="reference internal" href="skyline.html#settings.ANALYZER_OPTIMUM_RUN_DURATION" title="settings.ANALYZER_OPTIMUM_RUN_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_OPTIMUM_RUN_DURATION</span></code></a>
+if you are only processing a few 1000 metrics with a data point every minute
+then the optimum settings will most likely be something similar to:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ANALYZER_PROCESSES</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">ANALYZER_OPTIMUM_RUN_DURATION</span> <span class="o">=</span> <span class="mi">60</span>
+</pre></div>
+</div>
+<p>Python multiprocessing is not very efficient if it is not need, in fact
+the overall overhead of the spawned processes ends up greater than the
+overhead of processing with a single process.</p>
+<p>See <a class="reference external" href="analyzer-optimizations.html">Analyzer Optimizations</a></p>
+<div class="section" id="algorithms">
+<h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this headline">¶</a></h2>
+<p>Skyline Analyzer was designed to handle a very large number of metrics,
+for which picking models by hand would prove infeasible. As such,
+Skyline Analyzer relies upon the consensus of an ensemble of a few
+different algorithms. If the majority of algorithms agree that any given
+metric is anomalous, the metric will be classified as anomalous. It may
+then be surfaced to the Webapp or pushed to mirage, if Mirage is enabled and
+configured for the namespace of the anomalous metric.</p>
+<p>Currently, Skyline does not come with very many algorithmic batteries
+included. This is by design. Included are a few algorithms to get you
+started, but you are not obligated to use them and are encouraged to
+extend them to accommodate your particular data. Indeed, you are
+ultimately responsible for using the proper statistical tools the
+correct way with respect to your data.</p>
+<p>Of course, we welcome all pull requests containing additional algorithms
+to make this tool as robust as possible. To this end, the algorithms
+were designed to be very easy to extend and modify. All algorithms are
+located in <code class="docutils literal"><span class="pre">algorithms.py</span></code>.  To add an algorithm to the ensemble, simply
+define your algorithm and add the name of your <a class="reference internal" href="skyline.html#settings.ALGORITHMS" title="settings.ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALGORITHMS</span></code></a>.
+Make sure your algorithm returns either <code class="docutils literal"><span class="pre">True</span></code>, <code class="docutils literal"><span class="pre">False</span></code> or <code class="docutils literal"><span class="pre">None</span></code>, and be
+sure to update the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> setting appropriately.</p>
+</div>
+<div class="section" id="algorithm-philosophy">
+<h2>Algorithm philosophy<a class="headerlink" href="#algorithm-philosophy" title="Permalink to this headline">¶</a></h2>
+<p>The basic algorithm is based on 3-sigma, derived from Shewhart&#8217;s
+<a class="reference external" href="http://en.wikipedia.org/wiki/Statistical_process_control">statistical process
+control</a>.
+However, you are not limited to 3-sigma based algorithms if you do not
+want to use them - as long as you return a boolean, you can add any sort
+of algorithm you like to run on timeseries and vote.</p>
+</div>
+<div class="section" id="explanation-of-exceptions">
+<h2>Explanation of Exceptions<a class="headerlink" href="#explanation-of-exceptions" title="Permalink to this headline">¶</a></h2>
+<p><strong>TooShort</strong>: The timeseries was too short, as defined in
+<a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a></p>
+<p><strong>Incomplete</strong>: The timeseries was less than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>
+seconds long</p>
+<p><strong>Stale</strong>: The timeseries has not received a new metric in more than
+<a class="reference internal" href="skyline.html#settings.STALE_PERIOD" title="settings.STALE_PERIOD"><code class="xref py py-mod docutils literal"><span class="pre">settings.STALE_PERIOD</span></code></a> seconds</p>
+<p><strong>Boring</strong>: The timeseries has been the same value for the past
+<a class="reference internal" href="skyline.html#settings.MAX_TOLERABLE_BOREDOM" title="settings.MAX_TOLERABLE_BOREDOM"><code class="xref py py-mod docutils literal"><span class="pre">settings.MAX_TOLERABLE_BOREDOM</span></code></a> seconds</p>
+<p><strong>Other</strong>: There&#8217;s probably an error in the code, if you&#8217;ve been making
+changes or we have.</p>
+</div>
+<div class="section" id="push-to-mirage">
+<h2>Push to Mirage<a class="headerlink" href="#push-to-mirage" title="Permalink to this headline">¶</a></h2>
+<p>Analyzer can push anomalous metrics that have a seasonality /
+periodicity that is greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> to the mirage
+service, see <a class="reference external" href="mirage.html">Mirage</a>.</p>
+</div>
+<div class="section" id="what-analyzer-does">
+<h2>What <strong>Analyzer</strong> does<a class="headerlink" href="#what-analyzer-does" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Analyzer determines all unique metrics in Redis and divides them
+between <code class="docutils literal"><span class="pre">ANALYZER_PROCESSES</span></code> to be analysed between
+<code class="docutils literal"><span class="pre">spin_process</span></code> processes.</li>
+<li>The spawned <code class="docutils literal"><span class="pre">spin_process</span></code> processes pull the all timeseries for
+their <code class="docutils literal"><span class="pre">assigned_metrics</span></code> they have been assigned from Redis and
+iterate through each metric and analyze the timeseries against the
+<code class="docutils literal"><span class="pre">ALGORITHMS</span></code> declared in the settings.py</li>
+<li>The <code class="docutils literal"><span class="pre">spin_process</span></code> will add any metric that it finds anomalous
+(triggers <code class="docutils literal"><span class="pre">CONSENSUS</span></code> number of algorithms) to a list of
+anomalous_metrics.</li>
+<li>The parent Analyzer process will then check every metric in the
+anomalous_metrics list to see if:<ul>
+<li>If the metric matches an <code class="docutils literal"><span class="pre">ALERT</span></code> tuple in settings.py</li>
+<li>If a Mirage parameter is set in the tuple, then Analyzer does not
+alert, but hands the metric off to Mirage by adding a Mirage check
+file.</li>
+<li>If <code class="docutils literal"><span class="pre">ENABLE_CRUCIBLE</span></code> is True, Analyzer adds timeseries as a json
+file and a Crucible check file.</li>
+<li>If no Mirage parameter, but the metric matches an <code class="docutils literal"><span class="pre">ALERT</span></code> tuple
+namespace, Analyzer then checks if an Analyzer alert key exists for
+the metric by querying the metric&#8217;s Analyzer alert key in Redis.</li>
+<li>If no alert key, Analyzer sends alert/s to the configured alerters
+and sets the metric&#8217;s Analyzer alert key for <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code>
+seconds.</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="analyzer-optimizations.html" class="btn btn-neutral float-right" title="Analyzer Optimizations" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="horizon.html" class="btn btn-neutral" title="Horizon" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 *.log
-settings.py
 dump.rdb
 nohup.out
+docs/_build/doctrees
+__pycache__/
