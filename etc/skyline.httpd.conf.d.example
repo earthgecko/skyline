@@ -30,6 +30,9 @@ Listen 8080
     ErrorLog "<YOUR_ERROR_LOG>"
     CustomLog "<YOUR_CUSTOM_LOG>"
 
+    # Mitigate httpoxy vulnerability
+    RequestHeader unset Proxy early
+
     # Set the Strict-Transport-Security and X-Frame-Options headers
     Header always set Strict-Transport-Security "max-age=63072000; includeSubdomains; preload"
     Header always append X-Frame-Options SAMEORIGIN

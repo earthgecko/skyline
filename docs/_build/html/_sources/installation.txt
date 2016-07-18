@@ -163,7 +163,7 @@ environment, it does not lend itself to repeatability or a common known state.
     vi settings.py
 
 - If you are **upgrading**, at this point return to the
-  `Upgrading <webapp.html#apache-and-gunicorn>`__ page.
+  `Upgrading <upgrading.html>`__ page.
 - Before you test Skyline by seeding Redis with some test data, ensure
   that you have configured the firewall/iptables with the appropriate restricted
   access.

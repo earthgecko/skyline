@@ -138,6 +138,6 @@ documentation are still appropriate.
 - If you added the new ``skyline_test.alerters.test`` alerts tuples to your
   ``settings.py`` you can test them now, see `Alert testing <alert-testing.html>`__
 - Look at implementing the other new features at your leisure
-- Panorama was probably the quickest win if you opted to not install it
+- Panorama is probably the quickest win if you opted to not install it
 - Boundary and Mirage will take a little assessment to see what metrics
   you want to configure them for.
