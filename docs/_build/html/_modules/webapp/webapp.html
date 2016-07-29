@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.webapp &mdash; Skyline 1.0.1-dev documentation</title>
+  <title>webapp.webapp &mdash; Skyline 1.0.2-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.1-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.2-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -166,7 +166,7 @@
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
-<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">abort</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">abort</span><span class="p">,</span> <span class="n">flash</span>
 <span class="kn">from</span> <span class="nn">daemon</span> <span class="kn">import</span> <span class="n">runner</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isdir</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
@@ -183,6 +183,8 @@
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="c1"># flask things for rebrow</span>
 <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">session</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span> <span class="n">Markup</span><span class="p">,</span> <span class="n">json</span>
+<span class="c1"># For secret_key</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
 
 <span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
 
@@ -210,13 +212,29 @@
 
 <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
 
-<span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="c1"># ENABLE_WEBAPP_DEBUG = True</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid5</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">NAMESPACE_DNS</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">))</span>
 <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PROPAGATE_EXCEPTIONS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
 
 <span class="n">graph_url_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">)</span>
 <span class="n">PANORAMA_GRAPH_URL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\/render\/.*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">graph_url_string</span><span class="p">)</span>
+
+<span class="c1"># @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly</span>
+<span class="c1"># Defaults for momentjs to work if the setttings.py was not updated</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">WEBAPP_USER_TIMEZONE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_USER_TIMEZONE</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">WEBAPP_USER_TIMEZONE</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">WEBAPP_FIXED_TIMEZONE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_FIXED_TIMEZONE</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">WEBAPP_FIXED_TIMEZONE</span> <span class="o">=</span> <span class="s1">&#39;Etc/GMT+0&#39;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">WEBAPP_JAVASCRIPT_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_JAVASCRIPT_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">WEBAPP_JAVASCRIPT_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
 
 
 <span class="nd">@app.before_request</span>
@@ -345,7 +363,10 @@
                         <span class="s1">&#39;PANORAMA_DBPORT&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">,</span>
                         <span class="s1">&#39;PANORAMA_DBUSER&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
                         <span class="s1">&#39;PANORAMA_DBUSERPASS&#39;</span><span class="p">:</span> <span class="s1">&#39;redacted&#39;</span><span class="p">,</span>
-                        <span class="s1">&#39;PANORAMA_GRAPH_URL&#39;</span><span class="p">:</span> <span class="n">PANORAMA_GRAPH_URL</span>
+                        <span class="s1">&#39;PANORAMA_GRAPH_URL&#39;</span><span class="p">:</span> <span class="n">PANORAMA_GRAPH_URL</span><span class="p">,</span>
+                        <span class="s1">&#39;WEBAPP_USER_TIMEZONE&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_USER_TIMEZONE</span><span class="p">,</span>
+                        <span class="s1">&#39;WEBAPP_FIXED_TIMEZONE&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_FIXED_TIMEZONE</span><span class="p">,</span>
+                        <span class="s1">&#39;WEBAPP_JAVASCRIPT_DEBUG&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_JAVASCRIPT_DEBUG</span>
                         <span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;error: &quot;</span> <span class="o">+</span> <span class="n">e</span>
@@ -1000,7 +1021,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.1-dev',
+            VERSION:'1.0.2-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

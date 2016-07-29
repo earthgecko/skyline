@@ -1225,3 +1225,35 @@ WEBAPP_ALLOWED_IPS = ['127.0.0.1']
 :var WEBAPP_ALLOWED_IPS: The allowed IP addresses
 :vartype WEBAPP_ALLOWED_IPS: array
 """
+
+WEBAPP_USER_TIMEZONE = True
+"""
+:var WEBAPP_USER_TIMEZONE: This determines the user's timezone and
+    renders graphs with the user's date values.  If this is set to ``False`` the
+    timezone in :mod:`settings.WEBAPP_FIXED_TIMEZONE` is used.
+:vartype WEBAPP_USER_TIMEZONE: boolean
+"""
+
+WEBAPP_FIXED_TIMEZONE = 'Etc/GMT+0'
+"""
+:var WEBAPP_FIXED_TIMEZONE: You can specific a timezone you want the client
+    browser to render graph date and times in.  This setting is only used if the
+    :mod:`settings.WEBAPP_USER_TIMEZONE` is set to ``False``.
+    This must be a valid momentjs timezone name, see:
+    https://github.com/moment/moment-timezone/blob/develop/data/packed/latest.json
+:vartype WEBAPP_FIXED_TIMEZONE: str
+
+.. note:: Timezones, UTC and javascript Date
+    You only need to use the first element of the momentjs timezone string, some
+    examples, 'Europe/London', 'Etc/UTC', 'America/Los_Angeles'.
+    Because the Webapp is graphing using data UTC timestamps, you may may want
+    to display the graphs to users with a fixed timezone and not use the browser
+    timezone so that the Webapp graphs are the same in any location.
+
+"""
+
+WEBAPP_JAVASCRIPT_DEBUG = False
+"""
+:var WEBAPP_JAVASCRIPT_DEBUG: Enables some javascript console.log when enabled.
+:vartype WEBAPP_JAVASCRIPT_DEBUG: boolean
+"""

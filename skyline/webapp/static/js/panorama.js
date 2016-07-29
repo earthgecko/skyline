@@ -16,13 +16,48 @@ var GRAPH_URL,
     time_shift,
     fetch_from_timestamp,
     fetch_until_timestamp,
-    datapoints;
+    datapoints,
+    g_timezoneName,
+    WEBAPP_JAVASCRIPT_DEBUG,
+    WEBAPP_USER_TIMEZONE,
+    WEBAPP_FIXED_TIMEZONE;
 
 var panorama_mini_data = [];
 var panorama_big_data = [];
 var datapoints = [];
 
 var initial = true;
+
+// @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
+$.get('/app_settings', function(tz_json){
+    data = JSON.parse(tz_json);
+    WEBAPP_JAVASCRIPT_DEBUG = data['WEBAPP_JAVASCRIPT_DEBUG'];
+    WEBAPP_USER_TIMEZONE = data['WEBAPP_USER_TIMEZONE'];
+    if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+      console.log('WEBAPP_USER_TIMEZONE: ' + WEBAPP_USER_TIMEZONE);
+    }
+    WEBAPP_FIXED_TIMEZONE = data['WEBAPP_FIXED_TIMEZONE'];
+    if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+      console.log('WEBAPP_FIXED_TIMEZONE: ' + WEBAPP_FIXED_TIMEZONE);
+    }
+    if (WEBAPP_USER_TIMEZONE == true) {
+      g_timezoneName = moment.tz.guess();
+      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+        console.log('Using WEBAPP_USER_TIMEZONE g_timezoneName: ' + g_timezoneName);
+      }
+    } else {
+      g_timezoneName = WEBAPP_FIXED_TIMEZONE;
+      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+        console.log('Using WEBAPP_FIXED_TIMEZONE g_timezoneName: ' + g_timezoneName);
+      }
+    }
+    if (typeof g_timezoneName === 'undefined') {
+      g_timezoneName = 'Etc/GMT+0';
+      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+        console.log('initialisation forced g_timezoneName: ' + g_timezoneName);
+      }
+    }
+});
 
 // This function call is hardcoded as JSONP in the panorama.json file
 var handle_data = function(panorama_data) {
@@ -40,21 +75,31 @@ var handle_data = function(panorama_data) {
         created_date = metric[5];
 
         time_shift = parseInt(full_duration) / 24;
+        five_percent_seconds = Math.round((parseInt(full_duration) / 100) * 5);
+        time_shift = parseInt(five_percent_seconds);
+        time_shift_hours = (parseInt(time_shift) / 60) / 60;
+
+        // We fetch time_shift less data
+        fetch_from_timestamp = (parseInt(from_timestamp) - parseInt(time_shift));
+        // We fetch time_shift more of data
+        fetch_until_timestamp = (parseInt(until_timestamp) + parseInt(time_shift));
 
 /* @modified 20160703 - Feature #1464: Webapp rebrow
 dygraph was just updated - no more strftime, now include strftime-0.9.2 for
 dygraph-1.1.1 */
 //        from_date = new Date(from_timestamp * 1000).strftime('%H:%M_%Y%m%d');
 //        until_date = new Date(until_timestamp * 1000).strftime('%H:%M_%Y%m%d');
-        from_date = strftime('%H:%M_%Y%m%d', new Date(from_timestamp * 1000));
-        until_date = strftime('%H:%M_%Y%m%d', new Date(until_timestamp * 1000));
+// @modified 20160727 - Bug #1524: Panorama dygraph not aligning correctly
+// We have to handle the window relative to the full_duration of the
+// timeseries.  So we timeshit 5 percent
+//        from_date = strftime('%H:%M_%Y%m%d', new Date(from_timestamp * 1000));
+//        until_date = strftime('%H:%M_%Y%m%d', new Date(until_timestamp * 1000));
+        from_date = strftime('%H:%M_%Y%m%d', new Date(fetch_from_timestamp * 1000));
+        until_date = strftime('%H:%M_%Y%m%d', new Date(fetch_until_timestamp * 1000));
 
-
-//        var src = GRAPH_URL.replace('%s', name);
         var src = PANORAMA_GRAPH_URL + '/render/?width=1400&from=' + from_date + '&until=' + until_date + '&target=' + name
 
         // Add a space after the metric name to make each unique
-//        to_append = "<div class='sub'><a target='_blank' href='" + src + "'><div class='name'>" + anomaly_id + " </div></a>&nbsp;&nbsp;"
         to_append = "<div class='sub'><a target='_blank' href='" + src + "'><div class='anomaly_id'>" + anomaly_id + " </div></a>&nbsp;&nbsp;"
         to_append += "<div class='metric_name'>" + name + "</div>";
         to_append += "<div class='selected_anomaly_id'>" + parseInt(metric[0]) + "</div>";
@@ -77,6 +122,9 @@ dygraph-1.1.1 */
         created_date = panaroma_date[0][5];
         from_timestamp = (until_timestamp - full_duration);
         time_shift = parseInt(full_duration) / 24;
+
+        five_percent_seconds = Math.round((parseInt(full_duration) / 100) * 5);
+        time_shift = parseInt(five_percent_seconds);
 
         // We fetch time_shift less data
         fetch_from_timestamp = (from_timestamp + time_shift);
@@ -113,6 +161,11 @@ var handle_interaction = function() {
 
     full_duration = parseInt(until_timestamp) - parseInt(from_timestamp);
     time_shift = parseInt(full_duration) / 24;
+    // @modified 20160727 - Bug #1524: Panorama dygraph not aligning correctly
+    // We have to handle the window relative to the full_duration of the
+    // timeseries.  So we timeshit 5 percent
+    five_percent_seconds = Math.round((parseInt(full_duration) / 100) * 5);
+    time_shift = parseInt(five_percent_seconds);
     time_shift_hours = (parseInt(time_shift) / 60) / 60;
 
     // We fetch time_shift less data
@@ -141,7 +194,7 @@ var handle_interaction = function() {
     graph_cd_string = "created: " + created_date;
     $('#graph_subtitle_created_date').html(graph_cd_string);
 
-    graph_ts_string = "time shifted (hours): " + parseInt(time_shift_hours);
+    graph_ts_string = "Graph rendered using timezone " + g_timezoneName + " - FULL DURATION has been time shifted " + parseInt(time_shift_hours) + " hours to shift the anomaly into view";
     $('#time_shift').html(graph_ts_string);
 
     // Bleh, hack to fix up the layout on load
@@ -149,15 +202,95 @@ var handle_interaction = function() {
 }
 
 $(function(){
+
+// @madded 20160726 - Bug #1524: Panorama dygraph not aligning correctly
+// Eddified's elegent hack - http://stackoverflow.com/a/24196184
+// START
+//
+    if (WEBAPP_USER_TIMEZONE == true) {
+      g_timezoneName = moment.tz.guess();
+      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+        console.log('Using WEBAPP_USER_TIMEZONE g_timezoneName: ' + g_timezoneName);
+      }
+    } else {
+      g_timezoneName = WEBAPP_FIXED_TIMEZONE;
+      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+        console.log('Using WEBAPP_FIXED_TIMEZONE g_timezoneName: ' + g_timezoneName);
+      }
+    }
+    if (typeof g_timezoneName === 'undefined') {
+      g_timezoneName = 'Etc/GMT+0';
+      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+        console.log('initialisation forced g_timezoneName: ' + g_timezoneName);
+      }
+    }
+
+    function getMomentTZ(d, interpret) {
+        // Always setting a timezone seems to prevent issues with daylight savings time boundaries, even when the timezone we are setting is the same as the browser: https://github.com/moment/moment/issues/1709
+        // The moment tz docs state this:
+        //  moment.tz(..., String) is used to create a moment with a timezone, and moment().tz(String) is used to change the timezone on an existing moment.
+        // Here is some code demonstrating the difference.
+        //  d = new Date()
+        //  d.getTime() / 1000                                   // 1448297005.27
+        //  moment(d).tz(tzStringName).toDate().getTime() / 1000 // 1448297005.27
+        //  moment.tz(d, tzStringName).toDate().getTime() / 1000 // 1448300605.27
+        if (interpret) {
+            return moment.tz(d, g_timezoneName); // if d is a javascript Date object, the resulting moment may have a *different* epoch than the input Date d.
+        } else {
+            return moment(d).tz(g_timezoneName); // does not change epoch value, just outputs same epoch value as different timezone
+        }
+    }
+
+    /** Elegant hack: overwrite Dygraph's DateAccessorsUTC to return values
+     * according to the currently selected timezone (which is stored in
+     * g_timezoneName) instead of UTC.
+     * This hack has no effect unless the 'labelsUTC' setting is true. See Dygraph
+     * documentation regarding labelsUTC flag.
+     */
+    Dygraph.DateAccessorsUTC = {
+        getFullYear:     function(d) {return getMomentTZ(d, false).year();},
+        getMonth:        function(d) {return getMomentTZ(d, false).month();},
+        getDate:         function(d) {return getMomentTZ(d, false).date();},
+        getHours:        function(d) {return getMomentTZ(d, false).hour();},
+        getMinutes:      function(d) {return getMomentTZ(d, false).minute();},
+        getSeconds:      function(d) {return getMomentTZ(d, false).second();},
+        getMilliseconds: function(d) {return getMomentTZ(d, false).millisecond();},
+        getDay:          function(d) {return getMomentTZ(d, false).day();},
+        makeDate:        function(y, m, d, hh, mm, ss, ms) {
+            return getMomentTZ({
+                year: y,
+                month: m,
+                day: d,
+                hour: hh,
+                minute: mm,
+                second: ss,
+                millisecond: ms,
+            }, true).toDate();
+        },
+    };
+
+    // ok, now be sure to set labelsUTC option to true
+//    var graphoptions = {
+//      labels: ['Time', 'Impressions', 'Clicks'],
+//      labelsUTC: true
+//    };
+    //var g = new Dygraph(chart, data, graphoptions);
+// END
+
     big_graph = new Dygraph(document.getElementById("graph"), panorama_big_data, {
         labels: [ 'Date', '' ],
+        // @added 20160726 - Bug #1524: Panorama dygraph not aligning correctly
+        // labelsUTC for Eddified's elegent hack
+        labelsUTC: true,
         labelsDiv: document.getElementById('big_label'),
 /* @modified 20160703 - Feature #1464: Webapp rebrow
 dygraph was just updated - per-axis defines now - dygraph-1.1.1 */
 //        xAxisLabelWidth: 35,
 //        yAxisLabelWidth: 35,
         axisLabelFontSize: 9,
-        rollPeriod: 2,
+// @modified 20160727 - Bug #1524: Panorama dygraph not aligning correctly
+// No rollPeriod
+//        rollPeriod: 2,
 //        drawXGrid: true,
 //        drawYGrid: false,
         interactionModel: {},
@@ -165,18 +298,22 @@ dygraph was just updated - per-axis defines now - dygraph-1.1.1 */
 //        drawXAxis: true,
         underlayCallback: function(canvas, area, g) {
             var full_duration = parseInt(until_timestamp) - parseInt(from_timestamp);
-
             var d = new Date();
             var t = d.getTime();
             var time_now = Math.round(t / 1000);
             var anomaly_age = parseInt(time_now) - parseInt(from_timestamp)
-            var time_shift = parseInt(full_duration) / 96;
-            var from_here = (parseInt(until_timestamp) - parseInt(time_shift));
-            if (anomaly_age < 3600) {
-                var to_here = (parseInt(until_timestamp) + 900);
+            // @modified 20160727 - Bug #1524: Panorama dygraph not aligning correctly
+            //var time_shift = parseInt(full_duration) / 96;
+            // We have to handle the window relative to the full_duration of the
+            // timeseries, use percantage
+            if (full_duration > 120000) {
+              var window_seconds = Math.round((parseInt(full_duration) / 100) * 1);
             } else {
-                var to_here = (parseInt(until_timestamp) + parseInt(time_shift));
+              var window_seconds = Math.round((parseInt(full_duration) / 100) * 2);
             }
+
+            var from_here = (parseInt(until_timestamp) - parseInt(window_seconds));
+            var to_here = (parseInt(until_timestamp) + parseInt(window_seconds));
 
             var bottom_left = g.toDomXCoord(from_here);
             var top_right = g.toDomXCoord(to_here);
@@ -232,14 +369,45 @@ dygraph was just updated - per-axis defines now - dygraph-1.1.1 */
                 valueFormatter: function(ms) {
 // @modified 20160703 - Feature #1464: Webapp rebrow - dygraph-1.1.1 no strftime
 //                  return new Date(ms * 1000).strftime('%Y-%m-%d %H:%M') + ' ';
-                  vF_now_date = strftime('%Y-%m-%d %H:%M', new Date(ms * 1000));
+                  // vF_now_date = strftime('%Y-%m-%d %H:%M', new Date(ms * 1000));
+// @modified 20160726 - Bug #1524: Panorama dygraph not aligning correctly
+// momentjs tz not using javascript Date
+//                  vF_now_date = strftime('%Y-%m-%d %H:%M', new Date(ms * 1000));
+                  if (WEBAPP_USER_TIMEZONE == true) {
+                    tz_date = moment.tz(moment.unix(ms), g_timezoneName);
+                    if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+                      console.log(tz_date);
+                    }
+                    utc_date = tz_date.format("YYYY-MM-DD HH:mm");
+                    if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+                      console.log(utc_date);
+                    }
+                  } else {
+                    utc_date = moment.unix(ms).utc().format("YYYY-MM-DD HH:mm");
+                  }
+                  vF_now_date = utc_date
                   vF_string = vF_now_date + ' ';
                   return vF_string;
                 },
                 axisLabelFormatter: function(ms, gran, opts, g) {
 // @modified 20160703 - Feature #1464: Webapp rebrow - dygraph-1.1.1 no strftime
 //                    return new Date(ms * 1000).strftime('%H:%M');
-                    now_date = strftime('%H:%M', new Date(ms * 1000));
+                    // now_date = strftime('%H:%M', new Date(ms * 1000));
+// @modified 20160726 - Bug #1524: Panorama dygraph not aligning correctly
+//                    now_date = strftime('%H:%M', new Date(ms * 1000));
+                    if (WEBAPP_USER_TIMEZONE == true) {
+                      tz_date = moment.tz(moment.unix(ms), g_timezoneName);
+                      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+                        console.log(tz_date);
+                      }
+                      utc_date = tz_date.format("HH:mm");
+                      if (WEBAPP_JAVASCRIPT_DEBUG == true) {
+                        console.log(utc_date);
+                      }
+                    } else {
+                      utc_date = moment.unix(ms).utc().format("HH:mm");
+                    }
+                    now_date = utc_date
                     return now_date;
                 },
                 ticker: Dygraph.dateTicker,
@@ -264,6 +432,10 @@ dygraph was just updated - per-axis defines now - dygraph-1.1.1 */
         FULL_NAMESPACE = data['FULL_NAMESPACE'];
         GRAPH_URL = data['GRAPH_URL'];
         PANORAMA_GRAPH_URL = data['PANORAMA_GRAPH_URL'];
+// @added 20160726 - Bug #1524: Panorama dygraph not aligning correctly
+        WEBAPP_JAVASCRIPT_DEBUG = data['WEBAPP_JAVASCRIPT_DEBUG'];
+        WEBAPP_USER_TIMEZONE = data['WEBAPP_USER_TIMEZONE'];
+        WEBAPP_FIXED_TIMEZONE = data['WEBAPP_FIXED_TIMEZONE'];
 
         // Get initial data after getting the host variables
         pull_panorama_data();

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Webapp &mdash; Skyline 1.0.1-dev documentation</title>
+  <title>Webapp &mdash; Skyline 1.0.2-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.1-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.2-dev documentation" href="index.html"/>
         <link rel="next" title="Redis integration" href="redis-integration.html"/>
         <link rel="prev" title="Panorama" href="panorama.html"/> 
 
@@ -122,6 +122,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#panorama-web-ui">Panorama web UI</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#basic-function">Basic function</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#closest-approximations">Closest approximations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-zones">Time zones</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#rebrow"><span class="red">re</span><span class="brow">brow</span></a><ul>
@@ -331,6 +332,20 @@ horizontal line as the indicator, rather than the thinner, normal red horizontal
 line.</p>
 <img alt="_images/panorama.closest.approximation.aggregrated.png" src="_images/panorama.closest.approximation.aggregrated.png" />
 </div>
+<div class="section" id="time-zones">
+<h3>Time zones<a class="headerlink" href="#time-zones" title="Permalink to this headline">¶</a></h3>
+<p>It must be noted that the Panorama view graphs can be rendered differently
+depending on the browser and server time zone.  The original dygraph renders
+used the javascript <code class="docutils literal"><span class="pre">Date</span></code> function to generate the datetime ticker, etc.  If
+your Graphite server happens to be in a different time zone to user browser,
+this would display clock skews where the Panorama reported anomaly details do
+not match the graph times displayed.  Webapp in the Panorama view allows you to
+either use the browser time zone or use a fixed timezone so that all rendered
+graphs are the same no matter where is the world they are viewed from.</p>
+<p>By default, the browser time zone setting is used, as per the original Skyline
+UI, you can use <a class="reference internal" href="skyline.html#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_USER_TIMEZONE</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_FIXED_TIMEZONE</span></code></a> to modify this behavior if required.</p>
+</div>
 </div>
 <div class="section" id="rebrow">
 <h2><span class="red">re</span><span class="brow">brow</span><a class="headerlink" href="#rebrow" title="Permalink to this headline">¶</a></h2>
@@ -406,7 +421,7 @@ browser to graph the timeseries.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.1-dev',
+            VERSION:'1.0.2-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

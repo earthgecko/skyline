@@ -547,7 +547,7 @@ def get_graphite_metric(
             if settings.ENABLE_DEBUG:
                 current_logger.info('data retrieved OK')
         except:
-            datapoints = [[None, int(graphite_until)]]
+            datapoints = [[None, str(graphite_until)]]
             current_logger.error('error :: data retrieval failed')
 
         converted = []
