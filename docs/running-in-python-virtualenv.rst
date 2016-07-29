@@ -35,7 +35,7 @@ requires the following system dependencies:
 
 .. code-block:: bash
 
-    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev:amd64 python-pip
+    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev python-pip
 
 virtualenv
 ~~~~~~~~~~
