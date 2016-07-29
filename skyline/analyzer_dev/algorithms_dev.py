@@ -328,14 +328,14 @@ def ks_test(timeseries):
         return None
 
 
-def determine_median(array):
+def determine_median(timeseries):
     """
-    Determine the median in an array of values
+    Determine the median of the values in the timeseries
     """
 
     # logger.info('Running ' + str(get_function_name()))
     try:
-        np_array = np.array(array)
+        np_array = pandas.Series([x[1] for x in timeseries])
     except:
         return False
     try:
