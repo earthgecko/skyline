@@ -1,4 +1,4 @@
-CREATE SCHEMA `skyline` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE SCHEMA IF NOT EXISTS `skyline` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 use skyline;
 
@@ -15,35 +15,35 @@ NOTES:
 
 */
 
-CREATE TABLE `hosts` (
+CREATE TABLE IF NOT EXISTS `hosts` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT 'host unique id',
   `host` VARCHAR(255) NOT NULL COMMENT 'host name, e.g. skyline-prod-1',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
   INDEX `host_id` (`id`, `host`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 
-CREATE TABLE `apps` (
+CREATE TABLE IF NOT EXISTS `apps` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'app unique id',
   `app` VARCHAR(255) NOT NULL COMMENT 'app name, e.g. analyzer',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
   INDEX `app` (`id`,`app`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 
-CREATE TABLE `algorithms` (
+CREATE TABLE IF NOT EXISTS `algorithms` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'algorithm unique id',
   `algorithm` VARCHAR(255) NOT NULL COMMENT 'algorithm name, e.g. least_squares`',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
   INDEX `algorithm_id` (`id`,`algorithm`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 
-CREATE TABLE `sources` (
+CREATE TABLE IF NOT EXISTS `sources` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'source unique id',
   `source` VARCHAR(255) NOT NULL COMMENT 'name of the data source, e.g. graphite, Kepler, webcam',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (`id`),
   INDEX `app` (`id`,`source` ASC)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 
-CREATE TABLE `metrics` (
+CREATE TABLE IF NOT EXISTS `metrics` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'metric unique id',
   `metric` VARCHAR(255) NOT NULL COMMENT 'metric name',
   `ionosphere_enabled` tinyint(1) DEFAULT NULL COMMENT 'are ionosphere rules enabled 1 or not enabled 0 on the metric',
@@ -51,7 +51,7 @@ CREATE TABLE `metrics` (
   PRIMARY KEY (id),
   INDEX `metric` (`id`,`metric`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 
-CREATE TABLE `anomalies` (
+CREATE TABLE IF NOT EXISTS `anomalies` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'anomaly unique id',
   `metric_id` INT(11) NOT NULL COMMENT 'metric id',
   `host_id` INT(11) NOT NULL COMMENT 'host id',
@@ -78,7 +78,7 @@ CREATE TABLE `anomalies` (
     ENGINE=InnoDB;
 
 /*
-CREATE TABLE `skyline`.`ionosphere` (
+CREATE TABLE IF NOT EXISTS `skyline`.`ionosphere` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere rule unique id',
   `metric_id` INT(11) NOT NULL COMMENT 'metric id',
   `enabled` tinyint(1) DEFAULT NULL COMMENT 'rule is enabled 1 or not enabled 0',
