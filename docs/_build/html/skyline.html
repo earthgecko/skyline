@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.0.0-dev documentation</title>
+  <title>skyline package &mdash; Skyline 1.0.1-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.1-dev documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -1120,6 +1120,33 @@ should surface the metric timeseries for</li>
 <p class="first admonition-title">Note</p>
 <p class="last">Consider using the default skyline_test.alerters.test for testing
 alerts with.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.PLOT_REDIS_DATA">
+<code class="descname">PLOT_REDIS_DATA</code><em class="property"> = True</em><a class="headerlink" href="#settings.PLOT_REDIS_DATA" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><strong>PLOT_REDIS_DATA</strong></a> (<em>boolean</em>) &#8211; Plot graph using Redis timeseries data on with
+Analyzer alerts.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li>There are times when Analyzer alerts have no data in the Graphite graphs
+and/or the data in the Graphite graph is skewed due to retentions aggregation.
+This mitigates that by creating a graph using the Redis timeseries data and
+embedding the image in the Analyzer alerts as well.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The Redis data plot has the following additional information as well,
+the 3sigma upper (and if applicable lower) bounds and the mean are plotted
+and reported too.  Although less is more effective, in this case getting a
+visualisation of the 3sigma boundaries is informative.</p>
 </div>
 </dd></dl>
 
@@ -2382,7 +2409,7 @@ object, the object is returned</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0-dev',
+            VERSION:'1.0.1-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

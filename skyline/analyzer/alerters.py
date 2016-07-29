@@ -1,3 +1,4 @@
+import logging
 from smtplib import SMTP
 import alerters
 try:
@@ -6,6 +7,18 @@ except ImportError:
     import urllib.request
     import urllib.error
 from requests.utils import quote
+
+# Added for graphs showing Redis data
+import traceback
+import redis
+from msgpack import Unpacker
+import datetime as dt
+import matplotlib.pyplot as plt
+from matplotlib.pylab import rcParams
+from matplotlib.dates import DateFormatter
+import io
+import numpy as np
+import pandas as pd
 
 import os.path
 import sys
@@ -23,6 +36,14 @@ if python_version == 3:
     from email.mime.image import MIMEImage
 
 import settings
+import skyline_version
+
+skyline_app = 'analyzer'
+skyline_app_logger = '%sLog' % skyline_app
+logger = logging.getLogger(skyline_app_logger)
+skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
+
+skyline_version = skyline_version.__absolute_version__
 
 """
 Create any alerter you want here. The function will be invoked from trigger_alert.
@@ -52,6 +73,10 @@ def alert_smtp(alert, metric):
     recipients that are configured for the metric.
 
     """
+    LOCAL_DEBUG = False
+    logger = logging.getLogger(skyline_app_logger)
+    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+        logger.info('debug :: alert_smtp - sending smtp alert')
 
     # FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
     # in the graph
@@ -70,6 +95,8 @@ def alert_smtp(alert, metric):
         recipients = [recipients]
 
     unencoded_graph_title = 'Skyline Analyzer - ALERT at %s hours %s - %s' % (full_duration_in_hours, metric[1], metric[0])
+    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+        logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
 
@@ -89,8 +116,12 @@ def alert_smtp(alert, metric):
     if settings.SMTP_OPTS.get('embed-images'):
         try:
             image_data = urllib2.urlopen(link).read()
+            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - image data OK')
         except urllib2.URLError:
             image_data = None
+            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - image data None')
 
     # If we failed to get the image or if it was explicitly disabled,
     # use the image URL instead of the content.
@@ -98,23 +129,255 @@ def alert_smtp(alert, metric):
         img_tag = '<img src="%s"/>' % link
     else:
         img_tag = '<img src="cid:%s"/>' % content_id
+        if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+            logger.info('debug :: alert_smtp - img_tag: %s' % img_tag)
 
-    body = 'Skyline Analyzer alert <br> Anomalous value: %s <br> Next alert in: %s seconds <br> <a href="%s">%s</a>' % (metric[0], alert[2], link, img_tag)
+    redis_image_data = None
+    try:
+        plot_redis_data = settings.PLOT_REDIS_DATA
+    except:
+        plot_redis_data = False
+
+    if settings.SMTP_OPTS.get('embed-images') and plot_redis_data:
+        # Create graph from Redis data
+        try:
+            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        except:
+            logger.error('error :: alert_smtp - redis connection failed')
+
+        redis_metric_key = '%s%s' % (settings.FULL_NAMESPACE, metric[1])
+        try:
+            raw_series = REDIS_ALERTER_CONN.get(redis_metric_key)
+            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - raw_series: %s' % 'OK')
+        except:
+            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - raw_series: %s' % 'FAIL')
+
+        try:
+            unpacker = Unpacker(use_list=True)
+            unpacker.feed(raw_series)
+            timeseries_x = [float(item[0]) for item in unpacker]
+            unpacker = Unpacker(use_list=True)
+            unpacker.feed(raw_series)
+            timeseries_y = [item[1] for item in unpacker]
+
+            unpacker = Unpacker(use_list=False)
+            unpacker.feed(raw_series)
+            timeseries = list(unpacker)
+        except:
+            logger.error('error :: alert_smtp - unpack timeseries failed')
+            timeseries = None
+
+        pd_series_values = None
+        if timeseries:
+            try:
+                values = pd.Series([x[1] for x in timeseries])
+                # Because the truth value of a Series is ambiguous
+                pd_series_values = True
+            except:
+                logger.error('error :: alert_smtp - pandas value series on timeseries failed')
+
+        if pd_series_values:
+            try:
+                array_median = np.median(values)
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - values median: %s' % str(array_median))
+
+                array_amax = np.amax(values)
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - array_amax: %s' % str(array_amax))
+                array_amin = np.amin(values)
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - array_amin: %s' % str(array_amin))
+                mean = values.mean()
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - mean: %s' % str(mean))
+                stdDev = values.std()
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - stdDev: %s' % str(stdDev))
+
+                sigma3 = 3 * stdDev
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - sigma3: %s' % str(sigma3))
+
+                sigma3_series = [sigma3] * len(values)
+
+                sigma3_upper_bound = mean + sigma3
+                try:
+                    sigma3_lower_bound = mean - sigma3
+                except:
+                    sigma3_lower_bound = 0
+
+                sigma3_upper_series = [sigma3_upper_bound] * len(values)
+                sigma3_lower_series = [sigma3_lower_bound] * len(values)
+                amax_series = [array_amax] * len(values)
+                amin_series = [array_amin] * len(values)
+                mean_series = [mean] * len(values)
+            except:
+                logger.error('error :: alert_smtp - numpy ops on series failed')
+                mean_series = None
+
+        if mean_series:
+            graph_title = 'Skyline Analyzer - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (full_duration_in_hours, metric[1], metric[0])
+            if python_version == 3:
+                buf = io.StringIO()
+            else:
+                buf = io.BytesIO()
+
+            # Too big
+            # rcParams['figure.figsize'] = 12, 6
+            rcParams['figure.figsize'] = 8, 4
+            try:
+                # fig = plt.figure()
+                fig = plt.figure(frameon=False)
+                ax = fig.add_subplot(111)
+                ax.set_title(graph_title, fontsize='small')
+                ax.set_axis_bgcolor('black')
+                try:
+                    datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
+                    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                        logger.info('debug :: alert_smtp - datetimes: %s' % 'OK')
+                except:
+                    logger.error('error :: alert_smtp - datetimes: %s' % 'FAIL')
+
+                plt.xticks(rotation=0, horizontalalignment='center')
+                xfmt = DateFormatter('%a %H:%M')
+                plt.gca().xaxis.set_major_formatter(xfmt)
+
+                ax.xaxis.set_major_formatter(xfmt)
+
+                ax.plot(datetimes, timeseries_y, color='orange', lw=0.6, zorder=3)
+                ax.tick_params(axis='both', labelsize='xx-small')
+
+                max_value_label = 'max - %s' % str(array_amax)
+                ax.plot(datetimes, amax_series, lw=1, label=max_value_label, color='m', ls='--', zorder=4)
+                min_value_label = 'min - %s' % str(array_amin)
+                ax.plot(datetimes, amin_series, lw=1, label=min_value_label, color='b', ls='--', zorder=4)
+                mean_value_label = 'mean - %s' % str(mean)
+                ax.plot(datetimes, mean_series, lw=1.5, label=mean_value_label, color='g', ls='--', zorder=4)
+
+                sigma3_text = (r'3$\sigma$')
+                sigma3_label = '%s - %s' % (str(sigma3_text), str(sigma3))
+
+                sigma3_upper_label = '%s upper - %s' % (str(sigma3_text), str(sigma3_upper_bound))
+                ax.plot(datetimes, sigma3_upper_series, lw=1, label=sigma3_upper_label, color='r', ls='solid', zorder=4)
+
+                if sigma3_lower_bound > 0:
+                    sigma3_lower_label = '%s lower - %s' % (str(sigma3_text), str(sigma3_lower_bound))
+                    ax.plot(datetimes, sigma3_lower_series, lw=1, label=sigma3_lower_label, color='r', ls='solid', zorder=4)
+
+                ax.get_yaxis().get_major_formatter().set_useOffset(False)
+                ax.get_yaxis().get_major_formatter().set_scientific(False)
+
+                # Shrink current axis's height by 10% on the bottom
+                box = ax.get_position()
+                ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                                 box.width, box.height * 0.9])
+
+                # Put a legend below current axis
+                ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+                          fancybox=True, shadow=True, ncol=4, fontsize='x-small')
+                plt.rc('lines', lw=2, color='w')
+
+                plt.grid(True)
+
+                ax.grid(b=True, which='both', axis='both', color='lightgray',
+                        linestyle='solid', alpha=0.5, linewidth=0.6)
+                ax.set_axis_bgcolor('black')
+
+                rcParams['xtick.direction'] = 'out'
+                rcParams['ytick.direction'] = 'out'
+                ax.margins(y=.02, x=.03)
+                # tight_layout removes the legend box
+                # fig.tight_layout()
+                try:
+                    plt.savefig(buf, format='png')
+                    redis_graph_content_id = 'redis.%s' % metric[1]
+                    redis_image_data = True
+                    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                        logger.info('debug :: alert_smtp - savefig: %s' % 'OK')
+                except:
+                    logger.error('error :: alert_smtp - plt.savefig: %s' % 'FAIL')
+            except:
+                logger.error('error :: alert_smtp - could not build plot')
+                logger.info(traceback.format_exc())
+
+    if redis_image_data:
+        redis_img_tag = '<img src="cid:%s"/>' % redis_graph_content_id
+        if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+            logger.info('debug :: alert_smtp - redis_img_tag: %s' % redis_img_tag)
+    else:
+        redis_img_tag = '<img src="%s"/>' % 'none'
+
+    body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> Analyzer alert</font></h3><br>'
+    body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
+    body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
+    body += '<font color="black">At hours: %s</font><br>' % str(full_duration_in_hours)
+    body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+    if redis_image_data:
+        body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
+            str(array_amin), str(array_amax), str(mean))
+        body += '3-sigma: %s <br>' % str(sigma3)
+        body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
+            str(sigma3_upper_bound), str(sigma3_lower_bound))
+        body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
+        body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
+    if image_data:
+        body += '<h3><font color="black">Graphite data at FULL_DURATION (may be aggregated)</font></h3>'
+        body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
+        body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
+    if redis_image_data:
+        body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
+        body += 'however do note that will remove the 3-sigma and mean value too.</font>'
+    body += '<br>'
+    body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
 
     for recipient in recipients:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = '[Skyline alert] - Analyzer ALERT - ' + metric[1]
-        msg['From'] = sender
-        msg['To'] = recipient
+        try:
 
-        msg.attach(MIMEText(body, 'html'))
-        if image_data is not None:
-            msg_attachment = MIMEImage(image_data)
-            msg_attachment.add_header('Content-ID', '<%s>' % content_id)
-            msg.attach(msg_attachment)
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = '[Skyline alert] - Analyzer ALERT - ' + metric[1]
+            msg['From'] = sender
+            msg['To'] = recipient
+
+            msg.attach(MIMEText(body, 'html'))
+
+            if redis_image_data:
+                try:
+                    buf.seek(0)
+                    msg_plot_attachment = MIMEImage(buf.read())
+                    msg_plot_attachment.add_header('Content-ID', '<%s>' % redis_graph_content_id)
+                    msg.attach(msg_plot_attachment)
+                    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                        logger.info('debug :: alert_smtp - msg_plot_attachment - redis data done')
+                except:
+                    logger.error('error :: alert_smtp - msg_plot_attachment')
+                    logger.info(traceback.format_exc())
+
+            if image_data is not None:
+                try:
+                    msg_attachment = MIMEImage(image_data)
+                    msg_attachment.add_header('Content-ID', '<%s>' % content_id)
+                    msg.attach(msg_attachment)
+                    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                        logger.info('debug :: alert_smtp - msg_attachment - Graphite img source done')
+                except:
+                    logger.error('error :: alert_smtp - msg_attachment')
+                    logger.info(traceback.format_exc())
+        except:
+            logger.error('error :: alert_smtp - could not attach')
+            logger.info(traceback.format_exc())
 
         s = SMTP('127.0.0.1')
-        s.sendmail(sender, recipient, msg.as_string())
+        try:
+            s.sendmail(sender, recipient, msg.as_string())
+            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - message sent to %s OK' % str(recipient))
+        except:
+            logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
+            logger.info(traceback.format_exc())
+
         s.quit()
 
 

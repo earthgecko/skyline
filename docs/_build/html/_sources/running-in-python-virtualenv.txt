@@ -104,7 +104,7 @@ Once again using Python-2.7.12:
     PROJECT="skyline-py2712"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects"
-    virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
+    virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
 
 
 Make sure to add the ``/etc/skyline/skyline.conf`` file - see

@@ -36,10 +36,10 @@ The architecture/pipeline works very well at doing what it does.  It is solid an
 To overcome some of the limitations of Skyline.  This project extends it.
 
 The new look of Skyline apps
--------------------------
+----------------------------
 
 * Horizon - feed metrics to Redis via a pickle input
-* Analyzer - analyze metrics 
+* Analyzer - analyze metrics
 * Mirage - analyze specific metrics at a custom time range
 * Boundary - analyze specific timeseries for specific conditions
 * Crucible - store anomalous timeseries resources and ad-hoc analysis of any
@@ -55,6 +55,14 @@ desired apps need to be enabled.
 Skyline can now be feed/query and analyze timeseries on an ad-hoc basis, on the
 fly.  This means Skyline can now be used to analyze and process static data too,
 it is no longer just a machine/app metric fed system.
+
+A simplified workflow of Skyline
+--------------------------------
+
+.. figure:: images/skyline.simplified.workflow.annotated.gif
+   :alt: A simplified workflow of Skyline
+
+`Fullsize image <_images/skyline.simplified.workflow.annotated.gif>`_ for a clearer picture.
 
 What's new
 ----------

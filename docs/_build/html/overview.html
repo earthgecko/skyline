@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview &mdash; Skyline 1.0.0-dev documentation</title>
+  <title>Overview &mdash; Skyline 1.0.1-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.1-dev documentation" href="index.html"/>
         <link rel="next" title="Requirements" href="requirements.html"/>
         <link rel="prev" title="Skyline documentation" href="index.html"/> 
 
@@ -87,7 +87,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#a-brief-history">A brief history</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skyline-as-a-work-in-progress">Skyline - as a work in progress</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#the-new-look-skyline-apps">The new look Skyline apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-new-look-of-skyline-apps">The new look of Skyline apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-simplified-workflow-of-skyline">A simplified workflow of Skyline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-s-new">What&#8217;s new</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-s-old">What&#8217;s old</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-architecture-in-a-nutshell">The architecture in a nutshell</a></li>
@@ -184,21 +185,17 @@ actively maintaining Skyline in 2014.</p>
 <h2>Skyline - as a work in progress<a class="headerlink" href="#skyline-as-a-work-in-progress" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://www.etsy.com/">Etsy</a> found the &#8220;one size fits all approach&#8221; to anomaly detection wasn&#8217;t
 actually proving all that useful to them.</p>
-<p>There is some truth in that in terms of the one size fits all methodology that
+<p>There is <strong>some truth</strong> in that in terms of the one size fits all methodology that
 Skyline was framed around.  With hundreds of thousands of metrics this does make
 Skyline fairly hard to tame, in terms of how useful it is and tuning the noise
 is difficult.  Tuning the noise to make it constantly useful and not just noisy,
 removes the &#8220;without the need to configure a model/thresholds&#8221; element somewhat.</p>
 <p>So why continue developing Skyline?</p>
-<p>Because it works and because it is Python.  Being Python based allows Skyline to
-integrate with a lot of other awesome things in the machine learning and
-scientific Python ecosystem.  It&#8217;s modularity makes it is very flexible.</p>
-<p>With some time and tuning, Skyline works!</p>
-<p>The architecture/pipeline works very well at doing what it does, it is based on
-solid, battle tested components, Python and Redis.</p>
+<p>The architecture/pipeline works very well at doing what it does.  It is solid and battle tested.
+To overcome some of the limitations of Skyline.  This project extends it.</p>
 </div>
-<div class="section" id="the-new-look-skyline-apps">
-<h2>The new look Skyline apps<a class="headerlink" href="#the-new-look-skyline-apps" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-new-look-of-skyline-apps">
+<h2>The new look of Skyline apps<a class="headerlink" href="#the-new-look-of-skyline-apps" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Horizon - feed metrics to Redis via a pickle input</li>
 <li>Analyzer - analyze metrics</li>
@@ -216,6 +213,13 @@ desired apps need to be enabled.</p>
 <p>Skyline can now be feed/query and analyze timeseries on an ad-hoc basis, on the
 fly.  This means Skyline can now be used to analyze and process static data too,
 it is no longer just a machine/app metric fed system.</p>
+</div>
+<div class="section" id="a-simplified-workflow-of-skyline">
+<h2>A simplified workflow of Skyline<a class="headerlink" href="#a-simplified-workflow-of-skyline" title="Permalink to this headline">¶</a></h2>
+<div class="figure">
+<img alt="A simplified workflow of Skyline" src="_images/skyline.simplified.workflow.annotated.gif" />
+</div>
+<p><a class="reference external" href="_images/skyline.simplified.workflow.annotated.gif">Fullsize image</a> for a clearer picture.</p>
 </div>
 <div class="section" id="what-s-new">
 <h2>What&#8217;s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h2>
@@ -293,7 +297,7 @@ Steinbach&#8217;s excellent <a class="reference external" href="https://github.c
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0-dev',
+            VERSION:'1.0.1-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

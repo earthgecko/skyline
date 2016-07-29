@@ -1,5 +1,11 @@
 # What's new
 
+## Skyline v1.0.1-beta - the crucible branch
+
+Analyzer alerts with a graph plotted from Redis data, not just the Graphite
+graph see
+`Analyzer SMTP alert graphs <../analyzer.html#analyzer-smtp-alert-graphs>`__
+
 ## Skyline v1.0.0-beta - the crucible branch
 
 The crucible branch had an issue open called `Bug #982: Too much in crucible branch`
@@ -8,8 +14,8 @@ The crucible branch had an issue open called `Bug #982: Too much in crucible bra
 >
 > I have added some pep20, sphinx docs and python package restructuring from @languitar etsy/skyline #93 - https://github.com/languitar/skyline/tree/setuptools - which turns skyline into a python package
 
-The reality was that it was too difficut to reverse engineer all the changes
-into separate branches, so it contiuned unabated...
+The reality was that it was too difficult to reverse engineer all the changes
+into separate branches, so it continued unabated...
 
 This version of Skyline sees enough changes to worthy of a major version change.
 That said the changes are/should be backwards compatible with older versions,
@@ -81,7 +87,7 @@ See [Analyzer Optimisations](analyzer-optimisation.html)
 
 See [Logging](logging.html)
 
-### Webapp security
+### Webapp
 
 Some simple and basic security was added to the Webapp now it can be enabled
 to access a MySQL database in the Panorama context.
@@ -89,6 +95,8 @@ to access a MySQL database in the Panorama context.
 - Only allow IP addresses in `WEBAPP_ALLOWED_IPS`
 - There is now a single HTTP auth user `WEBAPP_AUTH_USER` and
   `WEBAPP_AUTH_USER_PASSWORD`
+- The Webapp can now be served via gunicorn and Apache (or any other HTTP
+  reverse proxy).
 
 See [Webapp](webapp.html)
 

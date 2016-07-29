@@ -36,7 +36,8 @@ Python multiprocessing is not very efficient if it is not need, in fact
 the overall overhead of the spawned processes ends up greater than the
 overhead of processing with a single process.
 
-See `Analyzer Optimizations <analyzer-optimizations.html>`__
+See `Optimizations results <analyzer-optimizations.html#optimizations-results>`__
+and `Analyzer Optimizations <analyzer-optimizations.html>`__
 
 Algorithms
 ==========
@@ -98,6 +99,42 @@ Push to Mirage
 Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than :mod:`settings.FULL_DURATION` to the mirage
 service, see `Mirage <mirage.html>`__.
+
+Analyzer SMTP alert graphs
+==========================
+
+Analyzer by default now sends 2 graphs in any SMTP alert.  The original Graphite
+graph is sent and an additional graph image is sent that is plotted using the
+actual Redis timeseries data for the metric.
+
+The Redis data graph has been added to make it specifically clear as to the data
+that Analyzer is alerting on.  Often your metrics are aggregated in Graphite and
+a Graphite graph is not the exact representation of the timeseries data that
+triggered the alert, so having both is clearer.
+
+The Redis data graph also adds the mean and the 3-sigma boundaries to the plot,
+which is useful for brain training.  This goes against the "less is more
+(effective)" data visualization philosophy, however if the human neocortex is
+present with 3-sigma boundaries enough times, it will probably eventually be
+able to calculate 3-sigma boundaries in any timeseries, reasonably well.
+
+Bearing in mind that when we view anomalous timeseries in the UI we are
+presented with a red line depicting the anomalous range, this graph just does
+the similar in the alert context.
+
+Should you wish to disable the Redis data graph and simply have the Graphite
+graph, simply set :mod:`settings.PLOT_REDIS_DATA` to ``False``.
+
+Example alert
+^^^^^^^^^^^^^
+
+.. figure:: images/skyline.analyzer.redis.data.graph.png
+   :alt: Redis data graph in Analyzer alert
+
+   Example of the Redis data graph in the alert
+
+.. note:: The Redis data graphs do make the alerter a little more CPU when
+  matplotlib plots the alerts and the alert email larger in size.
 
 What **Analyzer** does
 ======================

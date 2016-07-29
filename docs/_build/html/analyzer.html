@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Analyzer &mdash; Skyline 1.0.0-dev documentation</title>
+  <title>Analyzer &mdash; Skyline 1.0.1-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.1-dev documentation" href="index.html"/>
         <link rel="next" title="Analyzer Optimizations" href="analyzer-optimizations.html"/>
         <link rel="prev" title="Horizon" href="horizon.html"/> 
 
@@ -98,6 +98,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#algorithm-philosophy">Algorithm philosophy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#explanation-of-exceptions">Explanation of Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#push-to-mirage">Push to Mirage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analyzer-smtp-alert-graphs">Analyzer SMTP alert graphs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-alert">Example alert</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#what-analyzer-does">What <strong>Analyzer</strong> does</a></li>
 </ul>
 </li>
@@ -195,7 +199,8 @@ then the optimum settings will most likely be something similar to:</p>
 <p>Python multiprocessing is not very efficient if it is not need, in fact
 the overall overhead of the spawned processes ends up greater than the
 overhead of processing with a single process.</p>
-<p>See <a class="reference external" href="analyzer-optimizations.html">Analyzer Optimizations</a></p>
+<p>See <a class="reference external" href="analyzer-optimizations.html#optimizations-results">Optimizations results</a>
+and <a class="reference external" href="analyzer-optimizations.html">Analyzer Optimizations</a></p>
 <div class="section" id="algorithms">
 <h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this headline">¶</a></h2>
 <p>Skyline Analyzer was designed to handle a very large number of metrics,
@@ -246,6 +251,38 @@ changes or we have.</p>
 <p>Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> to the mirage
 service, see <a class="reference external" href="mirage.html">Mirage</a>.</p>
+</div>
+<div class="section" id="analyzer-smtp-alert-graphs">
+<h2>Analyzer SMTP alert graphs<a class="headerlink" href="#analyzer-smtp-alert-graphs" title="Permalink to this headline">¶</a></h2>
+<p>Analyzer by default now sends 2 graphs in any SMTP alert.  The original Graphite
+graph is sent and an additional graph image is sent that is plotted using the
+actual Redis timeseries data for the metric.</p>
+<p>The Redis data graph has been added to make it specifically clear as to the data
+that Analyzer is alerting on.  Often your metrics are aggregated in Graphite and
+a Graphite graph is not the exact representation of the timeseries data that
+triggered the alert, so having both is clearer.</p>
+<p>The Redis data graph also adds the mean and the 3-sigma boundaries to the plot,
+which is useful for brain training.  This goes against the &#8220;less is more
+(effective)&#8221; data visualization philosophy, however if the human neocortex is
+present with 3-sigma boundaries enough times, it will probably eventually be
+able to calculate 3-sigma boundaries in any timeseries, reasonably well.</p>
+<p>Bearing in mind that when we view anomalous timeseries in the UI we are
+presented with a red line depicting the anomalous range, this graph just does
+the similar in the alert context.</p>
+<p>Should you wish to disable the Redis data graph and simply have the Graphite
+graph, simply set <a class="reference internal" href="skyline.html#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><code class="xref py py-mod docutils literal"><span class="pre">settings.PLOT_REDIS_DATA</span></code></a> to <code class="docutils literal"><span class="pre">False</span></code>.</p>
+<div class="section" id="example-alert">
+<h3>Example alert<a class="headerlink" href="#example-alert" title="Permalink to this headline">¶</a></h3>
+<div class="figure" id="id1">
+<img alt="Redis data graph in Analyzer alert" src="_images/skyline.analyzer.redis.data.graph.png" />
+<p class="caption"><span class="caption-text">Example of the Redis data graph in the alert</span></p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The Redis data graphs do make the alerter a little more CPU when
+matplotlib plots the alerts and the alert email larger in size.</p>
+</div>
+</div>
 </div>
 <div class="section" id="what-analyzer-does">
 <h2>What <strong>Analyzer</strong> does<a class="headerlink" href="#what-analyzer-does" title="Permalink to this headline">¶</a></h2>
@@ -321,7 +358,7 @@ seconds.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0-dev',
+            VERSION:'1.0.1-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

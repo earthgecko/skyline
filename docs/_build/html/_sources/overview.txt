@@ -24,7 +24,7 @@ Skyline - as a work in progress
 `Etsy`_ found the "one size fits all approach" to anomaly detection wasn't
 actually proving all that useful to them.
 
-There is some truth in that in terms of the one size fits all methodology that
+There is **some truth** in that in terms of the one size fits all methodology that
 Skyline was framed around.  With hundreds of thousands of metrics this does make
 Skyline fairly hard to tame, in terms of how useful it is and tuning the noise
 is difficult.  Tuning the noise to make it constantly useful and not just noisy,
@@ -32,17 +32,11 @@ removes the "without the need to configure a model/thresholds" element somewhat.
 
 So why continue developing Skyline?
 
-Because it works and because it is Python.  Being Python based allows Skyline to
-integrate with a lot of other awesome things in the machine learning and
-scientific Python ecosystem.  It's modularity makes it is very flexible.
+The architecture/pipeline works very well at doing what it does.  It is solid and battle tested.
+To overcome some of the limitations of Skyline.  This project extends it.
 
-With some time and tuning, Skyline works!
-
-The architecture/pipeline works very well at doing what it does, it is based on
-solid, battle tested components, Python and Redis.
-
-The new look Skyline apps
--------------------------
+The new look of Skyline apps
+----------------------------
 
 * Horizon - feed metrics to Redis via a pickle input
 * Analyzer - analyze metrics
@@ -61,6 +55,14 @@ desired apps need to be enabled.
 Skyline can now be feed/query and analyze timeseries on an ad-hoc basis, on the
 fly.  This means Skyline can now be used to analyze and process static data too,
 it is no longer just a machine/app metric fed system.
+
+A simplified workflow of Skyline
+--------------------------------
+
+.. figure:: images/skyline.simplified.workflow.annotated.gif
+   :alt: A simplified workflow of Skyline
+
+`Fullsize image <_images/skyline.simplified.workflow.annotated.gif>`_ for a clearer picture.
 
 What's new
 ----------

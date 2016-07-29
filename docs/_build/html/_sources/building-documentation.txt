@@ -111,3 +111,13 @@ function build_docs() {
 
 # build_docs <app_dir>
 ```
+
+Building workflow diagrams with UML
+###################################
+
+This can be quite handy to make simple diagrams, if not finicky.  A good resource
+is the PlantUML.com server is handy for making workflow diagrams, without having
+to create and edit SVGs.
+
+The docs/skyline.simplified.workflow.uml rendered by the PlantUML server:
+`Simplified Skyline workflow with PlantUML server<http://plantuml.com/plantuml/png/ZLFBJWCn3BpdAwozmmTKLQLo0IIGW0ekY4EwwrAhUQoSNLO5yU-upQEx2A6U4eyzCqwSTDGPXDLkRyWX1BAjeGrX0uFdtSRuGIbTTvvXsLXo53hMXsW-XvlUQWUBXLAryNq3NmhWrMB7L8Stq07INdqhvNo3K5spRhVKOQLKoi750Z8Aiyo0pXSqSv-meL3bw7w_UhmhqTOpVNedST4ItOHEPMyYg79IwexAqweZfDIhDiWTSZnE3hAhTjhiFv4hbNSmlxmiSiiCjhqneaeM0p9XW0rxcomAK_h8-iBLpbj9H2ZxhNtl6itxIkNTnEygW__v5UOPVfPOlsCrwJ5YmcZxi4qqtmS8g8ENkZBpL7XeS3JV-uZ-tM6PUEAUqM8hA6khnqqsVd12pQaHLGRxaD3YSLxrwThEgo_fN7zyhrBCM7jk4kTmSd8nbqyqu5gtRQNYUXhm68Y44N3wA-N2n7FwOMVnvkJr_lh8mazICtWX7E3v5Zv8mvhz8EFv0G00>`__

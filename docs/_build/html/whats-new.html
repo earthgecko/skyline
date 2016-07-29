@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>What’s new &mdash; Skyline 1.0.0-dev documentation</title>
+  <title>What’s new &mdash; Skyline 1.0.1-dev documentation</title>
   
 
   
@@ -32,9 +32,9 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.1-dev documentation" href="index.html"/>
         <link rel="next" title="Development" href="development/index.html"/>
-        <link rel="prev" title="1.0.0 - the crucible branch" href="releases/1_0_0.html"/> 
+        <link rel="prev" title="1.0.1 - the crucible branch" href="releases/1_0_1.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -111,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">What&#8217;s new</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-v1-0-1-beta-the-crucible-branch">Skyline v1.0.1-beta - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skyline-v1-0-0-beta-the-crucible-branch">Skyline v1.0.0-beta - the crucible branch</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#conceptual-changes">Conceptual changes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#etsy-to-time">Etsy to <code class="docutils literal"><span class="pre">time()</span></code></a></li>
@@ -124,7 +125,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#analyzer-optimisations">Analyzer optimisations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#algorithm-breakdown-metrics">algorithm_breakdown metrics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#improved-log-handling">Improved log handling</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#webapp-security">Webapp security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#webapp">Webapp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#panorama">Panorama</a></li>
 </ul>
 </li>
@@ -179,6 +180,12 @@
             
   <div class="section" id="what-s-new">
 <span id="what-s-new"></span><h1>What&#8217;s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="skyline-v1-0-1-beta-the-crucible-branch">
+<span id="skyline-v1-0-1-beta-the-crucible-branch"></span><h2>Skyline v1.0.1-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-1-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h2>
+<p>Analyzer alerts with a graph plotted from Redis data, not just the Graphite
+graph see
+<code class="docutils literal"><span class="pre">Analyzer</span> <span class="pre">SMTP</span> <span class="pre">alert</span> <span class="pre">graphs</span> <span class="pre">&lt;../analyzer.html#analyzer-smtp-alert-graphs&gt;</span></code>__</p>
+</div>
 <div class="section" id="skyline-v1-0-0-beta-the-crucible-branch">
 <span id="skyline-v1-0-0-beta-the-crucible-branch"></span><h2>Skyline v1.0.0-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-0-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h2>
 <p>The crucible branch had an issue open called <code class="docutils literal"><span class="pre">Bug</span> <span class="pre">#982:</span> <span class="pre">Too</span> <span class="pre">much</span> <span class="pre">in</span> <span class="pre">crucible</span> <span class="pre">branch</span></code></p>
@@ -186,8 +193,8 @@
 <div><p>Too much in crucible branch</p>
 <p>I have added some pep20, sphinx docs and python package restructuring from &#64;languitar etsy/skyline #93 - https://github.com/languitar/skyline/tree/setuptools - which turns skyline into a python package</p>
 </div></blockquote>
-<p>The reality was that it was too difficut to reverse engineer all the changes
-into separate branches, so it contiuned unabated...</p>
+<p>The reality was that it was too difficult to reverse engineer all the changes
+into separate branches, so it continued unabated...</p>
 <p>This version of Skyline sees enough changes to worthy of a major version change.
 That said the changes are/should be backwards compatible with older versions,
 mostly (best efforts applied) with a caveat on the skyline graphite metrics
@@ -259,14 +266,16 @@ hang.</p>
 </ul>
 <p>See <a class="reference external" href="logging.html">Logging</a></p>
 </div>
-<div class="section" id="webapp-security">
-<span id="webapp-security"></span><h3>Webapp security<a class="headerlink" href="#webapp-security" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="webapp">
+<span id="webapp"></span><h3>Webapp<a class="headerlink" href="#webapp" title="Permalink to this headline">¶</a></h3>
 <p>Some simple and basic security was added to the Webapp now it can be enabled
 to access a MySQL database in the Panorama context.</p>
 <ul class="simple">
 <li>Only allow IP addresses in <code class="docutils literal"><span class="pre">WEBAPP_ALLOWED_IPS</span></code></li>
 <li>There is now a single HTTP auth user <code class="docutils literal"><span class="pre">WEBAPP_AUTH_USER</span></code> and
 <code class="docutils literal"><span class="pre">WEBAPP_AUTH_USER_PASSWORD</span></code></li>
+<li>The Webapp can now be served via gunicorn and Apache (or any other HTTP
+reverse proxy).</li>
 </ul>
 <p>See <a class="reference external" href="webapp.html">Webapp</a></p>
 </div>
@@ -287,7 +296,7 @@ to access a MySQL database in the Panorama context.</p>
         <a href="development/index.html" class="btn btn-neutral float-right" title="Development" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="releases/1_0_0.html" class="btn btn-neutral" title="1.0.0 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="releases/1_0_1.html" class="btn btn-neutral" title="1.0.1 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -318,7 +327,7 @@ to access a MySQL database in the Panorama context.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0-dev',
+            VERSION:'1.0.1-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

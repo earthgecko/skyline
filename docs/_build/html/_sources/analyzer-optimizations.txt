@@ -62,6 +62,8 @@ will find that:
 - a) we now see 1 CPU running at a few percent, only spiking up for 14 seconds
 - b) our duration has probably decreased to about 50%
 
+See `Optimizations results`_ at the end of this page.
+
 Analyzer work rate
 ------------------
 
@@ -283,3 +285,29 @@ performance weighing matrix is:
         'stddev_from_moving_average',
         'least_squares',
     ]
+
+
+Optimizations results
+---------------------
+
+These server graphs show the pre and post crucible update metrics related to CPU
+and loadavg for a dedicated Skyline server running on a 4 vCPU, 4GB RAM, SSD
+cloud server.  The server is handling ~3000 metrics and is solely dedicated to
+running Skyline.  It was upgraded from the Boundary branch version to Crucible.
+
+It was running Analyzer, Mirage and Boundary, however these graphs clearly show
+the impact that the Analyzer optimizations have on the overall workload.
+Interestingly, after deployment the server is also running MySQL and the
+Panorama daemon in addition to what it was running before.
+
+The server was running the skyline.analyzer.metrics branch Analyzer which was
+only a few steps away from Etsy master and those steps were related to Analyzer
+sending a few more Skyline metric namespaces to Graphite, in terms of Analyzer
+and the algorithms logic pre update were identical to Etsy master.
+
+.. figure:: images/crucible/analyzer.optimizations/analyzer.skyline1.runtime.png
+.. figure:: images/crucible/analyzer.optimizations/analyzer.optimizations.cpu0.png
+.. figure:: images/crucible/analyzer.optimizations/analyzer.optimizations.cpu1.png
+.. figure:: images/crucible/analyzer.optimizations/analyzer.optimizations.cpu2.png
+.. figure:: images/crucible/analyzer.optimizations/analyzer.optimizations.cpu3.png
+.. figure:: images/crucible/analyzer.optimizations/analyzer.optimizations.loadavg.png

@@ -1,0 +1,54 @@
+# The source uml for skyline.simplified.workflow.png as generate by PlantUML
+# http://plantuml.com/plantuml/png/ZLFBJWCn3BpdAwozmmTKLQLo0IIGW0ekY4EwwrAhUQoSNLO5yU-upQEx2A6U4eyzCqwSTDGPXDLkRyWX1BAjeGrX0uFdtSRuGIbTTvvXsLXo53hMXsW-XvlUQWUBXLAryNq3NmhWrMB7L8Stq07INdqhvNo3K5spRhVKOQLKoi750Z8Aiyo0pXSqSv-meL3bw7w_UhmhqTOpVNedST4ItOHEPMyYg79IwexAqweZfDIhDiWTSZnE3hAhTjhiFv4hbNSmlxmiSiiCjhqneaeM0p9XW0rxcomAK_h8-iBLpbj9H2ZxhNtl6itxIkNTnEygW__v5UOPVfPOlsCrwJ5YmcZxi4qqtmS8g8ENkZBpL7XeS3JV-uZ-tM6PUEAUqM8hA6khnqqsVd12pQaHLGRxaD3YSLxrwThEgo_fN7zyhrBCM7jk4kTmSd8nbqyqu5gtRQNYUXhm68Y44N3wA-N2n7FwOMVnvkJr_lh8mazICtWX7E3v5Zv8mvhz8EFv0G00
+@startuml
+title Skyline simplified workflow
+
+actor Administrator << Human >>
+
+cloud {
+  [metrics] as metrics
+}
+
+node "Graphite"
+
+metrics -> Graphite : metrics to Graphite
+
+node "Redis"
+
+node "MySQL"
+
+node "horizon"
+
+Graphite -> horizon : metrics to Horizon
+horizon -> Redis : metrics to Redis
+
+[alerters] as alerters
+
+node "analyzer"
+analyzer <.. Redis : Analyzer pulls timeseries from Redis
+analyzer -> alerters : anomaly alert
+
+node "boundary"
+boundary <.. Redis : Boundary pulls timeseries from Redis
+boundary -> alerters : anomaly alert
+
+node "mirage"
+analyzer -> mirage : push anomalous seasonal metrics
+mirage <.. Graphite : Mirage pulls timeseries from Graphite
+mirage -> alerters : anomaly alert
+
+node "panorama"
+analyzer -down-> panorama : anomaly to Panorama
+mirage -down-> panorama : anomaly to Panorama
+boundary -down-> panorama : anomaly to Panorama
+panorama -down-> MySQL : record anomalies in MySQL
+
+node "webapp"
+webapp <.. Redis
+webapp <.. MySQL
+webapp <.. Graphite
+
+alerters -> Administrator : alerts
+
+Administrator <.. webapp : View UI via browser
+@enduml
