@@ -5,3 +5,7 @@ dump.rdb
 nohup.out
 docs/_build/doctrees
 __pycache__/
+crucible/check/*
+crucible/data/*
+check/*
+data/*
