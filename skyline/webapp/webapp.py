@@ -15,7 +15,6 @@ from os import remove as os_remove
 from time import time, sleep
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
-import time
 from datetime import datetime, timedelta
 import os
 import base64
