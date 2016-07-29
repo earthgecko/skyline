@@ -6,3 +6,4 @@ Release Notes
    :glob:
 
    releases/1_0_0
+   releases/1_0_1

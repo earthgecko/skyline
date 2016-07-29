@@ -103,6 +103,8 @@ environment, it does not lend itself to repeatability or a common known state.
     # This can take lots and lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
 
+    # NOW wait at least 7 minutes (on a Linode 4 vCPU, 4GB RAM, SSD cloud node anyway)
+
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   setup if it is not using PATH
   ``/opt/python_virtualenv/projects/skyline-py2712/bin/python2.7``

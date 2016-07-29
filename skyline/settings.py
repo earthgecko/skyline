@@ -485,6 +485,24 @@ trigger again.
 
 """
 
+PLOT_REDIS_DATA = True
+"""
+:var PLOT_REDIS_DATA: Plot graph using Redis timeseries data on with
+    Analyzer alerts.
+:vartype PLOT_REDIS_DATA: boolean
+
+- There are times when Analyzer alerts have no data in the Graphite graphs
+  and/or the data in the Graphite graph is skewed due to retentions aggregation.
+  This mitigates that by creating a graph using the Redis timeseries data and
+  embedding the image in the Analyzer alerts as well.
+
+.. note:: The Redis data plot has the following additional information as well,
+    the 3sigma upper (and if applicable lower) bounds and the mean are plotted
+    and reported too.  Although less is more effective, in this case getting a
+    visualisation of the 3sigma boundaries is informative.
+
+"""
+
 # Each alert module requires additional information.
 SMTP_OPTS = {
     # This specifies the sender of email alerts.

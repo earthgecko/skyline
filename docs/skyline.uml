@@ -1,0 +1,93 @@
+@startuml
+title Skyline workflow
+
+actor Administrator << Human >>
+
+cloud {
+  [metrics_feed] as metrics_feed
+}
+
+package "Graphite" {
+  [whisper] as whisper
+  [carbon-relay] as carbon_relay
+  [carbon-carbon] as carbon_cache
+  [graphite-web] as graphite_web
+  metrics_feed --> carbon_relay
+  carbon_relay -down--> carbon_cache : pickle
+  carbon_cache ..> whisper : populates
+  graphite_web <- whisper
+}
+
+node "Redis" {
+  database "db0" {
+    frame "metrics" {
+      [skyline.analyzer.runtime]
+    }
+  }
+}
+
+node "MySQL" {
+  database "skyline" {
+    frame "tables" {
+      [skyline.algorithms]
+      [skyline.anomalies]
+      [skyline.apps]
+      [skyline.hosts]
+      [skyline.metrics]
+      [skyline.sources]
+    }
+  }
+}
+
+package Skyline {
+  [alerters] as alerters
+  node "Horizon" {
+    carbon_relay -right..> [listen.py] : pickle
+    [listen.py] ..> [worker.py] : queue
+    [worker.py] ..> Redis : msgpack
+    [worker.py] ..> carbon_relay : queue_metrics
+  }
+  node "Analyzer" {
+    [analyzer.py] as analyzer
+    [algorithms.py] as analyzer_algorithms
+    [alerters.py] as analyzer_alerters
+    analyzer <.. Redis : msgpack
+    analyzer ..> analyzer_algorithms : timeseries;
+    analyzer_algorithms ..> analyzer : anomalies
+    analyzer ..> analyzer_alerters : anomalies
+    analyzer_alerters ..> alerters : anomalies
+    analyzer ..> carbon_relay : analyzer.metrics
+  }
+  node "Boundary" {
+    [boundary.py] as boundary
+    boundary <.. Redis : msgpack
+    boundary ..> [boundary_algorithms.py] : timeseries
+    [boundary_algorithms.py] ..> boundary : anomalies
+    boundary ..> carbon_relay : boundary.metrics
+  }
+  node "Mirage" {
+    [mirage.py] as mirage
+    analyzer ..> mirage : second_order_resolution_hours.anomalies
+    mirage <.. graphite_web : http/json_timeserie
+    mirage ..> [mirage_algorithms.py] : json_timeseries
+    [mirage_algorithms.py] ..> mirage : anomalies
+    mirage ..> [mirage_alerters.py] : anomalies
+    [mirage_alerters.py] ..> alerters : anomalies
+  }
+  node "Panorama" {
+    [panorama.py] as panorama
+    analyzer -down..> panorama : Analyzer.anomalies
+    mirage -down..> panorama : Mirage.anomalies
+    boundary -down..> panorama : Boundary.anomalies
+    panorama -down..> MySQL : anomalies
+  }
+  node "Webapp" {
+    [Webapp_UI] ..> Redis
+    [Panorama_UI] ..> Redis
+    [Panorama_UI] ..> MySQL
+    [Rebrow_UI] ..> Redis
+  }
+  alerters ..> Administrator : anomaly.alerts
+}
+
+@enduml

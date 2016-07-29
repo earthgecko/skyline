@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.analyzer package &mdash; Skyline 1.0.0-dev documentation</title>
+  <title>skyline.analyzer package &mdash; Skyline 1.0.1-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.1-dev documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.analyzer_dev package" href="skyline.analyzer_dev.html"/>
         <link rel="prev" title="skyline package" href="skyline.html"/> 
@@ -219,6 +219,22 @@ are available for the app.</p>
 </div>
 <div class="section" id="module-analyzer.alerters">
 <span id="skyline-analyzer-alerters-module"></span><h2>skyline.analyzer.alerters module<a class="headerlink" href="#module-analyzer.alerters" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="analyzer.alerters.skyline_version">
+<code class="descname">skyline_version</code><em class="property"> = 'Skyline (crucible v1.0.1-beta)'</em><a class="headerlink" href="#analyzer.alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create any alerter you want here. The function will be invoked from trigger_alert.
+Two arguments will be passed, both of them tuples: alert and metric.</p>
+<dl class="docutils">
+<dt>alert: the tuple specified in your settings:</dt>
+<dd>alert[0]: The matched substring of the anomalous metric
+alert[1]: the name of the strategy being used to alert
+alert[2]: The timeout of the alert that was triggered</dd>
+<dt>metric: information about the anomaly itself</dt>
+<dd>metric[0]: the anomalous value
+metric[1]: The full name of the anomalous metric</dd>
+</dl>
+</dd></dl>
+
 <dl class="function">
 <dt id="analyzer.alerters.alert_smtp">
 <code class="descname">alert_smtp</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
@@ -411,8 +427,8 @@ tons of errors into the log.</p>
 
 <dl class="function">
 <dt id="analyzer.algorithms.determine_median">
-<code class="descname">determine_median</code><span class="sig-paren">(</span><em>array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#determine_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.determine_median" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determine the median in an array of values</p>
+<code class="descname">determine_median</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#determine_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.determine_median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the median of the values in the timeseries</p>
 </dd></dl>
 
 <dl class="function">
@@ -549,7 +565,7 @@ and assign each process a set of metrics to analyse for anomalies.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.0-dev',
+            VERSION:'1.0.1-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

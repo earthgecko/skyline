@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_algorithms &mdash; Skyline 1.0.0-dev documentation</title>
+  <title>mirage.mirage_algorithms &mdash; Skyline 1.0.1-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.0-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.1-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -549,14 +549,14 @@
         <span class="k">return</span> <span class="bp">False</span></div>
 
 
-<div class="viewcode-block" id="determine_median"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.determine_median">[docs]</a><span class="k">def</span> <span class="nf">determine_median</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+<div class="viewcode-block" id="determine_median"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.determine_median">[docs]</a><span class="k">def</span> <span class="nf">determine_median</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Determine the median in an array of values</span>
+<span class="sd">    Determine the median of the values in the timeseries</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># logger.info(&#39;Running &#39; + str(get_function_name()))</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+        <span class="n">np_array</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">False</span>
     <span class="k">try</span><span class="p">:</span>
@@ -659,7 +659,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.0-dev',
+            VERSION:'1.0.1-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
