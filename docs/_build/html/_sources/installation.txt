@@ -221,7 +221,7 @@ environment, it does not lend itself to repeatability or a common known state.
 - For Boundary setup see `Boundary <boundary.html>`__
 
 Automation and configuration management notes
-=============================================
+---------------------------------------------
 
 The installation of packages in the ``requirements.txt`` can take a long time,
 specifically the pandas build.  This will usually take longer than the default

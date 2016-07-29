@@ -6,7 +6,7 @@ import re
 import traceback
 from msgpack import Unpacker
 from functools import wraps
-from flask import Flask, request, render_template, redirect, Response, abort
+from flask import Flask, request, render_template, redirect, Response, abort, flash
 from daemon import runner
 from os.path import dirname, abspath, isdir
 from os import path
@@ -23,6 +23,8 @@ from msgpack import unpackb, packb
 import string
 # flask things for rebrow
 from flask import session, g, url_for, flash, Markup, json
+# For secret_key
+import uuid
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
@@ -50,13 +52,29 @@ access_logger = logging.getLogger('werkzeug')
 
 REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
-ENABLE_WEBAPP_DEBUG = True
+# ENABLE_WEBAPP_DEBUG = True
 
 app = Flask(__name__)
+app.secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 graph_url_string = str(settings.GRAPH_URL)
 PANORAMA_GRAPH_URL = re.sub('\/render\/.*', '', graph_url_string)
+
+# @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
+# Defaults for momentjs to work if the setttings.py was not updated
+try:
+    WEBAPP_USER_TIMEZONE = settings.WEBAPP_USER_TIMEZONE
+except:
+    WEBAPP_USER_TIMEZONE = True
+try:
+    WEBAPP_FIXED_TIMEZONE = settings.WEBAPP_FIXED_TIMEZONE
+except:
+    WEBAPP_FIXED_TIMEZONE = 'Etc/GMT+0'
+try:
+    WEBAPP_JAVASCRIPT_DEBUG = settings.WEBAPP_JAVASCRIPT_DEBUG
+except:
+    WEBAPP_JAVASCRIPT_DEBUG = False
 
 
 @app.before_request
@@ -185,7 +203,10 @@ def app_settings():
                         'PANORAMA_DBPORT': settings.PANORAMA_DBPORT,
                         'PANORAMA_DBUSER': settings.PANORAMA_DBUSER,
                         'PANORAMA_DBUSERPASS': 'redacted',
-                        'PANORAMA_GRAPH_URL': PANORAMA_GRAPH_URL
+                        'PANORAMA_GRAPH_URL': PANORAMA_GRAPH_URL,
+                        'WEBAPP_USER_TIMEZONE': settings.WEBAPP_USER_TIMEZONE,
+                        'WEBAPP_FIXED_TIMEZONE': settings.WEBAPP_FIXED_TIMEZONE,
+                        'WEBAPP_JAVASCRIPT_DEBUG': settings.WEBAPP_JAVASCRIPT_DEBUG
                         }
     except Exception as e:
         error = "error: " + e

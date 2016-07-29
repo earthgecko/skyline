@@ -168,6 +168,22 @@ line.
 
 .. image:: images/panorama.closest.approximation.aggregrated.png
 
+Time zones
+----------
+
+It must be noted that the Panorama view graphs can be rendered differently
+depending on the browser and server time zone.  The original dygraph renders
+used the javascript ``Date`` function to generate the datetime ticker, etc.  If
+your Graphite server happens to be in a different time zone to user browser,
+this would display clock skews where the Panorama reported anomaly details do
+not match the graph times displayed.  Webapp in the Panorama view allows you to
+either use the browser time zone or use a fixed timezone so that all rendered
+graphs are the same no matter where is the world they are viewed from.
+
+By default, the browser time zone setting is used, as per the original Skyline
+UI, you can use :mod:`settings.WEBAPP_USER_TIMEZONE` and
+:mod:`settings.WEBAPP_FIXED_TIMEZONE` to modify this behavior if required.
+
 :red:`re`:brow:`brow`
 =====================
 

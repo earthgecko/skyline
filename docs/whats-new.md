@@ -1,10 +1,14 @@
 # What's new
 
+## Skyline v1.0.2-beta - the crucible branch
+
+Custom time zone settings for the rendering of Webapp Panorama dygraph graphs
+see [Webapp - Time zones](webapp.html#time-zones)
+
 ## Skyline v1.0.1-beta - the crucible branch
 
 Analyzer alerts with a graph plotted from Redis data, not just the Graphite
-graph see
-`Analyzer SMTP alert graphs <../analyzer.html#analyzer-smtp-alert-graphs>`__
+graph see [Analyzer SMTP alert graphs](analyzer.html#analyzer-smtp-alert-graphs)
 
 ## Skyline v1.0.0-beta - the crucible branch
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.0.1-dev documentation</title>
+  <title>skyline package &mdash; Skyline 1.0.2-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.1-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.2-dev documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -2138,6 +2138,60 @@ in <a class="reference internal" href="#settings.WEBAPP_ALLOWED_IPS" title="sett
 </table>
 </dd></dl>
 
+<dl class="data">
+<dt id="settings.WEBAPP_USER_TIMEZONE">
+<code class="descname">WEBAPP_USER_TIMEZONE</code><em class="property"> = True</em><a class="headerlink" href="#settings.WEBAPP_USER_TIMEZONE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><strong>WEBAPP_USER_TIMEZONE</strong></a> (<em>boolean</em>) &#8211; This determines the user&#8217;s timezone and
+renders graphs with the user&#8217;s date values.  If this is set to <code class="docutils literal"><span class="pre">False</span></code> the
+timezone in <a class="reference internal" href="#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_FIXED_TIMEZONE</span></code></a> is used.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.WEBAPP_FIXED_TIMEZONE">
+<code class="descname">WEBAPP_FIXED_TIMEZONE</code><em class="property"> = 'Etc/GMT+0'</em><a class="headerlink" href="#settings.WEBAPP_FIXED_TIMEZONE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><strong>WEBAPP_FIXED_TIMEZONE</strong></a> (<em>str</em>) &#8211; You can specific a timezone you want the client
+browser to render graph date and times in.  This setting is only used if the
+<a class="reference internal" href="#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_USER_TIMEZONE</span></code></a> is set to <code class="docutils literal"><span class="pre">False</span></code>.
+This must be a valid momentjs timezone name, see:
+<a class="reference external" href="https://github.com/moment/moment-timezone/blob/develop/data/packed/latest.json">https://github.com/moment/moment-timezone/blob/develop/data/packed/latest.json</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Timezones, UTC and javascript Date
+You only need to use the first element of the momentjs timezone string, some
+examples, &#8216;Europe/London&#8217;, &#8216;Etc/UTC&#8217;, &#8216;America/Los_Angeles&#8217;.
+Because the Webapp is graphing using data UTC timestamps, you may may want
+to display the graphs to users with a fixed timezone and not use the browser
+timezone so that the Webapp graphs are the same in any location.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.WEBAPP_JAVASCRIPT_DEBUG">
+<code class="descname">WEBAPP_JAVASCRIPT_DEBUG</code><em class="property"> = False</em><a class="headerlink" href="#settings.WEBAPP_JAVASCRIPT_DEBUG" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_JAVASCRIPT_DEBUG" title="settings.WEBAPP_JAVASCRIPT_DEBUG"><strong>WEBAPP_JAVASCRIPT_DEBUG</strong></a> (<em>boolean</em>) &#8211; Enables some javascript console.log when enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_functions">
 <span id="skyline-skyline-functions-module"></span><h2>skyline.skyline_functions module<a class="headerlink" href="#module-skyline_functions" title="Permalink to this headline">¶</a></h2>
@@ -2409,7 +2463,7 @@ object, the object is returned</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.1-dev',
+            VERSION:'1.0.2-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
