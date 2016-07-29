@@ -35,7 +35,7 @@ requires the following system dependencies:
 
 .. code-block:: bash
 
-    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev python-pip
+    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev:amd64 python-pip
 
 virtualenv
 ~~~~~~~~~~
@@ -104,7 +104,7 @@ Once again using Python-2.7.12:
     PROJECT="skyline-py2712"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects"
-    virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
+    virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
 
 
 Make sure to add the ``/etc/skyline/skyline.conf`` file - see
