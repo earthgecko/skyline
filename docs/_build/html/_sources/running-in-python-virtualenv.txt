@@ -29,13 +29,19 @@ requires the following system dependencies:
 
 .. code-block:: bash
 
-    yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel python-pip
+    yum -y install epel-release
+    yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel \
+      gcc gcc-c++ readline-devel ncurses-devel gdbm-devel compat-readline5 \
+      freetype-devel libpng-devel python-pip wget tar git
 
 -  Debian family
 
 .. code-block:: bash
 
-    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev python-pip
+    apt-get -y install build-essential
+    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev \
+      libreadline6-dev libgdbm-dev libncurses5 libncurses5-dev libncursesw5 \
+      libfreetype6-dev libxft-dev python-pip wget tar git
 
 virtualenv
 ~~~~~~~~~~
@@ -76,6 +82,10 @@ with any path you choose and we are going to use python-2.7.12:
     cd ${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}
     ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
     make
+
+    # Optionally here if you have the time or interest you can run
+    # make test
+
     make altinstall
 
 You will now have a Python-2.7.12 environment with the Python

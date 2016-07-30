@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.0.2-dev documentation</title>
+  <title>Installation &mdash; Skyline 1.0.3-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.2-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.3-dev documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -192,10 +192,13 @@ automation and configuration management see the section at the end of this page.
 </div>
 <div class="section" id="steps">
 <h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
-<p><strong>NOTE</strong>: all the documentation and testing is based on running Skyline in a
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All the documentation and testing is based on running Skyline in a
 Python-2.7.12 virtualenv, if you choose to deploy Skyline another way, you are
 on your own.  Although it is possible to run Skyline in a different type of
 environment, it does not lend itself to repeatability or a common known state.</p>
+</div>
 <ul class="simple">
 <li>Create a python-2.7.12 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
 Python virtualenv</a></li>
@@ -220,6 +223,12 @@ redis.conf</li>
 <span class="n">unixsocketperm</span> <span class="mi">777</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The unixsocket on the apt redis-server package is
+<code class="docutils literal"><span class="pre">/var/run/redis/redis.sock</span></code> if you use this path ensure you change
+<a class="reference internal" href="skyline.html#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.REDIS_SOCKET_PATH</span></code></a> to this path</p>
+</div>
 <ul class="simple">
 <li>Start Redis</li>
 <li>Make the required directories</li>
@@ -237,8 +246,14 @@ mkdir /tmp/skyline
 </pre></div>
 </div>
 <ul class="simple">
-<li>git clone Skyline</li>
+<li>git clone Skyline (git should have been installed in the <a class="reference external" href="running-in-python-virtualenv.html">Running in Python
+virtualenv</a> section)</li>
 </ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p /opt/skyline/github
+<span class="nb">cd</span> /opt/skyline/github
+git clone https://github.com/earthgecko/skyline.git
+</pre></div>
+</div>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p /opt/skyline/github
 <span class="nb">cd</span> /opt/skyline/github
 git clone https://github.com/earthgecko/skyline.git
@@ -262,12 +277,15 @@ a while.</li>
 bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5<span class="o">=</span>6d42998cfec6e85b902d4ffa5a35ce86
 
 <span class="c1"># The MySQL download source can now be commented it out of requirements.txt</span>
-<span class="c1"># vi /opt/skyline/github/skyline/requirements.txt</span>
+cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep -v <span class="s2">&quot;cdn.mysql.com/Downloads&quot;</span> &gt; /tmp/requirements.txt
 
 <span class="c1"># This can take lots and lots of minutes...</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/requirements.txt
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /tmp/requirements.txt
 
 <span class="c1"># NOW wait at least 7 minutes (on a Linode 4 vCPU, 4GB RAM, SSD cloud node anyway)</span>
+<span class="c1"># and once completed, deactivate the virtualenv</span>
+
+deactivate
 </pre></div>
 </div>
 <ul class="simple">
@@ -454,7 +472,7 @@ the dependency is fulfilled.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.2-dev',
+            VERSION:'1.0.3-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

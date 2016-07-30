@@ -1,5 +1,9 @@
 # What's new
 
+## Skyline v1.0.3-beta - the crucible branch
+
+Some documentation updates and setup.py things
+
 ## Skyline v1.0.2-beta - the crucible branch
 
 Custom time zone settings for the rendering of Webapp Panorama dygraph graphs

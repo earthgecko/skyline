@@ -5,3 +5,17 @@ dump.rdb
 nohup.out
 docs/_build/doctrees
 __pycache__/
+crucible/check/*
+crucible/data/*
+check/*
+data/*
+
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+/*.egg
