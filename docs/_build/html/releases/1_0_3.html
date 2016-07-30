@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.0.0 - the crucible branch &mdash; Skyline 1.0.3-dev documentation</title>
+  <title>1.0.3 - the crucible branch &mdash; Skyline 1.0.3-dev documentation</title>
   
 
   
@@ -34,8 +34,8 @@
   
     <link rel="top" title="Skyline 1.0.3-dev documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.0.1 - the crucible branch" href="1_0_1.html"/>
-        <link rel="prev" title="Release Notes" href="../releases.html"/> 
+        <link rel="next" title="What’s new" href="../whats-new.html"/>
+        <link rel="prev" title="1.0.2 - the crucible branch" href="1_0_2.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -111,22 +111,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.0 - the crucible branch</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#crucible">Crucible</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sphinx-documentation">sphinx documentation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#setuptools">setuptools</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#webapp">Webapp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#performance-tuning">Performance tuning</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analyzer-optimizations">Analyzer optimizations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#algorithm-breakdown-metrics">algorithm_breakdown metrics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#improved-log-handling">Improved log handling</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#panorama">Panorama</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#known-issues-in-this-release">Known issues in this release</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.3 - the crucible branch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
@@ -165,11 +153,11 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.0.0 - the crucible branch</li>
+    <li>1.0.3 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_0_0.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_0_3.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -180,95 +168,22 @@
            <div itemprop="articleBody">
             
   <div class="section" id="the-crucible-branch">
-<h1>1.0.0 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
-<p>Including sphinx, setuptools and panorama branches</p>
-<p>This release contains a fair amount of changes and additions:</p>
+<h1>1.0.3 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<p>Some documentation updates and setup.py things</p>
+<p>Changes include:</p>
 <ul class="simple">
-<li>The addition of the crucible module into Skyline</li>
-<li>The addition of sphinx-apidoc documentation</li>
-<li>A new package layout to accommodate python-setuptools and
-sphinx-apidoc</li>
-<li>A docs, Panorama and rebrow added to Webapp</li>
+<li>Added epel-release to the RedHat family install as python-pip is not in the
+main repos and gcc</li>
+<li>Added wget and tar in case someone is using a minimal OS install</li>
+<li>Added build-essentials as Ubuntu-14.04.4 has to have build-essentials first or
+zlib, et al are not available even if zlib1g-dev et al are installed</li>
+<li>Added libreadline6-dev and readline-devel and ncurses</li>
+<li>Added basic overview of the Webapp uml and png to docs as per suggested by &#64;blak3r2</li>
+<li>Wrapped MySQL debug logging in the proper if ENABLE_DEBUG conditionals as
+these were being generally logged for Panorama patterning</li>
+<li>Added setup.py and setup.cfg for pypi</li>
+<li>Bumped up to version 1.0.3</li>
 </ul>
-<p>These changes are backwards compatible in so much as an existing Skyline
-directory and file structure could be replaced by this release and a
-valid settings.py being deployed, whether the settings.py was the old
-format or the new format, the services for which the settings.py is
-configured will start. In theory. However there is so much change in
-this branch it probably cannot be stated with 100% certainty that
-something may not work as expected. Therefore, to be safe and
-transparent, lets say it is backwards incompatible. See <a class="reference external" href="../whats-new.html">Whats
-new</a> for a full rundown since the last Etsy
-commit.</p>
-<div class="section" id="crucible">
-<h2>Crucible<a class="headerlink" href="#crucible" title="Permalink to this headline">¶</a></h2>
-<p>The release adds the integration of crucible to allow for the storing of
-anomalous timeseries and related metadata. With the goal being able to
-produce anomaly analysis resources on the fly and add ad-hoc timeseries
-for crucible analysis.</p>
-<p>See <a class="reference external" href="../crucible.html">Crucible</a></p>
-</div>
-<div class="section" id="sphinx-documentation">
-<h2>sphinx documentation<a class="headerlink" href="#sphinx-documentation" title="Permalink to this headline">¶</a></h2>
-<p>The code has been documented with sphinx-apidoc, which was dependent on
-changes to the package structure, see below.</p>
-<p>The docs are served via the webapp at <a class="reference external" href="http://:/static/docs">http://:/static/docs</a> or from your
-local repo in your browser at <a class="reference external" href="file:///docs/_build/html/index.html">file:///docs/_build/html/index.html</a></p>
-</div>
-<div class="section" id="setuptools">
-<h2>setuptools<a class="headerlink" href="#setuptools" title="Permalink to this headline">¶</a></h2>
-<p>A package restructure was undertaken to make skyline a more traditional
-python package. Much of these changes were based on merging some of
-&#64;languitar changes for setuptools and more pythonic structure that was
-submitted as:</p>
-<p>Provide a setuptools-based build infrastructure #93 - etsy/#91</p>
-</div>
-<div class="section" id="webapp">
-<h2>Webapp<a class="headerlink" href="#webapp" title="Permalink to this headline">¶</a></h2>
-<p>The docs are now served by the Webapp and a menu referencing the
-different available endpoints in Webapp was added.</p>
-<ul class="simple">
-<li>Basic security restrictions added.</li>
-<li>gunicorn</li>
-<li>New Panorama endpoint</li>
-<li>New rebrow enadpoint</li>
-</ul>
-</div>
-<div class="section" id="performance-tuning">
-<h2>Performance tuning<a class="headerlink" href="#performance-tuning" title="Permalink to this headline">¶</a></h2>
-<p>See <a class="reference external" href="../analyzer-optimizations.html">Analyzer Optimizations</a></p>
-</div>
-<div class="section" id="analyzer-optimizations">
-<h2>Analyzer optimizations<a class="headerlink" href="#analyzer-optimizations" title="Permalink to this headline">¶</a></h2>
-<p>See <a class="reference external" href="../analyzer-optimizations.html">Analyzer Optimizations</a></p>
-</div>
-<div class="section" id="algorithm-breakdown-metrics">
-<h2>algorithm_breakdown metrics<a class="headerlink" href="#algorithm-breakdown-metrics" title="Permalink to this headline">¶</a></h2>
-<p>See <a class="reference external" href="../analyzer-optimizations.html">Analyzer Optimizations</a></p>
-</div>
-<div class="section" id="improved-log-handling">
-<h2>Improved log handling<a class="headerlink" href="#improved-log-handling" title="Permalink to this headline">¶</a></h2>
-<p>See <a class="reference external" href="../logging.html">Logging</a></p>
-</div>
-<div class="section" id="panorama">
-<h2>Panorama<a class="headerlink" href="#panorama" title="Permalink to this headline">¶</a></h2>
-<p>See <a class="reference external" href="../panorama.html">Panorama</a></p>
-</div>
-<div class="section" id="known-issues-in-this-release">
-<h2>Known issues in this release<a class="headerlink" href="#known-issues-in-this-release" title="Permalink to this headline">¶</a></h2>
-<p>Currently sphinx-apidoc is being used to documentation the code, however
-to get working docs, a small modification is required to the files
-outputted by sphinx-apidoc.</p>
-<p>This is related to the package restructure undertaken to make the
-Skyline code and layout more in line with a normal python package.
-Although this seems to have been achieved, the small hack to the
-sphinx-apidoc output suggests that this is not 100% correct. Further
-evidence of this is in terms of importing from settings.py, the path
-needs to be appended in the code, which really should not be required.
-However, it is working and in the future this should be figured and
-fixed.</p>
-<p>See <a class="reference external" href="../building-documentation.html">Building Documentation</a></p>
-</div>
 </div>
 
 
@@ -278,10 +193,10 @@ fixed.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_0_1.html" class="btn btn-neutral float-right" title="1.0.1 - the crucible branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../whats-new.html" class="btn btn-neutral float-right" title="What’s new" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../releases.html" class="btn btn-neutral" title="Release Notes" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_0_2.html" class="btn btn-neutral" title="1.0.2 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
