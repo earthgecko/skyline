@@ -1,6 +1,6 @@
 DESCRIPTION = 'Anomaly detection in timeseries data'
 LONG_DESCRIPTION = 'http://earthgecko-skyline.readthedocs.io'
-NAME = 'skyline'
+NAME = 'earthgecko_skyline'
 AUTHOR = 'Abe Stanway'
 AUTHOR_EMAIL = 'abe@etsy.com'
 MAINTAINER = 'Gary Wilson'
@@ -37,7 +37,7 @@ setup(
         'Environment :: Web Environment',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Developers',
-        'Topic :: System :: Monitoring'
+        'Topic :: System :: Monitoring',
         'Topic :: Scientific/Engineering :: Information Analysis',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
