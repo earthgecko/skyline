@@ -626,7 +626,8 @@ def mysql_select(current_skyline_app, select):
 
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
-    current_logger.info('debug :: entering mysql_select')
+    if ENABLE_DEBUG:
+        current_logger.info('debug :: entering mysql_select')
 
     try:
         mysql.connector
@@ -678,12 +679,14 @@ def mysql_select(current_skyline_app, select):
             pattern_match = True
             if pattern_match:
                 query = str(select)
-                current_logger.info('debug :: unescaped query - %s' % (str(query)))
+                if ENABLE_DEBUG:
+                    current_logger.info('debug :: unescaped query - %s' % (str(query)))
                 cursor = cnx.cursor()
                 cursor.execute(query)
             else:
                 query = conversion.MySQLConverter().escape(select)
-                current_logger.info('debug :: escaped query - %s' % (str(query)))
+                if ENABLE_DEBUG:
+                    current_logger.info('debug :: escaped query - %s' % (str(query)))
                 cursor = cnx.cursor()
                 cursor.execute(query.format(query))
 

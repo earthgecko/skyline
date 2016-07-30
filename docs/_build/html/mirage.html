@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mirage &mdash; Skyline 1.0.2-dev documentation</title>
+  <title>Mirage &mdash; Skyline 1.0.3-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.2-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.3-dev documentation" href="index.html"/>
         <link rel="next" title="Boundary" href="boundary.html"/>
         <link rel="prev" title="Analyzer Optimizations" href="analyzer-optimizations.html"/> 
 
@@ -96,9 +96,12 @@
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Mirage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#what-mirage-can-and-cannot-do">What Mirage can and cannot do</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setting-up-mirage">Setting up Mirage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-mirage-does">What Mirage does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-real-world-example-with-tenfold-com">A real world example with tenfold.com</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-mirage-can-and-cannot-do">What Mirage can and cannot do</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-and-enabling-mirage">Setting up and enabling Mirage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-mirage-does">What Mirage does</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
@@ -168,9 +171,11 @@
 <p>The Mirage service is responsible for analyzing selected timeseries at custom
 time ranges when a timeseries seasonality does not fit within
 <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>.</p>
-<p>The Mirage aap allows for second order resolution analysis of metrics that
+<p>The Mirage app allows for second order resolution analysis of metrics that
 have a <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> defined in their Analyzer alert tuple
 <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> setting.</p>
+<p>Mirage is fed by Analyzer.
+Mirage gets timeseries data from Graphite.</p>
 <p>Analyzer&#8217;s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> somewhat limits Analyzer&#8217;s usefulness
 for metrics that have a seasonality / periodicity that is greater than
 <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>.  Increasing <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> to
@@ -186,10 +191,43 @@ surface the metric&#8217;s timeseries at its defined seasonality, in real time f
 Graphite in json format and then analyze the timeseries to determine if the
 datapoint that triggered analyzer, is anomalous at the metric&#8217;s true
 seasonality.</p>
+<div class="section" id="a-real-world-example-with-tenfold-com">
+<h2>A real world example with tenfold.com<a class="headerlink" href="#a-real-world-example-with-tenfold-com" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">blak3r2:</th><td class="field-body">Our app logs phone calls for businesses and I want to be able to
+detect when VIP phone systems go down or act funny and begin flooding us with
+events.  Our work load is very noisy from 9-5pm... where 9-5 is different for
+each customer depending on their workload so thresholding and modeling isn&#8217;t
+good.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">earthgecko:</th><td class="field-body">Yes, Mirage is great at user defined seasonality, in your case
+weekday 9-5 peaks, evening drop offs, early morning and weekend lows - multi
+seasonal, Mirage is the ticket.
+Your best bet would be to try 7days (168) as your SECOND_ORDER_RESOLUTION_HOURS
+value for those app log metrics, however, you may get away with a 3 day
+window, it depends on the metrics really, but it may not be noisy at 3 days
+resolution, even at the weekends.
+Also bear in mind, Mirage does some  &#8220;normalizing&#8221; if your have aggregations
+in Graphite (e.g retentions), due to Mirage probably pulling aggregated data,
+however it is analyzing the timeseries at the aggregated resolution so it is
+&#8220;normalised&#8221; as the data point that Analyzer triggered on is ALSO aggregated
+in that timeseries resolution.  So intuitively on may think it may miss it in
+the aggregation then.  True, but Analyzer will likely trigger on the next run
+again if it IS anomalous, anomalous metrics normally trigger multiple,
+multiple times (hence the EXPIRATION_TIME settings), so when Analyzer pushes
+to Mirage again, each aggregation is more likely to trigger anomalous, IF it
+is anomalous at the user defined full duration.  A little flattened maybe, a
+little lag maybe, but less noise, more signal.</td>
+</tr>
+</tbody>
+</table>
 <div class="section" id="what-mirage-can-and-cannot-do">
-<h2>What Mirage can and cannot do<a class="headerlink" href="#what-mirage-can-and-cannot-do" title="Permalink to this headline">¶</a></h2>
-<p>It is important to know that Mirage is not necessarily suited to make highly
-variable less noisy e.g. spikey metrics.</p>
+<h3>What Mirage can and cannot do<a class="headerlink" href="#what-mirage-can-and-cannot-do" title="Permalink to this headline">¶</a></h3>
+<p>It is important to know that Mirage is not necessarily suited to making highly
+variable metrics less noisy e.g. spikey metrics.</p>
 <p>Mirage is more useful on fairly constant rate metrics which contain known
 or expected seasonalities.  For example take a metric such as
 office.energy.consumation.per.hour,  this type of metric would most likely have
@@ -226,8 +264,8 @@ that Mirage is probably using aggregated data (unless your Graphite is not using
 retentions and aggregating) and due to this Mirage will lose some resolution
 resulting in it being less sensitive to anomalies than Analyzer is.</p>
 </div>
-<div class="section" id="setting-up-mirage">
-<h2>Setting up Mirage<a class="headerlink" href="#setting-up-mirage" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setting-up-and-enabling-mirage">
+<h3>Setting up and enabling Mirage<a class="headerlink" href="#setting-up-and-enabling-mirage" title="Permalink to this headline">¶</a></h3>
 <p>By default Mirage is disabled, various Mirage options can be configured in the
 <code class="docutils literal"><span class="pre">settings.py</span></code> file and Analyzer and Mirage can be configured as appropriate
 for your environment.</p>
@@ -271,7 +309,7 @@ discarding <a class="reference internal" href="skyline.html#settings.MIRAGE_STAL
 signals would still be sent.</p>
 </div>
 <div class="section" id="what-mirage-does">
-<h2>What Mirage does<a class="headerlink" href="#what-mirage-does" title="Permalink to this headline">¶</a></h2>
+<h3>What Mirage does<a class="headerlink" href="#what-mirage-does" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Mirage watches for added check files.</li>
 <li>When a check is found, Mirage determines what the configured
@@ -285,6 +323,7 @@ signals would still be sent.</p>
 via the configured alerters for the matching metric <code class="xref py py-mod docutils literal"><span class="pre">settings.ALERT</span></code>
 tuple and sets the metric alert key for <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds.</li>
 </ul>
+</div>
 </div>
 </div>
 
@@ -329,7 +368,7 @@ tuple and sets the metric alert key for <code class="docutils literal"><span cla
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.2-dev',
+            VERSION:'1.0.3-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -25,6 +25,13 @@ UI to:
 * Browse the Redis DB with a port of Marian Steinbach's excellent :red:`re`:brow:`brow`
   https://github.com/marians/rebrow
 
+A basic overview of the Webapp
+==============================
+
+.. figure:: images/skyline.simplified.workflow.annotated.gif
+   :alt: A simplified workflow of Skyline
+
+
 Deploying the Webapp
 ====================
 

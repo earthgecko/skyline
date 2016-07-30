@@ -6,9 +6,12 @@ The Mirage service is responsible for analyzing selected timeseries at custom
 time ranges when a timeseries seasonality does not fit within
 :mod:`settings.FULL_DURATION`.
 
-The Mirage aap allows for second order resolution analysis of metrics that
+The Mirage app allows for second order resolution analysis of metrics that
 have a ``SECOND_ORDER_RESOLUTION_HOURS`` defined in their Analyzer alert tuple
 :mod:`settings.ALERTS` setting.
+
+Mirage is fed by Analyzer.
+Mirage gets timeseries data from Graphite.
 
 Analyzer's :mod:`settings.FULL_DURATION` somewhat limits Analyzer's usefulness
 for metrics that have a seasonality / periodicity that is greater than
@@ -27,11 +30,40 @@ Graphite in json format and then analyze the timeseries to determine if the
 datapoint that triggered analyzer, is anomalous at the metric's true
 seasonality.
 
+A real world example with tenfold.com
+-------------------------------------
+
+:blak3r2: Our app logs phone calls for businesses and I want to be able to
+  detect when VIP phone systems go down or act funny and begin flooding us with
+  events.  Our work load is very noisy from 9-5pm... where 9-5 is different for
+  each customer depending on their workload so thresholding and modeling isn't
+  good.
+
+:earthgecko:  Yes, Mirage is great at user defined seasonality, in your case
+  weekday 9-5 peaks, evening drop offs, early morning and weekend lows - multi
+  seasonal, Mirage is the ticket.
+  Your best bet would be to try 7days (168) as your SECOND_ORDER_RESOLUTION_HOURS
+  value for those app log metrics, however, you may get away with a 3 day
+  window, it depends on the metrics really, but it may not be noisy at 3 days
+  resolution, even at the weekends.
+  Also bear in mind, Mirage does some  "normalizing" if your have aggregations
+  in Graphite (e.g retentions), due to Mirage probably pulling aggregated data,
+  however it is analyzing the timeseries at the aggregated resolution so it is
+  "normalised" as the data point that Analyzer triggered on is ALSO aggregated
+  in that timeseries resolution.  So intuitively on may think it may miss it in
+  the aggregation then.  True, but Analyzer will likely trigger on the next run
+  again if it IS anomalous, anomalous metrics normally trigger multiple,
+  multiple times (hence the EXPIRATION_TIME settings), so when Analyzer pushes
+  to Mirage again, each aggregation is more likely to trigger anomalous, IF it
+  is anomalous at the user defined full duration.  A little flattened maybe, a
+  little lag maybe, but less noise, more signal.
+
+
 What Mirage can and cannot do
 =============================
 
-It is important to know that Mirage is not necessarily suited to make highly
-variable less noisy e.g. spikey metrics.
+It is important to know that Mirage is not necessarily suited to making highly
+variable metrics less noisy e.g. spikey metrics.
 
 Mirage is more useful on fairly constant rate metrics which contain known
 or expected seasonalities.  For example take a metric such as
@@ -207,8 +239,9 @@ that Mirage is probably using aggregated data (unless your Graphite is not using
 retentions and aggregating) and due to this Mirage will lose some resolution
 resulting in it being less sensitive to anomalies than Analyzer is.
 
-Setting up Mirage
-=================
+Setting up and enabling Mirage
+==============================
+
 
 By default Mirage is disabled, various Mirage options can be configured in the
 ``settings.py`` file and Analyzer and Mirage can be configured as appropriate

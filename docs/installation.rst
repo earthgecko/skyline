@@ -30,10 +30,10 @@ Use ``sudo`` appropriately for your environment wherever necessary.
 Steps
 -----
 
-**NOTE**: all the documentation and testing is based on running Skyline in a
-Python-2.7.12 virtualenv, if you choose to deploy Skyline another way, you are
-on your own.  Although it is possible to run Skyline in a different type of
-environment, it does not lend itself to repeatability or a common known state.
+.. note:: All the documentation and testing is based on running Skyline in a
+  Python-2.7.12 virtualenv, if you choose to deploy Skyline another way, you are
+  on your own.  Although it is possible to run Skyline in a different type of
+  environment, it does not lend itself to repeatability or a common known state.
 
 -  Create a python-2.7.12 virtualenv for Skyline to run in see `Running in
    Python virtualenv <running-in-python-virtualenv.html>`__
@@ -55,6 +55,10 @@ environment, it does not lend itself to repeatability or a common known state.
     unixsocket /tmp/redis.sock
     unixsocketperm 777
 
+.. note:: The unixsocket on the apt redis-server package is
+  ``/var/run/redis/redis.sock`` if you use this path ensure you change
+  :mod:`settings.REDIS_SOCKET_PATH` to this path
+
 -  Start Redis
 -  Make the required directories
 
@@ -71,7 +75,14 @@ environment, it does not lend itself to repeatability or a common known state.
     mkdir /etc/skyline
     mkdir /tmp/skyline
 
-- git clone Skyline
+- git clone Skyline (git should have been installed in the `Running in Python
+  virtualenv <running-in-python-virtualenv.html>`__ section)
+
+.. code-block:: bash
+
+    mkdir -p /opt/skyline/github
+    cd /opt/skyline/github
+    git clone https://github.com/earthgecko/skyline.git
 
 .. code-block:: bash
 
@@ -98,12 +109,15 @@ environment, it does not lend itself to repeatability or a common known state.
     bin/"pip${PYTHON_MAJOR_VERSION}" install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86
 
     # The MySQL download source can now be commented it out of requirements.txt
-    # vi /opt/skyline/github/skyline/requirements.txt
+    cat /opt/skyline/github/skyline/requirements.txt | grep -v "cdn.mysql.com/Downloads" > /tmp/requirements.txt
 
     # This can take lots and lots of minutes...
-    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
+    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.txt
 
     # NOW wait at least 7 minutes (on a Linode 4 vCPU, 4GB RAM, SSD cloud node anyway)
+    # and once completed, deactivate the virtualenv
+
+    deactivate
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   setup if it is not using PATH

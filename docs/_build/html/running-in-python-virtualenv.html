@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Running Skyline in a Python virtualenv &mdash; Skyline 1.0.2-dev documentation</title>
+  <title>Running Skyline in a Python virtualenv &mdash; Skyline 1.0.3-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.2-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.3-dev documentation" href="index.html"/>
         <link rel="next" title="Installation" href="installation.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -191,13 +191,19 @@ requires the following system dependencies:</p>
 <ul class="simple">
 <li>RedHat family</li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel python-pip
+<div class="highlight-bash"><div class="highlight"><pre><span></span>yum -y install epel-release
+yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel <span class="se">\</span>
+  gcc gcc-c++ readline-devel ncurses-devel gdbm-devel compat-readline5 <span class="se">\</span>
+  freetype-devel libpng-devel python-pip wget tar git
 </pre></div>
 </div>
 <ul class="simple">
 <li>Debian family</li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev python-pip
+<div class="highlight-bash"><div class="highlight"><pre><span></span>apt-get -y install build-essential
+apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev <span class="se">\</span>
+  libreadline6-dev libgdbm-dev libncurses5 libncurses5-dev libncursesw5 <span class="se">\</span>
+  libfreetype6-dev libxft-dev python-pip wget tar git
 </pre></div>
 </div>
 </div>
@@ -233,6 +239,10 @@ tar -zxvf <span class="s2">&quot;Python-</span><span class="si">${</span><span c
 <span class="nb">cd</span> <span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/Python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
 ./configure --prefix<span class="o">=</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
 make
+
+<span class="c1"># Optionally here if you have the time or interest you can run</span>
+<span class="c1"># make test</span>
+
 make altinstall
 </pre></div>
 </div>
@@ -307,7 +317,7 @@ virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span c
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.2-dev',
+            VERSION:'1.0.3-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
