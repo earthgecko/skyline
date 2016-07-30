@@ -28,7 +28,7 @@ UI to:
 A basic overview of the Webapp
 ==============================
 
-.. figure:: images/skyline.simplified.workflow.annotated.gif
+.. figure:: images/crucible/webapp/skyline.webapp.basic.overview.png
    :alt: A simplified workflow of Skyline
 
 
