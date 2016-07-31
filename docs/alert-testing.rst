@@ -12,7 +12,7 @@ virtualenv and documentation PATHs as an example:
 .. code-block:: bash
 
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline2711"
+  PROJECT="skyline-py2712"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
