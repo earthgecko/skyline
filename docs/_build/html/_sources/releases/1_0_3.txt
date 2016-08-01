@@ -16,4 +16,6 @@ Changes include:
 - Wrapped MySQL debug logging in the proper if ENABLE_DEBUG conditionals as
   these were being generally logged for Panorama patterning
 - Added setup.py and setup.cfg for pypi
+- Minor docs changes and additions
+- Added Known bugs divs to now and Panorama views in the Webapp
 - Bumped up to version 1.0.3
