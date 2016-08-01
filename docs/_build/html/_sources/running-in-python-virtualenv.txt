@@ -51,9 +51,11 @@ virtualenv. *NOTE:* if you are using a version of Python virtualenv
 already, this may not suit your setup.
 
 virtualenv must be >= 15.0.1 due to some recent changes in the pip and
-setuptools, see *Recent changes in the pip environment* section in
+setuptools, see **Recent changes in the pip environment** section in
 `Requirements <requirements.html#recent-changes-in-the-pip-environment>`__
 for more details.
+
+This is using your system pip at this point only to install virtualenv.
 
 .. code-block:: bash
 
@@ -62,15 +64,16 @@ for more details.
 Python version
 ~~~~~~~~~~~~~~
 
-Below we use the PATH /opt/python\_virtualenv, which you can substitute
-with any path you choose and we are going to use python-2.7.12:
+Below we use the path ``/opt/python_virtualenv``, which you can substitute
+with any path you choose.  We are going to use the Python-2.7.12 source and
+build and install an isolated Python-2.7.12, this has no effect on your system
+Python:
 
 .. code-block:: bash
 
     PYTHON_VERSION="2.7.12"
     PYTHON_MAJOR_VERSION="2.7"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PR0JECT="skyline-py2712"
 
     mkdir -p "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}"
     mkdir -p "${PYTHON_VIRTUALENV_DIR}/projects"

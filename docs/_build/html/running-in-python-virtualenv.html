@@ -213,21 +213,23 @@ apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev <s
 virtualenv. <em>NOTE:</em> if you are using a version of Python virtualenv
 already, this may not suit your setup.</p>
 <p>virtualenv must be &gt;= 15.0.1 due to some recent changes in the pip and
-setuptools, see <em>Recent changes in the pip environment</em> section in
+setuptools, see <strong>Recent changes in the pip environment</strong> section in
 <a class="reference external" href="requirements.html#recent-changes-in-the-pip-environment">Requirements</a>
 for more details.</p>
+<p>This is using your system pip at this point only to install virtualenv.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install <span class="s1">&#39;virtualenv&gt;=15.0.1&#39;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="python-version">
 <h2>Python version<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h2>
-<p>Below we use the PATH /opt/python_virtualenv, which you can substitute
-with any path you choose and we are going to use python-2.7.12:</p>
+<p>Below we use the path <code class="docutils literal"><span class="pre">/opt/python_virtualenv</span></code>, which you can substitute
+with any path you choose.  We are going to use the Python-2.7.12 source and
+build and install an isolated Python-2.7.12, this has no effect on your system
+Python:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7.12&quot;</span>
 <span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PR0JECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
 
 mkdir -p <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
 mkdir -p <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
