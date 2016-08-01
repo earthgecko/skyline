@@ -84,12 +84,6 @@ Steps
     cd /opt/skyline/github
     git clone https://github.com/earthgecko/skyline.git
 
-.. code-block:: bash
-
-    mkdir -p /opt/skyline/github
-    cd /opt/skyline/github
-    git clone https://github.com/earthgecko/skyline.git
-
 - Once again using the Python-2.7.12 virtualenv,  install the requirements using
   the virtualenv pip, this can take a long time, the pandas install takes quite
   a while.
