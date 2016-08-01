@@ -161,6 +161,18 @@ momentjs to handle date ticker in the timezone in Dygraph
                 <div class="col-xs-6 col-md-4" align="right">Original, unaggregated anomalous datapoint</div>
                 <div id="metrics_listings"></div>
             </div>
+<!-- @added 20160801 - Webapp js - first element in the list does not load timeseries data -->
+            <div class="known_bugs">
+              <table>
+                  <caption><b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b></caption>
+                  <tr>
+                      <td>
+                        <a target='_blank' href="https://github.com/earthgecko/skyline/issues/17">#17</a>
+                      </td>
+                      <td> The first element in initial list does not fetch timeseries data, mouseover any other and then the first will be available</td>
+                  </tr>
+              </table>
+            </div>
           </div>
   {% endif %}
 {% endif %}

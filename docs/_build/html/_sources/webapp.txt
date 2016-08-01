@@ -29,7 +29,7 @@ A basic overview of the Webapp
 ==============================
 
 .. figure:: images/crucible/webapp/skyline.webapp.basic.overview.png
-   :alt: A simplified workflow of Skyline
+   :alt: A basic overview of the Webapp
 
 
 Deploying the Webapp

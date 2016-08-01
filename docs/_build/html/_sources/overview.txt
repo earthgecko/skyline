@@ -96,7 +96,7 @@ Skyline uses to following technologies and libraries at its core:
 4. **scipy** - `SciPy`_ Library - Fundamental library for scientific computing
 5. **pandas** - `pandas`_ - Python Data Analysis Library
 6. **mysql/mariadb** - a database - `MySQL`_ or `MariaDB`_
-7. **:red:`re`:brow:`brow`** - Skyline uses a modified port of Marian
+7. :red:`re`:brow:`brow` - Skyline uses a modified port of Marian
    Steinbach's excellent `rebrow`_
 
 .. _Etsy: https://www.etsy.com/
