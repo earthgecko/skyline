@@ -88,6 +88,16 @@ Steps
   the virtualenv pip, this can take a long time, the pandas install takes quite
   a while.
 
+.. warning:: When working with virtualenv Python versions you must always
+  remember to use the activate and deactivate commands to ensure you are using
+  the correct version of Python.  Although running a virtualenv does not affect
+  the system Python, not using activate can result in the user making errors
+  that MAY affect the system Python and packages.  For example, a user does not
+  use activate and just uses pip not bin/pip2.7 and pip installs some packages.
+  User error can result in the system Python being affected.  Get in to the
+  habit of always using explicit bin/pip2.7 and bin/python2.7 commands to ensure
+  that it is harder for you to err.
+
 .. code-block:: bash
 
     PYTHON_MAJOR_VERSION="2.7"

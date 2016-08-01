@@ -259,6 +259,18 @@ git clone https://github.com/earthgecko/skyline.git
 the virtualenv pip, this can take a long time, the pandas install takes quite
 a while.</li>
 </ul>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">When working with virtualenv Python versions you must always
+remember to use the activate and deactivate commands to ensure you are using
+the correct version of Python.  Although running a virtualenv does not affect
+the system Python, not using activate can result in the user making errors
+that MAY affect the system Python and packages.  For example, a user does not
+use activate and just uses pip not bin/pip2.7 and pip installs some packages.
+User error can result in the system Python being affected.  Get in to the
+habit of always using explicit bin/pip2.7 and bin/python2.7 commands to ensure
+that it is harder for you to err.</p>
+</div>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
 <span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
