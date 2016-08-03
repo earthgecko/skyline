@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.0.3 - the crucible branch &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>1.0.4 - the crucible branch &mdash; Skyline 1.0.4-dev documentation</title>
   
 
   
@@ -115,7 +115,7 @@
 <li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.3 - the crucible branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.4 - the crucible branch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
@@ -154,7 +154,7 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.0.3 - the crucible branch</li>
+    <li>1.0.4 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -169,23 +169,32 @@
            <div itemprop="articleBody">
             
   <div class="section" id="the-crucible-branch">
-<h1>1.0.3 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<h1>1.0.4 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
 <p>Some documentation updates and setup.py things</p>
 <p>Changes include:</p>
 <ul class="simple">
-<li>Added epel-release to the RedHat family install as python-pip is not in the
-main repos and gcc</li>
-<li>Added wget and tar in case someone is using a minimal OS install</li>
-<li>Added build-essentials as Ubuntu-14.04.4 has to have build-essentials first or
-zlib, et al are not available even if zlib1g-dev et al are installed</li>
-<li>Added libreadline6-dev and readline-devel and ncurses</li>
-<li>Added basic overview of the Webapp uml and png to docs as per suggested by &#64;blak3r2</li>
-<li>Wrapped MySQL debug logging in the proper if ENABLE_DEBUG conditionals as
-these were being generally logged for Panorama patterning</li>
-<li>Added setup.py and setup.cfg for pypi</li>
-<li>Minor docs changes and additions</li>
-<li>Added Known bugs divs to now and Panorama views in the Webapp</li>
-<li>Bumped up to version 1.0.3</li>
+<li>Corrected boundary anomaly_seen log info context</li>
+<li>In the skyline_functions get_graphite_metric slip the fetching Graphite json
+into 2 try: blocks the actual Graphite request and the reading datapoints from
+json and added the graphite_json_fetched variable to test the condition</li>
+<li>Padded out skyline_functions docstrings with type definitions for each param</li>
+<li>Escape : ( and ) in metric name to Graphite URI for Unescaped Graphite target
+<a class="reference external" href="https://github.com/earthgecko/skyline/issues/20">https://github.com/earthgecko/skyline/issues/20</a> in mirage and skyline_functions</li>
+<li>Rmoved old sys.path requirements for the old import settings method.</li>
+<li>Added some notes to the development doc regarding ongoing refactoring work</li>
+<li>Added validation on all Panorama GET parameters to mitigate as much XSS and
+SQL injection as I can at the moment, arachni is happier now.</li>
+<li>Sanitize request.args</li>
+<li>Added missing settings. to CRUCIBLE_PROCESSES thanks &#64;blake3r2, this stops it
+doing nothing.  This branch reallt should have been called panorama, but it
+started last year as crucible, so crucible was not fully tested in the new
+structure, apologies.</li>
+<li>Misc docs changes</li>
+<li>Adding additional exception handling to Analyzer - Issue #19 - task1544
+<a class="reference external" href="https://github.com/earthgecko/skyline/issues/19">https://github.com/earthgecko/skyline/issues/19</a></li>
+<li>This is a start but not complete, other issues took precedence and these are
+the changes to date.</li>
+<li>Bumped version to 1.0.4</li>
 </ul>
 </div>
 
