@@ -197,12 +197,26 @@ Steps
     # And Panorama if you have setup in the DB at this stage
     /opt/skyline/github/skyline/bin/panorama.d start
 
--  Check the log files to ensure things are running and there are no
-   errors.
+- Check the log files to ensure things started OK and are running and there are
+  no errors.
+
+.. note:: When checking a log make sure you check the log for the appropriate
+  time, Skyline can log lots fast, so short tails may miss some event you
+  expect between that restart and tail.
 
 .. code-block:: bash
 
-    tail /var/log/skyline/*.log
+    # Check what the logs reported when the apps started
+    head -n 20 /var/log/skyline/*.log
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    cat /var/log/skyline/horizon.log | grep "error" | tail
+    cat /var/log/skyline/analyzer.log | grep "error" | tail
+    cat /var/log/skyline/webapp.log | grep "error" | tail
+    cat /var/log/skyline/panorama.log | grep "error" | tail
 
 -  Seed Redis with some test data
 

@@ -122,6 +122,16 @@ class Analyzer(Thread):
         spin_start = time()
         logger.info('spin_process started')
 
+        # @modified 20160801 - Adding additional exception handling to Analyzer
+        # Check the unique_metrics list is valid
+        try:
+            valid_unique_metrics = len(unique_metrics)
+        except:
+            logger.error('error :: the unique_metrics list is not valid')
+            logger.info(traceback.format_exc())
+            logger.info('nothing to do, no unique_metrics')
+            return
+
         # Discover assigned metrics
         keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.ANALYZER_PROCESSES)))
         if i == settings.ANALYZER_PROCESSES:
@@ -141,11 +151,22 @@ class Analyzer(Thread):
             return
 
         # Multi get series
-        raw_assigned = self.redis_conn.mget(assigned_metrics)
+        # @modified 20160801 - Adding additional exception handling to Analyzer
+        raw_assigned_failed = True
+        try:
+            raw_assigned = self.redis_conn.mget(assigned_metrics)
+            raw_assigned_failed = False
+        except:
+            logger.error('error :: failed to get assigned_metrics from Redis')
+            logger.info(traceback.format_exc())
 
         # Make process-specific dicts
         exceptions = defaultdict(int)
         anomaly_breakdown = defaultdict(int)
+
+        # @added 20160803 - Adding additional exception handling to Analyzer
+        if raw_assigned_failed:
+            return
 
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
@@ -382,7 +403,12 @@ class Analyzer(Thread):
                 mode_arg = int('0755')
             if python_version == 3:
                 mode_arg = mode=0o755
-            os.makedirs(settings.SKYLINE_TMP_DIR, mode_arg)
+            # @modified 20160803 - Adding additional exception handling to Analyzer
+            try:
+                os.makedirs(settings.SKYLINE_TMP_DIR, mode_arg)
+            except:
+                logger.error('error :: failed to create %s' % settings.SKYLINE_TMP_DIR)
+                logger.info(traceback.format_exc())
 
         # Initiate the algorithm timings if Analyzer is configured to send the
         # algorithm_breakdown metrics with ENABLE_ALGORITHM_RUN_METRICS
@@ -398,16 +424,33 @@ class Analyzer(Thread):
             try:
                 self.redis_conn.ping()
             except:
-                logger.error('skyline can\'t connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
+                logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
+                logger.info(traceback.format_exc())
                 sleep(10)
-                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                try:
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                except:
+                    logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
+                    logger.info(traceback.format_exc())
+
                 continue
 
             # Report app up
-            self.redis_conn.setex(skyline_app, 120, now)
+            try:
+                self.redis_conn.setex(skyline_app, 120, now)
+            except:
+                logger.error('error :: Analyzer could not update the Redis %s key' % skyline_app)
+                logger.info(traceback.format_exc())
 
             # Discover unique metrics
-            unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        # @modified 20160803 - Adding additional exception handling to Analyzer
+            try:
+                unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+            except:
+                logger.error('error :: Analyzer could not get the unique_metrics list from Redis')
+                logger.info(traceback.format_exc())
+                sleep(10)
+                continue
 
             if len(unique_metrics) == 0:
                 logger.info('no metrics in redis. try adding some - see README')
@@ -420,10 +463,20 @@ class Analyzer(Thread):
                 algorithm_count_file = algorithm_tmp_file_prefix + algorithm + '.count'
                 algorithm_timings_file = algorithm_tmp_file_prefix + algorithm + '.timings'
                 # with open(algorithm_count_file, 'a') as f:
-                with open(algorithm_count_file, 'w') as f:
-                    pass
-                with open(algorithm_timings_file, 'w') as f:
-                    pass
+                # @modified 20160803 - Adding additional exception handling to Analyzer
+                try:
+                    with open(algorithm_count_file, 'w') as f:
+                        pass
+                except:
+                    logger.error('error :: could not create file %s' % algorithm_count_file)
+                    logger.info(traceback.format_exc())
+
+                try:
+                    with open(algorithm_timings_file, 'w') as f:
+                        pass
+                except:
+                    logger.error('error :: could not create file %s' % algorithm_timings_file)
+                    logger.info(traceback.format_exc())
 
             # Remove any existing algorithm.error files from any previous runs
             # that did not cleanup for any reason
@@ -437,7 +490,8 @@ class Analyzer(Thread):
                         except OSError:
                             pass
             except:
-                logger.error('failed to cleanup algorithm.error files ' + traceback.format_exc())
+                logger.error('error :: failed to cleanup algorithm.error files')
+                logger.info(traceback.format_exc())
 
             # Spawn processes
             pids = []
@@ -448,12 +502,16 @@ class Analyzer(Thread):
                     logger.info('WARNING: skyline is set for more cores than needed.')
                     break
 
-                p = Process(target=self.spin_process, args=(i, unique_metrics))
-                pids.append(p)
-                pid_count += 1
-                logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(settings.ANALYZER_PROCESSES)))
-                p.start()
-                spawned_pids.append(p.pid)
+                try:
+                    p = Process(target=self.spin_process, args=(i, unique_metrics))
+                    pids.append(p)
+                    pid_count += 1
+                    logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(settings.ANALYZER_PROCESSES)))
+                    p.start()
+                    spawned_pids.append(p.pid)
+                except:
+                    logger.error('error :: failed to spawn process')
+                    logger.info(traceback.format_exc())
 
             # Send wait signal to zombie processes
             # for p in pids:

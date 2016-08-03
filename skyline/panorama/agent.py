@@ -97,11 +97,11 @@ if __name__ == "__main__":
             cnx.close()
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                logger.error('error: something is wrong with your user name or password')
+                logger.error('error :: something is wrong with your user name or password')
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                logger.error('error: the %s database does not exist' % settings.PANORAMA_DATABASE)
+                logger.error('error :: the %s database does not exist' % settings.PANORAMA_DATABASE)
             else:
-                logger.error('mysql error: %s' % str(err))
+                logger.error('error :: mysql error - %s' % str(err))
     except:
         try:
             if configuration_error:

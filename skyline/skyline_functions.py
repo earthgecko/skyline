@@ -49,7 +49,10 @@ def send_graphite_metric(current_skyline_app, metric, value):
 
     :param current_skyline_app: the skyline app using this function
     :param metric: the metric namespace
-    :param value: the metric value
+    :param value: the metric value (as a str not an int)
+    :type current_skyline_app: str
+    :type metric: str
+    :type value: str
     :return: ``True`` or ``False``
     :rtype: boolean
 
@@ -99,7 +102,7 @@ def mkdir_p(path):
     Create nested directories.
 
     :param path: directory path to create
-
+    :type path: str
     :return: returns True
 
     """
@@ -131,9 +134,12 @@ def load_metric_vars(current_skyline_app, metric_vars_file):
     """
     Import the metric variables for a check from a metric check variables file
 
+    :param current_skyline_app: the skyline app using this function
     :param metric_vars_file: the path and filename to the metric variables files
-
-    :return: returns True
+    :type current_skyline_app: str
+    :type metric_vars_file: str
+    :return: the metric_vars module object or ``False``
+    :rtype: object or boolean
 
     """
     try:
@@ -179,8 +185,12 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
     :param file: the path and filename to write the data into
     :param mode: ``w`` to overwrite, ``a`` to append
     :param data: the data to write to the file
-
-    :return: returns True
+    :type current_skyline_app: str
+    :type file: str
+    :type mode: str
+    :type data: str
+    :return: ``True`` or ``False``
+    :rtype: boolean
 
     """
     try:
@@ -238,8 +248,11 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
     :param current_skyline_app: the skyline app using this function
     :param failed_check_dir: the directory where failed checks are moved to
     :param check_file_to_fail: failed check file to move
-
-    :return: ``True``, ``False`` ``pass``
+    :type current_skyline_app: str
+    :type failed_check_dir: str
+    :type check_file_to_fail: str
+    :return: ``True``, ``False``
+    :rtype: boolean
 
     """
     try:
@@ -309,11 +322,14 @@ def alert_expiry_check(current_skyline_app, metric, metric_timestamp, added_by):
     :param current_skyline_app: the skyline app using this function
     :param metric: metric name
     :param added_by: which app requested the alert_expiry_check
+    :type current_skyline_app: str
+    :type metric: str
+    :type added_by: str
+    :return: ``True``, ``False``
+    :rtype: boolean
 
-    :return: ``True``, ``False`` ``pass``
-
-    - If in alert expiry period returns ```True```
-    - If not in alert expiry period or unknown returns ```False```
+    - If inside the alert expiry period returns ``True``
+    - If not in the alert expiry period or unknown returns ``False``
     """
 
     try:
@@ -433,6 +449,15 @@ def get_graphite_metric(
     :param data_type: image or json
     :param output_object: object or path and filename to save data as, if set to
                           object, the object is returned
+    :type current_skyline_app: str
+    :type metric: str
+    :type from_timestamp: str
+    :type until_timestamp: str
+    :type data_type: str
+    :type output_object: str
+    :return: timeseries string, ``True``, ``False``
+    :rtype: str or boolean
+
     """
     try:
         os.getpid()
@@ -444,6 +469,12 @@ def get_graphite_metric(
 
 #    if settings.ENABLE_DEBUG:
     current_logger.info('graphite_metric - %s' % (metric))
+
+    # @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20
+    #                   bug1546: Unescaped Graphite target
+    new_metric_namespace = metric.replace(':', '\:')
+    metric_namespace = new_metric_namespace.replace('(', '\(')
+    metric = metric_namespace.replace(')', '\)')
 
     # Graphite timeouts
     connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
@@ -540,15 +571,23 @@ def get_graphite_metric(
         if settings.ENABLE_DEBUG:
             current_logger.info('use_timeout - %s' % (str(use_timeout)))
 
+        graphite_json_fetched = False
         try:
             r = requests.get(url, timeout=use_timeout)
-            js = r.json()
-            datapoints = js[0]['datapoints']
-            if settings.ENABLE_DEBUG:
-                current_logger.info('data retrieved OK')
+            graphite_json_fetched = True
         except:
             datapoints = [[None, str(graphite_until)]]
-            current_logger.error('error :: data retrieval failed')
+            current_logger.error('error :: data retrieval from Graphite failed')
+
+        if graphite_json_fetched:
+            try:
+                js = r.json()
+                datapoints = js[0]['datapoints']
+                if settings.ENABLE_DEBUG:
+                    current_logger.info('data retrieved OK')
+            except:
+                datapoints = [[None, str(graphite_until)]]
+                current_logger.error('error :: failed to parse data points from retrieved json')
 
         converted = []
         for datapoint in datapoints:

@@ -380,7 +380,12 @@ class Crucible(Thread):
         # anomaly dir
         if not os.path.exists(str(anomaly_dir)):
             try:
-                mkdir_p(skyline_app, str(anomaly_dir))
+                # mkdir_p(skyline_app, str(anomaly_dir))
+                if python_version == 2:
+                    mode_arg = int('0755')
+                if python_version == 3:
+                    mode_arg = mode=0o755
+                os.makedirs(anomaly_dir, mode_arg)
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('created anomaly dir - %s' % str(anomaly_dir))
             except:
@@ -894,14 +899,17 @@ class Crucible(Thread):
             logger.info('assigning check for processing - %s' % str(metric_var_files_sorted[0]))
 
             # Reset process_list
-            self.process_list[:] = []
+            try:
+                self.process_list[:] = []
+            except:
+                logger.error('error :: failed to reset self.process_list')
 
             # Spawn processes
             pids = []
             spawned_pids = []
             pid_count = 0
             run_timestamp = int(now)
-            for i in range(1, CRUCIBLE_PROCESSES + 1):
+            for i in range(1, settings.CRUCIBLE_PROCESSES + 1):
                 p = Process(target=self.spin_process, args=(i, run_timestamp, str(metric_check_file)))
                 pids.append(p)
                 pid_count += 1

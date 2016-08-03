@@ -55,8 +55,17 @@ REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 # ENABLE_WEBAPP_DEBUG = True
 
 app = Flask(__name__)
-app.secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
+# app.secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
+secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
+app.secret_key = secret_key
+
 app.config['PROPAGATE_EXCEPTIONS'] = True
+
+app.config.update(
+    SESSION_COOKIE_NAME='skyline',
+    SESSION_COOKIE_SECURE=True,
+    SECRET_KEY=secret_key
+)
 
 graph_url_string = str(settings.GRAPH_URL)
 PANORAMA_GRAPH_URL = re.sub('\/render\/.*', '', graph_url_string)
@@ -129,7 +138,7 @@ def requires_auth(f):
 @requires_auth
 def index():
 
-    s = time.time()
+    start = time.time()
     if 'uh_oh' in request.args:
         try:
             return render_template(
@@ -143,7 +152,7 @@ def index():
     try:
         return render_template(
             'now.html', version=skyline_version,
-            duration=(time.time() - s)), 200
+            duration=(time.time() - start)), 200
     except:
         error_string = traceback.format_exc()
         logger.error('error :: failed to render index.html: %s' % str(error_string))
@@ -153,10 +162,10 @@ def index():
 @app.route("/now")
 @requires_auth
 def now():
-    s = time.time()
+    start = time.time()
     try:
         return render_template(
-            'now.html', version=skyline_version, duration=(time.time() - s)), 200
+            'now.html', version=skyline_version, duration=(time.time() - start)), 200
     except:
         error_string = traceback.format_exc()
         logger.error('error :: failed to render now.html: %s' % str(error_string))
@@ -231,7 +240,7 @@ def version():
 @app.route("/api", methods=['GET'])
 def data():
     if 'metric' in request.args:
-        metric = request.args.get('metric', None)
+        metric = request.args.get(str('metric'), None)
         try:
             raw_series = REDIS_CONN.get(metric)
             if not raw_series:
@@ -323,10 +332,10 @@ def data():
 @app.route("/docs")
 @requires_auth
 def docs():
-    s = time.time()
+    start = time.time()
     try:
         return render_template(
-            'docs.html', version=skyline_version, duration=(time.time() - s)), 200
+            'docs.html', version=skyline_version, duration=(time.time() - start)), 200
     except:
         return 'Uh oh ... a Skyline 500 :(', 500
 
@@ -342,7 +351,8 @@ def panorama():
         except:
             return 'Uh oh ... a Skyline 500 :(', 500
 
-    s = time.time()
+    start = time.time()
+
     try:
         apps = get_list('app')
     except:
@@ -364,10 +374,178 @@ def panorama():
         logger.error('error :: %s' % traceback.print_exc())
         hosts = ['None']
 
+    request_args_present = False
     try:
         request_args_len = len(request.args)
+        request_args_present = True
     except:
         request_args_len = 0
+
+    # @added 20160803 - Sanitize request.args
+    REQUEST_ARGS = ['from_date',
+                    'from_time',
+                    'from_timestamp',
+                    'until_date',
+                    'until_time',
+                    'until_timestamp',
+                    'count_by_metric',
+                    'metric',
+                    'metric_like',
+                    'app',
+                    'source',
+                    'host',
+                    'algorithm',
+                    'limit',
+                    'order',
+                    ]
+
+    if request_args_present:
+        for i in request.args:
+            key = str(i)
+            if key not in REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(value)))
+                return 'Bad Request', 400
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+
+            if key == 'metric' and value != 'all':
+                if value != '':
+                    try:
+                        unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                    except:
+                        logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                        logger.info(traceback.format_exc())
+                        return 'Internal Server Error', 500
+                    metric_name = settings.FULL_NAMESPACE + value
+                    if metric_name not in unique_metrics:
+                        error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
+
+            if key == 'count_by_metric':
+                count_by_metric_invalid = True
+                if value == 'false':
+                    count_by_metric_invalid = False
+                if value == 'true':
+                    count_by_metric_invalid = False
+                if count_by_metric_invalid:
+                    error_string = 'error :: invalid %s value passed %s' % (key, value)
+                    logger.error('error :: invalid %s value passed %s' % (key, value))
+                    return 'Bad Request', 400
+
+            if key == 'metric_like':
+                metric_namespace_pattern = value.replace('%', '')
+                metric_like_invalid = True
+                try:
+                    unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                except:
+                    logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                    logger.info(traceback.format_exc())
+                    return 'Internal Server Error', 500
+
+                matching = [s for s in unique_metrics if metric_namespace_pattern in s]
+                if len(matching) == 0:
+                    error_string = 'error :: no metric like - %s - exists in Redis' % metric_namespace_pattern
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 404
+
+            if key == 'from_timestamp' or key == 'until_timestamp':
+                timestamp_format_invalid = True
+                if value == 'all':
+                    timestamp_format_invalid = False
+                # unix timestamp
+                if value.isdigit():
+                    timestamp_format_invalid = False
+                # %Y%m%d %H:%M timestamp
+                if timestamp_format_invalid:
+                    value_strip_colon = value.replace(':', '')
+                    new_value = value_strip_colon.replace(' ', '')
+                    if new_value.isdigit():
+                        timestamp_format_invalid = False
+                if timestamp_format_invalid:
+                    error_string = 'error :: invalid %s value passed %s' % (key, value)
+                    logger.error('error :: invalid %s value passed %s' % (key, value))
+                    return 'Bad Request', 400
+
+            if key == 'app':
+                if value != 'all':
+                    if value not in apps:
+                        error_string = 'error :: no %s - %s' % (key, value)
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
+
+            if key == 'source':
+                if value != 'all':
+                    if value not in sources:
+                        error_string = 'error :: no %s - %s' % (key, value)
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
+
+            if key == 'algorithm':
+                if value != 'all':
+                    if value not in algorithms:
+                        error_string = 'error :: no %s - %s' % (key, value)
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
+
+            if key == 'host':
+                if value != 'all':
+                    if value not in hosts:
+                        error_string = 'error :: no %s - %s' % (key, value)
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
+
+            if key == 'limit':
+                limit_invalid = True
+                limit_is_not_numeric = True
+                if value.isdigit():
+                    limit_is_not_numeric = False
+
+                if limit_is_not_numeric:
+                    error_string = 'error :: %s must be a numeric value - requested %s' % (key, value)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 400
+
+                new_value = int(value)
+                try:
+                    valid_value = new_value + 1
+                except:
+                    valid_value = None
+                if valid_value and new_value < 101:
+                    limit_invalid = False
+                if limit_invalid:
+                    error_string = 'error :: %s must be < 100 - requested %s' % (key, value)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 400
+
+            if key == 'order':
+                order_invalid = True
+                if value == 'DESC':
+                    order_invalid = False
+                if value == 'ASC':
+                    order_invalid = False
+                if order_invalid:
+                    error_string = 'error :: %s must be DESC or ASC' % (key)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 400
 
     latest_anomalies = False
     if request_args_len == 0:
@@ -379,7 +557,7 @@ def panorama():
                 'panorama.html', anomalies=panorama_data, app_list=apps,
                 source_list=sources, algorithm_list=algorithms,
                 host_list=hosts, results='Latest anomalies',
-                version=skyline_version, duration=(time.time() - s)), 200
+                version=skyline_version, duration=(time.time() - start)), 200
         except:
             logger.error('error :: failed to get panorama: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -392,15 +570,27 @@ def panorama():
                 count_request = 'true'
         try:
             query, panorama_data = panorama_request()
-            # logger.info('panorama_data - %s' % str(panorama_data))
-            results_string = 'Found anomalies for ' + query
+            if settings.ENABLE_DEBUG or settings.ENABLE_WEBAPP_DEBUG:
+                logger.info('panorama_data - %s' % str(panorama_data))
+                logger.info('debug :: query - %s' % str(query))
+                logger.info('debug :: panorama_data - %s' % str(panorama_data))
+                logger.info('debug :: skyline_version - %s' % str(skyline_version))
+        except:
+            logger.error('error :: failed to get panorama_request: ' + traceback.format_exc())
+            return 'Uh oh ... a Skyline 500 :(', 500
+
+        try:
+            results_string = 'Found anomalies for %s' % str(query)
+
+            duration = (time.time() - start)
+            logger.info('debug :: duration - %s' % str(duration))
             return render_template(
                 'panorama.html', anomalies=panorama_data, app_list=apps,
                 source_list=sources, algorithm_list=algorithms,
                 host_list=hosts, results=results_string, count_request=count_request,
-                version=skyline_version, duration=(time.time() - s)), 200
+                version=skyline_version, duration=(time.time() - start)), 200
         except:
-            logger.error('error :: failed to get panorama: ' + traceback.format_exc())
+            logger.error('error :: failed to render panorama.html: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
 
 
@@ -544,11 +734,11 @@ def rebrow():
         url = url_for('rebrow_server_db', host=host, port=port, db=db)
         return redirect(url)
     else:
-        s = time.time()
+        start = time.time()
         return render_template(
             'rebrow_login.html',
             version=skyline_version,
-            duration=(time.time() - s))
+            duration=(time.time() - start))
 
 
 @app.route("/rebrow_server_db/<host>:<int:port>/<int:db>/")
@@ -556,7 +746,7 @@ def rebrow_server_db(host, port, db):
     """
     List all databases and show info on server
     """
-    s = time.time()
+    start = time.time()
     r = redis.StrictRedis(host=host, port=port, db=0)
     info = r.info('all')
     dbsize = r.dbsize()
@@ -569,7 +759,7 @@ def rebrow_server_db(host, port, db):
         dbsize=dbsize,
         serverinfo_meta=serverinfo_meta,
         version=skyline_version,
-        duration=(time.time() - s))
+        duration=(time.time() - start))
 
 
 @app.route("/rebrow_keys/<host>:<int:port>/<int:db>/keys/", methods=['GET', 'POST'])
@@ -577,7 +767,7 @@ def rebrow_keys(host, port, db):
     """
     List keys for one database
     """
-    s = time.time()
+    start = time.time()
     r = redis.StrictRedis(host=host, port=port, db=db)
     if request.method == 'POST':
         action = request.form['action']
@@ -613,7 +803,7 @@ def rebrow_keys(host, port, db):
             pattern=pattern,
             num_keys=len(keys),
             version=skyline_version,
-            duration=(time.time() - s))
+            duration=(time.time() - start))
 
 
 @app.route("/rebrow_key/<host>:<int:port>/<int:db>/keys/<key>/")
@@ -629,7 +819,7 @@ def rebrow_key(host, port, db, key):
     # if key.startswith('metrics.'):
     #     msg_packed_key = True
     key = base64.urlsafe_b64decode(key.encode('utf8'))
-    s = time.time()
+    start = time.time()
     r = redis.StrictRedis(host=host, port=port, db=db)
     dump = r.dump(key)
     if dump is None:
@@ -676,7 +866,7 @@ def rebrow_key(host, port, db, key):
         now=datetime.utcnow(),
         expiration=datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
         version=skyline_version,
-        duration=(time.time() - s),
+        duration=(time.time() - start),
         msg_packed_key=msg_pack_key)
 
 

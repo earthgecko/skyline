@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage &mdash; Skyline 1.0.3-dev documentation</title>
+  <title>mirage.mirage &mdash; Skyline 1.0.4-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.3-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -192,8 +192,7 @@
 
 <span class="c1"># from skyline import settings</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">write_data_to_file</span>
 
@@ -261,6 +260,13 @@
                 <span class="k">raise</span></div>
 
 <div class="viewcode-block" id="Mirage.surface_graphite_metric_data"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.surface_graphite_metric_data">[docs]</a>    <span class="k">def</span> <span class="nf">surface_graphite_metric_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">):</span>
+
+        <span class="c1"># @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20</span>
+        <span class="c1">#                   bug1546: Unescaped Graphite target</span>
+        <span class="n">new_metric_namespace</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;\:&#39;</span><span class="p">)</span>
+        <span class="n">metric_namespace</span> <span class="o">=</span> <span class="n">new_metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;\(&#39;</span><span class="p">)</span>
+        <span class="n">metric_name</span> <span class="o">=</span> <span class="n">metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;\)&#39;</span><span class="p">)</span>
+
         <span class="c1"># We use absolute time so that if there is a lag in mirage the correct</span>
         <span class="c1"># timeseries data is still surfaced relevant to the anomalous datapoint</span>
         <span class="c1"># timestamp</span>
@@ -890,7 +896,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.3-dev',
+            VERSION:'1.0.4-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

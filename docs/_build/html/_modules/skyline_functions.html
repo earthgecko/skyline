@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.0.3-dev documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.0.4-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.3-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -209,7 +209,10 @@
 
 <span class="sd">    :param current_skyline_app: the skyline app using this function</span>
 <span class="sd">    :param metric: the metric namespace</span>
-<span class="sd">    :param value: the metric value</span>
+<span class="sd">    :param value: the metric value (as a str not an int)</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type metric: str</span>
+<span class="sd">    :type value: str</span>
 <span class="sd">    :return: ``True`` or ``False``</span>
 <span class="sd">    :rtype: boolean</span>
 
@@ -259,7 +262,7 @@
 <span class="sd">    Create nested directories.</span>
 
 <span class="sd">    :param path: directory path to create</span>
-
+<span class="sd">    :type path: str</span>
 <span class="sd">    :return: returns True</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -291,9 +294,12 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Import the metric variables for a check from a metric check variables file</span>
 
+<span class="sd">    :param current_skyline_app: the skyline app using this function</span>
 <span class="sd">    :param metric_vars_file: the path and filename to the metric variables files</span>
-
-<span class="sd">    :return: returns True</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type metric_vars_file: str</span>
+<span class="sd">    :return: the metric_vars module object or ``False``</span>
+<span class="sd">    :rtype: object or boolean</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -339,8 +345,12 @@
 <span class="sd">    :param file: the path and filename to write the data into</span>
 <span class="sd">    :param mode: ``w`` to overwrite, ``a`` to append</span>
 <span class="sd">    :param data: the data to write to the file</span>
-
-<span class="sd">    :return: returns True</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type file: str</span>
+<span class="sd">    :type mode: str</span>
+<span class="sd">    :type data: str</span>
+<span class="sd">    :return: ``True`` or ``False``</span>
+<span class="sd">    :rtype: boolean</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -398,8 +408,11 @@
 <span class="sd">    :param current_skyline_app: the skyline app using this function</span>
 <span class="sd">    :param failed_check_dir: the directory where failed checks are moved to</span>
 <span class="sd">    :param check_file_to_fail: failed check file to move</span>
-
-<span class="sd">    :return: ``True``, ``False`` ``pass``</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type failed_check_dir: str</span>
+<span class="sd">    :type check_file_to_fail: str</span>
+<span class="sd">    :return: ``True``, ``False``</span>
+<span class="sd">    :rtype: boolean</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -469,11 +482,14 @@
 <span class="sd">    :param current_skyline_app: the skyline app using this function</span>
 <span class="sd">    :param metric: metric name</span>
 <span class="sd">    :param added_by: which app requested the alert_expiry_check</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type metric: str</span>
+<span class="sd">    :type added_by: str</span>
+<span class="sd">    :return: ``True``, ``False``</span>
+<span class="sd">    :rtype: boolean</span>
 
-<span class="sd">    :return: ``True``, ``False`` ``pass``</span>
-
-<span class="sd">    - If in alert expiry period returns ```True```</span>
-<span class="sd">    - If not in alert expiry period or unknown returns ```False```</span>
+<span class="sd">    - If inside the alert expiry period returns ``True``</span>
+<span class="sd">    - If not in the alert expiry period or unknown returns ``False``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -593,6 +609,15 @@
 <span class="sd">    :param data_type: image or json</span>
 <span class="sd">    :param output_object: object or path and filename to save data as, if set to</span>
 <span class="sd">                          object, the object is returned</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type metric: str</span>
+<span class="sd">    :type from_timestamp: str</span>
+<span class="sd">    :type until_timestamp: str</span>
+<span class="sd">    :type data_type: str</span>
+<span class="sd">    :type output_object: str</span>
+<span class="sd">    :return: timeseries string, ``True``, ``False``</span>
+<span class="sd">    :rtype: str or boolean</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
@@ -604,6 +629,12 @@
 
 <span class="c1">#    if settings.ENABLE_DEBUG:</span>
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+
+    <span class="c1"># @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20</span>
+    <span class="c1">#                   bug1546: Unescaped Graphite target</span>
+    <span class="n">new_metric_namespace</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;\:&#39;</span><span class="p">)</span>
+    <span class="n">metric_namespace</span> <span class="o">=</span> <span class="n">new_metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;\(&#39;</span><span class="p">)</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;\)&#39;</span><span class="p">)</span>
 
     <span class="c1"># Graphite timeouts</span>
     <span class="n">connect_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_CONNECT_TIMEOUT</span><span class="p">)</span>
@@ -700,15 +731,23 @@
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;use_timeout - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">use_timeout</span><span class="p">)))</span>
 
+        <span class="n">graphite_json_fetched</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
-            <span class="n">js</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-            <span class="n">datapoints</span> <span class="o">=</span> <span class="n">js</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;datapoints&#39;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data retrieved OK&#39;</span><span class="p">)</span>
+            <span class="n">graphite_json_fetched</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">)]]</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: data retrieval failed&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: data retrieval from Graphite failed&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">graphite_json_fetched</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">js</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="n">datapoints</span> <span class="o">=</span> <span class="n">js</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;datapoints&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data retrieved OK&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">)]]</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to parse data points from retrieved json&#39;</span><span class="p">)</span>
 
         <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
@@ -910,7 +949,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.3-dev',
+            VERSION:'1.0.4-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
