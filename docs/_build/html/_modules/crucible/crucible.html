@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crucible.crucible &mdash; Skyline 1.0.3-dev documentation</title>
+  <title>crucible.crucible &mdash; Skyline 1.0.4-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.3-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -540,7 +540,12 @@
         <span class="c1"># anomaly dir</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">)):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
+                <span class="c1"># mkdir_p(skyline_app, str(anomaly_dir))</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o755</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;created anomaly dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
@@ -1054,14 +1059,17 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;assigning check for processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
             <span class="c1"># Reset process_list</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">process_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">process_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to reset self.process_list&#39;</span><span class="p">)</span>
 
             <span class="c1"># Spawn processes</span>
             <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">run_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">CRUCIBLE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)))</span>
                 <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                 <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1126,7 +1134,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.3-dev',
+            VERSION:'1.0.4-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

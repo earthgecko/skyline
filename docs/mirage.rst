@@ -329,7 +329,7 @@ seasonal_pub1 and seasonal_pub_freddy with Mirage
 
 Hopefully it is clear that the first ``stats_counts.http.rpm.publishers.*``
 alert tuple would route ALL to alerter and seasonal_pub1 and seasonal_pub_freddy
-would never get sent to be analyzed by Mirage.
+would never get sent to Mirage to be analyzed.
 
 Enabling
 --------

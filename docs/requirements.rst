@@ -21,6 +21,9 @@ verified as working version with Python-2.7 within a virtaulenv.
 Recent changes in the pip environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. note:: If you use pip or virtualenv in any other context, please note the
+  following and assess if and/or how it pertains to you environment
+
 The new pip, setuptools, distribute and virtualenv methodology that the
 pypa community has adopted is in a bit of a state of flux in terms of
 the setuptools version and virtualenv implementation of making the
@@ -29,6 +32,9 @@ the setuptools version and virtualenv implementation of making the
 distribute is one of the requirements on packages that pip tries to
 install. However, it is needed for Mirage if you are trying to
 run/upgrade on Python-2.6
+
+.. note:  Everything below this point on the page is for people upgrading.  It
+  concerns the implications on/with older versions of things.
 
 pandas
 ======

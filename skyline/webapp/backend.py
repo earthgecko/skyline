@@ -373,17 +373,26 @@ def get_list(thing):
     table = '%ss' % thing
     query = 'select %s from %s' % (thing, table)
     logger.info('select %s from %s' % (thing, table))
+    got_results = False
     try:
         results = mysql_select(skyline_app, query)
+        got_results = True
     except:
         logger.error('error :: failed to get list of %ss from %s' % (thing, table))
         results = None
 
-    logger.info('results: %s' % str(results))
     things = []
-    for result in results:
-        things.append(str(result[0]))
+    results_array_valid = False
+    try:
+        test_results = results[0]
+        results_array_valid = True
+    except:
+        logger.error('error :: invalid results array for get list of %ss from %s' % (thing, table))
 
-    logger.info('things: %s' % str(things))
+    if results_array_valid:
+        logger.info('results: %s' % str(results))
+        for result in results:
+            things.append(str(result[0]))
+        logger.info('things: %s' % str(things))
 
     return things

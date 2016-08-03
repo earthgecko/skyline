@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Webapp &mdash; Skyline 1.0.3-dev documentation</title>
+  <title>Webapp &mdash; Skyline 1.0.4-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.3-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.4-dev documentation" href="index.html"/>
         <link rel="next" title="Redis integration" href="redis-integration.html"/>
         <link rel="prev" title="Panorama" href="panorama.html"/> 
 
@@ -242,6 +242,8 @@ production.</p>
 production environments.  See <a class="reference external" href="http://flask.pocoo.org/docs/0.11/deploying/">http://flask.pocoo.org/docs/0.11/deploying/</a></p>
 <p>In addition to that, considering that the Webapp now has MySQL in the mix, this
 element adds further reason to properly secure the environment.</p>
+<p>There is potential for XSS and SQL injection via the Webapp, ensure TRUSTED
+access only.</p>
 </div>
 </div>
 <div class="section" id="apache-and-gunicorn">
@@ -428,7 +430,7 @@ browser to graph the timeseries.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.3-dev',
+            VERSION:'1.0.4-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

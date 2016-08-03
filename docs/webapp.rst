@@ -66,6 +66,9 @@ production environments.  See http://flask.pocoo.org/docs/0.11/deploying/
 In addition to that, considering that the Webapp now has MySQL in the mix, this
 element adds further reason to properly secure the environment.
 
+There is potential for XSS and SQL injection via the Webapp, ensure TRUSTED
+access only.
+
 Apache and gunicorn
 -------------------
 

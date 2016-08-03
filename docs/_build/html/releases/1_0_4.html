@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - Webapp &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>1.0.3 - the crucible branch &mdash; Skyline 1.0.4-dev documentation</title>
   
 
   
@@ -33,9 +33,9 @@
 
   
     <link rel="top" title="Skyline 1.0.4-dev documentation" href="../index.html"/>
-        <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Roadmap" href="../roadmap.html"/>
-        <link rel="prev" title="Development" href="index.html"/> 
+        <link rel="up" title="Release Notes" href="../releases.html"/>
+        <link rel="next" title="What’s new" href="../whats-new.html"/>
+        <link rel="prev" title="1.0.3 - the crucible branch" href="1_0_3.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -110,17 +110,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../building-documentation.html">Building documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.3 - the crucible branch</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Development - Webapp</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#flask">Flask</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
 </ul>
@@ -153,13 +152,13 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-          <li><a href="index.html">Development</a> &raquo;</li>
+          <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>Development - Webapp</li>
+    <li>1.0.3 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/development/webapp.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_0_4.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -169,33 +168,25 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="development-webapp">
-<h1>Development - Webapp<a class="headerlink" href="#development-webapp" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="flask">
-<h2>Flask<a class="headerlink" href="#flask" title="Permalink to this headline">¶</a></h2>
-<p>The Skyline Webapp has arguably grown to the point were Flask may no longer
-necessarily by the best choice for the frontend UI any more.  For a number of
-reasons, such as:</p>
+  <div class="section" id="the-crucible-branch">
+<h1>1.0.3 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<p>Some documentation updates and setup.py things</p>
+<p>Changes include:</p>
 <ul class="simple">
-<li>The frontend UI functionality is going to grow, with the addition of other
-things requiring more visualizations.</li>
-<li>A high-level Python Web framework like Django may be more appropriate in the
-long run.</li>
+<li>Added epel-release to the RedHat family install as python-pip is not in the
+main repos and gcc</li>
+<li>Added wget and tar in case someone is using a minimal OS install</li>
+<li>Added build-essentials as Ubuntu-14.04.4 has to have build-essentials first or
+zlib, et al are not available even if zlib1g-dev et al are installed</li>
+<li>Added libreadline6-dev and readline-devel and ncurses</li>
+<li>Added basic overview of the Webapp uml and png to docs as per suggested by &#64;blak3r2</li>
+<li>Wrapped MySQL debug logging in the proper if ENABLE_DEBUG conditionals as
+these were being generally logged for Panorama patterning</li>
+<li>Added setup.py and setup.cfg for pypi</li>
+<li>Minor docs changes and additions</li>
+<li>Added Known bugs divs to now and Panorama views in the Webapp</li>
+<li>Bumped up to version 1.0.3</li>
 </ul>
-<p>The reasons for sticking with Flask at this point are:</p>
-<ul class="simple">
-<li>Because Flask is pretty cool.</li>
-<li>It is a microframework not a full blown web framework.</li>
-<li>It is probably simpler.</li>
-<li>Therefore, it keeps more focus at the &#8220;doing stuff&#8221; with Skyline, other and
-Python side of the equation for now, rather than at writing a new web UI with
-Django and porting the current stuff to Django.</li>
-<li>A fair bit of time has been spent adding new things with Flask.</li>
-<li>With gunicorn, Flask can.</li>
-<li>For now it is more than good enough.</li>
-<li>web development, one drop at a time</li>
-</ul>
-</div>
 </div>
 
 
@@ -205,10 +196,10 @@ Django and porting the current stuff to Django.</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../roadmap.html" class="btn btn-neutral float-right" title="Roadmap" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../whats-new.html" class="btn btn-neutral float-right" title="What’s new" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Development" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_0_3.html" class="btn btn-neutral" title="1.0.3 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

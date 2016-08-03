@@ -733,7 +733,7 @@ class Boundary(Thread):
                             times_seen = int(raw_times_seen[0]) + 1
                             try:
                                 self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
-                                logger.info('error :: set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
+                                logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
                             except:
                                 times_seen = 1
                                 logger.error('error :: set anomaly seen key failed :: %s seen %s' % (anomaly_cache_key, str(times_seen)))

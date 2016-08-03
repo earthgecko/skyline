@@ -32,8 +32,7 @@ import datetime
 
 # from skyline import settings
 import os.path
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-sys.path.insert(0, os.path.dirname(__file__))
+
 import settings
 from skyline_functions import write_data_to_file
 
@@ -101,6 +100,13 @@ class Mirage(Thread):
                 raise
 
     def surface_graphite_metric_data(self, metric_name, graphite_from, graphite_until):
+
+        # @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20
+        #                   bug1546: Unescaped Graphite target
+        new_metric_namespace = metric_name.replace(':', '\:')
+        metric_namespace = new_metric_namespace.replace('(', '\(')
+        metric_name = metric_namespace.replace(')', '\)')
+
         # We use absolute time so that if there is a lag in mirage the correct
         # timeseries data is still surfaced relevant to the anomalous datapoint
         # timestamp
