@@ -1,12 +1,8 @@
-import pandas
 import numpy as np
 import scipy
-import statsmodels.api as sm
 import traceback
 import logging
-import re
 from time import time
-from msgpack import unpackb, packb
 from redis import StrictRedis
 
 import sys
@@ -15,7 +11,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.par
 sys.path.insert(0, os.path.dirname(__file__))
 
 from settings import (
-    FULL_DURATION,
     MAX_TOLERABLE_BOREDOM,
     MIN_TOLERABLE_LENGTH,
     STALE_PERIOD,
@@ -314,14 +309,12 @@ def run_selected_algorithm(
             logger.info('debug :: auto aggregating %s for %s' % (metric_name, algorithm))
         try:
             agg_timeseries = autoaggregate_ts(timeseries, autoaggregate_value)
-            aggregatation_failed = False
             if ENABLE_BOUNDARY_DEBUG:
                 logger.info(
                     'debug :: aggregated_timeseries returned %s for %s' % (
                         metric_name, algorithm))
         except Exception as e:
             agg_timeseries = []
-            aggregatation_failed = True
             if ENABLE_BOUNDARY_DEBUG:
                 logger.info('debug error - autoaggregate excpection %s for %s' % (metric_name, algorithm))
                 logger.error('Algorithm error: %s' % traceback.format_exc())

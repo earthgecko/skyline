@@ -8,13 +8,11 @@ from time import time, sleep
 from threading import Thread
 from collections import defaultdict
 from multiprocessing import Process, Manager, Queue
-from msgpack import Unpacker, unpackb, packb
-from os import path, kill, getpid, system, listdir
-from os.path import dirname, join, abspath, isfile
+from msgpack import Unpacker, packb
+from os import path, kill, getpid
 from math import ceil
 import traceback
 import operator
-import socket
 import re
 import os
 import errno
@@ -787,7 +785,7 @@ class Boundary(Thread):
                                         send_alert = True
                                         if ENABLE_BOUNDARY_DEBUG:
                                             logger.info("debug :: alerts_sent set to %s" % str(alerts_sent))
-                                            logger.info("debug :: send_alert set to %s" % str(sent_alert))
+                                            logger.info("debug :: send_alert set to %s" % str(send_alert))
                                     else:
                                         if ENABLE_BOUNDARY_DEBUG:
                                             logger.info("debug :: redis alerter key retrieved, unpacking" + str(alerter_sent_count_key))

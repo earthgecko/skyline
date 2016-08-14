@@ -1,15 +1,12 @@
 import logging
 import traceback
-import sys
-import re
 from os import path
 import string
 import operator
-from time import time, sleep
 
-from flask import Flask, request, render_template, redirect
-import mysql.connector
-from mysql.connector import errorcode
+from flask import request
+# import mysql.connector
+# from mysql.connector import errorcode
 
 import settings
 from skyline_functions import get_graphite_metric, mysql_select

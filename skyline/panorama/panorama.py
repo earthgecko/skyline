@@ -6,33 +6,18 @@ except:
 from redis import StrictRedis
 from time import time, sleep
 from threading import Thread
-from collections import defaultdict
-from multiprocessing import Process, Manager, Queue
-from msgpack import Unpacker, unpackb, packb
+from multiprocessing import Process, Manager
+from msgpack import Unpacker, packb
 import os
-from os import path, kill, getpid, system, listdir
+from os import kill, getpid, listdir
 from os.path import join, isfile
-from math import ceil
 import traceback
-import operator
-import socket
-import re
-import imp
-import shutil
 from sys import version_info
 import mysql.connector
 from mysql.connector import errorcode
 
 import settings
-from skyline_functions import send_graphite_metric, mkdir_p, load_metric_vars, fail_check
-
-# Converting one settings variable into a local variable, just because it is a
-# long string otherwise.
-try:
-    ENABLE_PANORAMA_DEBUG = settings.ENABLE_PANORAMA_DEBUG
-except:
-    logger.error('error :: cannot determine ENABLE_PANORAMA_DEBUG from settings' % skyline_app)
-    ENABLE_PANORAMA_DEBUG = False
+from skyline_functions import load_metric_vars, fail_check
 
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
@@ -44,6 +29,14 @@ skyline_app_logwait = '%s.wait' % skyline_app_logfile
 python_version = int(version_info[0])
 
 this_host = str(os.uname()[1])
+
+# Converting one settings variable into a local variable, just because it is a
+# long string otherwise.
+try:
+    ENABLE_PANORAMA_DEBUG = settings.ENABLE_PANORAMA_DEBUG
+except:
+    logger.error('error :: cannot determine ENABLE_PANORAMA_DEBUG from settings' % skyline_app)
+    ENABLE_PANORAMA_DEBUG = False
 
 try:
     SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
@@ -496,6 +489,7 @@ class Panorama(Thread):
                             query_cache_key, str(determined_id)))
                     except Exception as e:
                         logger.error(traceback.format_exc())
+                        logger.error('%s' % str(e))
                         logger.error('error :: failed to set query_cache_key - %s - id: %s' % (
                             query_cache_key, str(determined_id)))
                 return determined_id
@@ -819,7 +813,6 @@ class Panorama(Thread):
             spawned_pids = []
             pid_count = 0
             now = time()
-            run_timestamp = int(now)
             for i in range(1, settings.PANORAMA_PROCESSES + 1):
                 try:
                     p = Process(target=self.spin_process, args=(i, metric_check_file))
@@ -857,4 +850,23 @@ class Panorama(Thread):
                 for p in pids:
                     p.terminate()
                     p.join()
+
+                check_file_name = os.path.basename(str(metric_check_file))
+                if settings.ENABLE_PANORAMA_DEBUG:
+                    logger.info('debug :: check_file_name - %s' % check_file_name)
+                check_file_timestamp = check_file_name.split('.', 1)[0]
+                if settings.ENABLE_PANORAMA_DEBUG:
+                    logger.info('debug :: check_file_timestamp - %s' % str(check_file_timestamp))
+                check_file_metricname_txt = check_file_name.split('.', 1)[1]
+                if settings.ENABLE_PANORAMA_DEBUG:
+                    logger.info('debug :: check_file_metricname_txt - %s' % check_file_metricname_txt)
+                check_file_metricname = check_file_metricname_txt.replace('.txt', '')
+                if settings.ENABLE_PANORAMA_DEBUG:
+                    logger.info('debug :: check_file_metricname - %s' % check_file_metricname)
+                check_file_metricname_dir = check_file_metricname.replace('.', '/')
+                if settings.ENABLE_PANORAMA_DEBUG:
+                    logger.info('debug :: check_file_metricname_dir - %s' % check_file_metricname_dir)
+
+                metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
+
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))

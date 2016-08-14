@@ -7,18 +7,16 @@ from redis import StrictRedis
 import time
 from time import time, sleep
 from threading import Thread
-from multiprocessing import Process, Manager, Queue
-from msgpack import Unpacker, unpackb, packb
+from multiprocessing import Process, Manager
+from msgpack import packb
 import os
-from os.path import dirname, join, abspath, isfile
-from os import path, kill, getpid, system, getcwd, listdir, makedirs
+from os.path import join, isfile
+from os import kill, getpid, listdir
 from sys import exit, version_info
 import traceback
 import re
-import socket
 import json
 import gzip
-import sys
 import requests
 try:
     import urlparse
@@ -30,7 +28,6 @@ except ImportError:
     import urllib.request
     import urllib.error
 import errno
-import imp
 import datetime
 import shutil
 
@@ -39,7 +36,7 @@ import os.path
 # sys.path.insert(0, os.path.dirname(__file__))
 
 import settings
-from skyline_functions import mkdir_p, load_metric_vars, fail_check
+from skyline_functions import load_metric_vars, fail_check
 
 from crucible_algorithms import run_algorithms
 
@@ -357,7 +354,7 @@ class Crucible(Thread):
                 try:
                     last_check = self.redis_conn.get(cache_key)
                 except Exception as e:
-                    logger.error('error :: could not query cache_key for %s - %s - %s' % (alerter, metric, e))
+                    logger.error('error :: could not query cache_key for %s - %s - %s' % (source_app, metric, e))
                     logger.info('all anomaly files will be removed')
                     remove_all_anomaly_files = True
 
@@ -366,7 +363,7 @@ class Crucible(Thread):
                     self.redis_conn.setex(cache_key, expiration_timeout, packb(value))
                     logger.info('set cache_key for %s - %s with timeout of %s' % (source_app, metric, str(expiration_timeout)))
                 except Exception as e:
-                    logger.error('error :: could not query cache_key for %s - %s - %s' % (alerter, metric, e))
+                    logger.error('error :: could not query cache_key for %s - %s - %s' % (source_app, metric, e))
                     logger.info('all anomaly files will be removed')
                     remove_all_anomaly_files = True
             else:
@@ -661,8 +658,6 @@ class Crucible(Thread):
         # Run crucible algorithms
         logger.info('running crucible tests - %s' % (metric))
 
-        timeseries_dir = metric.replace('.', '/')
-
         if os.path.isfile(anomaly_json_gz):
             if not os.path.isfile(anomaly_json):
                 if settings.ENABLE_CRUCIBLE_DEBUG:
@@ -797,9 +792,11 @@ class Crucible(Thread):
                 os.system('%s %s' % (str(run_script), str(crucible_anomaly_file)))
 
         # Remove metric check file
+        nothing_to_do = ''
+
         try:
             os.remove(metric_check_file)
-            logger.info('complete removed check file - %s' % (metric_check_file))
+            logger.info('complete removed check file - %s %s' % (metric_check_file, nothing_to_do))
         except OSError:
             pass
 
