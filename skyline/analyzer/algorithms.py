@@ -32,14 +32,14 @@ from settings import (
 
 from algorithm_exceptions import *
 
-skyline_app = 'analyzer'
-skyline_app_logger = '%sLog' % skyline_app
-logger = logging.getLogger(skyline_app_logger)
-
 if ENABLE_SECOND_ORDER:
     from redis import StrictRedis
     from msgpack import unpackb, packb
     redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+
+skyline_app = 'analyzer'
+skyline_app_logger = '%sLog' % skyline_app
+logger = logging.getLogger(skyline_app_logger)
 
 try:
     send_algorithm_run_metrics = ENABLE_ALGORITHM_RUN_METRICS
@@ -431,6 +431,25 @@ def determine_median(timeseries):
     return False
 
 
+def determine_array_median(array):
+    """
+    Determine the median of the values in an array
+    """
+    try:
+        np_array = np.array(array)
+    except:
+        return False
+
+    # logger.info('Running ' + str(get_function_name()))
+    try:
+        array_median = np.median(np_array)
+        return array_median
+    except:
+        return False
+
+    return False
+
+
 def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     """
     This method runs a meta-analysis on the metric to determine whether the
@@ -540,7 +559,7 @@ def run_selected_algorithm(timeseries, metric_name):
         elif algorithm_result.count(False) == 1:
             result = False
         elif algorithm_result.count(None) == 1:
-            algorithm_result = None
+            result = None
         else:
             result = False
 
@@ -555,15 +574,14 @@ def run_selected_algorithm(timeseries, metric_name):
         if ENABLE_ALL_ALGORITHMS_RUN_METRICS:
             continue
 
-        false_count = final_ensemble.count(False)
-        true_count = final_ensemble.count(True)
-
+        # true_count = final_ensemble.count(True)
+        # false_count = final_ensemble.count(False)
         # logger.info('current false_count %s' % (str(false_count)))
 
         if final_ensemble.count(False) >= maximum_false_count:
             consensus_possible = False
             # logger.info('CONSENSUS cannot be reached as %s algorithms have already not been triggered' % (str(false_count)))
-            skip_algorithms_count = number_of_algorithms - number_of_algorithms_run
+            # skip_algorithms_count = number_of_algorithms - number_of_algorithms_run
             # logger.info('skipping %s algorithms' % (str(skip_algorithms_count)))
 
     # logger.info('final_ensemble: %s' % (str(final_ensemble)))
