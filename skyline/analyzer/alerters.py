@@ -19,9 +19,12 @@ from matplotlib.dates import DateFormatter
 import io
 import numpy as np
 import pandas as pd
+import syslog
 
 import os.path
 import sys
+import resource
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -58,7 +61,7 @@ metric: information about the anomaly itself
     metric[1]: The full name of the anomalous metric
 """
 
-# FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
+# FULL_DURATION to hours so that Analyzer surfaces the relevant timeseries data
 # in the graph
 try:
     full_duration_seconds = int(settings.FULL_DURATION)
@@ -77,6 +80,7 @@ def alert_smtp(alert, metric):
     logger = logging.getLogger(skyline_app_logger)
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - sending smtp alert')
+        logger.info('debug :: alert_smtp - Memory usage at start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
     # FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data
     # in the graph
@@ -88,7 +92,23 @@ def alert_smtp(alert, metric):
         recipient = alert[1]
     else:
         sender = settings.SMTP_OPTS['sender']
-        recipients = settings.SMTP_OPTS['recipients'][alert[0]]
+        # @modified 20160806 - Added default_recipient
+        try:
+            recipients = settings.SMTP_OPTS['recipients'][alert[0]]
+            use_default_recipient = False
+        except:
+            use_default_recipient = True
+        if use_default_recipient:
+            try:
+                recipients = settings.SMTP_OPTS['default_recipient']
+                logger.info(
+                    'alert_smtp - using default_recipient as no recipients are configured for %s' %
+                    str(alert[0]))
+            except:
+                logger.error(
+                    'error :: alert_smtp - no known recipient for %s' %
+                    str(alert[0]))
+                return False
 
     # Backwards compatibility
     if type(recipients) is str:
@@ -123,6 +143,9 @@ def alert_smtp(alert, metric):
             if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                 logger.info('debug :: alert_smtp - image data None')
 
+    if LOCAL_DEBUG:
+        logger.info('debug :: alert_smtp - Memory usage after image_data: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
     # If we failed to get the image or if it was explicitly disabled,
     # use the image URL instead of the content.
     if image_data is None:
@@ -155,6 +178,8 @@ def alert_smtp(alert, metric):
                 logger.info('debug :: alert_smtp - raw_series: %s' % 'FAIL')
 
         try:
+            if LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - Memory usage before get Redis timeseries data: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             unpacker = Unpacker(use_list=True)
             unpacker.feed(raw_series)
             timeseries_x = [float(item[0]) for item in unpacker]
@@ -165,6 +190,8 @@ def alert_smtp(alert, metric):
             unpacker = Unpacker(use_list=False)
             unpacker.feed(raw_series)
             timeseries = list(unpacker)
+            if LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - Memory usage after get Redis timeseries data: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         except:
             logger.error('error :: alert_smtp - unpack timeseries failed')
             timeseries = None
@@ -172,9 +199,13 @@ def alert_smtp(alert, metric):
         pd_series_values = None
         if timeseries:
             try:
+                if LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - Memory usage before pd.Series: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                 values = pd.Series([x[1] for x in timeseries])
                 # Because the truth value of a Series is ambiguous
                 pd_series_values = True
+                if LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - Memory usage after pd.Series: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             except:
                 logger.error('error :: alert_smtp - pandas value series on timeseries failed')
 
@@ -201,7 +232,7 @@ def alert_smtp(alert, metric):
                 if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                     logger.info('debug :: alert_smtp - sigma3: %s' % str(sigma3))
 
-                sigma3_series = [sigma3] * len(values)
+                # sigma3_series = [sigma3] * len(values)
 
                 sigma3_upper_bound = mean + sigma3
                 try:
@@ -220,10 +251,17 @@ def alert_smtp(alert, metric):
 
         if mean_series:
             graph_title = 'Skyline Analyzer - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (full_duration_in_hours, metric[1], metric[0])
-            if python_version == 3:
-                buf = io.StringIO()
-            else:
-                buf = io.BytesIO()
+            # @modified 20160814 - Bug #1558: Memory leak in Analyzer
+            # I think the buf is causing a memory leak, trying a file
+            # if python_version == 3:
+            #     buf = io.StringIO()
+            # else:
+            #     buf = io.BytesIO()
+            buf = '%s/%s.%s.%s.png' % (
+                settings.SKYLINE_TMP_DIR, skyline_app, str(metric[0]), metric[0])
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - Memory usage before plot Redis data: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Too big
             # rcParams['figure.figsize'] = 12, 6
@@ -258,7 +296,7 @@ def alert_smtp(alert, metric):
                 ax.plot(datetimes, mean_series, lw=1.5, label=mean_value_label, color='g', ls='--', zorder=4)
 
                 sigma3_text = (r'3$\sigma$')
-                sigma3_label = '%s - %s' % (str(sigma3_text), str(sigma3))
+                # sigma3_label = '%s - %s' % (str(sigma3_text), str(sigma3))
 
                 sigma3_upper_label = '%s upper - %s' % (str(sigma3_text), str(sigma3_upper_bound))
                 ax.plot(datetimes, sigma3_upper_series, lw=1, label=sigma3_upper_label, color='r', ls='solid', zorder=4)
@@ -292,50 +330,68 @@ def alert_smtp(alert, metric):
                 # tight_layout removes the legend box
                 # fig.tight_layout()
                 try:
+                    if LOCAL_DEBUG:
+                        logger.info('debug :: alert_smtp - Memory usage before plt.savefig: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                     plt.savefig(buf, format='png')
+                    # @added 20160814 - Bug #1558: Memory leak in Analyzer
+                    # As per http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13222.html
+                    # savefig in the parent process was causing the memory leak
+                    # the below fig.clf() and plt.close() did not resolve this
+                    # however spawing a multiprocessing process for alert_smtp
+                    # does solve this as issue as all memory is freed when the
+                    # process terminates.
+                    fig.clf()
+                    plt.close(fig)
                     redis_graph_content_id = 'redis.%s' % metric[1]
                     redis_image_data = True
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                         logger.info('debug :: alert_smtp - savefig: %s' % 'OK')
+                        logger.info('debug :: alert_smtp - Memory usage after plt.savefig: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                 except:
                     logger.error('error :: alert_smtp - plt.savefig: %s' % 'FAIL')
             except:
                 logger.error('error :: alert_smtp - could not build plot')
                 logger.info(traceback.format_exc())
 
+    if LOCAL_DEBUG:
+        logger.info('debug :: alert_smtp - Memory usage before email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
     if redis_image_data:
         redis_img_tag = '<img src="cid:%s"/>' % redis_graph_content_id
         if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-            logger.info('debug :: alert_smtp - redis_img_tag: %s' % redis_img_tag)
+            logger.info('debug :: alert_smtp - redis_img_tag: %s' % str(redis_img_tag))
     else:
-        redis_img_tag = '<img src="%s"/>' % 'none'
+        redis_img_tag = '<img src="none"/>'
 
-    body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> Analyzer alert</font></h3><br>'
-    body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
-    body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
-    body += '<font color="black">At hours: %s</font><br>' % str(full_duration_in_hours)
-    body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
-    if redis_image_data:
-        body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
-            str(array_amin), str(array_amax), str(mean))
-        body += '3-sigma: %s <br>' % str(sigma3)
-        body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
-            str(sigma3_upper_bound), str(sigma3_lower_bound))
-        body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
-        body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
-    if image_data:
-        body += '<h3><font color="black">Graphite data at FULL_DURATION (may be aggregated)</font></h3>'
-        body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
-        body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
-    if redis_image_data:
-        body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
-        body += 'however do note that will remove the 3-sigma and mean value too.</font>'
-    body += '<br>'
-    body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
+    try:
+        body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> Analyzer alert</font></h3><br>'
+        body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
+        body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
+        body += '<font color="black">At hours: %s</font><br>' % str(full_duration_in_hours)
+        body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+        if redis_image_data:
+            body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
+                str(array_amin), str(array_amax), str(mean))
+            body += '3-sigma: %s <br>' % str(sigma3)
+            body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
+                str(sigma3_upper_bound), str(sigma3_lower_bound))
+            body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
+            body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
+        if image_data:
+            body += '<h3><font color="black">Graphite data at FULL_DURATION (may be aggregated)</font></h3>'
+            body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
+            body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
+        if redis_image_data:
+            body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
+            body += 'however do note that will remove the 3-sigma and mean value too.</font>'
+        body += '<br>'
+        body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
+    except:
+        logger.error('error :: alert_smtp - could not build body')
+        logger.info(traceback.format_exc())
 
     for recipient in recipients:
         try:
-
             msg = MIMEMultipart('alternative')
             msg['Subject'] = '[Skyline alert] - Analyzer ALERT - ' + metric[1]
             msg['From'] = sender
@@ -345,8 +401,25 @@ def alert_smtp(alert, metric):
 
             if redis_image_data:
                 try:
-                    buf.seek(0)
-                    msg_plot_attachment = MIMEImage(buf.read())
+                    # @modified 20160814 - Bug #1558: Memory leak in Analyzer
+                    # I think the buf is causing a memory leak, trying a file
+                    # buf.seek(0)
+                    # msg_plot_attachment = MIMEImage(buf.read())
+                    # msg_plot_attachment = MIMEImage(buf.read())
+                    try:
+                        with open(buf, 'r') as f:
+                            plot_image_data = f.read()
+                        try:
+                            os.remove(buf)
+                        except OSError:
+                            logger.error(
+                                'error :: alert_smtp - failed to remove file - %s' % buf)
+                            logger.info(traceback.format_exc())
+                            pass
+                    except:
+                        logger.error('error :: failed to read plot file - %s' % buf)
+                        plot_image_data = None
+                    msg_plot_attachment = MIMEImage(plot_image_data)
                     msg_plot_attachment.add_header('Content-ID', '<%s>' % redis_graph_content_id)
                     msg.attach(msg_plot_attachment)
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
@@ -380,6 +453,55 @@ def alert_smtp(alert, metric):
 
         s.quit()
 
+        if LOCAL_DEBUG:
+            logger.info('debug :: alert_smtp - Memory usage after email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+        if redis_image_data:
+            # buf.seek(0)
+            # buf.write('none')
+            if LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - Memory usage before del redis_image_data objects: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            del raw_series
+            del unpacker
+            del timeseries[:]
+            del timeseries_x[:]
+            del timeseries_y[:]
+            del values
+            del datetimes[:]
+            del msg_plot_attachment
+            del redis_image_data
+            # We del all variables that are floats as they become unique objects and
+            # can result in what appears to be a memory leak, but is not, it is
+            # just the way Python handles floats
+            del mean
+            del array_amin
+            del array_amax
+            del stdDev
+            del sigma3
+            if LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - Memory usage after del redis_image_data objects: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            if LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - Memory usage before del fig object: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            # @added 20160814 - Bug #1558: Memory leak in Analyzer
+            #                   Issue #21 Memory leak in Analyzer - https://github.com/earthgecko/skyline/issues/21
+            # As per http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13222.html
+            fig.clf()
+            plt.close(fig)
+            del fig
+            if LOCAL_DEBUG:
+                logger.info('debug :: alert_smtp - Memory usage after del fig object: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+        if LOCAL_DEBUG:
+            logger.info('debug :: alert_smtp - Memory usage before del other objects: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+        del recipients[:]
+        del body
+        del msg
+        del image_data
+        del msg_attachment
+        if LOCAL_DEBUG:
+            logger.info('debug :: alert_smtp - Memory usage after del other objects: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+        return
+
 
 def alert_pagerduty(alert, metric):
     """
@@ -390,7 +512,7 @@ def alert_pagerduty(alert, metric):
         pager = pygerduty.PagerDuty(settings.PAGERDUTY_OPTS['subdomain'], settings.PAGERDUTY_OPTS['auth_token'])
         pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], "Anomalous metric: %s (value: %s)" % (metric[1], metric[0]))
     else:
-        pagerduty_not_enabled = True
+        return
 
 
 def alert_hipchat(alert, metric):
@@ -429,7 +551,7 @@ def alert_hipchat(alert, metric):
                 'rooms/message', method='POST',
                 parameters={'room_id': room, 'from': 'Skyline', 'color': hipchat_color, 'message': message})
     else:
-        hipchat_not_enabled = True
+        return
 
 
 def alert_syslog(alert, metric):
@@ -438,8 +560,6 @@ def alert_syslog(alert, metric):
 
     """
     if settings.SYSLOG_ENABLED:
-        import sys
-        import syslog
         syslog_ident = settings.SYSLOG_OPTS['ident']
         message = str('Analyzer - Anomalous metric: %s (value: %s)' % (metric[1], metric[0]))
         if sys.version_info[:2] == (2, 6):
@@ -452,7 +572,7 @@ def alert_syslog(alert, metric):
             syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
         syslog.syslog(4, message)
     else:
-        syslog_not_enabled = True
+        return
 
 
 def trigger_alert(alert, metric):
@@ -479,4 +599,8 @@ def trigger_alert(alert, metric):
     else:
         strategy = 'alert_%s' % alert[1]
 
-    getattr(alerters, strategy)(alert, metric)
+    try:
+        getattr(alerters, strategy)(alert, metric)
+    except:
+        logger.error('error :: alerters - %s - getattr error' % strategy)
+        logger.info(traceback.format_exc())

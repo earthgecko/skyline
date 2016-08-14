@@ -8,12 +8,9 @@ from time import time, sleep
 from threading import Thread
 from collections import defaultdict
 from multiprocessing import Process, Manager, Queue
-from msgpack import Unpacker, unpackb, packb
-from os import path, kill, getpid, system
-from math import ceil
+from msgpack import packb
+from os import kill, getpid
 import traceback
-import operator
-import socket
 import re
 # imports required for surfacing graphite JSON formatted timeseries for use in
 # Mirage
@@ -30,8 +27,8 @@ import imp
 from os import listdir
 import datetime
 
-# from skyline import settings
 import os.path
+import resource
 
 import settings
 from skyline_functions import write_data_to_file
@@ -40,7 +37,32 @@ from mirage_alerters import trigger_alert
 from negaters import trigger_negater
 from mirage_algorithms import run_selected_algorithm
 from algorithm_exceptions import *
-from os.path import dirname, join, abspath, isfile
+from os.path import join, isfile
+
+"""
+ENABLE_MEMORY_PROFILING - DEVELOPMENT ONLY
+
+# @added 20160806 - Bug #1558: Memory leak in Analyzer
+# Added all the memory profiling blocks - mem_top, pympler, objgraph, gc
+Garbage collection et al, should not be run in anything but development model,
+therefore these variables are hard coded and not accessible via settings.py,
+if you are in here reading this then knock yourself out.  gc and dump_garbage
+can be useful for getting an idea about what all the objects in play are, but
+garbage collection will just take longer and longer to run.
+
+"""
+LOCAL_DEBUG = False
+ENABLE_MEMORY_PROFILING = False
+garbage_collection_enabled = False
+
+if ENABLE_MEMORY_PROFILING:
+    # @added 20160806 - Bug #1558: Memory leak in Analyzer
+    # As per http://stackoverflow.com/a/1641280
+    # This got useable understandable data
+    if garbage_collection_enabled:
+        from gc import get_objects
+        # Debug with garbage collection - http://code.activestate.com/recipes/65333/
+        import gc
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -87,6 +109,21 @@ class Mirage(Thread):
             kill(self.parent_pid, 0)
         except:
             exit(0)
+
+    def spawn_alerter_process(self, alert, metric, second_order_resolution_seconds):
+        """
+        Spawn a process to trigger an alert.  This is used by smtp alerters so
+        that matplotlib objects are cleared down and the alerter cannot create
+        a memory leak in this manner and plt.savefig keeps the object in memory
+        until the process terminates.  Seeing as data is being surfaced and
+        processed in the alert_smtp context, multiprocessing the alert creation
+        and handling prevents any memory leaks in the parent.
+        # @added 20160814 - Bug #1558: Memory leak in Analyzer
+        #                   Issue #21 Memory leak in Analyzer
+        # https://github.com/earthgecko/skyline/issues/21
+        """
+
+        trigger_alert(alert, metric, second_order_resolution_seconds)
 
     def mkdir_p(self, path):
         try:
@@ -144,7 +181,7 @@ class Mirage(Thread):
         return False
 
     def load_metric_vars(self, filename):
-        if os.path.isfile(filename) == True:
+        if os.path.isfile(filename):
             f = open(filename)
             global metric_vars
             metric_vars = imp.load_source('metric_vars', '', f)
@@ -152,6 +189,47 @@ class Mirage(Thread):
             return True
 
         return False
+
+    def dump_garbage(self):
+        """
+        DEVELOPMENT ONLY
+
+        # @added 20160806 - Bug #1558: Memory leak in Analyzer
+        # Debug with garbage collection - http://code.activestate.com/recipes/65333/
+
+        show us what's the garbage about
+        """
+
+        if ENABLE_MEMORY_PROFILING and garbage_collection_enabled:
+            # force collection
+            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                logger.info('debug :: GARBAGE')
+            try:
+                gc.collect()
+                gc_collect_ok = True
+            except:
+                logger.error('error :: gc.collect failed')
+                logger.info(traceback.format_exc())
+                gc_collect_ok = False
+
+            if gc_collect_ok:
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: GARBAGE OBJECTS')
+                for x in gc.garbage:
+                    s = str(x)
+                    if len(s) > 80:
+                        s = s[:80]
+                    # print type(x), "\n  ", s
+                    try:
+                        log_string = type(x), "\n  ", s
+                    except:
+                        logger.error('error :: print x and s')
+                        logger.info(traceback.format_exc())
+
+                    # if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    #     logger.info(log_string)
+        else:
+            return None
 
     def spin_process(self, i, run_timestamp):
         """
@@ -200,7 +278,7 @@ class Mirage(Thread):
         int_run_timestamp = int(run_timestamp)
         metric_timestamp_age = int_run_timestamp - int_metric_timestamp
         if metric_timestamp_age > settings.MIRAGE_STALE_SECONDS:
-            logger.info('stale check       :: %s check request is %s seconds old - discarding' % (metric_vars.metric, metric_timestamp_age))
+            logger.info('stale check :: %s check request is %s seconds old - discarding' % (metric_vars.metric, metric_timestamp_age))
             # Remove metric check file
 #            try:
 #                os.remove(metric_check_file)
@@ -233,7 +311,7 @@ class Mirage(Thread):
 
         # Get data from graphite
         logger.info(
-            'retrieve data     :: surfacing %s timeseries from graphite for %s seconds' % (
+            'retrieve data :: surfacing %s timeseries from graphite for %s seconds' % (
                 metric_vars.metric, second_order_resolution_seconds))
         self.surface_graphite_metric_data(metric_vars.metric, graphite_from, graphite_until)
 
@@ -249,7 +327,7 @@ class Mirage(Thread):
                 pass
             return
         else:
-            logger.info('retrieved data    :: for %s at %s seconds' % (
+            logger.info('retrieved data :: for %s at %s seconds' % (
                 metric_vars.metric, second_order_resolution_seconds))
 
         # Make process-specific dicts
@@ -263,7 +341,7 @@ class Mirage(Thread):
             logger.info('data points surfaced :: %s' % (len(timeseries)))
 
         try:
-            logger.info('analyzing         :: %s at %s seconds' % (metric_vars.metric, second_order_resolution_seconds))
+            logger.info('analyzing :: %s at %s seconds' % (metric_vars.metric, second_order_resolution_seconds))
             anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_vars.metric, second_order_resolution_seconds)
 
             # If it's anomalous, add it to list
@@ -443,6 +521,9 @@ class Mirage(Thread):
         for key, value in exceptions.items():
             self.mirage_exceptions_q.put((key, value))
 
+        metric_var_files = []
+        timeseries = []
+
         # Remove metric check file
         try:
             os.remove(metric_check_file)
@@ -484,8 +565,77 @@ class Mirage(Thread):
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
+        def smtp_trigger_alert(alert, metric, second_order_resolution_seconds):
+            # Spawn processes
+            pids = []
+            spawned_pids = []
+            pid_count = 0
+            try:
+                p = Process(target=self.spawn_alerter_process, args=(alert, metric, second_order_resolution_seconds))
+                pids.append(p)
+                pid_count += 1
+                p.start()
+                spawned_pids.append(p.pid)
+            except:
+                logger.error('error :: failed to spawn_alerter_process')
+                logger.info(traceback.format_exc())
+            p_starts = time()
+            while time() - p_starts <= 15:
+                if any(p.is_alive() for p in pids):
+                    # Just to avoid hogging the CPU
+                    sleep(.1)
+                else:
+                    # All the processes are done, break now.
+                    break
+            else:
+                # We only enter this if we didn't 'break' above.
+                logger.info('%s :: timed out, killing the spawn_trigger_alert process' % (skyline_app))
+                for p in pids:
+                    p.terminate()
+                    p.join()
+
+        """
+        DEVELOPMENT ONLY
+
+        # @added 20160806 - Bug #1558: Memory leak in Analyzer
+        # Debug with garbage collection - http://code.activestate.com/recipes/65333/
+
+        """
+        if ENABLE_MEMORY_PROFILING and garbage_collection_enabled:
+            # Debug with garbage collection - http://code.activestate.com/recipes/65333/
+            gc.enable()
+            gc.set_debug(gc.DEBUG_LEAK)
+
+            # As per http://stackoverflow.com/a/1641280
+            # This got useable understandable data with gc
+            before = defaultdict(int)
+            after = defaultdict(int)
+            for i in get_objects():
+                before[type(i)] += 1
+
+        if LOCAL_DEBUG:
+            logger.info('debug :: Memory usage in run at start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
         while 1:
             now = time()
+
+            """
+            DEVELOPMENT ONLY
+
+            # @added 20160806 - Bug #1558: Memory leak in Analyzer
+            # Debug with garbage collection - http://code.activestate.com/recipes/65333/
+
+            """
+            if ENABLE_MEMORY_PROFILING and garbage_collection_enabled:
+                # As per http://stackoverflow.com/a/1641280
+                # This got useable understandable data with gc
+                before = defaultdict(int)
+                after = defaultdict(int)
+                for i in get_objects():
+                    before[type(i)] += 1
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage before looking for checks: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Make sure Redis is up
             try:
@@ -531,7 +681,7 @@ class Mirage(Thread):
                     break
 
             metric_var_files_sorted = sorted(metric_var_files)
-            metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
+            # metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
 
             logger.info('processing %s' % metric_var_files_sorted[0])
 
@@ -639,8 +789,8 @@ class Mirage(Thread):
                     metric_value = metric_variable[1]
                 if metric_variable[0] == 'hours_to_resolve':
                     hours_to_resolve = metric_variable[1]
-                if metric_variable[0] == 'metric_timestamp':
-                    metric_timestamp = metric_variable[1]
+                # if metric_variable[0] == 'metric_timestamp':
+                #     metric_timestamp = metric_variable[1]
 
             logger.info('analysis done - %s' % metric_name)
 
@@ -655,18 +805,34 @@ class Mirage(Thread):
                     for metric in self.anomalous_metrics:
                         ALERT_MATCH_PATTERN = alert[0]
                         METRIC_PATTERN = metric[1]
-                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                        try:
+                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                        except:
+                            pattern_match = False
+                        # @modified 20160806 - Reintroduced the original
+                        # substring matching after wildcard matching, to allow
+                        # more flexibility
+                        if not pattern_match:
+                            if alert[0] in metric[1]:
+                                pattern_match = True
                         if pattern_match:
                             cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
                             try:
                                 last_alert = self.redis_conn.get(cache_key)
                                 if not last_alert:
                                     self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                    trigger_alert(alert, metric, second_order_resolution_seconds)
-                                    logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
+                                    # trigger_alert(alert, metric, second_order_resolution_seconds)
+                                    try:
+                                        if alert[1] != 'smtp':
+                                            trigger_alert(alert, metric, second_order_resolution_seconds)
+                                        else:
+                                            smtp_trigger_alert(alert, metric, second_order_resolution_seconds)
+                                        logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
+                                    except Exception as e:
+                                        logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
                             except Exception as e:
-                                logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
+                                logger.error('error :: could not query Redis for cache_key')
 
             if settings.NEGATE_ANALYZER_ALERTS:
                 if len(self.anomalous_metrics) == 0:
@@ -697,6 +863,40 @@ class Mirage(Thread):
 
             # Reset metric_variables
             self.metric_variables[:] = []
+
+            """
+            DEVELOPMENT ONLY
+
+            # @added 20160806 - Bug #1558: Memory leak in Analyzer
+            # Debug with garbage collection - http://code.activestate.com/recipes/65333/
+
+            """
+            if ENABLE_MEMORY_PROFILING and garbage_collection_enabled:
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    for i in get_objects():
+                        after[type(i)] += 1
+                    gc_results = [(k, after[k] - before[k]) for k in after if after[k] - before[k]]
+                    for gc_result in gc_results:
+                        logger.info('debug :: %s' % str(gc_result))
+
+                # @added 20160806 - Bug #1558: Memory leak in Analyzer
+                # Debug with garbage collection - http://code.activestate.com/recipes/65333/
+                # show the dirt ;-)
+                try:
+                    logger.info('garbage collecting')
+                    all_the_garbage = self.dump_garbage()
+                except:
+                    logger.error('error :: during garbage collecting')
+                    logger.info(traceback.format_exc())
+                    all_the_garbage = 'gc errored'
+
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info(all_the_garbage)
+
+                logger.info('garbage collected')
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage end of run: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Sleep if it went too fast
             if time() - now < 1:

@@ -2,7 +2,7 @@ import logging
 import sys
 import traceback
 from os import getpid
-from os.path import dirname, abspath, isdir
+from os.path import isdir
 from daemon import runner
 from time import sleep, time
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
@@ -11,6 +11,7 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+from validate_settings import validate_settings_variables
 
 from mirage import Mirage
 from mirage_algorithms import *
@@ -49,6 +50,24 @@ def run():
         print ('log directory does not exist at %s' % settings.LOG_PATH)
         sys.exit(1)
 
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    handler = logging.handlers.TimedRotatingFileHandler(
+        logfile,
+        when="midnight",
+        interval=1,
+        backupCount=5)
+
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    # Validate settings variables
+    valid_settings = validate_settings_variables(skyline_app)
+
+    if not valid_settings:
+        print ('error :: invalid variables in settings.py - cannot start')
+        sys.exit(1)
+
     # Make sure we can run all the algorithms
     try:
         timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
@@ -62,16 +81,9 @@ def run():
         traceback.print_exc()
         sys.exit(1)
 
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    handler = logging.handlers.TimedRotatingFileHandler(
-        logfile,
-        when="midnight",
-        interval=1,
-        backupCount=5)
-
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    logger.info('Tested algorithms')
+    del timeseries
+    del ensemble
 
     mirage = MirageAgent()
 
@@ -82,5 +94,5 @@ def run():
         daemon_runner.daemon_context.files_preserve = [handler.stream]
         daemon_runner.do_action()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run()

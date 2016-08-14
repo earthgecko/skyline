@@ -2,7 +2,7 @@ import logging
 import sys
 import traceback
 from os import getpid
-from os.path import dirname, abspath, isdir
+from os.path import isdir
 from daemon import runner
 from time import sleep, time
 
@@ -13,6 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.par
 sys.path.insert(0, os.path.dirname(__file__))
 
 import settings
+from validate_settings import validate_settings_variables
 
 from analyzer import Analyzer
 
@@ -75,6 +76,13 @@ def run():
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
 
+    # Validate settings variables
+    valid_settings = validate_settings_variables(skyline_app)
+
+    if not valid_settings:
+        print ('error :: invalid variables in settings.py - cannot start')
+        sys.exit(1)
+
     # Make sure we can run all the algorithms
     try:
         # from analyzer import algorithms
@@ -92,6 +100,8 @@ def run():
         sys.exit(1)
 
     logger.info('Tested algorithms')
+    del timeseries
+    del ensemble
 
     analyzer = AnalyzerAgent()
 

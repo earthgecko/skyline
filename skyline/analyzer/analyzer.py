@@ -8,18 +8,17 @@ from time import time, sleep
 from threading import Thread
 from collections import defaultdict
 from multiprocessing import Process, Manager, Queue
-from msgpack import Unpacker, unpackb, packb
+from msgpack import Unpacker, packb
 import os
-from os import path, kill, getpid, system
+from os import path, kill, getpid
 from math import ceil
 import traceback
 import operator
-import socket
 import re
 from sys import version_info
-
 import os.path
-import sys
+import resource
+
 import settings
 from skyline_functions import send_graphite_metric, write_data_to_file
 
@@ -32,7 +31,7 @@ try:
 except:
     send_algorithm_run_metrics = False
 if send_algorithm_run_metrics:
-    from algorithms import determine_median
+    from algorithms import determine_array_median
 
 # TODO if settings.ENABLE_CRUCIBLE: and ENABLE_PANORAMA
 #    from spectrum import push_to_crucible
@@ -56,6 +55,8 @@ except:
     SERVER_METRIC_PATH = ''
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
+
+LOCAL_DEBUG = False
 
 
 class Analyzer(Thread):
@@ -82,7 +83,9 @@ class Analyzer(Thread):
         self.anomalous_metrics = Manager().list()
         self.exceptions_q = Queue()
         self.anomaly_breakdown_q = Queue()
-        self.mirage_metrics = Manager().list()
+        # @modified 20160813 - Bug #1558: Memory leak in Analyzer
+        # Not used
+        # self.mirage_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -93,6 +96,21 @@ class Analyzer(Thread):
             kill(self.parent_pid, 0)
         except:
             exit(0)
+
+    def spawn_alerter_process(self, alert, metric):
+        """
+        Spawn a process to trigger an alert.  This is used by smtp alerters so
+        that matplotlib objects are cleared down and the alerter cannot create
+        a memory leak in this manner and plt.savefig keeps the object in memory
+        until the process terminates.  Seeing as data is being surfaced and
+        processed in the alert_smtp context, multiprocessing the alert creation
+        and handling prevents any memory leaks in the parent.
+        # @added 20160814 - Bug #1558: Memory leak in Analyzer
+        #                   Issue #21 Memory leak in Analyzer
+        # https://github.com/earthgecko/skyline/issues/21
+        """
+
+        trigger_alert(alert, metric)
 
     def spin_process(self, i, unique_metrics):
         """
@@ -121,11 +139,13 @@ class Analyzer(Thread):
 
         spin_start = time()
         logger.info('spin_process started')
+        if LOCAL_DEBUG:
+            logger.info('debug :: Memory usage spin_process start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
         # @modified 20160801 - Adding additional exception handling to Analyzer
         # Check the unique_metrics list is valid
         try:
-            valid_unique_metrics = len(unique_metrics)
+            len(unique_metrics)
         except:
             logger.error('error :: the unique_metrics list is not valid')
             logger.info(traceback.format_exc())
@@ -145,6 +165,8 @@ class Analyzer(Thread):
 
         # Compile assigned metrics
         assigned_metrics = [unique_metrics[index] for index in assigned_keys]
+        if LOCAL_DEBUG:
+            logger.info('debug :: Memory usage spin_process after assigned_metrics: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
         # Check if this process is unnecessary
         if len(assigned_metrics) == 0:
@@ -156,6 +178,8 @@ class Analyzer(Thread):
         try:
             raw_assigned = self.redis_conn.mget(assigned_metrics)
             raw_assigned_failed = False
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage spin_process after raw_assigned: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         except:
             logger.error('error :: failed to get assigned_metrics from Redis')
             logger.info(traceback.format_exc())
@@ -177,7 +201,10 @@ class Analyzer(Thread):
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
+            except:
+                timeseries = []
 
+            try:
                 anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
 
                 # If it's anomalous, add it to list
@@ -341,8 +368,12 @@ class Analyzer(Thread):
         for key, value in exceptions.items():
             self.exceptions_q.put((key, value))
 
+        if LOCAL_DEBUG:
+            logger.info('debug :: Memory usage spin_process end: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
         spin_end = time() - spin_start
         logger.info('spin_process took %.2f seconds' % spin_end)
+        return
 
     def run(self):
         """
@@ -410,6 +441,35 @@ class Analyzer(Thread):
                 logger.error('error :: failed to create %s' % settings.SKYLINE_TMP_DIR)
                 logger.info(traceback.format_exc())
 
+        def smtp_trigger_alert(alert, metric):
+            # Spawn processes
+            pids = []
+            spawned_pids = []
+            pid_count = 0
+            try:
+                p = Process(target=self.spawn_alerter_process, args=(alert, metric))
+                pids.append(p)
+                pid_count += 1
+                p.start()
+                spawned_pids.append(p.pid)
+            except:
+                logger.error('error :: failed to spawn_alerter_process')
+                logger.info(traceback.format_exc())
+            p_starts = time()
+            while time() - p_starts <= 15:
+                if any(p.is_alive() for p in pids):
+                    # Just to avoid hogging the CPU
+                    sleep(.1)
+                else:
+                    # All the processes are done, break now.
+                    break
+            else:
+                # We only enter this if we didn't 'break' above.
+                logger.info('%s :: timed out, killing the spawn_trigger_alert process' % (skyline_app))
+                for p in pids:
+                    p.terminate()
+                    p.join()
+
         # Initiate the algorithm timings if Analyzer is configured to send the
         # algorithm_breakdown metrics with ENABLE_ALGORITHM_RUN_METRICS
         algorithm_tmp_file_prefix = settings.SKYLINE_TMP_DIR + '/' + skyline_app + '.'
@@ -417,8 +477,14 @@ class Analyzer(Thread):
         if send_algorithm_run_metrics:
             algorithms_to_time = settings.ALGORITHMS
 
+        if LOCAL_DEBUG:
+            logger.info('debug :: Memory usage in run after algorithms_to_time: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
         while 1:
             now = time()
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage before unique_metrics lookup: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Make sure Redis is up
             try:
@@ -443,7 +509,7 @@ class Analyzer(Thread):
                 logger.info(traceback.format_exc())
 
             # Discover unique metrics
-        # @modified 20160803 - Adding additional exception handling to Analyzer
+            # @modified 20160803 - Adding additional exception handling to Analyzer
             try:
                 unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
             except:
@@ -456,6 +522,9 @@ class Analyzer(Thread):
                 logger.info('no metrics in redis. try adding some - see README')
                 sleep(10)
                 continue
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage in run after unique_metrics: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
@@ -478,6 +547,9 @@ class Analyzer(Thread):
                     logger.error('error :: could not create file %s' % algorithm_timings_file)
                     logger.info(traceback.format_exc())
 
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage in run before removing algorithm_count_files and algorithm_timings_files: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
             # Remove any existing algorithm.error files from any previous runs
             # that did not cleanup for any reason
             pattern = '%s.*.algorithm.error' % skyline_app
@@ -492,6 +564,9 @@ class Analyzer(Thread):
             except:
                 logger.error('error :: failed to cleanup algorithm.error files')
                 logger.info(traceback.format_exc())
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage in run before spawning processes: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Spawn processes
             pids = []
@@ -545,18 +620,21 @@ class Analyzer(Thread):
                         str(completed_pid), algorithm)
                     if os.path.isfile(algorithm_error_file):
                         logger.info(
-                            'error - spin_process with pid %s has reported an error with the %s algorithm' % (
+                            'error :: spin_process with pid %s has reported an error with the %s algorithm' % (
                                 str(completed_pid), algorithm))
                         try:
                             with open(algorithm_error_file, 'r') as f:
                                 error_string = f.read()
                             logger.error('%s' % str(error_string))
                         except:
-                            logger.error('failed to read %s error file' % algorithm)
+                            logger.error('error :: failed to read %s error file' % algorithm)
                         try:
                             os.remove(algorithm_error_file)
                         except OSError:
                             pass
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage after spin_process spawned processes finish: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Grab data from the queue and populate dictionaries
             exceptions = dict()
@@ -581,54 +659,145 @@ class Analyzer(Thread):
                 except Empty:
                     break
 
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage in run before alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
             # Send alerts
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
                     for metric in self.anomalous_metrics:
                         ALERT_MATCH_PATTERN = alert[0]
                         METRIC_PATTERN = metric[1]
-                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                        if pattern_match:
-                            cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
+                        pattern_match = False
+                        matched_by = 'not matched'
+                        try:
+                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                            # if LOCAL_DEBUG:
+                            #     logger.info(
+                            #         'debug :: regex alert pattern matched :: %s %s' %
+                            #         (alert[0], metric[1]))
+                            matched_by = 'regex'
+                        except:
+                            pattern_match = False
+                        # @modified 20160806 - Reintroduced the original
+                        # substring matching after wildcard matching, to allow
+                        # more flexibility
+                        if not pattern_match:
+                            if alert[0] in metric[1]:
+                                pattern_match = True
+                                # if LOCAL_DEBUG:
+                                #     logger.info(
+                                #         'debug :: substring alert pattern matched :: %s %s' %
+                                #         (alert[0], metric[1]))
+                                matched_by = 'substring'
+
+                        if not pattern_match:
+                            continue
+
+                        mirage_metric = False
+                        analyzer_metric = True
+                        cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
+
+                        try:
+                            SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                            mirage_metric = True
+                            analyzer_metric = False
+                            logger.info(
+                                'mirage check :: %s at %s hours - matched by %s' %
+                                (metric[1],
+                                    str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
+                                    matched_by))
+                        except:
+                            mirage_metric = False
+                            if LOCAL_DEBUG:
+                                logger.info('debug :: not Mirage metric - %s' % metric[1])
+
+                        if mirage_metric:
+                            # Write anomalous metric to test at second
+                            # order resolution by crucible to the check
+                            # file
+                            if LOCAL_DEBUG:
+                                logger.info(
+                                    'debug :: Memory usage in run before writing mirage check file: %s (kb)' %
+                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                            metric_timestamp = int(time())
+                            anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
+                            with open(anomaly_check_file, 'w') as fh:
+                                # metric_name, anomalous datapoint, hours to resolve, timestamp
+                                fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], metric_timestamp))
+                            if LOCAL_DEBUG:
+                                logger.info(
+                                    'debug :: Memory usage in run after writing mirage check file: %s (kb)' %
+                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                            if python_version == 2:
+                                mode_arg = int('0644')
+                            if python_version == 3:
+                                mode_arg = '0o644'
+                            os.chmod(anomaly_check_file, mode_arg)
+                            if LOCAL_DEBUG:
+                                logger.info(
+                                    'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %
+                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+                            logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
+                            # Alert for analyzer if enabled
+                            if settings.ENABLE_FULL_DURATION_ALERTS:
+                                self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                logger.info('triggering alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' % (metric[1], metric[0], alert[1]))
+                                try:
+                                    if alert[1] != 'smtp':
+                                        trigger_alert(alert, metric)
+                                    else:
+                                        smtp_trigger_alert(alert, metric)
+                                except:
+                                    logger.error(
+                                        'error :: failed to trigger_alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' %
+                                        (metric[1], metric[0], alert[1]))
+                            else:
+                                if LOCAL_DEBUG:
+                                    logger.info('debug :: ENABLE_FULL_DURATION_ALERTS not enabled')
+
+                        if analyzer_metric:
                             try:
                                 last_alert = self.redis_conn.get(cache_key)
-                                if not last_alert:
-                                    try:
-                                        SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
-                                        logger.info('mirage check      :: %s' % (metric[1]))
-                                        # Write anomalous metric to test at second
-                                        # order resolution by crucible to the check
-                                        # file
-                                        metric_timestamp = int(time())
-                                        anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
-                                        with open(anomaly_check_file, 'w') as fh:
-                                            # metric_name, anomalous datapoint, hours to resolve, timestamp
-                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], metric_timestamp))
-                                        if python_version == 2:
-                                            mode_arg = int('0644')
-                                        if python_version == 3:
-                                            mode_arg = '0o644'
-                                        os.chmod(anomaly_check_file, mode_arg)
-
-                                        logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
-                                        # Add to the mirage_metrics list
-                                        base_name = METRIC_PATTERN.replace(settings.FULL_NAMESPACE, '', 1)
-                                        metric = [metric[0], base_name]
-                                        self.mirage_metrics.append(metric)
-                                        # Alert for analyzer if enabled
-                                        if settings.ENABLE_FULL_DURATION_ALERTS:
-                                            self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                            trigger_alert(alert, metric)
-                                    except:
-                                        self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                        trigger_alert(alert, metric)
                             except Exception as e:
-                                logger.error('error :: could not send alert: %s' % e)
+                                logger.error('error :: could not query Redis for cache_key: %s' % e)
+                                continue
 
-            # Push to crucible
-#            if len(self.crucible_anomalous_metrics) > 0:
-#                logger.info('to do - push to crucible')
+                            if last_alert:
+                                continue
+
+                            try:
+                                self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                            except:
+                                logger.error('error :: failed to set alert cache key :: %s' % (cache_key))
+                            logger.info(
+                                'triggering alert :: %s %s via %s - matched by %s' %
+                                (metric[1], metric[0], alert[1], matched_by))
+                            if LOCAL_DEBUG:
+                                logger.info(
+                                    'debug :: Memory usage in run before triggering alert: %s (kb)' %
+                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                            try:
+                                if alert[1] != 'smtp':
+                                    trigger_alert(alert, metric)
+                                else:
+                                    smtp_trigger_alert(alert, metric)
+                                    if LOCAL_DEBUG:
+                                        logger.info('debug :: smtp_trigger_alert spawned')
+                                if LOCAL_DEBUG:
+                                    logger.info(
+                                        'debug :: Memory usage in run after triggering alert: %s (kb)' %
+                                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                            except:
+                                logger.error('error :: trigger_alert - %s' % traceback.format_exc())
+                                logger.error(
+                                    'error :: failed to trigger_alert :: %s %s via %s' %
+                                    (metric[1], metric[0], alert[1]))
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage in run after alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Write anomalous_metrics to static webapp directory
             if len(self.anomalous_metrics) > 0:
@@ -641,6 +810,9 @@ class Analyzer(Thread):
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage in run before algorithm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
             for algorithm in algorithms_to_time:
                 algorithm_count_file = algorithm_tmp_file_prefix + algorithm + '.count'
                 algorithm_timings_file = algorithm_tmp_file_prefix + algorithm + '.timings'
@@ -700,7 +872,7 @@ class Analyzer(Thread):
                 # logger.info('sum_of_algorithm_timings - %s - %.16f seconds' % (algorithm, sum_of_algorithm_timings))
 
                 try:
-                    _median_algorithm_timing = determine_median(algorithm_timings_array)
+                    _median_algorithm_timing = determine_array_median(algorithm_timings_array)
                 except:
                     _median_algorithm_timing = round(0.0, 6)
                     logger.error('error - _median_algorithm_timing - %s' % (algorithm))
@@ -719,6 +891,9 @@ class Analyzer(Thread):
                 send_graphite_metric(skyline_app, send_metric_name, str(sum_of_algorithm_timings))
                 send_metric_name = use_namespace + '.timing.median_time'
                 send_graphite_metric(skyline_app, send_metric_name, str(median_algorithm_timing))
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage in run after algorithm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             run_time = time() - now
             total_metrics = str(len(unique_metrics))
@@ -754,23 +929,49 @@ class Analyzer(Thread):
                 send_graphite_metric(skyline_app, send_metric_name, str(value))
 
             # Check canary metric
-            raw_series = self.redis_conn.get(settings.FULL_NAMESPACE + settings.CANARY_METRIC)
-            if raw_series is not None:
-                unpacker = Unpacker(use_list=False)
-                unpacker.feed(raw_series)
-                timeseries = list(unpacker)
-                time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
-                projected = 24 * (time() - now) / time_human
+            try:
+                raw_series = self.redis_conn.get(settings.FULL_NAMESPACE + settings.CANARY_METRIC)
+            except:
+                logger.error('error :: failed to get CANARY_METRIC from Redis')
+                raw_series = None
 
-                logger.info('canary duration   :: %.2f' % time_human)
+            if raw_series is not None:
+                try:
+                    unpacker = Unpacker(use_list=False)
+                    unpacker.feed(raw_series)
+                    timeseries = list(unpacker)
+                    time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
+                    projected = 24 * (time() - now) / time_human
+                    logger.info('canary duration   :: %.2f' % time_human)
+                except:
+                    logger.error(
+                        'error :: failed to unpack/calculate canary duration')
+
                 send_metric_name = skyline_app_graphite_namespace + '.duration'
                 send_graphite_metric(skyline_app, send_metric_name, str(time_human))
 
                 send_metric_name = skyline_app_graphite_namespace + '.projected'
                 send_graphite_metric(skyline_app, send_metric_name, str(projected))
 
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage before reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
             # Reset counters
             self.anomalous_metrics[:] = []
+            unique_metrics = []
+            raw_series = None
+            del timeseries[:]
+            unpacker = None
+            # We del all variables that are floats as they become unique objects and
+            # can result in what appears to be a memory leak, but in not, just the
+            # way Python handles floats
+            del time_human
+            del projected
+            del run_time
+
+            if LOCAL_DEBUG:
+                logger.info('debug :: Memory usage after reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                logger.info('debug :: Memory usage before sleep: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Sleep if it went too fast
             # if time() - now < 5:
