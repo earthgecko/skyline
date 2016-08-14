@@ -11,6 +11,7 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+from validate_settings import validate_settings_variables
 
 from listen import Listen
 from roomba import Roomba
@@ -117,6 +118,13 @@ def run():
                                                     target=handler)
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
+
+    # Validate settings variables
+    valid_settings = validate_settings_variables(skyline_app)
+
+    if not valid_settings:
+        print ('error :: invalid variables in settings.py - cannot start')
+        sys.exit(1)
 
     horizon = Horizon()
 

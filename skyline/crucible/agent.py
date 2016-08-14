@@ -1,20 +1,18 @@
 import logging
 import sys
-import traceback
 import os
 from os import getpid
-from os import getcwd, listdir, makedirs
-from os.path import dirname, abspath, isdir
+from os.path import isdir
 from daemon import runner
-from time import sleep, time
+from time import sleep
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+from validate_settings import validate_settings_variables
 
-# from skyline import settings
 from crucible import Crucible
 from crucible_algorithms import run_algorithms
 
@@ -108,6 +106,13 @@ def run():
                                                     target=handler)
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
+
+    # Validate settings variables
+    valid_settings = validate_settings_variables(skyline_app)
+
+    if not valid_settings:
+        print ('error :: invalid variables in settings.py - cannot start')
+        sys.exit(1)
 
     crucible = CrucibleAgent()
 
