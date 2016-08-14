@@ -9,11 +9,15 @@ from time import sleep, time
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
+import warnings
+warnings.filterwarnings('error', 'a', RuntimeWarning, 'pandas', 0)
+
 import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
 import settings
+from validate_settings import validate_settings_variables
 
 from analyzer_dev import Analyzer
 
@@ -123,6 +127,13 @@ def run():
                                                     target=handler)
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
+
+    # Validate settings variables
+    valid_settings = validate_settings_variables(skyline_app)
+
+    if not valid_settings:
+        print ('error :: invalid variables in settings.py - cannot start')
+        sys.exit(1)
 
     if len(sys.argv) > 1 and sys.argv[1] == 'stop':
         do_not_overwrite_log = True
