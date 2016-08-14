@@ -513,11 +513,19 @@ SMTP_OPTS = {
         'skyline': ['you@your_domain.com', 'them@your_domain.com'],
         'skyline_test.alerters.test': ['you@your_domain.com'],
     },
+    # This is the default recipient which acts as a catchall for alert tuples
+    # that do not have a matching namespace defined in recipients
+    'default_recipient': ['you@your_domain.com'],
     'embed-images': True,
 }
 """
 :var SMTP_OPTS: Your SMTP settings.
 :vartype SMTP_OPTS: dictionary
+
+.. note:: For each alert tuple defined in :mod:`settings.ALERTS` you need a
+    recipient defined that matches the namespace.  The default_recipient acts
+    as a catchall for any alert tuple that does not have a matching recipients
+    defined.
 """
 
 HIPCHAT_OPTS = {
@@ -1074,6 +1082,9 @@ BOUNDARY_SMTP_OPTS = {
         'nometrics': ['you@your_domain.com', 'them@your_domain.com'],
         'nometrics.either': ['you@your_domain.com', 'another@some-company.com'],
     },
+    # This is the default recipient which acts as a catchall for alert tuples
+    # that do not have a matching namespace defined in recipients
+    'default_recipient': ['you@your_domain.com'],
     'embed-images': True,
     # Send graphite graphs at the most meaningful resolution if different from
     # FULL_DURATION
