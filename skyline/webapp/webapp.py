@@ -8,7 +8,7 @@ from msgpack import Unpacker
 from functools import wraps
 from flask import Flask, request, render_template, redirect, Response, abort, flash
 from daemon import runner
-from os.path import dirname, abspath, isdir
+from os.path import isdir
 from os import path
 import string
 from os import remove as os_remove
@@ -19,8 +19,6 @@ import time
 from datetime import datetime, timedelta
 import os
 import base64
-from msgpack import unpackb, packb
-import string
 # flask things for rebrow
 from flask import session, g, url_for, flash, Markup, json
 # For secret_key
@@ -32,8 +30,9 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+from validate_settings import validate_settings_variables
 import skyline_version
-from skyline_functions import get_graphite_metric, write_data_to_file
+from skyline_functions import get_graphite_metric
 
 from backend import panorama_request, get_list
 
@@ -403,7 +402,7 @@ def panorama():
         for i in request.args:
             key = str(i)
             if key not in REQUEST_ARGS:
-                logger.error('error :: invalid request argument - %s=%s' % (key, str(value)))
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
                 return 'Bad Request', 400
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
@@ -437,7 +436,6 @@ def panorama():
 
             if key == 'metric_like':
                 metric_namespace_pattern = value.replace('%', '')
-                metric_like_invalid = True
                 try:
                     unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                 except:
@@ -547,9 +545,7 @@ def panorama():
                         {'results': error_string})
                     return resp, 400
 
-    latest_anomalies = False
     if request_args_len == 0:
-        latest_anomalies = True
         try:
             panorama_data = panorama_request()
             # logger.info('panorama_data - %s' % str(panorama_data))
@@ -562,7 +558,6 @@ def panorama():
             logger.error('error :: failed to get panorama: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
     else:
-        search_request = True
         count_request = 'false'
         if 'count_by_metric' in request.args:
             count_by_metric = request.args.get('count_by_metric', None)
@@ -957,6 +952,13 @@ def run():
                                                     target=handler)
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
+
+    # Validate settings variables
+    valid_settings = validate_settings_variables(skyline_app)
+
+    if not valid_settings:
+        print ('error :: invalid variables in settings.py - cannot start')
+        sys.exit(1)
 
     try:
         settings.WEBAPP_SERVER

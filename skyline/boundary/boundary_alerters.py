@@ -1,3 +1,4 @@
+import logging
 from smtplib import SMTP
 import boundary_alerters
 try:
@@ -23,6 +24,11 @@ if python_version == 3:
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+
+skyline_app = 'boundary'
+skyline_app_logger = '%sLog' % skyline_app
+logger = logging.getLogger(skyline_app_logger)
+skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
 """
 Create any alerter you want here. The function is invoked from trigger_alert.
@@ -135,7 +141,7 @@ def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, alg
         pager = pygerduty.PagerDuty(settings.BOUNDARY_PAGERDUTY_OPTS['subdomain'], settings.BOUNDARY_PAGERDUTY_OPTS['auth_token'])
         pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
     else:
-        pagerduty_not_enabled = True
+        return False
 
 
 def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
@@ -192,7 +198,7 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
             for room in rooms:
                 hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.BOUNDARY_HIPCHAT_OPTS['color'], 'message': '%s - Boundary - %s - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, algorithm, metric_name, datapoint, graphite_previous_hours, embed_graph)})
     else:
-        hipchat_not_enabled = True
+        return False
 
 
 def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
@@ -211,7 +217,7 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
             syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
         syslog.syslog(4, message)
     else:
-        syslog_not_enabled = True
+        return False
 
 
 def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm):
@@ -221,4 +227,8 @@ def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigg
     else:
         strategy = 'alert_%s' % alerter
 
-    getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm)
+    try:
+        getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm)
+    except:
+        logger.error('error :: alerters - %s - getattr error' % strategy)
+        logger.info(traceback.format_exc())

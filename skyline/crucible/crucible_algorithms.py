@@ -7,11 +7,9 @@ import traceback
 import logging
 import os
 import time
-from multiprocessing import Process
 from sys import version_info
 
-from os.path import dirname, join, abspath
-from os import makedirs
+from os.path import join
 
 import sys
 import os.path
@@ -20,12 +18,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from settings import (
     ALGORITHMS,
-    ENABLE_CRUCIBLE_DEBUG,
     MIRAGE_ALGORITHMS,
     PANDAS_VERSION,
 )
 
-logger = logging.getLogger("crucibleLog")
+skyline_app = 'crucible'
+skyline_app_logger = '%sLog' % skyline_app
+logger = logging.getLogger(skyline_app_logger)
+
 python_version = int(version_info[0])
 
 """
@@ -133,8 +133,8 @@ def first_hour_average(timeseries, end_timestamp, full_duration):
     #    last_hour_threshold = int_end_timestamp - (int_full_duration - 3600)
         int_second_last_end_timestamp = int(timeseries[-2][0])
         resolution = int_end_timestamp - int_second_last_end_timestamp
-        ten_data_point_seconds = resolution * 10
-        ten_datapoints_ago = int_end_timestamp - ten_data_point_seconds
+        # @modified 20160814 - pyflaked
+        # ten_data_point_seconds = resolution * 10
         sixty_data_point_seconds = resolution * 60
         sixty_datapoints_ago = int_end_timestamp - sixty_data_point_seconds
         last_hour_threshold = int_end_timestamp - (int_full_duration - sixty_datapoints_ago)
@@ -209,10 +209,11 @@ def mean_subtraction_cumulation(timeseries, end_timestamp, full_duration):
         series = pandas.Series([x[1] if x[1] else 0 for x in timeseries])
         series = series - series[0:len(series) - 1].mean()
         stdDev = series[0:len(series) - 1].std()
-        if PANDAS_VERSION < '0.18.0':
-            expAverage = pandas.stats.moments.ewma(series, com=15)
-        else:
-            expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
+        # @modified 20160814 - pyflaked
+        # if PANDAS_VERSION < '0.18.0':
+        #     expAverage = pandas.stats.moments.ewma(series, com=15)
+        # else:
+        #     expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
 
         if PANDAS_VERSION < '0.17.0':
             return abs(series.iget(-1)) > 3 * stdDev
@@ -234,8 +235,9 @@ def least_squares(timeseries, end_timestamp, full_duration):
         x = np.array([t[0] for t in timeseries])
         y = np.array([t[1] for t in timeseries])
         A = np.vstack([x, np.ones(len(x))]).T
-        results = np.linalg.lstsq(A, y)
-        residual = results[1]
+        # @modified 20160814 - pyflaked
+        # results = np.linalg.lstsq(A, y)
+        # residual = results[1]
         m, c = np.linalg.lstsq(A, y)[0]
         errors = []
         # Evaluate append once, not every time in the loop - this gains ~0.020 s on
@@ -306,8 +308,9 @@ def ks_test(timeseries, end_timestamp, full_duration):
     try:
         int_end_timestamp = int(timeseries[-1][0])
 
-        hour_ago = int_end_timestamp - 3600
-        ten_minutes_ago = int_end_timestamp - 600
+        # @modified 20160814 - pyflaked
+        # hour_ago = int_end_timestamp - 3600
+        # ten_minutes_ago = int_end_timestamp - 600
     # Determine resolution of the data set
     #    reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
     #    probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
@@ -485,7 +488,8 @@ def run_algorithms(
             logger.info('info :: error thrown in algorithm running and plotting - %s' % (str(algorithm)))
 
     end_analysis = int(time.time())
-    seconds_to_run = end_analysis - start_analysis
+    # @modified 20160814 - pyflaked
+    # seconds_to_run = end_analysis - start_analysis
 #    logger.info(
 #        'analysis of %s at a full duration of %s took %s seconds' %
 #        (timeseries_name, str(full_duration), str(seconds_to_run)))
