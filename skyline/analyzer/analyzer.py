@@ -699,19 +699,20 @@ class Analyzer(Thread):
                         analyzer_metric = True
                         cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
 
-                        try:
-                            SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
-                            mirage_metric = True
-                            analyzer_metric = False
-                            logger.info(
-                                'mirage check :: %s at %s hours - matched by %s' %
-                                (metric[1],
-                                    str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
-                                    matched_by))
-                        except:
-                            mirage_metric = False
-                            if LOCAL_DEBUG:
-                                logger.info('debug :: not Mirage metric - %s' % metric[1])
+                        if settings.ENABLE_MIRAGE:
+                            try:
+                                SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                                mirage_metric = True
+                                analyzer_metric = False
+                                logger.info(
+                                    'mirage check :: %s at %s hours - matched by %s' %
+                                    (metric[1],
+                                        str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
+                                        matched_by))
+                            except:
+                                mirage_metric = False
+                                if LOCAL_DEBUG:
+                                    logger.info('debug :: not Mirage metric - %s' % metric[1])
 
                         if mirage_metric:
                             # Write anomalous metric to test at second
@@ -721,6 +722,22 @@ class Analyzer(Thread):
                                 logger.info(
                                     'debug :: Memory usage in run before writing mirage check file: %s (kb)' %
                                     resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                            # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
+                            # With the reintroduction of the original substring
+                            # matching it become evident that Analyzer could
+                            # alert on a Mirage metric via a match on a parent
+                            # namespace pattern later in the ALERTS tuples.
+                            # If it is a Mirage metric, we add a mirage.metrics
+                            # key for Analyzer to check in the analyzer_metric
+                            # step below.  This allows us to wildcard and
+                            # substring match, but the mirage.metrics keys act
+                            # as a dynamic SKIP_LIST for Analyzer
+                            mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
+                            try:
+                                self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
+                            except:
+                                logger.error('error :: failed to add mirage.metrics Redis key')
+
                             metric_timestamp = int(time())
                             anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
                             with open(anomaly_check_file, 'w') as fh:
@@ -757,8 +774,25 @@ class Analyzer(Thread):
                             else:
                                 if LOCAL_DEBUG:
                                     logger.info('debug :: ENABLE_FULL_DURATION_ALERTS not enabled')
+                            continue
 
                         if analyzer_metric:
+                            # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
+                            # If the metric has a dynamic mirage.metrics key,
+                            # skip it
+                            mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
+                            mirage_metric_key = False
+                            if settings.ENABLE_MIRAGE:
+                                try:
+                                    mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
+                                except Exception as e:
+                                    logger.error('error :: could not query Redis for mirage_metric_cache_key: %s' % e)
+
+                            if mirage_metric_key:
+                                if LOCAL_DEBUG:
+                                    logger.info('debug :: mirage metric key exists, skipping %s' % metric[1])
+                                continue
+
                             try:
                                 last_alert = self.redis_conn.get(cache_key)
                             except Exception as e:
