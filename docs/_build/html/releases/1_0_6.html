@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.0.5 - the crucible branch &mdash; Skyline 1.0.6-dev documentation</title>
+  <title>1.0.6 - the crucible branch &mdash; Skyline 1.0.6-dev documentation</title>
   
 
   
@@ -34,8 +34,8 @@
   
     <link rel="top" title="Skyline 1.0.6-dev documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.0.6 - the crucible branch" href="1_0_6.html"/>
-        <link rel="prev" title="1.0.4 - the crucible branch" href="1_0_4.html"/> 
+        <link rel="next" title="What’s new" href="../whats-new.html"/>
+        <link rel="prev" title="1.0.5 - the crucible branch" href="1_0_5.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -116,8 +116,8 @@
 <li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.5 - the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1_0_6.html">1.0.6 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_5.html">1.0.5 - the crucible branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.6 - the crucible branch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
@@ -156,11 +156,11 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.0.5 - the crucible branch</li>
+    <li>1.0.6 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_0_5.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_0_6.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -171,50 +171,21 @@
            <div itemprop="articleBody">
             
   <div class="section" id="the-crucible-branch">
-<h1>1.0.5 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
-<p>Fixes two Analyzer memory leaks and improves overview memory footprint a bit.</p>
+<h1>1.0.6 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<p>A very quick release to fix the immediate last release which was missing a
+settings.py variable related to ENABLE_WEBAPP_DEBUG in v1.0.5-crucible-beta
+The variable had been included in config management but not the codebase hence
+it tested fine.</p>
 <p>Changes include:</p>
 <ul class="simple">
-<li>Issue #21 Memory leak in Analyzer - self.mirage_metrics.append(metric) and
-plt.savefig memory leaks were fixed. Removed unused but appended mirage list.
-Moved trigger_alert to a multiprocessing process when the alert is smtp. This
-is used by smtp alerters so that matplotlib objects are cleared down and the
-alerter cannot create a memory leak in this manner as plt.savefig keeps the
-object in memory until the process terminates.  Seeing as data is being
-surfaced and processed in the alert_smtp context, multiprocessing the alert
-creation and handling prevents any memory leaks in the parent. This fixes
-Issue #21 Memory leak in Analyzer - <a class="reference external" href="https://github.com/earthgecko/skyline/issues/21">https://github.com/earthgecko/skyline/issues/21</a>
-internal ref #1558: Memory leak in Analyzer</li>
-<li>In agent del the algorithm test objects to free the memory</li>
-<li>Applied in both Analyzer and Mirage</li>
-<li>Some pyflakes linting done</li>
-<li>Reintroduced the original alert substring matching AFTER wildcard matching, to
-allow more flexibility</li>
-<li>In Analyzer streamlined the Mirage metrics a bit</li>
-<li>Added some settings vaidation in the agents</li>
-<li>Issue #22 - Analyzer also alerting on Mirage metrics now
-This fixes #22 by introducing a mirage.metrics Redis key namespace for any
-Mirage metric.  This acts as a dynamic SKIP_LIST for Analyzer so to speak and
-allows for wildcard and substring matching and prevents Analyzer alerting on
-Mirage metrics.</li>
-<li>Added determine_array_median - readded the method to determine_median of an
-array which was changed to a timeseries from an array in
-<a class="reference external" href="https://github.com/earthgecko/skyline/commit/9dcf8ffbf6da0820ec5d2f93d3d7079abed3f5a7">https://github.com/earthgecko/skyline/commit/9dcf8ffbf6da0820ec5d2f93d3d7079abed3f5a7</a>
-errorneously as it was assumed to not be being used however it was being used
-by algorithm timings</li>
-<li>Some pyflakes linting done with unused imports and unused variables</li>
-<li>Added validation of settings with validate_settings.py, although this does not
-cover all settings, it tests the critical ones per app that have no except
-handling - in the agent.py</li>
-<li>Some pyflakes linting done with unused imports and unused variables</li>
-<li>Added del of test objects to reduced memory to all agents that test algorithms</li>
-<li>Added validate_settings to webapp</li>
-<li>Added default recipient which acts as a catchall for alert tuples that do not
-have a matching namespace defined in recipients in SMTP_OPTS and
-BOUNDARY_SMTP_OPTS</li>
-<li>Added analyzer_debug to crucible branch, the analyzer_debug app which has a
-number of memory debugging tools and options that can be turned on and off, etc</li>
-<li>Bumped version to 1.0.5</li>
+<li>The addition of a missing settings.py variable in v1.0.5-crucible-beta
+ENABLE_WEBAPP_DEBUG</li>
+<li>Added a check to validate_settings.py for ENABLE_WEBAPP_DEBUG</li>
+<li>Minor modification to webapp.py and backend.py to handle it not being defined
+gracefully</li>
+<li>Fixed a minor bug in the webapp/backend.py to not 500 if no metric_like row
+ids are found in the MySQL result</li>
+<li>Bumped version to 1.0.6</li>
 </ul>
 </div>
 
@@ -225,10 +196,10 @@ number of memory debugging tools and options that can be turned on and off, etc<
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_0_6.html" class="btn btn-neutral float-right" title="1.0.6 - the crucible branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../whats-new.html" class="btn btn-neutral float-right" title="What’s new" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_0_4.html" class="btn btn-neutral" title="1.0.4 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_0_5.html" class="btn btn-neutral" title="1.0.5 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
