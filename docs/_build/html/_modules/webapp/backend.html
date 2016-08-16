@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.backend &mdash; Skyline 1.0.5-dev documentation</title>
+  <title>webapp.backend &mdash; Skyline 1.0.6-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.6-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -194,7 +194,7 @@
 <span class="c1"># Converting one settings variable into a local variable, just because it is a</span>
 <span class="c1"># long string otherwise.</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_PANORAMA_DEBUG from settings&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
     <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
@@ -301,8 +301,25 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metric ids from db: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="k">return</span> <span class="bp">False</span>
 
-                <span class="n">ids</span> <span class="o">=</span> <span class="n">get_ids_from_rows</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
-                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
+                <span class="n">rows_returned</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rows_returned</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">ENABLE_WEBAPP_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: rows - rows[0] - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">rows_returned</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">if</span> <span class="n">ENABLE_WEBAPP_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: no rows returned&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">rows_returned</span><span class="p">:</span>
+                    <span class="n">ids</span> <span class="o">=</span> <span class="n">get_ids_from_rows</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">rows</span><span class="p">)</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Get nothing</span>
+                    <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_id IN (0)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ENABLE_WEBAPP_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: no rows returned using new_query_string - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">new_query_string</span><span class="p">)</span>
+
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="bp">True</span>
 
@@ -586,7 +603,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.5-dev',
+            VERSION:'1.0.6-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
