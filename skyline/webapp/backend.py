@@ -34,7 +34,7 @@ REQUEST_ARGS = ['from_date',
 # Converting one settings variable into a local variable, just because it is a
 # long string otherwise.
 try:
-    ENABLE_WEBAPP_DEBUG = settings.ENABLE_PANORAMA_DEBUG
+    ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
 except:
     logger.error('error :: cannot determine ENABLE_PANORAMA_DEBUG from settings' % skyline_app)
     ENABLE_WEBAPP_DEBUG = False
@@ -141,8 +141,25 @@ def panorama_request():
                     logger.error('error :: failed to get metric ids from db: %s' % traceback.format_exc())
                     return False
 
-                ids = get_ids_from_rows('metric', rows)
-                new_query_string = '%s WHERE metric_id IN (%s)' % (query_string, str(ids))
+                rows_returned = None
+                try:
+                    rows_returned = rows[0]
+                    if ENABLE_WEBAPP_DEBUG:
+                        logger.info('debug :: rows - rows[0] - %s' % str(rows[0]))
+                except:
+                    rows_returned = False
+                    if ENABLE_WEBAPP_DEBUG:
+                        logger.info('debug :: no rows returned')
+
+                if rows_returned:
+                    ids = get_ids_from_rows('metric', rows)
+                    new_query_string = '%s WHERE metric_id IN (%s)' % (query_string, str(ids))
+                else:
+                    # Get nothing
+                    new_query_string = '%s WHERE metric_id IN (0)' % (query_string)
+                    if ENABLE_WEBAPP_DEBUG:
+                        logger.info('debug :: no rows returned using new_query_string - %s' % new_query_string)
+
                 query_string = new_query_string
                 needs_and = True
 

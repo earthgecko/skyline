@@ -1268,3 +1268,9 @@ WEBAPP_JAVASCRIPT_DEBUG = False
 :var WEBAPP_JAVASCRIPT_DEBUG: Enables some javascript console.log when enabled.
 :vartype WEBAPP_JAVASCRIPT_DEBUG: boolean
 """
+
+ENABLE_WEBAPP_DEBUG = False
+"""
+:var ENABLE_WEBAPP_DEBUG: Enables some app specific debugging to log.
+:vartype ENABLE_WEBAPP_DEBUG: boolean
+"""

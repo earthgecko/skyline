@@ -435,21 +435,25 @@ def panorama():
                     return 'Bad Request', 400
 
             if key == 'metric_like':
-                metric_namespace_pattern = value.replace('%', '')
-                try:
-                    unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
-                except:
-                    logger.error('error :: Webapp could not get the unique_metrics list from Redis')
-                    logger.info(traceback.format_exc())
-                    return 'Internal Server Error', 500
+                if value == 'all':
+                    metric_namespace_pattern = value.replace('all', '')
 
-                matching = [s for s in unique_metrics if metric_namespace_pattern in s]
-                if len(matching) == 0:
-                    error_string = 'error :: no metric like - %s - exists in Redis' % metric_namespace_pattern
-                    logger.error(error_string)
-                    resp = json.dumps(
-                        {'results': error_string})
-                    return resp, 404
+                metric_namespace_pattern = value.replace('%', '')
+                if metric_namespace_pattern != '' and value != 'all':
+                    try:
+                        unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                    except:
+                        logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                        logger.info(traceback.format_exc())
+                        return 'Internal Server Error', 500
+
+                    matching = [s for s in unique_metrics if metric_namespace_pattern in s]
+                    if len(matching) == 0:
+                        error_string = 'error :: no metric like - %s - exists in Redis' % metric_namespace_pattern
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
 
             if key == 'from_timestamp' or key == 'until_timestamp':
                 timestamp_format_invalid = True
@@ -565,11 +569,14 @@ def panorama():
                 count_request = 'true'
         try:
             query, panorama_data = panorama_request()
-            if settings.ENABLE_DEBUG or settings.ENABLE_WEBAPP_DEBUG:
-                logger.info('panorama_data - %s' % str(panorama_data))
-                logger.info('debug :: query - %s' % str(query))
-                logger.info('debug :: panorama_data - %s' % str(panorama_data))
-                logger.info('debug :: skyline_version - %s' % str(skyline_version))
+            try:
+                if settings.ENABLE_DEBUG or settings.ENABLE_WEBAPP_DEBUG:
+                    logger.info('panorama_data - %s' % str(panorama_data))
+                    logger.info('debug :: query - %s' % str(query))
+                    logger.info('debug :: panorama_data - %s' % str(panorama_data))
+                    logger.info('debug :: skyline_version - %s' % str(skyline_version))
+            except:
+                logger.error('error :: ENABLE_DEBUG or ENABLE_WEBAPP_DEBUG are not set in settings.py')
         except:
             logger.error('error :: failed to get panorama_request: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
