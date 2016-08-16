@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.alerters &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>analyzer.alerters &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -179,9 +179,12 @@
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">syslog</span>
 
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">resource</span>
+
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
 
@@ -218,7 +221,7 @@
 <span class="sd">    metric[1]: The full name of the anomalous metric</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1"># FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data</span>
+<span class="c1"># FULL_DURATION to hours so that Analyzer surfaces the relevant timeseries data</span>
 <span class="c1"># in the graph</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">full_duration_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
@@ -237,6 +240,7 @@
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - sending smtp alert&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage at start: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
     <span class="c1"># FULL_DURATION to hours so that analyzer surfaces the relevant timeseries data</span>
     <span class="c1"># in the graph</span>
@@ -248,7 +252,23 @@
         <span class="n">recipient</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
-        <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;recipients&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="c1"># @modified 20160806 - Added default_recipient</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;recipients&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">use_default_recipient</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;default_recipient&#39;</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;alert_smtp - using default_recipient as no recipients are configured for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: alert_smtp - no known recipient for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">return</span> <span class="bp">False</span>
 
     <span class="c1"># Backwards compatibility</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">recipients</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
@@ -283,6 +303,9 @@
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data None&#39;</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after image_data: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
     <span class="c1"># If we failed to get the image or if it was explicitly disabled,</span>
     <span class="c1"># use the image URL instead of the content.</span>
     <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -315,6 +338,8 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - raw_series: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before get Redis timeseries data: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
             <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
             <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
             <span class="n">timeseries_x</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">unpacker</span><span class="p">]</span>
@@ -325,6 +350,8 @@
             <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
             <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after get Redis timeseries data: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - unpack timeseries failed&#39;</span><span class="p">)</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="bp">None</span>
@@ -332,9 +359,13 @@
         <span class="n">pd_series_values</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before pd.Series: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
                 <span class="n">values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
                 <span class="c1"># Because the truth value of a Series is ambiguous</span>
                 <span class="n">pd_series_values</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after pd.Series: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - pandas value series on timeseries failed&#39;</span><span class="p">)</span>
 
@@ -361,7 +392,7 @@
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - sigma3: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">))</span>
 
-                <span class="n">sigma3_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">sigma3</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="c1"># sigma3_series = [sigma3] * len(values)</span>
 
                 <span class="n">sigma3_upper_bound</span> <span class="o">=</span> <span class="n">mean</span> <span class="o">+</span> <span class="n">sigma3</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -380,10 +411,17 @@
 
         <span class="k">if</span> <span class="n">mean_series</span><span class="p">:</span>
             <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Analyzer - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+            <span class="c1"># @modified 20160814 - Bug #1558: Memory leak in Analyzer</span>
+            <span class="c1"># I think the buf is causing a memory leak, trying a file</span>
+            <span class="c1"># if python_version == 3:</span>
+            <span class="c1">#     buf = io.StringIO()</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     buf = io.BytesIO()</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before plot Redis data: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
             <span class="c1"># Too big</span>
             <span class="c1"># rcParams[&#39;figure.figsize&#39;] = 12, 6</span>
@@ -418,7 +456,7 @@
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">mean_series</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">mean_value_label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
                 <span class="n">sigma3_text</span> <span class="o">=</span> <span class="p">(</span><span class="s1">r&#39;3$\sigma$&#39;</span><span class="p">)</span>
-                <span class="n">sigma3_label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sigma3_text</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">))</span>
+                <span class="c1"># sigma3_label = &#39;%s - %s&#39; % (str(sigma3_text), str(sigma3))</span>
 
                 <span class="n">sigma3_upper_label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> upper - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sigma3_text</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_upper_bound</span><span class="p">))</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">sigma3_upper_series</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">sigma3_upper_label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
@@ -452,50 +490,68 @@
                 <span class="c1"># tight_layout removes the legend box</span>
                 <span class="c1"># fig.tight_layout()</span>
                 <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before plt.savefig: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
                     <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+                    <span class="c1"># @added 20160814 - Bug #1558: Memory leak in Analyzer</span>
+                    <span class="c1"># As per http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13222.html</span>
+                    <span class="c1"># savefig in the parent process was causing the memory leak</span>
+                    <span class="c1"># the below fig.clf() and plt.close() did not resolve this</span>
+                    <span class="c1"># however spawing a multiprocessing process for alert_smtp</span>
+                    <span class="c1"># does solve this as issue as all memory is freed when the</span>
+                    <span class="c1"># process terminates.</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
                     <span class="n">redis_graph_content_id</span> <span class="o">=</span> <span class="s1">&#39;redis.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="n">redis_image_data</span> <span class="o">=</span> <span class="bp">True</span>
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - savefig: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;OK&#39;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after plt.savefig: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - plt.savefig: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not build plot&#39;</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
+    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before email: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
         <span class="n">redis_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;cid:</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_graph_content_id</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - redis_img_tag: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - redis_img_tag: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_img_tag</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">redis_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">redis_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;none&quot;/&gt;&#39;</span>
 
-    <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; Analyzer alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;metric: &lt;b&gt;</span><span class="si">%s</span><span class="s1">&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomalous value: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;At hours: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Next alert in: </span><span class="si">%s</span><span class="s1"> seconds&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;min: </span><span class="si">%s</span><span class="s1">  | max: </span><span class="si">%s</span><span class="s1">   | mean: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">array_amin</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amax</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean</span><span class="p">))</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">)</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma upper bound: </span><span class="si">%s</span><span class="s1">   | 3-sigma lower bound: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_upper_bound</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_lower_bound</span><span class="p">))</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Redis data at FULL_DURATION&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;:</span><span class="si">%s</span><span class="s1">&lt;br&gt;&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span>
-    <span class="k">if</span> <span class="n">image_data</span><span class="p">:</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Graphite data at FULL_DURATION (may be aggregated)&lt;/font&gt;&lt;/h3&gt;&#39;</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Clicking on the above graph will open to the Graphite graph with current data&lt;/font&gt;&lt;br&gt;&#39;</span>
-    <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;br&gt;&#39;</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot; align=&quot;right&quot;&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; version :: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_version</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; Analyzer alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;metric: &lt;b&gt;</span><span class="si">%s</span><span class="s1">&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomalous value: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;At hours: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Next alert in: </span><span class="si">%s</span><span class="s1"> seconds&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;min: </span><span class="si">%s</span><span class="s1">  | max: </span><span class="si">%s</span><span class="s1">   | mean: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">array_amin</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amax</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean</span><span class="p">))</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">)</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma upper bound: </span><span class="si">%s</span><span class="s1">   | 3-sigma lower bound: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_upper_bound</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_lower_bound</span><span class="p">))</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Redis data at FULL_DURATION&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;:</span><span class="si">%s</span><span class="s1">&lt;br&gt;&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span>
+        <span class="k">if</span> <span class="n">image_data</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Graphite data at FULL_DURATION (may be aggregated)&lt;/font&gt;&lt;/h3&gt;&#39;</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Clicking on the above graph will open to the Graphite graph with current data&lt;/font&gt;&lt;br&gt;&#39;</span>
+        <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
+            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;br&gt;&#39;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot; align=&quot;right&quot;&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; version :: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_version</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not build body&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
     <span class="k">for</span> <span class="n">recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-
             <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;alternative&#39;</span><span class="p">)</span>
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] - Analyzer ALERT - &#39;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
@@ -505,8 +561,25 @@
 
             <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">buf</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">msg_plot_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                    <span class="c1"># @modified 20160814 - Bug #1558: Memory leak in Analyzer</span>
+                    <span class="c1"># I think the buf is causing a memory leak, trying a file</span>
+                    <span class="c1"># buf.seek(0)</span>
+                    <span class="c1"># msg_plot_attachment = MIMEImage(buf.read())</span>
+                    <span class="c1"># msg_plot_attachment = MIMEImage(buf.read())</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">plot_image_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s1">&#39;error :: alert_smtp - failed to remove file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">buf</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="k">pass</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read plot file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">buf</span><span class="p">)</span>
+                        <span class="n">plot_image_data</span> <span class="o">=</span> <span class="bp">None</span>
+                    <span class="n">msg_plot_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">plot_image_data</span><span class="p">)</span>
                     <span class="n">msg_plot_attachment</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-ID&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_graph_content_id</span><span class="p">)</span>
                     <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">msg_plot_attachment</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
@@ -538,7 +611,56 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not send email to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
-        <span class="n">s</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div>
+        <span class="n">s</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after email: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
+            <span class="c1"># buf.seek(0)</span>
+            <span class="c1"># buf.write(&#39;none&#39;)</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before del redis_image_data objects: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">raw_series</span>
+            <span class="k">del</span> <span class="n">unpacker</span>
+            <span class="k">del</span> <span class="n">timeseries</span><span class="p">[:]</span>
+            <span class="k">del</span> <span class="n">timeseries_x</span><span class="p">[:]</span>
+            <span class="k">del</span> <span class="n">timeseries_y</span><span class="p">[:]</span>
+            <span class="k">del</span> <span class="n">values</span>
+            <span class="k">del</span> <span class="n">datetimes</span><span class="p">[:]</span>
+            <span class="k">del</span> <span class="n">msg_plot_attachment</span>
+            <span class="k">del</span> <span class="n">redis_image_data</span>
+            <span class="c1"># We del all variables that are floats as they become unique objects and</span>
+            <span class="c1"># can result in what appears to be a memory leak, but is not, it is</span>
+            <span class="c1"># just the way Python handles floats</span>
+            <span class="k">del</span> <span class="n">mean</span>
+            <span class="k">del</span> <span class="n">array_amin</span>
+            <span class="k">del</span> <span class="n">array_amax</span>
+            <span class="k">del</span> <span class="n">stdDev</span>
+            <span class="k">del</span> <span class="n">sigma3</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after del redis_image_data objects: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before del fig object: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+            <span class="c1"># @added 20160814 - Bug #1558: Memory leak in Analyzer</span>
+            <span class="c1">#                   Issue #21 Memory leak in Analyzer - https://github.com/earthgecko/skyline/issues/21</span>
+            <span class="c1"># As per http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13222.html</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">fig</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after del fig object: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage before del other objects: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">recipients</span><span class="p">[:]</span>
+        <span class="k">del</span> <span class="n">body</span>
+        <span class="k">del</span> <span class="n">msg</span>
+        <span class="k">del</span> <span class="n">image_data</span>
+        <span class="k">del</span> <span class="n">msg_attachment</span>
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after del other objects: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="alert_pagerduty"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.alert_pagerduty">[docs]</a><span class="k">def</span> <span class="nf">alert_pagerduty</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
@@ -550,7 +672,7 @@
         <span class="n">pager</span> <span class="o">=</span> <span class="n">pygerduty</span><span class="o">.</span><span class="n">PagerDuty</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;subdomain&#39;</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;auth_token&#39;</span><span class="p">])</span>
         <span class="n">pager</span><span class="o">.</span><span class="n">trigger_incident</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="s2">&quot;Anomalous metric: </span><span class="si">%s</span><span class="s2"> (value: </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">pagerduty_not_enabled</span> <span class="o">=</span> <span class="bp">True</span></div>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="alert_hipchat"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.alert_hipchat">[docs]</a><span class="k">def</span> <span class="nf">alert_hipchat</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
@@ -589,7 +711,7 @@
                 <span class="s1">&#39;rooms/message&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
                 <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;room_id&#39;</span><span class="p">:</span> <span class="n">room</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">:</span> <span class="s1">&#39;Skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">hipchat_color</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">message</span><span class="p">})</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">hipchat_not_enabled</span> <span class="o">=</span> <span class="bp">True</span></div>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="alert_syslog"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.alert_syslog">[docs]</a><span class="k">def</span> <span class="nf">alert_syslog</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
@@ -598,8 +720,6 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_ENABLED</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">sys</span>
-        <span class="kn">import</span> <span class="nn">syslog</span>
         <span class="n">syslog_ident</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_OPTS</span><span class="p">[</span><span class="s1">&#39;ident&#39;</span><span class="p">]</span>
         <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;Analyzer - Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
@@ -612,7 +732,7 @@
             <span class="n">syslog</span><span class="o">.</span><span class="n">openlog</span><span class="p">(</span><span class="n">syslog_ident</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_PID</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_LOCAL4</span><span class="p">)</span>
         <span class="n">syslog</span><span class="o">.</span><span class="n">syslog</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">syslog_not_enabled</span> <span class="o">=</span> <span class="bp">True</span></div>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="trigger_alert"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.trigger_alert">[docs]</a><span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
@@ -639,7 +759,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="nb">getattr</span><span class="p">(</span><span class="n">alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alerters - </span><span class="si">%s</span><span class="s1"> - getattr error&#39;</span> <span class="o">%</span> <span class="n">strategy</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span></div>
 </pre></div>
 
            </div>
@@ -673,7 +797,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

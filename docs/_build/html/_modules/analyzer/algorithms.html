@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.algorithms &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>analyzer.algorithms &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -192,14 +192,14 @@
 
 <span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
 
-<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;analyzer&#39;</span>
-<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
-
 <span class="k">if</span> <span class="n">ENABLE_SECOND_ORDER</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span>
     <span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
     <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;analyzer&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="n">ENABLE_ALGORITHM_RUN_METRICS</span>
@@ -591,6 +591,25 @@
     <span class="k">return</span> <span class="bp">False</span></div>
 
 
+<div class="viewcode-block" id="determine_array_median"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.algorithms.determine_array_median">[docs]</a><span class="k">def</span> <span class="nf">determine_array_median</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the median of the values in an array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c1"># logger.info(&#39;Running &#39; + str(get_function_name()))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">array_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">array_median</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
 <div class="viewcode-block" id="is_anomalously_anomalous"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.algorithms.is_anomalously_anomalous">[docs]</a><span class="k">def</span> <span class="nf">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method runs a meta-analysis on the metric to determine whether the</span>
@@ -700,7 +719,7 @@
         <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">algorithm_result</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
 
@@ -715,15 +734,14 @@
         <span class="k">if</span> <span class="n">ENABLE_ALL_ALGORITHMS_RUN_METRICS</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">false_count</span> <span class="o">=</span> <span class="n">final_ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-        <span class="n">true_count</span> <span class="o">=</span> <span class="n">final_ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-
+        <span class="c1"># true_count = final_ensemble.count(True)</span>
+        <span class="c1"># false_count = final_ensemble.count(False)</span>
         <span class="c1"># logger.info(&#39;current false_count %s&#39; % (str(false_count)))</span>
 
         <span class="k">if</span> <span class="n">final_ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">maximum_false_count</span><span class="p">:</span>
             <span class="n">consensus_possible</span> <span class="o">=</span> <span class="bp">False</span>
             <span class="c1"># logger.info(&#39;CONSENSUS cannot be reached as %s algorithms have already not been triggered&#39; % (str(false_count)))</span>
-            <span class="n">skip_algorithms_count</span> <span class="o">=</span> <span class="n">number_of_algorithms</span> <span class="o">-</span> <span class="n">number_of_algorithms_run</span>
+            <span class="c1"># skip_algorithms_count = number_of_algorithms - number_of_algorithms_run</span>
             <span class="c1"># logger.info(&#39;skipping %s algorithms&#39; % (str(skip_algorithms_count)))</span>
 
     <span class="c1"># logger.info(&#39;final_ensemble: %s&#39; % (str(final_ensemble)))</span>
@@ -777,7 +795,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

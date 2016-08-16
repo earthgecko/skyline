@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>mirage.mirage &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -168,12 +168,9 @@
 <span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Queue</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">system</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">packb</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">operator</span>
-<span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="c1"># imports required for surfacing graphite JSON formatted timeseries for use in</span>
 <span class="c1"># Mirage</span>
@@ -190,8 +187,8 @@
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">listdir</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 
-<span class="c1"># from skyline import settings</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">resource</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">write_data_to_file</span>
@@ -200,7 +197,32 @@
 <span class="kn">from</span> <span class="nn">negaters</span> <span class="kn">import</span> <span class="n">trigger_negater</span>
 <span class="kn">from</span> <span class="nn">mirage_algorithms</span> <span class="kn">import</span> <span class="n">run_selected_algorithm</span>
 <span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isfile</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">ENABLE_MEMORY_PROFILING - DEVELOPMENT ONLY</span>
+
+<span class="sd"># @added 20160806 - Bug #1558: Memory leak in Analyzer</span>
+<span class="sd"># Added all the memory profiling blocks - mem_top, pympler, objgraph, gc</span>
+<span class="sd">Garbage collection et al, should not be run in anything but development model,</span>
+<span class="sd">therefore these variables are hard coded and not accessible via settings.py,</span>
+<span class="sd">if you are in here reading this then knock yourself out.  gc and dump_garbage</span>
+<span class="sd">can be useful for getting an idea about what all the objects in play are, but</span>
+<span class="sd">garbage collection will just take longer and longer to run.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">ENABLE_MEMORY_PROFILING</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">garbage_collection_enabled</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">if</span> <span class="n">ENABLE_MEMORY_PROFILING</span><span class="p">:</span>
+    <span class="c1"># @added 20160806 - Bug #1558: Memory leak in Analyzer</span>
+    <span class="c1"># As per http://stackoverflow.com/a/1641280</span>
+    <span class="c1"># This got useable understandable data</span>
+    <span class="k">if</span> <span class="n">garbage_collection_enabled</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">gc</span> <span class="kn">import</span> <span class="n">get_objects</span>
+        <span class="c1"># Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
+        <span class="kn">import</span> <span class="nn">gc</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -247,6 +269,21 @@
             <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Mirage.spawn_alerter_process"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.spawn_alerter_process">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_alerter_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Spawn a process to trigger an alert.  This is used by smtp alerters so</span>
+<span class="sd">        that matplotlib objects are cleared down and the alerter cannot create</span>
+<span class="sd">        a memory leak in this manner and plt.savefig keeps the object in memory</span>
+<span class="sd">        until the process terminates.  Seeing as data is being surfaced and</span>
+<span class="sd">        processed in the alert_smtp context, multiprocessing the alert creation</span>
+<span class="sd">        and handling prevents any memory leaks in the parent.</span>
+<span class="sd">        # @added 20160814 - Bug #1558: Memory leak in Analyzer</span>
+<span class="sd">        #                   Issue #21 Memory leak in Analyzer</span>
+<span class="sd">        # https://github.com/earthgecko/skyline/issues/21</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Mirage.mkdir_p"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.mkdir_p">[docs]</a>    <span class="k">def</span> <span class="nf">mkdir_p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -304,7 +341,7 @@
         <span class="k">return</span> <span class="bp">False</span></div>
 
 <div class="viewcode-block" id="Mirage.load_metric_vars"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.load_metric_vars">[docs]</a>    <span class="k">def</span> <span class="nf">load_metric_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
             <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
             <span class="k">global</span> <span class="n">metric_vars</span>
             <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
@@ -312,6 +349,47 @@
             <span class="k">return</span> <span class="bp">True</span>
 
         <span class="k">return</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="Mirage.dump_garbage"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.dump_garbage">[docs]</a>    <span class="k">def</span> <span class="nf">dump_garbage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEVELOPMENT ONLY</span>
+
+<span class="sd">        # @added 20160806 - Bug #1558: Memory leak in Analyzer</span>
+<span class="sd">        # Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
+
+<span class="sd">        show us what&#39;s the garbage about</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ENABLE_MEMORY_PROFILING</span> <span class="ow">and</span> <span class="n">garbage_collection_enabled</span><span class="p">:</span>
+            <span class="c1"># force collection</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: GARBAGE&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+                <span class="n">gc_collect_ok</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: gc.collect failed&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">gc_collect_ok</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="k">if</span> <span class="n">gc_collect_ok</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: GARBAGE OBJECTS&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gc</span><span class="o">.</span><span class="n">garbage</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">80</span><span class="p">:</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[:</span><span class="mi">80</span><span class="p">]</span>
+                    <span class="c1"># print type(x), &quot;\n  &quot;, s</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">log_string</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  &quot;</span><span class="p">,</span> <span class="n">s</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: print x and s&#39;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                    <span class="c1"># if settings.ENABLE_DEBUG or LOCAL_DEBUG:</span>
+                    <span class="c1">#     logger.info(log_string)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span></div>
 
 <div class="viewcode-block" id="Mirage.spin_process"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -360,7 +438,7 @@
         <span class="n">int_run_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">run_timestamp</span><span class="p">)</span>
         <span class="n">metric_timestamp_age</span> <span class="o">=</span> <span class="n">int_run_timestamp</span> <span class="o">-</span> <span class="n">int_metric_timestamp</span>
         <span class="k">if</span> <span class="n">metric_timestamp_age</span> <span class="o">&gt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_STALE_SECONDS</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stale check       :: </span><span class="si">%s</span><span class="s1"> check request is </span><span class="si">%s</span><span class="s1"> seconds old - discarding&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp_age</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stale check :: </span><span class="si">%s</span><span class="s1"> check request is </span><span class="si">%s</span><span class="s1"> seconds old - discarding&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp_age</span><span class="p">))</span>
             <span class="c1"># Remove metric check file</span>
 <span class="c1">#            try:</span>
 <span class="c1">#                os.remove(metric_check_file)</span>
@@ -393,7 +471,7 @@
 
         <span class="c1"># Get data from graphite</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s1">&#39;retrieve data     :: surfacing </span><span class="si">%s</span><span class="s1"> timeseries from graphite for </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="s1">&#39;retrieve data :: surfacing </span><span class="si">%s</span><span class="s1"> timeseries from graphite for </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">surface_graphite_metric_data</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">)</span>
 
@@ -409,7 +487,7 @@
                 <span class="k">pass</span>
             <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved data    :: for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved data :: for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
 
         <span class="c1"># Make process-specific dicts</span>
@@ -423,7 +501,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data points surfaced :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)))</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzing         :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzing :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
             <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
 
             <span class="c1"># If it&#39;s anomalous, add it to list</span>
@@ -603,6 +681,9 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mirage_exceptions_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
+        <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="c1"># Remove metric check file</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
@@ -644,8 +725,77 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
 
+        <span class="k">def</span> <span class="nf">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+            <span class="c1"># Spawn processes</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spawn_alerter_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to spawn_alerter_process&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing the spawn_trigger_alert process&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEVELOPMENT ONLY</span>
+
+<span class="sd">        # @added 20160806 - Bug #1558: Memory leak in Analyzer</span>
+<span class="sd">        # Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ENABLE_MEMORY_PROFILING</span> <span class="ow">and</span> <span class="n">garbage_collection_enabled</span><span class="p">:</span>
+            <span class="c1"># Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
+            <span class="n">gc</span><span class="o">.</span><span class="n">set_debug</span><span class="p">(</span><span class="n">gc</span><span class="o">.</span><span class="n">DEBUG_LEAK</span><span class="p">)</span>
+
+            <span class="c1"># As per http://stackoverflow.com/a/1641280</span>
+            <span class="c1"># This got useable understandable data with gc</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">after</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">get_objects</span><span class="p">():</span>
+                <span class="n">before</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage in run at start: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
         <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            DEVELOPMENT ONLY</span>
+
+<span class="sd">            # @added 20160806 - Bug #1558: Memory leak in Analyzer</span>
+<span class="sd">            # Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">ENABLE_MEMORY_PROFILING</span> <span class="ow">and</span> <span class="n">garbage_collection_enabled</span><span class="p">:</span>
+                <span class="c1"># As per http://stackoverflow.com/a/1641280</span>
+                <span class="c1"># This got useable understandable data with gc</span>
+                <span class="n">before</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">after</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">get_objects</span><span class="p">():</span>
+                    <span class="n">before</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage before looking for checks: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
             <span class="c1"># Make sure Redis is up</span>
             <span class="k">try</span><span class="p">:</span>
@@ -691,7 +841,7 @@
                     <span class="k">break</span>
 
             <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
-            <span class="n">metric_check_file</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># metric_check_file = settings.MIRAGE_CHECK_PATH + &quot;/&quot; + metric_var_files_sorted[0]</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -799,8 +949,8 @@
                     <span class="n">metric_value</span> <span class="o">=</span> <span class="n">metric_variable</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">metric_variable</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;hours_to_resolve&#39;</span><span class="p">:</span>
                     <span class="n">hours_to_resolve</span> <span class="o">=</span> <span class="n">metric_variable</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">metric_variable</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;metric_timestamp&#39;</span><span class="p">:</span>
-                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">metric_variable</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># if metric_variable[0] == &#39;metric_timestamp&#39;:</span>
+                <span class="c1">#     metric_timestamp = metric_variable[1]</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analysis done - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
 
@@ -815,18 +965,34 @@
                     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">:</span>
                         <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                        <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
-                        <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
+                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="c1"># @modified 20160806 - Reintroduced the original</span>
+                        <span class="c1"># substring matching after wildcard matching, to allow</span>
+                        <span class="c1"># more flexibility</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_match</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                                <span class="n">pattern_match</span> <span class="o">=</span> <span class="bp">True</span>
                         <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                             <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.last_alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="ow">not</span> <span class="n">last_alert</span><span class="p">:</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-                                    <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent </span><span class="si">%s</span><span class="s1"> alert: For </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                    <span class="c1"># trigger_alert(alert, metric, second_order_resolution_seconds)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
+                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                            <span class="n">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent </span><span class="si">%s</span><span class="s1"> alert: For </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not send </span><span class="si">%s</span><span class="s1"> alert for </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">e</span><span class="p">))</span>
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not send </span><span class="si">%s</span><span class="s1"> alert for </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">e</span><span class="p">))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">NEGATE_ANALYZER_ALERTS</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -857,6 +1023,40 @@
 
             <span class="c1"># Reset metric_variables</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metric_variables</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            DEVELOPMENT ONLY</span>
+
+<span class="sd">            # @added 20160806 - Bug #1558: Memory leak in Analyzer</span>
+<span class="sd">            # Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">ENABLE_MEMORY_PROFILING</span> <span class="ow">and</span> <span class="n">garbage_collection_enabled</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">get_objects</span><span class="p">():</span>
+                        <span class="n">after</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">gc_results</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">after</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">before</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">after</span> <span class="k">if</span> <span class="n">after</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">before</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>
+                    <span class="k">for</span> <span class="n">gc_result</span> <span class="ow">in</span> <span class="n">gc_results</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">gc_result</span><span class="p">))</span>
+
+                <span class="c1"># @added 20160806 - Bug #1558: Memory leak in Analyzer</span>
+                <span class="c1"># Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
+                <span class="c1"># show the dirt ;-)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;garbage collecting&#39;</span><span class="p">)</span>
+                    <span class="n">all_the_garbage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dump_garbage</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: during garbage collecting&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">all_the_garbage</span> <span class="o">=</span> <span class="s1">&#39;gc errored&#39;</span>
+
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">all_the_garbage</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;garbage collected&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage end of run: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
             <span class="c1"># Sleep if it went too fast</span>
             <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -896,7 +1096,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

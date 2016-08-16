@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_alerters &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>mirage.mirage_alerters &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -158,7 +158,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for mirage.mirage_alerters</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">smtplib</span> <span class="kn">import</span> <span class="n">SMTP</span>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">smtplib</span> <span class="kn">import</span> <span class="n">SMTP</span>
 <span class="kn">import</span> <span class="nn">mirage_alerters</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">urllib2</span>
@@ -167,7 +168,25 @@
     <span class="kn">import</span> <span class="nn">urllib.error</span>
 <span class="kn">from</span> <span class="nn">requests.utils</span> <span class="kn">import</span> <span class="n">quote</span>
 
+<span class="c1"># Added for graphs showing Redis data</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">redis</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pylab</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">matplotlib.dates</span> <span class="kn">import</span> <span class="n">DateFormatter</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">syslog</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">resource</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">email.MIMEMultipart</span> <span class="kn">import</span> <span class="n">MIMEMultipart</span>
@@ -178,10 +197,15 @@
     <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="kn">import</span> <span class="n">MIMEText</span>
     <span class="kn">from</span> <span class="nn">email.mime.image</span> <span class="kn">import</span> <span class="n">MIMEImage</span>
 
-<span class="kn">import</span> <span class="nn">os.path</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
 <span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Create any alerter you want here. The function will be invoked from trigger_alert.</span>
@@ -198,7 +222,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># FULL_DURATION to hours so that Mirage can surface the relevant timeseries data</span>
-<span class="c1"># for analyzer comparison in the graph</span>
+<span class="c1"># for Analyzer comparison in the graph</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">full_duration_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
 <span class="k">except</span><span class="p">:</span>
@@ -207,6 +231,16 @@
 
 
 <div class="viewcode-block" id="alert_smtp"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_smtp">[docs]</a><span class="k">def</span> <span class="nf">alert_smtp</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by :func:`~trigger_alert` and sends an alert via smtp to the</span>
+<span class="sd">    recipients that are configured for the metric.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - sending smtp alert&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage at start: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
     <span class="c1"># SECOND_ORDER_RESOLUTION_SECONDS to hours so that Mirage surfaces the</span>
     <span class="c1"># relevant timeseries data in the graph</span>
@@ -218,7 +252,23 @@
         <span class="n">recipient</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
-        <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;recipients&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="c1"># @modified 20160806 - Added default_recipient</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;recipients&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">use_default_recipient</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;default_recipient&#39;</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;alert_smtp - using default_recipient as no recipients are configured for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: alert_smtp - no known recipient for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">return</span> <span class="bp">False</span>
 
     <span class="c1"># Backwards compatibility</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">recipients</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
@@ -226,22 +276,27 @@
 
     <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Mirage - ALERT at </span><span class="si">%s</span><span class="s1"> hours - anomalous data point - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - unencoded_graph_title: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">unencoded_graph_title</span><span class="p">)</span>
     <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
 
     <span class="n">content_id</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;embed-images&#39;</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">link</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data OK&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
             <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data None&#39;</span><span class="p">)</span>
 
     <span class="c1"># If we failed to get the image or if it was explicitly disabled,</span>
     <span class="c1"># use the image URL instead of the content.</span>
@@ -249,36 +304,286 @@
         <span class="n">img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">link</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;cid:</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">content_id</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - img_tag: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">img_tag</span><span class="p">)</span>
 
-    <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;Mirage ALERT &lt;br&gt; Anomalous metric: </span><span class="si">%s</span><span class="s1"> &lt;br&gt; value: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours &lt;br&gt; Next alert in: </span><span class="si">%s</span><span class="s1"> seconds &lt;br&gt; &lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
+    <span class="n">redis_image_data</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">plot_redis_data</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">PLOT_REDIS_DATA</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">plot_redis_data</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;embed-images&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">plot_redis_data</span><span class="p">:</span>
+        <span class="c1"># Create graph from Redis data</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
+
+        <span class="n">redis_metric_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_series</span> <span class="o">=</span> <span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">redis_metric_key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - raw_series: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;OK&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - raw_series: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+            <span class="n">timeseries_x</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">unpacker</span><span class="p">]</span>
+            <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+            <span class="n">timeseries_y</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">unpacker</span><span class="p">]</span>
+
+            <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - unpack timeseries failed&#39;</span><span class="p">)</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">pd_series_values</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+                <span class="c1"># Because the truth value of a Series is ambiguous</span>
+                <span class="n">pd_series_values</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - pandas value series on timeseries failed&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pd_series_values</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">array_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - values median: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_median</span><span class="p">))</span>
+
+                <span class="n">array_amax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - array_amax: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amax</span><span class="p">))</span>
+                <span class="n">array_amin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - array_amin: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amin</span><span class="p">))</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - mean: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean</span><span class="p">))</span>
+                <span class="n">stdDev</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - stdDev: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">stdDev</span><span class="p">))</span>
+
+                <span class="n">sigma3</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - sigma3: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">))</span>
+
+                <span class="c1"># sigma3_series = [sigma3] * len(values)</span>
+
+                <span class="n">sigma3_upper_bound</span> <span class="o">=</span> <span class="n">mean</span> <span class="o">+</span> <span class="n">sigma3</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">sigma3_lower_bound</span> <span class="o">=</span> <span class="n">mean</span> <span class="o">-</span> <span class="n">sigma3</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">sigma3_lower_bound</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">sigma3_upper_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">sigma3_upper_bound</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="n">sigma3_lower_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">sigma3_lower_bound</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="n">amax_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">array_amax</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="n">amin_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">array_amin</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="n">mean_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - numpy ops on series failed&#39;</span><span class="p">)</span>
+                <span class="n">mean_series</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">mean_series</span><span class="p">:</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Mirage - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+
+            <span class="c1"># Too big</span>
+            <span class="c1"># rcParams[&#39;figure.figsize&#39;] = 12, 6</span>
+            <span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># fig = plt.figure()</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">graph_title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_bgcolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">datetimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">timeseries_x</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - datetimes: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;OK&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - datetimes: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">)</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+                <span class="n">xfmt</span> <span class="o">=</span> <span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%a %H:%M&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">xfmt</span><span class="p">)</span>
+
+                <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">xfmt</span><span class="p">)</span>
+
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">timeseries_y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="s1">&#39;xx-small&#39;</span><span class="p">)</span>
+
+                <span class="n">max_value_label</span> <span class="o">=</span> <span class="s1">&#39;max - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amax</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">amax_series</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">max_value_label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">min_value_label</span> <span class="o">=</span> <span class="s1">&#39;min - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amin</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">amin_series</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">min_value_label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">mean_value_label</span> <span class="o">=</span> <span class="s1">&#39;mean - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">mean_series</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">mean_value_label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+                <span class="n">sigma3_text</span> <span class="o">=</span> <span class="p">(</span><span class="s1">r&#39;3$\sigma$&#39;</span><span class="p">)</span>
+                <span class="c1"># sigma3_label = &#39;%s - %s&#39; % (str(sigma3_text), str(sigma3))</span>
+
+                <span class="n">sigma3_upper_label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> upper - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sigma3_text</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_upper_bound</span><span class="p">))</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">sigma3_upper_series</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">sigma3_upper_label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">sigma3_lower_bound</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">sigma3_lower_label</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> lower - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sigma3_text</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_lower_bound</span><span class="p">))</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">sigma3_lower_series</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">sigma3_lower_label</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+                <span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">get_major_formatter</span><span class="p">()</span><span class="o">.</span><span class="n">set_useOffset</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">get_yaxis</span><span class="p">()</span><span class="o">.</span><span class="n">get_major_formatter</span><span class="p">()</span><span class="o">.</span><span class="n">set_scientific</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+                <span class="c1"># Shrink current axis&#39;s height by 10% on the bottom</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_position</span><span class="p">([</span><span class="n">box</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">y0</span> <span class="o">+</span> <span class="n">box</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span>
+                                 <span class="n">box</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">box</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">])</span>
+
+                <span class="c1"># Put a legend below current axis</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper center&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.05</span><span class="p">),</span>
+                          <span class="n">fancybox</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;x-small&#39;</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+                <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;lightgray&#39;</span><span class="p">,</span>
+                        <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_bgcolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+
+                <span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.direction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;out&#39;</span>
+                <span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.direction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;out&#39;</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">y</span><span class="o">=.</span><span class="mo">02</span><span class="p">,</span> <span class="n">x</span><span class="o">=.</span><span class="mo">03</span><span class="p">)</span>
+                <span class="c1"># tight_layout removes the legend box</span>
+                <span class="c1"># fig.tight_layout()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+                    <span class="c1"># @added 20160814 - Bug #1558: Memory leak in Analyzer</span>
+                    <span class="c1"># As per http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13222.html</span>
+                    <span class="c1"># savefig in the parent process was causing the memory leak</span>
+                    <span class="c1"># the below fig.clf() and plt.close() did not resolve this</span>
+                    <span class="c1"># however spawing a multiprocessing process for alert_smtp</span>
+                    <span class="c1"># does solve this as issue as all memory is freed when the</span>
+                    <span class="c1"># process terminates.</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                    <span class="n">redis_graph_content_id</span> <span class="o">=</span> <span class="s1">&#39;redis.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">redis_image_data</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - savefig: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;OK&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - plt.savefig: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not build plot&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
+        <span class="n">redis_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;cid:</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_graph_content_id</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - redis_img_tag: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">redis_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="s1">&#39;none&#39;</span>
+
+    <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; Mirage alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;metric: &lt;b&gt;</span><span class="si">%s</span><span class="s1">&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomalous value: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;At hours: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Next alert in: </span><span class="si">%s</span><span class="s1"> seconds&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">image_data</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)&lt;/font&gt;&lt;/h3&gt;&#39;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Clicking on the above graph will open to the Graphite graph with current data&lt;/font&gt;&lt;br&gt;&#39;</span>
+    <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;min: </span><span class="si">%s</span><span class="s1">  | max: </span><span class="si">%s</span><span class="s1">   | mean: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">array_amin</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amax</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean</span><span class="p">))</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma upper bound: </span><span class="si">%s</span><span class="s1">   | 3-sigma lower bound: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_upper_bound</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_lower_bound</span><span class="p">))</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Redis data at FULL_DURATION&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;:</span><span class="si">%s</span><span class="s1">&lt;br&gt;&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;br&gt;&#39;</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot; align=&quot;right&quot;&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; version :: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_version</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;alternative&#39;</span><span class="p">)</span>
-        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] &#39;</span> <span class="o">+</span> <span class="s1">&#39;Mirage ALERT - &#39;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
-        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
+        <span class="k">try</span><span class="p">:</span>
 
-        <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">msg_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
-            <span class="n">msg_attachment</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-ID&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="n">content_id</span><span class="p">)</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">msg_attachment</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;alternative&#39;</span><span class="p">)</span>
+            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] - Mirage ALERT - &#39;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
+            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
+
+            <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">msg_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
+                    <span class="n">msg_attachment</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-ID&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="n">content_id</span><span class="p">)</span>
+                    <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">msg_attachment</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - msg_attachment - Graphite img source done&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - msg_attachment&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">buf</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">msg_plot_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                    <span class="n">msg_plot_attachment</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-ID&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_graph_content_id</span><span class="p">)</span>
+                    <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">msg_plot_attachment</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - msg_plot_attachment - redis data done&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - msg_plot_attachment&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not attach&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">)</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">recipient</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">recipient</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - message sent to </span><span class="si">%s</span><span class="s1"> OK&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not send email to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+        <span class="n">s</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after email: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="alert_pagerduty"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_pagerduty">[docs]</a><span class="k">def</span> <span class="nf">alert_pagerduty</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by :func:`~trigger_alert` and sends an alert via PagerDuty</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_ENABLED</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">pygerduty</span>
         <span class="n">pager</span> <span class="o">=</span> <span class="n">pygerduty</span><span class="o">.</span><span class="n">PagerDuty</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;subdomain&#39;</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;auth_token&#39;</span><span class="p">])</span>
         <span class="n">pager</span><span class="o">.</span><span class="n">trigger_incident</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="s2">&quot;Mirage alert - </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">pagerduty_not_enabled</span> <span class="o">=</span> <span class="bp">True</span></div>
+        <span class="k">return</span> <span class="bp">False</span></div>
 
 
 <div class="viewcode-block" id="alert_hipchat"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_hipchat">[docs]</a><span class="k">def</span> <span class="nf">alert_hipchat</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by :func:`~trigger_alert` and sends an alert the hipchat room that is</span>
+<span class="sd">    configured in settings.py.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># SECOND_ORDER_RESOLUTION_SECONDS to hours so that Mirage surfaces the</span>
     <span class="c1"># relevant timeseries data in the graph</span>
@@ -304,13 +609,11 @@
         <span class="k">for</span> <span class="n">room</span> <span class="ow">in</span> <span class="n">rooms</span><span class="p">:</span>
             <span class="n">hipster</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="s1">&#39;rooms/message&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;room_id&#39;</span><span class="p">:</span> <span class="n">room</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">:</span> <span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">HIPCHAT_OPTS</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">],</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - Mirage - Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">) at </span><span class="si">%s</span><span class="s1"> hours </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">embed_graph</span><span class="p">)})</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">hipchat_not_enabled</span> <span class="o">=</span> <span class="bp">True</span></div>
+        <span class="k">return</span> <span class="bp">False</span></div>
 
 
 <div class="viewcode-block" id="alert_syslog"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_syslog">[docs]</a><span class="k">def</span> <span class="nf">alert_syslog</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_ENABLED</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">sys</span>
-        <span class="kn">import</span> <span class="nn">syslog</span>
         <span class="n">syslog_ident</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_OPTS</span><span class="p">[</span><span class="s1">&#39;ident&#39;</span><span class="p">]</span>
         <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;Mirage - Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
@@ -323,17 +626,39 @@
             <span class="n">syslog</span><span class="o">.</span><span class="n">openlog</span><span class="p">(</span><span class="n">syslog_ident</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_PID</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_LOCAL4</span><span class="p">)</span>
         <span class="n">syslog</span><span class="o">.</span><span class="n">syslog</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">syslog_not_enabled</span> <span class="o">=</span> <span class="bp">True</span></div>
+        <span class="k">return</span> <span class="bp">False</span></div>
 
 
 <div class="viewcode-block" id="trigger_alert"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.trigger_alert">[docs]</a><span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by :class:`~skyline.skyline.Mirage.run` to trigger an alert,</span>
+<span class="sd">    Mirage passes two arguments, both of them tuples.  The alerting strategy</span>
+<span class="sd">    is determined and the approriate alert def is then called and passed the</span>
+<span class="sd">    tuples.</span>
+
+<span class="sd">    :param alert:</span>
+<span class="sd">        The alert tuple specified in settings.py.\n</span>
+<span class="sd">        alert[0]: The matched substring of the anomalous metric\n</span>
+<span class="sd">        alert[1]: the name of the strategy being used to alert\n</span>
+<span class="sd">        alert[2]: The timeout of the alert that was triggered\n</span>
+<span class="sd">        alert[3]: The SECOND_ORDER_RESOLUTION_HOURS\n</span>
+<span class="sd">    :param meric:</span>
+<span class="sd">        The metric tuple.\n</span>
+<span class="sd">        metric[0]: the anomalous value</span>
+<span class="sd">        metric[1]: The full name of the anomalous metric</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="s1">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_smtp&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="nb">getattr</span><span class="p">(</span><span class="n">mirage_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span></div>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">mirage_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alerters - </span><span class="si">%s</span><span class="s1"> - getattr error&#39;</span> <span class="o">%</span> <span class="n">strategy</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span></div>
 </pre></div>
 
            </div>
@@ -367,7 +692,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

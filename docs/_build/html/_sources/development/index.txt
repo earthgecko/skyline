@@ -5,6 +5,7 @@ Development
 .. toctree::
 
 	webapp.rst
+	debugging.rst
 
 DRY
 ###

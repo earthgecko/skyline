@@ -50,6 +50,14 @@ skyline.skyline_version module
     :undoc-members:
     :show-inheritance:
 
+skyline.validate_settings module
+--------------------------------
+
+.. automodule:: validate_settings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

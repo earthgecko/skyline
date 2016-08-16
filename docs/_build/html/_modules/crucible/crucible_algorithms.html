@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crucible.crucible_algorithms &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>crucible.crucible_algorithms &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -167,11 +167,9 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">abspath</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">makedirs</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
@@ -180,12 +178,14 @@
 
 <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ALGORITHMS</span><span class="p">,</span>
-    <span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">,</span>
     <span class="n">MIRAGE_ALGORITHMS</span><span class="p">,</span>
     <span class="n">PANDAS_VERSION</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;crucibleLog&quot;</span><span class="p">)</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;crucible&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -293,8 +293,8 @@
     <span class="c1">#    last_hour_threshold = int_end_timestamp - (int_full_duration - 3600)</span>
         <span class="n">int_second_last_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">resolution</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">int_second_last_end_timestamp</span>
-        <span class="n">ten_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mi">10</span>
-        <span class="n">ten_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">ten_data_point_seconds</span>
+        <span class="c1"># @modified 20160814 - pyflaked</span>
+        <span class="c1"># ten_data_point_seconds = resolution * 10</span>
         <span class="n">sixty_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mi">60</span>
         <span class="n">sixty_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">sixty_data_point_seconds</span>
         <span class="n">last_hour_threshold</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="p">(</span><span class="n">int_full_duration</span> <span class="o">-</span> <span class="n">sixty_datapoints_ago</span><span class="p">)</span>
@@ -369,10 +369,11 @@
         <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
         <span class="n">series</span> <span class="o">=</span> <span class="n">series</span> <span class="o">-</span> <span class="n">series</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.18.0&#39;</span><span class="p">:</span>
-            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="c1"># @modified 20160814 - pyflaked</span>
+        <span class="c1"># if PANDAS_VERSION &lt; &#39;0.18.0&#39;:</span>
+        <span class="c1">#     expAverage = pandas.stats.moments.ewma(series, com=15)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()</span>
 
         <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
@@ -394,8 +395,9 @@
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="n">residual</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># @modified 20160814 - pyflaked</span>
+        <span class="c1"># results = np.linalg.lstsq(A, y)</span>
+        <span class="c1"># residual = results[1]</span>
         <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Evaluate append once, not every time in the loop - this gains ~0.020 s on</span>
@@ -466,8 +468,9 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">int_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="n">hour_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="mi">3600</span>
-        <span class="n">ten_minutes_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="mi">600</span>
+        <span class="c1"># @modified 20160814 - pyflaked</span>
+        <span class="c1"># hour_ago = int_end_timestamp - 3600</span>
+        <span class="c1"># ten_minutes_ago = int_end_timestamp - 600</span>
     <span class="c1"># Determine resolution of the data set</span>
     <span class="c1">#    reference = scipy.array([x[1] for x in timeseries if x[0] &gt;= hour_ago and x[0] &lt; ten_minutes_ago])</span>
     <span class="c1">#    probe = scipy.array([x[1] for x in timeseries if x[0] &gt;= ten_minutes_ago])</span>
@@ -645,7 +648,8 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: error thrown in algorithm running and plotting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)))</span>
 
     <span class="n">end_analysis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
-    <span class="n">seconds_to_run</span> <span class="o">=</span> <span class="n">end_analysis</span> <span class="o">-</span> <span class="n">start_analysis</span>
+    <span class="c1"># @modified 20160814 - pyflaked</span>
+    <span class="c1"># seconds_to_run = end_analysis - start_analysis</span>
 <span class="c1">#    logger.info(</span>
 <span class="c1">#        &#39;analysis of %s at a full duration of %s took %s seconds&#39; %</span>
 <span class="c1">#        (timeseries_name, str(full_duration), str(seconds_to_run)))</span>
@@ -684,7 +688,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

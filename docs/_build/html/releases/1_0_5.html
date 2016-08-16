@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.0.1 - the crucible branch &mdash; Skyline 1.0.5-dev documentation</title>
+  <title>1.0.5 - the crucible branch &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -34,8 +34,8 @@
   
     <link rel="top" title="Skyline 1.0.5-dev documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.0.2 - the crucible branch" href="1_0_2.html"/>
-        <link rel="prev" title="1.0.0 - the crucible branch" href="1_0_0.html"/> 
+        <link rel="next" title="What’s new" href="../whats-new.html"/>
+        <link rel="prev" title="1.0.4 - the crucible branch" href="1_0_4.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -112,11 +112,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1_0_5.html">1.0.5 - the crucible branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.5 - the crucible branch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
@@ -155,11 +155,11 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.0.1 - the crucible branch</li>
+    <li>1.0.5 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_0_1.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_0_5.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -170,30 +170,50 @@
            <div itemprop="articleBody">
             
   <div class="section" id="the-crucible-branch">
-<h1>1.0.1 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
-<p>This is a minor update to the the crucible branch which fixes a few bugs and
-some documentation corrections and additions.  It also adds a Redis data graph
-to the Analyzer alerter see
-<a class="reference external" href="../analyzer.html#analyzer-smtp-alert-graphs">Analyzer SMTP alert graphs</a></p>
+<h1>1.0.5 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<p>Fixes two Analyzer memory leaks and improves overview memory footprint a bit.</p>
 <p>Changes include:</p>
 <ul class="simple">
-<li>blak3r2 patch-5 <a class="reference external" href="https://github.com/earthgecko/skyline/pull/12">https://github.com/earthgecko/skyline/pull/12</a> related to
-<code class="docutils literal"><span class="pre">use</span> <span class="pre">skyline;</span></code></li>
-<li>Fixed a determine_median error, related to an error that crept in testing
-although it is not currently used, it was included incorrectly as in
-patterning the value range of the timeseries had has already been panda.Series
-into an array.</li>
-<li>Corrected path as per blak3r2 blak3r2:patch-3 as per
-https://github.com/earthgecko/skyline/pull/11/files</li>
-<li>Added matplotlib Redis data graph to alerters - this adds a matplotlib plot
-image to the smtp alert with additional details showing the 3sigma upper (and
-if applicable lower) bounds and the mean.</li>
-<li>Added <a class="reference internal" href="../skyline.html#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><code class="xref py py-mod docutils literal"><span class="pre">settings.PLOT_REDIS_DATA</span></code></a> to the settings.py</li>
-<li>Added a note about expected installation pip times</li>
-<li>Updated Python version references in docs from 2.7.11 to 2.7.12</li>
-<li>Added docs/skyline.simplified.workflow.uml and docs/skyline.uml for a workflow
-diagram with some annotations - things clustered by role</li>
-<li>Bumped up to version 1.0.1</li>
+<li>Issue #21 Memory leak in Analyzer - self.mirage_metrics.append(metric) and
+plt.savefig memory leaks were fixed. Removed unused but appended mirage list.
+Moved trigger_alert to a multiprocessing process when the alert is smtp. This
+is used by smtp alerters so that matplotlib objects are cleared down and the
+alerter cannot create a memory leak in this manner as plt.savefig keeps the
+object in memory until the process terminates.  Seeing as data is being
+surfaced and processed in the alert_smtp context, multiprocessing the alert
+creation and handling prevents any memory leaks in the parent. This fixes
+Issue #21 Memory leak in Analyzer - <a class="reference external" href="https://github.com/earthgecko/skyline/issues/21">https://github.com/earthgecko/skyline/issues/21</a>
+internal ref #1558: Memory leak in Analyzer</li>
+<li>In agent del the algorithm test objects to free the memory</li>
+<li>Applied in both Analyzer and Mirage</li>
+<li>Some pyflakes linting done</li>
+<li>Reintroduced the original alert substring matching AFTER wildcard matching, to
+allow more flexibility</li>
+<li>In Analyzer streamlined the Mirage metrics a bit</li>
+<li>Added some settings vaidation in the agents</li>
+<li>Issue #22 - Analyzer also alerting on Mirage metrics now
+This fixes #22 by introducing a mirage.metrics Redis key namespace for any
+Mirage metric.  This acts as a dynamic SKIP_LIST for Analyzer so to speak and
+allows for wildcard and substring matching and prevents Analyzer alerting on
+Mirage metrics.</li>
+<li>Added determine_array_median - readded the method to determine_median of an
+array which was changed to a timeseries from an array in
+<a class="reference external" href="https://github.com/earthgecko/skyline/commit/9dcf8ffbf6da0820ec5d2f93d3d7079abed3f5a7">https://github.com/earthgecko/skyline/commit/9dcf8ffbf6da0820ec5d2f93d3d7079abed3f5a7</a>
+errorneously as it was assumed to not be being used however it was being used
+by algorithm timings</li>
+<li>Some pyflakes linting done with unused imports and unused variables</li>
+<li>Added validation of settings with validate_settings.py, although this does not
+cover all settings, it tests the critical ones per app that have no except
+handling - in the agent.py</li>
+<li>Some pyflakes linting done with unused imports and unused variables</li>
+<li>Added del of test objects to reduced memory to all agents that test algorithms</li>
+<li>Added validate_settings to webapp</li>
+<li>Added default recipient which acts as a catchall for alert tuples that do not
+have a matching namespace defined in recipients in SMTP_OPTS and
+BOUNDARY_SMTP_OPTS</li>
+<li>Added analyzer_debug to crucible branch, the analyzer_debug app which has a
+number of memory debugging tools and options that can be turned on and off, etc</li>
+<li>Bumped version to 1.0.5</li>
 </ul>
 </div>
 
@@ -204,10 +224,10 @@ diagram with some annotations - things clustered by role</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_0_2.html" class="btn btn-neutral float-right" title="1.0.2 - the crucible branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../whats-new.html" class="btn btn-neutral float-right" title="What’s new" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_0_0.html" class="btn btn-neutral" title="1.0.0 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_0_4.html" class="btn btn-neutral" title="1.0.4 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
