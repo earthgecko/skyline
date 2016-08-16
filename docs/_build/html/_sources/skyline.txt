@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     skyline.analyzer
+    skyline.analyzer_debug
     skyline.analyzer_dev
     skyline.boundary
     skyline.crucible
@@ -46,6 +47,14 @@ skyline.skyline_version module
 ------------------------------
 
 .. automodule:: skyline_version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.validate_settings module
+--------------------------------
+
+.. automodule:: validate_settings
     :members:
     :undoc-members:
     :show-inheritance:

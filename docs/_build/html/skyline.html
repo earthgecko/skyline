@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>skyline package &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -116,6 +116,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">skyline package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer.html">skyline.analyzer package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_debug.html">skyline.analyzer_debug package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
@@ -130,6 +131,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
 </li>
@@ -190,6 +192,15 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.algorithms">skyline.analyzer.algorithms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.analyzer">skyline.analyzer.analyzer module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.analyzer_debug.html">skyline.analyzer_debug package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer_debug.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer_debug.html#module-analyzer_debug.agent">skyline.analyzer_debug.agent module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer_debug.html#module-analyzer_debug.alerters">skyline.analyzer_debug.alerters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer_debug.html#module-analyzer_debug.algorithms">skyline.analyzer_debug.algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer_debug.html#module-analyzer_debug.analyzer_debug">skyline.analyzer_debug.analyzer_debug module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer_debug.html#module-analyzer_debug">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a><ul>
@@ -1152,7 +1163,7 @@ visualisation of the 3sigma boundaries is informative.</p>
 
 <dl class="data">
 <dt id="settings.SMTP_OPTS">
-<code class="descname">SMTP_OPTS</code><em class="property"> = {'embed-images': True, 'sender': 'skyline&#64;your_domain.com', 'recipients': {'skyline': ['you&#64;your_domain.com', 'them&#64;your_domain.com'], 'skyline_test.alerters.test': ['you&#64;your_domain.com']}}</em><a class="headerlink" href="#settings.SMTP_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SMTP_OPTS</code><em class="property"> = {'embed-images': True, 'default_recipient': ['you&#64;your_domain.com'], 'sender': 'skyline&#64;your_domain.com', 'recipients': {'skyline': ['you&#64;your_domain.com', 'them&#64;your_domain.com'], 'skyline_test.alerters.test': ['you&#64;your_domain.com']}}</em><a class="headerlink" href="#settings.SMTP_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1161,6 +1172,13 @@ visualisation of the 3sigma boundaries is informative.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For each alert tuple defined in <a class="reference internal" href="#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> you need a
+recipient defined that matches the namespace.  The default_recipient acts
+as a catchall for any alert tuple that does not have a matching recipients
+defined.</p>
+</div>
 </dd></dl>
 
 <dl class="data">
@@ -1923,7 +1941,7 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 
 <dl class="data">
 <dt id="settings.BOUNDARY_SMTP_OPTS">
-<code class="descname">BOUNDARY_SMTP_OPTS</code><em class="property"> = {'embed-images': True, 'graphite_graph_line_color': 'pink', 'sender': 'skyline-boundary&#64;your_domain.com', 'recipients': {'nometrics': ['you&#64;your_domain.com', 'them&#64;your_domain.com'], 'skyline_test.alerters.test': ['you&#64;your_domain.com'], 'nometrics.either': ['you&#64;your_domain.com', 'another&#64;some-company.com']}, 'graphite_previous_hours': 7}</em><a class="headerlink" href="#settings.BOUNDARY_SMTP_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">BOUNDARY_SMTP_OPTS</code><em class="property"> = {'embed-images': True, 'sender': 'skyline-boundary&#64;your_domain.com', 'recipients': {'nometrics': ['you&#64;your_domain.com', 'them&#64;your_domain.com'], 'skyline_test.alerters.test': ['you&#64;your_domain.com'], 'nometrics.either': ['you&#64;your_domain.com', 'another&#64;some-company.com']}, 'graphite_graph_line_color': 'pink', 'graphite_previous_hours': 7, 'default_recipient': ['you&#64;your_domain.com']}</em><a class="headerlink" href="#settings.BOUNDARY_SMTP_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2439,6 +2457,28 @@ object, the object is returned</li>
 <span id="skyline-skyline-version-module"></span><h2>skyline.skyline_version module<a class="headerlink" href="#module-skyline_version" title="Permalink to this headline">¶</a></h2>
 <p>version info</p>
 </div>
+<div class="section" id="module-validate_settings">
+<span id="skyline-validate-settings-module"></span><h2>skyline.validate_settings module<a class="headerlink" href="#module-validate_settings" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="validate_settings.validate_settings_variables">
+<code class="descname">validate_settings_variables</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/validate_settings.html#validate_settings_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#validate_settings.validate_settings_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used by the agent.py to validate the variables in
+settings.py are valid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>current_skyline_app</strong> &#8211; the skyline app using this function</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">True</span></code> or <code class="docutils literal"><span class="pre">False</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="module-contents">
 <h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-skyline"></span><p>Used by autodoc_mock_imports.</p>
@@ -2486,7 +2526,7 @@ object, the object is returned</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

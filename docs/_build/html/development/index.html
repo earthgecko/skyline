@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>Development &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../index.html"/>
         <link rel="next" title="Development - Webapp" href="webapp.html"/>
         <link rel="prev" title="What’s new" href="../whats-new.html"/> 
 
@@ -113,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dry">DRY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-going-refactoring">On going refactoring</a></li>
 </ul>
@@ -169,6 +170,24 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Development - Webapp</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html#flask">Flask</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Development - Debugging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#code-profiling">Code profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#memory-debugging">Memory debugging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#analyzer-debug">analyzer_debug</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#multiprocessing">multiprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#resource">resource</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#pmap">pmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#gc">gc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#pyflakes">pyflakes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#pympler">pympler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#mem-top">mem_top</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#pytracker">pytracker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#objgraph">objgraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="debugging.html#guppy-and-heapy">guppy and heapy</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -270,7 +289,7 @@ becomes desired.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

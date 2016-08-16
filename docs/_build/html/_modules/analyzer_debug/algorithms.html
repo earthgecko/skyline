@@ -1,0 +1,823 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>analyzer_debug.algorithms &mdash; Skyline 1.0.5-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>analyzer_debug.algorithms</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for analyzer_debug.algorithms</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="kn">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getpid</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+<span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ALGORITHMS</span><span class="p">,</span>
+    <span class="n">CONSENSUS</span><span class="p">,</span>
+    <span class="n">FULL_DURATION</span><span class="p">,</span>
+    <span class="n">MAX_TOLERABLE_BOREDOM</span><span class="p">,</span>
+    <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">,</span>
+    <span class="n">STALE_PERIOD</span><span class="p">,</span>
+    <span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+    <span class="n">ENABLE_SECOND_ORDER</span><span class="p">,</span>
+    <span class="n">BOREDOM_SET_SIZE</span><span class="p">,</span>
+    <span class="n">PANDAS_VERSION</span><span class="p">,</span>
+    <span class="n">RUN_OPTIMIZED_WORKFLOW</span><span class="p">,</span>
+    <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span>
+    <span class="n">ENABLE_ALGORITHM_RUN_METRICS</span><span class="p">,</span>
+    <span class="n">ENABLE_ALL_ALGORITHMS_RUN_METRICS</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="c1">#warnings.filterwarnings(&#39;always&#39;, &#39;find_module&#39;, &#39;RuntimeWarning&#39;, &#39;find_module&#39;, 0)</span>
+<span class="c1">#warnings.simplefilter(&#39;error&#39;, &#39;RuntimeWarning&#39;, 0)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="s1">&#39;pandas&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;analyzer_debug&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">ENABLE_SECOND_ORDER</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span>
+    <span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
+    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="n">ENABLE_ALGORITHM_RUN_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
+<span class="sd">as long as you return a boolean that determines whether the input timeseries is</span>
+<span class="sd">anomalous or not.</span>
+
+<span class="sd">The key here is to return a True or False boolean.</span>
+
+<span class="sd">You should use the pythonic except mechanism to ensure any excpetions do not</span>
+<span class="sd">cause things to halt and the record_algorithm_error utility can be used to</span>
+<span class="sd">sample any algorithm errors to log.</span>
+
+<span class="sd">To add an algorithm, define it here, and add its name to settings.ALGORITHMS.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="tail_avg"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.tail_avg">[docs]</a><span class="k">def</span> <span class="nf">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility function used to calculate the average of the last three</span>
+<span class="sd">    datapoints in the series as a measure, instead of just the last datapoint.</span>
+<span class="sd">    It reduces noise, but it also reduces sensitivity and increases the delay</span>
+<span class="sd">    to detection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span>
+        <span class="k">return</span> <span class="n">t</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="median_absolute_deviation"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.median_absolute_deviation">[docs]</a><span class="k">def</span> <span class="nf">median_absolute_deviation</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the deviation of its latest datapoint with</span>
+<span class="sd">    respect to the median is X times larger than the median of deviations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># logger.info(&#39;Running &#39; + str(get_function_name()))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">median</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+        <span class="n">demedianed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">series</span> <span class="o">-</span> <span class="n">median</span><span class="p">)</span>
+        <span class="n">median_deviation</span> <span class="o">=</span> <span class="n">demedianed</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c1"># The test statistic is infinite when the median is zero,</span>
+    <span class="c1"># so it becomes super sensitive. We play it safe and skip when this happens.</span>
+    <span class="k">if</span> <span class="n">median_deviation</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">test_statistic</span> <span class="o">=</span> <span class="n">demedianed</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">median_deviation</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">test_statistic</span> <span class="o">=</span> <span class="n">demedianed</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">median_deviation</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c1"># Completely arbitary...triggers if the median deviation is</span>
+    <span class="c1"># 6 times bigger than the median</span>
+    <span class="k">if</span> <span class="n">test_statistic</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c1"># As per https://github.com/etsy/skyline/pull/104 by @rugger74</span>
+    <span class="c1"># Although never seen this should return False if not &gt; arbitary_value</span>
+    <span class="c1"># 20160523 @earthgecko</span>
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="grubbs"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.grubbs">[docs]</a><span class="k">def</span> <span class="nf">grubbs</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the Z score is greater than the Grubb&#39;s score.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+        <span class="n">tail_average</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+        <span class="n">z_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">tail_average</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">stdDev</span>
+        <span class="n">len_series</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="o">.</span><span class="mo">05</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">len_series</span><span class="p">),</span> <span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">threshold_squared</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">threshold</span>
+        <span class="n">grubbs_score</span> <span class="o">=</span> <span class="p">((</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">len_series</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">threshold_squared</span> <span class="o">/</span> <span class="p">(</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">threshold_squared</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">z_score</span> <span class="o">&gt;</span> <span class="n">grubbs_score</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="first_hour_average"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.first_hour_average">[docs]</a><span class="k">def</span> <span class="nf">first_hour_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcuate the simple average over one hour, FULL_DURATION seconds ago.</span>
+<span class="sd">    A timeseries is anomalous if the average of the last three datapoints</span>
+<span class="sd">    are outside of three standard deviations of this value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">last_hour_threshold</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="p">(</span><span class="n">FULL_DURATION</span> <span class="o">-</span> <span class="mi">3600</span><span class="p">)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_hour_threshold</span><span class="p">])</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="stddev_from_average"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.stddev_from_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the absolute value of the average of the latest</span>
+<span class="sd">    three datapoint minus the moving average is greater than three standard</span>
+<span class="sd">    deviations of the average. This does not exponentially weight the MA and so</span>
+<span class="sd">    is better for detecting anomalies with respect to the entire series.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="stddev_from_moving_average"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.stddev_from_moving_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_moving_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the absolute value of the average of the latest</span>
+<span class="sd">    three datapoint minus the moving average is greater than three standard</span>
+<span class="sd">    deviations of the moving average. This is better for finding anomalies with</span>
+<span class="sd">    respect to the short term trends.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.18.0&#39;</span><span class="p">:</span>
+            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+            <span class="n">stdDev</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewmstd</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">stdDev</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">bias</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">expAverage</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">expAverage</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="c1"># http://stackoverflow.com/questions/28757389/loc-vs-iloc-vs-ix-vs-at-vs-iat</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="mean_subtraction_cumulation"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.mean_subtraction_cumulation">[docs]</a><span class="k">def</span> <span class="nf">mean_subtraction_cumulation</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the value of the next datapoint in the</span>
+<span class="sd">    series is farther than three standard deviations out in cumulative terms</span>
+<span class="sd">    after subtracting the mean from each data point.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">series</span> <span class="o">-</span> <span class="n">series</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.18.0&#39;</span><span class="p">:</span>
+            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="least_squares"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.least_squares">[docs]</a><span class="k">def</span> <span class="nf">least_squares</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the average of the last three datapoints</span>
+<span class="sd">    on a projected least squares model is greater than three sigma.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Evaluate append once, not every time in the loop - this gains ~0.020 s on</span>
+        <span class="c1"># every timeseries potentially @earthgecko #1310</span>
+        <span class="n">append_error</span> <span class="o">=</span> <span class="n">errors</span><span class="o">.</span><span class="n">append</span>
+
+        <span class="c1"># Further a question exists related to performance and accruracy with</span>
+        <span class="c1"># regards to how many datapoints are in the sample, currently all datapoints</span>
+        <span class="c1"># are used but this may not be the ideal or most efficient computation or</span>
+        <span class="c1"># fit for a timeseries... @earthgecko is checking graphite...</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">projected</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="n">value</span> <span class="o">-</span> <span class="n">projected</span>
+            <span class="c1"># errors.append(error) # @earthgecko #1310</span>
+            <span class="n">append_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">std_dev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span>
+
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">std_dev</span> <span class="o">*</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">std_dev</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="histogram_bins"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.histogram_bins">[docs]</a><span class="k">def</span> <span class="nf">histogram_bins</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if the average of the last three datapoints falls</span>
+<span class="sd">    into a histogram bin with less than 20 other datapoints (you&#39;ll need to tweak</span>
+<span class="sd">    that number depending on your data)</span>
+
+<span class="sd">    Returns: the size of the bin which contains the tail_avg. Smaller bin size</span>
+<span class="sd">    means more anomalous.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># DEBUG make exception</span>
+        <span class="c1"># series1 = pandas.Series([x[1] for x in timeseries])</span>
+        <span class="c1"># last_hour_threshold = time() - (FULL_DURATION - 3600)</span>
+        <span class="c1"># series2 = pandas.Series([x[1] for x in timeseries if x[0] &lt; last_hour_threshold])</span>
+        <span class="c1"># expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=50).mean()</span>
+        <span class="c1"># stdDev1 = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=50).std(bias=False)</span>
+        <span class="c1"># series = pandas.Series([x[1] if x[1] else 0 for x in timeseries])</span>
+        <span class="c1"># series4 = series - series[0:len(series) - 1].mean()</span>
+        <span class="c1"># expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()</span>
+        <span class="c1"># debug = pandas</span>
+
+        <span class="n">series</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">bin_size</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">bin_size</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="c1"># Is it in the first bin?</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">return</span> <span class="bp">True</span>
+                <span class="c1"># Is it in the current bin?</span>
+                <span class="k">elif</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="ks_test"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.ks_test">[docs]</a><span class="k">def</span> <span class="nf">ks_test</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates</span>
+<span class="sd">    that data distribution for last 10 minutes is different from last hour.</span>
+<span class="sd">    It produces false positives on non-stationary series so Augmented</span>
+<span class="sd">    Dickey-Fuller test applied to check for stationarity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hour_ago</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="mi">3600</span>
+        <span class="n">ten_minutes_ago</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="mi">600</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">hour_ago</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ten_minutes_ago</span><span class="p">])</span>
+        <span class="n">probe</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ten_minutes_ago</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">reference</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span> <span class="ow">or</span> <span class="n">probe</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">ks_d</span><span class="p">,</span> <span class="n">ks_p_value</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">ks_2samp</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">probe</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ks_p_value</span> <span class="o">&lt;</span> <span class="mf">0.05</span> <span class="ow">and</span> <span class="n">ks_d</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="n">adf</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">stattools</span><span class="o">.</span><span class="n">adfuller</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">adf</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">THE END of NO MAN&#39;S LAND</span>
+
+
+<span class="sd">THE START of UTILITY FUNCTIONS</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="get_function_name"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.get_function_name">[docs]</a><span class="k">def</span> <span class="nf">get_function_name</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility function is used to determine what algorithm is reporting</span>
+<span class="sd">    an algorithm error when the record_algorithm_error is used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="record_algorithm_error"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.record_algorithm_error">[docs]</a><span class="k">def</span> <span class="nf">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This utility function is used to facilitate the traceback from any algorithm</span>
+<span class="sd">    errors.  The algorithm functions themselves we want to run super fast and</span>
+<span class="sd">    without fail in terms of stopping the function returning and not reporting</span>
+<span class="sd">    anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+<span class="sd">    algorithm errors to a tmp file and report once per run rather than spewing</span>
+<span class="sd">    tons of errors into the log.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        algorithm errors tmp file clean up</span>
+<span class="sd">            the algorithm error tmp files are handled and cleaned up in</span>
+<span class="sd">            :class:`Analyzer` after all the spawned processes are completed.</span>
+
+<span class="sd">    :param algorithm_name: the algoritm function name</span>
+<span class="sd">    :type algorithm_name: str</span>
+<span class="sd">    :param traceback_format_exc_string: the traceback_format_exc string</span>
+<span class="sd">    :type traceback_format_exc_string: str</span>
+<span class="sd">    :return:</span>
+<span class="sd">        - ``True`` the error string was written to the algorithm_error_file</span>
+<span class="sd">        - ``False`` the error string was not written to the algorithm_error_file</span>
+
+<span class="sd">    :rtype:</span>
+<span class="sd">        - boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_process_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+    <span class="n">algorithm_error_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.algorithm.error&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_process_pid</span><span class="p">),</span> <span class="n">algorithm_name</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">traceback_format_exc_string</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="determine_median"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.determine_median">[docs]</a><span class="k">def</span> <span class="nf">determine_median</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the median of the values in the timeseries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># logger.info(&#39;Running &#39; + str(get_function_name()))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">np_array</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">array_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">array_median</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="is_anomalously_anomalous"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.is_anomalously_anomalous">[docs]</a><span class="k">def</span> <span class="nf">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method runs a meta-analysis on the metric to determine whether the</span>
+<span class="sd">    metric has a past history of triggering. TODO: weight intervals based on datapoint</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># We want the datapoint to avoid triggering twice on the same data</span>
+    <span class="n">new_trigger</span> <span class="o">=</span> <span class="p">[</span><span class="n">time</span><span class="p">(),</span> <span class="n">datapoint</span><span class="p">]</span>
+
+    <span class="c1"># Get the old history</span>
+    <span class="n">raw_trigger_history</span> <span class="o">=</span> <span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;trigger_history.&#39;</span> <span class="o">+</span> <span class="n">metric_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_trigger_history</span><span class="p">:</span>
+        <span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;trigger_history.&#39;</span> <span class="o">+</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">packb</span><span class="p">([(</span><span class="n">time</span><span class="p">(),</span> <span class="n">datapoint</span><span class="p">)]))</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="n">trigger_history</span> <span class="o">=</span> <span class="n">unpackb</span><span class="p">(</span><span class="n">raw_trigger_history</span><span class="p">)</span>
+
+    <span class="c1"># Are we (probably) triggering on the same data?</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">new_trigger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>
+            <span class="n">new_trigger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">300</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c1"># Update the history</span>
+    <span class="n">trigger_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_trigger</span><span class="p">)</span>
+    <span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;trigger_history.&#39;</span> <span class="o">+</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">trigger_history</span><span class="p">))</span>
+
+    <span class="c1"># Should we surface the anomaly?</span>
+    <span class="n">trigger_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">trigger_history</span><span class="p">]</span>
+    <span class="n">intervals</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">trigger_times</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">trigger_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trigger_times</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">trigger_times</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">intervals</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">intervals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span></div>
+
+
+<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.analyzer_debug.html#analyzer_debug.algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter timeseries and run selected algorithm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get rid of short series</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
+
+    <span class="c1"># Get rid of stale series</span>
+    <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">STALE_PERIOD</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Stale</span><span class="p">()</span>
+
+    <span class="c1"># Get rid of boring series</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">MAX_TOLERABLE_BOREDOM</span><span class="p">:]))</span> <span class="o">==</span> <span class="n">BOREDOM_SET_SIZE</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Boring</span><span class="p">()</span>
+
+    <span class="c1"># RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:</span>
+    <span class="c1"># ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]</span>
+    <span class="c1"># which runs all timeseries through all ALGORITHMS</span>
+    <span class="n">final_ensemble</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">number_of_algorithms_triggered</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">number_of_algorithms_run</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">number_of_algorithms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ALGORITHMS</span><span class="p">)</span>
+    <span class="n">maximum_false_count</span> <span class="o">=</span> <span class="n">number_of_algorithms</span> <span class="o">-</span> <span class="n">CONSENSUS</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="c1"># logger.info(&#39;the maximum_false_count is %s, above which CONSENSUS cannot be achieved&#39; % (str(maximum_false_count)))</span>
+    <span class="n">consensus_possible</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c1"># DEVELOPMENT: this is for a development version of analyzer only</span>
+    <span class="k">if</span> <span class="n">skyline_app</span> <span class="o">==</span> <span class="s1">&#39;analyzer_dev&#39;</span><span class="p">:</span>
+        <span class="n">time_all_algorithms</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">time_all_algorithms</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">algorithm_tmp_file_prefix</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">consensus_possible</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">send_algorithm_run_metrics</span><span class="p">:</span>
+                <span class="n">algorithm_count_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">.count&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_tmp_file_prefix</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                <span class="n">algorithm_timings_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">.timings&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_tmp_file_prefix</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+
+            <span class="n">run_algorithm</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">run_algorithm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+            <span class="n">number_of_algorithms_run</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">send_algorithm_run_metrics</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">test_algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">)</span> <span class="k">for</span> <span class="n">test_algorithm</span> <span class="ow">in</span> <span class="n">run_algorithm</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c1"># logger.error(&#39;%s failed&#39; % (algorithm))</span>
+                <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">send_algorithm_run_metrics</span><span class="p">:</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_count_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_timings_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.6f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span>
+            <span class="c1"># logger.info(&#39;CONSENSUS NOT ACHIEVABLE - skipping %s&#39; % (str(algorithm)))</span>
+
+        <span class="k">if</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">number_of_algorithms_triggered</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># logger.info(&#39;algorithm %s triggerred&#39; % (str(algorithm)))</span>
+        <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">algorithm_result</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="n">final_ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">RUN_OPTIMIZED_WORKFLOW</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">time_all_algorithms</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">ENABLE_ALL_ALGORITHMS_RUN_METRICS</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># true_count = final_ensemble.count(True)</span>
+        <span class="c1"># false_count = final_ensemble.count(False)</span>
+        <span class="c1"># logger.info(&#39;current false_count %s&#39; % (str(false_count)))</span>
+
+        <span class="k">if</span> <span class="n">final_ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">maximum_false_count</span><span class="p">:</span>
+            <span class="n">consensus_possible</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="c1"># logger.info(&#39;CONSENSUS cannot be reached as %s algorithms have already not been triggered&#39; % (str(false_count)))</span>
+            <span class="c1"># skip_algorithms_count = number_of_algorithms - number_of_algorithms_run</span>
+            <span class="c1"># logger.info(&#39;skipping %s algorithms&#39; % (str(skip_algorithms_count)))</span>
+
+    <span class="c1"># logger.info(&#39;final_ensemble: %s&#39; % (str(final_ensemble)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="n">final_ensemble</span>
+
+        <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="n">CONSENSUS</span>
+        <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ENABLE_SECOND_ORDER</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.0.5-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

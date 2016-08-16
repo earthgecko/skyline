@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.mirage package &mdash; Skyline 1.0.4-dev documentation</title>
+  <title>skyline.mirage package &mdash; Skyline 1.0.5-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.4-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.5-dev documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.panorama package" href="skyline.panorama.html"/>
         <link rel="prev" title="skyline.horizon package" href="skyline.horizon.html"/> 
@@ -117,6 +117,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="skyline.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer.html">skyline.analyzer package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_debug.html">skyline.analyzer_debug package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
@@ -140,6 +141,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
 </ul>
 </li>
@@ -226,6 +228,20 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="mirage.mirage.Mirage.spawn_alerter_process">
+<code class="descname">spawn_alerter_process</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.spawn_alerter_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.spawn_alerter_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn a process to trigger an alert.  This is used by smtp alerters so
+that matplotlib objects are cleared down and the alerter cannot create
+a memory leak in this manner and plt.savefig keeps the object in memory
+until the process terminates.  Seeing as data is being surfaced and
+processed in the alert_smtp context, multiprocessing the alert creation
+and handling prevents any memory leaks in the parent.
+# &#64;added 20160814 - Bug #1558: Memory leak in Analyzer
+#                   Issue #21 Memory leak in Analyzer
+# <a class="reference external" href="https://github.com/earthgecko/skyline/issues/21">https://github.com/earthgecko/skyline/issues/21</a></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="mirage.mirage.Mirage.mkdir_p">
 <code class="descname">mkdir_p</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.mkdir_p"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.mkdir_p" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -239,6 +255,15 @@
 <dt id="mirage.mirage.Mirage.load_metric_vars">
 <code class="descname">load_metric_vars</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.load_metric_vars" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="mirage.mirage.Mirage.dump_garbage">
+<code class="descname">dump_garbage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.dump_garbage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.dump_garbage" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEVELOPMENT ONLY</p>
+<p># &#64;added 20160806 - Bug #1558: Memory leak in Analyzer
+# Debug with garbage collection - <a class="reference external" href="http://code.activestate.com/recipes/65333/">http://code.activestate.com/recipes/65333/</a></p>
+<p>show us what&#8217;s the garbage about</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="mirage.mirage.Mirage.spin_process">
@@ -257,20 +282,42 @@
 </div>
 <div class="section" id="module-mirage.mirage_alerters">
 <span id="skyline-mirage-mirage-alerters-module"></span><h2>skyline.mirage.mirage_alerters module<a class="headerlink" href="#module-mirage.mirage_alerters" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="mirage.mirage_alerters.skyline_version">
+<code class="descname">skyline_version</code><em class="property"> = 'Skyline (crucible v1.0.5-beta)'</em><a class="headerlink" href="#mirage.mirage_alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create any alerter you want here. The function will be invoked from trigger_alert.
+Two arguments will be passed, both of them tuples: alert and metric.</p>
+<dl class="docutils">
+<dt>alert: the tuple specified in your settings:</dt>
+<dd>alert[0]: The matched substring of the anomalous metric
+alert[1]: the name of the strategy being used to alert
+alert[2]: The timeout of the alert that was triggered
+alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</dd>
+<dt>metric: information about the anomaly itself</dt>
+<dd>metric[0]: the anomalous value
+metric[1]: The full name of the anomalous metric</dd>
+</dl>
+</dd></dl>
+
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_smtp">
 <code class="descname">alert_smtp</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert via smtp to the
+recipients that are configured for the metric.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_pagerduty">
 <code class="descname">alert_pagerduty</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_pagerduty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_pagerduty" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert via PagerDuty</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_hipchat">
 <code class="descname">alert_hipchat</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_hipchat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_hipchat" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert the hipchat room that is
+configured in settings.py.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_syslog">
@@ -280,7 +327,31 @@
 <dl class="function">
 <dt id="mirage.mirage_alerters.trigger_alert">
 <code class="descname">trigger_alert</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">run</span></code> to trigger an alert,
+Mirage passes two arguments, both of them tuples.  The alerting strategy
+is determined and the approriate alert def is then called and passed the
+tuples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>alert</strong> &#8211; <p>The alert tuple specified in settings.py.</p>
+<p>alert[0]: The matched substring of the anomalous metric</p>
+<p>alert[1]: the name of the strategy being used to alert</p>
+<p>alert[2]: The timeout of the alert that was triggered</p>
+<p>alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</p>
+</li>
+<li><strong>meric</strong> &#8211; <p>The metric tuple.</p>
+<p>metric[0]: the anomalous value
+metric[1]: The full name of the anomalous metric</p>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 <div class="section" id="module-mirage.mirage_algorithms">
@@ -520,7 +591,7 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.4-dev',
+            VERSION:'1.0.5-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
