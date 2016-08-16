@@ -28,7 +28,7 @@ momentjs to handle date ticker in the timezone in Dygraph
                 <option value="false">false</option>
                 <option value="true">true</option>
               </select> (NOTE: this overrides the above metric value if one is specified)<br><br>
-              <label>metric_like:</label><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.%)<br>
+              <label>metric_like:</label><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)<br>
               <label>from_timestamp:</label><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)<br>
               <label>until_timestamp:</label><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)<br>
 {% if app_list %}

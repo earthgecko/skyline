@@ -145,6 +145,16 @@ def validate_settings_variables(current_skyline_app):
         print ('error :: PANORAMA_ENABLED is not set in settings.py')
         invalid_variables = True
 
+    if current_skyline_app == 'webapp':
+        try:
+            TEST_ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
+        except:
+            logger.error('error :: ENABLE_WEBAPP_DEBUG is not set in settings.py')
+            logger.info(traceback.format_exc())
+            logger.error('error :: exiting, please fix setting.py')
+            print ('error :: ENABLE_WEBAPP_DEBUG is not set in settings.py')
+            invalid_variables = True
+
     if invalid_variables:
         return False
 
