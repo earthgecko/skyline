@@ -834,13 +834,27 @@ class Analyzer(Thread):
                 logger.info('debug :: Memory usage in run after alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Write anomalous_metrics to static webapp directory
-            if len(self.anomalous_metrics) > 0:
-                filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
-                with open(filename, 'w') as fh:
-                    # Make it JSONP with a handle_data() function
-                    anomalous_metrics = list(self.anomalous_metrics)
-                    anomalous_metrics.sort(key=operator.itemgetter(1))
-                    fh.write('handle_data(%s)' % anomalous_metrics)
+            # @modified 20160818 - Issue #19: Add additional exception handling to Analyzer
+            anomalous_metrics_list_len = False
+            try:
+                len(self.anomalous_metrics)
+                anomalous_metrics_list_len = True
+            except:
+                logger.error('error :: failed to determine length of anomalous_metrics list')
+
+            if anomalous_metrics_list_len:
+                if len(self.anomalous_metrics) > 0:
+                    filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
+                    try:
+                        with open(filename, 'w') as fh:
+                            # Make it JSONP with a handle_data() function
+                            anomalous_metrics = list(self.anomalous_metrics)
+                            anomalous_metrics.sort(key=operator.itemgetter(1))
+                            fh.write('handle_data(%s)' % anomalous_metrics)
+                    except:
+                        logger.error(
+                            'error :: failed to write anomalies to %s' %
+                            str(filename))
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
