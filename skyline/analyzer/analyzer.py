@@ -852,6 +852,7 @@ class Analyzer(Thread):
                             anomalous_metrics.sort(key=operator.itemgetter(1))
                             fh.write('handle_data(%s)' % anomalous_metrics)
                     except:
+                        logger.info(traceback.format_exc())
                         logger.error(
                             'error :: failed to write anomalies to %s' %
                             str(filename))
