@@ -36,7 +36,7 @@ REQUEST_ARGS = ['from_date',
 try:
     ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
 except:
-    logger.error('error :: cannot determine ENABLE_PANORAMA_DEBUG from settings' % skyline_app)
+    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings')
     ENABLE_WEBAPP_DEBUG = False
 
 

@@ -16,6 +16,10 @@ warnings.filterwarnings('error', 'a', RuntimeWarning, 'pandas', 0)
 import redis
 from msgpack import Unpacker
 import datetime as dt
+# @modified 20160821 - Issue #23 Test dependency updates
+# Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.pylab import rcParams
 from matplotlib.dates import DateFormatter
