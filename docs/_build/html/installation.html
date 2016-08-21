@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.0.6-dev documentation</title>
+  <title>Installation &mdash; Skyline 1.0.7-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.6-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.7-dev documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -390,10 +390,15 @@ head -n <span class="m">20</span> /var/log/skyline/*.log
 tail -n <span class="m">20</span> /var/log/skyline/*.log
 
 <span class="c1"># Any errors - each app</span>
-cat /var/log/skyline/horizon.log <span class="p">|</span> grep <span class="s2">&quot;error&quot;</span> <span class="p">|</span> tail
-cat /var/log/skyline/analyzer.log <span class="p">|</span> grep <span class="s2">&quot;error&quot;</span> <span class="p">|</span> tail
-cat /var/log/skyline/webapp.log <span class="p">|</span> grep <span class="s2">&quot;error&quot;</span> <span class="p">|</span> tail
-cat /var/log/skyline/panorama.log <span class="p">|</span> grep <span class="s2">&quot;error&quot;</span> <span class="p">|</span> tail
+cat /var/log/skyline/horizon.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/analyzer.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/webapp.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/panorama.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+
+<span class="c1"># If you have the other services running</span>
+cat /var/log/skyline/mirage.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/boundary.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/crucible.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
 </pre></div>
 </div>
 <ul class="simple">
@@ -495,7 +500,7 @@ the dependency is fulfilled.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.6-dev',
+            VERSION:'1.0.7-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

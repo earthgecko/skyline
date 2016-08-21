@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer_dev.analyzer_dev &mdash; Skyline 1.0.6-dev documentation</title>
+  <title>analyzer_dev.analyzer_dev &mdash; Skyline 1.0.7-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.6-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.7-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -159,21 +159,21 @@
             
   <h1>Source code for analyzer_dev.analyzer_dev</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
-<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Queue</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
+<span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">system</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">system</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -181,17 +181,17 @@
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
 <span class="kn">import</span> <span class="nn">settings</span>
 
-<span class="kn">from</span> <span class="nn">alerters</span> <span class="kn">import</span> <span class="n">trigger_alert</span>
-<span class="kn">from</span> <span class="nn">algorithms_dev</span> <span class="kn">import</span> <span class="n">run_selected_algorithm</span>
+<span class="kn">from</span> <span class="nn">alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
+<span class="kn">from</span> <span class="nn">algorithms_dev</span> <span class="k">import</span> <span class="n">run_selected_algorithm</span>
 <span class="c1"># from skyline import algorithm_exceptions</span>
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALGORITHM_RUN_METRICS</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">if</span> <span class="n">send_algorithm_run_metrics</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">algorithms_dev</span> <span class="kn">import</span> <span class="n">determine_median</span>
+    <span class="kn">from</span> <span class="nn">algorithms_dev</span> <span class="k">import</span> <span class="n">determine_median</span>
 
 <span class="c1"># TODO if settings.ENABLE_CRUCIBLE: and ENABLE_PANORAMA</span>
 <span class="c1">#    from spectrum import push_to_crucible</span>
@@ -233,7 +233,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Analyzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
@@ -249,7 +249,7 @@
             <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Analyzer.send_graphite_metric"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.send_graphite_metric">[docs]</a>    <span class="k">def</span> <span class="nf">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -271,27 +271,27 @@
             <span class="c1"># mlowicki:handle_connection_error_to_graphite on 16 Mar 2015</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">CARBON_PORT</span><span class="p">))</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+                <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+                <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
                 <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
                                       <span class="n">settings</span><span class="o">.</span><span class="n">CARBON_PORT</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Can&#39;t connect to Graphite at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">False</span>
 
             <span class="c1"># For the same reason as above</span>
             <span class="c1"># sock.sendall(&#39;%s %s %i\n&#39; % (name, value, time()))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app_metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">time</span><span class="p">()))</span>
                 <span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-                <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
                                       <span class="n">settings</span><span class="o">.</span><span class="n">CARBON_PORT</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Can&#39;t connect to Graphite at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="k">return</span> <span class="bp">False</span></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="Analyzer.spin_process"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">unique_metrics</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -348,7 +348,7 @@
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">raw_series</span> <span class="o">=</span> <span class="n">raw_assigned</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
 
@@ -450,9 +450,9 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="mo">0750</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="mi">0750</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o750</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o750</span><span class="p">)</span>
 
         <span class="c1"># Initiate the algorithm timings if Analyzer is configured to send the</span>
         <span class="c1"># algorithm_breakdown metrics with ENABLE_ALGORITHM_RUN_METRICS</span>
@@ -579,7 +579,7 @@
                             <span class="n">float_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">unquoted_value_string</span><span class="p">)</span>
                             <span class="n">algorithm_count_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">float_value</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">algorithm_count_array</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">algorithm_count_array</span> <span class="o">=</span> <span class="kc">False</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_count_array</span><span class="p">:</span>
                     <span class="k">continue</span>
@@ -600,7 +600,7 @@
                             <span class="n">float_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">unquoted_value_string</span><span class="p">)</span>
                             <span class="n">algorithm_timings_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">float_value</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">algorithm_timings_array</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">algorithm_timings_array</span> <span class="o">=</span> <span class="kc">False</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm_timings_array</span><span class="p">:</span>
                     <span class="k">continue</span>
@@ -666,8 +666,8 @@
 
             <span class="c1"># Check canary metric</span>
             <span class="n">raw_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">CANARY_METRIC</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">raw_series</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">raw_series</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
                 <span class="n">time_human</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3600</span>
@@ -738,7 +738,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.6-dev',
+            VERSION:'1.0.7-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

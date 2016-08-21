@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_algorithms &mdash; Skyline 1.0.6-dev documentation</title>
+  <title>mirage.mirage_algorithms &mdash; Skyline 1.0.7-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.6-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.7-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -159,20 +159,20 @@
             
   <h1>Source code for mirage.mirage_algorithms</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="kn">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getpid</span>
 
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
 
-<span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">MIRAGE_ALGORITHMS</span><span class="p">,</span>
     <span class="n">MIRAGE_CONSENSUS</span><span class="p">,</span>
     <span class="n">MIRAGE_DATA_FOLDER</span><span class="p">,</span>
@@ -182,7 +182,7 @@
     <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -232,12 +232,12 @@
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># The test statistic is infinite when the median is zero,</span>
     <span class="c1"># so it becomes super sensitive. We play it safe and skip when this happens.</span>
     <span class="k">if</span> <span class="n">median_deviation</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -246,7 +246,7 @@
             <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
             <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">test_statistic</span> <span class="o">=</span> <span class="n">demedianed</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">median_deviation</span>
@@ -254,14 +254,14 @@
             <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
             <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># Completely arbitary...triggers if the median deviation is</span>
     <span class="c1"># 6 times bigger than the median</span>
     <span class="k">if</span> <span class="n">test_statistic</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="grubbs"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.grubbs">[docs]</a><span class="k">def</span> <span class="nf">grubbs</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -276,7 +276,7 @@
         <span class="n">tail_average</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
         <span class="n">z_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">tail_average</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">stdDev</span>
         <span class="n">len_series</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
-        <span class="n">threshold</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="o">.</span><span class="mo">05</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">len_series</span><span class="p">),</span> <span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="o">.</span><span class="mi">05</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">len_series</span><span class="p">),</span> <span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">threshold_squared</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">threshold</span>
         <span class="n">grubbs_score</span> <span class="o">=</span> <span class="p">((</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">len_series</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">threshold_squared</span> <span class="o">/</span> <span class="p">(</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">threshold_squared</span><span class="p">))</span>
 
@@ -285,7 +285,7 @@
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="first_hour_average"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.first_hour_average">[docs]</a><span class="k">def</span> <span class="nf">first_hour_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -306,7 +306,7 @@
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="stddev_from_average"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.stddev_from_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -328,7 +328,7 @@
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="stddev_from_moving_average"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.stddev_from_moving_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_moving_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -344,8 +344,8 @@
             <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
             <span class="n">stdDev</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewmstd</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-            <span class="n">stdDev</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">bias</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">stdDev</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">expAverage</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -356,7 +356,7 @@
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="mean_subtraction_cumulation"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.mean_subtraction_cumulation">[docs]</a><span class="k">def</span> <span class="nf">mean_subtraction_cumulation</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -373,7 +373,7 @@
         <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.18.0&#39;</span><span class="p">:</span>
             <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
@@ -383,7 +383,7 @@
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="least_squares"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.least_squares">[docs]</a><span class="k">def</span> <span class="nf">least_squares</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -415,7 +415,7 @@
             <span class="n">append_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
         <span class="n">std_dev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span>
@@ -425,7 +425,7 @@
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="histogram_bins"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.histogram_bins">[docs]</a><span class="k">def</span> <span class="nf">histogram_bins</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -448,17 +448,17 @@
                 <span class="c1"># Is it in the first bin?</span>
                 <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                        <span class="k">return</span> <span class="bp">True</span>
+                        <span class="k">return</span> <span class="kc">True</span>
                 <span class="c1"># Is it in the current bin?</span>
                 <span class="k">elif</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
-                        <span class="k">return</span> <span class="bp">True</span>
+                        <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span></div>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="ks_test"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.ks_test">[docs]</a><span class="k">def</span> <span class="nf">ks_test</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
@@ -476,23 +476,23 @@
         <span class="n">probe</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ten_minutes_ago</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">reference</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span> <span class="ow">or</span> <span class="n">probe</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
         <span class="n">ks_d</span><span class="p">,</span> <span class="n">ks_p_value</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">ks_2samp</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">probe</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ks_p_value</span> <span class="o">&lt;</span> <span class="mf">0.05</span> <span class="ow">and</span> <span class="n">ks_d</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
             <span class="n">adf</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">stattools</span><span class="o">.</span><span class="n">adfuller</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">adf</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
         <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">THE END of NO MAN&#39;S LAND</span>
@@ -508,7 +508,7 @@
 <span class="sd">    This is a utility function is used to determine what algorithm is reporting</span>
 <span class="sd">    an algorithm error when the record_algorithm_error is used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="record_algorithm_error"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.record_algorithm_error">[docs]</a><span class="k">def</span> <span class="nf">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">):</span>
@@ -544,9 +544,9 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">traceback_format_exc_string</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span></div>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="determine_median"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.determine_median">[docs]</a><span class="k">def</span> <span class="nf">determine_median</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
@@ -558,14 +558,14 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">np_array</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">array_median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">array_median</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="is_anomalously_anomalous"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.is_anomalously_anomalous">[docs]</a><span class="k">def</span> <span class="nf">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">):</span>
@@ -580,14 +580,14 @@
     <span class="n">raw_trigger_history</span> <span class="o">=</span> <span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mirage_trigger_history.&#39;</span> <span class="o">+</span> <span class="n">metric_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_trigger_history</span><span class="p">:</span>
         <span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;mirage_trigger_history.&#39;</span> <span class="o">+</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">packb</span><span class="p">([(</span><span class="n">time</span><span class="p">(),</span> <span class="n">datapoint</span><span class="p">)]))</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="n">trigger_history</span> <span class="o">=</span> <span class="n">unpackb</span><span class="p">(</span><span class="n">raw_trigger_history</span><span class="p">)</span>
 
     <span class="c1"># Are we (probably) triggering on the same data?</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">new_trigger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>
             <span class="n">new_trigger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">300</span><span class="p">):</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Update the history</span>
     <span class="n">trigger_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_trigger</span><span class="p">)</span>
@@ -615,17 +615,17 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">]</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="n">MIRAGE_CONSENSUS</span>
-        <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">MIRAGE_ENABLE_SECOND_ORDER</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
-                    <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="k">return</span> <span class="bp">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span></div>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span></div>
 </pre></div>
 
            </div>
@@ -659,7 +659,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.6-dev',
+            VERSION:'1.0.7-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

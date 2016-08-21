@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.0.6-dev documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.0.7-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.6-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.0.7-dev documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -165,11 +165,11 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isfile</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isfile</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="k">try</span><span class="p">:</span>
@@ -186,11 +186,11 @@
 <span class="kn">import</span> <span class="nn">settings</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">GRAPHITE_HOST</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">GRAPHITE_HOST</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">GRAPHITE_HOST</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">CARBON_PORT</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">CARBON_PORT</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">CARBON_PORT</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
@@ -199,7 +199,7 @@
           <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span>
           <span class="s1">&#39;port&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">,</span>
           <span class="s1">&#39;database&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">,</span>
-          <span class="s1">&#39;raise_on_warnings&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+          <span class="s1">&#39;raise_on_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="send_graphite_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.send_graphite_metric">[docs]</a><span class="k">def</span> <span class="nf">send_graphite_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
@@ -230,31 +230,31 @@
         <span class="c1"># mlowicki:handle_connection_error_to_graphite on 16 Mar 2015</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">))</span>
-            <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
-            <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
             <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">)</span>
             <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
             <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s1">&#39;error :: cannot connect to Graphite at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
         <span class="c1"># For the same reason as above</span>
         <span class="c1"># sock.sendall(&#39;%s %s %i\n&#39; % (name, value, time()))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">time</span><span class="p">()))</span>
             <span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">)</span>
             <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
             <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s1">&#39;error :: could not send data to Graphite at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="mkdir_p"><a class="viewcode-back" href="../skyline.html#skyline_functions.mkdir_p">[docs]</a><span class="k">def</span> <span class="nf">mkdir_p</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -273,15 +273,15 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">python_version</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
         <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o755</span>
+            <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
     <span class="c1"># Python &gt;2.5</span>
     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -332,7 +332,7 @@
                 <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;failed to import metric variables - metric_check_file&#39;</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
-                <span class="n">metric_vars</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">metric_vars</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">return</span> <span class="n">metric_vars</span></div>
 
@@ -361,7 +361,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">python_version</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
         <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">write_to_file</span><span class="p">)</span>
@@ -370,7 +370,7 @@
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="n">o755</span>
+                <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
         <span class="c1"># Python &gt;2.5</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -394,11 +394,11 @@
             <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
         <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">write_to_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="fail_check"><a class="viewcode-back" href="../skyline.html#skyline_functions.fail_check">[docs]</a><span class="k">def</span> <span class="nf">fail_check</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">failed_check_dir</span><span class="p">,</span> <span class="n">check_file_to_fail</span><span class="p">):</span>
@@ -428,7 +428,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">python_version</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
         <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
@@ -445,7 +445,7 @@
                 <span class="s1">&#39;error :: failed to create failed_check_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">failed_check_dir</span><span class="p">))</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
     <span class="n">check_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">check_file_to_fail</span><span class="p">))</span>
     <span class="n">failed_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">failed_check_dir</span><span class="p">,</span> <span class="n">check_file_name</span><span class="p">)</span>
@@ -459,14 +459,14 @@
         <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
 
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;failed to move check file to -</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="k">pass</span>
 
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="alert_expiry_check"><a class="viewcode-back" href="../skyline.html#skyline_functions.alert_expiry_check">[docs]</a><span class="k">def</span> <span class="nf">alert_expiry_check</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">added_by</span><span class="p">):</span>
@@ -507,7 +507,7 @@
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
             <span class="s1">&#39;error :: failed to query redis cache key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;analyzer&#39;</span> <span class="ow">or</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;mirage&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
@@ -529,7 +529,7 @@
                         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
                     <span class="n">check_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_time</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_age</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">expiration_timeout</span><span class="p">):</span>
-                        <span class="n">check_expired</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="n">check_expired</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
                             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;the check is older than EXPIRATION_TIME for the metric - not checking - check_expired&#39;</span>
                             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
@@ -550,7 +550,7 @@
                         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
                     <span class="n">check_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_time</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">check_age</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">expiration_timeout</span><span class="p">):</span>
-                        <span class="n">check_expired</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="n">check_expired</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
                             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;the check is older than EXPIRATION_TIME for the metric - not checking - check_expired&#39;</span>
                             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
@@ -583,17 +583,17 @@
                 <span class="s1">&#39;error :: could not query cache_key for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">alerter</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;all anomaly files will be removed&#39;</span><span class="p">)</span>
-            <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">check_expired</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s1">&#39;check_expired - all anomaly files will be removed&#39;</span><span class="p">)</span>
-            <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s1">&#39;cache_key is set and not expired for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - all anomaly files will be removed&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
-            <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="bp">True</span></div>
+            <span class="n">remove_all_anomaly_files</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="get_graphite_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_metric">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_metric</span><span class="p">(</span>
@@ -667,10 +667,10 @@
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">))</span>
 
-    <span class="n">get_image</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">get_image</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;image&#39;</span> <span class="ow">and</span> <span class="n">output_object</span> <span class="o">!=</span> <span class="s1">&#39;object&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">output_object</span><span class="p">):</span>
-            <span class="n">get_image</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">get_image</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graph file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_object</span><span class="p">))</span>
@@ -689,16 +689,16 @@
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite image url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">image_url</span><span class="p">)))</span>
         <span class="n">image_url_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">)</span>
 
-        <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">image_url_timeout</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;url OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
         <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
-            <span class="n">image_data</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: url bad - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
@@ -719,7 +719,7 @@
 
         <span class="k">if</span> <span class="n">output_object</span> <span class="o">!=</span> <span class="s1">&#39;object&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">output_object</span><span class="p">):</span>
-                <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
 
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;surfacing timeseries data for </span><span class="si">%s</span><span class="s1"> from graphite from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">)</span>
@@ -731,12 +731,12 @@
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;use_timeout - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">use_timeout</span><span class="p">)))</span>
 
-        <span class="n">graphite_json_fetched</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">graphite_json_fetched</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
-            <span class="n">graphite_json_fetched</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">graphite_json_fetched</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">)]]</span>
+            <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">)]]</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: data retrieval from Graphite failed&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">graphite_json_fetched</span><span class="p">:</span>
@@ -746,7 +746,7 @@
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
                     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data retrieved OK&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">)]]</span>
+                <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">)]]</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to parse data points from retrieved json&#39;</span><span class="p">)</span>
 
         <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
@@ -774,9 +774,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">output_object</span><span class="p">):</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s1">&#39;error :: failed to surface </span><span class="si">%s</span><span class="s1"> json from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">True</span></div>
+            <span class="k">return</span> <span class="kc">True</span></div>
 
 <span class="c1">################################################################################</span>
 
@@ -811,17 +811,17 @@
 <span class="sd">            * ``None``</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
-            <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span><span class="p">:</span>
-            <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
@@ -835,7 +835,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">conversion</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="kn">import</span> <span class="n">conversion</span>
+        <span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="k">import</span> <span class="n">conversion</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">re</span>
     <span class="k">except</span><span class="p">:</span>
@@ -848,7 +848,7 @@
     <span class="k">except</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mysql error - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to connect to mysql&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">cnx</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -863,7 +863,7 @@
             <span class="c1"># related to % character. pseudo basic HTTP auth has been added to</span>
             <span class="c1"># the webapp just in someone does not secure it properly, a little</span>
             <span class="c1"># defence in depth, so added WEBAPP_ALLOWED_IPS too.</span>
-            <span class="n">pattern_match</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39; LIKE &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">select</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
@@ -875,7 +875,7 @@
                     <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: pattern_match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback_format_exc</span><span class="p">())</span>
 
             <span class="c1"># TBD - not sure how to get it escaping safely</span>
-            <span class="n">pattern_match</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                 <span class="n">query</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">select</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">ENABLE_DEBUG</span><span class="p">:</span>
@@ -901,9 +901,9 @@
                 <span class="s1">&#39;error :: failed to query database - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">select</span><span class="p">)))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">False</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ENABLE_DEBUG</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to connect to mysql&#39;</span><span class="p">)</span>
@@ -911,11 +911,11 @@
     <span class="c1"># Close the test mysql connection</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">return</span> <span class="bp">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span></div>
 </pre></div>
 
            </div>
@@ -949,7 +949,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.6-dev',
+            VERSION:'1.0.7-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

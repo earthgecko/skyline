@@ -213,10 +213,15 @@ Steps
     tail -n 20 /var/log/skyline/*.log
 
     # Any errors - each app
-    cat /var/log/skyline/horizon.log | grep "error" | tail
-    cat /var/log/skyline/analyzer.log | grep "error" | tail
-    cat /var/log/skyline/webapp.log | grep "error" | tail
-    cat /var/log/skyline/panorama.log | grep "error" | tail
+    cat /var/log/skyline/horizon.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
+    cat /var/log/skyline/analyzer.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
+    cat /var/log/skyline/webapp.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
+    cat /var/log/skyline/panorama.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
+
+    # If you have the other services running
+    cat /var/log/skyline/mirage.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
+    cat /var/log/skyline/boundary.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
+    cat /var/log/skyline/crucible.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
 
 -  Seed Redis with some test data
 
