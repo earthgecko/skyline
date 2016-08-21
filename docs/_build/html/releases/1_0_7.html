@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.0.1 - the crucible branch &mdash; Skyline 1.0.7-dev documentation</title>
+  <title>1.0.7 - the crucible branch &mdash; Skyline 1.0.7-dev documentation</title>
   
 
   
@@ -34,8 +34,8 @@
   
     <link rel="top" title="Skyline 1.0.7-dev documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.0.2 - the crucible branch" href="1_0_2.html"/>
-        <link rel="prev" title="1.0.0 - the crucible branch" href="1_0_0.html"/> 
+        <link rel="next" title="What’s new" href="../whats-new.html"/>
+        <link rel="prev" title="1.0.6 - the crucible branch" href="1_0_6.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -112,13 +112,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_5.html">1.0.5 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_6.html">1.0.6 - the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1_0_7.html">1.0.7 - the crucible branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.7 - the crucible branch</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
@@ -157,11 +157,11 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.0.1 - the crucible branch</li>
+    <li>1.0.7 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_0_1.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_0_7.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -172,31 +172,30 @@
            <div itemprop="articleBody">
             
   <div class="section" id="the-crucible-branch">
-<h1>1.0.1 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
-<p>This is a minor update to the the crucible branch which fixes a few bugs and
-some documentation corrections and additions.  It also adds a Redis data graph
-to the Analyzer alerter see
-<a class="reference external" href="../analyzer.html#analyzer-smtp-alert-graphs">Analyzer SMTP alert graphs</a></p>
+<h1>1.0.7 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<p>Issue #23 Test dependency updates -
+<a class="reference external" href="https://github.com/earthgecko/skyline/issues/23">https://github.com/earthgecko/skyline/issues/23</a></p>
+<p>An update to dependencies and a minor addition to matplotlib implementation in
+alerts.</p>
+<p>All current requirements.txt versions verified as of 20160820</p>
 <p>Changes include:</p>
 <ul class="simple">
-<li>blak3r2 patch-5 <a class="reference external" href="https://github.com/earthgecko/skyline/pull/12">https://github.com/earthgecko/skyline/pull/12</a> related to
-<code class="docutils literal"><span class="pre">use</span> <span class="pre">skyline;</span></code></li>
-<li>Fixed a determine_median error, related to an error that crept in testing
-although it is not currently used, it was included incorrectly as in
-patterning the value range of the timeseries had has already been panda.Series
-into an array.</li>
-<li>Corrected path as per blak3r2 blak3r2:patch-3 as per
-https://github.com/earthgecko/skyline/pull/11/files</li>
-<li>Added matplotlib Redis data graph to alerters - this adds a matplotlib plot
-image to the smtp alert with additional details showing the 3sigma upper (and
-if applicable lower) bounds and the mean.</li>
-<li>Added <a class="reference internal" href="../skyline.html#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><code class="xref py py-mod docutils literal"><span class="pre">settings.PLOT_REDIS_DATA</span></code></a> to the settings.py</li>
-<li>Added a note about expected installation pip times</li>
-<li>Updated Python version references in docs from 2.7.11 to 2.7.12</li>
-<li>Added docs/skyline.simplified.workflow.uml and docs/skyline.uml for a workflow
-diagram with some annotations - things clustered by role</li>
-<li>Bumped up to version 1.0.1</li>
+<li>Updated the following dependecies:
+scipy==0.17.1 to scipy==0.18.0
+pytz==2016.4 to pytz==2016.6.1
+pyparsing==2.1.5 to pyparsing==2.1.8
+matplotlib==1.5.1 to matplotlib==1.5.2
+msgpack-python==0.4.7 to msgpack-python==0.4.8
+requests==2.10.0 to requests==2.11.1</li>
+<li>In alerters matplotlib==1.5.2 requries an additional configuration defined of
+matplotlib.use(&#8216;Agg&#8217;) for the the generation of a plot in a non windowed
+environment</li>
+<li>Bumped to 1.0.7</li>
 </ul>
+<p>Modified:
+requirements.txt
+skyline/analyzer/alerters.py
+skyline/mirage/mirage_alerters.py</p>
 </div>
 
 
@@ -206,10 +205,10 @@ diagram with some annotations - things clustered by role</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_0_2.html" class="btn btn-neutral float-right" title="1.0.2 - the crucible branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../whats-new.html" class="btn btn-neutral float-right" title="What’s new" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_0_0.html" class="btn btn-neutral" title="1.0.0 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_0_6.html" class="btn btn-neutral" title="1.0.6 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

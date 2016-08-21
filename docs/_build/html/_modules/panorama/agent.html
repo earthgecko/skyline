@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>panorama.agent &mdash; Skyline 1.0.6-dev documentation</title>
+  <title>panorama.agent &mdash; Skyline 1.0.7-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.6-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.7-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -161,25 +161,25 @@
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getpid</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isdir</span>
-<span class="kn">from</span> <span class="nn">daemon</span> <span class="kn">import</span> <span class="n">runner</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">daemon</span> <span class="k">import</span> <span class="n">runner</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
-<span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="kn">import</span> <span class="n">errorcode</span>
+<span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="k">import</span> <span class="n">errorcode</span>
 
-<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="k">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
 
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">validate_settings</span> <span class="kn">import</span> <span class="n">validate_settings_variables</span>
+<span class="kn">from</span> <span class="nn">validate_settings</span> <span class="k">import</span> <span class="n">validate_settings_variables</span>
 
-<span class="kn">from</span> <span class="nn">panorama</span> <span class="kn">import</span> <span class="n">Panorama</span>
+<span class="kn">from</span> <span class="nn">panorama</span> <span class="k">import</span> <span class="n">Panorama</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;panorama&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
@@ -195,9 +195,9 @@
               <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span>
               <span class="s1">&#39;port&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">,</span>
               <span class="s1">&#39;database&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">,</span>
-              <span class="s1">&#39;raise_on_warnings&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+              <span class="s1">&#39;raise_on_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;error: failed to determine database settings from settings.py&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error: failed to determine database settings from settings.py&#39;</span><span class="p">)</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 
@@ -221,15 +221,15 @@
 <span class="sd">    Start the Panorama agent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">):</span>
-        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;pid directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;pid directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">):</span>
-        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;log directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;log directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">):</span>
-        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;Panorama check directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Panorama check directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
@@ -250,18 +250,18 @@
     <span class="n">valid_settings</span> <span class="o">=</span> <span class="n">validate_settings_variables</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_settings</span><span class="p">:</span>
-        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;error :: invalid variables in settings.py - cannot start&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: invalid variables in settings.py - cannot start&#39;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Make sure mysql is available</span>
-    <span class="n">mysql_up</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">mysql_up</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">configuration_error</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">configuration_error</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># Try connect to mysql</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cnx</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
-            <span class="n">configuration_error</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="n">mysql_up</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">configuration_error</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">mysql_up</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">except</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errorcode</span><span class="o">.</span><span class="n">ER_ACCESS_DENIED_ERROR</span><span class="p">:</span>
@@ -273,9 +273,9 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">configuration_error</span><span class="p">:</span>
-                <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;The database is not available&#39;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;The database is not available&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;The database is not available&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;The database is not available&#39;</span><span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mysql_up</span><span class="p">:</span>
@@ -322,7 +322,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.6-dev',
+            VERSION:'1.0.7-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

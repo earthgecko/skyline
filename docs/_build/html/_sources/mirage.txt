@@ -15,7 +15,7 @@ An overview of Mirage
 
 - Mirage is fed specific user defined metrics by Analyzer.
 - Mirage gets timeseries data for metrics from Graphite.
-- Mirage does not have its own ``ALERT`` settings it uses :mod:`settings.ALERTS`
+- Mirage does not have its own ``ALERTS`` settings it uses :mod:`settings.ALERTS`
   just like Analyzer does.
 - Mirage also sends anomaly details to Panorama, like Analyzer does.
 
