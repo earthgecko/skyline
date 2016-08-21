@@ -1,5 +1,7 @@
 setuptools
 wheel
+# @modified 20160820 - Issue #23 Test dependency updates
+# All current versions verified as of 20160820 - https://github.com/earthgecko/skyline/issues/21
 redis==2.10.5
 hiredis==0.2.0
 
@@ -15,7 +17,6 @@ MarkupSafe==0.23
 Werkzeug==0.11.10
 click==6.6
 Flask==0.11.1
-
 
 simplejson==3.8.2
 six==1.10.0
@@ -36,14 +37,22 @@ mock==2.0.0
 
 numpy==1.11.1
 
-scipy==0.17.1
+# @modified 20160820 - Issue #23 Test dependency updates
+#scipy==0.17.1
+scipy==0.18.0
 
 # matplotlib and co
 python-dateutil==2.5.3
-pytz==2016.4
+# @modified 20160820 - Issue #23 Test dependency updates
+#pytz==2016.4
+pytz==2016.6.1
 cycler==0.10.0
-pyparsing==2.1.5
-matplotlib==1.5.1
+# @modified 20160820 - Issue #23 Test dependency updates
+#pyparsing==2.1.5
+pyparsing==2.1.8
+# @modified 20160820 - Issue #23 Test dependency updates
+#matplotlib==1.5.1
+matplotlib==1.5.2
 
 pandas==0.18.1
 
@@ -51,8 +60,13 @@ patsy==0.4.1
 
 statsmodels==0.6.1
 
-msgpack-python==0.4.7
-requests==2.10.0
+# @modified 20160820 - Issue #23 Test dependency updates
+#msgpack-python==0.4.7
+msgpack-python==0.4.8
+
+# @modified 20160820 - Issue #23 Test dependency updates
+#requests==2.10.0
+requests==2.11.1
 
 #pytest
 
