@@ -2,6 +2,10 @@ import pandas
 import numpy as np
 import scipy
 import statsmodels.api as sm
+# @modified 20160821 - Issue #23 Test dependency updates
+# Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import traceback
 import logging
