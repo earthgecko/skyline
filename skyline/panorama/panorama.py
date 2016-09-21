@@ -49,6 +49,21 @@ skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PA
 
 failed_checks_dir = '%s_failed' % settings.PANORAMA_CHECK_PATH
 
+# @added 20160907 - Handle Panorama stampede on restart after not running #26
+# Allow to expire check if greater than PANORAMA_CHECK_MAX_AGE, backwards
+# compatible
+try:
+    test_max_age_set = 1 + settings.PANORAMA_CHECK_MAX_AGE
+    if test_max_age_set > 1:
+        max_age = True
+    if test_max_age_set == 1:
+        max_age = False
+    max_age_seconds = settings.PANORAMA_CHECK_MAX_AGE
+except:
+    max_age = False
+    max_age_seconds = 0
+expired_checks_dir = '%s_expired' % settings.PANORAMA_CHECK_PATH
+
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -299,6 +314,9 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - from_timestamp - %s' % from_timestamp)
         except:
+            # @added 20160822 - Bug #1460: panorama check file fails
+            # Added exception handling here
+            logger.info(traceback.format_exc())
             logger.error('error :: failed to read from_timestamp variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
@@ -391,6 +409,17 @@ class Panorama(Thread):
             logger.info(
                 'Panorama metric key not expired - %s.last_check.%s.%s' % (
                     skyline_app, app, metric))
+
+        # @added 20160907 - Handle Panorama stampede on restart after not running #26
+        # Allow to expire check if greater than PANORAMA_CHECK_MAX_AGE
+        if max_age:
+            now = time()
+            anomaly_age = int(now) - int(metric_timestamp)
+            if anomaly_age > max_age_seconds:
+                record_anomaly = False
+                logger.info(
+                    'Panorama check max age exceeded - %s seconds old, older than %s seconds discarding' % (
+                        metric, str(anomaly_age), str(max_age_seconds)))
 
         if not record_anomaly:
             logger.info('not recording anomaly for - %s' % (metric))

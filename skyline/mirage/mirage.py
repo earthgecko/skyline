@@ -31,7 +31,7 @@ import os.path
 import resource
 
 import settings
-from skyline_functions import write_data_to_file
+from skyline_functions import write_data_to_file, load_metric_vars, fail_check
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
@@ -183,10 +183,17 @@ class Mirage(Thread):
     def load_metric_vars(self, filename):
         if os.path.isfile(filename):
             f = open(filename)
-            global metric_vars
-            metric_vars = imp.load_source('metric_vars', '', f)
-            f.close()
-            return True
+            # @added 20160822 - Bug #1460: panorama check file fails
+            # Do not make this global
+            # global metric_vars
+            try:
+                metric_vars = imp.load_source('metric_vars', '', f)
+                f.close()
+                # return True
+                return metric_vars
+            except:
+                logger.error('error :: failed to load metric_vars')
+                logger.info(traceback.format_exc())
 
         return False
 
@@ -248,7 +255,17 @@ class Mirage(Thread):
             settings.MIRAGE_CHECK_PATH, str(metric_var_files_sorted[0]))
 
         # Load metric variables
-        self.load_metric_vars(metric_check_file)
+        # @modified 20160822 - Bug #1460: panorama check file fails
+        # Changed to panorama style skyline_functions load_metric_vars
+        # self.load_metric_vars(metric_check_file)
+        # Load and validate metric variables
+        try:
+            metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
 
         # Test metric variables
         if len(metric_vars.metric) == 0:
