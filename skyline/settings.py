@@ -764,7 +764,7 @@ PANORAMA_EXPIRY_TIME = 900
 """
 :var PANORAMA_EXPIRY_TIME: Panorama will only store one anomaly for a metric \
     every PANORAMA_EXPIRY_TIME seconds.
-:vartype PANORAMA_EXPIRY_TIME:
+:vartype PANORAMA_EXPIRY_TIME: int
 
 - This is the Panorama sample rate.  Please bear in mind Panorama does not use
   the ALERTS time expiry keys or matching, Panorama records every anomaly, even
@@ -772,6 +772,17 @@ PANORAMA_EXPIRY_TIME = 900
   often fire as anomalous every minute, until it no longer is.
 """
 
+PANORAMA_CHECK_MAX_AGE = 300
+"""
+:var PANORAMA_CHECK_MAX_AGE: Panorama will only process a check file if it is
+    not older than PANORAMA_CHECK_MAX_AGE seconds.  If it is set to 0 it does
+    all.  This setting just ensures if Panorama stalls for some hours and is
+    restarted, the user can choose to discard older checks and miss anomalies
+    being recorded if they so choose to, to prevent Panorama stampeding against
+    MySQL if something went down and Panorama comes back online with lots of
+    checks.
+:vartype PANORAMA_CHECK_MAX_AGE: int
+"""
 
 """
 Mirage settings

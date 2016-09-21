@@ -171,6 +171,18 @@ def now():
         return 'Uh oh ... a Skyline 500 :(', 500
 
 
+@app.route("/then")
+@requires_auth
+def then():
+    start = time.time()
+    try:
+        return render_template('then.html'), 200
+    except:
+        error_string = traceback.format_exc()
+        logger.error('error :: failed to render then.html: %s' % str(error_string))
+        return 'Uh oh ... a Skyline 500 :(', 500
+
+
 @app.route("/anomalies.json")
 def anomalies():
     try:

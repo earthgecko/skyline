@@ -2,6 +2,8 @@
 Test class for Skyline all imports
 """
 
+# EXPERIMENTAL - does not work as desired
+
 import sys
 import os.path
 import os
