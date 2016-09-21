@@ -418,7 +418,7 @@ class Panorama(Thread):
             if anomaly_age > max_age_seconds:
                 record_anomaly = False
                 logger.info(
-                    'Panorama check max age exceeded - %s seconds old, older than %s seconds discarding' % (
+                    'Panorama check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
                         metric, str(anomaly_age), str(max_age_seconds)))
 
         if not record_anomaly:
