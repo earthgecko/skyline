@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Panorama &mdash; Skyline 1.0.7-dev documentation</title>
+  <title>Panorama &mdash; Skyline 1.0.8-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.7-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
         <link rel="next" title="Webapp" href="webapp.html"/>
         <link rel="prev" title="Crucible" href="crucible.html"/> 
 
@@ -168,6 +168,11 @@
 that have alert tuples set.  Panorama records samples of all metrics that are
 flagged as anomalous.  Sampling at <a class="reference internal" href="skyline.html#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_EXPIRY_TIME</span></code></a>, the
 default is 900 seconds.</p>
+<p>The <a class="reference internal" href="skyline.html#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_CHECK_MAX_AGE</span></code></a> ensures that Panorama only processes
+checks that are not older than this value.  This mitigates against Panorama
+stampeding against the MySQL database, if either Panorama or MySQL were stopped
+and there are a lot of Panorama check files queued to process.  If this is set
+to 0, Panorama will process all checks, regardless of age.</p>
 <p>There is a Panorama view in the Skyline Webapp frontend UI to allow you to
 search and view historical anomalies.</p>
 <div class="section" id="create-a-mysql-database">
@@ -230,7 +235,7 @@ installation process.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.7-dev',
+            VERSION:'1.0.8-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

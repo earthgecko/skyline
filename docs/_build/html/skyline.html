@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.0.7-dev documentation</title>
+  <title>skyline package &mdash; Skyline 1.0.8-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.7-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -1524,7 +1524,7 @@ nothing currently.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><strong>PANORAMA_EXPIRY_TIME</strong></a> &#8211; Panorama will only store one anomaly for a metric every PANORAMA_EXPIRY_TIME seconds.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><strong>PANORAMA_EXPIRY_TIME</strong></a> (<em>int</em>) &#8211; Panorama will only store one anomaly for a metric every PANORAMA_EXPIRY_TIME seconds.</td>
 </tr>
 </tbody>
 </table>
@@ -1534,6 +1534,25 @@ the ALERTS time expiry keys or matching, Panorama records every anomaly, even
 if the metric is not in an alert tuple.  Consider that a metric could and does
 often fire as anomalous every minute, until it no longer is.</li>
 </ul>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.PANORAMA_CHECK_MAX_AGE">
+<code class="descname">PANORAMA_CHECK_MAX_AGE</code><em class="property"> = 300</em><a class="headerlink" href="#settings.PANORAMA_CHECK_MAX_AGE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><strong>PANORAMA_CHECK_MAX_AGE</strong></a> (<em>int</em>) &#8211; Panorama will only process a check file if it is
+not older than PANORAMA_CHECK_MAX_AGE seconds.  If it is set to 0 it does
+all.  This setting just ensures if Panorama stalls for some hours and is
+restarted, the user can choose to discard older checks and miss anomalies
+being recorded if they so choose to, to prevent Panorama stampeding against
+MySQL if something went down and Panorama comes back online with lots of
+checks.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="data">
@@ -2529,7 +2548,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.7-dev',
+            VERSION:'1.0.8-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

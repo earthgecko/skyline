@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>algorithm_exceptions &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>1.0.8 - the crucible branch &mdash; Skyline 1.0.8-dev documentation</title>
   
 
   
@@ -32,8 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="../index.html"/>
-        <link rel="up" title="Module code" href="index.html"/> 
+    <link rel="top" title="Skyline 1.0.8-dev documentation" href="../index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -135,7 +134,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -143,11 +142,11 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-          <li><a href="index.html">Module code</a> &raquo;</li>
-      
-    <li>algorithm_exceptions</li>
+    <li>1.0.8 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
+          
+            <a href="../_sources/releases/1_0_8.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -157,18 +156,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for algorithm_exceptions</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="TooShort"><a class="viewcode-back" href="../skyline.html#algorithm_exceptions.TooShort">[docs]</a><span></span><span class="k">class</span> <span class="nc">TooShort</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+  <div class="section" id="the-crucible-branch">
+<h1>1.0.8 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Mirage changes include a changed to panorama style skyline_functions
+load_metric_vars and fail_check</li>
+<li>Handle Panorama stampede on restart after not running #26
+Added to settings and Panorama to allow to discard any checks older than
+PANORAMA_CHECK_MAX_AGE to prevent a stampede if desired, not ideal but solves
+the stampede problem for now - <a class="reference external" href="https://github.com/earthgecko/skyline/issues/26">https://github.com/earthgecko/skyline/issues/26</a></li>
+<li>Added the original Skyline UI back as a then tab, for nostalgic and historical
+reasons.</li>
+<li>Bumped to version 1.0.8</li>
+</ul>
+<p>Added:
+skyline/webapp/static/css/skyline.css
+skyline/webapp/templates/then.html</p>
+<p>Modified:
+docs/panorama.rst
+skyline/mirage/mirage.py
+skyline/panorama/panorama.py
+skyline/settings.py
+skyline/webapp/webapp.py
+skyline/webapp/templates/layout.html
+skyline/tests/test_imports.py
+skyline/skyline_version.py</p>
+</div>
 
-
-<div class="viewcode-block" id="Stale"><a class="viewcode-back" href="../skyline.html#algorithm_exceptions.Stale">[docs]</a><span class="k">class</span> <span class="nc">Stale</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-
-
-<div class="viewcode-block" id="Boring"><a class="viewcode-back" href="../skyline.html#algorithm_exceptions.Boring">[docs]</a><span class="k">class</span> <span class="nc">Boring</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-</pre></div>
 
            </div>
           </div>
