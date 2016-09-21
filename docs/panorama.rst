@@ -8,6 +8,12 @@ that have alert tuples set.  Panorama records samples of all metrics that are
 flagged as anomalous.  Sampling at :mod:`settings.PANORAMA_EXPIRY_TIME`, the
 default is 900 seconds.
 
+The :mod:`settings.PANORAMA_CHECK_MAX_AGE` ensures that Panorama only processes
+checks that are not older than this value.  This mitigates against Panorama
+stampeding against the MySQL database, if either Panorama or MySQL were stopped
+and there are a lot of Panorama check files queued to process.  If this is set
+to 0, Panorama will process all checks, regardless of age.
+
 There is a Panorama view in the Skyline Webapp frontend UI to allow you to
 search and view historical anomalies.
 
@@ -24,6 +30,16 @@ access the database with the user and password you configure in ``settings.py``
 - Start Panorama (use you appropriate PATH) - or go back to `Installation`_ and
   continue with the installation steps and Panorama will be started later in the
   installation process.
+
+.. note: It is recommended, if possible that MySQL is configured to use a single
+  file per InnoDB table with the MySQL config option - ``innodb_file_per_table=1``
+  This is due to the fact that the anomalies MySQL table is an InnoDB table and
+  all the other Skyline DB tables are MyISAM.
+  If you are adding the Skyline DB to an existing MySQL database server please
+  consider the ramifications to your setup.  It is not a requirement, just a
+  tidier and more efficient way to run MySQL InnoDB tables in terms of
+  managing space allocations with InnoDB and it segregates databases from each
+  in the context on the .ibd file spaces.
 
 .. code-block:: bash
 

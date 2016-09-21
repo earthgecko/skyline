@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview: module code &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>1.0.8 - the crucible branch &mdash; Skyline 1.0.8-dev documentation</title>
   
 
   
@@ -134,7 +134,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -142,9 +142,11 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Overview: module code</li>
+    <li>1.0.8 - the crucible branch</li>
       <li class="wy-breadcrumbs-aside">
         
+          
+            <a href="../_sources/releases/1_0_8.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -154,44 +156,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="algorithm_exceptions.html">algorithm_exceptions</a></li>
-<li><a href="analyzer/agent.html">analyzer.agent</a></li>
-<li><a href="analyzer/alerters.html">analyzer.alerters</a></li>
-<li><a href="analyzer/algorithms.html">analyzer.algorithms</a></li>
-<li><a href="analyzer/analyzer.html">analyzer.analyzer</a></li>
-<li><a href="analyzer_debug/agent.html">analyzer_debug.agent</a></li>
-<li><a href="analyzer_debug/alerters.html">analyzer_debug.alerters</a></li>
-<li><a href="analyzer_debug/algorithms.html">analyzer_debug.algorithms</a></li>
-<li><a href="analyzer_debug/analyzer_debug.html">analyzer_debug.analyzer_debug</a></li>
-<li><a href="analyzer_dev/agent.html">analyzer_dev.agent</a></li>
-<li><a href="analyzer_dev/alerters.html">analyzer_dev.alerters</a></li>
-<li><a href="analyzer_dev/algorithms_dev.html">analyzer_dev.algorithms_dev</a></li>
-<li><a href="analyzer_dev/analyzer_dev.html">analyzer_dev.analyzer_dev</a></li>
-<li><a href="boundary/agent.html">boundary.agent</a></li>
-<li><a href="boundary/boundary.html">boundary.boundary</a></li>
-<li><a href="boundary/boundary_alerters.html">boundary.boundary_alerters</a></li>
-<li><a href="boundary/boundary_algorithms.html">boundary.boundary_algorithms</a></li>
-<li><a href="crucible/agent.html">crucible.agent</a></li>
-<li><a href="crucible/crucible.html">crucible.crucible</a></li>
-<li><a href="crucible/crucible_algorithms.html">crucible.crucible_algorithms</a></li>
-<li><a href="horizon/agent.html">horizon.agent</a></li>
-<li><a href="horizon/listen.html">horizon.listen</a></li>
-<li><a href="horizon/roomba.html">horizon.roomba</a></li>
-<li><a href="horizon/worker.html">horizon.worker</a></li>
-<li><a href="logging.html">logging</a></li>
-<li><a href="mirage/agent.html">mirage.agent</a></li>
-<li><a href="mirage/mirage.html">mirage.mirage</a></li>
-<li><a href="mirage/mirage_alerters.html">mirage.mirage_alerters</a></li>
-<li><a href="mirage/mirage_algorithms.html">mirage.mirage_algorithms</a></li>
-<li><a href="mirage/negaters.html">mirage.negaters</a></li>
-<li><a href="panorama/agent.html">panorama.agent</a></li>
-<li><a href="panorama/panorama.html">panorama.panorama</a></li>
-<li><a href="skyline_functions.html">skyline_functions</a></li>
-<li><a href="validate_settings.html">validate_settings</a></li>
-<li><a href="webapp/backend.html">webapp.backend</a></li>
-<li><a href="webapp/webapp.html">webapp.webapp</a></li>
+  <div class="section" id="the-crucible-branch">
+<h1>1.0.8 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Mirage changes include a changed to panorama style skyline_functions
+load_metric_vars and fail_check</li>
+<li>Handle Panorama stampede on restart after not running #26
+Added to settings and Panorama to allow to discard any checks older than
+PANORAMA_CHECK_MAX_AGE to prevent a stampede if desired, not ideal but solves
+the stampede problem for now - <a class="reference external" href="https://github.com/earthgecko/skyline/issues/26">https://github.com/earthgecko/skyline/issues/26</a></li>
+<li>Added the original Skyline UI back as a then tab, for nostalgic and historical
+reasons.</li>
+<li>Bumped to version 1.0.8</li>
 </ul>
+<p>Added:
+skyline/webapp/static/css/skyline.css
+skyline/webapp/templates/then.html</p>
+<p>Modified:
+docs/panorama.rst
+skyline/mirage/mirage.py
+skyline/panorama/panorama.py
+skyline/settings.py
+skyline/webapp/webapp.py
+skyline/webapp/templates/layout.html
+skyline/tests/test_imports.py
+skyline/skyline_version.py</p>
+</div>
+
 
            </div>
           </div>

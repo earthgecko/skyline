@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage &mdash; Skyline 1.0.7-dev documentation</title>
+  <title>mirage.mirage &mdash; Skyline 1.0.8-dev documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.7-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.0.8-dev documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -191,7 +191,7 @@
 <span class="kn">import</span> <span class="nn">resource</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">write_data_to_file</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">load_metric_vars</span><span class="p">,</span> <span class="n">fail_check</span>
 
 <span class="kn">from</span> <span class="nn">mirage_alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
 <span class="kn">from</span> <span class="nn">negaters</span> <span class="k">import</span> <span class="n">trigger_negater</span>
@@ -343,10 +343,17 @@
 <div class="viewcode-block" id="Mirage.load_metric_vars"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.load_metric_vars">[docs]</a>    <span class="k">def</span> <span class="nf">load_metric_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
             <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-            <span class="k">global</span> <span class="n">metric_vars</span>
-            <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">return</span> <span class="kc">True</span>
+            <span class="c1"># @added 20160822 - Bug #1460: panorama check file fails</span>
+            <span class="c1"># Do not make this global</span>
+            <span class="c1"># global metric_vars</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="c1"># return True</span>
+                <span class="k">return</span> <span class="n">metric_vars</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load metric_vars&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -408,7 +415,17 @@
             <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
         <span class="c1"># Load metric variables</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_metric_vars</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
+        <span class="c1"># @modified 20160822 - Bug #1460: panorama check file fails</span>
+        <span class="c1"># Changed to panorama style skyline_functions load_metric_vars</span>
+        <span class="c1"># self.load_metric_vars(metric_check_file)</span>
+        <span class="c1"># Load and validate metric variables</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load metric variables from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
 
         <span class="c1"># Test metric variables</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1096,7 +1113,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.7-dev',
+            VERSION:'1.0.8-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

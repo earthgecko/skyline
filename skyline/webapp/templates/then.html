@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <title>skyline</title>
+        <script src="/static/js/mousetrap.min.js"></script>
+<!--
+        <script src="/static/js/jquery.min.js"></script>
+        <script src="/static/js/dygraph-combined.js"></script>
+        <script src="/static/js/skyline.js"></script>
+
+        <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+-->
+<!-- @added 20160818 - Feature #1568: webapp - then
+Updated bootstrap, dygraph and jquery (only to 2.2.4 as bootstrap needs < 3.0)
+bootstrap was update for the rebrow (https://github.com/marians/rebrow) layout
+elements.
+jquery was just updated - live() deprecated, changed to move
+dygraph was just updated.
+The strftime js (https://github.com/samsonjs/strftime/tree/v0.9.2) was added as
+dygraph-1.1.1 no longer includes the strftime library.
+fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v4.6.3
+-->
+        <script src="/static/jquery-2.2.4/dist/jquery.min.js"></script>
+        <script src="/static/strftime-0.9.2/strftime-min.js"></script>
+        <script src="/static/dygraph-1.1.1/dygraph-combined.js"></script>
+        <script src="/static/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+        <script src="/static/js/skyline.js"></script>
+
+        <link rel="stylesheet" href="/static/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap-3.3.6-dist/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="/static/fontawesome-4.6.3/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/static/css/skyline.css">
+
+        <div id="navbar">
+            <div class='container'>
+                <a href='/' id="logo" class='brand' href='/'>
+                    skyline
+                </a>
+            </div>
+        </div>
+
+        <div class="container main_container">
+            <div id="title_container">
+                <span id="graph_title">Select a metric</span>
+            </div>
+            <div id="graph_container">
+                <div class="duration">1 hour:</div>
+                <div id="mini_label"></div>
+                <div id="mini"></div>
+                <div class="duration">24 hours:</div>
+                <div id="big_label"></div>
+                <div id="graph"></div>
+            </div>
+            <div id="metrics_main">
+                <div id="legend">
+                    <span id="legend_name">metric name</span>
+                    <span id="legend_coefficient">anomalous datapoint</span>
+                </div>
+                <div id="metrics_listings"></div>
+            </div>
+        <p>This is the original Skyline UI and is here for nostalgic and historical reasons.</p>
+        </div>
+    </body>
+</html>
