@@ -25,13 +25,7 @@ server to create the database on.  The Skyline server just has to be able to
 access the database with the user and password you configure in ``settings.py``
 :mod:`settings.PANORAMA_DBUSER` and :mod:`settings.PANORAMA_DBUSERPASS`
 
-- See ``skyline.sql`` in your cloned Skyline repo for the schema creation script
-- Enable Panorama and set the other Panorama settings in ``settings.py``
-- Start Panorama (use you appropriate PATH) - or go back to `Installation`_ and
-  continue with the installation steps and Panorama will be started later in the
-  installation process.
-
-.. note: It is recommended, if possible that MySQL is configured to use a single
+.. note:: It is recommended, if possible that MySQL is configured to use a single
   file per InnoDB table with the MySQL config option - ``innodb_file_per_table=1``
   This is due to the fact that the anomalies MySQL table is an InnoDB table and
   all the other Skyline DB tables are MyISAM.
@@ -40,6 +34,12 @@ access the database with the user and password you configure in ``settings.py``
   tidier and more efficient way to run MySQL InnoDB tables in terms of
   managing space allocations with InnoDB and it segregates databases from each
   in the context on the .ibd file spaces.
+
+- See ``skyline.sql`` in your cloned Skyline repo for the schema creation script
+- Enable Panorama and set the other Panorama settings in ``settings.py``
+- Start Panorama (use you appropriate PATH) - or go back to `Installation`_ and
+  continue with the installation steps and Panorama will be started later in the
+  installation process.
 
 .. code-block:: bash
 

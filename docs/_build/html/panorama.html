@@ -181,6 +181,18 @@ search and view historical anomalies.</p>
 server to create the database on.  The Skyline server just has to be able to
 access the database with the user and password you configure in <code class="docutils literal"><span class="pre">settings.py</span></code>
 <a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSER" title="settings.PANORAMA_DBUSER"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_DBUSER</span></code></a> and <a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_DBUSERPASS</span></code></a></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is recommended, if possible that MySQL is configured to use a single
+file per InnoDB table with the MySQL config option - <code class="docutils literal"><span class="pre">innodb_file_per_table=1</span></code>
+This is due to the fact that the anomalies MySQL table is an InnoDB table and
+all the other Skyline DB tables are MyISAM.
+If you are adding the Skyline DB to an existing MySQL database server please
+consider the ramifications to your setup.  It is not a requirement, just a
+tidier and more efficient way to run MySQL InnoDB tables in terms of
+managing space allocations with InnoDB and it segregates databases from each
+in the context on the .ibd file spaces.</p>
+</div>
 <ul class="simple">
 <li>See <code class="docutils literal"><span class="pre">skyline.sql</span></code> in your cloned Skyline repo for the schema creation script</li>
 <li>Enable Panorama and set the other Panorama settings in <code class="docutils literal"><span class="pre">settings.py</span></code></li>
