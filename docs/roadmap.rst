@@ -18,13 +18,16 @@ were possible, so cython where applicable is the obvious choice.
 Continue updating the code base to ensure that everything can be run on
 >= Python-3.5.x
 
-Ionosphere
-==========
+Ionosphere - in development
+===========================
 
 Functionality to allow the operator to flag false positives, with a view
 to using machine learning to train Skyline on anomalies.  Using the entire data
 set for training it, perhaps even using an entire namespace to increase the
 accuracy of the anomaly detection via multiple avenues of analysis.
+
+Some possible movement - see `Development - Ionosphere
+<development/ionosphere.html>`__
 
 Meteor
 ======
@@ -46,6 +49,8 @@ requirement for the additional overheads of ruby and Elasticsearch.
 
 This would allow for the correlations to be determined for any metrics
 at any point within the ``FULL_DURATION`` period.
+
+Help wanted.
 
 Skyline and NASA/FITS data
 ==========================

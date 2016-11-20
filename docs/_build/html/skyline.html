@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>skyline package &mdash; Skyline 1.1.0-dev documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -62,7 +65,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -89,7 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -100,6 +103,8 @@
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -108,7 +113,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
@@ -120,6 +124,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
@@ -226,6 +231,13 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.horizon.html#module-horizon.roomba">skyline.horizon.roomba module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.horizon.html#module-horizon.worker">skyline.horizon.worker module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.horizon.html#module-horizon">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.agent">skyline.ionosphere.agent module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.ionosphere">skyline.ionosphere.ionosphere module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a><ul>
@@ -629,6 +641,20 @@ anomalies to for crucible to check to a file on disk - absolute path</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_PATH" title="settings.PANORAMA_CHECK_PATH"><strong>PANORAMA_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
 anomalies to for Panorama to check to a file on disk - absolute path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_CHECK_PATH">
+<code class="descname">IONOSPHERE_CHECK_PATH</code><em class="property"> = '/opt/skyline/ionosphere/check'</em><a class="headerlink" href="#settings.IONOSPHERE_CHECK_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><strong>IONOSPHERE_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
+anomalies to for Ionosphere to check to a file on disk - absolute path</td>
 </tr>
 </tbody>
 </table>
@@ -2060,6 +2086,93 @@ anomaly data for timeseries will be stored - absolute path</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.IONOSPHERE_ENABLED">
+<code class="descname">IONOSPHERE_ENABLED</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ENABLED" title="settings.IONOSPHERE_ENABLED"><strong>IONOSPHERE_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enable Ionosphere</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_PROCESSES">
+<code class="descname">IONOSPHERE_PROCESSES</code><em class="property"> = 1</em><a class="headerlink" href="#settings.IONOSPHERE_PROCESSES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROCESSES" title="settings.IONOSPHERE_PROCESSES"><strong>IONOSPHERE_PROCESSES</strong></a> &#8211; Number of processes to assign to Panorama, should never
+need more than 1</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.ENABLE_IONOSPHERE_DEBUG">
+<code class="descname">ENABLE_IONOSPHERE_DEBUG</code><em class="property"> = False</em><a class="headerlink" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="settings.ENABLE_IONOSPHERE_DEBUG"><strong>ENABLE_IONOSPHERE_DEBUG</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - enables additional debug logging
+useful for development only, this should definitely be set to <code class="docutils literal"><span class="pre">False</span></code> on
+production system as LOTS of output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_CHECK_MAX_AGE">
+<code class="descname">IONOSPHERE_CHECK_MAX_AGE</code><em class="property"> = 300</em><a class="headerlink" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="settings.IONOSPHERE_CHECK_MAX_AGE"><strong>IONOSPHERE_CHECK_MAX_AGE</strong></a> (<em>int</em>) &#8211; Ionosphere will only process a check file if it is
+not older than IONOSPHERE_CHECK_MAX_AGE seconds.  If it is set to 0 it does
+all.  This setting just ensures if Ionosphere stalls for some hours and is
+restarted, the user can choose to discard older checks and miss anomalies
+being recorded if they so choose to, to prevent Ionosphere stampeding.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_DATA_FOLDER">
+<code class="descname">IONOSPHERE_DATA_FOLDER</code><em class="property"> = '/opt/skyline/ionosphere/data'</em><a class="headerlink" href="#settings.IONOSPHERE_DATA_FOLDER" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_DATA_FOLDER" title="settings.IONOSPHERE_DATA_FOLDER"><strong>IONOSPHERE_DATA_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Ionosphere data folder
+where anomaly data for timeseries will be stored - absolute path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR">
+<code class="descname">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</code><em class="property"> = 86400</em><a class="headerlink" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><strong>IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</strong></a> (<em>int</em>) &#8211; Ionosphere will keep timeseries
+data files for this long, for the operator to review.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.WEBAPP_SERVER">
 <code class="descname">WEBAPP_SERVER</code><em class="property"> = 'gunicorn'</em><a class="headerlink" href="#settings.WEBAPP_SERVER" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -2419,6 +2532,12 @@ object, the object is returned</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="skyline_functions.send_anomalous_metric_to">
+<code class="descname">send_anomalous_metric_to</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>send_to_app</em>, <em>timeseries_dir</em>, <em>metric_timestamp</em>, <em>base_name</em>, <em>datapoint</em>, <em>from_timestamp</em>, <em>triggered_algorithms</em>, <em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#send_anomalous_metric_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.send_anomalous_metric_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign a metric and timeseries to Crucible or Ionosphere.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="skyline_functions.mysql_select">
 <code class="descname">mysql_select</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>select</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#mysql_select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.mysql_select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select data from mysql database</p>
@@ -2548,7 +2667,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.1.0-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -4,12 +4,14 @@ Skyline functions
 These are shared functions that are required in multiple modules.
 """
 import logging
-import traceback
-from time import time
-import socket
-
 from os.path import dirname, join, abspath, isfile
 from os import path
+from time import time
+import socket
+import datetime
+import errno
+
+import traceback
 import json
 import requests
 try:
@@ -21,7 +23,6 @@ try:
 except ImportError:
     import urllib.request
     import urllib.error
-import datetime
 
 import settings
 
@@ -111,16 +112,7 @@ def mkdir_p(path):
     except:
         import os
     try:
-        python_version
-    except:
-        from sys import version_info
-        python_version = int(version_info[0])
-    try:
-        if python_version == 2:
-            mode_arg = int('0755')
-        if python_version == 3:
-            mode_arg = mode=0o755
-        os.makedirs(path, mode_arg)
+        os.makedirs(path, mode=0o755)
         return True
     # Python >2.5
     except OSError as exc:
@@ -618,6 +610,100 @@ def get_graphite_metric(
         else:
             return True
 
+# @added 20160922 - Branch #922: Ionosphere
+# Added the send_anomalous_metric_to function for Analyzer and Mirage
+
+
+def send_anomalous_metric_to(
+    current_skyline_app, send_to_app, timeseries_dir, metric_timestamp,
+        base_name, datapoint, from_timestamp, triggered_algorithms, timeseries):
+    """
+    Assign a metric and timeseries to Crucible or Ionosphere.
+    """
+    try:
+        os.getpid()
+    except:
+        import os
+
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    if send_to_app == 'crucible':
+        anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+        check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
+    if send_to_app == 'ionosphere':
+        anomaly_dir = settings.IONOSPHERE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+        check_file = '%s/%s.%s.txt' % (settings.IONOSPHERE_CHECK_PATH, metric_timestamp, base_name)
+
+    if not os.path.exists(anomaly_dir):
+        if python_version == 2:
+            mode_arg = int('0755')
+        if python_version == 3:
+            mode_arg = mode=0o755
+        os.makedirs(anomaly_dir, mode_arg)
+
+    # Note:
+    # The values are enclosed is single quoted intentionally
+    # as the imp.load_source used in crucible results in a
+    # shift in the decimal position when double quoted, e.g.
+    # value = "5622.0" gets imported as
+    # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+    # single quoting results in the desired,
+    # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+    now_timestamp = int(time())
+    anomaly_data = 'metric = \'%s\'\n' \
+                   'value = \'%s\'\n' \
+                   'from_timestamp = \'%s\'\n' \
+                   'metric_timestamp = \'%s\'\n' \
+                   'algorithms = %s\n' \
+                   'triggered_algorithms = %s\n' \
+                   'anomaly_dir = \'%s\'\n' \
+                   'graphite_metric = True\n' \
+                   'run_crucible_tests = False\n' \
+                   'added_by = \'%s\'\n' \
+                   'added_at = \'%s\'\n' \
+        % (base_name, str(datapoint), from_timestamp, metric_timestamp,
+            str(settings.ALGORITHMS), triggered_algorithms, anomaly_dir,
+            current_skyline_app, str(now_timestamp))
+
+    # Create an anomaly file with details about the anomaly
+    anomaly_file = '%s/%s.txt' % (anomaly_dir, base_name)
+    try:
+        write_data_to_file(current_skyline_app, anomaly_file, 'w', anomaly_data)
+        current_logger.info('added %s anomaly file :: %s' % (send_to_app, anomaly_file))
+    except:
+        current_logger.info(traceback.format_exc())
+        current_logger.error(
+            'error :: failed to add %s anomaly file :: %s' %
+            (send_to_app, anomaly_file))
+
+    # Create timeseries json file with the timeseries
+    json_file = '%s/%s.json' % (anomaly_dir, base_name)
+    timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+    try:
+        write_data_to_file(current_skyline_app, json_file, 'w', timeseries_json)
+        current_logger.info('added %s timeseries file :: %s' % (send_to_app, json_file))
+    except:
+        current_logger.error(
+            'error :: failed to add %s timeseries file :: %s' %
+            (send_to_app, json_file))
+        current_logger.info(traceback.format_exc())
+
+    # Create a check file
+    try:
+        write_data_to_file(current_skyline_app, check_file, 'w', anomaly_data)
+        current_logger.info('added %s check :: %s,%s' % (send_to_app, base_name, metric_timestamp))
+    except:
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: failed to add %s check file :: %s' % (send_to_app, check_file))
+
+
 ################################################################################
 
 
@@ -659,6 +745,11 @@ def mysql_select(current_skyline_app, select):
         nothing_to_do = True
     try:
         if settings.ENABLE_WEBAPP_DEBUG:
+            ENABLE_DEBUG = True
+    except:
+        nothing_to_do = True
+    try:
+        if settings.ENABLE_IONOSPHERE_DEBUG:
             ENABLE_DEBUG = True
     except:
         nothing_to_do = True

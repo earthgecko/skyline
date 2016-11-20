@@ -183,7 +183,7 @@ Steps
     vi settings.py
 
 - If you are **upgrading**, at this point return to the
-  `Upgrading <upgrading.html>`__ page.
+  `Upgrading <upgrading/index.html>`__ page.
 - Before you test Skyline by seeding Redis with some test data, ensure
   that you have configured the firewall/iptables with the appropriate restricted
   access.

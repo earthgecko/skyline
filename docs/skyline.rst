@@ -11,6 +11,7 @@ Subpackages
     skyline.boundary
     skyline.crucible
     skyline.horizon
+    skyline.ionosphere
     skyline.mirage
     skyline.panorama
     skyline.webapp

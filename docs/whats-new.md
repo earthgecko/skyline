@@ -1,5 +1,14 @@
 # What's new
 
+## Skyline v1.1.0-beta the ionosphere branch
+
+See `Ionosphere <ionosphere.html>`__ and `Development - Ionosphere
+<development/ionosphere.html>`__
+
+## Skyline v1.0.4-beta - v1.0.8-beta the crucible branch
+
+Mics changes and bug fixes.
+
 ## Skyline v1.0.3-beta - the crucible branch
 
 Some documentation updates and setup.py things

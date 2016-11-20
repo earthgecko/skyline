@@ -145,6 +145,15 @@ def validate_settings_variables(current_skyline_app):
         print ('error :: PANORAMA_ENABLED is not set in settings.py')
         invalid_variables = True
 
+    try:
+        TEST_IONOSPHERE_ENABLED = settings.IONOSPHERE_ENABLED
+    except:
+        logger.error('error :: IONOSPHERE_ENABLED is not set in settings.py')
+        logger.info(traceback.format_exc())
+        logger.error('error :: exiting, please fix setting.py')
+        print ('error :: IONOSPHERE_ENABLED is not set in settings.py')
+        invalid_variables = True
+
     if current_skyline_app == 'webapp':
         try:
             TEST_ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
@@ -153,6 +162,70 @@ def validate_settings_variables(current_skyline_app):
             logger.info(traceback.format_exc())
             logger.error('error :: exiting, please fix setting.py')
             print ('error :: ENABLE_WEBAPP_DEBUG is not set in settings.py')
+            invalid_variables = True
+
+    try:
+        TEST_IONOSPHERE_ENABLED = settings.IONOSPHERE_ENABLED
+    except:
+        logger.error('error :: IONOSPHERE_ENABLED is not set in settings.py')
+        logger.info(traceback.format_exc())
+        logger.error('error :: exiting, please fix setting.py')
+        print ('error :: IONOSPHERE_ENABLED is not set in settings.py')
+        invalid_variables = True
+
+    try:
+        TEST_IONOSPHERE_CHECK_PATH = settings.IONOSPHERE_CHECK_PATH
+    except:
+        logger.error('error :: IONOSPHERE_CHECK_PATH is not set in settings.py')
+        logger.info(traceback.format_exc())
+        logger.error('error :: exiting, please fix setting.py')
+        print ('error :: IONOSPHERE_CHECK_PATH is not set in settings.py')
+        invalid_variables = True
+
+    try:
+        TEST_IONOSPHERE_DATA_FOLDER = settings.IONOSPHERE_DATA_FOLDER
+    except:
+        logger.error('error :: IONOSPHERE_DATA_FOLDER is not set in settings.py')
+        logger.info(traceback.format_exc())
+        logger.error('error :: exiting, please fix setting.py')
+        print ('error :: IONOSPHERE_DATA_FOLDER is not set in settings.py')
+        invalid_variables = True
+
+    if current_skyline_app == 'ionosphere':
+        try:
+            TEST_IONOSPHERE_PROCESSES = 1 + settings.IONOSPHERE_PROCESSES
+        except:
+            logger.error('error :: IONOSPHERE_PROCESSES is not set in settings.py')
+            logger.info(traceback.format_exc())
+            logger.error('error :: exiting, please fix setting.py')
+            print ('error :: IONOSPHERE_PROCESSES is not set in settings.py')
+            invalid_variables = True
+
+        try:
+            TEST_ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
+        except:
+            logger.error('error :: ENABLE_IONOSPHERE_DEBUG is not set in settings.py')
+            logger.info(traceback.format_exc())
+            logger.error('error :: exiting, please fix setting.py')
+            print ('error :: ENABLE_IONOSPHERE_DEBUG is not set in settings.py')
+            invalid_variables = True
+
+        try:
+            TEST_IONOSPHERE_CHECK_MAX_AGE = 1 + settings.IONOSPHERE_CHECK_MAX_AGE
+        except:
+            logger.error('error :: IONOSPHERE_CHECK_MAX_AGE is not set in settings.py')
+            logger.info(traceback.format_exc())
+            logger.error('error :: exiting, please fix setting.py')
+            print ('error :: IONOSPHERE_CHECK_MAX_AGE is not set in settings.py')
+            invalid_variables = True
+
+        try:
+            TEST_IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR = 1 + settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR
+        except:
+            logger.error('error :: IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR is not set in settings.py')
+            logger.info(traceback.format_exc())
+            logger.error('error :: exiting, please fix setting.py')
+            print ('error :: IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR is not set in settings.py')
             invalid_variables = True
 
     if invalid_variables:

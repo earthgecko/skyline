@@ -20,7 +20,7 @@ import os.path
 import resource
 
 import settings
-from skyline_functions import send_graphite_metric, write_data_to_file
+from skyline_functions import send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -86,6 +86,17 @@ class Analyzer(Thread):
         # @modified 20160813 - Bug #1558: Memory leak in Analyzer
         # Not used
         # self.mirage_metrics = Manager().list()
+        # @added 20160923 - Branch #922: Ionosphere
+        self.mirage_metrics = Manager().list()
+        self.ionosphere_metrics = Manager().list()
+        # @added 20161119 - Branch #922: ionosphere
+        #                   Task #1718: review.tsfresh
+        # Send a breakdown of what metrics were sent to other apps
+        self.sent_to_mirage = Manager().list()
+        self.sent_to_crucible = Manager().list()
+        self.sent_to_panorama = Manager().list()
+        self.sent_to_ionosphere = Manager().list()
+        self.ionosphere_data_sets = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -99,18 +110,101 @@ class Analyzer(Thread):
 
     def spawn_alerter_process(self, alert, metric):
         """
-        Spawn a process to trigger an alert.  This is used by smtp alerters so
-        that matplotlib objects are cleared down and the alerter cannot create
-        a memory leak in this manner and plt.savefig keeps the object in memory
-        until the process terminates.  Seeing as data is being surfaced and
-        processed in the alert_smtp context, multiprocessing the alert creation
-        and handling prevents any memory leaks in the parent.
-        # @added 20160814 - Bug #1558: Memory leak in Analyzer
-        #                   Issue #21 Memory leak in Analyzer
-        # https://github.com/earthgecko/skyline/issues/21
+        Spawn a process to trigger an alert.
+
+        This is used by smtp alerters so that matplotlib objects are cleared
+        down and the alerter cannot create a memory leak in this manner and
+        plt.savefig keeps the object in memory until the process terminates.
+        Seeing as data is being surfaced and processed in the alert_smtp
+        context, multiprocessing the alert creation and handling prevents any
+        memory leaks in the parent.
+
+        Added 20160814 relating to:
+
+        * Bug #1558: Memory leak in Analyzer
+        * Issue #21 Memory leak in Analyzer see https://github.com/earthgecko/skyline/issues/21
+
+        Parameters as per :py:func:`skyline.analyzer.alerters.trigger_alert
+        <analyzer.alerters.trigger_alert>`
+
         """
 
         trigger_alert(alert, metric)
+
+    def send_anomalous_metric_to(
+            self, send_to_app, timeseries_dir, metric_timestamp, base_name,
+            datapoint, from_timestamp, triggered_algorithms, timeseries):
+        """
+        Assign a metric and timeseries to Crucible or Ionosphere.
+        """
+
+        if send_to_app == 'crucible':
+            anomaly_dir = '%s/%s/%s' % (settings.CRUCIBLE_DATA_FOLDER, timeseries_dir, metric_timestamp)
+            check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
+        if send_to_app == 'ionosphere':
+            # @modified 20161119 - Branch #922: ionosphere
+            # Use the timestamp as the parent dir for training_data
+            # anomaly_dir = '%s/%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, timeseries_dir, metric_timestamp)
+            anomaly_dir = '%s/%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, metric_timestamp, timeseries_dir)
+            check_file = '%s/%s.%s.txt' % (settings.IONOSPHERE_CHECK_PATH, metric_timestamp, base_name)
+
+        if not os.path.exists(anomaly_dir):
+            mkdir_p(anomaly_dir)
+
+        # Note:
+        # The values are enclosed is single quoted intentionally
+        # as the imp.load_source used in crucible results in a
+        # shift in the decimal position when double quoted, e.g.
+        # value = "5622.0" gets imported as
+        # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+        # single quoting results in the desired,
+        # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+        now_timestamp = int(time())
+        anomaly_data = 'metric = \'%s\'\n' \
+                       'value = \'%s\'\n' \
+                       'from_timestamp = \'%s\'\n' \
+                       'metric_timestamp = \'%s\'\n' \
+                       'algorithms = %s\n' \
+                       'triggered_algorithms = %s\n' \
+                       'anomaly_dir = \'%s\'\n' \
+                       'graphite_metric = True\n' \
+                       'run_crucible_tests = False\n' \
+                       'added_by = \'%s\'\n' \
+                       'added_at = \'%s\'\n' \
+            % (base_name, str(datapoint), from_timestamp, metric_timestamp,
+                str(settings.ALGORITHMS), triggered_algorithms, anomaly_dir,
+                skyline_app, str(now_timestamp))
+
+        # Create an anomaly file with details about the anomaly
+        anomaly_file = '%s/%s.txt' % (anomaly_dir, base_name)
+        try:
+            write_data_to_file(skyline_app, anomaly_file, 'w', anomaly_data)
+            logger.info('added %s anomaly file :: %s' % (send_to_app, anomaly_file))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error(
+                'error :: failed to add %s anomaly file :: %s' %
+                (send_to_app, anomaly_file))
+
+        # Create timeseries json file with the timeseries
+        json_file = '%s/%s.json' % (anomaly_dir, base_name)
+        timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+        try:
+            write_data_to_file(skyline_app, json_file, 'w', timeseries_json)
+            logger.info('added %s timeseries file :: %s' % (send_to_app, json_file))
+        except:
+            logger.error(
+                'error :: failed to add %s timeseries file :: %s' %
+                (send_to_app, json_file))
+            logger.info(traceback.format_exc())
+
+        # Create a check file
+        try:
+            write_data_to_file(skyline_app, check_file, 'w', anomaly_data)
+            logger.info('added %s check :: %s,%s' % (send_to_app, base_name, metric_timestamp))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to add %s check file :: %s' % (send_to_app, check_file))
 
     def spin_process(self, i, unique_metrics):
         """
@@ -192,6 +286,20 @@ class Analyzer(Thread):
         if raw_assigned_failed:
             return
 
+        # @added 20161119 - Branch #922: ionosphere
+        #                   Task #1718: review.tsfresh
+        # Determine the unique Mirage and Ionosphere metrics once, which are
+        # used later to determine how Analyzer should handle/route anomalies
+        try:
+            mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+        except:
+            mirage_unique_metrics = []
+
+        try:
+            ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+        except:
+            ionosphere_unique_metrics = []
+
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
             self.check_if_parent_is_alive()
@@ -228,19 +336,83 @@ class Analyzer(Thread):
                     if settings.PANORAMA_ENABLED:
                         determine_anomaly_details = True
 
+                    # If Ionosphere is enabled determine details
+                    try:
+                        ionosphere_enabled = settings.IONOSPHERE_ENABLED
+                        if settings.IONOSPHERE_ENABLED:
+                            determine_anomaly_details = True
+                    except:
+                        ionosphere_enabled = False
+
                     if determine_anomaly_details:
                         metric_timestamp = str(int(timeseries[-1][0]))
                         from_timestamp = str(int(timeseries[1][0]))
                         timeseries_dir = base_name.replace('.', '/')
 
+                    # @added 20161119 - Branch #922: ionosphere
+                    #                   Task #1718: review.tsfresh
+                    # Set defaults which can be used later to determine how
+                    # Analyzer should handle/route anomalies
+                    analyzer_metric = True
+                    mirage_metric = False
+                    crucible_metric = False
+                    panorama_metric = False
+                    ionosphere_metric = False
+
+                    if base_name in mirage_unique_metrics:
+                        analyzer_metric = False
+                        mirage_metric = True
+
+                    if ionosphere_enabled:
+                        if analyzer_metric:
+                            # We do not want send all anomalous metrics to
+                            # Ionosphere if they are not being alerted on as
+                            # they will be pointless they will have no alert if
+                            # it is within the EXPIRATION_TIME and there will be
+                            # no reference in an alert for the user to action.
+                            cache_key = 'last_alert.smtp.%s' % (base_name)
+                            last_alert = False
+                            try:
+                                last_alert = self.redis_conn.get(cache_key)
+                            except Exception as e:
+                                logger.error('error :: could not query Redis for cache_key: %s' % e)
+
+                            if not last_alert:
+                                self.send_anomalous_metric_to(
+                                    'ionosphere', timeseries_dir, metric_timestamp,
+                                    base_name, str(datapoint), from_timestamp,
+                                    triggered_algorithms, timeseries)
+
+                            ionosphere_metric = [datapoint, base_name]
+                            self.anomalous_metrics.append(metric)
+
+                        else:
+                            logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
+
+                    if base_name in ionosphere_unique_metrics:
+                        analyzer_metric = False
+                        ionosphere_metric = True
+
                     # If Panorama is enabled - create a Panorama check
+                    # @modified 20160922 - Branch #922: Ionosphere
+                    # Only create a Panorama check if it is an Analyzer metric
+                    # not leaving Mirage to Panorama checks for its own metrics
                     if settings.PANORAMA_ENABLED:
+                        # Only send Analyzer metrics and not Mirage metrics
+                        if settings.ENABLE_MIRAGE:
+                            if not mirage_unique_metrics_fetched:
+                                try:
+                                    mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+                                except:
+                                    mirage_unique_metrics = []
+
+                            if metric_name in mirage_unique_metrics:
+                                analyzer_metric = False
+
+                    # Only send Analyzer metrics
+                    if analyzer_metric:
                         if not os.path.exists(settings.PANORAMA_CHECK_PATH):
-                            if python_version == 2:
-                                mode_arg = int('0755')
-                            if python_version == 3:
-                                mode_arg = mode=0o755
-                            os.makedirs(settings.PANORAMA_CHECK_PATH, mode_arg)
+                            mkdir_p(settings.PANORAMA_CHECK_PATH)
 
                         # Note:
                         # The values are enclosed is single quoted intentionally
@@ -279,17 +451,15 @@ class Analyzer(Thread):
                         except:
                             logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                             logger.info(traceback.format_exc())
+                    else:
+                        logger.info('not adding panorama anomaly file for Mirage metric - %s' % (metric))
 
                     # If Crucible is enabled - save timeseries and create a
                     # Crucible check
                     if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
                         crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
                         if not os.path.exists(crucible_anomaly_dir):
-                            if python_version == 2:
-                                mode_arg = int('0755')
-                            if python_version == 3:
-                                mode_arg = mode=0o755
-                            os.makedirs(crucible_anomaly_dir, mode_arg)
+                            mkdir_p(crucible_anomaly_dir)
 
                         # Note:
                         # The values are enclosed is single quoted intentionally
@@ -430,13 +600,9 @@ class Analyzer(Thread):
             logger.info('bin/%s.d log management done' % skyline_app)
 
         if not os.path.exists(settings.SKYLINE_TMP_DIR):
-            if python_version == 2:
-                mode_arg = int('0755')
-            if python_version == 3:
-                mode_arg = mode=0o755
             # @modified 20160803 - Adding additional exception handling to Analyzer
             try:
-                os.makedirs(settings.SKYLINE_TMP_DIR, mode_arg)
+                mkdir_p(settings.SKYLINE_TMP_DIR)
             except:
                 logger.error('error :: failed to create %s' % settings.SKYLINE_TMP_DIR)
                 logger.info(traceback.format_exc())
@@ -522,6 +688,68 @@ class Analyzer(Thread):
                 logger.info('no metrics in redis. try adding some - see README')
                 sleep(10)
                 continue
+
+            # @added 20160922 - Branch #922: Ionosphere
+            # Add a Redis set of mirage.unique_metrics
+            if settings.ENABLE_MIRAGE:
+                try:
+                    mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+                    if LOCAL_DEBUG:
+                        logger.info('debug :: fetched the mirage.unique_metrics Redis set')
+                        logger.info('debug :: %s' % str(mirage_unique_metrics))
+                except:
+                    mirage_unique_metrics = []
+                    logger.info('failed to fetch the mirage.unique_metrics Redis set')
+
+                for alert in settings.ALERTS:
+                    for metric in unique_metrics:
+                        ALERT_MATCH_PATTERN = alert[0]
+                        METRIC_PATTERN = metric
+                        pattern_match = False
+                        matched_by = 'not matched'
+                        try:
+                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                            matched_by = 'regex'
+                            pattern_match = True
+                        except:
+                            pattern_match = False
+
+                        if not pattern_match:
+                            if alert[0] in metric:
+                                pattern_match = True
+                                matched_by = 'substring'
+
+                        if not pattern_match:
+                            continue
+
+                        mirage_metric = False
+                        try:
+                            SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                            mirage_metric = True
+                        except:
+                            mirage_metric = False
+
+                        if mirage_metric:
+                            if metric not in mirage_unique_metrics:
+                                try:
+                                    self.redis_conn.sadd('mirage.unique_metrics', metric)
+                                    if LOCAL_DEBUG:
+                                        logger.info('debug :: added %s to mirage.unique_metrics' % metric)
+                                except:
+                                    if LOCAL_DEBUG:
+                                        logger.error('error :: failed to add %s to mirage.unique_metrics set' % metric)
+
+                        # Do we use list or dict, which is better performance?
+                        # With dict - Use EAFP (easier to ask forgiveness than
+                        # permission)
+                        try:
+                            blah = dict["mykey"]
+                            # key exists in dict
+                        except:
+                            # key doesn't exist in dict
+                            blah = False
+            # END Redis mirage.unique_metrics_set
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run after unique_metrics: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -666,20 +894,25 @@ class Analyzer(Thread):
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
                     for metric in self.anomalous_metrics:
-                        ALERT_MATCH_PATTERN = alert[0]
-                        METRIC_PATTERN = metric[1]
                         pattern_match = False
-                        matched_by = 'not matched'
-                        try:
-                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                            # if LOCAL_DEBUG:
-                            #     logger.info(
-                            #         'debug :: regex alert pattern matched :: %s %s' %
-                            #         (alert[0], metric[1]))
-                            matched_by = 'regex'
-                        except:
-                            pattern_match = False
+                        # Absolute match
+                        if str(metric) == str(alert[0]):
+                            pattern_match = True
+
+                        if not pattern_match:
+                            ALERT_MATCH_PATTERN = alert[0]
+                            METRIC_PATTERN = metric[1]
+                            matched_by = 'not matched'
+                            try:
+                                alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                                pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                                # if LOCAL_DEBUG:
+                                #     logger.info(
+                                #         'debug :: regex alert pattern matched :: %s %s' %
+                                #         (alert[0], metric[1]))
+                                matched_by = 'regex'
+                            except:
+                                pattern_match = False
                         # @modified 20160806 - Reintroduced the original
                         # substring matching after wildcard matching, to allow
                         # more flexibility
@@ -977,6 +1210,48 @@ class Analyzer(Thread):
                 send_metric_name = '%s.anomaly_breakdown.%s' % (skyline_app_graphite_namespace, key)
                 send_graphite_metric(skyline_app, send_metric_name, str(value))
 
+            # @added 20161119 - Branch #922: ionosphere
+            #                   Task #1718: review.tsfresh
+            # Send a breakdown of what metrics were sent to other apps
+            # @added 20161119 - Branch #922: ionosphere
+            #                   Task #1718: review.tsfresh
+            # Send a breakdown of what metrics were sent to other apps
+            if settings.ENABLE_MIRAGE:
+                try:
+                    sent_to_mirage = str(len(self.sent_to_mirage))
+                except:
+                    sent_to_mirage = '0'
+                logger.info('sent_to_mirage    :: %s' % sent_to_mirage)
+                send_metric_name = '%s.sent_to_mirage' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_mirage)
+
+            if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
+                try:
+                    sent_to_crucible = str(len(self.sent_to_crucible))
+                except:
+                    sent_to_crucible = '0'
+                logger.info('sent_to_crucible  :: %s' % sent_to_crucible)
+                send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
+
+            if settings.PANORAMA_ENABLED:
+                try:
+                    sent_to_panorama = str(len(self.sent_to_panorama))
+                except:
+                    sent_to_panorama = '0'
+                logger.info('sent_to_panorama  :: %s' % sent_to_panorama)
+                send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
+
+            if settings.IONOSPHERE_ENABLED:
+                try:
+                    sent_to_ionosphere = str(len(self.sent_to_ionosphere))
+                except:
+                    sent_to_ionosphere = '0'
+                logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
+                send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
+
             # Check canary metric
             try:
                 raw_series = self.redis_conn.get(settings.FULL_NAMESPACE + settings.CANARY_METRIC)
@@ -1007,6 +1282,16 @@ class Analyzer(Thread):
 
             # Reset counters
             self.anomalous_metrics[:] = []
+            self.mirage_metrics[:] = []
+            self.ionosphere_metrics[:] = []
+            # @added 20161119 - Branch #922: ionosphere
+            #                   Task #1718: review.tsfresh
+            self.sent_to_mirage[:] = []
+            self.sent_to_crucible[:] = []
+            self.sent_to_panorama[:] = []
+            self.sent_to_ionosphere[:] = []
+            self.ionosphere_data_sets[:] = []
+
             unique_metrics = []
             raw_series = None
             del timeseries[:]

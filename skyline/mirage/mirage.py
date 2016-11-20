@@ -31,7 +31,9 @@ import os.path
 import resource
 
 import settings
-from skyline_functions import write_data_to_file, load_metric_vars, fail_check
+# @modified 20160922 - Branch #922: Ionosphere
+# Added the send_anomalous_metric_to skyline_functions.py
+from skyline_functions import write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
@@ -507,6 +509,16 @@ class Mirage(Thread):
                     except:
                         logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
                         logger.info(traceback.format_exc())
+
+                # @added 20160922 - Branch #922: Ionosphere
+                # Also added the send_anomalous_metric_to skyline_functions.py
+                # function
+                if settings.IONOSPHERE_ENABLED:
+                    send_anomalous_metric_to(
+                        skyline_app, 'ionosphere', timeseries_dir,
+                        metric_timestamp, base_name, str(datapoint),
+                        from_timestamp, triggered_algorithms, timeseries)
+
             else:
                 base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
                 not_anomalous_metric = [datapoint, base_name]

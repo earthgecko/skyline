@@ -1,5 +1,16 @@
 # A bit of a contrived example...
 import numpy as np
+
+# @added 20161119 - Task #1758: Update deps in Ionosphere
+# The update to Sphinx or matplotlib is causing a user error warning
+# This call to matplotlib.use() has no effect
+# because the backend has already been chosen;
+# matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
+# or matplotlib.backends is imported for the first time.
+# Seen in adding Redis data plot to the alerters, fixes like this
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches

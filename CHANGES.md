@@ -1,5 +1,13 @@
 # CHANGES.md
 
+## Ionosphere - v1.1.0-ionosphere-alpha
+
+- Added alpha Ionosphere functionality using @blue-yonder / tsfresh feature
+  extraction see docs/development/ionosphere.rst
+- This also added a fairly generic script to extract_features from a &format=csv
+  Graphite @graphite-project / graphite-web rendered csv for a single timeseries
+  skyline/tsfresh/scripts/tsfresh_graphite_csv.py
+
 ## Panorama
 
 - mysql-connector-python added

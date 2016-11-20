@@ -32,8 +32,17 @@ removes the "without the need to configure a model/thresholds" element somewhat.
 
 So why continue developing Skyline?
 
-The architecture/pipeline works very well at doing what it does.  It is solid and battle tested.
-To overcome some of the limitations of Skyline.  This project extends it.
+The architecture/pipeline works very well at doing what it does.  It is solid
+and battle tested.  To overcome some of the limitations of Skyline.  This
+project extends it.
+
+And...
+
+Skyline is **FAST**!!!  Faster enough to handle 10s of 1000s of timeseries in
+near real-time.  In the world of Python, data analysis, R and most machine
+learning, Skyline is FAST.  Processing and analyzing 1000s and 1000s of
+constantly changing timeseries, every minute of every day and it can do it in
+multiple resolutions, on a fairly low end commodity server.
 
 The new look of Skyline apps
 ----------------------------

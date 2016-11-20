@@ -582,8 +582,10 @@ def alert_syslog(alert, metric):
 
 def trigger_alert(alert, metric):
     """
-    Called by :class:`~skyline.skyline.Analyzer.run` to trigger an alert,
-    Analyzer passes two arguments, both of them tuples.  The alerting strategy
+    Called by :py:func:`skyline.analyzer.Analyzer.spawn_alerter_process
+    <analyzer.analyzer.Analyzer.spawn_alerter_process>` to trigger an alert.
+
+    Analyzer passes two arguments, both of them tuples. The alerting strategy
     is determined and the approriate alert def is then called and passed the
     tuples.
 
@@ -594,8 +596,8 @@ def trigger_alert(alert, metric):
         alert[2]: The timeout of the alert that was triggered\n
     :param meric:
         The metric tuple.\n
-        metric[0]: the anomalous value
-        metric[1]: The full name of the anomalous metric
+        metric[0]: the anomalous value\n
+        metric[1]: The full name of the anomalous metric\n
 
     """
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Requirements &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>Requirements &mdash; Skyline 1.1.0-dev documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -62,7 +65,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -89,7 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#requirements-txt"><code class="docutils literal"><span class="pre">requirements.txt</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#recent-changes-in-the-pip-environment">Recent changes in the pip environment</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pandas">pandas</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#python-2-6">Python-2.6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#python-2-6-may-work-but-not-supported">Python-2.6 - may work, but not supported</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#redhat-family-6-x">RedHat family 6.x</a></li>
 </ul>
 </li>
@@ -100,7 +103,7 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -111,6 +114,8 @@
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -119,7 +124,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
@@ -171,12 +175,12 @@
             
   <div class="section" id="requirements">
 <h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
-<p>The ideal requirements are:</p>
+<p>The requirements are:</p>
 <ul class="simple">
 <li>Linux (and probably any environment that supports Python virtualenv
 and bash)</li>
 <li>virtualenv</li>
-<li>Python-2.7.11 or Python-2.7.12 (running in an isolated vitualenv)</li>
+<li>Python-2.7.12 (running in an isolated vitualenv)</li>
 <li>Redis</li>
 <li>MySQL or mariadb [optional - required for Panorama]</li>
 <li>A Graphite implementation sending data would help :)</li>
@@ -202,6 +206,7 @@ install. However, it is needed for Mirage if you are trying to
 run/upgrade on Python-2.6</p>
 <div class="section" id="pandas">
 <h4>pandas<a class="headerlink" href="#pandas" title="Permalink to this headline">¶</a></h4>
+<p>Updated: 20161120 - can no longer be supported as of Ionosphere (probably)</p>
 <p>The <code class="docutils literal"><span class="pre">PANDAS_VERSION</span></code> variable was added to settings.py to handle
 backwards compatability with any instances of Skyline that are run older
 versions that perhaps cannot upgrade to a later version due to any
@@ -228,14 +233,15 @@ moving average function used in a number of algorithms</li>
 <p>Skyline should be able to run on pandas versions 0.12.0 - 0.18.0 (or
 later)</p>
 </div>
-<div class="section" id="python-2-6">
-<h4>Python-2.6<a class="headerlink" href="#python-2-6" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="python-2-6-may-work-but-not-supported">
+<h4>Python-2.6 - may work, but not supported<a class="headerlink" href="#python-2-6-may-work-but-not-supported" title="Permalink to this headline">¶</a></h4>
 <p>Skyline can still run on Python-2.6. However deploying Skyline on
 Python-2.6 requires jumping through some hoops. This is because of the
 dependencies and pip packages moving a lot. At some point some older pip
 package is not going to be available any longer and it will no longer be
 possible, unless you are packaging the pip packages into your own packages, e.g.
 with fpm or such.</p>
+<p>Updated: 20161120 - can no longer be supported as of Ionosphere (probably)</p>
 </div>
 <div class="section" id="redhat-family-6-x">
 <h4>RedHat family 6.x<a class="headerlink" href="#redhat-family-6-x" title="Permalink to this headline">¶</a></h4>
@@ -244,6 +250,7 @@ Skyline in an isolated virtualenv, but have to use the system Python and
 pip. The following pip installs and versions are known to working, with
 a caveat on the scipy needs to be installed via yum NOT pip and you need
 to do the following:</p>
+<p>Updated: 20161120 - this information is now too old to be applicable really.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install <span class="nv">numpy</span><span class="o">==</span>1.8.0
 yum install scipy
 pip install --force-reinstall --ignore-installed <span class="nv">numpy</span><span class="o">==</span>1.8.0
@@ -341,7 +348,7 @@ exist in the future, this is documented here for info ONLY.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.1.0-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -33,7 +33,12 @@ access the database with the user and password you configure in ``settings.py``
   consider the ramifications to your setup.  It is not a requirement, just a
   tidier and more efficient way to run MySQL InnoDB tables in terms of
   managing space allocations with InnoDB and it segregates databases from each
-  in the context on the .ibd file spaces.
+  other in the context on the .ibd file spaces, making for easier management of
+  each individual database in terms of ibd file space.  However that was really
+  only an additional caution.  Retrospectively, it is unlikely that the
+  anomalies table will ever really be a major problem in terms of the page space
+  requirements any time soon.  It appears and it is hoped anyway, time and
+  really big data sets may invalidate this in the future, Gaia DR1 MySQL say :)
 
 - See ``skyline.sql`` in your cloned Skyline repo for the schema creation script
 - Enable Panorama and set the other Panorama settings in ``settings.py``
