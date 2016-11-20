@@ -37,7 +37,7 @@ calculate the features for.
 :type path_to_your_graphite_csv: str
 :param pytz_tz: [OPTIONAL] defaults to UTC or pass as your pytz timezone string.
     For a list of all pytz timezone strings see
-    https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/webapp.rst
+    https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst
     and find yours.
 :type string: str
 
