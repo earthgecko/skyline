@@ -393,22 +393,6 @@ class Analyzer(Thread):
                         analyzer_metric = False
                         ionosphere_metric = True
 
-                    # If Panorama is enabled - create a Panorama check
-                    # @modified 20160922 - Branch #922: Ionosphere
-                    # Only create a Panorama check if it is an Analyzer metric
-                    # not leaving Mirage to Panorama checks for its own metrics
-                    if settings.PANORAMA_ENABLED:
-                        # Only send Analyzer metrics and not Mirage metrics
-                        if settings.ENABLE_MIRAGE:
-                            if not mirage_unique_metrics_fetched:
-                                try:
-                                    mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
-                                except:
-                                    mirage_unique_metrics = []
-
-                            if metric_name in mirage_unique_metrics:
-                                analyzer_metric = False
-
                     # Only send Analyzer metrics
                     if analyzer_metric:
                         if not os.path.exists(settings.PANORAMA_CHECK_PATH):
