@@ -36,7 +36,7 @@ import os.path
 # sys.path.insert(0, os.path.dirname(__file__))
 
 import settings
-from skyline_functions import load_metric_vars, fail_check
+from skyline_functions import load_metric_vars, fail_check, mkdir_p
 
 from crucible_algorithms import run_algorithms
 
@@ -378,11 +378,7 @@ class Crucible(Thread):
         if not os.path.exists(str(anomaly_dir)):
             try:
                 # mkdir_p(skyline_app, str(anomaly_dir))
-                if python_version == 2:
-                    mode_arg = int('0755')
-                if python_version == 3:
-                    mode_arg = mode=0o755
-                os.makedirs(anomaly_dir, mode_arg)
+                mkdir_p(anomaly_dir)
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('created anomaly dir - %s' % str(anomaly_dir))
             except:
@@ -758,11 +754,7 @@ class Crucible(Thread):
         crucible_anomaly_file = '%s/%s.txt' % (anomaly_dir, metric)
         with open(crucible_anomaly_file, 'a') as fh:
             fh.write(crucible_data)
-        if python_version == 2:
-            mode_arg = int('0644')
-        if python_version == 3:
-            mode_arg = '0o644'
-        os.chmod(crucible_anomaly_file, mode_arg)
+        os.chmod(crucible_anomaly_file, mode=0o644)
         logger.info('updated crucible anomaly file - %s/%s.txt' % (anomaly_dir, metric))
 
         # gzip the json timeseries data after analysis
@@ -775,11 +767,7 @@ class Crucible(Thread):
                     f_out.close()
                     f_in.close()
                     os.remove(anomaly_json)
-                    if python_version == 2:
-                        mode_arg = int('0644')
-                    if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(anomaly_json_gz, mode_arg)
+                    os.chmod(anomaly_json_gz, mode=0o644)
                     logger.info('gzipped - %s' % (anomaly_json_gz))
                 except:
                     logger.error('error :: Failed to gzip data file - %s' % str(traceback.print_exc()))
@@ -849,11 +837,7 @@ class Crucible(Thread):
                 os.path.exists(settings.CRUCIBLE_CHECK_PATH)
             except:
                 logger.error('error :: check dir did not exist - %s' % settings.CRUCIBLE_CHECK_PATH)
-                if python_version == 2:
-                    mode_arg = int('0755')
-                if python_version == 3:
-                    mode_arg = mode=0o755
-                os.makedirs(settings.CRUCIBLE_CHECK_PATH, mode_arg)
+                mkdir_p(settings.CRUCIBLE_CHECK_PATH)
                 logger.info('check dir created - %s' % settings.CRUCIBLE_CHECK_PATH)
                 os.path.exists(settings.CRUCIBLE_CHECK_PATH)
                 # continue

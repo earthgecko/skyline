@@ -428,11 +428,7 @@ def run_algorithms(
     results_dir = os.path.dirname(timeseries_file)
 
     if not os.path.exists(results_dir):
-        if python_version == 2:
-            mode_arg = int('0755')
-        if python_version == 3:
-            mode_arg = mode=0o755
-        os.makedirs(results_dir, mode_arg)
+        os.makedirs(results_dir, mode=0o755)
 
     start_analysis = int(time.time())
 

@@ -486,11 +486,7 @@ class Ionosphere(Thread):
                 os.path.exists(settings.IONOSPHERE_CHECK_PATH)
             except:
                 logger.error('error :: check dir did not exist - %s' % settings.IONOSPHERE_CHECK_PATH)
-                if python_version == 2:
-                    mode_arg = int('0755')
-                if python_version == 3:
-                    mode_arg = mode=0o755
-                os.makedirs(settings.IONOSPHERE_CHECK_PATH, mode_arg)
+                mkdir_p(settings.IONOSPHERE_CHECK_PATH)
 
                 logger.info('check dir created - %s' % settings.IONOSPHERE_CHECK_PATH)
                 os.path.exists(settings.IONOSPHERE_CHECK_PATH)

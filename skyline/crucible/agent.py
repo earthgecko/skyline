@@ -61,22 +61,14 @@ def run():
     # Make sure the required directories exists
     if not os.path.exists(settings.CRUCIBLE_CHECK_PATH):
         try:
-            if python_version == 2:
-                mode_arg = int('0755')
-            if python_version == 3:
-                mode_arg = mode=0o755
-            os.makedirs(settings.CRUCIBLE_CHECK_PATH, mode_arg)
+            os.makedirs(settings.CRUCIBLE_CHECK_PATH, mode=0o755)
         except:
             print ('failed to create directory - %s' % settings.CRUCIBLE_CHECK_PATH)
             sys.exit(1)
 
     if not os.path.exists(settings.CRUCIBLE_DATA_FOLDER):
         try:
-            if python_version == 2:
-                mode_arg = int('0755')
-            if python_version == 3:
-                mode_arg = mode=0o755
-            os.makedirs(settings.CRUCIBLE_DATA_FOLDER, mode_arg)
+            os.makedirs(settings.CRUCIBLE_DATA_FOLDER, mode=0o755)
         except:
             print ('failed to create directory - %s' % settings.CRUCIBLE_DATA_FOLDER)
             sys.exit(1)
@@ -84,11 +76,7 @@ def run():
     failed_checks_dir = settings.CRUCIBLE_DATA_FOLDER + '/failed_checks'
     if not os.path.exists(failed_checks_dir):
         try:
-            if python_version == 2:
-                mode_arg = int('0755')
-            if python_version == 3:
-                mode_arg = mode=0o755
-            os.makedirs(failed_checks_dir, mode_arg)
+            os.makedirs(failed_checks_dir, mode=0o755)
         except:
             print ('failed to create directory - %s' % failed_checks_dir)
             sys.exit(1)

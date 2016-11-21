@@ -17,7 +17,7 @@ import mysql.connector
 from mysql.connector import errorcode
 
 import settings
-from skyline_functions import load_metric_vars, fail_check
+from skyline_functions import load_metric_vars, fail_check, mkdir_p
 
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
@@ -796,11 +796,7 @@ class Panorama(Thread):
                 os.path.exists(settings.PANORAMA_CHECK_PATH)
             except:
                 logger.error('error :: check dir did not exist - %s' % settings.PANORAMA_CHECK_PATH)
-                if python_version == 2:
-                    mode_arg = int('0755')
-                if python_version == 3:
-                    mode_arg = mode=0o755
-                os.makedirs(settings.PANORAMA_CHECK_PATH, mode_arg)
+                mkdir_p(settings.PANORAMA_CHECK_PATH)
 
                 logger.info('check dir created - %s' % settings.PANORAMA_CHECK_PATH)
                 os.path.exists(settings.PANORAMA_CHECK_PATH)

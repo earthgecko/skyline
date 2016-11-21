@@ -33,7 +33,7 @@ import resource
 import settings
 # @modified 20160922 - Branch #922: Ionosphere
 # Added the send_anomalous_metric_to skyline_functions.py
-from skyline_functions import write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to
+from skyline_functions import write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to, mkdir_p
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
@@ -395,11 +395,7 @@ class Mirage(Thread):
                 # If Panorama is enabled - create a Panorama check
                 if settings.PANORAMA_ENABLED:
                     if not os.path.exists(settings.PANORAMA_CHECK_PATH):
-                        if python_version == 2:
-                            mode_arg = int('0755')
-                        if python_version == 3:
-                            mode_arg = mode=0o755
-                        os.makedirs(settings.PANORAMA_CHECK_PATH, mode_arg)
+                        mkdir_p(settings.PANORAMA_CHECK_PATH)
 
                     # Note:
                     # The values are enclosed is single quoted intentionally
@@ -447,11 +443,7 @@ class Mirage(Thread):
                     timeseries_dir = base_name.replace('.', '/')
                     crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
                     if not os.path.exists(crucible_anomaly_dir):
-                        if python_version == 2:
-                            mode_arg = int('0755')
-                        if python_version == 3:
-                            mode_arg = mode=0o755
-                        os.makedirs(crucible_anomaly_dir, mode_arg)
+                        mkdir_p(crucible_anomaly_dir)
 
                     # Note:
                     # The value is enclosed is single quoted intentionally
