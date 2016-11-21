@@ -519,10 +519,9 @@ class Crucible(Thread):
                         f.write(image_data)
                     logger.info('retrieved - %s' % (anomaly_graph))
                     if python_version == 2:
-                        mode_arg = int('0644')
+                        os.chmod(graphite_image_file, 0644)
                     if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(graphite_image_file, mode_arg)
+                        os.chmod(graphite_image_file, mode=0o644)
                 else:
                     logger.error('error :: failed to retrieved - %s' % (anomaly_graph))
             else:
@@ -566,10 +565,10 @@ class Crucible(Thread):
                     with open(anomaly_json, 'w') as f:
                         f.write(json.dumps(converted))
                     if python_version == 2:
-                        mode_arg = int('0644')
+                        os.chmod(anomaly_json, 0644)
                     if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(anomaly_json, mode_arg)
+                        os.chmod(anomaly_json, mode=0o644)
+
                     if settings.ENABLE_CRUCIBLE_DEBUG:
                         logger.info('json file - %s' % anomaly_json)
 
@@ -618,10 +617,9 @@ class Crucible(Thread):
                     f_in.close()
                     os.remove(anomaly_json)
                     if python_version == 2:
-                        mode_arg = int('0644')
+                        os.chmod(anomaly_json_gz, 0644)
                     if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(anomaly_json_gz, mode_arg)
+                        os.chmod(anomaly_json_gz, mode=0o644)
                     if settings.ENABLE_CRUCIBLE_DEBUG:
                         logger.info('gzipped - %s' % anomaly_json_gz)
                     try:
@@ -674,10 +672,9 @@ class Crucible(Thread):
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('anomaly_json done')
                 if python_version == 2:
-                    mode_arg = int('0644')
+                    os.chmod(anomaly_json, 0644)
                 if python_version == 3:
-                    mode_arg = '0o644'
-                os.chmod(anomaly_json, mode_arg)
+                    os.chmod(anomaly_json, mode=0o644)
         else:
             if settings.ENABLE_CRUCIBLE_DEBUG:
                 logger.info('No gzip - %s' % anomaly_json_gz)
@@ -699,10 +696,9 @@ class Crucible(Thread):
                 logger.error('error :: file not found - %s' % anomaly_json)
                 shutil.move(metric_check_file, failed_check_file)
                 if python_version == 2:
-                    mode_arg = int('0644')
+                    os.chmod(failed_check_file, 0644)
                 if python_version == 3:
-                    mode_arg = '0o644'
-                os.chmod(failed_check_file, mode_arg)
+                    os.chmod(failed_check_file, mode=0o644)
                 logger.info('moved check file to - %s' % failed_check_file)
             except OSError:
                 logger.error('error :: failed to move check file to - %s' % failed_check_file)
@@ -754,7 +750,10 @@ class Crucible(Thread):
         crucible_anomaly_file = '%s/%s.txt' % (anomaly_dir, metric)
         with open(crucible_anomaly_file, 'a') as fh:
             fh.write(crucible_data)
-        os.chmod(crucible_anomaly_file, mode=0o644)
+        if python_version == 2:
+            os.chmod(crucible_anomaly_file, 0644)
+        if python_version == 3:
+            os.chmod(crucible_anomaly_file, mode=0o644)
         logger.info('updated crucible anomaly file - %s/%s.txt' % (anomaly_dir, metric))
 
         # gzip the json timeseries data after analysis
@@ -767,7 +766,10 @@ class Crucible(Thread):
                     f_out.close()
                     f_in.close()
                     os.remove(anomaly_json)
-                    os.chmod(anomaly_json_gz, mode=0o644)
+                    if python_version == 2:
+                        os.chmod(anomaly_json_gz, 0644)
+                    if python_version == 3:
+                        os.chmod(anomaly_json_gz, mode=0o644)
                     logger.info('gzipped - %s' % (anomaly_json_gz))
                 except:
                     logger.error('error :: Failed to gzip data file - %s' % str(traceback.print_exc()))

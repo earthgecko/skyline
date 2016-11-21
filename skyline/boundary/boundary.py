@@ -498,10 +498,9 @@ class Boundary(Thread):
                         with open(crucible_anomaly_file, 'w') as fh:
                             fh.write(crucible_anomaly_data)
                         if python_version == 2:
-                            mode_arg = int('0644')
+                            os.chmod(crucible_anomaly_file, 0644)
                         if python_version == 3:
-                            mode_arg = '0o644'
-                        os.chmod(crucible_anomaly_file, mode_arg)
+                            os.chmod(crucible_anomaly_file, mode=0o644)
                         logger.info('added crucible anomaly file :: %s/%s.txt' % (crucible_anomaly_dir, base_name))
 
                         # Create timeseries json file with the timeseries
@@ -511,10 +510,9 @@ class Boundary(Thread):
                             # timeseries
                             fh.write(timeseries_json)
                         if python_version == 2:
-                            mode_arg = int('0644')
+                            os.chmod(json_file, 0644)
                         if python_version == 3:
-                            mode_arg = '0o644'
-                        os.chmod(json_file, mode_arg)
+                            os.chmod(json_file, mode=0o644)
                         logger.info('added crucible timeseries file :: %s/%s.json' % (crucible_anomaly_dir, base_name))
 
                         # Create a crucible check file
@@ -522,10 +520,9 @@ class Boundary(Thread):
                         with open(crucible_check_file, 'w') as fh:
                             fh.write(crucible_anomaly_data)
                         if python_version == 2:
-                            mode_arg = int('0644')
+                            os.chmod(crucible_check_file, 0644)
                         if python_version == 3:
-                            mode_arg = '0o644'
-                        os.chmod(crucible_check_file, mode_arg)
+                            os.chmod(crucible_check_file, mode=0o644)
                         logger.info('added crucible check :: %s,%s' % (base_name, metric_timestamp))
 
             # It could have been deleted by the Roomba

@@ -513,13 +513,6 @@ class Ionosphere(Thread):
                     except:
                         logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
-                    try:
-                        last_purge_key = '%s.last_purge_ts' % skyline_app
-                        self.redis_conn.setex(last_purge_key, 1800, last_purge_ts)
-                        logger.info('updated Redis key for %s up' % last_purge_key)
-                    except:
-                        logger.error('error :: failed to update Redis key for %s' % last_purge_key)
-
                 # Discover metric anomalies to insert
                 metric_var_files = False
                 try:

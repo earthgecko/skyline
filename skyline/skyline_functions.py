@@ -199,11 +199,7 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
     file_dir = os.path.dirname(write_to_file)
     if not os.path.exists(file_dir):
         try:
-            if python_version == 2:
-                mode_arg = int('0755')
-            if python_version == 3:
-                mode_arg = mode=0o755
-            os.makedirs(file_dir, mode_arg)
+            os.makedirs(file_dir, mode=0o755)
         # Python >2.5
         except OSError as exc:
             if exc.errno == errno.EEXIST and os.path.isdir(path):
@@ -221,10 +217,9 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
         with open(write_to_file, mode) as fh:
             fh.write(data)
         if python_version == 2:
-            mode_arg = int('0644')
+            os.chmod(write_to_file, 0644)
         if python_version == 3:
-            mode_arg = '0o644'
-        os.chmod(write_to_file, mode_arg)
+            os.chmod(write_to_file, mode=0o644)
 
         return True
     except:
@@ -285,10 +280,9 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
     try:
         shutil.move(check_file_to_fail, failed_check_file)
         if python_version == 2:
-            mode_arg = int('0644')
+            os.chmod(failed_check_file, 0644)
         if python_version == 3:
-            mode_arg = '0o644'
-        os.chmod(failed_check_file, mode_arg)
+            os.chmod(failed_check_file, mode=0o644)
 
         current_logger.info('moved check file to - %s' % failed_check_file)
         return True
@@ -456,6 +450,12 @@ def get_graphite_metric(
     except:
         import os
 
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -535,10 +535,9 @@ def get_graphite_metric(
                 f.write(image_data)
             current_logger.info('retrieved - %s' % (graphite_image_file))
             if python_version == 2:
-                mode_arg = int('0644')
+                os.chmod(graphite_image_file, 0644)
             if python_version == 3:
-                mode_arg = '0o644'
-            os.chmod(graphite_image_file, mode_arg)
+                os.chmod(graphite_image_file, mode=0o644)
         else:
             current_logger.error(
                 'error :: failed to retrieved - %s' % (graphite_image_file))
@@ -593,10 +592,9 @@ def get_graphite_metric(
             with open(output_object, 'w') as f:
                 f.write(json.dumps(converted))
             if python_version == 2:
-                mode_arg = int('0644')
+                os.chmod(output_object, 0644)
             if python_version == 3:
-                mode_arg = '0o644'
-            os.chmod(output_object, mode_arg)
+                os.chmod(output_object, mode=0o644)
             if settings.ENABLE_DEBUG:
                 current_logger.info('json file - %s' % output_object)
         else:
@@ -638,15 +636,16 @@ def send_anomalous_metric_to(
         anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
         check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
     if send_to_app == 'ionosphere':
-        anomaly_dir = settings.IONOSPHERE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+        # @modified 20161121 - Branch #922: ionosphere
+        # Use the timestamp as the parent dir for training_data, it is easier
+        # to manage and clean on timestamps.  Walking through 1000s of Graphite
+        # style dirs with dotted metric namespaces for timestamps.
+        # anomaly_dir = settings.IONOSPHERE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+        anomaly_dir = '%s/%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, metric_timestamp, timeseries_dir)
         check_file = '%s/%s.%s.txt' % (settings.IONOSPHERE_CHECK_PATH, metric_timestamp, base_name)
 
     if not os.path.exists(anomaly_dir):
-        if python_version == 2:
-            mode_arg = int('0755')
-        if python_version == 3:
-            mode_arg = mode=0o755
-        os.makedirs(anomaly_dir, mode_arg)
+        os.makedirs(anomaly_dir, mode=0o755)
 
     # Note:
     # The values are enclosed is single quoted intentionally

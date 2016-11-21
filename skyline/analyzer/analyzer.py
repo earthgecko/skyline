@@ -378,7 +378,8 @@ class Analyzer(Thread):
                                 logger.error('error :: could not query Redis for cache_key: %s' % e)
 
                             if not last_alert:
-                                self.send_anomalous_metric_to(
+                                # self.send_anomalous_metric_to(
+                                send_anomalous_metric_to(
                                     'ionosphere', timeseries_dir, metric_timestamp,
                                     base_name, str(datapoint), from_timestamp,
                                     triggered_algorithms, timeseries)
@@ -965,10 +966,9 @@ class Analyzer(Thread):
                                     'debug :: Memory usage in run after writing mirage check file: %s (kb)' %
                                     resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                             if python_version == 2:
-                                mode_arg = int('0644')
+                                os.chmod(anomaly_check_file, 0644)
                             if python_version == 3:
-                                mode_arg = '0o644'
-                            os.chmod(anomaly_check_file, mode_arg)
+                                os.chmod(anomaly_check_file, mode=0o644)
                             if LOCAL_DEBUG:
                                 logger.info(
                                     'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %

@@ -488,10 +488,9 @@ def run_algorithms(
             plt.savefig(results_filename, dpi=100)
     #            logger.info('%s :: %s' % (algorithm, results_filename))
             if python_version == 2:
-                mode_arg = int('0644')
+                os.chmod(results_filename, 0644)
             if python_version == 3:
-                mode_arg = '0o644'
-            os.chmod(results_filename, mode_arg)
+                os.chmod(results_filename, mode=0o644)
         except:
             logger.error('error :: %s' % (traceback.format_exc()))
             logger.info('info :: error thrown in algorithm running and plotting - %s' % (str(algorithm)))
