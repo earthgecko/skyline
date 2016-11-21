@@ -235,8 +235,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.agent">skyline.ionosphere.agent module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.ionosphere">skyline.ionosphere.ionosphere module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#skyline-ionosphere-agent-module">skyline.ionosphere.agent module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#skyline-ionosphere-ionosphere-module">skyline.ionosphere.ionosphere module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere">Module contents</a></li>
 </ul>
 </li>
@@ -2122,23 +2122,6 @@ need more than 1</td>
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="settings.ENABLE_IONOSPHERE_DEBUG"><strong>ENABLE_IONOSPHERE_DEBUG</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - enables additional debug logging
 useful for development only, this should definitely be set to <code class="docutils literal"><span class="pre">False</span></code> on
 production system as LOTS of output</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
-<dt id="settings.IONOSPHERE_CHECK_MAX_AGE">
-<code class="descname">IONOSPHERE_CHECK_MAX_AGE</code><em class="property"> = 300</em><a class="headerlink" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="settings.IONOSPHERE_CHECK_MAX_AGE"><strong>IONOSPHERE_CHECK_MAX_AGE</strong></a> (<em>int</em>) &#8211; Ionosphere will only process a check file if it is
-not older than IONOSPHERE_CHECK_MAX_AGE seconds.  If it is set to 0 it does
-all.  This setting just ensures if Ionosphere stalls for some hours and is
-restarted, the user can choose to discard older checks and miss anomalies
-being recorded if they so choose to, to prevent Ionosphere stampeding.</td>
 </tr>
 </tbody>
 </table>

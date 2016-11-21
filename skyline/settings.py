@@ -1220,16 +1220,6 @@ ENABLE_IONOSPHERE_DEBUG = False
 :vartype ENABLE_IONOSPHERE_DEBUG: boolean
 """
 
-IONOSPHERE_CHECK_MAX_AGE = 300
-"""
-:var IONOSPHERE_CHECK_MAX_AGE: Ionosphere will only process a check file if it is
-    not older than IONOSPHERE_CHECK_MAX_AGE seconds.  If it is set to 0 it does
-    all.  This setting just ensures if Ionosphere stalls for some hours and is
-    restarted, the user can choose to discard older checks and miss anomalies
-    being recorded if they so choose to, to prevent Ionosphere stampeding.
-:vartype IONOSPHERE_CHECK_MAX_AGE: int
-"""
-
 IONOSPHERE_DATA_FOLDER = '/opt/skyline/ionosphere/data'
 """
 :var IONOSPHERE_DATA_FOLDER: This is the path for the Ionosphere data folder
