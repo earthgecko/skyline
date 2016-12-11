@@ -108,9 +108,9 @@ msgpack-python==0.4.8
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
 #requests==2.11.1
-requests==2.12.1
-
-#pytest
+# @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
+#requests==2.12.1
+requests==2.12.3
 
 # ALERTERS - uncomment any alerters you want to enable
 python-simple-hipchat==0.4.0
@@ -147,4 +147,16 @@ pipdeptree==0.8.0
 ## tsfresh and deps
 scikit_learn==0.18.1
 future==0.16.0
-tsfresh==0.1.2
+# @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
+#tsfresh==0.1.2
+tsfresh==0.3.0
+termcolor==1.1.0
+
+# @added 20161127 - Branch #922: ionosphere
+## pytest and deps
+py==1.4.31
+pytest==3.0.4
+
+# @added 20161130 - Branch #922: ionosphere
+## sqlalchemy by this stage of the (no deps)
+sqlalchemy==1.1.4
