@@ -144,6 +144,8 @@ def load_metric_vars(current_skyline_app, metric_vars_file):
     except:
         import imp
 
+    metric_vars = False
+    metric_vars_got = False
     if os.path.isfile(metric_vars_file):
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
@@ -156,15 +158,19 @@ def load_metric_vars(current_skyline_app, metric_vars_file):
         with open(metric_vars_file) as f:
             try:
                 metric_vars = imp.load_source('metric_vars', '', f)
-                if settings.ENABLE_DEBUG:
-                    current_logger.info(
-                        'metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+                metric_vars_got = True
             except:
                 current_logger.info(traceback.format_exc())
                 msg = 'failed to import metric variables - metric_check_file'
                 current_logger.error(
                     'error :: %s - %s' % (msg, str(metric_vars_file)))
                 metric_vars = False
+
+        if settings.ENABLE_DEBUG and metric_vars_got:
+            current_logger.info(
+                'metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+    else:
+        current_logger.error('error :: metric_vars_file not found - %s' % (str(metric_vars_file)))
 
     return metric_vars
 
@@ -635,6 +641,7 @@ def send_anomalous_metric_to(
     if send_to_app == 'crucible':
         anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
         check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
+        check_dir = '%s' % (settings.CRUCIBLE_CHECK_PATH)
     if send_to_app == 'ionosphere':
         # @modified 20161121 - Branch #922: ionosphere
         # Use the timestamp as the parent dir for training_data, it is easier
@@ -643,6 +650,10 @@ def send_anomalous_metric_to(
         # anomaly_dir = settings.IONOSPHERE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
         anomaly_dir = '%s/%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, metric_timestamp, timeseries_dir)
         check_file = '%s/%s.%s.txt' % (settings.IONOSPHERE_CHECK_PATH, metric_timestamp, base_name)
+        check_dir = '%s' % (settings.IONOSPHERE_CHECK_PATH)
+
+    if not os.path.exists(check_dir):
+        os.makedirs(check_dir, mode=0o755)
 
     if not os.path.exists(anomaly_dir):
         os.makedirs(anomaly_dir, mode=0o755)
@@ -702,6 +713,17 @@ def send_anomalous_metric_to(
         current_logger.info(traceback.format_exc())
         current_logger.error('error :: failed to add %s check file :: %s' % (send_to_app, check_file))
 
+
+def RepresentsInt(s):
+    '''
+    As per http://stackoverflow.com/a/1267145 and @Aivar I must agree with
+    @Triptycha > "This 5 line function is not a complex mechanism."
+    '''
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
 
 ################################################################################
 
