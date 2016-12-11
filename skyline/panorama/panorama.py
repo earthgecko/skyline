@@ -337,7 +337,7 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - algorithms - %s' % str(algorithms))
         except:
-            logger.error('error :: failed to read algorithms variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read algorithms variable from check file setting to all - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -347,7 +347,7 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - triggered_algorithms - %s' % str(triggered_algorithms))
         except:
-            logger.error('error :: failed to read triggered_algorithms variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read triggered_algorithms variable from check file setting to all - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -357,7 +357,7 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - app - %s' % app)
         except:
-            logger.error('error :: failed to read app variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read app variable from check file setting to all  - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -367,7 +367,7 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - source - %s' % source)
         except:
-            logger.error('error :: failed to read source variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read source variable from check file setting to all  - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -377,7 +377,7 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - added_by - %s' % added_by)
         except:
-            logger.error('error :: failed to read added_by variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read added_by variable from check file setting to all - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -387,7 +387,7 @@ class Panorama(Thread):
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - added_at - %s' % added_at)
         except:
-            logger.error('error :: failed to read added_at variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
