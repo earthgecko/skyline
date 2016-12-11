@@ -1,0 +1,8 @@
+# pip requirements for scripts/tsfresh_graphite_csv in addition to tsfresh
+# requirements
+# Run:
+# pip install -r <path_to/tsfresh_graphite_csv.requirements.txt>
+python-dateutil==2.6.0
+pytz==2016.7
+termcolor==1.1.0
+traceback2==1.4.0
