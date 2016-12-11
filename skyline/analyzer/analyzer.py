@@ -131,81 +131,6 @@ class Analyzer(Thread):
 
         trigger_alert(alert, metric)
 
-    def send_anomalous_metric_to(
-            self, send_to_app, timeseries_dir, metric_timestamp, base_name,
-            datapoint, from_timestamp, triggered_algorithms, timeseries):
-        """
-        Assign a metric and timeseries to Crucible or Ionosphere.
-        """
-
-        if send_to_app == 'crucible':
-            anomaly_dir = '%s/%s/%s' % (settings.CRUCIBLE_DATA_FOLDER, timeseries_dir, metric_timestamp)
-            check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
-        if send_to_app == 'ionosphere':
-            # @modified 20161119 - Branch #922: ionosphere
-            # Use the timestamp as the parent dir for training_data
-            # anomaly_dir = '%s/%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, timeseries_dir, metric_timestamp)
-            anomaly_dir = '%s/%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, metric_timestamp, timeseries_dir)
-            check_file = '%s/%s.%s.txt' % (settings.IONOSPHERE_CHECK_PATH, metric_timestamp, base_name)
-
-        if not os.path.exists(anomaly_dir):
-            mkdir_p(anomaly_dir)
-
-        # Note:
-        # The values are enclosed is single quoted intentionally
-        # as the imp.load_source used in crucible results in a
-        # shift in the decimal position when double quoted, e.g.
-        # value = "5622.0" gets imported as
-        # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
-        # single quoting results in the desired,
-        # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
-        now_timestamp = int(time())
-        anomaly_data = 'metric = \'%s\'\n' \
-                       'value = \'%s\'\n' \
-                       'from_timestamp = \'%s\'\n' \
-                       'metric_timestamp = \'%s\'\n' \
-                       'algorithms = %s\n' \
-                       'triggered_algorithms = %s\n' \
-                       'anomaly_dir = \'%s\'\n' \
-                       'graphite_metric = True\n' \
-                       'run_crucible_tests = False\n' \
-                       'added_by = \'%s\'\n' \
-                       'added_at = \'%s\'\n' \
-            % (base_name, str(datapoint), from_timestamp, metric_timestamp,
-                str(settings.ALGORITHMS), triggered_algorithms, anomaly_dir,
-                skyline_app, str(now_timestamp))
-
-        # Create an anomaly file with details about the anomaly
-        anomaly_file = '%s/%s.txt' % (anomaly_dir, base_name)
-        try:
-            write_data_to_file(skyline_app, anomaly_file, 'w', anomaly_data)
-            logger.info('added %s anomaly file :: %s' % (send_to_app, anomaly_file))
-        except:
-            logger.info(traceback.format_exc())
-            logger.error(
-                'error :: failed to add %s anomaly file :: %s' %
-                (send_to_app, anomaly_file))
-
-        # Create timeseries json file with the timeseries
-        json_file = '%s/%s.json' % (anomaly_dir, base_name)
-        timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
-        try:
-            write_data_to_file(skyline_app, json_file, 'w', timeseries_json)
-            logger.info('added %s timeseries file :: %s' % (send_to_app, json_file))
-        except:
-            logger.error(
-                'error :: failed to add %s timeseries file :: %s' %
-                (send_to_app, json_file))
-            logger.info(traceback.format_exc())
-
-        # Create a check file
-        try:
-            write_data_to_file(skyline_app, check_file, 'w', anomaly_data)
-            logger.info('added %s check :: %s,%s' % (send_to_app, base_name, metric_timestamp))
-        except:
-            logger.info(traceback.format_exc())
-            logger.error('error :: failed to add %s check file :: %s' % (send_to_app, check_file))
-
     def spin_process(self, i, unique_metrics):
         """
         Assign a bunch of metrics for a process to analyze.
@@ -318,7 +243,8 @@ class Analyzer(Thread):
                 # If it's anomalous, add it to list
                 if anomalous:
                     base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-                    metric = [datapoint, base_name]
+                    metric_timestamp = timeseries[-1][0]
+                    metric = [datapoint, base_name, metric_timestamp]
                     self.anomalous_metrics.append(metric)
 
                     # Get the anomaly breakdown - who returned True?
@@ -378,15 +304,11 @@ class Analyzer(Thread):
                                 logger.error('error :: could not query Redis for cache_key: %s' % e)
 
                             if not last_alert:
-                                # self.send_anomalous_metric_to(
                                 send_anomalous_metric_to(
                                     'ionosphere', timeseries_dir, metric_timestamp,
                                     base_name, str(datapoint), from_timestamp,
                                     triggered_algorithms, timeseries)
-
-                            ionosphere_metric = [datapoint, base_name]
-                            self.anomalous_metrics.append(metric)
-
+                                self.sent_to_ionosphere.append(base_name)
                         else:
                             logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
 
@@ -395,7 +317,7 @@ class Analyzer(Thread):
                         ionosphere_metric = True
 
                     # Only send Analyzer metrics
-                    if analyzer_metric:
+                    if analyzer_metric and settings.PANORAMA_ENABLED:
                         if not os.path.exists(settings.PANORAMA_CHECK_PATH):
                             mkdir_p(settings.PANORAMA_CHECK_PATH)
 
@@ -433,6 +355,8 @@ class Analyzer(Thread):
                                 skyline_app, panaroma_anomaly_file, 'w',
                                 panaroma_anomaly_data)
                             logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                            self.sent_to_panorama.append(base_name)
+
                         except:
                             logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                             logger.info(traceback.format_exc())
@@ -499,6 +423,7 @@ class Analyzer(Thread):
                                 skyline_app, crucible_check_file, 'w',
                                 crucible_anomaly_data)
                             logger.info('added crucible check :: %s,%s' % (base_name, metric_timestamp))
+                            self.sent_to_crucible.append(base_name)
                         except:
                             logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
                             logger.info(traceback.format_exc())
@@ -881,7 +806,7 @@ class Analyzer(Thread):
                     for metric in self.anomalous_metrics:
                         pattern_match = False
                         # Absolute match
-                        if str(metric) == str(alert[0]):
+                        if str(metric[1]) == str(alert[0]):
                             pattern_match = True
 
                         if not pattern_match:
@@ -956,11 +881,12 @@ class Analyzer(Thread):
                             except:
                                 logger.error('error :: failed to add mirage.metrics Redis key')
 
-                            metric_timestamp = int(time())
-                            anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
+                            # metric_timestamp = int(time())
+                            # anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
+                            anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, str(metric[2]), metric[1])
                             with open(anomaly_check_file, 'w') as fh:
                                 # metric_name, anomalous datapoint, hours to resolve, timestamp
-                                fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], metric_timestamp))
+                                fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
                             if LOCAL_DEBUG:
                                 logger.info(
                                     'debug :: Memory usage in run after writing mirage check file: %s (kb)' %
@@ -975,6 +901,14 @@ class Analyzer(Thread):
                                     resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
                             logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
+                            try:
+                                self.sent_to_mirage.append(metric[1])
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error(
+                                    'error :: failed update self.sent_to_mirage.append with %s' %
+                                    metric[1])
+
                             # Alert for analyzer if enabled
                             if settings.ENABLE_FULL_DURATION_ALERTS:
                                 self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))

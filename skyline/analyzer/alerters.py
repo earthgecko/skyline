@@ -54,16 +54,20 @@ skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 skyline_version = skyline_version.__absolute_version__
 
 """
-Create any alerter you want here. The function will be invoked from trigger_alert.
+Create any alerter you want here. The function will be invoked from
+trigger_alert.
+
 Two arguments will be passed, both of them tuples: alert and metric.
 
-alert: the tuple specified in your settings:
-    alert[0]: The matched substring of the anomalous metric
-    alert[1]: the name of the strategy being used to alert
-    alert[2]: The timeout of the alert that was triggered
-metric: information about the anomaly itself
-    metric[0]: the anomalous value
-    metric[1]: The full name of the anomalous metric
+alert: the tuple specified in your settings:\n
+    alert[0]: The matched substring of the anomalous metric\n
+    alert[1]: the name of the strategy being used to alert\n
+    alert[2]: The timeout of the alert that was triggered\n
+metric: information about the anomaly itself\n
+    metric[0]: the anomalous value\n
+    metric[1]: The full name of the anomalous metric\n
+    metric[2]: anomaly timestamp\n
+
 """
 
 # FULL_DURATION to hours so that Analyzer surfaces the relevant timeseries data
@@ -338,6 +342,31 @@ def alert_smtp(alert, metric):
                     if LOCAL_DEBUG:
                         logger.info('debug :: alert_smtp - Memory usage before plt.savefig: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                     plt.savefig(buf, format='png')
+
+                    if settings.IONOSPHERE_ENABLED:
+                        timeseries_dir = base_name.replace('.', '/')
+
+                        training_data_dir = '%s/%s/' % (
+                            settings.IONOSPHERE_DATA_FOLDER, str(metric[2]),
+                            timeseries_dir)
+                        if os.path.exists(training_data_dir):
+                            training_data_redis_image = '%s/%s.png' % (
+                                training_data_dir, base_name)
+                            try:
+                                plt.savefig(training_data_redis_image, format='png')
+                                logger.info(
+                                    'alert_smtp - save redis training data image - %s' % (
+                                        training_data_redis_image))
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error(
+                                    'error :: alert_smtp - could not save - %s' % (
+                                        training_data_redis_image))
+                        else:
+                            logger.error(
+                                'error :: alert_smtp - path does not exist, could not save - %s' % (
+                                    training_data_redis_image))
+
                     # @added 20160814 - Bug #1558: Memory leak in Analyzer
                     # As per http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13222.html
                     # savefig in the parent process was causing the memory leak
@@ -372,6 +401,7 @@ def alert_smtp(alert, metric):
         body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> Analyzer alert</font></h3><br>'
         body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
         body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
+        body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(metric[2])
         body += '<font color="black">At hours: %s</font><br>' % str(full_duration_in_hours)
         body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
         if redis_image_data:
@@ -389,6 +419,12 @@ def alert_smtp(alert, metric):
         if redis_image_data:
             body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
             body += 'however do note that will remove the 3-sigma and mean value too.</font>'
+        if settings.IONOSPHERE_ENABLED:
+            body += '<br>'
+            ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+                settings.SKYLINE_URL, str(metric[2]), str(metric[1]))
+            body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+            body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
         body += '<br>'
         body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
     except:
@@ -424,6 +460,10 @@ def alert_smtp(alert, metric):
                     except:
                         logger.error('error :: failed to read plot file - %s' % buf)
                         plot_image_data = None
+
+                    # @added 20161124 - Branch #922: ionosphere
+
+
                     msg_plot_attachment = MIMEImage(plot_image_data)
                     msg_plot_attachment.add_header('Content-ID', '<%s>' % redis_graph_content_id)
                     msg.attach(msg_plot_attachment)
@@ -598,6 +638,7 @@ def trigger_alert(alert, metric):
         The metric tuple.\n
         metric[0]: the anomalous value\n
         metric[1]: The full name of the anomalous metric\n
+        metric[2]: anomaly timestamp\n
 
     """
 

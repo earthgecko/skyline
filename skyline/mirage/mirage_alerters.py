@@ -43,6 +43,7 @@ if python_version == 3:
 
 import settings
 import skyline_version
+from skyline_functions import write_data_to_file
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -55,14 +56,17 @@ skyline_version = skyline_version.__absolute_version__
 Create any alerter you want here. The function will be invoked from trigger_alert.
 Two arguments will be passed, both of them tuples: alert and metric.
 
-alert: the tuple specified in your settings:
-    alert[0]: The matched substring of the anomalous metric
-    alert[1]: the name of the strategy being used to alert
-    alert[2]: The timeout of the alert that was triggered
-    alert[3]: The SECOND_ORDER_RESOLUTION_HOURS
-metric: information about the anomaly itself
-    metric[0]: the anomalous value
-    metric[1]: The full name of the anomalous metric
+alert: the tuple specified in your settings:\n
+    alert[0]: The matched substring of the anomalous metric\n
+    alert[1]: the name of the strategy being used to alert\n
+    alert[2]: The timeout of the alert that was triggered\n
+    alert[3]: The SECOND_ORDER_RESOLUTION_HOURS\n
+
+metric: information about the anomaly itself\n
+    metric[0]: the anomalous value\n
+    metric[1]: The full name of the anomalous metric\n
+    metric[2]: anomaly timestamp\n
+
 """
 
 # FULL_DURATION to hours so that Mirage can surface the relevant timeseries data
@@ -85,6 +89,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - sending smtp alert')
         logger.info('debug :: alert_smtp - Memory usage at start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+
+    if settings.IONOSPHERE_ENABLED:
+        timeseries_dir = base_name.replace('.', '/')
+
+        training_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(metric[2]),
+            timeseries_dir)
 
     # SECOND_ORDER_RESOLUTION_SECONDS to hours so that Mirage surfaces the
     # relevant timeseries data in the graph
@@ -151,6 +164,22 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
         if settings.ENABLE_DEBUG or LOCAL_DEBUG:
             logger.info('debug :: alert_smtp - img_tag: %s' % img_tag)
 
+        if settings.IONOSPHERE_ENABLED:
+            # Create Ionosphere Graphite image
+            graphite_image_file = '%s/%s.%s.graphite.%sh.png' % (
+                training_data_dir, base_name, skyline_app,
+                second_order_resolution_in_hours)
+            try:
+                write_data_to_file(skyline_app, graphite_image_file, 'w', image_data)
+                logger.info(
+                    'added %s Ionosphere Graphite image :: %s' % (
+                        skyline_app, graphite_image_file))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error(
+                    'error :: failed to add %s Ionosphere Graphite image' % (
+                        skyline_app, graphite_image_file))
+
     redis_image_data = None
     try:
         plot_redis_data = settings.PLOT_REDIS_DATA
@@ -187,6 +216,32 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
         except:
             logger.error('error :: alert_smtp - unpack timeseries failed')
             timeseries = None
+
+        if settings.IONOSPHERE_ENABLED and timeseries:
+            '''
+            .. todo: this is possibly to be used to allow the user to submit the
+                FULL_DURATION duration data set for the features profile to be
+                created against IF it is a Mirage metric.  This would allow for
+                additional granularity in Mirage metrics, thereby maintaining
+                their seasonality, but allow user and Skyline to analyze the
+                anomaly at a FULL_DURATION resolution as well.  Not sure how to
+                code that in Ionosphere context yet but could just be additonal
+                flag in the Ionosphere record.  In the Ionosphere frontend, the
+                user would be given an option to either create the features
+                profile on the Mirage timeseries or the redis FULL_DURATION
+                timeseries.  It is a little complicated, but doable.
+            '''
+            # Create Ionosphere redis timeseries json
+            json_file = '%s/%s.%s.redis.%sh.json' % (
+                training_data_dir, base_name, skyline_app,
+                str(full_duration_in_hours))
+            timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+            try:
+                write_data_to_file(skyline_app, json_file, 'w', timeseries_json)
+                logger.info('added %s Ionosphere Redis data timeseries json file :: %s' % (skyline_app, json_file))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s Ionosphere Redis data timeseries json file' % (skyline_app, json_file))
 
         pd_series_values = None
         if timeseries:
@@ -310,6 +365,27 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
                 ax.margins(y=.02, x=.03)
                 # tight_layout removes the legend box
                 # fig.tight_layout()
+
+                if settings.IONOSPHERE_ENABLED:
+                    if os.path.exists(training_data_dir):
+                        training_data_redis_image = '%s/%s.%s.redis.plot.%sh.png' % (
+                            training_data_dir, base_name, skyline_app,
+                            str(full_duration_in_hours))
+                        try:
+                            plt.savefig(training_data_redis_image, format='png')
+                            logger.info(
+                                'alert_smtp - save redis training data image - %s' % (
+                                    training_data_redis_image))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error(
+                                'error :: alert_smtp - could not save - %s' % (
+                                    training_data_redis_image))
+                    else:
+                        logger.error(
+                            'error :: alert_smtp - path does not exist, could not save - %s' % (
+                                training_data_redis_image))
+
                 try:
                     plt.savefig(buf, format='png')
                     # @added 20160814 - Bug #1558: Memory leak in Analyzer
@@ -326,10 +402,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                         logger.info('debug :: alert_smtp - savefig: %s' % 'OK')
                 except:
+                    logger.info(traceback.format_exc())
                     logger.error('error :: alert_smtp - plt.savefig: %s' % 'FAIL')
             except:
-                logger.error('error :: alert_smtp - could not build plot')
                 logger.info(traceback.format_exc())
+                logger.error('error :: alert_smtp - could not build plot')
 
     if redis_image_data:
         redis_img_tag = '<img src="cid:%s"/>' % redis_graph_content_id
@@ -341,8 +418,16 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
     body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> Mirage alert</font></h3><br>'
     body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
     body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
+    body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(metric[2])
     body += '<font color="black">At hours: %s</font><br>' % str(second_order_resolution_in_hours)
     body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+    if settings.IONOSPHERE_ENABLED:
+#        body += '<br>'
+        body += '<h3><font color="black">Ionosphere: </font><font color="#dd3023">training </font><font color="#6698FF">data</font><font color="black"></font></h3>'
+        ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+            settings.SKYLINE_URL, str(metric[2]), str(metric[1]))
+        body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+        body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
     if image_data:
         body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
         body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
