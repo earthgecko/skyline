@@ -16,6 +16,13 @@ figured and fixed.  Perhaps the below edit of the auto generated .rst files
 could be achieved with a sphinx `conf.py` setting, if anyone knows please do
 let us know :)
 
+Part of the build
+=================
+
+The below documentation script not only builds the documentation, it also auto
+generates some documentation and it can also auto generates some Python code too
+when updates are required, such as the compilation of the tsfresh_features.py
+
 For now...
 
 Install docs-requirements.txt
@@ -92,12 +99,19 @@ Build
       return 1
     fi
 
-  # @added 20161119 - Branch #922: ionosphere
-  #                   Task #1718: review.tsfresh
-  # Build the pytz.rst page to generate the pytz timezone list for Skyline
-  # Ionosphere and tsfresh
-    python "$APPDIR/skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py"
-  # That creates "$APPDIR/docs/development/pytz.rst"
+    # @added 20161119 - Branch #922: ionosphere
+    #                   Task #1718: review.tsfresh
+    # Build the pytz.rst page to generate the pytz timezone list for Skyline
+    # Ionosphere and tsfresh, creates "$APPDIR/docs/development/pytz.rst"
+
+    python${PYTHON_MAJOR_VERSION} "$APPDIR/skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py"
+
+    # Run tests
+    python${PYTHON_MAJOR_VERSION} -m pytest tests/
+    if [ $? -ne 0 ]; then
+      echo "Tests failed not building documentation"
+      return 1
+    fi
 
     cd "$APPDIR/docs"
     echo "Building Skyline documentation - in $APPDIR/docs"

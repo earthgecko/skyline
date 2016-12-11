@@ -259,3 +259,11 @@ tsfresh possibly does have the potential to fulfill some of the functionality of
 Ionosphere as described above.
 
 It is not super fast, quite processor intensive, but... lots of features!!!
+
+.. code-block: bash
+
+  # @added 20161124184300 UTC
+  # THIS NEEDS to be update as soon as I got the PoC matched ONCE only... I ran
+  # It is SUPER fast on Graphite csv timeseries parsed timeseries and not
+  # processor intensive at all.  Storing all those features without violating
+  # the First Normal Form, still all in progress.

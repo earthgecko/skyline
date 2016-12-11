@@ -3,31 +3,32 @@ tsfresh
 
 EXPERIMENTAL
 
-The Ionosphere branch introduces tsfresh to the Skyline stack.
+The Ionosphere branch introduced tsfresh to the Skyline stack to enable the
+creation of feature profiles for timeseries that the user deems to be not
+anomalous.
 
 https://github.com/blue-yonder/tsfresh/
 
 See `Development - Ionosphere <development/ionosphere.html>`__ for the long
 trail that lead to tsfresh.
 
-Graphite integration
---------------------
+tsfresh and Graphite integration
+--------------------------------
 
 Skyline needs to tie Graphite, Redis and tsfresh together.  However these is
 fairly straight forward really, but to save any others having to reverse
-engineer the process the skyline/tsfresh/scripts are written is a generic type
-of way that does not require downloading Skyline, they should run standalone
-so that others can use them if they want some simple Graphite -> tsfresh
-capabilities.
+engineer the process the skyline/tsfresh_features/scripts are written is a
+generic type of way that does not require downloading Skyline, they should run
+standalone so that others can use them if they want some simple Graphite ->
+tsfresh feature extraction capabilities.
 
 See:
 
-- skyline/tsfresh/scripts/tsfresh_graphite_csv.py
-- skyline/tsfresh/scripts/tsfresh_graphite_csv.requirements.txt
+- skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py
+- skyline/tsfresh_features/scripts/tsfresh_graphite_csv.requirements.txt
 
-
-skyline/tsfresh/scripts/tsfresh_graphite_csv.py
------------------------------------------------
+skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Assign a Graphite single tiemseries metric csv file to tsfresh to process and
 calculate the features for.
@@ -41,11 +42,15 @@ calculate the features for.
     and find yours.
 :type string: str
 
-Run the script with:
+Run the script with, a virtualenv example is shown but you can run just with
+Python-2.7 from wherever you save the script:
 
-```
-python tsfresh/scripts/tsfresh_graphite_csv path_to_your_graphite_csv [pytz_timezone]
-```
+.. code-block:: bash
+
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+    bin/python2.7 tsfresh_features/scripts/tsfresh_graphite_csv path_to_your_graphite_csv [pytz_timezone]
+    deactivate
 
 Where path_to_your_graphite_csv.csv is a single metric timeseries that has been
 from retrieved from Graphite with the &format=csv request parameter and saved to
