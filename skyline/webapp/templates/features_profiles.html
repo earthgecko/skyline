@@ -1,0 +1,340 @@
+{% block features_profiles_block %}
+<!-- BEGIN /ionosphere/fp_veiw=true block -->
+{% if list_by %}
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+{% endif %}
+
+{% if list_by %}
+	<br>
+<!--  <h4><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></h4>-->
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+{% endif %}
+
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere metric_files block</br>
+{% endif %}
+
+
+{% if print_debug == 'True' %}
+<code> DEBUG </code></br>
+  {% if requested_timestamp %}
+<code> requested_timestamp </code>: {{ requested_timestamp }}<br>
+  {% else %}
+<code> requested_timestamp </code>: NOT FOUND<br>
+  {% endif %}
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+{% if list_by %}
+<div class="row">
+	<div class="col-md-3 col-md-push-9">
+		<p>Number of featurs profile data sets in results: <strong>{{ td_files|length }}</strong></p>
+		<form action="/a_500" method="get"><b>One day</b> you may be able to
+		find features profile data sets matching a pattern:<br>
+			<input name="pattern" value="*">
+		<input type="hidden" name="message" value="'You were told not to try and use the find feature, now look what happened.  Let that be a lesson to you to not try and break the rules.'" /></form><br>
+		<div>but currently this <code>does not work</code> yet so <code>do not use</code> it<br></div>
+		<div>The only reason it is here is to act as a reminder that it needs to be done.<br></div>
+		<div>And perhaps inspire someone to try and add it.<br></div>
+		<div><strike>If you think that you may be that person, please do get in touch.</strike><br></div>
+		<div>Change in strategy: rather fork it and try and when it works, get in touch.<br></div>
+	</div>
+{% endif %}
+
+{% if unique_metrics or metric_td_dirs %}
+		<div class="col-md-9 col-md-pull-3">
+			<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+  {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
+			  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+			  <li class="active"><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+  {% else %}
+			  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+			  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+  {% endif %}
+			</ul>
+			<div class="tab-content">
+{% endif %}
+
+{% if unique_metrics %}
+  {% if list_by == 'metric' or list_by == 'timestamp_td_dirs' %}
+<!-- BEGIN /ionosphere list_by 'metric' and 'timestamp_td_dirs' block -->
+    {% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere list_by 'metric' and 'timestamp_td_dirs' block</br>
+    {% endif %}
+  	  <div class="tab-pane active" id="by_metric">
+        <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span> {{ td_files|length }} data sets</h4>
+  			<table class="table table-hover">
+  				<thead>
+  					<tr>
+              <th>Metric</th>
+              <th>Link to features profile data sets</th>
+  					</tr>
+  				</thead>
+  				<tbody>
+    {% for metric in unique_metrics %}
+            <tr>
+              <td><code>{{ metric }}</code></td>
+              <td onclick="window.location='?fp_view=true&metric_td={{ metric }}&requested_timestamp={{ requested_timestamp }}'">
+                <a href="?fp_view=true&metric_td={{ metric }}&requested_timestamp={{ requested_timestamp }}">{{ metric }}</a>
+              </td>
+            </tr>
+    {% endfor %}
+					</tbody>
+				</table>
+			</div>
+  {% endif %}
+
+  {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
+<!-- BEGIN /ionosphere list_by 'date' and 'metric_td_dirs' block -->
+    {% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere list_by 'date' and 'metric_td_dirs' block</br>
+    {% endif %}
+      <div class="tab-pane active" id="by_date">
+        <h4><span class="logo"><span class="sky">Timestamps ::</span> <span class="re">features profiles :: </span></span></span> {{ td_files|length }} data sets</h4>
+		    <table class="table table-hover">
+  			<thead>
+  				<tr>
+            <th>Date</th>
+            <th>Timestamp</th>
+            <th>Link to features profile data sets</th>
+  				</tr>
+  			</thead>
+  			<tbody>
+    {% for unique_ts,hdates in metric_td_dirs %}
+          <tr>
+      {% if unique_ts == requested_timestamp %}
+            <td><code>{{ hdates }}</code></td>
+            <td> {{ unique_ts }} </td>
+            <td onclick="window.location='?fp_view=true&timestamp_td={{ unique_ts }}&requested_timestamp={{ unique_ts }}'">
+              <a href="?fp_view=true&timestamp_td={{ unique_ts }}&requested_timestamp={{ unique_ts }}">{{ unique_ts }}</a>
+      {% else %}
+            <td>{{ hdates }}</td>
+            <td> {{ unique_ts }} </td>
+        {% if requested_timestamp == False %}
+            <td onclick="window.location='?fp_view=true&timestamp_td={{ unique_ts }}&requested_timestamp={{ unique_ts }}'">
+              <a href="?fp_view=true&timestamp_td={{ unique_ts }}&requested_timestamp={{ unique_ts }}">{{ unique_ts }}</a>
+        {% else %}
+            <td onclick="window.location='?fp_view=true&timestamp_td={{ unique_ts }}&requested_timestamp={{ requested_timestamp }}'">
+              <a href="?fp_view=true&timestamp_td={{ unique_ts }}&requested_timestamp={{ requested_timestamp }}">{{ unique_ts }}</a>
+        {% endif %}
+      {% endif %}
+            </td>
+          </tr>
+    {% endfor %}
+  			</tbody>
+  		</table>
+  {% endif %}
+	  </div>
+{% endif %}
+
+
+{% if metric_td_dirs %}
+  {% if list_by == 'metric_td_dirs' %}
+<!-- BEGIN /ionosphere list_by 'metric_td_dirs' block -->
+    {% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere list_by 'metric_td_dirs' block</br>
+    {% endif %}
+
+  <div class="tab-pane active" id="by_date">
+
+      {% if print_debug == 'True' %}
+        {% for unique_ts,hdates in metric_td_dirs %}
+  <code> DEBUG </code> :: unique_ts :: {{ unique_ts }}</br>
+  <code> requested_timestamp</code> :: {{ requested_timestamp }}<br>
+  <code> hdates</code>:: {{ hdates }}</br>
+  <code> unique_ts</code>:: {{ unique_ts }}</br>
+        {% endfor %}
+      {% endif %}
+    <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profiles :: </span></span></span>{{ for_metric }} :: {{ td_files|length }} data sets</h4>
+If you arrived here via an initial List by date route, your selected date is the <code>highlighted</code> entry
+below.<br>
+Please note: be advised that tracking the timestamp and metric through Flask
+and Jinja templating was <b>very hard to achieve</b>.  However it was done to help <b>you</b>
+as if there are multiple data sets below and you came here by a list by
+date route, it is highly probable that you would not know the date you selected
+once you were presented with a multiple choice.  Please take the appropriate
+amount of time to appreciate this seemingly, insignificant feature that was
+<b>painstakingly</b> added for your benefit.<br>
+Also note:
+  	<table class="table table-hover">
+  		<thead>
+  			<tr>
+          <th>Date</th>
+          <th>Timestamp</th>
+          <th>Link to features profile data sets</th>
+  			</tr>
+  		</thead>
+  		<tbody>
+      {% for unique_ts,hdates in metric_td_dirs %}
+        <tr>
+        {% if (unique_ts|string == requested_timestamp) %}
+          <td><code> {{ hdates }} </code></td>
+        {% else %}
+          <td> {{ hdates }} </td>
+        {% endif %}
+          <td> {{ unique_ts }} </td>
+          <td onclick="window.location='?fp_view=true&timestamp={{ unique_ts }}&metric={{ for_metric }}&requested_timestamp={{ unique_ts }}'">
+            <a href="?fp_view=true&timestamp={{ unique_ts }}&metric={{ for_metric }}&requested_timestamp={{ unique_ts }}">{{ unique_ts }}</a>
+          </td>
+        </tr>
+      {% endfor %}
+			</tbody>
+		</table>
+  </div>
+  {% endif %}
+	</div>
+{% endif %}
+{% if list_by %}
+	</div>
+	</div>
+	</div>
+  </div>
+  </div>
+{% endif %}
+
+{% if metric_files %}
+<!-- BEGIN /ionosphere 'metric_files' block -->
+    {% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere?fp_view=true metric_files block</br>
+    {% endif %}
+    <h4><span class="logo"><span class="sky">Features</span> <span class="re">profile: </span>{{ for_metric }} - {{ human_date }}</h4>
+		<div class="col-md-10">
+  {% if data_ok == False %}
+  <h3><span class="logo"><span class="sky">Holy ::</span> <span class="re">shit</span></span></span></h3>
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error</span></span></span></h4>
+
+  <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error message</span></span></span></b>
+The timeseries data for this anomaly was not loaded, either an error occurred or
+the data is gone or corrupt.  Please try reload the page <strong>quicker</strong>
+next time.<br>
+<b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">advice :: </span></span></b>
+<ol type="1">
+  <li>Try be quicker next time</li>
+  <li>You can see if it is listed in the files section below and if it is
+	not there then maybe some Gremlins are in the data centre or you might need to
+	speak to management about the seemingly shoddy quality of the disks or resources
+	that you administrator/s are providing for this very important service.
+	</li>
+	<li>This could be indicative of the IMMINENT failure of the server running
+	this important Skyline service, it should not be corrupting or losing simple
+	json text files, this is really unacceptable and you should consider writing
+	a stern letter of complaint to your service provider.  If you are your own
+	service provider, perhaps it is time you found a new service provider.</li>
+</ol>
+<b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">apologies ::</span></span></b> below in the Danger alert<br>
+	  <div class="alert alert-danger">
+<strong>Danger! Oh dear.</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">apologies ::</span></span></b>
+ profusely it seems that the timeseries json data for {{ for_metric }} at {{ timestamp }} | {{ human_date }}
+has gone!!!  Perhaps it was removed before you could click the mouse. Maybe
+you need to try and be quicker next time.
+	  </div>
+  {% endif %}
+
+      <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">NOT anomalous ::</span></span></span> features profile id {{ features_profile_id }}</h3>
+  	  <h4><span class="logo"><span class="sky">Calculated ::</span> <span class="re">features ::</span></span></span> features profile id {{ features_profile_id }}</h4>
+  {% if extracted_features %}
+  		<pre>{{ extracted_features }}</pre>
+  {% else %}
+  		<pre>No extracted_features were passed, which is not ideal</pre>
+  {% endif %}
+  	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">details ::</span></span></span> features profile id {{ features_profile_id }}</h4>
+  {% if features_profile_details %}
+  		<pre>{{ features_profile_details }}</pre>
+  {% else %}
+  		<pre>No features_profile_details were passed, which is not ideal</pre>
+  {% endif %}
+
+
+
+      <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span></span> {{ for_metric }}</h4>
+      {{ metric_vars }}<br>
+  {% if panorama_anomaly_id != False %}
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+  {% elif panorama_anomaly_id == 'None' %}
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+{{ for_metric }} has no Panorama anomaly recorded at this timestamp, this can
+happen see <b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b> below
+  {% else %}
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+  {% endif %}
+  {% if panorama_anomaly_id == None %}
+	  <div class="alert alert-warning">
+<strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">apologies ::</span></span></b>
+ profusely it seems that {{ for_metric }} has no Panorama anomaly recorded at
+this timestamp, this can happen
+see <b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b> at
+the top right of this page.  Here is hoping that this day just gets better.
+	  </div>
+  {% endif %}
+
+  {% for image in metric_images %}
+    {% if 'graphite' in image %}
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph</h4>
+      {% if graphite_url != False %}
+If you wish to see the <a target='_blank' href="{{ graphite_url }}">current
+Graphite graph</a> for {{ for_metric }} (opens in new tab)
+      {% endif %}
+    {% elif 'redis' in image %}
+      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot</h4>
+    {% else %}
+      <h4><span class="logo"><span class="sky">Unknown ::</span> <span class="re">anomaly ::</span></span></span> image</h4>
+    {% endif %}
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+  {% endfor %}
+      <h4><span class="logo"><span class="sky">Features ::</span> <span class="re"> profile ::</span></span></span> files</h4>
+      <table>
+        <tr>
+          <th>[filename, path_and_filename]</th>
+        </tr>
+  {% for file in metric_files %}
+        <tr>
+          <td> {{ file }} </td>
+          <td onclick="window.location='?metric_td={{ metric }}'">
+            <a href="?metric_td={{ metric }}">{{ metric }}</a>
+          </td>
+        </tr>
+  {% endfor %}
+      </table>
+  {% if data_ok == True %}
+      <br><p>
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>
+      {{ timeseries }}
+  {% endif %}
+  </div>
+  <div class="known_bugs">
+    <table>
+        <caption><b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b></caption>
+        <tr>
+            <td>
+              <a target='_blank' href="https://github.com/earthgecko/skyline/issues/24">#24</a>
+            </td>
+            <td>An anomaly can sometimes not have a matching Panorama anomaly record due to Panorama check file fails #24</td>
+        </tr>
+    </table>
+  </div>
+{% endif %}
+
+<!-- END /ionosphere/fp_veiw=true block -->
+{% endblock %}
