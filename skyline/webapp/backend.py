@@ -1,9 +1,11 @@
 import logging
-import traceback
 from os import path
 import string
 import operator
+import time
+import re
 
+import traceback
 from flask import request
 # import mysql.connector
 # from mysql.connector import errorcode
@@ -17,6 +19,8 @@ skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
+skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
+logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
 REQUEST_ARGS = ['from_date',
                 'from_time',
@@ -29,6 +33,8 @@ REQUEST_ARGS = ['from_date',
                 'source',
                 'host',
                 'algorithm',
+                # @added 20161127 - Branch #922: ionosphere
+                'panorama_anomaly_id',
                 ]
 
 # Converting one settings variable into a local variable, just because it is a

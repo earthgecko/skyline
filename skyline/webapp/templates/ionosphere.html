@@ -2,22 +2,34 @@
 {% block body %}
 
 <!-- BEGIN /ionosphere block -->
-  <script src="/static/js/ionosphere.js"></script>
 
-<!-- @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
-momentjs to handle date ticker in the timezone in Dygraph
--->
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.5/moment-timezone-with-data.min.js"></script>
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/ionosphere">Ionosphere</a></li>
+{% if fp_view %}
+  {% if metric_files %}
+		<li><a href="/ionosphere?fp_view=true&metric_td={{ for_metric }}">Features profile</a></li>
+		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ for_metric }}</span>}</span></li>
+  {% else %}
+		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></li>
+  {% endif %}
+{% else %}
+  {% if metric_files %}
+		<li><a href="/ionosphere?metric_td={{ for_metric }}">training data</a></li>
+		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ for_metric }}</span>}</span></li>
+  {% else %}
+		<li class="active"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></li>
+  {% endif %}
+{% endif %}
+  </div>
+</ol>
 
-	<ol class="breadcrumb">
-  	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/ionosphere">Ionosphere</a></li>
-  		<li class="active"><span class="logo"><span class="sky">search</span> <span class="re">anomalies</span></li>
-    </div>
-	</ol>
-
+{% if fp_view %}
+    {% include "features_profiles.html" %}
+{% else %}
+    {% include "training_data.html" %}
+{% endif %}
 
 <!-- END /ionosphere block -->
 {% endblock %}

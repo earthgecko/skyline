@@ -62,6 +62,11 @@ fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v
           	class="active"
           	{% endif %}
           	><a href="/panorama">Panorama</a></li>
+          	<li
+          	{% if url_for("ionosphere") in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/ionosphere">Ionosphere</a></li>
             <li
             {% if url_for("rebrow") in request.path %}
             class="active"
