@@ -191,6 +191,15 @@ def validate_settings_variables(current_skyline_app):
         print ('error :: IONOSPHERE_DATA_FOLDER is not set in settings.py')
         invalid_variables = True
 
+    try:
+        TEST_IONOSPHERE_PROFILES_FOLDER = settings.IONOSPHERE_PROFILES_FOLDER
+    except:
+        logger.error('error :: IONOSPHERE_PROFILES_FOLDER is not set in settings.py')
+        logger.info(traceback.format_exc())
+        logger.error('error :: exiting, please fix setting.py')
+        print ('error :: IONOSPHERE_PROFILES_FOLDER is not set in settings.py')
+        invalid_variables = True
+
     if current_skyline_app == 'ionosphere':
         try:
             TEST_IONOSPHERE_PROCESSES = 1 + settings.IONOSPHERE_PROCESSES
