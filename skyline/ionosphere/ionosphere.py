@@ -459,6 +459,10 @@ class Ionosphere(Thread):
         r = None
         http_status_code = 0
         if settings.WEBAPP_AUTH_ENABLED:
+            # 10 second timout is sufficient locally under normal circumstances
+            # as tsfresh has yet to have been take longer than 6 seconds if so
+            # by the time the next request is made, the features file should
+            # exist.  So this is limited psuedo-idempotency.
             timeout_and_auth = 'timeout=10, auth=(%s, %s))' % (settings.WEBAPP_AUTH_USER, settings.WEBAPP_AUTH_USER_PASSWORD)
         else:
             timeout_and_auth = 'timeout=10'
@@ -469,7 +473,7 @@ class Ionosphere(Thread):
                     http_status_code = r.status_code
                 except:
                     logger.error('error :: could not retrieve %s' % webapp_url)
-                    sleep(1)
+                    sleep(5)
                     continue
                 else:
                     break
@@ -486,6 +490,7 @@ class Ionosphere(Thread):
                 calculated_feature_file_found = True
             else:
                 logger.error('error :: calculated features not available - %s' % (calculated_feature_file))
+                # send an Ionosphere alert or add a thunder branch alert
                 self.remove_metric_check_file(str(metric_check_file))
                 return
 
@@ -530,6 +535,7 @@ class Ionosphere(Thread):
                 #     log
                 #     update matched_count in ionosphere_table
                 #     not_anomalous = True
+                # https://docs.scipy.org/doc/numpy/reference/generated/numpy.testing.assert_almost_equal.html
                 logger.debug('debug :: %s is feature profile for %s' % (str(fp_id), base_name))
                 fp_ids_found = True
 

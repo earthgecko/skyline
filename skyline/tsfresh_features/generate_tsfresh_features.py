@@ -161,5 +161,5 @@ if __name__ == '__main__':
         print(colored('info: The newly generated feature names for TSFRESH_FEATURES list for skyline/tsfresh_feature_names.py is:', 'green'))
         print('TSFRESH_FEATURES = [')
         for nid, nname in feature_names:
-            print('    [%s, %s],' % (str(nid), str(nname)))
+            print('    [%s, \'%s\'],' % (str(nid), str(nname)))
         print(']')
