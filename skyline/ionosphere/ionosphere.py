@@ -25,6 +25,11 @@ from sqlalchemy.sql import select
 import requests
 from requests.auth import HTTPBasicAuth
 
+# @added 20161213 - Branch #1790: test_tsfresh
+# To match the new order introduced via the test_tsfresh method
+import numpy as np
+import pandas as pd
+
 import settings
 from skyline_functions import load_metric_vars, fail_check, mysql_select, write_data_to_file, mkdir_p
 
@@ -490,10 +495,13 @@ class Ionosphere(Thread):
                 calculated_feature_file_found = True
             else:
                 logger.error('error :: calculated features not available - %s' % (calculated_feature_file))
-                # send an Ionosphere alert or add a thunder branch alert
+                # send an Ionosphere alert or add a thunder branch alert, one
+                # one thing at a time.  You cannot rush timeseries.
                 self.remove_metric_check_file(str(metric_check_file))
                 return
 
+        # @modified 20161213 - Branch #1790: test_tsfresh
+        # TODO: Match the test_tsfresh method
         # Create an array of the calculated features
         calculated_features = []
         if calculated_feature_file_found:
@@ -536,6 +544,9 @@ class Ionosphere(Thread):
                 #     update matched_count in ionosphere_table
                 #     not_anomalous = True
                 # https://docs.scipy.org/doc/numpy/reference/generated/numpy.testing.assert_almost_equal.html
+                # @added 20161214 - Add a between timeframe option, e.g. if
+                # fp match, only see this as not anomalous if hour (and or min)
+                # is between x and y - handle rollovers, cron log archives, etc.
                 logger.debug('debug :: %s is feature profile for %s' % (str(fp_id), base_name))
                 fp_ids_found = True
 

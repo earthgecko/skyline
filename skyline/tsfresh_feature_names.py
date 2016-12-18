@@ -13,6 +13,10 @@ TSFRESH_BASELINE_VERSION = '0.3.0'
 :vartype TSFRESH_BASELINE_VERSION: str
 """
 
+# @modified 20161213 - Branch #1790: test_tsfresh
+# Reordered to match the new order introduced via the test_tsfresh method
+# introduced at
+# https://github.com/earthgecko/skyline/commit/5c6143d4757f7da47ea9fb9b454fbb63ea0f307b
 TSFRESH_FEATURES = [
     [1, 'value__symmetry_looking__r_0.65'],
     [2, 'value__first_location_of_maximum'],

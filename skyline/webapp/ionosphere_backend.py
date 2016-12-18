@@ -8,6 +8,8 @@ import csv
 import datetime
 import shutil
 import glob
+from ast import literal_eval
+
 
 import traceback
 from flask import request
@@ -293,7 +295,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
 
     if panorama_resp:
         try:
-            data = eval(r.text)
+            data = literal_eval(r.text)
             if str(data) == '[]':
                 panorama_anomaly_id = None
                 logger.debug('debug :: panorama anomlay data: %s' % str(data))
@@ -370,7 +372,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
         # Read the details file
         with open(features_profile_details_file, 'r') as f:
             fp_details_str = f.read()
-        fp_details = eval(fp_details_str)
+        fp_details = literal_eval(fp_details_str)
         calculated_with_tsfresh = fp_details[1]
         calculated_time = str(fp_details[2])
         fcount = str(fp_details[3])
@@ -380,7 +382,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
         # Read the created file
         with open(features_profile_created_file, 'r') as f:
             fp_created_str = f.read()
-        fp_created = eval(fp_created_str)
+        fp_created = literal_eval(fp_created_str)
         new_fp_id = fp_created[0]
 
         return str(new_fp_id), True, True, fail_msg, trace
@@ -625,7 +627,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
-    timeseries = eval(timeseries_array_str)
+    timeseries = literal_eval(timeseries_array_str)
 
     datapoints = timeseries
     validated_timeseries = []

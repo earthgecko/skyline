@@ -33,6 +33,7 @@ import os
 import sys
 import datetime
 import csv
+from ast import literal_eval
 
 import traceback
 import json
@@ -74,7 +75,7 @@ if __name__ == '__main__':
         timeseries_json = json.loads(f.read())
 
     timeseries_str = str(timeseries_json).replace('{u\'results\': ', '').replace('}', '')
-    full_timeseries = eval(timeseries_str)
+    full_timeseries = literal_eval(timeseries_str)
     timeseries = full_timeseries[:60]
 
     fname_in = anomaly_json

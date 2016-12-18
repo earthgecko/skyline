@@ -4,6 +4,7 @@ import sys
 import datetime
 import csv
 import time
+from ast import literal_eval
 
 import traceback
 import json
@@ -113,7 +114,7 @@ def calculate_features_profile(timestamp, metric, context):
         try:
             with open(features_profile_created_file, 'r') as f:
                 fp_created_str = f.read()
-            fp_created_array = eval(fp_created_str)
+            fp_created_array = literal_eval(fp_created_str)
             fp_id = fp_created_array[0]
             fp_created = True
         except:
@@ -151,7 +152,7 @@ def calculate_features_profile(timestamp, metric, context):
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
-    timeseries = eval(timeseries_array_str)
+    timeseries = literal_eval(timeseries_array_str)
 
     datapoints = timeseries
     converted = []
