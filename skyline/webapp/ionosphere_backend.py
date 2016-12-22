@@ -520,6 +520,11 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     fp_table_name = 'z_fp_%s' % str(metrics_id)
     try:
         fp_meta = MetaData()
+        # @modified 20161222 - Task #1812: z_fp table type
+        # Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
+        # up, there can be LOTS of file_per_table z_fp_ tables/files without
+        # the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
+        # in the table cache as required.
         fp_metric_table = Table(
             fp_table_name, fp_meta,
             Column('id', Integer, primary_key=True),
@@ -528,7 +533,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
             Column('value', DOUBLE(), nullable=True),
             mysql_charset='utf8',
             mysql_key_block_size='255',
-            mysql_engine='MyISAM')
+            mysql_engine='InnoDB')
         fp_metric_table.create(engine, checkfirst=True)
         fp_table_created = True
     except:
@@ -583,6 +588,11 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     ts_table_name = 'z_ts_%s' % str(metrics_id)
     try:
         ts_meta = MetaData()
+        # @modified 20161222 - Task #1812: z_fp table type
+        # Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
+        # up, there can be LOTS of file_per_table z_fp_ tables/files without
+        # the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
+        # in the table cache as required.
         ts_metric_table = Table(
             ts_table_name, ts_meta,
             Column('id', Integer, primary_key=True),
@@ -591,7 +601,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
             Column('value', DOUBLE(), nullable=True),
             mysql_charset='utf8',
             mysql_key_block_size='255',
-            mysql_engine='MyISAM')
+            mysql_engine='InnoDB')
         ts_metric_table.create(engine, checkfirst=True)
         ts_table_created = True
         logger.info('metric ts table created OK - %s' % (ts_table_name))

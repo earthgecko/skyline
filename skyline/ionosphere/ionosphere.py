@@ -367,14 +367,26 @@ class Ionosphere(Thread):
             self.remove_metric_check_file(str(metric_check_file))
             return
 
+        # @added 20161222 - ionosphere should extract features for every anomaly
+        # check that is sent through and calculate a feature_profile ready for
+        # submission by the user if they so choose.  Further ionosphere could
+        # make itself more useful by comparing any training data profiles to
+        # further anomalies, however the feature profiles for subsequent
+        # anomalies may be similar enough to match a few times and each a closer
+        # match to the next.
+        training_metric = False
+
         # Check if the metric has ionosphere_enabled, if not remove the check
         # file but not the data directory
         query = "SELECT ionosphere_enabled FROM metrics WHERE metric='%s'" % metric
         result = mysql_select(skyline_app, query)
         if str(result[0]) != '1':
             logger.info('Ionosphere not enabled on %s' % (metric))
-            self.remove_metric_check_file(str(metric_check_file))
-            return
+            # @modified 20161222 - do not remove metric file until features
+            # calculated
+            # self.remove_metric_check_file(str(metric_check_file))
+            # return
+            training_metric = True
         else:
             logger.info('Ionosphere is enabled on %s' % (metric))
 
@@ -402,111 +414,137 @@ class Ionosphere(Thread):
         # learnt.  It was the people input first here in many ways, which is
         # exactly how it was suppose to be.
         # This is now the Ionosphere meat.
-        # Get a MySQL engine
-        logger.info('getting MySQL engine')
-        try:
-            engine, fail_msg, trace = get_an_engine()
-            logger.info(fail_msg)
-        except:
-            trace = traceback.format_exc()
-            logger.error(trace)
-            fail_msg = 'error :: could not get a MySQL engine'
-            logger.error('%s' % fail_msg)
-            self.remove_metric_check_file(str(metric_check_file))
-            return False
+        # Get a MySQL engine only if not training_metric
+        if not training_metric:
+            logger.info('getting MySQL engine')
+            try:
+                engine, fail_msg, trace = get_an_engine()
+                logger.info(fail_msg)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: could not get a MySQL engine'
+                logger.error('%s' % fail_msg)
+                self.remove_metric_check_file(str(metric_check_file))
+                return False
 
-        if not engine:
-            trace = 'none'
-            fail_msg = 'error :: engine not obtained'
-            logger.error(fail_msg)
-            return False
+            if not engine:
+                trace = 'none'
+                fail_msg = 'error :: engine not obtained'
+                logger.error(fail_msg)
+                return False
 
-        # Get the ionosphere_table metadata
-        ionosphere_table = None
-        try:
-            ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
-            logger.info(fail_msg)
-        except:
-            trace = traceback.format_exc()
-            logger.error('%s' % trace)
-            fail_msg = 'error :: failed to get ionosphere_table meta for %s' % base_name
-            logger.error('%s' % fail_msg)
-            return False
+            # Get the ionosphere_table metadata
+            ionosphere_table = None
+            try:
+                ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+                logger.info(fail_msg)
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: failed to get ionosphere_table meta for %s' % base_name
+                logger.error('%s' % fail_msg)
+                return False
 
-        logger.info('ionosphere_table OK')
+            logger.info('ionosphere_table OK')
 
-        # Determine the fp_ids that exist for the metric
-        fp_ids = []
-        fp_ids_found = False
-        try:
-            connection = engine.connect()
-            stmt = select([ionosphere_table.c.fp_id]).where(ionosphere_table.c.metric == base_name)
-            result = connection.execute(stmt)
-            for row in result:
-                fp_id = row['id']
-                fp_ids.append(int(fp_id))
-            connection.close()
-            fp_count = len(fp_ids)
-            logger.info('determined %s fp ids for %s' % (str(fp_count), base_name))
-            return False
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: could not determine fp ids from DB for %s' % base_name)
+            # Determine the fp_ids that exist for the metric
+            fp_ids = []
+            fp_ids_found = False
+            try:
+                connection = engine.connect()
+                stmt = select([ionosphere_table.c.fp_id]).where(ionosphere_table.c.metric == base_name)
+                result = connection.execute(stmt)
+                for row in result:
+                    fp_id = row['id']
+                    fp_ids.append(int(fp_id))
+                connection.close()
+                fp_count = len(fp_ids)
+                logger.info('determined %s fp ids for %s' % (str(fp_count), base_name))
+                return False
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not determine fp ids from DB for %s' % base_name)
 
-        if fp_ids == []:
-            logger.error('error :: there are no fp ids for %s' % base_name)
-        else:
-            fp_ids_found = True
+            if fp_ids == []:
+                logger.error('error :: there are no fp ids for %s' % base_name)
+            else:
+                fp_ids_found = True
 
         # @added 20161221 - TODO: why not calculate the features of every
         # anomaly so the the use does not have to do it and wait for the
         # features to be calculated.
+        # Check the features were calculated by the webapp
+        calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
+        calculated_feature_file_found = False
+        if os.path.isfile(calculated_feature_file):
+            logger.info('calculated features available - %s' % (calculated_feature_file))
+            calculated_feature_file_found = True
+
+        comtext = skyline_app
+        if not calculated_feature_file_found:
+            try:
+                fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('failed to calculate features')
+                self.remove_metric_check_file(str(metric_check_file))
+                return
+
+        if os.path.isfile(calculated_feature_file):
+            logger.info('calculated features available - %s' % (calculated_feature_file))
+            calculated_feature_file_found = True
+            if training_metric:
+                logger.info('training metric done')
+                self.remove_metric_check_file(str(metric_check_file))
+                # TODO: make ionosphere more useful, compare any other
+                # available training_metric profiles here and match, not in the
+                # db context, in the training context.
+                return
 
         # @added 20161210 - Branch #922: ionosphere
         #                   Task #1658: Patterning Skyline Ionosphere
         # Calculate features for the current timeseries if there are fp ids
         # Just call it via the webapp... fewer lines of code and already done in
         # webapp/ionosphere_backend.py and webapp/features_proifle.py
-        webapp_url = '%s/ionosphere?timestamp=%s&metric=%s&calc_features=true' % (
-            settings.SKYLINE_URL, timestamp, base_name)
-        r = None
-        http_status_code = 0
-        if settings.WEBAPP_AUTH_ENABLED:
-            # 10 second timout is sufficient locally under normal circumstances
-            # as tsfresh has yet to have been take longer than 6 seconds if so
-            # by the time the next request is made, the features file should
-            # exist.  So this is limited psuedo-idempotency.
-            timeout_and_auth = 'timeout=10, auth=(%s, %s))' % (settings.WEBAPP_AUTH_USER, settings.WEBAPP_AUTH_USER_PASSWORD)
-        else:
-            timeout_and_auth = 'timeout=10'
-        if fp_ids_found:
-            for _ in range(2):
-                try:
-                    r = requests.get(webapp_url, timeout_and_auth)
-                    http_status_code = r.status_code
-                except:
-                    logger.error('error :: could not retrieve %s' % webapp_url)
-                    sleep(5)
-                    continue
+        if not calculated_feature_file_found:
+            webapp_url = '%s/ionosphere?timestamp=%s&metric=%s&calc_features=true' % (
+                settings.SKYLINE_URL, timestamp, base_name)
+            r = None
+            http_status_code = 0
+            if settings.WEBAPP_AUTH_ENABLED:
+                # 10 second timout is sufficient locally under normal circumstances
+                # as tsfresh has yet to have been take longer than 6 seconds if so
+                # by the time the next request is made, the features file should
+                # exist.  So this is limited psuedo-idempotency.
+                timeout_and_auth = 'timeout=10, auth=(%s, %s))' % (settings.WEBAPP_AUTH_USER, settings.WEBAPP_AUTH_USER_PASSWORD)
+            else:
+                timeout_and_auth = 'timeout=10'
+            if fp_ids_found:
+                for _ in range(2):
+                    try:
+                        r = requests.get(webapp_url, timeout_and_auth)
+                        http_status_code = r.status_code
+                    except:
+                        logger.error('error :: could not retrieve %s' % webapp_url)
+                        sleep(5)
+                        continue
+                    else:
+                        break
                 else:
-                    break
-            else:
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not retrieve %s after 3 tries' % webapp_url)
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not retrieve %s after 3 tries' % webapp_url)
 
-        # Check the features were calculated by the webapp
-        calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
-        calculated_feature_file_found = False
-        if int(http_status_code) == 200:
-            if os.path.isfile(calculated_feature_file):
-                logger.info('calculated features available - %s' % (calculated_feature_file))
-                calculated_feature_file_found = True
-            else:
-                logger.error('error :: calculated features not available - %s' % (calculated_feature_file))
-                # send an Ionosphere alert or add a thunder branch alert, one
-                # one thing at a time.  You cannot rush timeseries.
-                self.remove_metric_check_file(str(metric_check_file))
-                return
+            if int(http_status_code) == 200:
+                if os.path.isfile(calculated_feature_file):
+                    logger.info('calculated features available - %s' % (calculated_feature_file))
+                    calculated_feature_file_found = True
+                else:
+                    logger.error('error :: calculated features not available - %s' % (calculated_feature_file))
+                    # send an Ionosphere alert or add a thunder branch alert, one
+                    # one thing at a time.  You cannot rush timeseries.
+                    self.remove_metric_check_file(str(metric_check_file))
+                    return
 
         # @modified 20161213 - Branch #1790: test_tsfresh
         # TODO: Match the test_tsfresh method
