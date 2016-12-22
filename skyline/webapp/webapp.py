@@ -1046,7 +1046,7 @@ def ionosphere():
 
         if calculate_features or create_feature_profile or fp_view:
             try:
-                fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(requested_timestamp, base_name, context)
+                fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, requested_timestamp, base_name, context)
             except:
                 trace = traceback.format_exc()
                 message = 'failed to calculate features'

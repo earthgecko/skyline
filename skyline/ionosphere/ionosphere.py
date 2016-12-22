@@ -32,6 +32,10 @@ import pandas as pd
 
 import settings
 from skyline_functions import load_metric_vars, fail_check, mysql_select, write_data_to_file, mkdir_p
+# @added 20161221 - calculate features for every anomaly, instead of making the
+# user do it in the frontend or calling the webapp constantly in a cron like
+# manner.  Decouple Ionosphere from the webapp.
+from features_profile import feature_name_id, calculate_features_profile
 
 from database import get_engine, ionosphere_table_meta, metrics_table_meta
 
@@ -454,9 +458,13 @@ class Ionosphere(Thread):
         else:
             fp_ids_found = True
 
+        # @added 20161221 - TODO: why not calculate the features of every
+        # anomaly so the the use does not have to do it and wait for the
+        # features to be calculated.
+
         # @added 20161210 - Branch #922: ionosphere
         #                   Task #1658: Patterning Skyline Ionosphere
-        # Calculate features for the current timeseries is there are fp ids
+        # Calculate features for the current timeseries if there are fp ids
         # Just call it via the webapp... fewer lines of code and already done in
         # webapp/ionosphere_backend.py and webapp/features_proifle.py
         webapp_url = '%s/ionosphere?timestamp=%s&metric=%s&calc_features=true' % (

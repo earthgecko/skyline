@@ -105,7 +105,7 @@ class TestTsfreshBaseline(unittest.TestCase):
         tmp_csv = '%s.tmp.csv' % (self.fname_in)
         t_fname_out = '%s.features.transposed.csv' % self.fname_in
 
-        self.assertTrue(os.path.exists(baseline_ts_json))
+        self.assertTrue(os.path.isfile(baseline_ts_json))
 
         timeseries_json = None
         if os.path.isfile(baseline_ts_json):

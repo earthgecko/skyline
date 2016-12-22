@@ -10,7 +10,6 @@ import shutil
 import glob
 from ast import literal_eval
 
-
 import traceback
 from flask import request
 import requests
