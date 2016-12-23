@@ -422,8 +422,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
     body += '<font color="black">At hours: %s</font><br>' % str(second_order_resolution_in_hours)
     body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
     if settings.IONOSPHERE_ENABLED:
-#        body += '<br>'
-        body += '<h3><font color="black">Ionosphere: </font><font color="#dd3023">training </font><font color="#6698FF">data</font><font color="black"></font></h3>'
+        body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
         ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
             settings.SKYLINE_URL, str(metric[2]), str(metric[1]))
         body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'

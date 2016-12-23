@@ -98,8 +98,24 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     fname_in = ts_csv
     t_fname_out = fname_in + '.features.transposed.csv'
 
-    fp_created = None
     fp_id = None
+    f_calc = 'unknown'
+    if os.path.isfile(features_profile_details_file):
+        current_logger.info('features profile details file exist - %s' % (features_profile_details_file))
+        try:
+            with open(features_profile_details_file, 'r') as f:
+                fp_details_str = f.read()
+            fp_details_array = literal_eval(fp_details_str)
+            f_calc = ' (previously calculated) - %s' % str(fp_details_array[2])
+        except:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            current_logger.error(
+                'error: failed to read from %s' % (features_profile_details_file))
+    else:
+        current_logger.info('No features profile details file exist - %s' % (features_profile_details_file))
+
+    fp_created = None
     if os.path.isfile(features_profile_created_file):
         current_logger.info('features profile created file exist - %s' % (features_profile_created_file))
         try:
@@ -118,7 +134,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     if os.path.isfile(t_fname_out):
         current_logger.info('transposed features already exist - %s' % (t_fname_out))
-        return str(t_fname_out), True, fp_created, fp_id, 'none', 'none', '(previously calculated)'
+        return str(t_fname_out), True, fp_created, fp_id, 'none', 'none', f_calc
 
     start = timer()
     if os.path.isfile(anomaly_json):
@@ -300,7 +316,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     # Create a features profile details file
     try:
         data = '[%s, \'%s\', %s, %s, %s]' % (str(int(time.time())), str(TSFRESH_VERSION), str(calc_time), str(features_count), str(features_sum))
-        write_data_to_file(skyline_app, features_profile_details_file, 'w', data)
+        write_data_to_file(current_skyline_app, features_profile_details_file, 'w', data)
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)

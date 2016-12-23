@@ -404,6 +404,12 @@ def alert_smtp(alert, metric):
         body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(metric[2])
         body += '<font color="black">At hours: %s</font><br>' % str(full_duration_in_hours)
         body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+        if settings.IONOSPHERE_ENABLED:
+            body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
+            ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+                settings.SKYLINE_URL, str(metric[2]), str(metric[1]))
+            body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+            body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
         if redis_image_data:
             body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
                 str(array_amin), str(array_amax), str(mean))
@@ -419,12 +425,6 @@ def alert_smtp(alert, metric):
         if redis_image_data:
             body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
             body += 'however do note that will remove the 3-sigma and mean value too.</font>'
-        if settings.IONOSPHERE_ENABLED:
-            body += '<br>'
-            ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
-                settings.SKYLINE_URL, str(metric[2]), str(metric[1]))
-            body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
-            body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
         body += '<br>'
         body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
     except:

@@ -364,8 +364,12 @@ class Ionosphere(Thread):
             logger.info(
                 'Ionosphere check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
                     metric, str(anomaly_age), str(max_age_seconds)))
-            self.remove_metric_check_file(str(metric_check_file))
-            return
+            with open(metric_check_file, 'rt') as fr:
+                metric_check_file_contents = fr.readlines()
+                logger.info(
+                    'debug :: metric check file contents\n%s' % (str(metric_check_file_contents)))
+                self.remove_metric_check_file(str(metric_check_file))
+                return
 
         # @added 20161222 - ionosphere should extract features for every anomaly
         # check that is sent through and calculate a feature_profile ready for
@@ -480,6 +484,19 @@ class Ionosphere(Thread):
         if os.path.isfile(calculated_feature_file):
             logger.info('calculated features available - %s' % (calculated_feature_file))
             calculated_feature_file_found = True
+
+        if not calculated_feature_file_found:
+            if training_metric:
+                # Allow Graphite resources to be created if they are not an alert
+                # was not sent therefore features do not need to be calculated
+                sleep(5)
+                graphite_file_count = len([f for f in os.listdir(metric_training_data_dir)
+                                           if f.endswith('.png') and
+                                           os.path.isfile(os.path.join(metric_training_data_dir, f))])
+                if graphite_file_count == 0:
+                    logger.info('not calculating features no Graphite alert resources created in %s' % (metric_training_data_dir))
+                    self.remove_metric_check_file(str(metric_check_file))
+                    return
 
         context = skyline_app
         if not calculated_feature_file_found:
@@ -780,8 +797,13 @@ class Ionosphere(Thread):
                 # We only enter this if we didn't 'break' above.
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
-                    p.terminate()
-                    p.join()
+                    try:
+                        p.terminate()
+                        p.join()
+                        logger.info('%s :: killed spin_process process' % (skyline_app))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: killing all spin_process processes')
 
                 check_file_name = os.path.basename(str(metric_check_file))
                 if settings.ENABLE_IONOSPHERE_DEBUG:
@@ -800,5 +822,5 @@ class Ionosphere(Thread):
                     logger.info('debug :: check_file_metricname_dir - %s' % check_file_metricname_dir)
 
                 metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
-
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                break

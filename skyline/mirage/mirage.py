@@ -402,7 +402,8 @@ class Mirage(Thread):
         # If it's anomalous, add it to list
         if anomalous:
             base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-            metric_timestamp = int(timeseries[-1][0])
+            # metric_timestamp = int(timeseries[-1][0])
+            metric_timestamp = int_metric_timestamp
             anomalous_metric = [datapoint, base_name, metric_timestamp]
             self.anomalous_metrics.append(anomalous_metric)
             logger.info('anomaly detected  :: %s with %s' % (metric_vars.metric, metric_vars.value))
@@ -433,7 +434,7 @@ class Mirage(Thread):
                 ionosphere_enabled = False
 
             if determine_anomaly_details:
-                metric_timestamp = str(int(timeseries[-1][0]))
+                # metric_timestamp = str(int(timeseries[-1][0]))
                 from_timestamp = str(int(timeseries[1][0]))
                 timeseries_dir = base_name.replace('.', '/')
 
@@ -470,7 +471,7 @@ class Mirage(Thread):
                                         'added_by = \'%s\'\n' \
                                         'added_at = \'%s\'\n' \
                     % (base_name, str(datapoint), from_timestamp,
-                       metric_timestamp, str(settings.MIRAGE_ALGORITHMS),
+                       str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
                        triggered_algorithms, skyline_app, source,
                        this_host, added_at)
 
@@ -519,7 +520,7 @@ class Mirage(Thread):
                                         'added_by = \'%s\'\n' \
                                         'added_at = \'%s\'\n' \
                     % (base_name, str(datapoint), from_timestamp,
-                       metric_timestamp, str(settings.MIRAGE_ALGORITHMS),
+                       str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
                        triggered_algorithms, crucible_anomaly_dir,
                        skyline_app, metric_timestamp)
 
@@ -563,7 +564,7 @@ class Mirage(Thread):
                 if not last_alert:
                     send_anomalous_metric_to(
                         skyline_app, 'ionosphere', timeseries_dir,
-                        metric_timestamp, base_name, str(datapoint),
+                        str(int_metric_timestamp), base_name, str(datapoint),
                         from_timestamp, triggered_algorithms, timeseries)
                     self.sent_to_ionosphere.append(base_name)
                 else:
