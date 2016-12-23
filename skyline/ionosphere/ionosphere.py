@@ -481,7 +481,7 @@ class Ionosphere(Thread):
             logger.info('calculated features available - %s' % (calculated_feature_file))
             calculated_feature_file_found = True
 
-        comtext = skyline_app
+        context = skyline_app
         if not calculated_feature_file_found:
             try:
                 fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)

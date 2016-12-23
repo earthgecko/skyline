@@ -74,7 +74,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         context, base_name, timestamp))
 
     timeseries_dir = base_name.replace('.', '/')
-    if context == 'training_data':
+    if context == 'training_data' or context == 'ionosphere':
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, timestamp,
             timeseries_dir)
