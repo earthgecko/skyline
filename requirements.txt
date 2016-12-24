@@ -6,7 +6,9 @@ redis==2.10.5
 hiredis==0.2.0
 
 ## python-daemon and deps
-docutils==0.12
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#docutils==0.12
+docutils==0.13.1
 lockfile==0.12.2
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -24,7 +26,9 @@ MarkupSafe==0.23
 Werkzeug==0.11.11
 
 click==6.6
-Flask==0.11.1
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#Flask==0.11.1
+Flask==0.12
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -51,7 +55,9 @@ mock==2.0.0
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
 #numpy==1.11.1
-numpy==1.11.2
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#numpy==1.11.2
+numpy==1.11.3
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -72,7 +78,9 @@ python-dateutil==2.6.0
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
 #pytz==2016.6.1
-pytz==2016.7
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#pytz==2016.7
+pytz==2016.10
 
 cycler==0.10.0
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -110,7 +118,9 @@ msgpack-python==0.4.8
 #requests==2.11.1
 # @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
 #requests==2.12.1
-requests==2.12.3
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#requests==2.12.3
+requests==2.12.4
 
 # ALERTERS - uncomment any alerters you want to enable
 python-simple-hipchat==0.4.0
@@ -118,7 +128,9 @@ python-simple-hipchat==0.4.0
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
 #pygerduty==0.35.0
-pygerduty==0.35.1
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#pygerduty==0.35.1
+pygerduty==0.35.2
 
 # for panorama - direct from MySQL as the package has broken in the context of
 # pip and virtualenv - NOTE: once you have installed this once, if it is run in
@@ -154,8 +166,11 @@ termcolor==1.1.0
 
 # @added 20161127 - Branch #922: ionosphere
 ## pytest and deps
-py==1.4.31
-pytest==3.0.4
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#py==1.4.31
+#pytest==3.0.4
+py==1.4.32
+pytest==3.0.5
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
