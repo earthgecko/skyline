@@ -920,7 +920,7 @@ class Crucible(Thread):
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # p.join()
 
             while os.path.isfile(metric_check_file):
                 sleep(1)

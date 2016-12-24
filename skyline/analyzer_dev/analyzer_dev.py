@@ -369,7 +369,7 @@ class Analyzer(Thread):
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # p.join()
 
             # Grab data from the queue and populate dictionaries
             exceptions = dict()

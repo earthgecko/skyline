@@ -149,13 +149,13 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
                 'error: failed to read timeseries data from %s' % (anomaly_json))
             fail_msg = 'error: failed to read timeseries data from %s' % anomaly_json
             end = timer()
-            return 'error', False, fp_created, fp_id, fail_msg, trace
+            return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
     else:
         trace = 'none'
         fail_msg = 'error: file not found - %s' % (anomaly_json)
         current_logger.error(fail_msg)
         end = timer()
-        return 'error', False, fp_created, fp_id, fail_msg, trace, 'unknown'
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
@@ -181,6 +181,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     try:
         df = pd.read_csv(ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
+        current_logger.info('DataFrame created with %s' % ts_csv)
     except:
         trace = traceback.format_exc()
         current_logger.error(trace)
@@ -190,7 +191,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             os.remove(ts_csv)
             current_logger.info('removed %s' % ts_csv)
         end = timer()
-        return 'error', False, fp_created, fp_id, fail_msg, trace, 'unknown'
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
 # @added 20161207 - Task #1658: Patterning Skyline Ionosphere
 # Coverting the Dataframe types to suit MySQL data types
@@ -217,27 +218,29 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             os.remove(ts_csv)
             current_logger.info('removed %s' % ts_csv)
         end = timer()
-        return 'error', False, fp_created, fp_id, fail_msg, trace, 'unknown'
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     df.columns = ['metric', 'timestamp', 'value']
 
     start_feature_extraction = timer()
+    current_logger.info('starting extract_features')
     try:
         df_features = extract_features(df, column_id='metric', column_sort='timestamp', column_kind=None, column_value=None)
+        current_logger.info('features extracted from %s data' % ts_csv)
     except:
         trace = traceback.print_exc()
         current_logger.debug(trace)
         fail_msg = 'error: extracting features with tsfresh from - %s' % ts_csv
         current_logger.error('%s' % fail_msg)
         end_feature_extraction = timer()
-        current_logger.debug(
-            'debug :: feature extraction failed in %.6f seconds' % (
+        current_logger.info(
+            'feature extraction failed in %.6f seconds' % (
                 end_feature_extraction - start_feature_extraction))
         if os.path.isfile(ts_csv):
             os.remove(ts_csv)
             current_logger.info('removed %s' % ts_csv)
         end = timer()
-        return 'error', False, fp_created, fp_id, fail_msg, trace, 'unknown'
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     end_feature_extraction = timer()
     feature_extraction_time = end_feature_extraction - start_feature_extraction
@@ -261,7 +264,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             os.remove(ts_csv)
             current_logger.info('removed %s' % ts_csv)
         end = timer()
-        return 'error', False, fp_created, fp_id, fail_msg, trace, 'unknown'
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     # Create transposed features csv
     t_fname_out = fname_in + '.features.transposed.csv'
@@ -276,7 +279,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             os.remove(ts_csv)
             current_logger.info('removed %s' % ts_csv)
         end = timer()
-        return 'error', False, fp_created, fp_id, fail_msg, trace, 'unknown'
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     # Calculate the count and sum of the features values
     try:

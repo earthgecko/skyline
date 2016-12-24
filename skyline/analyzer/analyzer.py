@@ -161,6 +161,9 @@ class Analyzer(Thread):
         if LOCAL_DEBUG:
             logger.info('debug :: Memory usage spin_process start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+        # TESTING removal of p.join() from p.terminate()
+        # sleep(4)
+
         # @modified 20160801 - Adding additional exception handling to Analyzer
         # Check the unique_metrics list is valid
         try:
@@ -544,7 +547,7 @@ class Analyzer(Thread):
                 logger.info('%s :: timed out, killing the spawn_trigger_alert process' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # p.join()
 
         # Initiate the algorithm timings if Analyzer is configured to send the
         # algorithm_breakdown metrics with ENABLE_ALGORITHM_RUN_METRICS
@@ -732,7 +735,9 @@ class Analyzer(Thread):
             # Self monitor processes and terminate if any spin_process has run
             # for longer than 180 seconds - 20160512 @earthgecko
             p_starts = time()
+            # TESTING p.join removal
             while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
+            # while time() - p_starts <= 1:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)
@@ -745,8 +750,10 @@ class Analyzer(Thread):
                 # We only enter this if we didn't 'break' above.
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
+                    logger.info('%s :: killing spin_process process' % (skyline_app))
                     p.terminate()
-                    p.join()
+                    # p.join()
+                    logger.info('%s :: killed spin_process process' % (skyline_app))
 
             # Log the last reported error by any algorithms that errored in the
             # spawned processes from algorithms.py

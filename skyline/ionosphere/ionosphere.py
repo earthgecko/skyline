@@ -799,7 +799,7 @@ class Ionosphere(Thread):
                 for p in pids:
                     try:
                         p.terminate()
-                        p.join()
+                        # p.join()
                         logger.info('%s :: killed spin_process process' % (skyline_app))
                     except:
                         logger.error(traceback.format_exc())
@@ -823,4 +823,3 @@ class Ionosphere(Thread):
 
                 metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
-                break

@@ -270,14 +270,13 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
     if not os.path.exists(failed_check_dir):
         try:
             mkdir_p(failed_check_dir)
-            if settings.ENABLE_PANORAMA_DEBUG or settings.ENABLE_CRUCIBLE_DEBUG:
-                current_logger.info(
-                    'created failed_check_dir - %s' % str(failed_check_dir))
+            current_logger.info(
+                'created failed_check_dir - %s' % str(failed_check_dir))
         except:
+            current_logger.info(traceback.format_exc())
             current_logger.error(
                 'error :: failed to create failed_check_dir - %s' %
                 str(failed_check_dir))
-            current_logger.info(traceback.format_exc())
             return False
 
     check_file_name = os.path.basename(str(check_file_to_fail))
@@ -293,9 +292,9 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
         current_logger.info('moved check file to - %s' % failed_check_file)
         return True
     except OSError:
+        current_logger.info(traceback.format_exc())
         msg = 'failed to move check file to -%s' % failed_check_file
         current_logger.error('error :: %s' % msg)
-        current_logger.info(traceback.format_exc())
         pass
 
     return False

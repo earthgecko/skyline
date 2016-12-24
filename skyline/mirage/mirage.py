@@ -659,7 +659,7 @@ class Mirage(Thread):
                 logger.info('%s :: timed out, killing the spawn_trigger_alert process' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # p.join()
 
         """
         DEVELOPMENT ONLY
@@ -802,7 +802,7 @@ class Mirage(Thread):
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # p.join()
 
             # Log the last reported error by any algorithms that errored in the
             # spawned processes from algorithms.py
