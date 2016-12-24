@@ -874,7 +874,7 @@ class Panorama(Thread):
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # p.join()
 
                 check_file_name = os.path.basename(str(metric_check_file))
                 if settings.ENABLE_PANORAMA_DEBUG:
@@ -895,3 +895,8 @@ class Panorama(Thread):
                 metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
 
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()

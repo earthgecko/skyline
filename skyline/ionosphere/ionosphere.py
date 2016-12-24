@@ -31,7 +31,9 @@ import numpy as np
 import pandas as pd
 
 import settings
-from skyline_functions import load_metric_vars, fail_check, mysql_select, write_data_to_file, mkdir_p
+from skyline_functions import (
+    load_metric_vars, fail_check, mysql_select, write_data_to_file, mkdir_p,
+    send_graphite_metric)
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
 # manner.  Decouple Ionosphere from the webapp.
@@ -102,6 +104,7 @@ class Ionosphere(Thread):
         self.anomalous_metrics = Manager().list()
         self.metric_variables = Manager().list()
         self.mysql_conn = mysql.connector.connect(**config)
+        self.sent_to_panorama = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -228,8 +231,7 @@ class Ionosphere(Thread):
         """
 
         child_process_pid = os.getpid()
-        if settings.ENABLE_IONOSPHERE_DEBUG:
-            logger.info('debug :: child_process_pid - %s' % str(child_process_pid))
+        logger.info('child_process_pid - %s' % str(child_process_pid))
 
         if settings.ENABLE_IONOSPHERE_DEBUG:
             logger.info('debug :: processing metric check - %s' % metric_check_file)
@@ -501,6 +503,7 @@ class Ionosphere(Thread):
                     logger.info('anomaly Graphite alert resources found in %s' % (metric_training_data_dir))
 
         context = skyline_app
+        f_calc = None
         if not calculated_feature_file_found:
             try:
                 fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
@@ -513,6 +516,10 @@ class Ionosphere(Thread):
         if os.path.isfile(calculated_feature_file):
             logger.info('calculated features available - %s' % (calculated_feature_file))
             calculated_feature_file_found = True
+            if isinstance(f_calc, float):
+                f_calc_time = '%.2f' % f_calc
+                send_metric_name = '%s.features_calculation_time' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, f_calc_time)
             if training_metric:
                 logger.info('training metric done')
                 self.remove_metric_check_file(str(metric_check_file))
@@ -825,3 +832,8 @@ class Ionosphere(Thread):
 
                 metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()

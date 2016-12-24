@@ -550,6 +550,11 @@ class Analyzer(Thread):
                     p.terminate()
                     # p.join()
 
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spawn_trigger_alert - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()
+
         # Initiate the algorithm timings if Analyzer is configured to send the
         # algorithm_breakdown metrics with ENABLE_ALGORITHM_RUN_METRICS
         algorithm_tmp_file_prefix = settings.SKYLINE_TMP_DIR + '/' + skyline_app + '.'
@@ -737,8 +742,8 @@ class Analyzer(Thread):
             # for longer than 180 seconds - 20160512 @earthgecko
             p_starts = time()
             # TESTING p.join removal
-            while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
             # while time() - p_starts <= 1:
+            while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)
@@ -755,6 +760,11 @@ class Analyzer(Thread):
                     p.terminate()
                     # p.join()
                     logger.info('%s :: killed spin_process process' % (skyline_app))
+
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()
 
             # Log the last reported error by any algorithms that errored in the
             # spawned processes from algorithms.py

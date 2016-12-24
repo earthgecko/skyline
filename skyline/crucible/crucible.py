@@ -922,5 +922,10 @@ class Crucible(Thread):
                     p.terminate()
                     # p.join()
 
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()
+
             while os.path.isfile(metric_check_file):
                 sleep(1)

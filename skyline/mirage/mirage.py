@@ -34,7 +34,9 @@ from shutil import rmtree
 import settings
 # @modified 20160922 - Branch #922: Ionosphere
 # Added the send_anomalous_metric_to skyline_functions.py
-from skyline_functions import write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to, mkdir_p
+from skyline_functions import (
+    write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to,
+    mkdir_p, send_graphite_metric)
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
@@ -445,6 +447,7 @@ class Mirage(Thread):
             except Exception as e:
                 logger.error('error :: could not query Redis for cache_key')
 
+            added_at = str(int(time()))
             # If Panorama is enabled - create a Panorama check
             if settings.PANORAMA_ENABLED:
                 if not os.path.exists(settings.PANORAMA_CHECK_PATH):
@@ -458,7 +461,6 @@ class Mirage(Thread):
                 # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
                 # single quoting results in the desired,
                 # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
-                added_at = str(int(time()))
                 source = 'graphite'
                 panaroma_anomaly_data = 'metric = \'%s\'\n' \
                                         'value = \'%s\'\n' \
@@ -492,7 +494,6 @@ class Mirage(Thread):
             # If crucible is enabled - save timeseries and create a
             # crucible check
             if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
-                metric_timestamp = str(int(timeseries[-1][0]))
                 from_timestamp = str(int(timeseries[1][0]))
                 timeseries_dir = base_name.replace('.', '/')
                 crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
@@ -522,7 +523,7 @@ class Mirage(Thread):
                     % (base_name, str(datapoint), from_timestamp,
                        str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
                        triggered_algorithms, crucible_anomaly_dir,
-                       skyline_app, metric_timestamp)
+                       skyline_app, added_at)
 
                 # Create an anomaly file with details about the anomaly
                 crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, base_name)
@@ -661,6 +662,11 @@ class Mirage(Thread):
                     p.terminate()
                     # p.join()
 
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()
+
         """
         DEVELOPMENT ONLY
 
@@ -772,7 +778,9 @@ class Mirage(Thread):
             spawned_pids = []
             pid_count = 0
             MIRAGE_PROCESSES = 1
-            run_timestamp = int(now)
+            # @modified 20161224 - send mirage metrics to graphite
+            # run_timestamp = int(now)
+            run_timestamp = int(time())
             for i in range(1, MIRAGE_PROCESSES + 1):
                 p = Process(target=self.spin_process, args=(i, run_timestamp))
                 pids.append(p)
@@ -803,6 +811,11 @@ class Mirage(Thread):
                 for p in pids:
                     p.terminate()
                     # p.join()
+
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()
 
             # Log the last reported error by any algorithms that errored in the
             # spawned processes from algorithms.py
@@ -937,33 +950,45 @@ class Mirage(Thread):
                                     logger.error('error :: could not send alert: %s' % e)
 
             # Log progress
-
             if len(self.anomalous_metrics) > 0:
                 logger.info('seconds since last anomaly :: %.2f' % (time() - now))
                 logger.info('total anomalies   :: %d' % len(self.anomalous_metrics))
                 logger.info('exception stats   :: %s' % exceptions)
                 logger.info('anomaly breakdown :: %s' % anomaly_breakdown)
 
-                if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
-                    try:
-                        sent_to_crucible = str(len(self.sent_to_crucible))
-                    except:
-                        sent_to_crucible = '0'
-                    logger.info('sent_to_crucible  :: %s' % sent_to_crucible)
+            # Log to Graphite
+            run_time = time() - run_timestamp
+            logger.info('seconds to run    :: %.2f' % run_time)
+            graphite_run_time = '%.2f' % run_time
+            send_metric_name = skyline_app_graphite_namespace + '.run_time'
+            send_graphite_metric(skyline_app, send_metric_name, graphite_run_time)
 
-                if settings.PANORAMA_ENABLED:
-                    try:
-                        sent_to_panorama = str(len(self.sent_to_panorama))
-                    except:
-                        sent_to_panorama = '0'
-                    logger.info('sent_to_panorama  :: %s' % sent_to_panorama)
+            if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
+                try:
+                    sent_to_crucible = str(len(self.sent_to_crucible))
+                except:
+                    sent_to_crucible = '0'
+                logger.info('sent_to_crucible  :: %s' % sent_to_crucible)
+                send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
 
-                if settings.IONOSPHERE_ENABLED:
-                    try:
-                        sent_to_ionosphere = str(len(self.sent_to_ionosphere))
-                    except:
-                        sent_to_ionosphere = '0'
-                    logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
+            if settings.PANORAMA_ENABLED:
+                try:
+                    sent_to_panorama = str(len(self.sent_to_panorama))
+                except:
+                    sent_to_panorama = '0'
+                logger.info('sent_to_panorama  :: %s' % sent_to_panorama)
+                send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
+
+            if settings.IONOSPHERE_ENABLED:
+                try:
+                    sent_to_ionosphere = str(len(self.sent_to_ionosphere))
+                except:
+                    sent_to_ionosphere = '0'
+                logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
+                send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
 
             # Reset counters
             self.anomalous_metrics[:] = []
