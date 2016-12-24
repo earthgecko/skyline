@@ -161,7 +161,9 @@ scikit_learn==0.18.1
 future==0.16.0
 # @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
 #tsfresh==0.1.2
-tsfresh==0.3.0
+# @modified 20161224 - Task #1758: Update deps in Ionosphere
+#tsfresh==0.3.0
+tsfresh==0.3.1
 termcolor==1.1.0
 
 # @added 20161127 - Branch #922: ionosphere
