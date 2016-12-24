@@ -1,3 +1,4 @@
+from __future__ import division
 from smtplib import SMTP
 import sys
 python_version = int(sys.version_info[0])

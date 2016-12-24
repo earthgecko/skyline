@@ -1,3 +1,4 @@
+from __future__ import division
 import logging
 from Queue import Empty
 from redis import StrictRedis

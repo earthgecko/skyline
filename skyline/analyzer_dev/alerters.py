@@ -1,3 +1,4 @@
+from __future__ import division
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
