@@ -12,6 +12,11 @@ NOTES:
 - anomaly_timestamp - is limited by the extent of unix data, it does not suit
   old historical timestamp, e.g. 72 million years ago SN 2016coj went supernova,
   just a long term wiider consideration.
+- z_fp_ tables are InnoDB tables and each metric that has a feature profile
+  created has a z_fp_<metric_id> and a z_ts_<metric_id> table created, therefore
+  if you have 10000 metrics and you created features profile for each one, there
+  would be 20000 tables.  Bear in mind, that not all metrics will have features
+  profiles created as YOU have to manually create each one.
 
 */
 
@@ -201,7 +206,13 @@ CREATE TABLE IF NOT EXISTS `z_fp_metricid` (
   `feature_id` INT(5) NOT NULL COMMENT 'the id of the TSFRESH_FEATURES feature name',
   `value` DOUBLE DEFAULT NULL COMMENT 'the calculated value of the feature',
   PRIMARY KEY (id),
-  INDEX `fp` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+# @modified 20161224 - Task #1812: z_fp table type
+# Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
+# up, there can be LOTS of file_per_table z_fp_ tables/files without
+# the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
+# in the table cache as required.
+#  INDEX `fp` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+  INDEX `fp` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=InnoDB;
 
 /*
 This is an example metric timeseries table the Ionosphere generated
@@ -213,7 +224,13 @@ CREATE TABLE IF NOT EXISTS `z_ts_metricid` (
   `timestamp` INT(10) NOT NULL COMMENT 'a 10 digit unix epoch timestamp',
   `value` DOUBLE DEFAULT NULL COMMENT 'value',
   PRIMARY KEY (id),
-  INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+# @modified 20161224 - Task #1812: z_fp table type
+# Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
+# up, there can be LOTS of file_per_table z_fp_ tables/files without
+# the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
+# in the table cache as required.
+#  INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+  INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=InnoDB;
 
 # mariadb
 # https://mariadb.com/kb/en/mariadb/installing-mariadb-alongside-mysql/

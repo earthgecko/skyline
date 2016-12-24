@@ -494,9 +494,11 @@ class Ionosphere(Thread):
                                            if f.endswith('.png') and
                                            os.path.isfile(os.path.join(metric_training_data_dir, f))])
                 if graphite_file_count == 0:
-                    logger.info('not calculating features no Graphite alert resources created in %s' % (metric_training_data_dir))
+                    logger.info('not calculating features no anomaly Graphite alert resources created in %s' % (metric_training_data_dir))
                     self.remove_metric_check_file(str(metric_check_file))
                     return
+                else:
+                    logger.info('anomaly Graphite alert resources found in %s' % (metric_training_data_dir))
 
         context = skyline_app
         if not calculated_feature_file_found:
