@@ -12,7 +12,8 @@ from timeit import default_timer as timer
 import numpy as np
 import pandas as pd
 
-from tsfresh import extract_features, extract_relevant_features, select_features
+from tsfresh.feature_extraction import (
+    extract_features, ReasonableFeatureExtractionSettings)
 
 import settings
 import skyline_version
@@ -225,7 +226,22 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     start_feature_extraction = timer()
     current_logger.info('starting extract_features')
     try:
-        df_features = extract_features(df, column_id='metric', column_sort='timestamp', column_kind=None, column_value=None)
+        # @modified 20161226 - Bug #1822: tsfresh extract_features process stalling
+        # Changed to use the new ReasonableFeatureExtractionSettings that was
+        # introduced in tsfresh-0.4.0 to exclude the computationally high cost
+        # of extracting features from very static timeseries that has little to
+        # no variation is the values, which results in features taking up to
+        # almost 600 seconds to calculate on a timeseries of length 10075
+        # (168h - 1 datapoint per 60s)
+        # In terms of inline feature calculatation, always exclude
+        # high_comp_cost features.
+        # df_features = extract_features(df, column_id='metric', column_sort='timestamp', column_kind=None, column_value=None)
+        tsf_settings = ReasonableFeatureExtractionSettings()
+        # Disable tqdm progress bar
+        tsf_settings.disable_progressbar = True
+        df_features = extract_features(
+            df, column_id='metric', column_sort='timestamp', column_kind=None,
+            column_value=None, feature_extraction_settings=tsf_settings)
         current_logger.info('features extracted from %s data' % ts_csv)
     except:
         trace = traceback.print_exc()

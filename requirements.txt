@@ -163,7 +163,15 @@ future==0.16.0
 #tsfresh==0.1.2
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
 #tsfresh==0.3.0
-tsfresh==0.3.1
+# @modified 20161226 - Task #1758: Update deps in Ionosphere
+#                      Bug #1822: tsfresh extract_features process stalling
+# Making use of ReasonableFeatureExtractionSettings in 0.4.0 to overcome the
+# computationally high cost of extracting features from very static timeseries
+# that have little to no variation is the values, which results in features
+# taking up to almost 600 seconds to calculate on a timeseries of length 10075
+# (168h - 1 datapoint per 60s)
+#tsfresh==0.3.1
+tsfresh==0.4.0
 termcolor==1.1.0
 
 # @added 20161127 - Branch #922: ionosphere
