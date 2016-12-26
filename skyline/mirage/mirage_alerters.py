@@ -235,7 +235,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
             # Create Ionosphere redis timeseries json
             json_file = '%s/%s.%s.redis.%sh.json' % (
                 training_data_dir, base_name, skyline_app,
-                str(full_duration_in_hours))
+                str(int(full_duration_in_hours)))
             timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
             try:
                 write_data_to_file(skyline_app, json_file, 'w', timeseries_json)
@@ -294,7 +294,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
                 mean_series = None
 
         if mean_series:
-            graph_title = 'Skyline Mirage - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (full_duration_in_hours, metric[1], metric[0])
+            graph_title = 'Skyline Mirage - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (str(int(full_duration_in_hours)), metric[1], metric[0])
             if python_version == 3:
                 buf = io.StringIO()
             else:
@@ -371,7 +371,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
                     if os.path.exists(training_data_dir):
                         training_data_redis_image = '%s/%s.%s.redis.plot.%sh.png' % (
                             training_data_dir, base_name, skyline_app,
-                            str(full_duration_in_hours))
+                            str(int(full_duration_in_hours)))
                         try:
                             plt.savefig(training_data_redis_image, format='png')
                             logger.info(
