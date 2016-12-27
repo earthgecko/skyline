@@ -1358,16 +1358,23 @@ SKYLINE_URL = 'http://skyline.example.com:8080'
 :vartype SKYLINE_URL: str
 """
 
-TSFRESH_VERSION = '0.3.0'
+TSFRESH_VERSION = '0.4.0'
 """
 :var TSFRESH_VERSION: The version of tsfresh installed by pip, this is important
     in terms of feature extraction baselines
 :vartype TSFRESH_VERSION: str
 """
 
-TSFRESH_BASELINE_VERSION = '0.3.0'
+TSFRESH_BASELINE_VERSION = '0.4.0'
 """
 :var TSFRESH_BASELINE_VERSION: The version of tsfresh installed by pip, this is important
     in terms of feature extraction baselines
 :vartype TSFRESH_BASELINE_VERSION: str
+"""
+
+IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1
+"""
+:var IONOSPHERE_FEATURES_PERCENT_SIMILAR: The percentage difference between a
+    features profile sum and a calculated profile sum to result in a match.
+:vartype TSFRESH_VERSION: int
 """

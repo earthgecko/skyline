@@ -33,7 +33,7 @@ import pandas as pd
 import settings
 from skyline_functions import (
     load_metric_vars, fail_check, mysql_select, write_data_to_file, mkdir_p,
-    send_graphite_metric)
+    send_graphite_metric. send_anomalous_metric_to)
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
 # manner.  Decouple Ionosphere from the webapp.
@@ -467,7 +467,6 @@ class Ionosphere(Thread):
                 connection.close()
                 fp_count = len(fp_ids)
                 logger.info('determined %s fp ids for %s' % (str(fp_count), base_name))
-                return False
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: could not determine fp ids from DB for %s' % base_name)
@@ -596,14 +595,66 @@ class Ionosphere(Thread):
             return
 
         # Compare calculated features to feature values for each fp id
-        fp_ids_found = False
         not_anomalous = False
         if calculated_feature_file_found:
-            for fp_ip in fp_ids:
+            for fp_id in fp_ids:
+                features_count = None
+                fp_features = []
                 # Get features for fp_id from z_fp_<metric_id> table.
+                try:
+                    metric_fp_table = 'z_fp_%s' % str(metric_id)
+                    stmt = 'select feature_id, value from %s where fp_id=%s' % (metric_fp_table, str(fp_id))
+                    connection = engine.connect()
+                    for row in engine.execute(stmt):
+                        fp_feature_id = int(row['feature_id'])
+                        fp_value = float(row['value'])
+                        fp_features.append([fp_feature_id, fp_value])
+                    connection.close()
+                    features_count = len(fp_features)
+                    logger.info('determined %s features for fp_id %s' % (str(features_count), str(fp_id)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not determine features from DB for %s' % str(fp_id))
+
+                # Convert feature names in calculated_features to their id
+                logger.info('converting tsfresh feature names to Skyline feature ids')
+                calc_features_by_id = []
+                for feature_name, value in calculated_features:
+                    for skyline_feature_id, name in TSFRESH_FEATURES:
+                        if feature_name == name:
+                            skyline_feature_id = int(feature_id)
+                            calc_features_by_id.append([skyline_feature_id, float(value)])
+
                 # Determine what features each data has, extract only values for
                 # common features.
+                logger.info('determining common features')
+                relevant_fp_feature_values = []
+                relevant_calc_feature_values = []
+                for skyline_feature_id, value in calc_features_by_id:
+                    for fp_feature_id, fp_value in fp_features:
+                        if skyline_feature_id == fp_feature_id:
+                            relevant_fp_feature_values.append(fp_value)
+                            relevant_calc_feature_values.append(value)
+
                 # Determine the sum of each set
+                relevant_fp_feature_values_count = len(relevant_fp_feature_values)
+                relevant_calc_feature_values_count = len(relevant_calc_feature_values)
+                if relevant_fp_feature_values_count != relevant_calc_feature_values_count:
+                    logger.error('error :: mismatch in number of common features')
+                    logger.error('error :: relevant_fp_feature_values_count - %s' % str(relevant_fp_feature_values_count))
+                    logger.error('error :: relevant_calc_feature_values_count - %s' % str(relevant_calc_feature_values_count))
+                    continue
+                else:
+                    logger.info('comparing on %s common features' % str(relevant_fp_feature_values_count))
+
+                if relevant_fp_feature_values_count == 0:
+                    logger.error('error :: relevant_fp_feature_values_count is zero')
+                    continue
+
+                # Determine the sum of each set
+                sum_fp_values = sum(relevant_fp_feature_values)
+                sum_calc_values = sum(relevant_calc_feature_values)
+
                 # Determine whether each set is positive or negative
                 # # if the same carry on
                 # # if both negative, make then both positive
@@ -611,20 +662,67 @@ class Ionosphere(Thread):
                 # Determine whether each set is positive or negative
                 # # if the same carry on
                 # # if both negative, make then both positive postive_sums
+                fp_sum = [sum_fp_values]
+                calc_sum = [sum_calc_values]
+                almost_equal = None
+                try:
+                    np.testing.assert_array_almost_equal(fp_sum, calc_sum)
+                    almost_equal = True
+                except:
+                    almost_equal = False
+
+                if almost_equal:
+                    not_anomalous = True
+                    logger.info('common features sums are almost equal, not anomalous' % str(relevant_fp_feature_values_count))
+
+                sums_array = np.array([fp_sum, calc_sum], dtype=float)
+                try:
+                    calc_percent_different = np.diff(a) / a[:-1] * 100.
+                    percent_different = calc_percent_different[0]
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to calculate percent_different')
+                    continue
+
                 # if diff_in_sums <= 1%:
-                #     log
-                #     update matched_count in ionosphere_table
-                #     not_anomalous = True
+                if percent_different < 0:
+                    new_pdiff = percent_different * -1
+                    percent_different = new_pdiff
+
+                if percent_different < settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:
+                    not_anomalous = True
+                    # log
+                    logger.info('not anomalous - features profile match - %s' % base_name)
+                    logger.info(
+                        'calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
+                        (str(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR),
+                            str(fp_id), str(percent_different)))
+                    # update matched_count in ionosphere_table
+                    matched_timestamp = time()
+                    try:
+                        connection = engine.connect()
+                        connection.execute(
+                            ionosphere_table.update(
+                                ionosphere_table.c.id == fp_id).
+                            values(matched_count=ionosphere_table.c.matched_count + 1,
+                                   last_matched=matched_timestamp))
+                        connection.close()
+                        logger.info('updated matched_count for %s' % str(fp_id))
+                        return False
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not update matched_count and last_matched for %s ' % str(fp_id))
+
                 # https://docs.scipy.org/doc/numpy/reference/generated/numpy.testing.assert_almost_equal.html
                 # @added 20161214 - Add a between timeframe option, e.g. if
                 # fp match, only see this as not anomalous if hour (and or min)
                 # is between x and y - handle rollovers, cron log archives, etc.
-                logger.debug('debug :: %s is feature profile for %s' % (str(fp_id), base_name))
-                fp_ids_found = True
+                logger.info('debug :: %s is a features profile for %s' % (str(fp_id), base_name))
 
-            # if not not_anomalous:
-            #     log anomaly
-            #     send to panorama
+            if not not_anomalous:
+                logger.info('anomalous - no feature profiles were matched - %s' % base_name)
+                # send to panorama
+
             #     send anomalous count metric to graphite
             #     alert
 

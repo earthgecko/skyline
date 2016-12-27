@@ -46,7 +46,7 @@ except:
     full_duration_seconds = 86400
 
 full_duration_in_hours = full_duration_seconds / 60 / 60
-exclude_redis_json = 'redis.%sh.json' % str(full_duration_in_hours)
+exclude_redis_json = 'redis.%sh.json' % str(int(full_duration_in_hours))
 
 
 def ionosphere_get_metrics_dir(requested_timestamp, context):

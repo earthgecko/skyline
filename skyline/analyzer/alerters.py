@@ -133,12 +133,12 @@ def alert_smtp(alert, metric):
     if settings.GRAPHITE_PORT != '':
         link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            settings.GRAPHITE_PORT, full_duration_in_hours, metric[1],
+            settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1],
             settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
         link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
     content_id = metric[1]
@@ -149,6 +149,9 @@ def alert_smtp(alert, metric):
             if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                 logger.info('debug :: alert_smtp - image data OK')
         except urllib2.URLError:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_smtp - failed to get image graph')
+            logger.error('error :: alert_smtp - %s' % str(link))
             image_data = None
             if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                 logger.info('debug :: alert_smtp - image data None')

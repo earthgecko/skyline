@@ -140,9 +140,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
     graph_title = '&title=%s' % graph_title_string
 
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
     image_data = None
@@ -152,6 +152,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
             if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                 logger.info('debug :: alert_smtp - image data OK')
         except urllib2.URLError:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_smtp - failed to get image graph')
+            logger.error('error :: alert_smtp - %s' % str(link))
             image_data = None
             if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                 logger.info('debug :: alert_smtp - image data None')
@@ -169,7 +172,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
             # Create Ionosphere Graphite image
             graphite_image_file = '%s/%s.%s.graphite.%sh.png' % (
                 training_data_dir, base_name, skyline_app,
-                second_order_resolution_in_hours)
+                str(second_order_resolution_in_hours))
             try:
                 write_data_to_file(skyline_app, graphite_image_file, 'w', image_data)
                 logger.info(
