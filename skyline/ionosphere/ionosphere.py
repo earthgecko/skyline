@@ -33,7 +33,7 @@ import pandas as pd
 import settings
 from skyline_functions import (
     load_metric_vars, fail_check, mysql_select, write_data_to_file, mkdir_p,
-    send_graphite_metric. send_anomalous_metric_to)
+    send_graphite_metric, send_anomalous_metric_to)
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
 # manner.  Decouple Ionosphere from the webapp.
