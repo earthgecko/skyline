@@ -677,11 +677,13 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
 
     # Set ionosphere_enabled for the metric
     try:
-        update_statement = 'UPDATE metrics SET ionosphere_enabled=1 WHERE id=%s' % str(metrics_id)
+        # update_statement = 'UPDATE metrics SET ionosphere_enabled=1 WHERE id=%s' % str(metrics_id)
         connection = engine.connect()
         # result = connection.execute('UPDATE metrics SET ionosphere_enabled=1 WHERE id=%s' % str(metrics_id))
-        connection.execute(ts_metric_table.insert(), insert_statement)
-
+        # connection.execute(ts_metric_table.insert(), insert_statement)
+        connection.execute(
+            metrics_table.update(
+                metrics_table.c.id == metrics_id).values(ionosphere_enabled=1))
         connection.close()
         logger.info('ionosphere_enabled set on metric id: %s' % str(metrics_id))
     except:
