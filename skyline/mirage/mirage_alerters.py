@@ -18,16 +18,19 @@ import datetime as dt
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.pylab import rcParams
-from matplotlib.dates import DateFormatter
-import io
-import numpy as np
-import pandas as pd
-import syslog
-import os.path
-import sys
-import resource
+# @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+# Handle flake8 E402
+if True:
+    import matplotlib.pyplot as plt
+    from matplotlib.pylab import rcParams
+    from matplotlib.dates import DateFormatter
+    import io
+    import numpy as np
+    import pandas as pd
+    import syslog
+    import os.path
+    import sys
+    import resource
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -42,9 +45,12 @@ if python_version == 3:
     from email.mime.text import MIMEText
     from email.mime.image import MIMEImage
 
-import settings
-import skyline_version
-from skyline_functions import write_data_to_file
+# @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+# Handle flake8 E402
+if True:
+    import settings
+    import skyline_version
+    from skyline_functions import write_data_to_file
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -133,7 +139,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
         recipients = [recipients]
 
     unencoded_graph_title = 'Skyline Mirage - ALERT at %s hours - anomalous data point - %s' % (
-        second_order_resolution_in_hours, metric[0])
+        str(int(second_order_resolution_in_hours)), metric[0])
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
@@ -172,7 +178,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
             # Create Ionosphere Graphite image
             graphite_image_file = '%s/%s.%s.graphite.%sh.png' % (
                 training_data_dir, base_name, skyline_app,
-                str(second_order_resolution_in_hours))
+                str(int(second_order_resolution_in_hours)))
             try:
                 write_data_to_file(skyline_app, graphite_image_file, 'w', image_data)
                 logger.info(

@@ -19,17 +19,20 @@ import datetime as dt
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.pylab import rcParams
-from matplotlib.dates import DateFormatter
-import io
-import numpy as np
-import pandas as pd
-import syslog
+# @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+# Handle flake8 E402
+if True:
+    import matplotlib.pyplot as plt
+    from matplotlib.pylab import rcParams
+    from matplotlib.dates import DateFormatter
+    # import io
+    import numpy as np
+    import pandas as pd
+    import syslog
 
-import os.path
-import sys
-import resource
+    import os.path
+    import sys
+    import resource
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -44,8 +47,11 @@ if python_version == 3:
     from email.mime.text import MIMEText
     from email.mime.image import MIMEImage
 
-import settings
-import skyline_version
+# @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+# Handle flake8 E402
+if True:
+    import settings
+    import skyline_version
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -123,6 +129,8 @@ def alert_smtp(alert, metric):
     # Backwards compatibility
     if type(recipients) is str:
         recipients = [recipients]
+
+    base_name = str(metric[1])
 
     unencoded_graph_title = 'Skyline Analyzer - ALERT at %s hours %s - %s' % (full_duration_in_hours, metric[1], metric[0])
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
@@ -466,8 +474,6 @@ def alert_smtp(alert, metric):
                         plot_image_data = None
 
                     # @added 20161124 - Branch #922: ionosphere
-
-
                     msg_plot_attachment = MIMEImage(plot_image_data)
                     msg_plot_attachment.add_header('Content-ID', '<%s>' % redis_graph_content_id)
                     msg.attach(msg_plot_attachment)

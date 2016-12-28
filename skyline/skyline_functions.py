@@ -615,11 +615,16 @@ def get_graphite_metric(
 
 # @added 20160922 - Branch #922: Ionosphere
 # Added the send_anomalous_metric_to function for Analyzer and Mirage
+# @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
+# Added full_duration which needs to be recorded to allow Mirage metrics
+# to be profiled on Redis timeseries data at FULL_DURATION
+# e.g. mirage.redis.24h.json
 
 
 def send_anomalous_metric_to(
     current_skyline_app, send_to_app, timeseries_dir, metric_timestamp,
-        base_name, datapoint, from_timestamp, triggered_algorithms, timeseries):
+        base_name, datapoint, from_timestamp, triggered_algorithms, timeseries,
+        full_duration):
     """
     Assign a metric and timeseries to Crucible or Ionosphere.
     """
@@ -666,6 +671,8 @@ def send_anomalous_metric_to(
     # single quoting results in the desired,
     # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
     now_timestamp = int(time())
+    # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
+    # Added full_duration
     anomaly_data = 'metric = \'%s\'\n' \
                    'value = \'%s\'\n' \
                    'from_timestamp = \'%s\'\n' \
@@ -677,9 +684,10 @@ def send_anomalous_metric_to(
                    'run_crucible_tests = False\n' \
                    'added_by = \'%s\'\n' \
                    'added_at = \'%s\'\n' \
+                   'full_duration = \'%s\'\n' \
         % (base_name, str(datapoint), from_timestamp, metric_timestamp,
             str(settings.ALGORITHMS), triggered_algorithms, anomaly_dir,
-            current_skyline_app, str(now_timestamp))
+            current_skyline_app, str(now_timestamp), str(int(full_duration)))
 
     # Create an anomaly file with details about the anomaly
     anomaly_file = '%s/%s.txt' % (anomaly_dir, base_name)

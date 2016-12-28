@@ -22,7 +22,7 @@ try:
 except ImportError:
     import urllib.parse
 import os
-import errno
+# import errno
 import imp
 from os import listdir
 import datetime
@@ -41,7 +41,7 @@ from skyline_functions import (
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
 from mirage_algorithms import run_selected_algorithm
-from algorithm_exceptions import *
+from algorithm_exceptions import TooShort, Stale, Boring
 from os.path import join, isfile
 
 """
@@ -88,6 +88,7 @@ except:
     SERVER_METRIC_PATH = ''
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
+failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
 
 
 class Mirage(Thread):
@@ -228,12 +229,12 @@ class Mirage(Thread):
                     # print type(x), "\n  ", s
                     try:
                         log_string = type(x), "\n  ", s
+                        log_string = 'unused variable for testing only'
                     except:
-                        logger.error('error :: print x and s')
                         logger.info(traceback.format_exc())
-
-                    # if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                    #     logger.info(log_string)
+                        logger.error('error :: print x and s')
+                    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                        logger.info(log_string)
         else:
             return None
 
@@ -252,6 +253,13 @@ class Mirage(Thread):
         metric_var_files_sorted = sorted(metric_var_files)
         metric_check_file = '%s/%s' % (
             settings.MIRAGE_CHECK_PATH, str(metric_var_files_sorted[0]))
+
+        check_file_name = os.path.basename(str(metric_check_file))
+        check_file_timestamp = check_file_name.split('.', 1)[0]
+        check_file_metricname_txt = check_file_name.split('.', 1)[1]
+        check_file_metricname = check_file_metricname_txt.replace('.txt', '')
+        check_file_metricname_dir = check_file_metricname.replace('.', '/')
+        metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
 
         # Load metric variables
         # @modified 20160822 - Bug #1460: panorama check file fails
@@ -445,7 +453,7 @@ class Mirage(Thread):
             try:
                 last_alert = self.redis_conn.get(cache_key)
             except Exception as e:
-                logger.error('error :: could not query Redis for cache_key')
+                logger.error('error :: could not query Redis for cache_key: %s' % str(e))
 
             added_at = str(int(time()))
             # If Panorama is enabled - create a Panorama check
@@ -561,12 +569,18 @@ class Mirage(Thread):
             # @added 20160922 - Branch #922: Ionosphere
             # Also added the send_anomalous_metric_to skyline_functions.py
             # function
-            if settings.IONOSPHERE_ENABLED:
+            if ionosphere_enabled:
                 if not last_alert:
+                    # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
+                    # Added full_duration which needs to be recorded to allow Mirage metrics
+                    # to be profiled on Redis timeseries data at FULL_DURATION
+                    # e.g. mirage.redis.24h.json
+                    full_duration = str(second_order_resolution_seconds)
                     send_anomalous_metric_to(
                         skyline_app, 'ionosphere', timeseries_dir,
                         str(int_metric_timestamp), base_name, str(datapoint),
-                        from_timestamp, triggered_algorithms, timeseries)
+                        from_timestamp, triggered_algorithms, timeseries,
+                        full_duration)
                     self.sent_to_ionosphere.append(base_name)
                 else:
                     logger.info('alert expiry key exists not sending to Ionosphere :: %s' % base_name)
@@ -901,8 +915,38 @@ class Mirage(Thread):
                     logger.error('error :: failed to rmtree %s' % metric_data_dir)
 
             if settings.MIRAGE_ENABLE_ALERTS:
+                # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                #                   Branch #922: Ionosphere
+                # Bringing Ionosphere online - do alert on Ionosphere metrics
+                try:
+                    ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+                    ionosphere_unique_metrics = []
+
                 for alert in settings.ALERTS:
                     for metric in self.anomalous_metrics:
+                        # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                        #                   Branch #922: Ionosphere
+                        # Bringing Ionosphere online - do alert on Ionosphere
+                        # metrics if Ionosphere is up
+                        metric_name = '%s.%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                        if metric_name in ionosphere_unique_metrics:
+                            ionosphere_up = False
+                            try:
+                                ionosphere_up = self.redis_conn.get('ionosphere')
+                            except Exception as e:
+                                logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
+                            if ionosphere_up:
+                                logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                                continue
+                            else:
+                                logger.error('error :: Ionosphere not report up')
+                                logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
+                        else:
+                            logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+
                         ALERT_MATCH_PATTERN = alert[0]
                         METRIC_PATTERN = metric[1]
                         try:

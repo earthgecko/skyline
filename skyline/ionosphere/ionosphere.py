@@ -32,14 +32,15 @@ import pandas as pd
 
 import settings
 from skyline_functions import (
-    load_metric_vars, fail_check, mysql_select, write_data_to_file, mkdir_p,
-    send_graphite_metric, send_anomalous_metric_to)
+    load_metric_vars, fail_check, mysql_select, write_data_to_file,
+    send_graphite_metric)
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
 # manner.  Decouple Ionosphere from the webapp.
-from features_profile import feature_name_id, calculate_features_profile
+from features_profile import calculate_features_profile
 
-from database import get_engine, ionosphere_table_meta, metrics_table_meta
+from database import get_engine, ionosphere_table_meta
+from tsfresh_feature_names import TSFRESH_FEATURES
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -219,6 +220,89 @@ class Ionosphere(Thread):
                 pass
         return
 
+# @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+#                   Branch #922: Ionosphere
+# Bringing Ionosphere online - do alert on Ionosphere metrics
+
+    def manage_ionosphere_unique_metrics(self):
+        """
+        Create a Redis set of all Ionosphere enabled metrics.
+
+        :param i: python process id
+        :return: returns True
+
+        """
+
+        def get_an_engine():
+            try:
+                engine, fail_msg, trace = get_engine(skyline_app)
+                return engine, fail_msg, trace
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: failed to get MySQL engine for'
+                logger.error('%s' % fail_msg)
+                return None, fail_msg, trace
+
+        try:
+            ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            ionosphere_unique_metrics_count = len(ionosphere_unique_metrics)
+            logger.info('Redis ionosphere.unique_metrics set has %s metrics' % (str(ionosphere_unique_metrics_count)))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+            ionosphere_unique_metrics = []
+
+        logger.info('getting MySQL engine')
+        try:
+            engine, fail_msg, trace = get_an_engine()
+            logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: could not get a MySQL engine'
+            logger.error('%s' % fail_msg)
+            return False
+
+        if not engine:
+            trace = 'none'
+            fail_msg = 'error :: engine not obtained'
+            logger.error(fail_msg)
+            return False
+
+        # Determine the metrics that have ionosphere_enabled
+        ionosphere_enabled_metrics = []
+        try:
+            stmt = 'select metric from metrics where ionosphere_enabled=1'
+            connection = engine.connect()
+            for row in engine.execute(stmt):
+                metric_basename = row['metric']
+                metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric_basename))
+                ionosphere_enabled_metrics.append(metric_name)
+            connection.close()
+            ionosphere_metrics_count = len(ionosphere_enabled_metrics)
+            logger.info('db has %s ionosphere_enabled metrics' % (str(ionosphere_metrics_count)))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine ionosphere_enabled metrics from the DB to manage ionosphere.unique_metrics Redis set')
+
+        for metric_name in ionosphere_enabled_metrics:
+            if metric_name in ionosphere_unique_metrics:
+                continue
+            try:
+                self.redis_conn.sadd('ionosphere.unique_metrics', metric_name)
+                logger.info('added %s to ionosphere.unique_metrics Redis set' % metric_name)
+            except:
+                logger.error(traceback.format_exc())
+                logger.info('error :: failed to add %s to ionosphere.unique_metrics Redis set' % metric_name)
+
+        try:
+            self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
+        except:
+            logger.error('error :: failed to set key :: ionosphere.manage_ionosphere_unique_metrics')
+
+        return True
+
     def spin_process(self, i, metric_check_file):
         """
         Assign a metric anomaly to process.
@@ -229,6 +313,17 @@ class Ionosphere(Thread):
         :return: returns True
 
         """
+
+        def get_an_engine():
+            try:
+                engine, fail_msg, trace = get_engine(skyline_app)
+                return engine, fail_msg, trace
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: failed to get MySQL engine for'
+                logger.error('%s' % fail_msg)
+                return None, fail_msg, trace
 
         child_process_pid = os.getpid()
         logger.info('child_process_pid - %s' % str(child_process_pid))
@@ -327,8 +422,7 @@ class Ionosphere(Thread):
                 logger.info('debug :: metric variable - algorithms - %s' % str(algorithms))
         except:
             logger.error('error :: failed to read algorithms variable from check file setting to all' % (metric_check_file))
-            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
-            return
+            algorithms = 'all'
 
         try:
             metric_vars.triggered_algorithms
@@ -337,16 +431,15 @@ class Ionosphere(Thread):
                 logger.info('debug :: metric variable - triggered_algorithms - %s' % str(triggered_algorithms))
         except:
             logger.error('error :: failed to read triggered_algorithms variable from check file setting to all' % (metric_check_file))
-            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
-            return
+            triggered_algorithms = 'all'
 
         try:
             metric_vars.added_by
-            app = str(metric_vars.added_by)
+            added_by = str(metric_vars.added_by)
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: metric variable - added_by - %s' % app)
+                logger.info('debug :: metric variable - added_by - %s' % added_by)
         except:
-            logger.error('error :: failed to read added_by variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read added_by variable from check file' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -357,6 +450,18 @@ class Ionosphere(Thread):
                 logger.info('debug :: metric variable - added_at - %s' % added_at)
         except:
             logger.error('error :: failed to read added_at variable from check file setting to all' % (metric_check_file))
+            added_by = 'all'
+
+        # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+        # Added full_duration which needs to be recorded to allow Mirage metrics
+        # to be profiled on Redis timeseries data at FULL_DURATION
+        try:
+            metric_vars.full_duration
+            full_duration = str(metric_vars.full_duration)
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: metric variable - full_duration - %s' % full_duration)
+        except:
+            logger.error('error :: failed to read full_duration variable from check file' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -410,6 +515,40 @@ class Ionosphere(Thread):
             logger.error('error :: training data ts json was not found - %s' % (anomaly_json))
             self.remove_metric_check_file(str(metric_check_file))
             return
+
+        # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+        # The timeseries full_duration needs to be recorded to allow Mirage metrics to
+        # be profiled on Redis timeseries data at FULL_DURATION
+        # e.g. mirage.redis.24h.json
+        if training_metric:
+            logger.info('training metric - %s' % (base_name))
+
+        if added_by == 'mirage':
+            logger.info('checking training data Redis json is available')
+            # Always calculate features for both the SECOND_ORDER_RESOLUTION_SECONDS
+            # timeseries data and the FULL_DURATION Redis timeseries data.
+            # It is always preferable to create a features profile on a FULL_DURATION
+            # data set, unless the user is flagging the actual Mirage timeseries as
+            # not anomalous.  In the Mirage context the not anomalous may often be more
+            # "visibile" in the FULL_DURATION view and if so should be matched on the
+            # FULL_DURATION timeseries data, even if it is a Mirage metric.
+            # Features profiles can be created for a Mirage metric on both the
+            # FULL_DURATION and the SECOND_ORDER_RESOLUTION_SECONDS data sets, however
+            # only one should be needed.
+            # A features profile should always be created at the highest resolution
+            # possible, FULL_DURATION data, wherever possible.
+            try:
+                full_duration_hours = str(int(settings.FULL_DURATION / 3600))
+                redis_anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, base_name, full_duration_hours)
+                if os.path.isfile(redis_anomaly_json):
+                    logger.info('training data Redis full duration ts json available - %s' % (redis_anomaly_json))
+                else:
+                    logger.error('error :: training data Redis full duration json was not found - %s' % (redis_anomaly_json))
+                    self.remove_metric_check_file(str(metric_check_file))
+                    return
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: training data Redis full duration json was not found - %s' % (redis_anomaly_json))
 
         # @added 20161209 - Branch #922: ionosphere
         #                   Task #1658: Patterning Skyline Ionosphere
@@ -490,7 +629,10 @@ class Ionosphere(Thread):
             if training_metric:
                 # Allow Graphite resources to be created if they are not an alert
                 # was not sent therefore features do not need to be calculated
-                sleep(5)
+                check_time = int(time())
+                check_age = check_time - int(added_at)
+                if check_age < 5:
+                    sleep(5)
                 graphite_file_count = len([f for f in os.listdir(metric_training_data_dir)
                                            if f.endswith('.png') and
                                            os.path.isfile(os.path.join(metric_training_data_dir, f))])
@@ -508,7 +650,7 @@ class Ionosphere(Thread):
                 fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
             except:
                 logger.error(traceback.format_exc())
-                logger.error('failed to calculate features')
+                logger.error('error :: failed to calculate features')
                 self.remove_metric_check_file(str(metric_check_file))
                 return
 
@@ -534,7 +676,7 @@ class Ionosphere(Thread):
         # webapp/ionosphere_backend.py and webapp/features_proifle.py
         if not calculated_feature_file_found:
             webapp_url = '%s/ionosphere?timestamp=%s&metric=%s&calc_features=true' % (
-                settings.SKYLINE_URL, timestamp, base_name)
+                settings.SKYLINE_URL, metric_timestamp, base_name)
             r = None
             http_status_code = 0
             if settings.WEBAPP_AUTH_ENABLED:
@@ -597,12 +739,27 @@ class Ionosphere(Thread):
         # Compare calculated features to feature values for each fp id
         not_anomalous = False
         if calculated_feature_file_found:
+
+            metrics_id = None
+            stmt = 'select id from metrics where metric=\'%s\'' % base_name
+            try:
+                connection = engine.connect()
+                for row in engine.execute(stmt):
+                    metrics_id = row['id']
+                connection.close()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not determine id from metrics table for - %s' % str(base_name))
+
             for fp_id in fp_ids:
+                if not metrics_id:
+                    continue
+
                 features_count = None
                 fp_features = []
                 # Get features for fp_id from z_fp_<metric_id> table.
                 try:
-                    metric_fp_table = 'z_fp_%s' % str(metric_id)
+                    metric_fp_table = 'z_fp_%s' % str(metrics_id)
                     stmt = 'select feature_id, value from %s where fp_id=%s' % (metric_fp_table, str(fp_id))
                     connection = engine.connect()
                     for row in engine.execute(stmt):
@@ -622,7 +779,6 @@ class Ionosphere(Thread):
                 for feature_name, value in calculated_features:
                     for skyline_feature_id, name in TSFRESH_FEATURES:
                         if feature_name == name:
-                            skyline_feature_id = int(feature_id)
                             calc_features_by_id.append([skyline_feature_id, float(value)])
 
                 # Determine what features each data has, extract only values for
@@ -677,7 +833,7 @@ class Ionosphere(Thread):
 
                 sums_array = np.array([fp_sum, calc_sum], dtype=float)
                 try:
-                    calc_percent_different = np.diff(a) / a[:-1] * 100.
+                    calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
                     percent_different = calc_percent_different[0]
                 except:
                     logger.error(traceback.format_exc())
@@ -722,7 +878,6 @@ class Ionosphere(Thread):
             if not not_anomalous:
                 logger.info('anomalous - no feature profiles were matched - %s' % base_name)
                 # send to panorama
-
             #     send anomalous count metric to graphite
             #     alert
 
@@ -850,6 +1005,54 @@ class Ionosphere(Thread):
                         logger.info('updated Redis key for %s up' % skyline_app)
                     except:
                         logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+
+                    # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                    #                   Branch #922: Ionosphere
+                    # Bringing Ionosphere online - do alert on Ionosphere metrics
+                    # Manage the ionosphere.unique_metrics Redis set which is queried
+                    # by Analyzer and Mirage, yes and we use multiprocessing
+                    last_update = None
+                    try:
+                        last_update = self.redis_conn.get('ionosphere.manage_ionosphere_unique_metrics')
+                    except Exception as e:
+                        logger.error('error :: could not query Redis for ionosphere.manage_ionosphere_unique_metrics: %s' % e)
+
+                    if not last_update:
+                        pids = []
+                        now = time()
+                        try:
+                            logger.info('starting manage_ionosphere_unique_metrics process')
+                            p = Process(target=self.manage_ionosphere_unique_metrics)
+                            pids.append(p)
+                            p.start()
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to start manage_ionosphere_unique_metrics')
+
+                        # Self monitor process and terminate if run for too long
+                        p_starts = time()
+                        while time() - p_starts <= 5:
+                            if any(p.is_alive() for p in pids):
+                                # Just to avoid hogging the CPU
+                                sleep(.1)
+                            else:
+                                # All the processes are done, break now.
+                                time_to_run = time() - p_starts
+                                logger.info(
+                                    'manage_ionosphere_unique_metrics completed in %.2f seconds' % (
+                                        time_to_run))
+                                break
+                        else:
+                            # We only enter this if we didn't 'break' above.
+                            logger.info('%s :: timed out, killing manage_ionosphere_unique_metrics process' % (skyline_app))
+                            for p in pids:
+                                try:
+                                    p.terminate()
+                                    # p.join()
+                                    logger.info('%s :: killed manage_ionosphere_unique_metrics process' % (skyline_app))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: killing all spin_process processes')
 
                 # Discover metric anomalies to insert
                 metric_var_files = False

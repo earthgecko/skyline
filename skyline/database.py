@@ -76,7 +76,7 @@ def ionosphere_table_meta(current_skyline_app, engine):
     #    ionosphere_table.create(engine, checkfirst=True)
     #    return ionosphere_table, 'ionosphere_table meta OK', 'none'
         ionosphere_table = Table('ionosphere', ionosphere_meta, autoload=True, autoload_with=engine)
-        return ionosphere_table, 'ionosphere_table meta relected OK', 'none'
+        return ionosphere_table, 'ionosphere_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
@@ -94,7 +94,7 @@ def metrics_table_meta(current_skyline_app, engine):
     try:
         metrics_meta = MetaData()
         metrics_table = Table('metrics', metrics_meta, autoload=True, autoload_with=engine)
-        return metrics_table, 'metrics_table meta relected OK', 'none'
+        return metrics_table, 'metrics_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
@@ -112,7 +112,7 @@ def anomalies_table_meta(current_skyline_app, engine):
     try:
         anomalies_meta = MetaData()
         anomalies_table = Table('anomalies', anomalies_meta, autoload=True, autoload_with=engine)
-        return anomalies_table, 'anomalies_table meta relected OK', 'none'
+        return anomalies_table, 'anomalies_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)

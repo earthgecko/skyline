@@ -25,7 +25,7 @@ from skyline_functions import send_graphite_metric, write_data_to_file, send_ano
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
-from algorithm_exceptions import *
+from algorithm_exceptions import TooShort, Stale, Boring
 
 try:
     send_algorithm_run_metrics = settings.ENABLE_ALGORITHM_RUN_METRICS
@@ -285,13 +285,20 @@ class Analyzer(Thread):
                     # Analyzer should handle/route anomalies
                     analyzer_metric = True
                     mirage_metric = False
-                    crucible_metric = False
-                    panorama_metric = False
+                    # crucible_metric = False
+                    # panorama_metric = False
                     ionosphere_metric = False
+                    # send_to_panaroma = False
+                    send_to_ionosphere = False
 
-                    if base_name in mirage_unique_metrics:
+                    if metric_name in mirage_unique_metrics:
                         analyzer_metric = False
                         mirage_metric = True
+
+                    if metric_name in ionosphere_unique_metrics:
+                        analyzer_metric = False
+                        ionosphere_metric = True
+                        send_to_ionosphere = True
 
                     if ionosphere_enabled:
                         if analyzer_metric:
@@ -299,7 +306,8 @@ class Analyzer(Thread):
                             # Ionosphere if they are not being alerted on as
                             # they will be pointless they will have no alert if
                             # it is within the EXPIRATION_TIME and there will be
-                            # no reference in an alert for the user to action.
+                            # no reference graphs from an alert for the user to
+                            # action.
                             cache_key = 'last_alert.smtp.%s' % (base_name)
                             last_alert = False
                             try:
@@ -308,17 +316,28 @@ class Analyzer(Thread):
                                 logger.error('error :: could not query Redis for cache_key: %s' % e)
 
                             if not last_alert:
-                                send_anomalous_metric_to(
-                                    'ionosphere', timeseries_dir, metric_timestamp,
-                                    base_name, str(datapoint), from_timestamp,
-                                    triggered_algorithms, timeseries)
-                                self.sent_to_ionosphere.append(base_name)
+                                send_to_ionosphere = True
                         else:
-                            logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
+                            if mirage_metric:
+                                logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
+                                send_to_ionosphere = False
 
-                    if base_name in ionosphere_unique_metrics:
+                    if send_to_ionosphere:
+                        try:
+                            # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
+                            # Added full_duration
+                            send_anomalous_metric_to(
+                                skyline_app, 'ionosphere', timeseries_dir,
+                                metric_timestamp, base_name, str(datapoint),
+                                from_timestamp, triggered_algorithms,
+                                timeseries, str(settings.FULL_DURATION))
+                            self.sent_to_ionosphere.append(base_name)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
+
+                    if ionosphere_metric:
                         analyzer_metric = False
-                        ionosphere_metric = True
 
                     # Only send Analyzer metrics
                     if analyzer_metric and settings.PANORAMA_ENABLED:
@@ -671,7 +690,7 @@ class Analyzer(Thread):
             # END Redis mirage.unique_metrics_set
 
             if LOCAL_DEBUG:
-                logger.info('debug :: Memory usage in run after unique_metrics: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                logger.info('debug :: Memory usage in run after unique_metrics: %s (kb), using blah %s' % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss), str(blah))
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
@@ -818,6 +837,16 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run before alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+            # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+            #                   Branch #922: Ionosphere
+            # Bringing Ionosphere online - do alert on Ionosphere metrics
+            try:
+                ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+                ionosphere_unique_metrics = []
+
             # Send alerts
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
@@ -944,6 +973,24 @@ class Analyzer(Thread):
                                 if LOCAL_DEBUG:
                                     logger.info('debug :: ENABLE_FULL_DURATION_ALERTS not enabled')
                             continue
+
+                        # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                        #                   Branch #922: Ionosphere
+                        # Bringing Ionosphere online - do alert on Ionosphere
+                        # metrics if Ionosphere is up
+                        metric_name = '%s.%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                        if metric_name in ionosphere_unique_metrics:
+                            ionosphere_up = False
+                            try:
+                                ionosphere_up = self.redis_conn.get('ionosphere')
+                            except Exception as e:
+                                logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
+                            if ionosphere_up:
+                                logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                                continue
+                            else:
+                                logger.error('error :: Ionosphere not report up')
+                                logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
 
                         if analyzer_metric:
                             # @added 20160815 - Analyzer also alerting on Mirage metrics now #22

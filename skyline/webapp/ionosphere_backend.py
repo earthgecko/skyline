@@ -367,6 +367,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     calculated_time = False
     fcount = None
     fsum = None
+    ts_full_duration = 0
 
     if path.isfile(features_profile_details_file):
         # Read the details file
@@ -377,6 +378,23 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
         calculated_time = str(fp_details[2])
         fcount = str(fp_details[3])
         fsum = str(fp_details[4])
+        try:
+            ts_full_duration = str(fp_details[5])
+        except:
+            logger.error('error :: could not determine the full duration from - %s' % features_profile_details_file)
+        if not ts_full_duration:
+            anomaly_check_file = '%s/%s.txt' % (
+                metric_training_data_dir, base_name)
+
+            if path.isfile(anomaly_check_file):
+                # Read the details file
+                with open(anomaly_check_file, 'r') as f:
+                    anomaly_details = f.readlines()
+                    for i, line in enumerate(anomaly_details):
+                        if 'full_duration' in line:
+                            _ts_full_duration = '%s' % str(line).split("'", 2)
+                            full_duration_array = literal_eval(_ts_full_duration)
+                            ts_full_duration = str(int(full_duration_array[1]))
 
     if path.isfile(features_profile_created_file):
         # Read the created file
@@ -494,10 +512,10 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     try:
         connection = engine.connect()
         ins = ionosphere_table.insert().values(
-            metric_id=int(metrics_id), enabled=1,
-            tsfresh_version=str(TSFRESH_VERSION),
-            calc_time=calculated_time,
-            features_count=fcount, features_sum=fsum)
+            metric_id=int(metrics_id), full_duration=int(ts_full_duration),
+            enabled=1, tsfresh_version=str(TSFRESH_VERSION),
+            calc_time=calculated_time, features_count=fcount,
+            features_sum=fsum)
         result = connection.execute(ins)
         connection.close()
         new_fp_id = result.inserted_primary_key[0]
@@ -667,7 +685,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     try:
         # data = '[%s, %s, ]' % (new_fp_id, str(int(time.time())))
         # write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
-        data = '[%s, %s, \'%s\', %s, %s, %s]' % (new_fp_id, str(int(time.time())), str(TSFRESH_VERSION), str(calculated_time), str(fcount), str(fsum))
+        data = '[%s, %s, \'%s\', %s, %s, %s, %s]' % (new_fp_id, str(int(time.time())), str(TSFRESH_VERSION), str(calculated_time), str(fcount), str(fsum), str(ts_full_duration))
         write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
     except:
         trace = traceback.format_exc()
@@ -791,6 +809,7 @@ def features_profile_details(fp_id):
         connection.close()
         tsfresh_version = row['tsfresh_version']
         calc_time = row['calc_time']
+        full_duration = row['full_duration']
         features_count = row['features_count']
         features_sum = row['features_sum']
         deleted = row['deleted']
@@ -801,6 +820,7 @@ def features_profile_details(fp_id):
         else:
             human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_matched)))
         created_timestamp = row['created_timestamp']
+        full_duration = row['full_duration']
         fp_details = '''
 tsfresh_version   :: %s | calc_time :: %s
 features_count    :: %s
@@ -809,9 +829,11 @@ deleted           :: %s
 matched_count     :: %s
 last_matched      :: %s | human_date :: %s
 created_timestamp :: %s
+full_duration     :: %s
 ''' % (str(tsfresh_version), str(calc_time), str(features_count),
             str(features_sum), str(deleted), str(matched_count),
-            str(last_matched), str(human_date), str(created_timestamp))
+            str(last_matched), str(human_date), str(created_timestamp),
+            str(full_duration))
     except:
         trace = traceback.format_exc()
         logger.error(trace)

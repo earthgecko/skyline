@@ -183,6 +183,10 @@ ALTER TABLE `anomalies` MODIFY `anomaly_timestamp` INT(10) NOT NULL COMMENT 'ano
 CREATE TABLE IF NOT EXISTS `ionosphere` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere features profile unique id',
   `metric_id` INT(11) NOT NULL COMMENT 'metric id',
+# @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+# The timeseries full_duration needs to be recorded to allow Mirage metrics to
+# be profiled on Redis timeseries data at FULL_DURATION
+  `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries on which the features profile was created',
   `enabled` tinyint(1) DEFAULT NULL COMMENT 'the features profile is enabled 1 or not enabled 0',
   `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
   `calc_time` FLOAT DEFAULT NULL COMMENT 'the time taken in seconds to calcalute the features',
