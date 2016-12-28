@@ -133,7 +133,7 @@ class Mirage(Thread):
         # https://github.com/earthgecko/skyline/issues/21
         """
 
-        trigger_alert(alert, metric, second_order_resolution_seconds)
+        trigger_alert(alert, metric, second_order_resolution_seconds, context)
 
     def surface_graphite_metric_data(self, metric_name, graphite_from, graphite_until):
 
@@ -647,13 +647,13 @@ class Mirage(Thread):
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
-        def smtp_trigger_alert(alert, metric, second_order_resolution_seconds):
+        def smtp_trigger_alert(alert, metric, second_order_resolution_seconds, context):
             # Spawn processes
             pids = []
             spawned_pids = []
             pid_count = 0
             try:
-                p = Process(target=self.spawn_alerter_process, args=(alert, metric, second_order_resolution_seconds))
+                p = Process(target=self.spawn_alerter_process, args=(alert, metric, second_order_resolution_seconds, context))
                 pids.append(p)
                 pid_count += 1
                 p.start()
@@ -742,10 +742,29 @@ class Mirage(Thread):
                 # Report app up
                 self.redis_conn.setex(skyline_app, 120, now)
 
+                # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                # If Ionosphere is going to pass alerts back to the app
+                # here we are going to have break out and force a alerting
+                # only run.
+                ionosphere_alerts = None
+                ionosphere_alerts_returned = False
+
                 metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
                 if len(metric_var_files) == 0:
-                    logger.info('sleeping no metrics...')
-                    sleep(10)
+                    # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                    # Ionosphere alerts
+                    ionosphere_alerts = None
+                    ionosphere_alerts_returned = False
+                    try:
+                        ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                        ionosphere_alerts_returned = True
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to scan ionosphere.mirage.alert.* from Redis')
+
+                    if not ionosphere_alerts_returned:
+                        logger.info('sleeping no metrics...')
+                        sleep(10)
                 else:
                     sleep(1)
 
@@ -763,220 +782,253 @@ class Mirage(Thread):
 
                 # Discover metric to analyze
                 metric_var_files = ''
+                # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                # Prioritises Ionosphere alerts
+                if ionosphere_alerts_returned:
+                    break
+
                 metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
                 if len(metric_var_files) > 0:
                     break
 
-            metric_var_files_sorted = sorted(metric_var_files)
-            # metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
+            # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+            # Only spawn process if this is not an Ionosphere alert
+            if not ionosphere_alerts_returned:
+                metric_var_files_sorted = sorted(metric_var_files)
+                # metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
 
-            processing_check_file = metric_var_files_sorted[0]
-            logger.info('processing %s' % processing_check_file)
+                processing_check_file = metric_var_files_sorted[0]
+                logger.info('processing %s' % processing_check_file)
 
-            # Remove any existing algorithm.error files from any previous runs
-            # that did not cleanup for any reason
-            pattern = '%s.*.algorithm.error' % skyline_app
-            try:
-                for f in os.listdir(settings.SKYLINE_TMP_DIR):
-                    if re.search(pattern, f):
-                        try:
-                            os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
-                            logger.info('cleaning up old error file - %s' % (str(f)))
-                        except OSError:
-                            pass
-            except:
-                logger.error('failed to cleanup mirage_algorithm.error files - %s' % (traceback.format_exc()))
+                # Remove any existing algorithm.error files from any previous runs
+                # that did not cleanup for any reason
+                pattern = '%s.*.algorithm.error' % skyline_app
+                try:
+                    for f in os.listdir(settings.SKYLINE_TMP_DIR):
+                        if re.search(pattern, f):
+                            try:
+                                os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
+                                logger.info('cleaning up old error file - %s' % (str(f)))
+                            except OSError:
+                                pass
+                except:
+                    logger.error('failed to cleanup mirage_algorithm.error files - %s' % (traceback.format_exc()))
 
-            # Spawn processes
-            pids = []
-            spawned_pids = []
-            pid_count = 0
-            MIRAGE_PROCESSES = 1
-            # @modified 20161224 - send mirage metrics to graphite
-            # run_timestamp = int(now)
-            run_timestamp = int(time())
-            for i in range(1, MIRAGE_PROCESSES + 1):
-                p = Process(target=self.spin_process, args=(i, run_timestamp))
-                pids.append(p)
-                pid_count += 1
-                logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(MIRAGE_PROCESSES)))
-                p.start()
-                spawned_pids.append(p.pid)
+                # Spawn processes
+                pids = []
+                spawned_pids = []
+                pid_count = 0
+                MIRAGE_PROCESSES = 1
+                # @modified 20161224 - send mirage metrics to graphite
+                # run_timestamp = int(now)
+                run_timestamp = int(time())
+                for i in range(1, MIRAGE_PROCESSES + 1):
+                    p = Process(target=self.spin_process, args=(i, run_timestamp))
+                    pids.append(p)
+                    pid_count += 1
+                    logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(MIRAGE_PROCESSES)))
+                    p.start()
+                    spawned_pids.append(p.pid)
 
-            # Send wait signal to zombie processes
-            # for p in pids:
-            #     p.join()
-            # Self monitor processes and terminate if any spin_process has run
-            # for longer than 180 seconds - 20160512 @earthgecko
-            p_starts = time()
-            while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
-                if any(p.is_alive() for p in pids):
-                    # Just to avoid hogging the CPU
-                    sleep(.1)
+                # Send wait signal to zombie processes
+                # for p in pids:
+                #     p.join()
+                # Self monitor processes and terminate if any spin_process has run
+                # for longer than 180 seconds - 20160512 @earthgecko
+                p_starts = time()
+                while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
+                    if any(p.is_alive() for p in pids):
+                        # Just to avoid hogging the CPU
+                        sleep(.1)
+                    else:
+                        # All the processes are done, break now.
+                        time_to_run = time() - p_starts
+                        logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (
+                            skyline_app, str(MIRAGE_PROCESSES), time_to_run))
+                        break
                 else:
-                    # All the processes are done, break now.
-                    time_to_run = time() - p_starts
-                    logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (
-                        skyline_app, str(MIRAGE_PROCESSES), time_to_run))
-                    break
-            else:
-                # We only enter this if we didn't 'break' above.
-                logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
+                    # We only enter this if we didn't 'break' above.
+                    logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
+                    for p in pids:
+                        p.terminate()
+                        # p.join()
+
                 for p in pids:
-                    p.terminate()
-                    # p.join()
+                    if p.is_alive():
+                        logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                        p.join()
 
-            for p in pids:
-                if p.is_alive():
-                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
-                    p.join()
-
-            # Log the last reported error by any algorithms that errored in the
-            # spawned processes from algorithms.py
-            for completed_pid in spawned_pids:
-                logger.info('spin_process with pid %s completed' % (str(completed_pid)))
-                for algorithm in settings.MIRAGE_ALGORITHMS:
-                    algorithm_error_file = '%s/%s.%s.%s.algorithm.error' % (
-                        settings.SKYLINE_TMP_DIR, skyline_app,
-                        str(completed_pid), algorithm)
-                    if os.path.isfile(algorithm_error_file):
-                        logger.info(
-                            'error - spin_process with pid %s has reported an error with the %s algorithm' % (
-                                str(completed_pid), algorithm))
-                        try:
-                            with open(algorithm_error_file, 'r') as f:
-                                error_string = f.read()
-                            logger.error('%s' % str(error_string))
-                        except:
-                            logger.error('failed to read %s error file' % algorithm)
-                        try:
-                            os.remove(algorithm_error_file)
-                        except OSError:
-                            pass
-
-            # Grab data from the queue and populate dictionaries
-            exceptions = dict()
-            anomaly_breakdown = dict()
-            while 1:
-                try:
-                    key, value = self.mirage_anomaly_breakdown_q.get_nowait()
-                    if key not in anomaly_breakdown.keys():
-                        anomaly_breakdown[key] = value
-                    else:
-                        anomaly_breakdown[key] += value
-                except Empty:
-                    break
-
-            while 1:
-                try:
-                    key, value = self.mirage_exceptions_q.get_nowait()
-                    if key not in exceptions.keys():
-                        exceptions[key] = value
-                    else:
-                        exceptions[key] += value
-                except Empty:
-                    break
-
-            for metric_variable in self.metric_variables:
-                if metric_variable[0] == 'metric_name':
-                    metric_name = metric_variable[1]
-                if metric_variable[0] == 'metric_value':
-                    metric_value = metric_variable[1]
-                if metric_variable[0] == 'hours_to_resolve':
-                    hours_to_resolve = metric_variable[1]
-                # if metric_variable[0] == 'metric_timestamp':
-                #     metric_timestamp = metric_variable[1]
-
-            logger.info('analysis done - %s' % metric_name)
-
-            # Send alerts
-            # Calculate hours second order resolution to seconds
-            logger.info('analyzed at %s hours resolution' % hours_to_resolve)
-            second_order_resolution_seconds = int(hours_to_resolve) * 3600
-            logger.info('analyzed at %s seconds resolution' % second_order_resolution_seconds)
-
-            # Remove metric check file
-            metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
-            if os.path.isfile(metric_check_file):
-                try:
-                    os.remove(metric_check_file)
-                    logger.info('removed check file - %s' % metric_check_file)
-                except OSError:
-                    pass
-
-            # Remove the metric directory
-            timeseries_dir = metric_name.replace('.', '/')
-            metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
-            if os.path.exists(metric_data_dir):
-                try:
-                    rmtree(metric_data_dir)
-                    logger.info('removed - %s' % metric_data_dir)
-                except:
-                    logger.error('error :: failed to rmtree %s' % metric_data_dir)
-
-            if settings.MIRAGE_ENABLE_ALERTS:
-                # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
-                #                   Branch #922: Ionosphere
-                # Bringing Ionosphere online - do alert on Ionosphere metrics
-                try:
-                    ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
-                    ionosphere_unique_metrics = []
-
-                for alert in settings.ALERTS:
-                    for metric in self.anomalous_metrics:
-                        # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
-                        #                   Branch #922: Ionosphere
-                        # Bringing Ionosphere online - do alert on Ionosphere
-                        # metrics if Ionosphere is up
-                        metric_name = '%s.%s' % (settings.FULL_NAMESPACE, str(metric[1]))
-                        if metric_name in ionosphere_unique_metrics:
-                            ionosphere_up = False
+                # Log the last reported error by any algorithms that errored in the
+                # spawned processes from algorithms.py
+                for completed_pid in spawned_pids:
+                    logger.info('spin_process with pid %s completed' % (str(completed_pid)))
+                    for algorithm in settings.MIRAGE_ALGORITHMS:
+                        algorithm_error_file = '%s/%s.%s.%s.algorithm.error' % (
+                            settings.SKYLINE_TMP_DIR, skyline_app,
+                            str(completed_pid), algorithm)
+                        if os.path.isfile(algorithm_error_file):
+                            logger.info(
+                                'error - spin_process with pid %s has reported an error with the %s algorithm' % (
+                                    str(completed_pid), algorithm))
                             try:
-                                ionosphere_up = self.redis_conn.get('ionosphere')
-                            except Exception as e:
-                                logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
-                            if ionosphere_up:
-                                logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
-                                continue
-                            else:
-                                logger.error('error :: Ionosphere not report up')
-                                logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
+                                with open(algorithm_error_file, 'r') as f:
+                                    error_string = f.read()
+                                logger.error('%s' % str(error_string))
+                            except:
+                                logger.error('failed to read %s error file' % algorithm)
+                            try:
+                                os.remove(algorithm_error_file)
+                            except OSError:
+                                pass
+
+                # Grab data from the queue and populate dictionaries
+                exceptions = dict()
+                anomaly_breakdown = dict()
+                while 1:
+                    try:
+                        key, value = self.mirage_anomaly_breakdown_q.get_nowait()
+                        if key not in anomaly_breakdown.keys():
+                            anomaly_breakdown[key] = value
                         else:
-                            logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+                            anomaly_breakdown[key] += value
+                    except Empty:
+                        break
 
-                        ALERT_MATCH_PATTERN = alert[0]
-                        METRIC_PATTERN = metric[1]
+                while 1:
+                    try:
+                        key, value = self.mirage_exceptions_q.get_nowait()
+                        if key not in exceptions.keys():
+                            exceptions[key] = value
+                        else:
+                            exceptions[key] += value
+                    except Empty:
+                        break
+
+                for metric_variable in self.metric_variables:
+                    if metric_variable[0] == 'metric_name':
+                        metric_name = metric_variable[1]
+                    if metric_variable[0] == 'metric_value':
+                        metric_value = metric_variable[1]
+                    if metric_variable[0] == 'hours_to_resolve':
+                        hours_to_resolve = metric_variable[1]
+                    # if metric_variable[0] == 'metric_timestamp':
+                    #     metric_timestamp = metric_variable[1]
+
+                logger.info('analysis done - %s' % metric_name)
+
+                # Send alerts
+                # Calculate hours second order resolution to seconds
+                logger.info('analyzed at %s hours resolution' % hours_to_resolve)
+                second_order_resolution_seconds = int(hours_to_resolve) * 3600
+                logger.info('analyzed at %s seconds resolution' % second_order_resolution_seconds)
+
+                # Remove metric check file
+                metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
+                if os.path.isfile(metric_check_file):
+                    try:
+                        os.remove(metric_check_file)
+                        logger.info('removed check file - %s' % metric_check_file)
+                    except OSError:
+                        pass
+
+                # Remove the metric directory
+                timeseries_dir = metric_name.replace('.', '/')
+                metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
+                if os.path.exists(metric_data_dir):
+                    try:
+                        rmtree(metric_data_dir)
+                        logger.info('removed - %s' % metric_data_dir)
+                    except:
+                        logger.error('error :: failed to rmtree %s' % metric_data_dir)
+
+                if settings.MIRAGE_ENABLE_ALERTS:
+                    # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                    #                   Branch #922: Ionosphere
+                    # Bringing Ionosphere online - do alert on Ionosphere metrics
+                    try:
+                        ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+                        ionosphere_unique_metrics = []
+
+            # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+            #                   Branch #922: Ionosphere
+            # Send alerts for Ionosphere
+            alert_context = 'Mirage'
+            if ionosphere_alerts_returned:
+                alert_context = 'Ionosphere'
+                ionosphere_unique_metrics = []
+                ionosphere_alert_on = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                for cache_key in ionosphere_alert_on:
+                    try:
+                        alert_on = redis_conn.get(cache_key)
+                        send_alert_for = literal_eval(alert_on)
+                        value = float(send_alert_for[0])
+                        base_name = str(send_alert_for[1])
+                        metric_timestamp = int(float(send_alert_for[2]))
+                        self.anomalous_metrics.append(anomalous_metric)
+                        triggered_algorithms = send_alert_for[3]
+                        anomaly_breakdown = dict()
+                        for algorithm in triggered_algorithms:
+                            anomaly_breakdown[algorithm] = 1
+                        self.redis_conn.delete(cache_key)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % base_name)
+
+            for alert in settings.ALERTS:
+                for metric in self.anomalous_metrics:
+                    # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                    #                   Branch #922: Ionosphere
+                    # Bringing Ionosphere online - do alert on Ionosphere
+                    # metrics if Ionosphere is up
+                    metric_name = '%s.%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                    if metric_name in ionosphere_unique_metrics:
+                        ionosphere_up = False
                         try:
-                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                        except:
-                            pattern_match = False
-                        # @modified 20160806 - Reintroduced the original
-                        # substring matching after wildcard matching, to allow
-                        # more flexibility
-                        if not pattern_match:
-                            if alert[0] in metric[1]:
-                                pattern_match = True
-                        if pattern_match:
-                            cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
-                            try:
-                                last_alert = self.redis_conn.get(cache_key)
-                                if not last_alert:
-                                    self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                    # trigger_alert(alert, metric, second_order_resolution_seconds)
-                                    try:
-                                        if alert[1] != 'smtp':
-                                            trigger_alert(alert, metric, second_order_resolution_seconds)
-                                        else:
-                                            smtp_trigger_alert(alert, metric, second_order_resolution_seconds)
-                                        logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
-                                    except Exception as e:
-                                        logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
-                            except Exception as e:
-                                logger.error('error :: could not query Redis for cache_key')
+                            ionosphere_up = self.redis_conn.get('ionosphere')
+                        except Exception as e:
+                            logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
+                        if ionosphere_up:
+                            logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                            continue
+                        else:
+                            logger.error('error :: Ionosphere not report up')
+                            logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
+                    else:
+                        logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+
+                    ALERT_MATCH_PATTERN = alert[0]
+                    METRIC_PATTERN = metric[1]
+                    try:
+                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                    except:
+                        pattern_match = False
+                    # @modified 20160806 - Reintroduced the original
+                    # substring matching after wildcard matching, to allow
+                    # more flexibility
+                    if not pattern_match:
+                        if alert[0] in metric[1]:
+                            pattern_match = True
+                    if pattern_match:
+                        cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
+                        try:
+                            last_alert = self.redis_conn.get(cache_key)
+                            if not last_alert:
+                                self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                # trigger_alert(alert, metric, second_order_resolution_seconds, context)
+                                try:
+                                    if alert[1] != 'smtp':
+                                        trigger_alert(alert, metric, second_order_resolution_seconds, context)
+                                    else:
+                                        smtp_trigger_alert(alert, metric, second_order_resolution_seconds, context)
+                                    logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
+                                except Exception as e:
+                                    logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
+                        except Exception as e:
+                            logger.error('error :: could not query Redis for cache_key')
 
             if settings.NEGATE_ANALYZER_ALERTS:
                 if len(self.anomalous_metrics) == 0:

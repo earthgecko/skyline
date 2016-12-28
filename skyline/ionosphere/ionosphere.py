@@ -878,13 +878,29 @@ class Ionosphere(Thread):
 
             if not not_anomalous:
                 logger.info('anomalous - no feature profiles were matched - %s' % base_name)
-                # send to panorama
+            #     send to panorama
             #     send anomalous count metric to graphite
-            #     alert
+            #     alert ... hmmm the harder part, maybe not all the resources
+            #     are already created, so just determining ALERTS and firing a
+            #     trigger_alert (pull in alerter.py and mirage_alerters.py?)
+            #     OR send back to app via Redis
+                cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+                try:
+                    self.redis_conn.setex(cache_key, 300, [float(value), base_name, int(metric_timestamp), triggered_algorithms])
+                    logger.info(
+                        'add Redis alert key - %s - [%s, \'%s\', %s, %s]' %
+                        (cache_key, str(value), base_name, str(int(metric_timestamp)),
+                            str(triggered_algorithms)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s]' %
+                        (cache_key, str(value), base_name, str(int(metric_timestamp)),
+                            str(triggered_algorithms)))
 
         # TO BE REMOVED
         self.remove_metric_check_file(str(metric_check_file))
-        return fp_ids_found
+        return
 
     def run(self):
         """

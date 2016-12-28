@@ -20,11 +20,12 @@ from sqlalchemy import (
 from sqlalchemy.dialects.mysql import DOUBLE, TINYINT
 from sqlalchemy.sql import select
 import json
+from tsfresh import __version__ as tsfresh_version
 
 import settings
 import skyline_version
 from skyline_functions import RepresentsInt, mkdir_p, write_data_to_file
-from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
+from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import get_engine, ionosphere_table_meta, metrics_table_meta
 
@@ -513,7 +514,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
         connection = engine.connect()
         ins = ionosphere_table.insert().values(
             metric_id=int(metrics_id), full_duration=int(ts_full_duration),
-            enabled=1, tsfresh_version=str(TSFRESH_VERSION),
+            enabled=1, tsfresh_version=str(tsfresh_version),
             calc_time=calculated_time, features_count=fcount,
             features_sum=fsum)
         result = connection.execute(ins)
@@ -685,7 +686,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     try:
         # data = '[%s, %s, ]' % (new_fp_id, str(int(time.time())))
         # write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
-        data = '[%s, %s, \'%s\', %s, %s, %s, %s]' % (new_fp_id, str(int(time.time())), str(TSFRESH_VERSION), str(calculated_time), str(fcount), str(fsum), str(ts_full_duration))
+        data = '[%s, %s, \'%s\', %s, %s, %s, %s]' % (new_fp_id, str(int(time.time())), str(tsfresh_version), str(calculated_time), str(fcount), str(fsum), str(ts_full_duration))
         write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
     except:
         trace = traceback.format_exc()
