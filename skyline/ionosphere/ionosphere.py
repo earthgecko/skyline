@@ -757,10 +757,11 @@ class Ionosphere(Thread):
 
                 features_count = None
                 fp_features = []
-                # Get features for fp_id from z_fp_<metric_id> table.
+                # Get features for fp_id from z_fp_<metric_id> table where the
+                # features profile is the same full_duration
                 try:
                     metric_fp_table = 'z_fp_%s' % str(metrics_id)
-                    stmt = 'select feature_id, value from %s where fp_id=%s' % (metric_fp_table, str(fp_id))
+                    stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s AND full_duration=%s' % (metric_fp_table, str(fp_id), str(full_duration))
                     connection = engine.connect()
                     for row in engine.execute(stmt):
                         fp_feature_id = int(row['feature_id'])
@@ -768,7 +769,7 @@ class Ionosphere(Thread):
                         fp_features.append([fp_feature_id, fp_value])
                     connection.close()
                     features_count = len(fp_features)
-                    logger.info('determined %s features for fp_id %s' % (str(features_count), str(fp_id)))
+                    logger.info('determined %s features for fp_id %s at full_duration of %s' % (str(features_count), str(fp_id), str(full_duration)))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not determine features from DB for %s' % str(fp_id))
