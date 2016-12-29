@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
   `matched_count` INT(11) DEFAULT 0 COMMENT 'the number of times this feature profile has been matched',
   `last_matched` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the last time this feature profile (or other) was matched',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+# @added 20161229 - Feature #1830: Ionosphere alerts
+# Record times checked
+  `last_checked` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the last time this feature profile was checked',
+  `checked_count` INT(10) DEFAULT 0 COMMENT 'the number of times this feature profile has been checked',
   PRIMARY KEY (id),
   INDEX `features_profile` (`id`,`metric_id`,`enabled`)  KEY_BLOCK_SIZE=255)
   ENGINE=InnoDB;

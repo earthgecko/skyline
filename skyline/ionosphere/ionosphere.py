@@ -856,6 +856,24 @@ class Ionosphere(Thread):
                     logger.error('error :: failed to calculate percent_different')
                     continue
 
+                # @added 20161229 - Feature #1830: Ionosphere alerts
+                # Update the features profile checked count and time
+                logger.info('updating checked details in db for %s' % (str(fp_id)))
+                # update matched_count in ionosphere_table
+                checked_timestamp = int(time())
+                try:
+                    connection = engine.connect()
+                    connection.execute(
+                        ionosphere_table.update(
+                            ionosphere_table.c.id == fp_id).
+                        values(checked_count=ionosphere_table.c.checked_count + 1,
+                               last_checked=checked_timestamp))
+                    connection.close()
+                    logger.info('updated checked_count for %s' % str(fp_id))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not update checked_count and last_checked for %s ' % str(fp_id))
+
                 # if diff_in_sums <= 1%:
                 if percent_different < 0:
                     new_pdiff = percent_different * -1
@@ -870,7 +888,7 @@ class Ionosphere(Thread):
                         (str(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR),
                             str(fp_id), str(percent_different)))
                     # update matched_count in ionosphere_table
-                    matched_timestamp = time()
+                    matched_timestamp = int(time())
                     try:
                         connection = engine.connect()
                         connection.execute(
@@ -880,7 +898,6 @@ class Ionosphere(Thread):
                                    last_matched=matched_timestamp))
                         connection.close()
                         logger.info('updated matched_count for %s' % str(fp_id))
-                        return False
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: could not update matched_count and last_matched for %s ' % str(fp_id))
