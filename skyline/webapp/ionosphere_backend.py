@@ -822,6 +822,14 @@ def features_profile_details(fp_id):
             human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_matched)))
         created_timestamp = row['created_timestamp']
         full_duration = row['full_duration']
+        # @modified 20161229 - Feature #1830: Ionosphere alerts
+        # Added checked_count and last_checked
+        last_checked = row['last_checked']
+        if str(last_checked) == '0':
+            checked_human_date = 'never checked'
+        else:
+            checked_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_checked)))
+        checked_count = row['checked_count']
         fp_details = '''
 tsfresh_version   :: %s | calc_time :: %s
 features_count    :: %s
@@ -831,14 +839,17 @@ matched_count     :: %s
 last_matched      :: %s | human_date :: %s
 created_timestamp :: %s
 full_duration     :: %s
+checked_count     :: %s
+last_checked      :: %s | human_date :: %s
 ''' % (str(tsfresh_version), str(calc_time), str(features_count),
             str(features_sum), str(deleted), str(matched_count),
             str(last_matched), str(human_date), str(created_timestamp),
-            str(full_duration))
+            str(full_duration), str(checked_count), str(last_checked),
+            str(checked_human_date))
     except:
         trace = traceback.format_exc()
         logger.error(trace)
-        fail_msg = 'error :: could not fp_id %s details from ionosphere DB table' % str(fp_id)
+        fail_msg = 'error :: could not get fp_id %s details from ionosphere DB table' % str(fp_id)
         logger.error('%s' % fail_msg)
         return False, False, fail_msg, trace
 
