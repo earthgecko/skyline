@@ -21,7 +21,8 @@ import os.path
 import resource
 
 import settings
-from skyline_functions import send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p
+from skyline_functions import (
+    send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p)
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -109,7 +110,7 @@ class Analyzer(Thread):
         except:
             exit(0)
 
-    def spawn_alerter_process(self, alert, metric):
+    def spawn_alerter_process(self, alert, metric, context):
         """
         Spawn a process to trigger an alert.
 
@@ -130,7 +131,7 @@ class Analyzer(Thread):
 
         """
 
-        trigger_alert(alert, metric)
+        trigger_alert(alert, metric, context)
 
     def spin_process(self, i, unique_metrics):
         """
@@ -540,13 +541,13 @@ class Analyzer(Thread):
                 logger.error('error :: failed to create %s' % settings.SKYLINE_TMP_DIR)
                 logger.info(traceback.format_exc())
 
-        def smtp_trigger_alert(alert, metric):
+        def smtp_trigger_alert(alert, metric, context):
             # Spawn processes
             pids = []
             spawned_pids = []
             pid_count = 0
             try:
-                p = Process(target=self.spawn_alerter_process, args=(alert, metric))
+                p = Process(target=self.spawn_alerter_process, args=(alert, metric, context))
                 pids.append(p)
                 pid_count += 1
                 p.start()
@@ -837,15 +838,31 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run before alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
-            # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+            # @added 20161228 - Feature #1830: Ionosphere alerts
             #                   Branch #922: Ionosphere
-            # Bringing Ionosphere online - do alert on Ionosphere metrics
+            # Bringing Ionosphere online - do not alert on Ionosphere metrics
             try:
                 ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
                 ionosphere_unique_metrics = []
+
+            # @added 20161229 - Feature #1830: Ionosphere alerts
+            # Determine if Ionosphere added any alerts to be sent
+            ionosphere_alerts = []
+            ionosphere_alerts_returned = False
+            try:
+                ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.analyzer.alert.*'))
+                ionosphere_alerts_returned = True
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to scan ionosphere.analyzer.alert.* from Redis')
+
+            if len(ionosphere_alerts) == 0:
+                ionosphere_alerts_returned = False
+            else:
+                logger.info('Ionosphere alert/s requested :: %s' % str(ionosphere_alerts))
 
             # Send alerts
             if settings.ENABLE_ALERTS:
@@ -962,9 +979,9 @@ class Analyzer(Thread):
                                 logger.info('triggering alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' % (metric[1], metric[0], alert[1]))
                                 try:
                                     if alert[1] != 'smtp':
-                                        trigger_alert(alert, metric)
+                                        trigger_alert(alert, metric, context)
                                     else:
-                                        smtp_trigger_alert(alert, metric)
+                                        smtp_trigger_alert(alert, metric, context)
                                 except:
                                     logger.error(
                                         'error :: failed to trigger_alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' %
@@ -974,7 +991,7 @@ class Analyzer(Thread):
                                     logger.info('debug :: ENABLE_FULL_DURATION_ALERTS not enabled')
                             continue
 
-                        # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                        # @added 20161228 - Feature #1830: Ionosphere alerts
                         #                   Branch #922: Ionosphere
                         # Bringing Ionosphere online - do alert on Ionosphere
                         # metrics if Ionosphere is up
@@ -1031,9 +1048,9 @@ class Analyzer(Thread):
                                     resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                             try:
                                 if alert[1] != 'smtp':
-                                    trigger_alert(alert, metric)
+                                    trigger_alert(alert, metric, context)
                                 else:
-                                    smtp_trigger_alert(alert, metric)
+                                    smtp_trigger_alert(alert, metric, context)
                                     if LOCAL_DEBUG:
                                         logger.info('debug :: smtp_trigger_alert spawned')
                                 if LOCAL_DEBUG:

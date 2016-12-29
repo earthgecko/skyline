@@ -33,7 +33,7 @@ import pandas as pd
 import settings
 from skyline_functions import (
     load_metric_vars, fail_check, mysql_select, write_data_to_file,
-    send_graphite_metric)
+    send_graphite_metric, mkdir_p)
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
 # manner.  Decouple Ionosphere from the webapp.
@@ -421,7 +421,7 @@ class Ionosphere(Thread):
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - algorithms - %s' % str(algorithms))
         except:
-            logger.error('error :: failed to read algorithms variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read algorithms variable from check file setting to all - %s' % (metric_check_file))
             algorithms = 'all'
 
         try:
@@ -430,7 +430,7 @@ class Ionosphere(Thread):
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - triggered_algorithms - %s' % str(triggered_algorithms))
         except:
-            logger.error('error :: failed to read triggered_algorithms variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read triggered_algorithms variable from check file setting to all - %s' % (metric_check_file))
             triggered_algorithms = 'all'
 
         try:
@@ -439,7 +439,7 @@ class Ionosphere(Thread):
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - added_by - %s' % added_by)
         except:
-            logger.error('error :: failed to read added_by variable from check file' % (metric_check_file))
+            logger.error('error :: failed to read added_by variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -449,7 +449,7 @@ class Ionosphere(Thread):
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - added_at - %s' % added_at)
         except:
-            logger.error('error :: failed to read added_at variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
             added_by = 'all'
 
         # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
@@ -461,7 +461,7 @@ class Ionosphere(Thread):
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - full_duration - %s' % full_duration)
         except:
-            logger.error('error :: failed to read full_duration variable from check file' % (metric_check_file))
+            logger.error('error :: failed to read full_duration variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -878,15 +878,62 @@ class Ionosphere(Thread):
 
             if not not_anomalous:
                 logger.info('anomalous - no feature profiles were matched - %s' % base_name)
-            #     send to panorama
-            #     send anomalous count metric to graphite
+                # Send to panorama as Analyzer and Mirage will only alert on the
+                # anomaly, they will not push it to Panorama
+                if settings.PANORAMA_ENABLED:
+                    if not os.path.exists(settings.PANORAMA_CHECK_PATH):
+                        mkdir_p(settings.PANORAMA_CHECK_PATH)
+                    # Note:
+                    # The values are enclosed is single quoted intentionally
+                    # as the imp.load_source used results in a shift in the
+                    # decimal position when double quoted, e.g.
+                    # value = "5622.0" gets imported as
+                    # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+                    # single quoting results in the desired,
+                    # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+                    added_at = str(int(time()))
+                    source = 'graphite'
+                    panaroma_anomaly_data = 'metric = \'%s\'\n' \
+                                            'value = \'%s\'\n' \
+                                            'from_timestamp = \'%s\'\n' \
+                                            'metric_timestamp = \'%s\'\n' \
+                                            'algorithms = %s\n' \
+                                            'triggered_algorithms = %s\n' \
+                                            'app = \'%s\'\n' \
+                                            'source = \'%s\'\n' \
+                                            'added_by = \'%s\'\n' \
+                                            'added_at = \'%s\'\n' \
+                        % (base_name, str(value), from_timestamp,
+                           metric_timestamp, str(settings.ALGORITHMS),
+                           triggered_algorithms, skyline_app, source,
+                           this_host, added_at)
+
+                    # Create an anomaly file with details about the anomaly
+                    panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                        settings.PANORAMA_CHECK_PATH, added_at,
+                        base_name)
+                    try:
+                        write_data_to_file(
+                            skyline_app, panaroma_anomaly_file, 'w',
+                            panaroma_anomaly_data)
+                        logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                        self.sent_to_panorama.append(base_name)
+
+                    except:
+                        logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                        logger.info(traceback.format_exc())
+                else:
+                    logger.info('not adding panorama anomaly file for Mirage metric - %s' % (metric))
+
             #     alert ... hmmm the harder part, maybe not all the resources
             #     are already created, so just determining ALERTS and firing a
             #     trigger_alert (pull in alerter.py and mirage_alerters.py?)
             #     OR send back to app via Redis
                 cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
                 try:
-                    self.redis_conn.setex(cache_key, 300, [float(value), base_name, int(metric_timestamp), triggered_algorithms])
+                    self.redis_conn.setex(
+                        cache_key, 300,
+                        [float(value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
                     logger.info(
                         'add Redis alert key - %s - [%s, \'%s\', %s, %s]' %
                         (cache_key, str(value), base_name, str(int(metric_timestamp)),

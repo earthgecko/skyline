@@ -176,7 +176,8 @@ CREATE TABLE IF NOT EXISTS `ts_metricid` (
 #                   Task #1658: Patterning Skyline Ionosphere
 #                   Task #1718: review.tsfresh
 # This is the required SQL to update Skyline crucible (v1.0.0 to v1.0.8) to
-# Ionosphere v1.1.x.  It is idempotent.
+# Ionosphere v1.1.x.  It is idempotent, but replication IF NOT EXISTS caveats
+# apply
 # Fix the timestamp int length from 11 to 10
 ALTER TABLE `anomalies` MODIFY `anomaly_timestamp` INT(10) NOT NULL COMMENT 'anomaly unix timestamp, see notes on historic dates above';
 

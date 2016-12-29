@@ -1376,5 +1376,5 @@ IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1
 """
 :var IONOSPHERE_FEATURES_PERCENT_SIMILAR: The percentage difference between a
     features profile sum and a calculated profile sum to result in a match.
-:vartype TSFRESH_VERSION: int
+:vartype IONOSPHERE_FEATURES_PERCENT_SIMILAR: int
 """

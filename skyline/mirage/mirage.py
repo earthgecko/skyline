@@ -30,6 +30,7 @@ import datetime
 import os.path
 import resource
 from shutil import rmtree
+from ast import literal_eval
 
 import settings
 # @modified 20160922 - Branch #922: Ionosphere
@@ -120,7 +121,7 @@ class Mirage(Thread):
         except:
             exit(0)
 
-    def spawn_alerter_process(self, alert, metric, second_order_resolution_seconds):
+    def spawn_alerter_process(self, alert, metric, second_order_resolution_seconds, context):
         """
         Spawn a process to trigger an alert.  This is used by smtp alerters so
         that matplotlib objects are cleared down and the alerter cannot create
@@ -571,7 +572,7 @@ class Mirage(Thread):
             # function
             if ionosphere_enabled:
                 if not last_alert:
-                    # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
+                    # @modified 20161228 Feature #1830: Ionosphere alerts
                     # Added full_duration which needs to be recorded to allow Mirage metrics
                     # to be profiled on Redis timeseries data at FULL_DURATION
                     # e.g. mirage.redis.24h.json
@@ -732,6 +733,8 @@ class Mirage(Thread):
                 sleep(10)
                 logger.info('connecting to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                if self.redis_conn.ping():
+                    logger.info('connected to redis')
                 continue
 
             """
@@ -751,9 +754,8 @@ class Mirage(Thread):
 
                 metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
                 if len(metric_var_files) == 0:
-                    # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
-                    # Ionosphere alerts
-                    ionosphere_alerts = None
+                    # @modified 20161228 - Feature #1830: Ionosphere alerts
+                    ionosphere_alerts = []
                     ionosphere_alerts_returned = False
                     try:
                         ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
@@ -761,6 +763,11 @@ class Mirage(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to scan ionosphere.mirage.alert.* from Redis')
+
+                    if len(ionosphere_alerts) == 0:
+                        ionosphere_alerts_returned = False
+                    else:
+                        logger.info('Ionosphere alert requested :: %s' % str(ionosphere_alerts))
 
                     if not ionosphere_alerts_returned:
                         logger.info('sleeping no metrics...')
@@ -782,7 +789,7 @@ class Mirage(Thread):
 
                 # Discover metric to analyze
                 metric_var_files = ''
-                # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                # @added 20161228 - Feature #1830: Ionosphere alerts
                 # Prioritises Ionosphere alerts
                 if ionosphere_alerts_returned:
                     break
@@ -791,7 +798,7 @@ class Mirage(Thread):
                 if len(metric_var_files) > 0:
                     break
 
-            # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+            # @modified 20161228 - Feature #1830: Ionosphere alerts
             # Only spawn process if this is not an Ionosphere alert
             if not ionosphere_alerts_returned:
                 metric_var_files_sorted = sorted(metric_var_files)
@@ -942,7 +949,7 @@ class Mirage(Thread):
                         logger.error('error :: failed to rmtree %s' % metric_data_dir)
 
                 if settings.MIRAGE_ENABLE_ALERTS:
-                    # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                    # @added 20161228 - Feature #1830: Ionosphere alerts
                     #                   Branch #922: Ionosphere
                     # Bringing Ionosphere online - do alert on Ionosphere metrics
                     try:
@@ -952,23 +959,28 @@ class Mirage(Thread):
                         logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
                         ionosphere_unique_metrics = []
 
-            # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+            # @added 20161228 - Feature #1830: Ionosphere alerts
             #                   Branch #922: Ionosphere
             # Send alerts for Ionosphere
             alert_context = 'Mirage'
             if ionosphere_alerts_returned:
                 alert_context = 'Ionosphere'
                 ionosphere_unique_metrics = []
+                logger.info('Ionosphere alerts requested emptying ionosphere_unique_metrics so Mirage will alert')
+                exceptions = dict()
+                run_timestamp = int(time())
                 ionosphere_alert_on = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
                 for cache_key in ionosphere_alert_on:
                     try:
-                        alert_on = redis_conn.get(cache_key)
+                        alert_on = self.redis_conn.get(cache_key)
                         send_alert_for = literal_eval(alert_on)
                         value = float(send_alert_for[0])
                         base_name = str(send_alert_for[1])
                         metric_timestamp = int(float(send_alert_for[2]))
-                        self.anomalous_metrics.append(anomalous_metric)
                         triggered_algorithms = send_alert_for[3]
+                        second_order_resolution_seconds = int(send_alert_for[4])
+                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
+                        self.anomalous_metrics.append(anomalous_metric)
                         anomaly_breakdown = dict()
                         for algorithm in triggered_algorithms:
                             anomaly_breakdown[algorithm] = 1
@@ -979,7 +991,7 @@ class Mirage(Thread):
 
             for alert in settings.ALERTS:
                 for metric in self.anomalous_metrics:
-                    # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                    # @added 20161228 - Feature #1830: Ionosphere alerts
                     #                   Branch #922: Ionosphere
                     # Bringing Ionosphere online - do alert on Ionosphere
                     # metrics if Ionosphere is up
@@ -1017,13 +1029,21 @@ class Mirage(Thread):
                         try:
                             last_alert = self.redis_conn.get(cache_key)
                             if not last_alert:
+                                if ionosphere_alerts_returned:
+                                    try:
+                                        second_order_resolution_seconds = metric[3]
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to determine full_duration from the Ionosphere alert for %s' % (metric[1]))
+                                        logger.info('using settings.FULL_DURATION - %s' % (str(settings.FULL_DURATION)))
+                                        second_order_resolution_seconds = settings.FULL_DURATION
                                 self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)
                                 try:
                                     if alert[1] != 'smtp':
-                                        trigger_alert(alert, metric, second_order_resolution_seconds, context)
+                                        trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     else:
-                                        smtp_trigger_alert(alert, metric, second_order_resolution_seconds, context)
+                                        smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
                                 except Exception as e:
                                     logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
