@@ -111,7 +111,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     if settings.IONOSPHERE_ENABLED:
         timeseries_dir = base_name.replace('.', '/')
         training_data_dir = '%s/%s/%s' % (
-            settings.IONOSPHERE_DATA_FOLDER, str(metric[2]),
+            settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
             timeseries_dir)
         graphite_image_file = '%s/%s.%s.graphite.%sh.png' % (
             training_data_dir, base_name, skyline_app,
@@ -491,13 +491,13 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
     body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
     body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
-    body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(metric[2])
+    body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
     body += '<font color="black">At hours: %s</font><br>' % str(int(second_order_resolution_in_hours))
     body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
     if settings.IONOSPHERE_ENABLED:
         body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
         ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
-            settings.SKYLINE_URL, str(metric[2]), str(metric[1]))
+            settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
         body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
         body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
     if image_data:
