@@ -99,6 +99,8 @@ class Analyzer(Thread):
         self.sent_to_panorama = Manager().list()
         self.sent_to_ionosphere = Manager().list()
         self.ionosphere_data_sets = Manager().list()
+        # @added 20161229 - Feature #1830: Ionosphere alerts
+        self.all_anomalous_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -318,6 +320,8 @@ class Analyzer(Thread):
 
                             if not last_alert:
                                 send_to_ionosphere = True
+                            else:
+                                send_to_ionosphere = False
                         else:
                             if mirage_metric:
                                 logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
@@ -631,31 +635,50 @@ class Analyzer(Thread):
             # @added 20160922 - Branch #922: Ionosphere
             # Add a Redis set of mirage.unique_metrics
             if settings.ENABLE_MIRAGE:
+                # @added 20161229 - Feature #1830: Ionosphere alerts
+                # Self manage the Mirage metrics set
+                manage_mirage_unique_metrics = True
+                try:
+                    manage_mirage_unique_metrics = self.redis_conn.get('analyzer.manage_mirage_unique_metrics')
+                    manage_mirage_unique_metrics = False
+                except Exception as e:
+                    logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
+
+                mirage_unique_metrics = []
                 try:
                     mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
                     if LOCAL_DEBUG:
                         logger.info('debug :: fetched the mirage.unique_metrics Redis set')
                         logger.info('debug :: %s' % str(mirage_unique_metrics))
                 except:
-                    mirage_unique_metrics = []
                     logger.info('failed to fetch the mirage.unique_metrics Redis set')
+
+                if manage_mirage_unique_metrics:
+                    try:
+                        logger.info('deleting Redis mirage.unique_metrics set to refresh')
+                        self.redis_conn.delete('mirage.unique_metrics')
+                        mirage_unique_metrics = []
+                    except Exception as e:
+                        logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
 
                 for alert in settings.ALERTS:
                     for metric in unique_metrics:
                         ALERT_MATCH_PATTERN = alert[0]
-                        METRIC_PATTERN = metric
+                        base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                        METRIC_PATTERN = base_name
                         pattern_match = False
                         matched_by = 'not matched'
                         try:
                             alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
                             pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                            matched_by = 'regex'
-                            pattern_match = True
+                            if pattern_match:
+                                matched_by = 'regex'
+                                pattern_match = True
                         except:
                             pattern_match = False
 
                         if not pattern_match:
-                            if alert[0] in metric:
+                            if alert[0] in base_name:
                                 pattern_match = True
                                 matched_by = 'substring'
 
@@ -678,6 +701,10 @@ class Analyzer(Thread):
                                 except:
                                     if LOCAL_DEBUG:
                                         logger.error('error :: failed to add %s to mirage.unique_metrics set' % metric)
+                                try:
+                                    self.redis_conn.setex('analyzer.manage_mirage_unique_metrics', 300, int(time()))
+                                except:
+                                    logger.error('error :: failed to set key :: analyzer.manage_mirage_unique_metrics')
 
                         # Do we use list or dict, which is better performance?
                         # With dict - Use EAFP (easier to ask forgiveness than
@@ -850,24 +877,51 @@ class Analyzer(Thread):
 
             # @added 20161229 - Feature #1830: Ionosphere alerts
             # Determine if Ionosphere added any alerts to be sent
+            for metric in self.anomalous_metrics:
+                self.all_anomalous_metrics.append(metric)
             ionosphere_alerts = []
             ionosphere_alerts_returned = False
+            context = 'Analyzer'
             try:
                 ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.analyzer.alert.*'))
                 ionosphere_alerts_returned = True
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to scan ionosphere.analyzer.alert.* from Redis')
-
             if len(ionosphere_alerts) == 0:
                 ionosphere_alerts_returned = False
             else:
                 logger.info('Ionosphere alert/s requested :: %s' % str(ionosphere_alerts))
+                for cache_key in ionosphere_alerts:
+                    try:
+                        alert_on = self.redis_conn.get(cache_key)
+                        send_alert_for = literal_eval(alert_on)
+                        value = float(send_alert_for[0])
+                        base_name = str(send_alert_for[1])
+                        metric_timestamp = int(float(send_alert_for[2]))
+                        triggered_algorithms = send_alert_for[3]
+                        second_order_resolution_seconds = int(send_alert_for[4])
+                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
+                        self.all_anomalous_metrics.append(anomalous_metric)
+                        for algorithm in triggered_algorithms:
+                            key = algorithm
+                            if key not in anomaly_breakdown.keys():
+                                anomaly_breakdown[key] = 1
+                            else:
+                                anomaly_breakdown[key] += 1
+                        self.redis_conn.delete(cache_key)
+                        logger.info('alerting for Ionosphere on %s' % base_name)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % cache_key)
 
             # Send alerts
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
-                    for metric in self.anomalous_metrics:
+                    # @modified 20161229 - Feature #1830: Ionosphere alerts
+                    # Handle alerting for Ionosphere
+                    # for metric in self.anomalous_metrics:
+                    for metric in self.all_anomalous_metrics:
                         pattern_match = False
                         # Absolute match
                         if str(metric[1]) == str(alert[0]):
@@ -1003,8 +1057,15 @@ class Analyzer(Thread):
                             except Exception as e:
                                 logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
                             if ionosphere_up:
-                                logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
-                                continue
+                                # @modified 20161229 - Feature #1830: Ionosphere alerts
+                                # Do alert if Ionosphere created a Redis
+                                # ionosphere.analyzer.alert key
+                                if str(metric[1]) in ionosphere_alerts:
+                                    logger.info('alerting as in ionosphere_alerts - Ionosphere metric - %s' % str(metric[1]))
+                                    context = 'Ionosphere'
+                                else:
+                                    logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                                    continue
                             else:
                                 logger.error('error :: Ionosphere not report up')
                                 logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
@@ -1291,6 +1352,8 @@ class Analyzer(Thread):
             self.sent_to_panorama[:] = []
             self.sent_to_ionosphere[:] = []
             self.ionosphere_data_sets[:] = []
+            # @added 20161229 - Feature #1830: Ionosphere alerts
+            self.all_anomalous_metrics[:] = []
 
             unique_metrics = []
             raw_series = None

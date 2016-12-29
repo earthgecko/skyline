@@ -109,7 +109,7 @@ def alert_smtp(alert, metric, context):
     if settings.IONOSPHERE_ENABLED:
         timeseries_dir = base_name.replace('.', '/')
         training_data_dir = '%s/%s/%s' % (
-            settings.IONOSPHERE_DATA_FOLDER, str(metric[2]),
+            settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
             timeseries_dir)
         graphite_image_file = '%s/%s.%s.graphite.%sh.png' % (
             training_data_dir, base_name, skyline_app,

@@ -253,6 +253,22 @@ class Ionosphere(Thread):
             logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
             ionosphere_unique_metrics = []
 
+        manage_ionosphere_unique_metrics = True
+        try:
+            manage_ionosphere_unique_metrics = self.redis_conn.get('ionosphere.manage_ionosphere_unique_metrics')
+            manage_ionosphere_unique_metrics = False
+        except Exception as e:
+            logger.error('error :: could not query Redis for ionosphere.manage_ionosphere_unique_metrics key: %s' % str(e))
+
+        if manage_ionosphere_unique_metrics:
+            try:
+                logger.info('deleting Redis ionosphere.unique_metrics set to refresh')
+                self.redis_conn.delete('ionosphere.unique_metrics')
+                manage_ionosphere_unique_metrics = False
+                ionosphere_unique_metrics = []
+            except Exception as e:
+                logger.error('error :: could not delete Redis set ionosphere.unique_metrics: %s' % str(e))
+
         logger.info('getting MySQL engine')
         try:
             engine, fail_msg, trace = get_an_engine()
@@ -295,11 +311,10 @@ class Ionosphere(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.info('error :: failed to add %s to ionosphere.unique_metrics Redis set' % metric_name)
-
-        try:
-            self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
-        except:
-            logger.error('error :: failed to set key :: ionosphere.manage_ionosphere_unique_metrics')
+            try:
+                self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
+            except:
+                logger.error('error :: failed to set key :: ionosphere.manage_ionosphere_unique_metrics')
 
         return True
 
