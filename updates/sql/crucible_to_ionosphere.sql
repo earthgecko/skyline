@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
   `features_count` INT(10) DEFAULT NULL COMMENT 'the number of features calculated',
   `features_sum` DOUBLE DEFAULT NULL COMMENT 'the sum of the features',
   `deleted` INT(10) DEFAULT NULL COMMENT 'the unix timestamp the features profile was deleted',
-  `matched_count` INT(11) DEFAULT NULL COMMENT 'the number of times this feature profile has been matched',
-  `last_matched` INT(10) DEFAULT NULL COMMENT 'the unix timestamp of the last time this feature profile (or other) was matched',
+  `matched_count` INT(11) DEFAULT 0 COMMENT 'the number of times this feature profile has been matched',
+  `last_matched` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the last time this feature profile (or other) was matched',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
   INDEX `features_profile` (`id`,`metric_id`,`enabled`)  KEY_BLOCK_SIZE=255)
