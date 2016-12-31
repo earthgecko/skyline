@@ -114,7 +114,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             current_logger.error(
                 'error: failed to read from %s' % (features_profile_details_file))
     else:
-        current_logger.info('No features profile details file exist - %s' % (features_profile_details_file))
+        current_logger.info('OK no features profile details file exists - %s' % (features_profile_details_file))
 
     fp_created = None
     if os.path.isfile(features_profile_created_file):
@@ -131,7 +131,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             current_logger.error(
                 'error: failed to read fp_id from %s' % (features_profile_created_file))
     else:
-        current_logger.info('No features profile created file exist - %s' % (features_profile_created_file))
+        current_logger.info('OK no features profile created file exists - %s' % (features_profile_created_file))
 
     if os.path.isfile(t_fname_out):
         current_logger.info('transposed features already exist - %s' % (t_fname_out))

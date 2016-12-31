@@ -267,3 +267,89 @@ It is not super fast, quite processor intensive, but... lots of features!!!
   # It is SUPER fast on Graphite csv timeseries parsed timeseries and not
   # processor intensive at all.  Storing all those features without violating
   # the First Normal Form, still all in progress.
+
+
+THE FIRST
+=========
+
+\o/ before the end of the year!!!
+
+This was the first production Ionosphere matched tsfresh features profile after
+a year in the waiting and making.
+
+A special thanks to @MaxBenChrist, @nils-braun and @jneuff over at
+https://github.com/blue-yonder/tsfresh
+
+Well it took a year :)  But... it works :)
+
+* Branch #922: ionosphere - created 2015-12-26 11:21 AM
+* Task #1658: Patterning Skyline Ionosphere
+
+ionosphere.log
+~~~~~~~~~~~~~~
+
+.. code-block: bash
+
+    2016-12-31 06:43:54 :: 31856 :: starting 1 of 1 spin_process/es
+    2016-12-31 06:43:54 :: 18700 :: child_process_pid - 18700
+    2016-12-31 06:43:54 :: 18700 :: loading metric variables from import - metric_check_file - /opt/skyline/ionosphere/check/1483166562.stats.skyline1.io.received.txt
+    2016-12-31 06:43:54 :: 18700 :: got MySQL engine
+    2016-12-31 06:43:54 :: 18700 :: metrics_table OK for stats.skyline1.io.received
+    2016-12-31 06:43:54 :: 18700 :: ionosphere_enabled is 1 for metric id 171 - stats.skyline1.io.received
+    2016-12-31 06:43:54 :: 18700 :: Ionosphere is enabled on stats.skyline1.io.received
+    2016-12-31 06:43:54 :: 18700 :: training data ts json available - /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/stats.skyline1.io.received.json
+    2016-12-31 06:43:54 :: 18700 :: getting MySQL engine
+    2016-12-31 06:43:54 :: 18700 :: got MySQL engine
+    2016-12-31 06:43:54 :: 18700 :: ionosphere_table meta reflected OK
+    2016-12-31 06:43:54 :: 18700 :: ionosphere_table OK
+    2016-12-31 06:43:54 :: 18700 :: determined 3 fp ids for stats.skyline1.io.received
+    2016-12-31 06:43:54 :: 18700 :: ionosphere feature profile creation requested for stats.skyline1.io.received at 1483166562
+    2016-12-31 06:43:54 :: 18700 :: No features profile details file exist - /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/1483166562.stats.skyline1.io.received.fp.details.txt
+    2016-12-31 06:43:54 :: 18700 :: No features profile created file exist - /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/1483166562.stats.skyline1.io.received.fp.created.txt
+    2016-12-31 06:43:54 :: 18700 :: DataFrame created with /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/stats.skyline1.io.received.tsfresh.input.csv
+    2016-12-31 06:43:54 :: 18700 :: starting extract_features
+    2016-12-31 06:43:55 :: 18700 :: features extracted from /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/stats.skyline1.io.received.tsfresh.input.csv data
+    2016-12-31 06:43:55 :: 18700 :: feature extraction took 0.815440 seconds
+    2016-12-31 06:43:55 :: 18700 :: features transposed
+    2016-12-31 06:43:55 :: 18700 :: features saved to /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/stats.skyline1.io.received.tsfresh.input.csv.features.csv
+    2016-12-31 06:43:55 :: 18700 :: transposed features saved to /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/stats.skyline1.io.received.tsfresh.input.csv.features.transposed.csv
+    2016-12-31 06:43:55 :: 18700 :: total feature profile completed in 0.908591 seconds
+    2016-12-31 06:43:55 :: 18700 :: removed /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/stats.skyline1.io.received.tsfresh.input.csv
+    2016-12-31 06:43:55 :: 18700 :: calculated features available - /opt/skyline/ionosphere/data/1483166562/stats/skyline1/io/received/stats.skyline1.io.received.tsfresh.input.csv.features.transposed.csv
+    2016-12-31 06:43:55 :: 18700 :: determined 150 features for fp_id 5
+    2016-12-31 06:43:55 :: 18700 :: converting tsfresh feature names to Skyline feature ids
+    2016-12-31 06:43:55 :: 18700 :: determining common features
+    2016-12-31 06:43:55 :: 18700 :: comparing on 150 common features
+    2016-12-31 06:43:55 :: 18700 :: sum of the values of the 150 common features in features profile - 1267803329.88
+    2016-12-31 06:43:55 :: 18700 :: sum of the values of the 150 common features in the calculated features - 926774397.936
+    2016-12-31 06:43:55 :: 18700 :: percent_different between common features sums - -26.8991983147
+    2016-12-31 06:43:55 :: 18700 :: updating checked details in db for 5
+    2016-12-31 06:43:55 :: 18700 :: updated checked_count for 5
+    2016-12-31 06:43:55 :: 18700 :: debug :: 5 is a features profile for stats.skyline1.io.received
+    2016-12-31 06:43:55 :: 18700 :: determined 150 features for fp_id 25
+    2016-12-31 06:43:55 :: 18700 :: converting tsfresh feature names to Skyline feature ids
+    2016-12-31 06:43:55 :: 18700 :: determining common features
+    2016-12-31 06:43:55 :: 18700 :: comparing on 150 common features
+    2016-12-31 06:43:55 :: 18700 :: sum of the values of the 150 common features in features profile - 460020831.778
+    2016-12-31 06:43:55 :: 18700 :: sum of the values of the 150 common features in the calculated features - 926774397.936
+    2016-12-31 06:43:55 :: 18700 :: percent_different between common features sums - 101.463571629
+    2016-12-31 06:43:55 :: 18700 :: updating checked details in db for 25
+    2016-12-31 06:43:55 :: 18700 :: updated checked_count for 25
+    2016-12-31 06:43:55 :: 18700 :: debug :: 25 is a features profile for stats.skyline1.io.received
+    2016-12-31 06:43:55 :: 18700 :: determined 150 features for fp_id 26
+    2016-12-31 06:43:55 :: 18700 :: converting tsfresh feature names to Skyline feature ids
+    2016-12-31 06:43:55 :: 18700 :: determining common features
+    2016-12-31 06:43:55 :: 18700 :: comparing on 150 common features
+    2016-12-31 06:43:55 :: 18700 :: sum of the values of the 150 common features in features profile - 929947185.801
+    2016-12-31 06:43:55 :: 18700 :: sum of the values of the 150 common features in the calculated features - 926774397.936
+    2016-12-31 06:43:55 :: 18700 :: percent_different between common features sums - -0.341179360791
+    2016-12-31 06:43:55 :: 18700 :: updating checked details in db for 26
+    2016-12-31 06:43:55 :: 18700 :: updated checked_count for 26
+    2016-12-31 06:43:55 :: 18700 :: not anomalous - features profile match - stats.skyline1.io.received
+    2016-12-31 06:43:55 :: 18700 :: calculated features sum are within 1 percent of fp_id 26 with 0.341179360791, not anomalous
+    2016-12-31 06:43:55 :: 18700 :: updated matched_count for 26
+    2016-12-31 06:43:55 :: 18700 :: debug :: 26 is a features profile for stats.skyline1.io.received
+    2016-12-31 06:43:55 :: 18700 :: metric_check_file removed - /opt/skyline/ionosphere/check/1483166562.stats.skyline1.io.received.txt
+    2016-12-31 06:43:56 :: 31856 :: ionosphere :: 1 spin_process/es completed in 1.35 seconds
+    2016-12-31 06:43:56 :: 31856 :: updated Redis key for ionosphere up
+    2016-12-31 06:43:56 :: 31856 :: purging any old training data
