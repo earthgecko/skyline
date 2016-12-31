@@ -1112,6 +1112,13 @@ class Analyzer(Thread):
                                 logger.error('error :: Ionosphere not report up')
                                 logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
 
+                        # @added 20161231 - Feature #1830: Ionosphere alerts
+                        #                   Analyzer also alerting on Mirage metrics now #22
+                        # Do not alert on Mirage metrics
+                        if metric_name in mirage_unique_metrics:
+                            logger.info('not alerting - skipping Mirage metric - %s' % str(metric[1]))
+                            continue
+
                         if analyzer_metric:
                             # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
                             # If the metric has a dynamic mirage.metrics key,
