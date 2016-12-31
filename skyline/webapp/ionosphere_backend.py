@@ -323,10 +323,21 @@ def get_an_engine():
         return None, fail_msg, trace
 
 
+def engine_disposal(engine):
+    if engine:
+        try:
+            engine.dispose()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: calling engine.dispose()')
+    return
+
+
 def create_features_profile(requested_timestamp, data_for_metric, context):
     """
     Add a features_profile to the Skyline DB.
     """
+
     base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
 
     if context == 'training_data':
@@ -752,6 +763,9 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     else:
         logger.error('error :: fp_id - %s - training data not copied to %s' % (str(new_fp_id), ts_features_profile_dir))
 
+    if engine:
+        engine_disposal(engine)
+
     return str(new_fp_id), True, False, fail_msg, trace
 
 
@@ -797,6 +811,8 @@ def features_profile_details(fp_id):
         logger.error('%s' % trace)
         fail_msg = 'error :: failed to get ionosphere_table meta for fp_id %s details' % str(fp_id)
         logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
         return False, False, fail_msg, trace
 
     logger.info('%s :: ionosphere_table OK' % function_str)
@@ -851,6 +867,11 @@ last_checked      :: %s | human_date :: %s
         logger.error(trace)
         fail_msg = 'error :: could not get fp_id %s details from ionosphere DB table' % str(fp_id)
         logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
         return False, False, fail_msg, trace
+
+    if engine:
+        engine_disposal(engine)
 
     return fp_details, True, fail_msg, trace

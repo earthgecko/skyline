@@ -357,6 +357,13 @@ class Ionosphere(Thread):
                 logger.info('Redis ionosphere.unique_metrics unknown setting to []')
                 ionosphere_unique_metrics = []
 
+        if engine:
+            try:
+                engine.dispose()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: calling engine.dispose()')
+
         return True
 
     # @added 20161230 - Feature #1830: Ionosphere alerts
@@ -467,6 +474,15 @@ class Ionosphere(Thread):
                 log_msg = 'error :: failed to get MySQL engine in spin_process'
                 logger.error('error :: failed to get MySQL engine in spin_process')
                 return None, log_msg, trace
+
+        def engine_disposal(engine):
+            if engine:
+                try:
+                    engine.dispose()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: calling engine.dispose()')
+            return
 
         child_process_pid = os.getpid()
         logger.info('child_process_pid - %s' % str(child_process_pid))
@@ -765,6 +781,8 @@ class Ionosphere(Thread):
         else:
             logger.error('error :: training data ts json was not found - %s' % (anomaly_json))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            if engine:
+                engine_disposal(engine)
             return
 
         # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
@@ -814,6 +832,8 @@ class Ionosphere(Thread):
             if not metrics_id:
                 logger.error('error :: metric id not known')
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
                 return False
 
             logger.info('getting MySQL engine')
@@ -886,6 +906,8 @@ class Ionosphere(Thread):
                 if graphite_file_count == 0:
                     logger.info('not calculating features no anomaly Graphite alert resources created in %s' % (metric_training_data_dir))
                     self.remove_metric_check_file(str(metric_check_file))
+                    if engine:
+                        engine_disposal(engine)
                     return
                 else:
                     logger.info('anomaly Graphite alert resources found in %s' % (metric_training_data_dir))
@@ -899,6 +921,8 @@ class Ionosphere(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to calculate features')
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
                 return
 
         if os.path.isfile(calculated_feature_file):
@@ -914,6 +938,8 @@ class Ionosphere(Thread):
                 # TODO: make ionosphere more useful, compare any other
                 # available training_metric profiles here and match, not in the
                 # db context, in the training context.
+                if engine:
+                    engine_disposal(engine)
                 return
 
         # @added 20161210 - Branch #922: ionosphere
@@ -958,6 +984,8 @@ class Ionosphere(Thread):
                     # send an Ionosphere alert or add a thunder branch alert, one
                     # one thing at a time.  You cannot rush timeseries.
                     self.remove_metric_check_file(str(metric_check_file))
+                    if engine:
+                        engine_disposal(engine)
                     return
 
         # @modified 20161213 - Branch #1790: test_tsfresh
@@ -981,6 +1009,8 @@ class Ionosphere(Thread):
         if len(calculated_features) == 0:
             logger.error('error :: no calculated features were determined from - %s' % (calculated_feature_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            if engine:
+                engine_disposal(engine)
             return
 
         # Compare calculated features to feature values for each fp id
@@ -990,6 +1020,8 @@ class Ionosphere(Thread):
                 if not metrics_id:
                     logger.error('error :: metric id not known')
                     fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                    if engine:
+                        engine_disposal(engine)
                     return False
 
                 features_count = None
@@ -1233,8 +1265,9 @@ class Ionosphere(Thread):
                         (cache_key, str(value), base_name, str(int(metric_timestamp)),
                             str(triggered_algorithms)))
 
-        # TO BE REMOVED
         self.remove_metric_check_file(str(metric_check_file))
+        if engine:
+            engine_disposal(engine)
         return
 
     def run(self):
