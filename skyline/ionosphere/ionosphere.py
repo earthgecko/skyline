@@ -14,6 +14,7 @@ from multiprocessing import Process, Manager
 import re
 from shutil import rmtree
 import csv
+from ast import literal_eval
 
 from redis import StrictRedis
 from msgpack import Unpacker, packb
@@ -39,7 +40,7 @@ from skyline_functions import (
 # manner.  Decouple Ionosphere from the webapp.
 from features_profile import calculate_features_profile
 
-from database import get_engine, ionosphere_table_meta
+from database import get_engine, ionosphere_table_meta, metrics_table_meta
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 skyline_app = 'ionosphere'
@@ -82,6 +83,8 @@ config = {'user': settings.PANORAMA_DBUSER,
 
 failed_checks_dir = '%s_failed' % settings.IONOSPHERE_CHECK_PATH
 last_purge_key = '%s.last_purge_ts' % skyline_app
+
+LOCAL_DEBUG = False
 
 
 class Ionosphere(Thread):
@@ -235,59 +238,61 @@ class Ionosphere(Thread):
 
         def get_an_engine():
             try:
-                engine, fail_msg, trace = get_engine(skyline_app)
-                return engine, fail_msg, trace
+                engine, log_msg, trace = get_engine(skyline_app)
+                return engine, log_msg, trace
             except:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
-                fail_msg = 'error :: failed to get MySQL engine for'
-                logger.error('%s' % fail_msg)
-                return None, fail_msg, trace
+                log_msg = 'error :: failed to get MySQL engine for manage_ionosphere_unique_metrics'
+                logger.error('%s' % log_msg)
+                return None, log_msg, trace
 
+        ionosphere_unique_metrics_count = 0
+        redis_ionosphere_unique_metrics = None
+        ionosphere_unique_metrics = []
         try:
-            ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
-            ionosphere_unique_metrics_count = len(ionosphere_unique_metrics)
-            logger.info('Redis ionosphere.unique_metrics set has %s metrics' % (str(ionosphere_unique_metrics_count)))
+            # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            redis_ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+            # ionosphere_unique_metrics = []
+
+        if redis_ionosphere_unique_metrics is not None:
+            ionosphere_unique_metrics = list(redis_ionosphere_unique_metrics)
+            ionosphere_unique_metrics_count = len(ionosphere_unique_metrics)
+            logger.info('Redis ionosphere.unique_metrics set has %s metrics' % (str(ionosphere_unique_metrics_count)))
+        else:
+            logger.info('Redis ionosphere.unique_metrics unknown setting to []')
             ionosphere_unique_metrics = []
 
         manage_ionosphere_unique_metrics = True
+        manage_ionosphere_unique_metrics_key = []
         try:
-            manage_ionosphere_unique_metrics = self.redis_conn.get('ionosphere.manage_ionosphere_unique_metrics')
-            manage_ionosphere_unique_metrics = False
+            manage_ionosphere_unique_metrics_key = self.redis_conn.get('ionosphere.manage_ionosphere_unique_metrics')
         except Exception as e:
-            logger.error('error :: could not query Redis for ionosphere.manage_ionosphere_unique_metrics key: %s' % str(e))
+            if LOCAL_DEBUG:
+                logger.error('error :: could not query Redis for ionosphere.manage_ionosphere_unique_metrics key: %s' % str(e))
 
-        if manage_ionosphere_unique_metrics:
-            try:
-                logger.info('deleting Redis ionosphere.unique_metrics set to refresh')
-                self.redis_conn.delete('ionosphere.unique_metrics')
-                manage_ionosphere_unique_metrics = False
-                ionosphere_unique_metrics = []
-            except Exception as e:
-                logger.error('error :: could not delete Redis set ionosphere.unique_metrics: %s' % str(e))
+        if manage_ionosphere_unique_metrics_key is not None:
+            manage_ionosphere_unique_metrics = False
 
-        logger.info('getting MySQL engine')
+        logger.info('getting MySQL engine for ionosphere_enabled_metrics')
         try:
-            engine, fail_msg, trace = get_an_engine()
-            logger.info(fail_msg)
+            engine, log_msg, trace = get_an_engine()
+            logger.info(log_msg)
         except:
-            trace = traceback.format_exc()
-            logger.error(trace)
-            fail_msg = 'error :: could not get a MySQL engine'
-            logger.error('%s' % fail_msg)
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not get a MySQL engine for ionosphere_enabled_metrics')
             return False
-
         if not engine:
-            trace = 'none'
-            fail_msg = 'error :: engine not obtained'
-            logger.error(fail_msg)
+            logger.error('error :: MySQL engine not obtained for ionosphere_enabled_metrics')
             return False
 
         # Determine the metrics that have ionosphere_enabled
         ionosphere_enabled_metrics = []
+        ionosphere_metrics_count = 0
+        query_ok = False
         try:
             stmt = 'select metric from metrics where ionosphere_enabled=1'
             connection = engine.connect()
@@ -296,27 +301,110 @@ class Ionosphere(Thread):
                 metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric_basename))
                 ionosphere_enabled_metrics.append(metric_name)
             connection.close()
-            ionosphere_metrics_count = len(ionosphere_enabled_metrics)
-            logger.info('db has %s ionosphere_enabled metrics' % (str(ionosphere_metrics_count)))
+            query_ok = True
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine ionosphere_enabled metrics from the DB to manage ionosphere.unique_metrics Redis set')
 
-        for metric_name in ionosphere_enabled_metrics:
-            if metric_name in ionosphere_unique_metrics:
-                continue
+        ionosphere_metrics_count = len(ionosphere_enabled_metrics)
+        logger.info('db has %s ionosphere_enabled metrics' % (str(ionosphere_metrics_count)))
+
+        if manage_ionosphere_unique_metrics:
+            # Testing the query was fine and Ionosphere metrics can go to 0 if
+            # all were disabled
+            if query_ok:
+                manage_ionosphere_unique_metrics = True
+            else:
+                manage_ionosphere_unique_metrics = False
+
+        if manage_ionosphere_unique_metrics:
+            for metric_name in ionosphere_enabled_metrics:
+                try:
+                    self.redis_conn.sadd('ionosphere.new_unique_metrics', metric_name)
+                    # logger.info('added %s to ionosphere.new_unique_metrics Redis set' % metric_name)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.info('error :: failed to add %s to ionosphere.new_unique_metrics Redis set' % metric_name)
+                try:
+                    self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
+                except:
+                    logger.error('error :: failed to set key :: ionosphere.manage_ionosphere_unique_metrics')
             try:
-                self.redis_conn.sadd('ionosphere.unique_metrics', metric_name)
-                logger.info('added %s to ionosphere.unique_metrics Redis set' % metric_name)
-            except:
-                logger.error(traceback.format_exc())
-                logger.info('error :: failed to add %s to ionosphere.unique_metrics Redis set' % metric_name)
+                logger.info('replacing Redis ionosphere.unique_metrics via rename of ionosphere.new_unique_metrics')
+                self.redis_conn.rename('ionosphere.new_unique_metrics', 'ionosphere.unique_metrics')
+                manage_ionosphere_unique_metrics = False
+                ionosphere_unique_metrics = []
+            except Exception as e:
+                logger.error('error :: could not delete Redis set ionosphere.unique_metrics: %s' % str(e))
             try:
                 self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
             except:
                 logger.error('error :: failed to set key :: ionosphere.manage_ionosphere_unique_metrics')
+            redis_ionosphere_unique_metrics = []
+            try:
+                # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                redis_ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+                # ionosphere_unique_metrics = []
+
+            if redis_ionosphere_unique_metrics is not None:
+                ionosphere_unique_metrics = list(redis_ionosphere_unique_metrics)
+                ionosphere_unique_metrics_count = len(ionosphere_unique_metrics)
+                logger.info('the new Redis ionosphere.unique_metrics set has %s metrics' % (str(ionosphere_unique_metrics_count)))
+            else:
+                logger.info('Redis ionosphere.unique_metrics unknown setting to []')
+                ionosphere_unique_metrics = []
 
         return True
+
+    # @added 20161230 - Feature #1830: Ionosphere alerts
+    #                   Bug #1460: panorama check file fails
+    #                   Panorama check file fails #24
+    # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+    def new_load_metric_vars(metric_vars_file):
+        """
+        Load the metric variables for a check from a metric check variables file
+
+        :param metric_vars_file: the path and filename to the metric variables files
+        :type metric_vars_file: str
+        :return: the metric_vars module object or ``False``
+        :rtype: list
+
+        """
+        metric_vars = False
+        metric_vars_got = False
+        if os.path.isfile(metric_vars_file):
+            logger.info(
+                'loading metric variables from metric_check_file - %s' % (
+                    str(metric_vars_file)))
+
+            metric_vars = []
+            with open(metric_vars_file) as f:
+                for line in f:
+                    add_line = line.replace('\n', '')
+                    metric_vars.append(add_line)
+
+            # Bug #1460: panorama check file fails
+            with open(metric_vars_file) as f:
+                try:
+                    metric_vars = imp.load_source('metric_vars', '', f)
+                    metric_vars_got = True
+                except:
+                    current_logger.info(traceback.format_exc())
+                    msg = 'failed to import metric variables - metric_check_file'
+                    current_logger.error(
+                        'error :: %s - %s' % (msg, str(metric_vars_file)))
+                    metric_vars = False
+
+            if settings.ENABLE_DEBUG and metric_vars_got:
+                current_logger.info(
+                    'metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+        else:
+            current_logger.error('error :: metric_vars_file not found - %s' % (str(metric_vars_file)))
+
+        return metric_vars
 
     def spin_process(self, i, metric_check_file):
         """
@@ -331,14 +419,13 @@ class Ionosphere(Thread):
 
         def get_an_engine():
             try:
-                engine, fail_msg, trace = get_engine(skyline_app)
-                return engine, fail_msg, trace
+                engine, log_msg, trace = get_engine(skyline_app)
+                return engine, log_msg, trace
             except:
-                trace = traceback.format_exc()
-                logger.error('%s' % trace)
-                fail_msg = 'error :: failed to get MySQL engine for'
-                logger.error('%s' % fail_msg)
-                return None, fail_msg, trace
+                logger.error(traceback.format_exc())
+                log_msg = 'error :: failed to get MySQL engine in spin_process'
+                logger.error('error :: failed to get MySQL engine in spin_process')
+                return None, log_msg, trace
 
         child_process_pid = os.getpid()
         logger.info('child_process_pid - %s' % str(child_process_pid))
@@ -373,8 +460,12 @@ class Ionosphere(Thread):
             logger.info('debug :: failed_check_file - %s' % failed_check_file)
 
         # Load and validate metric variables
+        current_metrics_var = None
         try:
             metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            # @added 20161230 - Panorama check file fails #24
+            # Could this do it
+            current_metrics_var = metric_vars
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
@@ -504,17 +595,71 @@ class Ionosphere(Thread):
 
         # Check if the metric has ionosphere_enabled, if not remove the check
         # file but not the data directory
-        query = "SELECT ionosphere_enabled FROM metrics WHERE metric='%s'" % metric
-        result = mysql_select(skyline_app, query)
-        if str(result[0]) != '1':
-            logger.info('Ionosphere not enabled on %s' % (metric))
-            # @modified 20161222 - do not remove metric file until features
-            # calculated
-            # self.remove_metric_check_file(str(metric_check_file))
-            # return
+        # @modified 20161230 - Feature #1830: Ionosphere alerts
+        # Use SQLAlchemy method
+        # query = "SELECT ionosphere_enabled FROM metrics WHERE metric='%s'" % metric
+        # result = mysql_select(skyline_app, query)
+        # if str(result[0]) != '1':
+        #     logger.info('Ionosphere not enabled on %s' % (metric))
+        #     # @modified 20161222 - do not remove metric file until features
+        #     # calculated
+        #     # self.remove_metric_check_file(str(metric_check_file))
+        #     # return
+        #     training_metric = True
+        try:
+            engine, log_msg, trace = get_an_engine()
+            logger.info(log_msg)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not get a MySQL engine to determine ionosphere_enabled')
+
+        if not engine:
+            logger.error('error :: engine not obtained to determine ionosphere_enabled')
+
+        # Get the metrics_table metadata
+        metrics_table = None
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info('metrics_table OK for %s' % base_name)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get metrics_table meta for %s' % base_name)
+
+        metrics_id = None
+        metric_ionosphere_enabled = None
+        try:
+            connection = engine.connect()
+            # stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))
+            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            result = connection.execute(stmt)
+            row = result.fetchone()
+            metrics_id = row['id']
+            metric_ionosphere_enabled = row['ionosphere_enabled']
+            connection.close()
+
+            if metric_ionosphere_enabled is not None:
+                training_metric = False
+            else:
+                # @modified 20161222 - do not remove metric file until features
+                # calculated
+                # self.remove_metric_check_file(str(metric_check_file))
+                # return
+                training_metric = True
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine ionosphere_enabled from metrics table for - %s' % base_name)
+            metric_ionosphere_enabled = None
             training_metric = True
+
+        logger.info(
+            'ionosphere_enabled is %s for metric id %s - %s' % (
+                str(metric_ionosphere_enabled), str(metrics_id),
+                base_name))
+
+        if training_metric:
+            logger.info('Ionosphere is not enabled on %s' % (base_name))
         else:
-            logger.info('Ionosphere is enabled on %s' % (metric))
+            logger.info('Ionosphere is enabled on %s' % (base_name))
 
         # @added 20161210 - Branch #922: ionosphere
         #                   Task #1658: Patterning Skyline Ionosphere
@@ -528,7 +673,7 @@ class Ionosphere(Thread):
             logger.info('training data ts json available - %s' % (anomaly_json))
         else:
             logger.error('error :: training data ts json was not found - %s' % (anomaly_json))
-            self.remove_metric_check_file(str(metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
         # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
@@ -559,8 +704,6 @@ class Ionosphere(Thread):
                     logger.info('training data Redis full duration ts json available - %s' % (redis_anomaly_json))
                 else:
                     logger.error('error :: training data Redis full duration json was not found - %s' % (redis_anomaly_json))
-                    self.remove_metric_check_file(str(metric_check_file))
-                    return
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: training data Redis full duration json was not found - %s' % (redis_anomaly_json))
@@ -576,56 +719,54 @@ class Ionosphere(Thread):
         # This is now the Ionosphere meat.
         # Get a MySQL engine only if not training_metric
         if not training_metric:
+
+            if not metrics_id:
+                logger.error('error :: metric id not known')
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                return False
+
             logger.info('getting MySQL engine')
             try:
-                engine, fail_msg, trace = get_an_engine()
-                logger.info(fail_msg)
+                engine, log_msg, trace = get_an_engine()
+                logger.info(log_msg)
             except:
-                trace = traceback.format_exc()
-                logger.error(trace)
-                fail_msg = 'error :: could not get a MySQL engine'
-                logger.error('%s' % fail_msg)
-                self.remove_metric_check_file(str(metric_check_file))
-                return False
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not get a MySQL engine to get fp_ids')
 
             if not engine:
-                trace = 'none'
-                fail_msg = 'error :: engine not obtained'
-                logger.error(fail_msg)
-                return False
+                logger.error('error :: engine not obtained to get fp_ids')
 
-            # Get the ionosphere_table metadata
-            ionosphere_table = None
             try:
-                ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
-                logger.info(fail_msg)
+                ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+                logger.info('ionosphere_table OK')
             except:
-                trace = traceback.format_exc()
-                logger.error('%s' % trace)
-                fail_msg = 'error :: failed to get ionosphere_table meta for %s' % base_name
-                logger.error('%s' % fail_msg)
-                return False
-
-            logger.info('ionosphere_table OK')
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get ionosphere_table meta for %s' % base_name)
 
             # Determine the fp_ids that exist for the metric
             fp_ids = []
             fp_ids_found = False
             try:
                 connection = engine.connect()
-                stmt = select([ionosphere_table.c.fp_id]).where(ionosphere_table.c.metric == base_name)
+                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
                 result = connection.execute(stmt)
                 for row in result:
-                    fp_id = row['id']
-                    fp_ids.append(int(fp_id))
+                    if int(row['full_duration']) == int(full_duration):
+                        fp_id = row['id']
+                        fp_ids.append(int(fp_id))
+                        logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+                else:
+                        logger.info('not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
                 connection.close()
                 fp_count = len(fp_ids)
                 logger.info('determined %s fp ids for %s' % (str(fp_count), base_name))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: could not determine fp ids from DB for %s' % base_name)
+                fp_count = 0
 
-            if fp_ids == []:
+            if len(fp_ids) == 0:
                 logger.error('error :: there are no fp ids for %s' % base_name)
             else:
                 fp_ids_found = True
@@ -662,11 +803,11 @@ class Ionosphere(Thread):
         f_calc = None
         if not calculated_feature_file_found:
             try:
-                fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
+                fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to calculate features')
-                self.remove_metric_check_file(str(metric_check_file))
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 return
 
         if os.path.isfile(calculated_feature_file):
@@ -746,37 +887,36 @@ class Ionosphere(Thread):
                         value = float(line[1])
                         calculated_features.append([feature_name, value])
 
-        if calculated_features == []:
+        if len(calculated_features) == 0:
             logger.error('error :: no calculated features were determined from - %s' % (calculated_feature_file))
-            self.remove_metric_check_file(str(metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
         # Compare calculated features to feature values for each fp id
         not_anomalous = False
         if calculated_feature_file_found:
-
-            metrics_id = None
-            stmt = 'select id from metrics where metric=\'%s\'' % base_name
-            try:
-                connection = engine.connect()
-                for row in engine.execute(stmt):
-                    metrics_id = row['id']
-                connection.close()
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not determine id from metrics table for - %s' % str(base_name))
-
             for fp_id in fp_ids:
                 if not metrics_id:
-                    continue
+                    logger.error('error :: metric id not known')
+                    fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                    return False
 
                 features_count = None
                 fp_features = []
                 # Get features for fp_id from z_fp_<metric_id> table where the
                 # features profile is the same full_duration
+                metric_fp_table = 'z_fp_%s' % str(metrics_id)
                 try:
-                    metric_fp_table = 'z_fp_%s' % str(metrics_id)
-                    stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s AND full_duration=%s' % (metric_fp_table, str(fp_id), str(full_duration))
+                    engine, log_msg, trace = get_an_engine()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not get a MySQL engine for feature_id and values from %s' % metric_fp_table)
+
+                if not engine:
+                    logger.error('error :: engine not obtained for feature_id and values from %s' % metric_fp_table)
+
+                try:
+                    stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s' % (metric_fp_table, str(fp_id))
                     connection = engine.connect()
                     for row in engine.execute(stmt):
                         fp_feature_id = int(row['feature_id'])
@@ -784,10 +924,10 @@ class Ionosphere(Thread):
                         fp_features.append([fp_feature_id, fp_value])
                     connection.close()
                     features_count = len(fp_features)
-                    logger.info('determined %s features for fp_id %s at full_duration of %s' % (str(features_count), str(fp_id), str(full_duration)))
+                    logger.info('determined %s features for fp_id %s' % (str(features_count), str(fp_id)))
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: could not determine features from DB for %s' % str(fp_id))
+                    logger.error('error :: could not determine feature_id, value from %s' % metric_fp_table)
 
                 # Convert feature names in calculated_features to their id
                 logger.info('converting tsfresh feature names to Skyline feature ids')
@@ -826,6 +966,12 @@ class Ionosphere(Thread):
                 # Determine the sum of each set
                 sum_fp_values = sum(relevant_fp_feature_values)
                 sum_calc_values = sum(relevant_calc_feature_values)
+                logger.info(
+                    'sum of the values of the %s common features in features profile - %s' % (
+                        str(relevant_fp_feature_values_count), str(sum_fp_values)))
+                logger.info(
+                    'sum of the values of the %s common features in the calculated features - %s' % (
+                        str(relevant_calc_feature_values_count), str(sum_calc_values)))
 
                 # Determine whether each set is positive or negative
                 # # if the same carry on
@@ -834,11 +980,11 @@ class Ionosphere(Thread):
                 # Determine whether each set is positive or negative
                 # # if the same carry on
                 # # if both negative, make then both positive postive_sums
-                fp_sum = [sum_fp_values]
-                calc_sum = [sum_calc_values]
+                fp_sum_array = [sum_fp_values]
+                calc_sum_array = [sum_calc_values]
                 almost_equal = None
                 try:
-                    np.testing.assert_array_almost_equal(fp_sum, calc_sum)
+                    np.testing.assert_array_almost_equal(fp_sum_array, calc_sum_array)
                     almost_equal = True
                 except:
                     almost_equal = False
@@ -847,10 +993,12 @@ class Ionosphere(Thread):
                     not_anomalous = True
                     logger.info('common features sums are almost equal, not anomalous' % str(relevant_fp_feature_values_count))
 
-                sums_array = np.array([fp_sum, calc_sum], dtype=float)
+                percent_different = 100
+                sums_array = np.array([sum_fp_values, sum_calc_values], dtype=float)
                 try:
                     calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
                     percent_different = calc_percent_different[0]
+                    logger.info('percent_different between common features sums - %s' % str(percent_different))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to calculate percent_different')
@@ -861,6 +1009,15 @@ class Ionosphere(Thread):
                 logger.info('updating checked details in db for %s' % (str(fp_id)))
                 # update matched_count in ionosphere_table
                 checked_timestamp = int(time())
+
+                try:
+                    engine, log_msg, trace = get_an_engine()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not get a MySQL engine to update checked details in db for %s' % (str(fp_id)))
+                if not engine:
+                    logger.error('error :: engine not obtained to update checked details in db for %s' % (str(fp_id)))
+
                 try:
                     connection = engine.connect()
                     connection.execute(
@@ -889,6 +1046,14 @@ class Ionosphere(Thread):
                             str(fp_id), str(percent_different)))
                     # update matched_count in ionosphere_table
                     matched_timestamp = int(time())
+                    try:
+                        engine, log_msg, trace = get_an_engine()
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not get a MySQL engine to update matched details in db for %s' % (str(fp_id)))
+                    if not engine:
+                        logger.error('error :: engine not obtained to update matched details in db for %s' % (str(fp_id)))
+
                     try:
                         connection = engine.connect()
                         connection.execute(

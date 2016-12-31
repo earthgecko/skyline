@@ -995,7 +995,7 @@ class Mirage(Thread):
                     #                   Branch #922: Ionosphere
                     # Bringing Ionosphere online - do alert on Ionosphere
                     # metrics if Ionosphere is up
-                    metric_name = '%s.%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                    metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
                     if metric_name in ionosphere_unique_metrics:
                         ionosphere_up = False
                         try:
@@ -1068,9 +1068,9 @@ class Mirage(Thread):
             # Log progress
             if len(self.anomalous_metrics) > 0:
                 logger.info('seconds since last anomaly :: %.2f' % (time() - now))
-                logger.info('total anomalies   :: %d' % len(self.anomalous_metrics))
-                logger.info('exception stats   :: %s' % exceptions)
-                logger.info('anomaly breakdown :: %s' % anomaly_breakdown)
+                logger.info('total anomalies    :: %d' % len(self.anomalous_metrics))
+                logger.info('exception stats    :: %s' % exceptions)
+                logger.info('anomaly breakdown  :: %s' % anomaly_breakdown)
 
             # Log to Graphite
             run_time = time() - run_timestamp
@@ -1084,7 +1084,7 @@ class Mirage(Thread):
                     sent_to_crucible = str(len(self.sent_to_crucible))
                 except:
                     sent_to_crucible = '0'
-                logger.info('sent_to_crucible  :: %s' % sent_to_crucible)
+                logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
                 send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
 
@@ -1093,7 +1093,7 @@ class Mirage(Thread):
                     sent_to_panorama = str(len(self.sent_to_panorama))
                 except:
                     sent_to_panorama = '0'
-                logger.info('sent_to_panorama  :: %s' % sent_to_panorama)
+                logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
                 send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
 

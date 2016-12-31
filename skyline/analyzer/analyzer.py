@@ -19,6 +19,7 @@ import re
 from sys import version_info
 import os.path
 import resource
+from ast import literal_eval
 
 import settings
 from skyline_functions import (
@@ -98,7 +99,6 @@ class Analyzer(Thread):
         self.sent_to_crucible = Manager().list()
         self.sent_to_panorama = Manager().list()
         self.sent_to_ionosphere = Manager().list()
-        self.ionosphere_data_sets = Manager().list()
         # @added 20161229 - Feature #1830: Ionosphere alerts
         self.all_anomalous_metrics = Manager().list()
 
@@ -294,14 +294,16 @@ class Analyzer(Thread):
                     # send_to_panaroma = False
                     send_to_ionosphere = False
 
-                    if metric_name in mirage_unique_metrics:
-                        analyzer_metric = False
-                        mirage_metric = True
-
                     if metric_name in ionosphere_unique_metrics:
                         analyzer_metric = False
                         ionosphere_metric = True
                         send_to_ionosphere = True
+
+                    if metric_name in mirage_unique_metrics:
+                        analyzer_metric = False
+                        ionosphere_metric = False
+                        mirage_metric = True
+                        send_to_ionosphere = False
 
                     if ionosphere_enabled:
                         if analyzer_metric:
@@ -328,6 +330,10 @@ class Analyzer(Thread):
                                 send_to_ionosphere = False
 
                     if send_to_ionosphere:
+                        if metric_name in ionosphere_unique_metrics:
+                            logger.info('sending an ionosphere metric to Ionosphere - %s' % (base_name))
+                        else:
+                            logger.info('sending an analyzer metric to Ionosphere for training - %s' % (base_name))
                         try:
                             # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
                             # Added full_duration
@@ -638,11 +644,18 @@ class Analyzer(Thread):
                 # @added 20161229 - Feature #1830: Ionosphere alerts
                 # Self manage the Mirage metrics set
                 manage_mirage_unique_metrics = True
+                manage_mirage_unique_metrics_key = []
                 try:
-                    manage_mirage_unique_metrics = self.redis_conn.get('analyzer.manage_mirage_unique_metrics')
-                    manage_mirage_unique_metrics = False
+                    manage_mirage_unique_metrics_key = list(self.redis_conn.get('analyzer.manage_mirage_unique_metrics'))
                 except Exception as e:
-                    logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
+                    if LOCAL_DEBUG:
+                        logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
+
+                if not manage_mirage_unique_metrics_key:
+                    manage_mirage_unique_metrics_key = []
+
+                if len(manage_mirage_unique_metrics_key) > 0:
+                    manage_mirage_unique_metrics = False
 
                 mirage_unique_metrics = []
                 try:
@@ -652,6 +665,10 @@ class Analyzer(Thread):
                         logger.info('debug :: %s' % str(mirage_unique_metrics))
                 except:
                     logger.info('failed to fetch the mirage.unique_metrics Redis set')
+                    mirage_unique_metrics = []
+
+                mirage_unique_metrics_count = len(mirage_unique_metrics)
+                logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
 
                 if manage_mirage_unique_metrics:
                     try:
@@ -702,7 +719,8 @@ class Analyzer(Thread):
                                     if LOCAL_DEBUG:
                                         logger.error('error :: failed to add %s to mirage.unique_metrics set' % metric)
                                 try:
-                                    self.redis_conn.setex('analyzer.manage_mirage_unique_metrics', 300, int(time()))
+                                    key_timestamp = int(time())
+                                    self.redis_conn.setex('analyzer.manage_mirage_unique_metrics', 300, key_timestamp)
                                 except:
                                     logger.error('error :: failed to set key :: analyzer.manage_mirage_unique_metrics')
 
@@ -715,6 +733,21 @@ class Analyzer(Thread):
                         except:
                             # key doesn't exist in dict
                             blah = False
+
+                # If they were refresh set them again
+                if mirage_unique_metrics == []:
+                    try:
+                        mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+                        mirage_unique_metrics_count = len(mirage_unique_metrics)
+                        logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
+                        if LOCAL_DEBUG:
+                            logger.info('debug :: fetched the mirage.unique_metrics Redis set')
+                            logger.info('debug :: %s' % str(mirage_unique_metrics))
+                    except:
+                        logger.info('failed to fetch the mirage.unique_metrics Redis set')
+                        mirage_unique_metrics == []
+                        mirage_unique_metrics_count = len(mirage_unique_metrics)
+
             # END Redis mirage.unique_metrics_set
 
             if LOCAL_DEBUG:
@@ -875,19 +908,28 @@ class Analyzer(Thread):
                 logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
                 ionosphere_unique_metrics = []
 
+            ionosphere_unique_metrics_count = len(ionosphere_unique_metrics)
+            logger.info('ionosphere.unique_metrics Redis set count - %s' % str(ionosphere_unique_metrics_count))
+
             # @added 20161229 - Feature #1830: Ionosphere alerts
             # Determine if Ionosphere added any alerts to be sent
             for metric in self.anomalous_metrics:
                 self.all_anomalous_metrics.append(metric)
             ionosphere_alerts = []
-            ionosphere_alerts_returned = False
+            ionosphere_alerts_returned = True
             context = 'Analyzer'
             try:
                 ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.analyzer.alert.*'))
-                ionosphere_alerts_returned = True
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to scan ionosphere.analyzer.alert.* from Redis')
+                ionosphere_alerts_returned = False
+
+            if not ionosphere_alerts:
+                ionosphere_alerts = []
+                ionosphere_alerts_returned = False
+
+            ionosphere_metric_alerts = []
             if len(ionosphere_alerts) == 0:
                 ionosphere_alerts_returned = False
             else:
@@ -900,8 +942,7 @@ class Analyzer(Thread):
                         base_name = str(send_alert_for[1])
                         metric_timestamp = int(float(send_alert_for[2]))
                         triggered_algorithms = send_alert_for[3]
-                        second_order_resolution_seconds = int(send_alert_for[4])
-                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
+                        anomalous_metric = [value, base_name, metric_timestamp]
                         self.all_anomalous_metrics.append(anomalous_metric)
                         for algorithm in triggered_algorithms:
                             key = algorithm
@@ -911,6 +952,7 @@ class Analyzer(Thread):
                                 anomaly_breakdown[key] += 1
                         self.redis_conn.delete(cache_key)
                         logger.info('alerting for Ionosphere on %s' % base_name)
+                        ionosphere_metric_alerts.append(base_name)
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % cache_key)
@@ -1049,7 +1091,7 @@ class Analyzer(Thread):
                         #                   Branch #922: Ionosphere
                         # Bringing Ionosphere online - do alert on Ionosphere
                         # metrics if Ionosphere is up
-                        metric_name = '%s.%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                        metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
                         if metric_name in ionosphere_unique_metrics:
                             ionosphere_up = False
                             try:
@@ -1060,7 +1102,7 @@ class Analyzer(Thread):
                                 # @modified 20161229 - Feature #1830: Ionosphere alerts
                                 # Do alert if Ionosphere created a Redis
                                 # ionosphere.analyzer.alert key
-                                if str(metric[1]) in ionosphere_alerts:
+                                if str(metric[1]) in ionosphere_metric_alerts:
                                     logger.info('alerting as in ionosphere_alerts - Ionosphere metric - %s' % str(metric[1]))
                                     context = 'Ionosphere'
                                 else:
@@ -1094,6 +1136,9 @@ class Analyzer(Thread):
                                 continue
 
                             if last_alert:
+                                if str(metric[1]) in ionosphere_metric_alerts:
+                                    logger.info('not alerting on ionosphere_alerts Ionosphere metric - last_alert key exists - %s' % str(metric[1]))
+                                    logger.info('so alert resources will not be created for this ionosphere_alerts Ionosphere metric - %s' % str(metric[1]))
                                 continue
 
                             try:
@@ -1244,12 +1289,12 @@ class Analyzer(Thread):
             total_anomalies = str(len(self.anomalous_metrics))
 
             # Log progress
-            logger.info('seconds to run    :: %.2f' % run_time)
-            logger.info('total metrics     :: %s' % total_metrics)
-            logger.info('total analyzed    :: %s' % total_analyzed)
-            logger.info('total anomalies   :: %s' % total_anomalies)
-            logger.info('exception stats   :: %s' % exceptions)
-            logger.info('anomaly breakdown :: %s' % anomaly_breakdown)
+            logger.info('seconds to run     :: %.2f' % run_time)
+            logger.info('total metrics      :: %s' % total_metrics)
+            logger.info('total analyzed     :: %s' % total_analyzed)
+            logger.info('total anomalies    :: %s' % total_anomalies)
+            logger.info('exception stats    :: %s' % exceptions)
+            logger.info('anomaly breakdown  :: %s' % anomaly_breakdown)
 
             # Log to Graphite
             graphite_run_time = '%.2f' % run_time
@@ -1282,16 +1327,23 @@ class Analyzer(Thread):
                     sent_to_mirage = str(len(self.sent_to_mirage))
                 except:
                     sent_to_mirage = '0'
-                logger.info('sent_to_mirage    :: %s' % sent_to_mirage)
+                logger.info('sent_to_mirage     :: %s' % sent_to_mirage)
                 send_metric_name = '%s.sent_to_mirage' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_mirage)
+                try:
+                    mirage_unique_metrics_count_str = str(mirage_unique_metrics_count)
+                except:
+                    mirage_unique_metrics_count_str = '0'
+                logger.info('Mirage metrics     :: %s' % mirage_unique_metrics_count_str)
+                send_metric_name = '%s.mirage_metrics' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, mirage_unique_metrics_count_str)
 
             if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
                 try:
                     sent_to_crucible = str(len(self.sent_to_crucible))
                 except:
                     sent_to_crucible = '0'
-                logger.info('sent_to_crucible  :: %s' % sent_to_crucible)
+                logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
                 send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
 
@@ -1300,7 +1352,7 @@ class Analyzer(Thread):
                     sent_to_panorama = str(len(self.sent_to_panorama))
                 except:
                     sent_to_panorama = '0'
-                logger.info('sent_to_panorama  :: %s' % sent_to_panorama)
+                logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
                 send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
 
@@ -1312,6 +1364,13 @@ class Analyzer(Thread):
                 logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
                 send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
+                try:
+                    ionosphere_unique_metrics_count_str = str(ionosphere_unique_metrics_count)
+                except:
+                    ionosphere_unique_metrics_count_str = '0'
+                logger.info('Ionosphere metrics :: %s' % ionosphere_unique_metrics_count_str)
+                send_metric_name = '%s.ionosphere_metrics' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, ionosphere_unique_metrics_count_str)
 
             # Check canary metric
             try:
@@ -1327,7 +1386,7 @@ class Analyzer(Thread):
                     timeseries = list(unpacker)
                     time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
                     projected = 24 * (time() - now) / time_human
-                    logger.info('canary duration   :: %.2f' % time_human)
+                    logger.info('canary duration    :: %.2f' % time_human)
                 except:
                     logger.error(
                         'error :: failed to unpack/calculate canary duration')
@@ -1351,7 +1410,6 @@ class Analyzer(Thread):
             self.sent_to_crucible[:] = []
             self.sent_to_panorama[:] = []
             self.sent_to_ionosphere[:] = []
-            self.ionosphere_data_sets[:] = []
             # @added 20161229 - Feature #1830: Ionosphere alerts
             self.all_anomalous_metrics[:] = []
 
