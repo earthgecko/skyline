@@ -395,7 +395,11 @@ class Analyzer(Thread):
                             logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                             logger.info(traceback.format_exc())
                     else:
-                        logger.info('not adding panorama anomaly file for Mirage metric - %s' % (metric))
+                        if mirage_metric:
+                            other_app = 'Mirage'
+                        if ionosphere_metric:
+                            other_app = 'Ionosphere'
+                        logger.info('not adding panorama anomaly file for %s - %s' % (other_app, metric))
 
                     # If Crucible is enabled - save timeseries and create a
                     # Crucible check
