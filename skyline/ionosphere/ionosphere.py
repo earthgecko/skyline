@@ -363,7 +363,7 @@ class Ionosphere(Thread):
     #                   Bug #1460: panorama check file fails
     #                   Panorama check file fails #24
     # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
-    def new_load_metric_vars(metric_vars_file):
+    def new_load_metric_vars(self, metric_vars_file):
         """
         Load the metric variables for a check from a metric check variables file
 
@@ -379,32 +379,73 @@ class Ionosphere(Thread):
             logger.info(
                 'loading metric variables from metric_check_file - %s' % (
                     str(metric_vars_file)))
-
-            metric_vars = []
-            with open(metric_vars_file) as f:
-                for line in f:
-                    add_line = line.replace('\n', '')
-                    metric_vars.append(add_line)
-
-            # Bug #1460: panorama check file fails
-            with open(metric_vars_file) as f:
-                try:
-                    metric_vars = imp.load_source('metric_vars', '', f)
-                    metric_vars_got = True
-                except:
-                    current_logger.info(traceback.format_exc())
-                    msg = 'failed to import metric variables - metric_check_file'
-                    current_logger.error(
-                        'error :: %s - %s' % (msg, str(metric_vars_file)))
-                    metric_vars = False
-
-            if settings.ENABLE_DEBUG and metric_vars_got:
-                current_logger.info(
-                    'metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
         else:
-            current_logger.error('error :: metric_vars_file not found - %s' % (str(metric_vars_file)))
+            logger.error(
+                'error :: loading metric variables from metric_check_file - file not found - %s' % (
+                    str(metric_vars_file)))
+            return False
 
-        return metric_vars
+        metric_vars = []
+        with open(metric_vars_file) as f:
+            for line in f:
+                no_new_line = line.replace('\n', '')
+                no_equal_line = no_new_line.replace(' = ', ',')
+                array = str(no_equal_line.split(',', 1))
+                add_line = literal_eval(array)
+                metric_vars.append(add_line)
+
+        string_keys = ['metric', 'anomaly_dir', 'added_by']
+        float_keys = ['value']
+        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
+        array_keys = ['algorithms', 'triggered_algorithms']
+        boolean_keys = ['graphite_metric', 'run_crucible_tests']
+
+        metric_vars_array = []
+        for var_array in metric_vars:
+            key = None
+            value = None
+            if var_array[0] in string_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = str(value_str)
+                if var_array[0] == 'metric':
+                    metric = value
+            if var_array[0] in float_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = float(value_str)
+            if var_array[0] in int_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = int(value_str)
+            if var_array[0] in array_keys:
+                key = var_array[0]
+                array_value_str = str(var_array[1]).replace("'", '')
+                value = literal_eval(str(var_array[1]))
+                # value = value_str
+            if var_array[0] in boolean_keys:
+                key = var_array[0]
+                if str(var_array[1]) == 'True':
+                    value = True
+                else:
+                    value = False
+            if key:
+                metric_vars_array.append([key, value])
+
+            if len(metric_vars_array) == 0:
+                logger.error(
+                    'error :: loading metric variables - none found' % (
+                        str(metric_vars_file)))
+                return False
+
+            if settings.ENABLE_DEBUG:
+                logger.info(
+                    'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+
+        logger.info('debug :: metric_vars for %s' % str(metric))
+        logger.info('debug :: %s' % str(metric_vars_array))
+
+        return metric_vars_array
 
     def spin_process(self, i, metric_check_file):
         """
@@ -459,13 +500,15 @@ class Ionosphere(Thread):
         if settings.ENABLE_IONOSPHERE_DEBUG:
             logger.info('debug :: failed_check_file - %s' % failed_check_file)
 
-        # Load and validate metric variables
-        current_metrics_var = None
         try:
-            metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
-            # @added 20161230 - Panorama check file fails #24
-            # Could this do it
-            current_metrics_var = metric_vars
+            # Load and validate metric variables
+            # @modified 20161231 - Feature #1830: Ionosphere alerts
+            #                      Bug #1460: panorama check file fails
+            #                      Panorama check file fails #24
+            # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+            # Use def new_load_metric_vars(self, metric_vars_file):
+            # metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            metric_vars_array = self.new_load_metric_vars(str(metric_check_file))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
@@ -477,30 +520,48 @@ class Ionosphere(Thread):
         # this ensures that if any of the variables are not set for some reason
         # we can handle unexpected data or situations gracefully and try and
         # ensure that the process does not hang.
+        metric = None
         try:
-            metric_vars.metric
-            metric = str(metric_vars.metric)
+            # metric_vars.metric
+            # metric = str(metric_vars.metric)
+            key = 'metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric = str(value_list[0])
             base_name = metric
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - metric - %s' % metric)
         except:
+            logger.info(traceback.format_exc())
             logger.error('error :: failed to read metric variable from check file - %s' % (metric_check_file))
+            metric = None
+
+        if not metric:
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        value = None
         try:
-            metric_vars.value
-            value = str(metric_vars.value)
+            # metric_vars.value
+            # value = str(metric_vars.value)
+            key = 'value'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            value = float(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - value - %s' % (value))
         except:
             logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
+            value = None
+
+        if not value:
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
         try:
-            metric_vars.from_timestamp
-            from_timestamp = str(metric_vars.from_timestamp)
+            # metric_vars.from_timestamp
+            # from_timestamp = str(metric_vars.from_timestamp)
+            key = 'from_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            from_timestamp = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - from_timestamp - %s' % from_timestamp)
         except:
@@ -511,19 +572,29 @@ class Ionosphere(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        metric_timestamp = None
         try:
-            metric_vars.metric_timestamp
-            metric_timestamp = str(metric_vars.metric_timestamp)
+            # metric_vars.metric_timestamp
+            # metric_timestamp = str(metric_vars.metric_timestamp)
+            key = 'metric_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric_timestamp = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - metric_timestamp - %s' % metric_timestamp)
         except:
             logger.error('error :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
+            metric_timestamp = None
+
+        if not metric_timestamp:
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
         try:
-            metric_vars.algorithms
-            algorithms = metric_vars.algorithms
+            # metric_vars.algorithms
+            # algorithms = metric_vars.algorithms
+            key = 'algorithms'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            algorithms = value_list[0]
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - algorithms - %s' % str(algorithms))
         except:
@@ -531,43 +602,63 @@ class Ionosphere(Thread):
             algorithms = 'all'
 
         try:
-            metric_vars.triggered_algorithms
-            triggered_algorithms = metric_vars.triggered_algorithms
+            # metric_vars.triggered_algorithms
+            # triggered_algorithms = metric_vars.triggered_algorithms
+            key = 'triggered_algorithms'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            algorithms = value_list[0]
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - triggered_algorithms - %s' % str(triggered_algorithms))
         except:
             logger.error('error :: failed to read triggered_algorithms variable from check file setting to all - %s' % (metric_check_file))
             triggered_algorithms = 'all'
 
+        added_by = None
         try:
-            metric_vars.added_by
-            added_by = str(metric_vars.added_by)
+            # metric_vars.added_by
+            # added_by = str(metric_vars.added_by)
+            key = 'added_by'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_by = str(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - added_by - %s' % added_by)
         except:
             logger.error('error :: failed to read added_by variable from check file - %s' % (metric_check_file))
+            added_by = None
+
+        if not added_by:
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
         try:
-            metric_vars.added_at
-            added_at = str(metric_vars.added_at)
+            # metric_vars.added_at
+            # added_at = str(metric_vars.added_at)
+            key = 'added_at'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_at = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - added_at - %s' % added_at)
         except:
             logger.error('error :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
-            added_by = 'all'
+            added_at = metric_timestamp
 
         # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
         # Added full_duration which needs to be recorded to allow Mirage metrics
         # to be profiled on Redis timeseries data at FULL_DURATION
+        full_duration = None
         try:
-            metric_vars.full_duration
-            full_duration = str(metric_vars.full_duration)
+            # metric_vars.full_duration
+            # full_duration = str(metric_vars.full_duration)
+            key = 'full_duration'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            full_duration = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - full_duration - %s' % full_duration)
         except:
             logger.error('error :: failed to read full_duration variable from check file - %s' % (metric_check_file))
+            full_duration = None
+
+        if not full_duration:
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
