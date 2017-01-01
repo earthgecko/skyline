@@ -295,7 +295,13 @@ class Analyzer(Thread):
                     send_to_ionosphere = False
 
                     if metric_name in ionosphere_unique_metrics:
-                        analyzer_metric = False
+                        # @modified 20170101 - Feature #1830: Ionosphere alerts
+                        # Correct rate limitining Ionosphere on last_alert cache key
+                        # Do not set analyzer_metric to False until after last_alert
+                        # key has been checked otherwise Ionosphere will get every
+                        # anomaly and as it will not be rate limited by the alert
+                        # cache key
+                        # analyzer_metric = False
                         ionosphere_metric = True
                         send_to_ionosphere = True
 
@@ -324,6 +330,8 @@ class Analyzer(Thread):
                                 send_to_ionosphere = True
                             else:
                                 send_to_ionosphere = False
+                                if ionosphere_metric:
+                                    logger.info('not sending to Ionosphere - alert key exists - %s' % (base_name))
                         else:
                             if mirage_metric:
                                 logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
