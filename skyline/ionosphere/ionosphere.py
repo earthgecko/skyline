@@ -17,24 +17,24 @@ import csv
 from ast import literal_eval
 
 from redis import StrictRedis
-from msgpack import Unpacker, packb
+# from msgpack import Unpacker, packb
 import traceback
 import mysql.connector
 from mysql.connector import errorcode
 
 from sqlalchemy.sql import select
-import requests
-from requests.auth import HTTPBasicAuth
+# import requests
+# from requests.auth import HTTPBasicAuth
 
 # @added 20161213 - Branch #1790: test_tsfresh
 # To match the new order introduced via the test_tsfresh method
 import numpy as np
-import pandas as pd
+# import pandas as pd
 
 import settings
 from skyline_functions import (
-    load_metric_vars, fail_check, mysql_select, write_data_to_file,
-    send_graphite_metric, mkdir_p)
+    fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p)
+
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
 # manner.  Decouple Ionosphere from the webapp.
@@ -105,9 +105,11 @@ class Ionosphere(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.anomalous_metrics = Manager().list()
-        self.metric_variables = Manager().list()
         self.mysql_conn = mysql.connector.connect(**config)
+        self.anomalous_metrics = Manager().list()
+        self.not_anomalous = Manager().list()
+        self.features_profiles_checked = Manager().list()
+        self.training_metrics = Manager().list()
         self.sent_to_panorama = Manager().list()
 
     def check_if_parent_is_alive(self):
@@ -290,6 +292,13 @@ class Ionosphere(Thread):
             return False
 
         # Determine the metrics that have ionosphere_enabled
+        # @added 20170103 - Task #1658: Patterning Skyline Ionosphere
+        # TODO: We need 2 sets not just ionosphere.unique_metrics otherwise
+        #       if a metric is switch from Analyzer to Mirage will send all
+        #       matched anomalies to Ionosphere even if there is no features
+        #       profile at the specified duration.
+        # ionosphere.analyzer.unique_metrics (at FULL_DURATION)
+        # ionosphere.mirage.unique_metrics (NOT at FULL_DURATION)
         ionosphere_enabled_metrics = []
         ionosphere_metrics_count = 0
         query_ok = False
@@ -380,8 +389,6 @@ class Ionosphere(Thread):
         :rtype: list
 
         """
-        metric_vars = False
-        metric_vars_got = False
         if os.path.isfile(metric_vars_file):
             logger.info(
                 'loading metric variables from metric_check_file - %s' % (
@@ -401,7 +408,7 @@ class Ionosphere(Thread):
                 add_line = literal_eval(array)
                 metric_vars.append(add_line)
 
-        string_keys = ['metric', 'anomaly_dir', 'added_by']
+        string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
         float_keys = ['value']
         int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
         array_keys = ['algorithms', 'triggered_algorithms']
@@ -427,9 +434,7 @@ class Ionosphere(Thread):
                 value = int(value_str)
             if var_array[0] in array_keys:
                 key = var_array[0]
-                array_value_str = str(var_array[1]).replace("'", '')
                 value = literal_eval(str(var_array[1]))
-                # value = value_str
             if var_array[0] in boolean_keys:
                 key = var_array[0]
                 if str(var_array[1]) == 'True':
@@ -552,6 +557,7 @@ class Ionosphere(Thread):
             metric = None
 
         if not metric:
+            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -562,6 +568,7 @@ class Ionosphere(Thread):
             key = 'value'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             value = float(value_list[0])
+            anomalous_value = value
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - value - %s' % (value))
         except:
@@ -569,9 +576,11 @@ class Ionosphere(Thread):
             value = None
 
         if not value:
+            logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        from_timestamp = None
         try:
             # metric_vars.from_timestamp
             # from_timestamp = str(metric_vars.from_timestamp)
@@ -585,6 +594,11 @@ class Ionosphere(Thread):
             # Added exception handling here
             logger.info(traceback.format_exc())
             logger.error('error :: failed to read from_timestamp variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        if not from_timestamp:
+            logger.error('error :: failed to load from_timestamp variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -602,6 +616,7 @@ class Ionosphere(Thread):
             metric_timestamp = None
 
         if not metric_timestamp:
+            logger.error('error :: failed to load metric_timestamp variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -622,7 +637,7 @@ class Ionosphere(Thread):
             # triggered_algorithms = metric_vars.triggered_algorithms
             key = 'triggered_algorithms'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
-            algorithms = value_list[0]
+            triggered_algorithms = value_list[0]
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: metric variable - triggered_algorithms - %s' % str(triggered_algorithms))
         except:
@@ -676,6 +691,21 @@ class Ionosphere(Thread):
 
         if not full_duration:
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        # @added 20170101 - Feature #1830: Ionosphere alerts
+        # Remove check file is an alert key exists
+        cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+        last_alert = False
+        try:
+            last_alert = self.redis_conn.get(cache_key)
+        except Exception as e:
+            logger.error('error :: could not query Redis for cache_key: %s' % e)
+        if not last_alert:
+            logger.info('debug :: no alert cache key - %s' % cache_key)
+        else:
+            logger.info('debug :: removing check - alert cache key exists - %s' % cache_key)
+            self.remove_metric_check_file(str(metric_check_file))
             return
 
         now = time()
@@ -752,11 +782,13 @@ class Ionosphere(Thread):
                 # self.remove_metric_check_file(str(metric_check_file))
                 # return
                 training_metric = True
+                self.training_metrics.append(base_name)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine ionosphere_enabled from metrics table for - %s' % base_name)
             metric_ionosphere_enabled = None
             training_metric = True
+            self.training_metrics.append(base_name)
 
         logger.info(
             'ionosphere_enabled is %s for metric id %s - %s' % (
@@ -836,6 +868,9 @@ class Ionosphere(Thread):
                     engine_disposal(engine)
                 return False
 
+            # @added 20170101 - Feature #1836: ionosphere - local features profiles disk cache
+            # Cache fp ids for 300 seconds?
+
             logger.info('getting MySQL engine')
             try:
                 engine, log_msg, trace = get_an_engine()
@@ -867,7 +902,7 @@ class Ionosphere(Thread):
                         fp_id = row['id']
                         fp_ids.append(int(fp_id))
                         logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
-                else:
+                    else:
                         logger.info('not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
                 connection.close()
                 fp_count = len(fp_ids)
@@ -881,6 +916,13 @@ class Ionosphere(Thread):
                 logger.error('error :: there are no fp ids for %s' % base_name)
             else:
                 fp_ids_found = True
+
+            if not fp_ids_found:
+                logger.error('error :: no fp ids were found for %s at %s' % (base_name, str(full_duration)))
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
+                return
 
         # @added 20161221 - TODO: why not calculate the features of every
         # anomaly so the the use does not have to do it and wait for the
@@ -928,10 +970,15 @@ class Ionosphere(Thread):
         if os.path.isfile(calculated_feature_file):
             logger.info('calculated features available - %s' % (calculated_feature_file))
             calculated_feature_file_found = True
-            if isinstance(f_calc, float):
-                f_calc_time = '%.2f' % f_calc
+            if f_calc:
                 send_metric_name = '%s.features_calculation_time' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, f_calc_time)
+                f_calc_time = '%.2f' % float(f_calc)
+                try:
+                    send_graphite_metric(skyline_app, send_metric_name, f_calc_time)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to send calculate features')
+
             if training_metric:
                 logger.info('training metric done')
                 self.remove_metric_check_file(str(metric_check_file))
@@ -942,51 +989,12 @@ class Ionosphere(Thread):
                     engine_disposal(engine)
                 return
 
-        # @added 20161210 - Branch #922: ionosphere
-        #                   Task #1658: Patterning Skyline Ionosphere
-        # Calculate features for the current timeseries if there are fp ids
-        # Just call it via the webapp... fewer lines of code and already done in
-        # webapp/ionosphere_backend.py and webapp/features_proifle.py
         if not calculated_feature_file_found:
-            webapp_url = '%s/ionosphere?timestamp=%s&metric=%s&calc_features=true' % (
-                settings.SKYLINE_URL, metric_timestamp, base_name)
-            r = None
-            http_status_code = 0
-            if settings.WEBAPP_AUTH_ENABLED:
-                # 10 second timout is sufficient locally under normal circumstances
-                # as tsfresh has yet to have been take longer than 6 seconds if so
-                # by the time the next request is made, the features file should
-                # exist.  So this is limited psuedo-idempotency.
-                timeout_and_auth = 'timeout=10, auth=(%s, %s))' % (settings.WEBAPP_AUTH_USER, settings.WEBAPP_AUTH_USER_PASSWORD)
-            else:
-                timeout_and_auth = 'timeout=10'
-            if fp_ids_found:
-                for _ in range(2):
-                    try:
-                        r = requests.get(webapp_url, timeout_and_auth)
-                        http_status_code = r.status_code
-                    except:
-                        logger.error('error :: could not retrieve %s' % webapp_url)
-                        sleep(5)
-                        continue
-                    else:
-                        break
-                else:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: could not retrieve %s after 3 tries' % webapp_url)
-
-            if int(http_status_code) == 200:
-                if os.path.isfile(calculated_feature_file):
-                    logger.info('calculated features available - %s' % (calculated_feature_file))
-                    calculated_feature_file_found = True
-                else:
-                    logger.error('error :: calculated features not available - %s' % (calculated_feature_file))
-                    # send an Ionosphere alert or add a thunder branch alert, one
-                    # one thing at a time.  You cannot rush timeseries.
-                    self.remove_metric_check_file(str(metric_check_file))
-                    if engine:
-                        engine_disposal(engine)
-                    return
+            logger.error('error :: calculated features file not available - %s' % (calculated_feature_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            if engine:
+                engine_disposal(engine)
+            return
 
         # @modified 20161213 - Branch #1790: test_tsfresh
         # TODO: Match the test_tsfresh method
@@ -1003,8 +1011,8 @@ class Ionosphere(Thread):
                         else:
                             feature_name = str(line[0])
                         count_id += 1
-                        value = float(line[1])
-                        calculated_features.append([feature_name, value])
+                        calc_value = float(line[1])
+                        calculated_features.append([feature_name, calc_value])
 
         if len(calculated_features) == 0:
             logger.error('error :: no calculated features were determined from - %s' % (calculated_feature_file))
@@ -1024,6 +1032,7 @@ class Ionosphere(Thread):
                         engine_disposal(engine)
                     return False
 
+                self.features_profiles_checked.append(fp_id)
                 features_count = None
                 fp_features = []
                 # Get features for fp_id from z_fp_<metric_id> table where the
@@ -1055,21 +1064,21 @@ class Ionosphere(Thread):
                 # Convert feature names in calculated_features to their id
                 logger.info('converting tsfresh feature names to Skyline feature ids')
                 calc_features_by_id = []
-                for feature_name, value in calculated_features:
+                for feature_name, calc_value in calculated_features:
                     for skyline_feature_id, name in TSFRESH_FEATURES:
                         if feature_name == name:
-                            calc_features_by_id.append([skyline_feature_id, float(value)])
+                            calc_features_by_id.append([skyline_feature_id, float(calc_value)])
 
                 # Determine what features each data has, extract only values for
                 # common features.
                 logger.info('determining common features')
                 relevant_fp_feature_values = []
                 relevant_calc_feature_values = []
-                for skyline_feature_id, value in calc_features_by_id:
+                for skyline_feature_id, calc_value in calc_features_by_id:
                     for fp_feature_id, fp_value in fp_features:
                         if skyline_feature_id == fp_feature_id:
                             relevant_fp_feature_values.append(fp_value)
-                            relevant_calc_feature_values.append(value)
+                            relevant_calc_feature_values.append(calc_value)
 
                 # Determine the sum of each set
                 relevant_fp_feature_values_count = len(relevant_fp_feature_values)
@@ -1105,16 +1114,6 @@ class Ionosphere(Thread):
                 # # if both negative, make then both positive postive_sums
                 fp_sum_array = [sum_fp_values]
                 calc_sum_array = [sum_calc_values]
-                almost_equal = None
-                try:
-                    np.testing.assert_array_almost_equal(fp_sum_array, calc_sum_array)
-                    almost_equal = True
-                except:
-                    almost_equal = False
-
-                if almost_equal:
-                    not_anomalous = True
-                    logger.info('common features sums are almost equal, not anomalous' % str(relevant_fp_feature_values_count))
 
                 percent_different = 100
                 sums_array = np.array([sum_fp_values, sum_calc_values], dtype=float)
@@ -1126,6 +1125,17 @@ class Ionosphere(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to calculate percent_different')
                     continue
+
+                almost_equal = None
+                try:
+                    np.testing.assert_array_almost_equal(fp_sum_array, calc_sum_array)
+                    almost_equal = True
+                except:
+                    almost_equal = False
+
+                if almost_equal:
+                    not_anomalous = True
+                    logger.info('common features sums are almost equal, not anomalous' % str(relevant_fp_feature_values_count))
 
                 # @added 20161229 - Feature #1830: Ionosphere alerts
                 # Update the features profile checked count and time
@@ -1167,6 +1177,9 @@ class Ionosphere(Thread):
                         'calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
                         (str(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR),
                             str(fp_id), str(percent_different)))
+
+                if not_anomalous:
+                    self.not_anomalous.append(base_name)
                     # update matched_count in ionosphere_table
                     matched_timestamp = int(time())
                     try:
@@ -1198,6 +1211,7 @@ class Ionosphere(Thread):
 
             if not not_anomalous:
                 logger.info('anomalous - no feature profiles were matched - %s' % base_name)
+                self.anomalous_metrics.append(base_name)
                 # Send to panorama as Analyzer and Mirage will only alert on the
                 # anomaly, they will not push it to Panorama
                 if settings.PANORAMA_ENABLED:
@@ -1223,9 +1237,9 @@ class Ionosphere(Thread):
                                             'source = \'%s\'\n' \
                                             'added_by = \'%s\'\n' \
                                             'added_at = \'%s\'\n' \
-                        % (base_name, str(value), from_timestamp,
-                           metric_timestamp, str(settings.ALGORITHMS),
-                           triggered_algorithms, skyline_app, source,
+                        % (base_name, str(anomalous_value), str(int(from_timestamp)),
+                           str(int(metric_timestamp)), str(settings.ALGORITHMS),
+                           str(triggered_algorithms), skyline_app, source,
                            this_host, added_at)
 
                     # Create an anomaly file with details about the anomaly
@@ -1238,12 +1252,9 @@ class Ionosphere(Thread):
                             panaroma_anomaly_data)
                         logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
                         self.sent_to_panorama.append(base_name)
-
                     except:
                         logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                         logger.info(traceback.format_exc())
-                else:
-                    logger.info('not adding panorama anomaly file for Mirage metric - %s' % (metric))
 
             #     alert ... hmmm the harder part, maybe not all the resources
             #     are already created, so just determining ALERTS and firing a
@@ -1253,17 +1264,22 @@ class Ionosphere(Thread):
                 try:
                     self.redis_conn.setex(
                         cache_key, 300,
-                        [float(value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                        [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
                     logger.info(
                         'add Redis alert key - %s - [%s, \'%s\', %s, %s]' %
-                        (cache_key, str(value), base_name, str(int(metric_timestamp)),
+                        (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
                             str(triggered_algorithms)))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error(
                         'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s]' %
-                        (cache_key, str(value), base_name, str(int(metric_timestamp)),
+                        (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
                             str(triggered_algorithms)))
+
+                self.remove_metric_check_file(str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
+                return
 
         self.remove_metric_check_file(str(metric_check_file))
         if engine:
@@ -1384,9 +1400,10 @@ class Ionosphere(Thread):
                 if not metric_var_files:
                     logger.info('sleeping 20 no metric check files')
                     sleep(20)
+                    up_now = time()
                     # Report app up
                     try:
-                        self.redis_conn.setex(skyline_app, 120, now)
+                        self.redis_conn.setex(skyline_app, 120, up_now)
                         logger.info('updated Redis key for %s up' % skyline_app)
                     except:
                         logger.error('error :: failed to update Redis key for %s up' % skyline_app)
@@ -1446,6 +1463,74 @@ class Ionosphere(Thread):
                 except:
                     logger.error('error :: failed to list files in check dir')
                     logger.info(traceback.format_exc())
+
+                # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
+                #                   Task #1658: Patterning Skyline Ionosphere
+                # Send Ionosphere metrics to Graphite every minute now that
+                # Ionosphere is better tuned and Reset lists
+                cache_key = '%s.sent_graphite_metrics' % skyline_app
+                redis_sent_graphite_metrics = False
+                try:
+                    redis_sent_graphite_metrics = self.redis_conn.get(cache_key)
+                except Exception as e:
+                    logger.error('error :: could not query Redis for key %s: %s' % (cache_key, e))
+
+                # Flush metrics to Graphite
+                if not redis_sent_graphite_metrics:
+                    try:
+                        not_anomalous = str(len(self.not_anomalous))
+                    except:
+                        not_anomalous = '0'
+                    logger.info('not_anomalous      :: %s' % not_anomalous)
+                    send_metric_name = '%s.not_anomalous' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, not_anomalous)
+
+                    try:
+                        total_anomalies = str(len(self.anomalous_metrics))
+                    except:
+                        total_anomalies = '0'
+                    logger.info('total_anomalies    :: %s' % total_anomalies)
+                    send_metric_name = '%s.total_anomalies' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, total_anomalies)
+
+                    try:
+                        training_metrics = str(len(self.training_metrics))
+                    except:
+                        training_metrics = '0'
+                    logger.info('training metrics   :: %s' % training_metrics)
+                    send_metric_name = '%s.training_metrics' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, training_metrics)
+
+                    try:
+                        features_profiles_checked = str(len(self.features_profiles_checked))
+                    except:
+                        features_profiles_checked = '0'
+                    logger.info('fps checked count  :: %s' % features_profiles_checked)
+                    send_metric_name = '%s.fps_checked' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, not_anomalous)
+
+                    if settings.PANORAMA_ENABLED:
+                        try:
+                            sent_to_panorama = str(len(self.sent_to_panorama))
+                        except:
+                            sent_to_panorama = '0'
+                        logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
+                        send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
+                        send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
+
+                    sent_graphite_metrics_now = int(time())
+                    try:
+                        self.redis_conn.setex(cache_key, 59, sent_graphite_metrics_now)
+                        logger.info('updated Redis key - %s' % cache_key)
+                    except:
+                        logger.error('error :: failed to update Redis key - %s up' % cache_key)
+
+                    # Reset lists
+                    self.anomalous_metrics[:] = []
+                    self.not_anomalous[:] = []
+                    self.features_profiles_checked[:] = []
+                    self.training_metrics[:] = []
+                    self.sent_to_panorama[:] = []
 
                 if metric_var_files:
                     break

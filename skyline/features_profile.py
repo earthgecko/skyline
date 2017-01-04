@@ -72,7 +72,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     if context == 'ionosphere':
         log_context = 'ionosphere'
     current_logger.info('%s feature profile creation requested for %s at %s' % (
-        context, base_name, timestamp))
+        log_context, base_name, timestamp))
 
     timeseries_dir = base_name.replace('.', '/')
     if context == 'training_data' or context == 'ionosphere':
@@ -344,6 +344,6 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     if os.path.isfile(ts_csv):
         os.remove(ts_csv)
-        current_logger.info('removed %s' % ts_csv)
+        current_logger.info('removed the created csv - %s' % ts_csv)
 
     return str(t_fname_out), True, fp_created, fp_id, 'none', 'none', str(calc_time)
