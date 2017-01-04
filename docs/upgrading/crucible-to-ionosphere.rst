@@ -13,6 +13,11 @@ New settings.py variables
 There is new dedicated Ionosphere settings section with the additions of all the
 new Ionosphere variables.
 
+Modified settings.py docstrings
+-------------------------------
+
+There are some changes in the ALERTS docstrings that cover pattern matching that
+should be reviewed.
 
 Clean up Skyline permissions
 ----------------------------
@@ -41,7 +46,7 @@ directories due to an octal bug that was introduced with the Crucible branch.
 Update your MySQL Skyline database
 ----------------------------------
 
-- Backup you Skyline MySQL DB.
+- Backup your Skyline MySQL DB.
 - Run the skyline.sql script against your database again.  There is one ALTER and
   a number of new tables.  The SQL script is idempotent, but always back it up
   first.

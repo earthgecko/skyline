@@ -463,6 +463,8 @@ trigger again.
         ('stats.', 'syslog', 1),
         # Wildcard namespaces can be used as well
         ('metric4.thing.*.requests', 'stmp', 900),
+        # However beware of wildcards as the above wildcard should really be
+        ('metric4.thing\..*.\.requests', 'stmp', 900),
         # mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and Mirage is enabled
         ('metric5.thing.*.rpm', 'smtp', 900, 168),
     )
@@ -470,7 +472,7 @@ trigger again.
 - Alert tuple parameters are:
 
 :param metric: metric name.
-:param alerter: alerter name.
+:param alerter: the alerter name e.g. smtp, syslog, hipchat, pagerduty
 :param EXPIRATION_TIME: Alerts will not fire twice within this amount of
     seconds, even if they trigger again.
 :param SECOND_ORDER_RESOLUTION_HOURS: (optional) The number of hours that Mirage
