@@ -307,7 +307,9 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
 	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profile ::</span></span></span> id {{ features_profile_id }} created OK</h4>
     {% if not features_profile_exists %}
 	  <div class="alert alert-success">
-	    <strong>Success!</strong> The features profile was created with id {{ features_profile_id }}.
+	    <strong>Success!</strong> The features profile was created with id {{ features_profile_id }}
+      and can be viewed in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric}}">features profile page for fp_id {{ features_profile_id }}</a>
+      or view under the {{ for_metric }} and {{ timestamp }}  dir in ionosphere/features_profiles/.
 	  </div>
     {% else %}
 	  <div class="alert alert-warning">
@@ -378,13 +380,17 @@ the top right of this page.  Here is hoping that this day just gets better.
   {% endif %}
   {% for image in metric_images %}
     {% if 'graphite' in image %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph</h4>
+      {% if metric_second_order_resolution_hours != False %}
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
+        {% else %}
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
+      {% endif %}
       {% if graphite_url != False %}
 If you wish to see the <a target='_blank' href="{{ graphite_url }}">current
 Graphite graph</a> for {{ for_metric }} (opens in new tab)
       {% endif %}
     {% elif 'redis' in image %}
-      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot</h4>
+      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
     {% else %}
       <h4><span class="logo"><span class="sky">Unknown ::</span> <span class="re">anomaly ::</span></span></span> image</h4>
     {% endif %}

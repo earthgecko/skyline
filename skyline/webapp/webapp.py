@@ -111,7 +111,7 @@ except:
 #        file_handler = MemoryHandler(app_logfile, mode='a')
 #        file_handler.setLevel(logging.DEBUG)
 #        app.logger.addHandler(file_handler)
-
+#
 #        formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 #        handler = logging.handlers.TimedRotatingFileHandler(
 #            app_logfile,
@@ -119,7 +119,7 @@ except:
 #            interval=1,
 #            backupCount=5)
 #        handler.setLevel(logging.DEBUG)
-
+#
 #        memory_handler = logging.handlers.MemoryHandler(100,
 #                                                        flushLevel=logging.DEBUG,
 #                                                        target=handler)
@@ -1035,6 +1035,12 @@ def ionosphere():
 
     if timestamp_arg and metric_arg:
         try:
+            # @modified 20170104 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added the full_duration_in_hours and changed graph color from blue to orange
+#full_duration_in_hours
+#GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
+# A regex is required to change the TARGET_HOURS, no? extend do not modify?
+# Not certain will review after Dude morning excersion
             graph_url = '%scactiStyle(%s)%s&colorList=blue' % (
                 settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
         except:
@@ -1100,6 +1106,27 @@ def ionosphere():
 
         try:
             mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id = ionosphere_metric_data(requested_timestamp, base_name, context)
+
+            # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added the full_duration parameter so that the appropriate graphs can be
+            # embedded for the user in the training data page
+            full_duration = settings.FULL_DURATION
+            full_duration_in_hours = int(full_duration / 3600)
+            second_order_resolution_hours = False
+            try:
+                key = 'full_duration'
+                value_list = [var_array[1] for var_array in m_vars if var_array[0] == key]
+                m_full_duration = int(value_list[0])
+                m_full_duration_in_hours = int(m_full_duration / 3600)
+                if m_full_duration != full_duration:
+                    second_order_resolution_hours = m_full_duration_in_hours
+            except:
+                m_full_duration = False
+                m_full_duration_in_hours = False
+                message = 'Uh oh ... a Skyline 500 :( :: m_vars - %s' % str(m_vars)
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -1109,6 +1136,11 @@ def ionosphere():
                 extracted_features=features, calc_time=f_calc,
                 features_profile_id=fp_id, features_profile_exists=fp_exists,
                 fp_view=fp_view_on, features_profile_details=fp_details,
+                redis_full_duration=full_duration,
+                redis_full_duration_in_hours=full_duration_in_hours,
+                metric_full_duration=m_full_duration,
+                metric_full_duration_in_hours=m_full_duration_in_hours,
+                metric_second_order_resolution_hours=second_order_resolution_hours,
                 tsfresh_version=TSFRESH_VERSION,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
@@ -1171,6 +1203,21 @@ def ionosphere_images():
                         return internal_error(message, trace)
 
     return 'Bad Request', 400
+
+# @added 20170102 - Feature #1838: utilites - ALERTS matcher
+#                   Branch #922: ionosphere
+#                   Task #1658: Patterning Skyline Ionosphere
+# Added utilities TODO
+# @app.route("/utilities")
+# @requires_auth
+# def utilities():
+#     start = time.time()
+#     try:
+#         return render_template('utilities.html'), 200
+#     except:
+#         error_string = traceback.format_exc()
+#         logger.error('error :: failed to render utilities.html: %s' % str(error_string))
+#         return 'Uh oh ... a Skyline 500 :(', 500
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow

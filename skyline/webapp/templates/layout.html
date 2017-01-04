@@ -39,6 +39,7 @@ fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="/now"><span class="sky">Sky</span><span class="re">line</span></a>
       </div>
@@ -72,6 +73,11 @@ fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v
             class="active"
             {% endif %}
             ><a href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></a></li>
+            <li
+            {% if url_for("utilities") in request.path %}
+            class="active"
+            {% endif %}
+            ><a href="/utilities">Utilities</a></li>
             <li
             {% if url_for("docs") in request.path %}
             class="active"
