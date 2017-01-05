@@ -1208,16 +1208,18 @@ def ionosphere_images():
 #                   Branch #922: ionosphere
 #                   Task #1658: Patterning Skyline Ionosphere
 # Added utilities TODO
-# @app.route("/utilities")
-# @requires_auth
-# def utilities():
-#     start = time.time()
-#     try:
-#         return render_template('utilities.html'), 200
-#     except:
-#         error_string = traceback.format_exc()
-#         logger.error('error :: failed to render utilities.html: %s' % str(error_string))
-#         return 'Uh oh ... a Skyline 500 :(', 500
+
+
+@app.route("/utilities")
+@requires_auth
+def utilities():
+    start = time.time()
+    try:
+        return render_template('utilities.html'), 200
+    except:
+        error_string = traceback.format_exc()
+        logger.error('error :: failed to render utilities.html: %s' % str(error_string))
+        return 'Uh oh ... a Skyline 500 :(', 500
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow
