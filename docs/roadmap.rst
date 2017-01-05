@@ -170,3 +170,13 @@ Machine learning
 
 Bring additional dimensions of machine learning capabilities into Skyline, too
 many avenues to mention...
+
+Grumpy
+======
+
+Investigate if any elements could benefit performance wise from being
+implemented in Grumpy - go running Python -
+https://opensource.googleblog.com/2017/01/grumpy-go-running-python.html there
+may be some mileage in using go instead of multiprocessing in some cases,
+algorithms, ionosphere, tsfresh chunks to go in extract_features rather than
+multiprocessing, scope for investigation.
