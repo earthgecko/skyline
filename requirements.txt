@@ -185,3 +185,11 @@ pytest==3.0.5
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
 sqlalchemy==1.1.4
+
+# @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs
+# readthedocs build is failing as they are Running Sphinx v1.3.5 and returns
+# Sphinx version error:
+# This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
+Sphinx==1.4.8
+sphinx-rtd-theme==0.1.9
+recommonmark==0.4.0

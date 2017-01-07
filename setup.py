@@ -64,14 +64,6 @@ def setup_package():
         #     'statsmodels==0.6.1', 'msgpack-python==0.4.7', 'requests==2.10.0',
         #     'gunicorn==19.6.0'
         # ],
-        # @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs
-        # readthedocs build is failing as they are Running Sphinx v1.3.5 and returns
-        # Sphinx version error:
-        # This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
-        install_requires=[
-            'setuptools', 'pip', 'wheel', 'Sphinx==1.4.8',
-            'sphinx-rtd-theme==0.1.9', 'recommonmark==0.4.0'
-        ],
     )
 
 if __name__ == '__main__':
