@@ -232,11 +232,11 @@ Also note:
     {% if print_debug == 'True' %}
 <code> DEBUG </code> :: /ionosphere metric_files block</br>
     {% endif %}
-    <h4><span class="logo"><span class="sky">Training</span> <span class="re">data: </span>{{ for_metric }} - {{ human_date }}</h4>
+    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span>{{ for_metric }} - {{ human_date }}</h4>
 		<div class="col-md-10">
   {% if data_ok == True %}
 		<div class="container">
-		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous:</code></span></span></span>  (aka: "That's not what I call an anomaly")</h4>
+		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span>  (aka: "That's not what I call an anomaly")</h4>
 		  <p>Train Skyline on this timeseries if this data is not anomalous.</p>
 		  <table class="table table-hover">
 		    <thead>
@@ -395,7 +395,7 @@ Image file: {{ image }}<br><br>
     {% endif %}
   {% endfor %}
 
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
 <!-- @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs -->
   {% for gimage in graphite_now_images %}
 <!--      <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" />

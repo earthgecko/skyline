@@ -406,6 +406,11 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
     graphite_now_images = []
     graphite_now = int(time.time())
     graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
+    # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
+    # Exclude if matches TARGET_HOURS - unique only
+    _graph_resolutions = sorted(set(graph_resolutions))
+    graph_resolutions = _graph_resolutions
+
     for target_hours in graph_resolutions:
         graph_image = False
         try:
@@ -426,6 +431,20 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
                 graph_image_file)
             if graph_image:
                 graphite_now_images.append(graph_image_file)
+            # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+            # TODO: Un/fortunately there is no simple method by which to annotate
+            # these Graphite NOW graphs at the anomaly timestamp, if these were
+            # from Grafana, yes but we cannot add Grafana as a dep :)  It would
+            # be possible to add these using the dygraph js method ala now, then
+            # and Panorama, but that is BEYOND the scope of js I want to have to
+            # deal with.  I think we can leave this up to the operator's
+            # neocortex to do the processing.  Which may be a valid point as
+            # sticking a single red line vertical line in the graphs ala Etsy
+            # deployments https://codeascraft.com/2010/12/08/track-every-release/
+            # or how @andymckay does it https://blog.mozilla.org/webdev/2012/04/05/tracking-deployments-in-graphite/
+            # would arguably introduce a bias in this context.  The neocortex
+            # should be able to handle this timeshifting fairly simply with a
+            # little practice.
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get Graphite graph at %s hours for %s' % (str(target_hours), base_name))
