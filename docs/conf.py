@@ -47,9 +47,9 @@ if not on_rtd:
 # Sphinx version error:
 # This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
 else:
-    if exists('requirements.txt'):
+    if os.path.isfile('requirements.txt'):
         run('pip install -r requirements.txt')
-    if exists('docs-requirements.txt'):
+    if os.path.isfile('docs-requirements.txt'):
         run('pip install -r docs-requirements.txt')
 
 # -- General configuration ------------------------------------------------
