@@ -378,10 +378,9 @@ see <b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</
 the top right of this page.  Here is hoping that this day just gets better.
 	  </div>
   {% endif %}
+
   {% for image in metric_images %}
-    {% if '.redis.plot' in image %}
-      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
-    {% else %}
+    {% if not '.redis.plot' in image %}
       {% if metric_second_order_resolution_hours != False %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
         {% else %}
@@ -391,10 +390,31 @@ the top right of this page.  Here is hoping that this day just gets better.
 If you wish to see the <a target='_blank' href="{{ graphite_url }}">current
 Graphite graph</a> for {{ for_metric }} (opens in new tab)
       {% endif %}
-    {% endif %}
       <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
+    {% endif %}
   {% endfor %}
+
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong></h4>
+<!-- @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs -->
+  {% for gimage in graphite_now_images %}
+<!--      <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" />
+# Align 4 images - tried all of http://stackoverflow.com/questions/9382970/how-to-center-a-div-with-bootstrap2
+# end up using https://owlcation.com/stem/how-to-align-images-side-by-side thanks
+# Ellen Brundige
+-->
+        <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+  {% endfor %}
+        <p style="clear: both;">
+
+  {% for image in metric_images %}
+    {% if '.redis.plot' in image %}
+      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+    {% endif %}
+  {% endfor %}
+
       <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span></span> files</h4>
       <table>
         <tr>
@@ -419,10 +439,17 @@ Image file: {{ image }}<br><br>
     <table>
         <caption><b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b></caption>
         <tr>
+<!-- @modified 20170106 - Feature #1830: Ionosphere alerts
+#                         Bug #1460: panorama check file fails
+#                         Panorama check file fails #24
+# Fixed
             <td>
               <a target='_blank' href="https://github.com/earthgecko/skyline/issues/24">#24</a>
             </td>
             <td>An anomaly can sometimes not have a matching Panorama anomaly record due to Panorama check file fails #24</td>
+-->
+            <td>None</td>
+            <td>That are known of at the present time</td>
         </tr>
     </table>
   </div>

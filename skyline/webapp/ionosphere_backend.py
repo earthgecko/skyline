@@ -1,6 +1,6 @@
 from __future__ import division
 import logging
-from os import path, walk, listdir
+from os import path, walk, listdir, remove
 import string
 import operator
 import time
@@ -24,7 +24,8 @@ from tsfresh import __version__ as tsfresh_version
 
 import settings
 import skyline_version
-from skyline_functions import RepresentsInt, mkdir_p, write_data_to_file
+from skyline_functions import (
+    RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import get_engine, ionosphere_table_meta, metrics_table_meta
@@ -325,7 +326,10 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
         metric_file = path.join(metric_data_dir, i_file)
         metric_paths.append([i_file, metric_file])
         if i_file.endswith('.png'):
-            images.append(str(metric_file))
+            # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+            # Exclude any graphite_now png files from the images lists
+            if '.graphite_now.' not in i_file:
+                images.append(str(metric_file))
         if i_file == metric_var_filename:
             metric_vars_file = str(metric_file)
         if i_file == ts_json_filename:
@@ -396,7 +400,39 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get anomaly id from panorama response: %s' % str(r.text))
 
-    return (metric_paths, images, human_date, metric_vars, ts_json, data_to_process, panorama_anomaly_id)
+    # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+    # Graphite now graphs at TARGET_HOURS, 24h, 7d, 30d to fully inform the
+    # operator about the metric.
+    graphite_now_images = []
+    graphite_now = int(time.time())
+    graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
+    for target_hours in graph_resolutions:
+        graph_image = False
+        try:
+            target_seconds = int((target_hours * 60) * 60)
+            from_timestamp = str(graphite_now - target_seconds)
+            until_timestamp = str(graphite_now)
+            graph_image_file = '%s/%s.graphite_now.%sh.png' % (metric_data_dir, base_name, str(target_hours))
+            # These are NOW graphs, so if the graph_image_file exists, remove it
+            if path.isfile(graph_image_file):
+                try:
+                    remove(str(graph_image_file))
+                    logger.info('graph_image_file removed - %s' % str(graph_image_file))
+                except OSError:
+                    pass
+            logger.info('getting Graphite graph for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+            graph_image = get_graphite_metric(
+                skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                graph_image_file)
+            if graph_image:
+                graphite_now_images.append(graph_image_file)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get Graphite graph at %s hours for %s' % (str(target_hours), base_name))
+
+    return (
+        metric_paths, images, human_date, metric_vars, ts_json, data_to_process,
+        panorama_anomaly_id, graphite_now_images)
 
 
 def get_an_engine():

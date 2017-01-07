@@ -1105,7 +1105,9 @@ def ionosphere():
                 return internal_error(fail_msg, trace)
 
         try:
-            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id = ionosphere_metric_data(requested_timestamp, base_name, context)
+            # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added graphite_now_images gimages
+            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages = ionosphere_metric_data(requested_timestamp, base_name, context)
 
             # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
             # Added the full_duration parameter so that the appropriate graphs can be
@@ -1127,10 +1129,17 @@ def ionosphere():
                 trace = traceback.format_exc()
                 return internal_error(message, trace)
 
+            # @added 20170105 - Feature #1842: Ionosphere - Graphite now graphs
+            # We want to sort the images so that the Graphite image is always
+            # displayed first in he training_data.html page AND we want Graphite
+            # now graphs at TARGET_HOURS, 24h, 7d, 30d to inform the operator
+            # about the metric
+            sorted_images = sorted(images)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
-                metric_images=images, human_date=hdate, timeseries=ts_json,
+                metric_images=sorted_images, human_date=hdate, timeseries=ts_json,
                 data_ok=data_to_process, td_files=mpaths,
                 panorama_anomaly_id=p_id, graphite_url=graph_url,
                 extracted_features=features, calc_time=f_calc,
@@ -1141,7 +1150,7 @@ def ionosphere():
                 metric_full_duration=m_full_duration,
                 metric_full_duration_in_hours=m_full_duration_in_hours,
                 metric_second_order_resolution_hours=second_order_resolution_hours,
-                tsfresh_version=TSFRESH_VERSION,
+                tsfresh_version=TSFRESH_VERSION, graphite_now_images=gimages,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

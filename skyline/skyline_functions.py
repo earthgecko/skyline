@@ -461,6 +461,11 @@ def get_graphite_metric(
         from sys import version_info
         python_version = int(version_info[0])
 
+    try:
+        quote(skyline_app, safe='')
+    except:
+        from requests.utils import quote
+
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -486,10 +491,12 @@ def get_graphite_metric(
 
     current_logger.info('read_timeout - %s' % str(read_timeout))
 
+    graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    current_logger.info('graphite_from - %s' % str(graphite_from))
+
     graphite_until = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     current_logger.info('graphite_until - %s' % str(graphite_until))
 
-    graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     output_format = data_type
 
     # graphite URL
@@ -511,6 +518,7 @@ def get_graphite_metric(
         else:
             if settings.ENABLE_DEBUG:
                 current_logger.info('graph file exists - %s' % str(output_object))
+            return True
 
     if get_image:
         current_logger.info(
@@ -522,6 +530,26 @@ def get_graphite_metric(
             image_url += '&width=586'
         if 'height' not in image_url:
             image_url += '&height=308'
+        # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+        # settings, color and title
+        if current_skyline_app == 'webapp':
+            if 'graphite_now' in output_object:
+                no_extension = os.path.splitext(output_object)[0]
+                _hours = os.path.splitext(no_extension)[1]
+                hours = _hours.replace('.', '')
+                int_hours = hours.replace('h', '')
+                str_value = str(int_hours)
+                period = 'hours'
+                if int(int_hours) > 24:
+                    str_value = str(int(int_hours) / 24)
+                    period = 'days'
+                unencoded_graph_title = 'Graphite NOW at %s %s' % (str_value, period)
+                graph_title_string = quote(unencoded_graph_title, safe='')
+                graph_title = '&title=%s' % graph_title_string
+                add_parameters = '%s&colorList=blue%s' % (settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                image_url += add_parameters
+                current_logger.info('Ionosphere graphite NOW url - %s' % (image_url))
+
         if settings.ENABLE_DEBUG:
             current_logger.info('graphite image url - %s' % (str(image_url)))
         image_url_timeout = int(connect_timeout)
@@ -550,6 +578,14 @@ def get_graphite_metric(
         if not os.path.isfile(graphite_image_file):
             msg = 'retrieve failed to surface %s graph from Graphite' % (metric)
             current_logger.error('error :: %s' % msg)
+        # @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs
+        # In order to determine whether a Graphite image was retrieved or not
+        # this needs to return here.  This should not be backwards incompatible
+        # as it has never been used to determine the outcome before it appears,
+        # which as they say is my bad.
+            return False
+        else:
+            return True
 
     if data_type == 'json':
 
@@ -612,6 +648,8 @@ def get_graphite_metric(
             return False
         else:
             return True
+
+    return True
 
 # @added 20160922 - Branch #922: Ionosphere
 # Added the send_anomalous_metric_to function for Analyzer and Mirage

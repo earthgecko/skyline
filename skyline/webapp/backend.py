@@ -11,7 +11,7 @@ from flask import request
 # from mysql.connector import errorcode
 
 import settings
-from skyline_functions import get_graphite_metric, mysql_select
+from skyline_functions import mysql_select
 
 import skyline_version
 skyline_version = skyline_version.__absolute_version__
