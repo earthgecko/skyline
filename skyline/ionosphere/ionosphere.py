@@ -31,6 +31,10 @@ from sqlalchemy.sql import select
 import numpy as np
 # import pandas as pd
 
+# @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+#                   Feature #1844: ionosphere_matched DB table
+from tsfresh import __version__ as tsfresh_version
+
 import settings
 from skyline_functions import (
     fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p)
@@ -1065,6 +1069,14 @@ class Ionosphere(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not determine feature_id, value from %s' % metric_fp_table)
 
+                # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+                #                   Feature #1844: ionosphere_matched DB table
+                # Added the calculated features sum for verification purposes
+                all_calc_features_sum_list = []
+                for feature_name, calc_value in calculated_features:
+                    all_calc_features_sum_list.append(float(calc_value))
+                all_calc_features_sum = sum(all_calc_features_sum_list)
+
                 # Convert feature names in calculated_features to their id
                 logger.info('converting tsfresh feature names to Skyline feature ids')
                 calc_features_by_id = []
@@ -1227,9 +1239,18 @@ class Ionosphere(Thread):
 
                     try:
                         connection = engine.connect()
+                        # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+                        #                      Feature #1844: ionosphere_matched DB table
+                        # Added all_calc_features_sum, all_calc_features_count,
+                        # sum_calc_values, common_features_count, tsfresh_version
                         ins = ionosphere_matched_table.insert().values(
                             fp_id=int(fp_id),
-                            metric_timestamp=int(metric_timestamp))
+                            metric_timestamp=int(metric_timestamp),
+                            all_calc_features_sum=all_calc_features_sum,
+                            all_calc_features_count=len(all_calc_features_sum_list),
+                            sum_calc_values=sum_calc_values,
+                            common_features_count=relevant_calc_feature_values_count,
+                            tsfresh_version=str(tsfresh_version))
                         result = connection.execute(ins)
                         connection.close()
                         new_matched_id = result.inserted_primary_key[0]

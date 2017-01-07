@@ -268,6 +268,15 @@ CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere matched unique id',
   `fp_id` INT(11) NOT NULL COMMENT 'features profile id',
   `metric_timestamp` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the not anomalous timeseries that matched the features profile',
+/*
+# @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+# Added details of match anomalies for verification added to tsfresh_version
+*/
+  `all_calc_features_sum` DOUBLE DEFAULT 0 COMMENT 'the sum of all the calculated features of the not_anomalous timeseries',
+  `all_calc_features_count` INT(10) DEFAULT 0 COMMENT 'the number of all the calculated features of the not_anomalous timeseries',
+  `sum_common_values` DOUBLE DEFAULT 0 COMMENT 'the sum of the common calculated features of the not_anomalous timeseries',
+  `common_features_count` INT(10) DEFAULT 0 COMMENT 'the number of the common calculated features of the not_anomalous timeseries',
+  `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
   PRIMARY KEY (id),
   INDEX `features_profile_matched` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255)
   ENGINE=InnoDB;

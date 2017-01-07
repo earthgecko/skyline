@@ -525,6 +525,15 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             logger.error('error :: failed to get ionosphere_checked_table meta for %s' % base_name)
 
         matched_timestamps = []
+
+        # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+        # Added details of match anomalies for verification added to tsfresh_version
+        all_calc_features_sum = None
+        all_calc_features_count = None
+        sum_common_values = None
+        common_features_count = None
+        # That is more than it looks...
+
         try:
             connection = engine.connect()
             stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.fp_id == int(fp_id))
