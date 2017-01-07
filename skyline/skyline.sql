@@ -270,7 +270,8 @@ CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
   `metric_timestamp` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the not anomalous timeseries that matched the features profile',
 /*
 # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
-# Added details of match anomalies for verification added to tsfresh_version
+# Added details of match anomalies for verification added up to the
+# tsfresh_version column.
 */
   `all_calc_features_sum` DOUBLE DEFAULT 0 COMMENT 'the sum of all the calculated features of the not_anomalous timeseries',
   `all_calc_features_count` INT(10) DEFAULT 0 COMMENT 'the number of all the calculated features of the not_anomalous timeseries',
