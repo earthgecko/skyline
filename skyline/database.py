@@ -136,7 +136,7 @@ def ionosphere_matched_table_meta(current_skyline_app, engine):
     try:
         ionosphere_matched_meta = MetaData()
         ionosphere_matched_table = Table('ionosphere_matched', ionosphere_matched_meta, autoload=True, autoload_with=engine)
-        return anomalies_table, 'ionosphere_matched_table meta reflected OK', 'none'
+        return ionosphere_matched_table, 'ionosphere_matched_table meta reflected OK', 'none'
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)

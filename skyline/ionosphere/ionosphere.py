@@ -40,7 +40,11 @@ from skyline_functions import (
 # manner.  Decouple Ionosphere from the webapp.
 from features_profile import calculate_features_profile
 
-from database import get_engine, ionosphere_table_meta, metrics_table_meta
+# @modified 20170107 - Feature #1844: ionosphere_matched DB table
+# Added ionosphere_matched_meta
+from database import (
+    get_engine, ionosphere_table_meta, metrics_table_meta,
+    ionosphere_matched_table_meta)
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 skyline_app = 'ionosphere'
@@ -898,8 +902,8 @@ class Ionosphere(Thread):
                 stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
                 result = connection.execute(stmt)
                 for row in result:
+                    fp_id = row['id']
                     if int(row['full_duration']) == int(full_duration):
-                        fp_id = row['id']
                         fp_ids.append(int(fp_id))
                         logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
                     else:
@@ -1202,6 +1206,39 @@ class Ionosphere(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: could not update matched_count and last_matched for %s ' % str(fp_id))
+
+                    # @added 20170107 - Feature #1844: ionosphere_matched DB table
+                    # Added ionosphere_matched update
+                    try:
+                        engine, log_msg, trace = get_an_engine()
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not get a MySQL engine to update ionosphere_matched for %s' % (str(fp_id)))
+                    if not engine:
+                        logger.error('error :: engine not obtained to update ionosphere_matched for %s' % (str(fp_id)))
+
+                    try:
+                        ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+                        logger.info(log_msg)
+                        logger.info('ionosphere_matched_table OK')
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get ionosphere_matched_table meta for %s' % base_name)
+
+                    try:
+                        connection = engine.connect()
+                        ins = ionosphere_matched_table.insert().values(
+                            fp_id=int(fp_id),
+                            metric_timestamp=int(metric_timestamp))
+                        result = connection.execute(ins)
+                        connection.close()
+                        new_matched_id = result.inserted_primary_key[0]
+                        logger.info('new ionosphere_matched id: %s' % str(new_matched_id))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error(
+                            'error :: could not update ionosphere_matched for %s with with timestamp %s' % (
+                                str(fp_id), str(metric_timestamp)))
 
                 # https://docs.scipy.org/doc/numpy/reference/generated/numpy.testing.assert_almost_equal.html
                 # @added 20161214 - Add a between timeframe option, e.g. if

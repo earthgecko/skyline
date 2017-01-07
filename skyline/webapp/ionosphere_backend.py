@@ -28,7 +28,9 @@ from skyline_functions import (
     RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)
 from tsfresh_feature_names import TSFRESH_FEATURES
 
-from database import get_engine, ionosphere_table_meta, metrics_table_meta
+from database import (
+    get_engine, ionosphere_table_meta, metrics_table_meta,
+    ionosphere_matched_table_meta)
 
 skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
@@ -210,7 +212,30 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
     return (metric_paths, unique_metrics, unique_timestamps, human_dates)
 
 
-def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
+def get_an_engine():
+
+    try:
+        engine, fail_msg, trace = get_engine(skyline_app)
+        return engine, fail_msg, trace
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: failed to get MySQL engine for'
+        logger.error('%s' % fail_msg)
+        return None, fail_msg, trace
+
+
+def engine_disposal(engine):
+    if engine:
+        try:
+            engine.dispose()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: calling engine.dispose()')
+    return
+
+
+def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id):
     """
     Get a list of all training data folders and metrics
     """
@@ -328,7 +353,14 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
         if i_file.endswith('.png'):
             # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
             # Exclude any graphite_now png files from the images lists
-            if '.graphite_now.' not in i_file:
+            append_image = True
+            if '.graphite_now.' in i_file:
+                append_image = False
+            # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+            # Exclude any matched.fp-id images
+            if '.matched.fp_id' in i_file:
+                append_image = False
+            if append_image:
                 images.append(str(metric_file))
         if i_file == metric_var_filename:
             metric_vars_file = str(metric_file)
@@ -405,11 +437,13 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
     # operator about the metric.
     graphite_now_images = []
     graphite_now = int(time.time())
-    graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
-    # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
-    # Exclude if matches TARGET_HOURS - unique only
-    _graph_resolutions = sorted(set(graph_resolutions))
-    graph_resolutions = _graph_resolutions
+    graph_resolutions = []
+    if context == 'training_data':
+        graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
+        # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
+        # Exclude if matches TARGET_HOURS - unique only
+        _graph_resolutions = sorted(set(graph_resolutions))
+        graph_resolutions = _graph_resolutions
 
     for target_hours in graph_resolutions:
         graph_image = False
@@ -449,32 +483,98 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context):
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get Graphite graph at %s hours for %s' % (str(target_hours), base_name))
 
-    return (
-        metric_paths, images, human_date, metric_vars, ts_json, data_to_process,
-        panorama_anomaly_id, graphite_now_images)
-
-
-def get_an_engine():
-
-    try:
-        engine, fail_msg, trace = get_engine(skyline_app)
-        return engine, fail_msg, trace
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to get MySQL engine for'
-        logger.error('%s' % fail_msg)
-        return None, fail_msg, trace
-
-
-def engine_disposal(engine):
-    if engine:
+    # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+    # Get the last 9 matched timestamps for the metric and get graphite graphs
+    # for them
+    graphite_matched_images = []
+    if context == 'features_profiles':
+        logger.info('getting MySQL engine')
         try:
-            engine.dispose()
+            engine, fail_msg, trace = get_an_engine()
+            logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: could not get a MySQL engine'
+            logger.error('%s' % fail_msg)
+            raise
+
+        if not engine:
+            trace = 'none'
+            fail_msg = 'error :: engine not obtained'
+            logger.error(fail_msg)
+            raise
+
+        logger.info('getting MySQL engine')
+        try:
+            engine, log_msg, trace = get_an_engine()
+            logger.info(log_msg)
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: calling engine.dispose()')
-    return
+            logger.error('error :: could not get a MySQL engine to get fp_ids')
+
+        if not engine:
+            logger.error('error :: engine not obtained to get fp_ids')
+
+        try:
+            ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('ionosphere_matched_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get ionosphere_checked_table meta for %s' % base_name)
+
+        matched_timestamps = []
+        try:
+            connection = engine.connect()
+            stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.fp_id == int(fp_id))
+            result = connection.execute(stmt)
+            for row in result:
+                matched_timestamp = row['metric_timestamp']
+                matched_timestamps.append(int(matched_timestamp))
+                logger.info('found matched_timestamp %s' % (str(matched_timestamp)))
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine timestamps from ionosphere_matched for fp_id %s' % str(fp_id))
+
+        len_matched_timestamps = len(matched_timestamps)
+        logger.info('determined %s matched timestamps for fp_id %s' % (str(len_matched_timestamps), str(fp_id)))
+
+        last_matched_timestamps = []
+        if len_matched_timestamps > 0:
+            sorted_matched_timestamps = sorted(matched_timestamps)
+            get_matched_timestamps = sorted_matched_timestamps[-4:]
+            # Order newest first
+            for ts in get_matched_timestamps[::-1]:
+                last_matched_timestamps.append(ts)
+
+        for matched_timestamp in last_matched_timestamps:
+            # Get Graphite images
+            graph_image = False
+            try:
+                key = 'full_duration'
+                value_list = [var_array[1] for var_array in metric_vars if var_array[0] == key]
+                full_duration = int(value_list[0])
+                from_timestamp = str(int(matched_timestamp) - int(full_duration))
+                until_timestamp = str(matched_timestamp)
+                graph_image_file = '%s/%s.matched.fp_id-%s.%s.png' % (metric_data_dir, base_name, str(fp_id), str(matched_timestamp))
+                logger.info('getting Graphite graph fpr fp_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (str(fp_id), str(from_timestamp), str(until_timestamp)))
+                graph_image = get_graphite_metric(
+                    skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                    graph_image_file)
+                if graph_image:
+                    graphite_matched_images.append(graph_image_file)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get Graphite graph for fp_id %s at %s' % (str(fp_id), str(matched_timestamp)))
+
+        if engine:
+            engine_disposal(engine)
+
+    return (
+        metric_paths, images, human_date, metric_vars, ts_json, data_to_process,
+        panorama_anomaly_id, graphite_now_images, graphite_matched_images)
 
 
 def create_features_profile(requested_timestamp, data_for_metric, context):

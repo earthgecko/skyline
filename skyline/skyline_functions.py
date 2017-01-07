@@ -466,6 +466,11 @@ def get_graphite_metric(
     except:
         from requests.utils import quote
 
+    try:
+        time.time()
+    except:
+        import time
+
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -533,17 +538,30 @@ def get_graphite_metric(
         # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
         # settings, color and title
         if current_skyline_app == 'webapp':
+            get_ionosphere_graphs = False
             if 'graphite_now' in output_object:
-                no_extension = os.path.splitext(output_object)[0]
-                _hours = os.path.splitext(no_extension)[1]
-                hours = _hours.replace('.', '')
-                int_hours = hours.replace('h', '')
+                get_ionosphere_graphs = True
+            # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+            # Added graphite_matched_images matched.fp_id
+            if 'matched.fp_id' in output_object:
+                get_ionosphere_graphs = True
+            if get_ionosphere_graphs:
+                int_hours = int((int(until_timestamp) - int(from_timestamp)) / 60 / 60)
+                if 'graphite_now' in output_object:
+                    no_extension = os.path.splitext(output_object)[0]
+                    _hours = os.path.splitext(no_extension)[1]
+                    hours = _hours.replace('.', '')
+                    int_hours = hours.replace('h', '')
                 str_value = str(int_hours)
                 period = 'hours'
                 if int(int_hours) > 24:
                     str_value = str(int(int_hours) / 24)
                     period = 'days'
-                unencoded_graph_title = 'Graphite NOW at %s %s' % (str_value, period)
+                if 'graphite_now' in output_object:
+                    unencoded_graph_title = 'Graphite NOW at %s %s' % (str_value, period)
+                if 'matched.fp_id' in output_object:
+                    human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(until_timestamp)))
+                    unencoded_graph_title = '%s at %s hours' % (str(human_date), str(int_hours))
                 graph_title_string = quote(unencoded_graph_title, safe='')
                 graph_title = '&title=%s' % graph_title_string
                 add_parameters = '%s&colorList=blue%s' % (settings.GRAPHITE_GRAPH_SETTINGS, graph_title)

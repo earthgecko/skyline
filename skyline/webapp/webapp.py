@@ -1105,9 +1105,11 @@ def ionosphere():
                 return internal_error(fail_msg, trace)
 
         try:
-            # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+            # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
             # Added graphite_now_images gimages
-            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages = ionosphere_metric_data(requested_timestamp, base_name, context)
+            # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+            # Added graphite_matched_images gmimages
+            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
 
             # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
             # Added the full_duration parameter so that the appropriate graphs can be
@@ -1151,6 +1153,7 @@ def ionosphere():
                 metric_full_duration_in_hours=m_full_duration_in_hours,
                 metric_second_order_resolution_hours=second_order_resolution_hours,
                 tsfresh_version=TSFRESH_VERSION, graphite_now_images=gimages,
+                graphite_matched_images=gmimages,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
