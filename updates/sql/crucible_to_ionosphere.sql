@@ -70,3 +70,16 @@ CREATE TABLE IF NOT EXISTS `z_ts_metricid` (
 # in the table cache as required.
 #  INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
   INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=InnoDB;
+
+# @added 20170107 - Feature #1844: ionosphere_matched DB table
+#                   Branch #922: ionosphere
+#                   Task #1658: Patterning Skyline Ionosphere
+# This table will allow for each not anomalous match that Ionosphere records to
+# be reviewed.  It could get big and perhaps should be optional
+CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere matched unique id',
+  `fp_id` INT(11) NOT NULL COMMENT 'features profile id',
+  `metric_timestamp` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the not anomalous timeseries that matched the features profile',
+  PRIMARY KEY (id),
+  INDEX `features_profile_matched` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255)
+  ENGINE=InnoDB;

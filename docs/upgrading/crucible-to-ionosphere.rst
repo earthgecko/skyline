@@ -47,6 +47,5 @@ Update your MySQL Skyline database
 ----------------------------------
 
 - Backup your Skyline MySQL DB.
-- Run the skyline.sql script against your database again.  There is one ALTER and
-  a number of new tables.  The SQL script is idempotent, but always back it up
-  first.
+- Review and run the updates/sql/crucible_to_ionosphere.sql script against your
+  database again.  There is one ALTER and a number of new tables.
