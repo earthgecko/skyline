@@ -119,3 +119,27 @@ def anomalies_table_meta(current_skyline_app, engine):
         fail_msg = 'error :: failed to reflect the anomalies table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace
+
+
+# @added 20170107 - Feature #1844: ionosphere_matched DB table
+#                   Branch #922: ionosphere
+#                   Task #1658: Patterning Skyline Ionosphere
+# This table will allow for each not anomalous match that Ionosphere records to
+# be reviewed.  It could get big and perhaps should be optional
+
+def ionosphere_matched_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the ionosphere_matched table MetaData
+    try:
+        ionosphere_matched_meta = MetaData()
+        ionosphere_matched_table = Table('ionosphere_matched', ionosphere_matched_meta, autoload=True, autoload_with=engine)
+        return anomalies_table, 'ionosphere_matched_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the ionosphere_matched table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
