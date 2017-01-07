@@ -42,15 +42,6 @@ if not on_rtd:
 
     import matplotlib
     matplotlib.use('Agg')
-# @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs
-# readthedocs build is failing as they are Running Sphinx v1.3.5 and returns
-# Sphinx version error:
-# This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
-else:
-    if os.path.isfile('requirements.txt'):
-        run('pip install -r requirements.txt')
-    if os.path.isfile('docs-requirements.txt'):
-        run('pip install -r docs-requirements.txt')
 
 # -- General configuration ------------------------------------------------
 
