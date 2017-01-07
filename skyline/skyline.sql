@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
   `anomaly_timestamp` INT(11) NOT NULL COMMENT 'anomaly unix timestamp, see notes on historic dates above',
   `anomalous_datapoint` DECIMAL(18,6) NOT NULL COMMENT 'anomalous datapoint',
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries in which the anomaly was detected, can be 0 if not relevant',
+/*
 # store numeric array in mysql numpy
 # http://stackoverflow.com/questions/7043158/insert-numpy-array-into-mysql-database
 # for later, maybe image arrays...
@@ -75,15 +76,18 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
 # @added 20161207 - Branch #922: ionosphere - added this note
 # Another way - http://acviana.github.io/posts/2014/numpy-arrays-and-sql/ - numpy float64 arrays
 # BLOB could be used, would also suit storing msgpack timeseries too.
+*/
   `algorithms_run` VARCHAR(255) NOT NULL COMMENT 'a csv list of the alogrithm ids e.g 1,2,3,4,5,6,8,9',
   `triggered_algorithms` VARCHAR(255) NOT NULL COMMENT 'a csv list of the triggered alogrithm ids e.g 1,2,4,6,8,9',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
+/*
 # Why index anomaly_timestamp and created_timestamp?  Because this is thinking
 # wider than just realtime, e.g. analyze the Havard lightcurve plates, this
 # being historical data, we may not know where in a historical set of metrics
 # when the anomaly occured, but knowing roughly when the anomalies would have
 # been created.
+*/
   INDEX `anomaly` (`id`,`metric_id`,`host_id`,`app_id`,`source_id`,`anomaly_timestamp`,
                    `full_duration`,`triggered_algorithms`,`created_timestamp`)  KEY_BLOCK_SIZE=255)
     ENGINE=InnoDB;
@@ -172,6 +176,7 @@ CREATE TABLE IF NOT EXISTS `ts_metricid` (
   INDEX `metric` (`id`,`metric`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 */
 
+/*
 # @added 20161207 - Branch #922: ionosphere
 #                   Task #1658: Patterning Skyline Ionosphere
 #                   Task #1718: review.tsfresh
@@ -179,14 +184,17 @@ CREATE TABLE IF NOT EXISTS `ts_metricid` (
 # Ionosphere v1.1.x.  It is idempotent, but replication IF NOT EXISTS caveats
 # apply
 # Fix the timestamp int length from 11 to 10
+*/
 ALTER TABLE `anomalies` MODIFY `anomaly_timestamp` INT(10) NOT NULL COMMENT 'anomaly unix timestamp, see notes on historic dates above';
 
 CREATE TABLE IF NOT EXISTS `ionosphere` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere features profile unique id',
   `metric_id` INT(11) NOT NULL COMMENT 'metric id',
+/*
 # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
 # The timeseries full_duration needs to be recorded to allow Mirage metrics to
 # be profiled on Redis timeseries data at FULL_DURATION
+*/
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries on which the features profile was created',
   `enabled` tinyint(1) DEFAULT NULL COMMENT 'the features profile is enabled 1 or not enabled 0',
   `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
@@ -199,8 +207,10 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
   `last_checked` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the last time this feature profile was checked',
   `check_count` INT(10) DEFAULT 0 COMMENT 'the number of times this feature profile has been checked',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+/*
 # @added 20161229 - Feature #1830: Ionosphere alerts
 # Record times checked
+*/
   `last_checked` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the last time this feature profile was checked',
   `checked_count` INT(10) DEFAULT 0 COMMENT 'the number of times this feature profile has been checked',
   PRIMARY KEY (id),
@@ -217,12 +227,14 @@ CREATE TABLE IF NOT EXISTS `z_fp_metricid` (
   `feature_id` INT(5) NOT NULL COMMENT 'the id of the TSFRESH_FEATURES feature name',
   `value` DOUBLE DEFAULT NULL COMMENT 'the calculated value of the feature',
   PRIMARY KEY (id),
+/*
 # @modified 20161224 - Task #1812: z_fp table type
 # Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
 # up, there can be LOTS of file_per_table z_fp_ tables/files without
 # the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
 # in the table cache as required.
 #  INDEX `fp` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+*/
   INDEX `fp` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=InnoDB;
 
 /*
@@ -235,19 +247,23 @@ CREATE TABLE IF NOT EXISTS `z_ts_metricid` (
   `timestamp` INT(10) NOT NULL COMMENT 'a 10 digit unix epoch timestamp',
   `value` DOUBLE DEFAULT NULL COMMENT 'value',
   PRIMARY KEY (id),
+/*
 # @modified 20161224 - Task #1812: z_fp table type
 # Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
 # up, there can be LOTS of file_per_table z_fp_ tables/files without
 # the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
 # in the table cache as required.
 #  INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+*/
   INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=InnoDB;
 
+/*
 # @added 20170107 - Feature #1844: ionosphere_matched DB table
 #                   Branch #922: ionosphere
 #                   Task #1658: Patterning Skyline Ionosphere
 # This table will allow for each not anomalous match that Ionosphere records to
 # be reviewed.  It could get big and perhaps should be optional
+*/
 CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere matched unique id',
   `fp_id` INT(11) NOT NULL COMMENT 'features profile id',
@@ -256,6 +272,8 @@ CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
   INDEX `features_profile_matched` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255)
   ENGINE=InnoDB;
 
+/*
 # mariadb
 # https://mariadb.com/kb/en/mariadb/installing-mariadb-alongside-mysql/
 # possible and possible to run side by side, fiddly but possible...
+*/
