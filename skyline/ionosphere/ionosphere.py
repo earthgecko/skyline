@@ -1283,10 +1283,10 @@ class Ionosphere(Thread):
                         ins = ionosphere_matched_table.insert().values(
                             fp_id=int(fp_id),
                             metric_timestamp=int(metric_timestamp),
-                            all_calc_features_sum=all_calc_features_sum,
+                            all_calc_features_sum=float(all_calc_features_sum),
                             all_calc_features_count=len(all_calc_features_sum_list),
-                            sum_calc_values=sum_calc_values,
-                            common_features_count=relevant_calc_feature_values_count,
+                            sum_common_values=float(sum_calc_values),
+                            common_features_count=int(relevant_calc_feature_values_count),
                             tsfresh_version=str(tsfresh_version))
                         result = connection.execute(ins)
                         connection.close()
