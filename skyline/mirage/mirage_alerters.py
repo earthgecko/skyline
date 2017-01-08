@@ -486,7 +486,16 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         if settings.ENABLE_DEBUG or LOCAL_DEBUG:
             logger.info('debug :: alert_smtp - redis_img_tag: %s' % str(redis_img_tag))
     else:
-        redis_img_tag = '<img src="none"/>'
+        # @modified 20161229 - Feature #1830: Ionosphere alerts
+        # @modified 20170108 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+        # Restored the previous redis_img_tag method as some smtp alerts were
+        # coming without a Redis graph, not all but some and for some reason,
+        # I am pretty certain retrospectively that it was done that way from
+        # testing I just wanted to try and be cleaner.
+        # The redis_img_tag was changed at
+        # https://github.com/earthgecko/skyline/commit/31bcacf3f90f0953ebed0d57260cb937e01f887c#diff-520bf2a218f65074ffead4d8184c138dR489
+        redis_img_tag = '<img src="%s"/>' % 'none'
+        # redis_img_tag = '<img src="none"/>'
 
     body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
     body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
@@ -511,6 +520,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
             str(sigma3_upper_bound), str(sigma3_lower_bound))
         body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
+
         body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
         body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
         body += 'however do note that will remove the 3-sigma and mean value too.</font>'
