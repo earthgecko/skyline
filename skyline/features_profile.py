@@ -90,6 +90,23 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     features_profile_details_file = '%s/%s.%s.fp.details.txt' % (
         metric_data_dir, str(timestamp), base_name)
 
+    # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
+    # Added metric_check_file and ts_full_duration is needed to be determined
+    # and added the to features_profile_details_file as it was not added here on
+    # the 20170104 when it was added the webapp and ionosphere
+    metric_var_filename = '%s.txt' % str(base_name)
+    anomaly_check_file = '%s/%s' % (metric_data_dir, metric_var_filename)
+    ts_full_duration = int(settings.FULL_DURATION)
+    if os.path.isfile(anomaly_check_file):
+        # Read the details file
+        with open(anomaly_check_file, 'r') as f:
+            anomaly_details = f.readlines()
+            for i, line in enumerate(anomaly_details):
+                if 'full_duration' in line:
+                    _ts_full_duration = '%s' % str(line).split("'", 2)
+                    full_duration_array = literal_eval(_ts_full_duration)
+                    ts_full_duration = str(int(full_duration_array[1]))
+
     anomaly_json = '%s/%s.json' % (metric_data_dir, base_name)
     ts_csv = '%s/%s.tsfresh.input.csv' % (metric_data_dir, base_name)
 #    anomaly_json = '/opt/skyline/ionosphere/data/1480104000/stats/statsd/graphiteStats/calculationtime/stats.statsd.graphiteStats.calculationtime.json'
@@ -107,7 +124,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             with open(features_profile_details_file, 'r') as f:
                 fp_details_str = f.read()
             fp_details_array = literal_eval(fp_details_str)
-            f_calc = ' (previously calculated) - %s' % str(fp_details_array[2])
+            f_calc = ' (previously calculated by Ionosphere) - %s' % str(fp_details_array[2])
         except:
             trace = traceback.format_exc()
             current_logger.error(trace)
@@ -334,7 +351,12 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     # Create a features profile details file
     try:
-        data = '[%s, \'%s\', %s, %s, %s]' % (str(int(time.time())), str(TSFRESH_VERSION), str(calc_time), str(features_count), str(features_sum))
+        # @modified 20170108 - Feature #1842: Ionosphere - Graphite now graphs
+        # Added the ts_full_duration here as it was not added here on the 20170104
+        # when it was added the webapp and ionosphere
+        data = '[%s, \'%s\', %s, %s, %s, %s]' % (
+            str(int(time.time())), str(TSFRESH_VERSION), str(calc_time),
+            str(features_count), str(features_sum), str(ts_full_duration))
         write_data_to_file(current_skyline_app, features_profile_details_file, 'w', data)
     except:
         trace = traceback.format_exc()

@@ -101,6 +101,10 @@ class Analyzer(Thread):
         self.sent_to_ionosphere = Manager().list()
         # @added 20161229 - Feature #1830: Ionosphere alerts
         self.all_anomalous_metrics = Manager().list()
+        # @added 20170108 - Feature #1830: Ionosphere alerts
+        # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
+        self.smtp_alerter_metrics = Manager().list()
+        self.non_smtp_alerter_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -311,6 +315,12 @@ class Analyzer(Thread):
                         mirage_metric = True
                         send_to_ionosphere = False
 
+                    # @added 20170108 - Feature #1830: Ionosphere alerts
+                    # Only send smtp_alerter_metrics to Ionosphere
+                    smtp_alert_enabled_metric = True
+                    if base_name in self.non_smtp_alerter_metrics:
+                        smtp_alert_enabled_metric = False
+
                     if ionosphere_enabled:
                         if analyzer_metric:
                             # We do not want send all anomalous metrics to
@@ -337,7 +347,10 @@ class Analyzer(Thread):
                                 logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
                                 send_to_ionosphere = False
 
-                    if send_to_ionosphere:
+                    # @modified 20170108 - Feature #1830: Ionosphere alerts
+                    # Only send smtp_alerter_metrics to Ionosphere
+                    # if send_to_ionosphere:
+                    if send_to_ionosphere and smtp_alert_enabled_metric:
                         if metric_name in ionosphere_unique_metrics:
                             logger.info('sending an ionosphere metric to Ionosphere - %s' % (base_name))
                         else:
@@ -764,6 +777,41 @@ class Analyzer(Thread):
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run after unique_metrics: %s (kb), using blah %s' % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss), str(blah))
+
+            # @added 20170108 - Feature #1830: Ionosphere alerts
+            # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
+            # Timed this takes 0.013319 seconds on 689 unique_metrics
+            for metric_name in unique_metrics:
+                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                for alert in settings.ALERTS:
+                    pattern_match = False
+                    if str(alert[1]) == 'smtp':
+                        ALERT_MATCH_PATTERN = alert[0]
+                        METRIC_PATTERN = base_name
+                        pattern_match = False
+                        try:
+                            # Match by regex
+                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                            if pattern_match:
+                                pattern_match = True
+                                if base_name not in self.smtp_alerter_metrics:
+                                    self.smtp_alerter_metrics.append(base_name)
+                        except:
+                            pattern_match = False
+
+                        if not pattern_match:
+                            # Match by substring
+                            if alert[0] in base_name:
+                                if base_name not in self.smtp_alerter_metrics:
+                                    self.smtp_alerter_metrics.append(base_name)
+
+                if base_name not in self.smtp_alerter_metrics:
+                    if base_name not in self.smtp_alerter_metrics:
+                        self.non_smtp_alerter_metrics.append(base_name)
+
+            logger.info('smtp_alerter_metrics     :: %s' % str(len(self.smtp_alerter_metrics)))
+            logger.info('non_smtp_alerter_metrics :: %s' % str(len(self.non_smtp_alerter_metrics)))
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
@@ -1431,6 +1479,10 @@ class Analyzer(Thread):
             self.sent_to_ionosphere[:] = []
             # @added 20161229 - Feature #1830: Ionosphere alerts
             self.all_anomalous_metrics[:] = []
+            # @added 20170108 - Feature #1830: Ionosphere alerts
+            # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
+            self.smtp_alerter_metrics[:] = []
+            self.non_smtp_alerter_metrics[:] = []
 
             unique_metrics = []
             raw_series = None

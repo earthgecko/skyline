@@ -119,6 +119,11 @@ class Ionosphere(Thread):
         self.features_profiles_checked = Manager().list()
         self.training_metrics = Manager().list()
         self.sent_to_panorama = Manager().list()
+        # @added 20170108 - Feature #1830: Ionosphere alerts
+        # Added lists of ionosphere_smtp_alerter_metrics and
+        # ionosphere_non_smtp_alerter_metrics
+        self.ionosphere_smtp_alerter_metrics = Manager().list()
+        self.ionosphere_non_smtp_alerter_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -307,6 +312,8 @@ class Ionosphere(Thread):
         #       profile at the specified duration.
         # ionosphere.analyzer.unique_metrics (at FULL_DURATION)
         # ionosphere.mirage.unique_metrics (NOT at FULL_DURATION)
+        # @modified 20170108 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+        # Yes those ^^ are needed, MySQL join?
         ionosphere_enabled_metrics = []
         ionosphere_metrics_count = 0
         query_ok = False
@@ -790,13 +797,25 @@ class Ionosphere(Thread):
                 # self.remove_metric_check_file(str(metric_check_file))
                 # return
                 training_metric = True
-                self.training_metrics.append(base_name)
+                # self.training_metrics.append(base_name)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine ionosphere_enabled from metrics table for - %s' % base_name)
             metric_ionosphere_enabled = None
             training_metric = True
-            self.training_metrics.append(base_name)
+            # self.training_metrics.append(base_name)
+
+        # @added 20170108 - Feature #1830: Ionosphere alerts
+        # Only process smtp_alerter_metrics
+        if training_metric:
+            if base_name in self.ionosphere_non_smtp_alerter_metrics:
+                logger.error('error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for %s' % (base_name))
+                self.remove_metric_check_file(str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
+                return
+            else:
+                self.training_metrics.append(base_name)
 
         logger.info(
             'ionosphere_enabled is %s for metric id %s - %s' % (
@@ -852,7 +871,7 @@ class Ionosphere(Thread):
                 if os.path.isfile(redis_anomaly_json):
                     logger.info('training data Redis full duration ts json available - %s' % (redis_anomaly_json))
                 else:
-                    logger.error('error :: training data Redis full duration json was not found - %s' % (redis_anomaly_json))
+                    logger.info('no training data Redis full duration json was not found - %s' % (redis_anomaly_json))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: training data Redis full duration json was not found - %s' % (redis_anomaly_json))
@@ -901,12 +920,23 @@ class Ionosphere(Thread):
             # Determine the fp_ids that exist for the metric
             fp_ids = []
             fp_ids_found = False
+            # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added all_fp_ids so that we can handle multiple durations and not
+            # error and reminds me of the needed metrics by FULL_DURATION
+            # ionosphere.analyzer.unique_metrics (at FULL_DURATION)
+            # ionosphere.mirage.unique_metrics (NOT at FULL_DURATION)
+            all_fp_ids = []
+
             try:
                 connection = engine.connect()
                 stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
                 result = connection.execute(stmt)
                 for row in result:
                     fp_id = row['id']
+                # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
+                # Added all_fp_ids
+                    all_fp_ids.append(int(fp_id))
+
                     if int(row['full_duration']) == int(full_duration):
                         fp_ids.append(int(fp_id))
                         logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
@@ -926,8 +956,15 @@ class Ionosphere(Thread):
                 fp_ids_found = True
 
             if not fp_ids_found:
-                logger.error('error :: no fp ids were found for %s at %s' % (base_name, str(full_duration)))
-                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                logger.info('no fp ids were found for %s at %s' % (base_name, str(full_duration)))
+                # @modified 20170108 - Feature #1842: Ionosphere - Graphite now graphs
+                # Use all_fp_ids so that we can handle multiple durations
+                # fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                if len(all_fp_ids) == 0:
+                    logger.error('error :: Ionosphere is enabled on %s but has no feature_profiles' % (base_name))
+                    fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                else:
+                    self.remove_metric_check_file(str(metric_check_file))
                 if engine:
                     engine_disposal(engine)
                 return
@@ -1596,6 +1633,48 @@ class Ionosphere(Thread):
             metric_var_files_sorted = sorted(metric_var_files)
             metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, str(metric_var_files_sorted[0]))
 
+            # @added 20170108 - Feature #1830: Ionosphere alerts
+            # Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics
+            # Timed this takes 0.013319 seconds on 689 unique_metrics
+            unique_metrics = []
+            try:
+                unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not get the unique_metrics list from Redis')
+                unique_metrics = []
+
+            for metric_name in unique_metrics:
+                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                for alert in settings.ALERTS:
+                    pattern_match = False
+                    if str(alert[1]) == 'smtp':
+                        ALERT_MATCH_PATTERN = alert[0]
+                        METRIC_PATTERN = base_name
+                        pattern_match = False
+                        try:
+                            # Match by regex
+                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                            if pattern_match:
+                                pattern_match = True
+                                if base_name not in self.ionosphere_smtp_alerter_metrics:
+                                    self.ionosphere_smtp_alerter_metrics.append(base_name)
+                        except:
+                            pattern_match = False
+
+                        if not pattern_match:
+                            # Match by substring
+                            if alert[0] in base_name:
+                                if base_name not in self.ionosphere_smtp_alerter_metrics:
+                                    self.ionosphere_smtp_alerter_metrics.append(base_name)
+
+                if base_name not in self.ionosphere_smtp_alerter_metrics:
+                    if base_name not in self.ionosphere_smtp_alerter_metrics:
+                        self.ionosphere_non_smtp_alerter_metrics.append(base_name)
+            logger.info('smtp_alerter_metrics     :: %s' % str(len(self.ionosphere_smtp_alerter_metrics)))
+            logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
+
             logger.info('processing - %s' % str(metric_var_files_sorted[0]))
 
             # Spawn processes
@@ -1666,3 +1745,9 @@ class Ionosphere(Thread):
                 if p.is_alive():
                     logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
                     p.join()
+
+            # @added 20170108 - Feature #1830: Ionosphere alerts
+            # Reset added lists of ionospehere_smtp_alerter_metrics and
+            # ionosphere_non_smtp_alerter_metrics
+            self.ionosphere_smtp_alerter_metrics[:] = []
+            self.ionosphere_non_smtp_alerter_metrics[:] = []

@@ -632,9 +632,13 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     calculated_time = False
     fcount = None
     fsum = None
-    ts_full_duration = 0
+    # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
+    # Added the ts_full_duration parameter so that the appropriate graphs can be
+    # embedded for the user in the training data page
+    ts_full_duration = '0'
 
     if path.isfile(features_profile_details_file):
+        logger.info('getting features profile details from from - %s' % features_profile_details_file)
         # Read the details file
         with open(features_profile_details_file, 'r') as f:
             fp_details_str = f.read()
@@ -647,11 +651,14 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
             ts_full_duration = str(fp_details[5])
         except:
             logger.error('error :: could not determine the full duration from - %s' % features_profile_details_file)
-        if not ts_full_duration:
+            ts_full_duration = '0'
+
+        if ts_full_duration == '0':
             anomaly_check_file = '%s/%s.txt' % (
                 metric_training_data_dir, base_name)
 
             if path.isfile(anomaly_check_file):
+                logger.info('determining the full duration from anomaly_check_file - %s' % anomaly_check_file)
                 # Read the details file
                 with open(anomaly_check_file, 'r') as f:
                     anomaly_details = f.readlines()
@@ -660,6 +667,7 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
                             _ts_full_duration = '%s' % str(line).split("'", 2)
                             full_duration_array = literal_eval(_ts_full_duration)
                             ts_full_duration = str(int(full_duration_array[1]))
+                            logger.info('determined the full duration as - %s' % str(ts_full_duration))
 
     if path.isfile(features_profile_created_file):
         # Read the created file
@@ -672,7 +680,6 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
 
     # Have data
     if path.isfile(features_file):
-        logger.error(traceback.format_exc())
         logger.info('features_file exists: %s' % features_file)
     else:
         trace = traceback.format_exc()
@@ -950,7 +957,9 @@ def create_features_profile(requested_timestamp, data_for_metric, context):
     try:
         # data = '[%s, %s, ]' % (new_fp_id, str(int(time.time())))
         # write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
-        data = '[%s, %s, \'%s\', %s, %s, %s, %s]' % (new_fp_id, str(int(time.time())), str(tsfresh_version), str(calculated_time), str(fcount), str(fsum), str(ts_full_duration))
+        data = '[%s, %s, \'%s\', %s, %s, %s, %s]' % (
+            new_fp_id, str(int(time.time())), str(tsfresh_version),
+            str(calculated_time), str(fcount), str(fsum), str(ts_full_duration))
         write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
     except:
         trace = traceback.format_exc()
