@@ -46,7 +46,14 @@ if not on_rtd:
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.4.8'
+# @modified 20170108 - Feature #1842: Ionosphere - Graphite now graphs
+# readthedocs build is failing as they are Running Sphinx v1.3.5 and returns
+# Sphinx version error:
+# This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
+if not on_rtd:
+    needs_sphinx = '1.4.8'
+else:
+    needs_sphinx = '1.3.5'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
