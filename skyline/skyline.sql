@@ -213,6 +213,12 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 */
   `last_checked` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the last time this feature profile was checked',
   `checked_count` INT(10) DEFAULT 0 COMMENT 'the number of times this feature profile has been checked',
+/*
+# @added 20170110 - Feature #1854: Ionosphere learn - generations
+# Added parent and generation for Ionosphere LEARN related features profiles
+*/
+  `parent_id` INT(10) DEFAULT 0 COMMENT 'the id of the parent features profile, 0 being the original human generated features profile',
+  `generation` INT DEFAULT 0 COMMENT 'the number of generations between this feature profile and the original, 0 being the original human generated features profile',
   PRIMARY KEY (id),
   INDEX `features_profile` (`id`,`metric_id`,`enabled`)  KEY_BLOCK_SIZE=255)
   ENGINE=InnoDB;
