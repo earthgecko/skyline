@@ -1402,7 +1402,7 @@ IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS = 30
 :vartype IONOSPHERE_LEARN_FULL_DURATION: int
 """
 
-IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3601
+IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3661
 """
 :var IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: The number of seconds that
     Ionosphere should wait before surfacing the metric timeseries for to learn
@@ -1413,9 +1413,9 @@ IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3601
 """
 
 IONOSPHERE_LEARNING_NAMESPACE_CONFIG = (
-    ('skyline_test.alerters.test', 30, 3601),
+    ('skyline_test.alerters.test', 30, 3661),
     # Learn all Ionosphere enabled metrics at 30 days
-    ('*', 30, 3601),
+    ('*', 30, 3661),
 )
 """
 :var IONOSPHERE_LEARNING_NAMESPACE_CONFIG: Configures specific namespaces at

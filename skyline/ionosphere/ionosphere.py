@@ -1478,7 +1478,7 @@ class Ionosphere(Thread):
                         settings.IONOSPHERE_DATA_FOLDER,
                         settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
 
-            # added 20170110 - Feature #1854: Ionosphere learn
+            # @added 20170110 - Feature #1854: Ionosphere learn
             # purge_old_data_dirs learn data
             try:
                 logger.info('purging any old learning data')
