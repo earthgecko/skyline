@@ -400,7 +400,7 @@ class Ionosphere(Thread):
 
         :param metric_vars_file: the path and filename to the metric variables files
         :type metric_vars_file: str
-        :return: the metric_vars module object or ``False``
+        :return: the metric_vars list or ``False``
         :rtype: list
 
         """
@@ -474,14 +474,37 @@ class Ionosphere(Thread):
 
         return metric_vars_array
 
+# @added 20170109 - Feature #1854: Ionosphere learn
+# Added the spawn_learn_process after determining to is not fit to bolt learn
+# inside of ionosphere.py in its entirety, no point in more conditional nesting
+# and bulking up ionosphere.py with more learn parameter to spin_process etc
+# ionosphere.py works, as good as it gets, so extended with learn.py.  This uses
+# the same no memory leak pattern that was adopted for smtp_alerts.
+    def spawn_learn_process(self, i, metric_check_file):
+        """
+        Spawn a process to learn.
+
+        This is used for Ionosphere to learn if anomalous metrics remain
+        anomalous over time, as the resolution decreases.  It follows the
+        multiprocessing methodology the was introduced in Analyzer and Mirage
+        in the context of the process objects being cleared down and the learn
+        processes cannot create memory leaks as the process always terminates or
+        is terminated this prevents any memory leaks in the parent.
+
+        """
+
+        learn(metric_check_file)
+
     def spin_process(self, i, metric_check_file):
         """
-        Assign a metric anomaly to process.
+        Assign an anomalous metric to check against features profiles.
 
         :param i: python process id
         :param metric_check_file: full path to the metric check file
-
-        :return: returns True
+        :type i: object
+        :type metric_check_file: str
+        :return: int
+        :rtype: int or boolean
 
         """
 
@@ -1549,7 +1572,7 @@ class Ionosphere(Thread):
                                     logger.info('%s :: killed manage_ionosphere_unique_metrics process' % (skyline_app))
                                 except:
                                     logger.error(traceback.format_exc())
-                                    logger.error('error :: killing all spin_process processes')
+                                    logger.error('error :: killing all manage_ionosphere_unique_metrics processes')
 
                 # Discover metric anomalies to insert
                 metric_var_files = False
@@ -1676,6 +1699,14 @@ class Ionosphere(Thread):
             logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
 
             logger.info('processing - %s' % str(metric_var_files_sorted[0]))
+
+            # @added 20170109 - Feature #1854: Ionosphere learn
+            # Added the learn variable to spawn a spawn_learn_process when
+            # required.
+            try:
+                learn = settings.IONOSPHERE_ENABLE_LEARNING
+            except:
+                learn = False
 
             # Spawn processes
             pids = []

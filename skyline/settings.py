@@ -1336,6 +1336,13 @@ IONOSPHERE_PROFILES_FOLDER = '/opt/skyline/ionosphere/features_profiles'
 :vartype IONOSPHERE_DATA_FOLDER: str
 """
 
+IONOSPHERE_LEARN_FOLDER = '/opt/skyline/ionosphere/learn'
+"""
+:var IONOSPHERE_LEARN_FOLDER: This is the path for the Ionosphere learning data
+    folder where learning data for timeseries will be processed - absolute path
+:vartype IONOSPHERE_LEARN_FOLDER: str
+"""
+
 IONOSPHERE_CHECK_MAX_AGE = 300
 """
 :var IONOSPHERE_CHECK_MAX_AGE: Ionosphere will only process a check file if it is
@@ -1379,4 +1386,82 @@ IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1
 :var IONOSPHERE_FEATURES_PERCENT_SIMILAR: The percentage difference between a
     features profile sum and a calculated profile sum to result in a match.
 :vartype IONOSPHERE_FEATURES_PERCENT_SIMILAR: int
+"""
+
+IONOSPHERE_ENABLE_LEARNING = True
+"""
+:var IONOSPHERE_LEARN: Whether Ionosphere is set to learn
+:vartype IONOSPHERE_LEARN: boolean
+"""
+
+IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS = 30
+"""
+:var IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS: The default full duration in
+    in days at which Ionosphere should learn, the default is 30 days.
+    Overridable per namespace in settings.IONOSPHERE_LEARNING_NAMESPACE_CONFIG
+:vartype IONOSPHERE_LEARN_FULL_DURATION: int
+"""
+
+IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3601
+"""
+:var IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: The number of seconds that
+    Ionosphere should wait before surfacing the metric timeseries for to learn
+    from.  What Graphite aggregration do you want the retention at before
+    querying it to learn from?
+    Overridable per namespace in settings.IONOSPHERE_LEARNING_NAMESPACE_CONFIG
+:vartype IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
+"""
+
+IONOSPHERE_LEARNING_NAMESPACE_CONFIG = (
+    ('skyline_test.alerters.test', 30, 3601),
+    # Learn all Ionosphere enabled metrics at 30 days
+    ('*', 30, 3601),
+)
+"""
+:var IONOSPHERE_LEARNING_NAMESPACE_CONFIG: Configures specific namespaces at
+    specific learning full duration in days.
+    Overrides settings.IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS and
+    settings.IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS per
+    defined namespace, first matched, used.  Order highest to lowest namespace
+    resoultion. Like settings.ALERTS, you know how this works now...
+:vartype IONOSPHERE_LEARNING: tuples
+
+This is the config by which each declared namespace can be assigned a learning
+full duration in days.  It is here to allow for overrides so that if a metric
+does not suit being learned at say 30 days, it could be learned at say 14 days
+instead if 14 days was a better suited learning full duration.
+
+To specifically disable learning on a namespace, set LEARN_FULL_DURATION_DAYS
+to 0
+
+- **Tuple schema example**::
+
+    IONOSPHERE_LEARNING_NAMESPACE_CONFIG = (
+        # ('<metric_namespace>', LEARN_FULL_DURATION_DAYS, LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS),
+        # Wildcard namespaces can be used as well
+        ('metric4.thing.*.requests', 14, 3601),
+        # However beware of wildcards as the above wildcard should really be
+        ('metric4.thing\..*.\.requests', 14, 7201),
+        # Disable learning on a namespace
+        ('metric5.thing.*.rpm', 0, 3601),
+        # Learn all Ionosphere enabled metrics at 30 days
+        ('*', 30, 3601),
+    )
+
+- Namespace tuple parameters are:
+
+:param metric_namespace: metric_namespace pattern
+:param LEARN_FULL_DURATION_DAYS: The number of days that Ionosphere should
+    should surface the metric timeseries for
+:param LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: The number of seconds that
+    Ionosphere should wait before surfacing the metric timeseries for to learn
+    from.  What Graphite aggregration do you want the retention at before
+    querying it to learn from?  REQUIRED, NOT optional, we could use the
+    settings.IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS but
+    that be some more conditionals, that we do not need, be precise, by now if
+    you are training Skyline well you will understand, be precise helps :)
+:type metric_namespace: str
+:type LEARN_FULL_DURATION_DAYS: int
+:type LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
+
 """
