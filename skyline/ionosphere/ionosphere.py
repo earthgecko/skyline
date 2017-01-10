@@ -1478,6 +1478,21 @@ class Ionosphere(Thread):
                         settings.IONOSPHERE_DATA_FOLDER,
                         settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
 
+            # added 20170110 - Feature #1854: Ionosphere learn
+            # purge_old_data_dirs learn data
+            try:
+                logger.info('purging any old learning data')
+                self.purge_old_data_dirs(
+                    settings.IONOSPHERE_LEARN_FOLDER,
+                    settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+            except:
+                logger.error('error :: purge_old_data_dirs learn - %s' % traceback.print_exc())
+                if ENABLE_IONOSPHERE_DEBUG:
+                    logger.info(
+                        'debug :: self.purge_old_data_dirs(%s, %s)' %
+                        settings.IONOSPHERE_LEARN_FOLDER,
+                        settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+
             # self.populate the database metatdata tables
             # What is my host id in the Skyline panorama DB?
             host_id = False
