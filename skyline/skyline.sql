@@ -53,6 +53,15 @@ CREATE TABLE IF NOT EXISTS `metrics` (
   `metric` VARCHAR(255) NOT NULL COMMENT 'metric name',
   `ionosphere_enabled` tinyint(1) DEFAULT NULL COMMENT 'are ionosphere rules enabled 1 or not enabled 0 on the metric',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+/*
+# @added 20170113 - Feature #1854: Ionosphere learn - generations
+# Added max_generations and percent_diff_from_origin for Ionosphere LEARN
+# related features profiles
+*/
+  `learn_full_duration_days` INT DEFAULT 30 COMMENT 'Ionosphere learn - the number days data to be used for learning the metric',
+  `learn_valid_ts_older_than` INT DEFAULT 3361 COMMENT 'Ionosphere learn - the age in seconds of a timeseries before it is valid to learn from',
+  `max_generations` INT DEFAULT 5 COMMENT 'Ionosphere learn - the maximum number of generations that can be learnt for this metric',
+  `max_percent_diff_from_origin` DOUBLE DEFAULT 7.0 COMMENT 'Ionosphere learn - the maximum percentage difference that a learn features profile sum can be from the original human generated features profile',
   PRIMARY KEY (id),
   INDEX `metric` (`id`,`metric`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 
@@ -219,6 +228,13 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 */
   `parent_id` INT(10) DEFAULT 0 COMMENT 'the id of the parent features profile, 0 being the original human generated features profile',
   `generation` INT DEFAULT 0 COMMENT 'the number of generations between this feature profile and the original, 0 being the original human generated features profile',
+/*
+# @added 20170111 - Feature #1854: Ionosphere learn - generations
+# Added max_generations and percent_diff_from_origin for Ionosphere LEARN
+# related features profiles
+*/
+  `max_generations` INT DEFAULT 0 COMMENT 'the number of generations between this feature profile and the original, 0 being the original human generated features profile',
+  `max_percent_diff_from_origin` DOUBLE DEFAULT NULL COMMENT 'the maximum percentage difference of the features profile sum for the original human generated features profile',
   PRIMARY KEY (id),
   INDEX `features_profile` (`id`,`metric_id`,`enabled`)  KEY_BLOCK_SIZE=255)
   ENGINE=InnoDB;

@@ -112,3 +112,21 @@ CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
   PRIMARY KEY (id),
   INDEX `features_profile_matched` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255)
   ENGINE=InnoDB;
+
+/*
+# @added 20170113 - Feature #1854: Ionosphere learn - generations
+# Added max_generations and percent_diff_from_origin for Ionosphere LEARN
+# related features profiles
+*/
+ALTER TABLE `metrics` ADD COLUMN `learn_full_duration_days` INT DEFAULT 30 COMMENT 'Ionosphere learn - the number days data to be used for learning the metric' AFTER `created_timestamp`;
+COMMIT;
+ALTER TABLE `metrics` ADD COLUMN `learn_valid_ts_older_than` INT DEFAULT 3361 COMMENT 'Ionosphere learn - the age in seconds of a timeseries before it is valid to learn from' AFTER `learn_full_duration_days`;
+COMMIT;
+/*
+# @modified 20170116 - Feature #1854: Ionosphere learn - generations
+# Fix name typo
+ALTER TABLE `metrics` ADD COLUMN `max_generations` INT DEFAULT 5 COMMENT 'Ionosphere learn - the maximum number of generations that can be learnt for this metric' AFTER `learn_valid_ts_older`;
+*/
+ALTER TABLE `metrics` ADD COLUMN `max_generations` INT DEFAULT 5 COMMENT 'Ionosphere learn - the maximum number of generations that can be learnt for this metric' AFTER `learn_valid_ts_older_than`;
+COMMIT;
+ALTER TABLE `metrics` ADD COLUMN `max_percent_diff_from_origin` DOUBLE DEFAULT 7.0 COMMENT 'Ionosphere learn - the maximum percentage difference that a learn features profile sum can be from the original human generated features profile' AFTER `max_generations`;

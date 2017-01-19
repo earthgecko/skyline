@@ -1367,63 +1367,112 @@ SKYLINE_URL = 'http://skyline.example.com:8080'
 :vartype SKYLINE_URL: str
 """
 
-TSFRESH_VERSION = '0.4.0'
-"""
-:var TSFRESH_VERSION: The version of tsfresh installed by pip, this is important
-    in terms of feature extraction baselines
-:vartype TSFRESH_VERSION: str
-"""
+# No longer declared in the settings.py handled outside user config in
+# skyline/tsfresh_feature_names.py
+# TSFRESH_VERSION = '0.4.0'
+# """
+# :var TSFRESH_VERSION: The version of tsfresh installed by pip, this is important
+#    in terms of feature extraction baselines
+# :vartype TSFRESH_VERSION: str
+# """
+#
+# TSFRESH_BASELINE_VERSION = '0.4.0'
+# """
+# :var TSFRESH_BASELINE_VERSION: The version of tsfresh installed by pip, this is important
+#     in terms of feature extraction baselines
+# :vartype TSFRESH_BASELINE_VERSION: str
+# """
 
-TSFRESH_BASELINE_VERSION = '0.4.0'
-"""
-:var TSFRESH_BASELINE_VERSION: The version of tsfresh installed by pip, this is important
-    in terms of feature extraction baselines
-:vartype TSFRESH_BASELINE_VERSION: str
-"""
-
-IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1
+IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1.0
 """
 :var IONOSPHERE_FEATURES_PERCENT_SIMILAR: The percentage difference between a
     features profile sum and a calculated profile sum to result in a match.
-:vartype IONOSPHERE_FEATURES_PERCENT_SIMILAR: int
+:vartype IONOSPHERE_FEATURES_PERCENT_SIMILAR: float
 """
 
-IONOSPHERE_ENABLE_LEARNING = True
+IONOSPHERE_LEARN = True
 """
 :var IONOSPHERE_LEARN: Whether Ionosphere is set to learn
 :vartype IONOSPHERE_LEARN: boolean
+
+.. note:: The below ``IONOSPHERE_LEARN_DEFAULT_`` variables are all overrideable in
+    the IONOSPHERE_LEARN_NAMESPACE_CONFIG tuple per defined metric namespace
+    further to this ALL metrics and their settings in terms of the Ionosphere
+    learning context can also be modified via the webapp UI Ionosphere section.
+    These settings are the defaults that are used in the creation of learnt
+    features profiles and new metrics, HOWEVER the database is the preferred
+    source of truth and will always be referred to first and the default or
+    settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG values shall only be used if
+    database values are not determined. These settings are here so that it is
+    easy to paint all metrics and others specifically as a whole, once a metric
+    is added to Ionosphere via the creation of a features profile, it is painted
+    with these defaults or the appropriate namespace settings in
+    settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+
+.. warning:: Changes made to a metric settings in the database directly via the
+    UI or your own SQL will not be overridden ``IONOSPHERE_LEARN_DEFAULT_``
+    variables or the IONOSPHERE_LEARN_NAMESPACE_CONFIG tuple per defined metric
+    namespace even if the metric matches the namespace, the database is the
+    source of truth.
+
 """
 
-IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS = 30
+IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS = 5
 """
-:var IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS: The default full duration in
+:var IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS: The maximum number of generations
+    that Ionosphere can automatically learn up to from the original human created
+    features profile within the IONOSPHERE_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN
+    Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+    and via webapp UI to update DB
+:vartype IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS: int
+"""
+
+IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 7.0
+"""
+:var IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN: The maximum percent
+    that an automatically generated features profile can be from the original
+    human created features profile, any automatically generated features profile
+    with the a greater percent difference above this value when summed common
+    features are calculated will be discarded.  Anything below this value will
+    be considered a valid learned features profile.
+:vartype IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN: float
+
+.. note:: This percent value will match -/+ e.g. works both ways x percent above
+    or below.  In terms of comparisons, a negative percent is simply multiplied
+    by -1.0
+"""
+
+IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS = 30
+"""
+:var IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS: The default full duration in
     in days at which Ionosphere should learn, the default is 30 days.
-    Overridable per namespace in settings.IONOSPHERE_LEARNING_NAMESPACE_CONFIG
-:vartype IONOSPHERE_LEARN_FULL_DURATION: int
+    Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+:vartype IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS: int
 """
 
-IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3661
+IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3661
 """
 :var IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: The number of seconds that
     Ionosphere should wait before surfacing the metric timeseries for to learn
     from.  What Graphite aggregration do you want the retention at before
     querying it to learn from?
-    Overridable per namespace in settings.IONOSPHERE_LEARNING_NAMESPACE_CONFIG
-:vartype IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
+    Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+:vartype IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
 """
 
-IONOSPHERE_LEARNING_NAMESPACE_CONFIG = (
-    ('skyline_test.alerters.test', 30, 3661),
+IONOSPHERE_LEARN_NAMESPACE_CONFIG = (
+    ('skyline_test.alerters.test', 30, 3661, 5, 7),
     # Learn all Ionosphere enabled metrics at 30 days
-    ('*', 30, 3661),
+    ('\*', 30, 3661, 5, 7),
 )
 """
-:var IONOSPHERE_LEARNING_NAMESPACE_CONFIG: Configures specific namespaces at
+:var IONOSPHERE_LEARN_NAMESPACE_CONFIG: Configures specific namespaces at
     specific learning full duration in days.
-    Overrides settings.IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS and
-    settings.IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS per
-    defined namespace, first matched, used.  Order highest to lowest namespace
-    resoultion. Like settings.ALERTS, you know how this works now...
+    Overrides settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS,
+    settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS,
+    settings.IONOSPHERE_MAX_GENERATIONS and settings.IONOSPHERE_MAX_PERCENT_DIFF_FROM_ORIGIN
+    per defined namespace, first matched, used.  Order highest to lowest
+    namespace resoultion. Like settings.ALERTS, you know how this works now...
 :vartype IONOSPHERE_LEARNING: tuples
 
 This is the config by which each declared namespace can be assigned a learning
@@ -1436,16 +1485,19 @@ to 0
 
 - **Tuple schema example**::
 
-    IONOSPHERE_LEARNING_NAMESPACE_CONFIG = (
-        # ('<metric_namespace>', LEARN_FULL_DURATION_DAYS, LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS),
+    IONOSPHERE_LEARN_NAMESPACE_CONFIG = (
+        # ('<metric_namespace>', LEARN_FULL_DURATION_DAYS,
+        #  LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS, MAX_GENERATIONS,
+        #  MAX_PERCENT_DIFF_FROM_ORIGIN),
         # Wildcard namespaces can be used as well
-        ('metric4.thing.*.requests', 14, 3601),
+        ('metric3.thing\..*', 90, 3661, 5, 7),
+        ('metric4.thing\..*.\.requests', 14, 3661, 5, 7),
         # However beware of wildcards as the above wildcard should really be
-        ('metric4.thing\..*.\.requests', 14, 7201),
+        ('metric4.thing\..*.\.requests', 14, 7261, 3, 5),
         # Disable learning on a namespace
-        ('metric5.thing.*.rpm', 0, 3601),
+        ('metric5.thing\..*.\.rpm', 0, 3661, 5, 7),
         # Learn all Ionosphere enabled metrics at 30 days
-        ('*', 30, 3601),
+        ('.*', 30, 3661, 5, 7),
     )
 
 - Namespace tuple parameters are:
@@ -1457,11 +1509,43 @@ to 0
     Ionosphere should wait before surfacing the metric timeseries for to learn
     from.  What Graphite aggregration do you want the retention at before
     querying it to learn from?  REQUIRED, NOT optional, we could use the
-    settings.IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS but
+    settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS but
     that be some more conditionals, that we do not need, be precise, by now if
     you are training Skyline well you will understand, be precise helps :)
+:param MAX_GENERATIONS: The maximum number of generations that Ionosphere can
+    automatically learn up to from the original human created features profile
+    on this metric namespace.
+:param MAX_PERCENT_DIFF_FROM_ORIGIN: The maximum percent that an automatically
+    generated features profile can be from the original human created features
+    profile for a metric in the namespace.
 :type metric_namespace: str
 :type LEARN_FULL_DURATION_DAYS: int
 :type LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
+:type MAX_GENERATIONS: int
+
+"""
+
+IONOSPHERE_AUTOBUILD = True
+"""
+:var IONOSPHERE_AUTOBUILD: Make best effort attempt to auto provision any
+    features_profiles directory and resources that have been deleted or are
+    missing.
+:vartype IONOSPHERE_AUTOBUILD: boolean
+
+.. note:: This is highlighted as a setting as the number of features_profiles
+    dirs that Ionosphere learn could spawn and the amount of data storage that
+    would result is unknown at this point. It is possible the operator is going
+    to need to prune this data a lot of which will probably never be looked
+    at. Or a Skyline node is going to fail, not have the features_profiles dirs
+    backed up and all the data is going to be lost or deleted. So it is possible for
+    Ionosphere to created all the human interrupted resources for the features
+    profile back under a best effort methodology. Although the original Redis graph
+    image would not be available, nor the Graphite graphs in the resolution at which
+    the features profile was created, however the fp_ts is available so the Redis
+    plot could be remade and all the Graphite graphs could be made as best effort
+    with whatever resoultion is available for that time period.
+    This allows the operator to delete/prune feature profile dirs by possibly least
+    matched by age, etc or all and still be able to surface the available features
+    profile page data on-demand.
 
 """
