@@ -75,7 +75,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
         except socket.error:
             sock.settimeout(None)
             endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
-            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(
                 'error :: cannot connect to Graphite at %s' % endpoint)
@@ -89,7 +89,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
             return True
         except:
             endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
-            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(
                 'error :: could not send data to Graphite at %s' % endpoint)
@@ -147,7 +147,7 @@ def load_metric_vars(current_skyline_app, metric_vars_file):
     metric_vars = False
     metric_vars_got = False
     if os.path.isfile(metric_vars_file):
-        current_skyline_app_logger = current_skyline_app + 'Log'
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.info(
             'loading metric variables from import - metric_check_file - %s' % (
@@ -214,7 +214,7 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
                 raise
 
     if not os.path.exists(file_dir):
-        current_skyline_app_logger = current_skyline_app + 'Log'
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error(
             'error :: could not create directory - %s' % (str(file_dir)))
@@ -264,7 +264,7 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
         from sys import version_info
         python_version = int(version_info[0])
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     if not os.path.exists(failed_check_dir):
@@ -328,10 +328,10 @@ def alert_expiry_check(current_skyline_app, metric, metric_timestamp, added_by):
     except:
         import re
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
-    cache_key = 'last_alert.%s.%s.%s' % (current_skyline_app, added_by, metric)
+    cache_key = 'last_alert.%s.%s.%s' % (str(current_skyline_app), added_by, metric)
     try:
         last_alert = self.redis_conn.get(cache_key)
     except:
@@ -386,11 +386,11 @@ def alert_expiry_check(current_skyline_app, metric, metric_timestamp, added_by):
                             msg = 'the check is older than EXPIRATION_TIME for the metric - not checking - check_expired'
                             current_logger.info('%s' % msg)
 
-    cache_key = '%s.last_check.%s.%s' % (current_skyline_app, added_by, metric)
+    cache_key = '%s.last_check.%s.%s' % (str(current_skyline_app), added_by, metric)
     if settings.ENABLE_DEBUG:
         current_logger.info(
             'debug :: cache_key - %s.last_check.%s.%s' % (
-                current_skyline_app, added_by, metric))
+                str(current_skyline_app), added_by, metric))
 
     # Only use the cache_key EXPIRATION_TIME if this is not a request to
     # run_crucible_tests on a timeseries
@@ -471,7 +471,7 @@ def get_graphite_metric(
     except:
         import time
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
 #    if settings.ENABLE_DEBUG:
@@ -537,7 +537,7 @@ def get_graphite_metric(
             image_url += '&height=308'
         # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
         # settings, color and title
-        if current_skyline_app == 'webapp':
+        if str(current_skyline_app) == 'webapp':
             get_ionosphere_graphs = False
             if 'graphite_now' in output_object:
                 get_ionosphere_graphs = True
@@ -695,22 +695,52 @@ def send_anomalous_metric_to(
         from sys import version_info
         python_version = int(version_info[0])
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
-    if send_to_app == 'crucible':
-        anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
-        check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
+    # @added 20170116 - Feature #1854: Ionosphere learn
+    added_by_context = str(current_skyline_app)
+
+    # @added 20170117 - Feature #1854: Ionosphere learn
+    # Added the ionosphere_learn_to_ionosphere to fix ionosphere_learn not being
+    # logged.
+    if str(send_to_app) == 'ionosphere_learn_to_ionosphere':
+        added_by_context = 'ionosphere_learn'
+        new_send_to_app = 'ionosphere'
+        send_to_app = new_send_to_app
+
+    if str(send_to_app) == 'crucible':
+        anomaly_dir = '%s/%s/%s' % (
+            settings.CRUCIBLE_DATA_FOLDER, str(timeseries_dir), str(metric_timestamp))
+        check_file = '%s/%s.%s.txt' % (
+            settings.CRUCIBLE_CHECK_PATH, str(metric_timestamp), str(base_name))
         check_dir = '%s' % (settings.CRUCIBLE_CHECK_PATH)
-    if send_to_app == 'ionosphere':
+    if str(send_to_app) == 'ionosphere':
         # @modified 20161121 - Branch #922: ionosphere
         # Use the timestamp as the parent dir for training_data, it is easier
         # to manage and clean on timestamps.  Walking through 1000s of Graphite
         # style dirs with dotted metric namespaces for timestamps.
         # anomaly_dir = settings.IONOSPHERE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
-        anomaly_dir = '%s/%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, metric_timestamp, timeseries_dir)
-        check_file = '%s/%s.%s.txt' % (settings.IONOSPHERE_CHECK_PATH, metric_timestamp, base_name)
+        anomaly_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
+            str(timeseries_dir))
+        check_file = '%s/%s.%s.txt' % (
+            settings.IONOSPHERE_CHECK_PATH, str(metric_timestamp),
+            str(base_name))
         check_dir = '%s' % (settings.IONOSPHERE_CHECK_PATH)
+
+        # @added 20170116 - Feature #1854: Ionosphere learn
+        # So as to not have to backport a context to all the instances of
+        # send_anomalous_metric_to identify what this was added_by, here the
+        # learn directory path string overrides the dirs if it is a learn
+        # related check
+        # @modified 20170117 - Feature #1854: Ionosphere learn
+        # The ionosphere_learn_to_ionosphere to fix ionosphere_learn not being
+        # logged.
+        # if str(settings.IONOSPHERE_LEARN_FOLDER) in anomaly_dir:
+        #     added_by_context = 'ionosphere_learn'
+        if added_by_context == 'ionosphere_learn':
+            current_logger.info('send_anomalous_metric_to :: this is an ionosphere_learn check')
 
     if not os.path.exists(check_dir):
         os.makedirs(check_dir, mode=0o755)
@@ -729,6 +759,8 @@ def send_anomalous_metric_to(
     now_timestamp = int(time())
     # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
     # Added full_duration
+    # @modified 20170116 - Feature #1854: Ionosphere learn
+    # Changed added_by parameter from current_skyline_app to added_by_context
     anomaly_data = 'metric = \'%s\'\n' \
                    'value = \'%s\'\n' \
                    'from_timestamp = \'%s\'\n' \
@@ -741,40 +773,48 @@ def send_anomalous_metric_to(
                    'added_by = \'%s\'\n' \
                    'added_at = \'%s\'\n' \
                    'full_duration = \'%s\'\n' \
-        % (base_name, str(datapoint), from_timestamp, metric_timestamp,
-            str(settings.ALGORITHMS), triggered_algorithms, anomaly_dir,
-            current_skyline_app, str(now_timestamp), str(int(full_duration)))
+        % (str(base_name), str(datapoint), str(from_timestamp),
+            str(metric_timestamp), str(settings.ALGORITHMS),
+            str(triggered_algorithms), anomaly_dir, added_by_context,
+            str(now_timestamp), str(int(full_duration)))
 
-    # Create an anomaly file with details about the anomaly
-    anomaly_file = '%s/%s.txt' % (anomaly_dir, base_name)
-    try:
-        write_data_to_file(current_skyline_app, anomaly_file, 'w', anomaly_data)
-        current_logger.info('added %s anomaly file :: %s' % (send_to_app, anomaly_file))
-    except:
-        current_logger.info(traceback.format_exc())
-        current_logger.error(
-            'error :: failed to add %s anomaly file :: %s' %
-            (send_to_app, anomaly_file))
+    # @modified 20170116 - Feature #1854: Ionosphere learn
+    # In the Ionosphere context there is no requirement to create a timeseries
+    # json file or anomaly_file, just the check
+    if added_by_context != 'ionosphere_learn':
 
-    # Create timeseries json file with the timeseries
-    json_file = '%s/%s.json' % (anomaly_dir, base_name)
-    timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
-    try:
-        write_data_to_file(current_skyline_app, json_file, 'w', timeseries_json)
-        current_logger.info('added %s timeseries file :: %s' % (send_to_app, json_file))
-    except:
-        current_logger.error(
-            'error :: failed to add %s timeseries file :: %s' %
-            (send_to_app, json_file))
-        current_logger.info(traceback.format_exc())
+        # Create an anomaly file with details about the anomaly
+        anomaly_file = '%s/%s.txt' % (anomaly_dir, str(base_name))
+        try:
+            write_data_to_file(str(current_skyline_app), anomaly_file, 'w', anomaly_data)
+            current_logger.info('added %s anomaly file :: %s' % (str(send_to_app), anomaly_file))
+        except:
+            current_logger.info(traceback.format_exc())
+            current_logger.error(
+                'error :: failed to add %s anomaly file :: %s' %
+                (str(send_to_app), anomaly_file))
+
+        # Create timeseries json file with the timeseries
+        json_file = '%s/%s.json' % (anomaly_dir, str(base_name))
+        timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+        try:
+            write_data_to_file(str(current_skyline_app), json_file, 'w', timeseries_json)
+            current_logger.info('added %s timeseries file :: %s' % (str(send_to_app), json_file))
+        except:
+            current_logger.error(
+                'error :: failed to add %s timeseries file :: %s' %
+                (str(send_to_app), json_file))
+            current_logger.info(traceback.format_exc())
 
     # Create a check file
     try:
-        write_data_to_file(current_skyline_app, check_file, 'w', anomaly_data)
-        current_logger.info('added %s check :: %s,%s' % (send_to_app, base_name, metric_timestamp))
+        write_data_to_file(str(current_skyline_app), check_file, 'w', anomaly_data)
+        current_logger.info(
+            'added %s check :: %s,%s' % (
+                str(send_to_app), str(base_name), str(metric_timestamp)))
     except:
         current_logger.info(traceback.format_exc())
-        current_logger.error('error :: failed to add %s check file :: %s' % (send_to_app, check_file))
+        current_logger.error('error :: failed to add %s check file :: %s' % (str(send_to_app), check_file))
 
 
 def RepresentsInt(s):
@@ -838,7 +878,7 @@ def mysql_select(current_skyline_app, select):
     except:
         nothing_to_do = True
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
     if ENABLE_DEBUG:
         current_logger.info('debug :: entering mysql_select')

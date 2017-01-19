@@ -240,7 +240,7 @@ def validate_settings_variables(current_skyline_app):
         try:
             TEST_IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1 + settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR
         except:
-            current_logger.error('error :: IONOSPHERE_FEATURES_PERCENT_SIMILAR is not set as an int in settings.py')
+            current_logger.error('error :: IONOSPHERE_FEATURES_PERCENT_SIMILAR is not set as a float in settings.py')
             current_logger.info(traceback.format_exc())
             current_logger.error('error :: exiting, please fix setting.py')
             print ('error :: IONOSPHERE_FEATURES_PERCENT_SIMILAR is not set in settings.py')
@@ -250,12 +250,12 @@ def validate_settings_variables(current_skyline_app):
         # Added the Ionosphere LEARN related variables
         ionosphere_learning_enabled = False
         try:
-            ionosphere_learning_enabled = settings.IONOSPHERE_ENABLE_LEARNING
+            ionosphere_learn_enabled = settings.IONOSPHERE_LEARN
         except:
-            current_logger.error('error :: IONOSPHERE_ENABLE_LEARNING is not set as a boolean in settings.py')
+            current_logger.error('error :: IONOSPHERE_LEARN is not set as a boolean in settings.py')
             current_logger.info(traceback.format_exc())
             current_logger.error('error :: exiting, please fix setting.py')
-            print ('error :: IONOSPHERE_ENABLE_LEARNING is not set in settings.py')
+            print ('error :: IONOSPHERE_LEARN is not set in settings.py')
             invalid_variables = True
 
         if ionosphere_learning_enabled:
@@ -268,32 +268,54 @@ def validate_settings_variables(current_skyline_app):
                 print ('error :: IONOSPHERE_LEARN_FOLDER is not set in settings.py')
                 invalid_variables = True
 
+            # @added 20160113 - Feature #1858: Ionosphere - autobuild features_profiles dir
             try:
-                TEST_IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS = 1 + settings.IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS
+                TEST_IONOSPHERE_AUTOBUILD = settings.IONOSPHERE_AUTOBUILD
             except:
-                current_logger.error('error :: IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS is not set as an int in settings.py')
+                current_logger.error('error :: IONOSPHERE_AUTOBUILD is not set in settings.py')
                 current_logger.info(traceback.format_exc())
                 current_logger.error('error :: exiting, please fix setting.py')
-                print ('error :: IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS is not set in settings.py')
+                print ('error :: IONOSPHERE_AUTOBUILD is not set in settings.py')
                 invalid_variables = True
 
-            try:
-                TEST_IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS = 1 + settings.IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS
-            except:
-                current_logger.error('error :: IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS is not set as an int in settings.py')
-                current_logger.info(traceback.format_exc())
-                current_logger.error('error :: exiting, please fix setting.py')
-                print ('error :: IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS is not set in settings.py')
-                invalid_variables = True
+        # @modified 20170115 - Feature #1854: Ionosphere learn - generations
+        # These are now used in a shared context in terms of being required
+        # by Panorama and ionosphere/learn
+        try:
+            TEST_IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS = 1 + settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
+        except:
+            current_logger.error('error :: IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS is not set as an int in settings.py')
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: exiting, please fix setting.py')
+            print ('error :: IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS is not set in settings.py')
+            invalid_variables = True
 
-            try:
-                TEST_IONOSPHERE_LEARNING_NAMESPACE_CONFIG = settings.IONOSPHERE_LEARNING_NAMESPACE_CONFIG
-            except:
-                current_logger.error('error :: IONOSPHERE_LEARNING_NAMESPACE_CONFIG is not set as a tuple of tuples in settings.py')
-                current_logger.info(traceback.format_exc())
-                current_logger.error('error :: exiting, please fix setting.py')
-                print ('error :: IONOSPHERE_LEARNING_NAMESPACE_CONFIG is not set in settings.py')
-                invalid_variables = True
+        try:
+            TEST_IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS = 1 + settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS
+        except:
+            current_logger.error('error :: IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS is not set as an int in settings.py')
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: exiting, please fix setting.py')
+            print ('error :: IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS is not set in settings.py')
+            invalid_variables = True
+
+        try:
+            TEST_IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 1 + settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN
+        except:
+            current_logger.error('error :: IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN is not set as a float or int in settings.py')
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: exiting, please fix setting.py')
+            print ('error :: IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN is not set in settings.py')
+            invalid_variables = True
+
+        try:
+            TEST_IONOSPHERE_LEARN_NAMESPACE_CONFIG = settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+        except:
+            current_logger.error('error :: IONOSPHERE_LEARN_NAMESPACE_CONFIG is not set as a tuple of tuples in settings.py')
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: exiting, please fix setting.py')
+            print ('error :: IONOSPHERE_LEARN_NAMESPACE_CONFIG is not set in settings.py')
+            invalid_variables = True
 
     if invalid_variables:
         return False

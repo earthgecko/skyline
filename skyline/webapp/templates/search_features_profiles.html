@@ -1,0 +1,183 @@
+{% block search_features_profiles_block %}
+<!-- BEGIN /ionosphere/fp_veiw=true&fp_search=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere search_features_profiles block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+		  <li class="active"><a href="?fp_search=true">Search</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles</span></span></span></h4>
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Features profile search</td>
+  		        <td><select name="fp_search">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Features profile count by metric</td>
+  		        <td><select name="count_by_metric">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Metric like</td>
+  		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp</td>
+  		        <td><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  {% if full_duration_list %}
+  		      <tr>
+  		        <td>full_duration</td>
+  		        <td><select name="full_duration">
+                <option value="all">all</option>
+          {% for item in full_duration_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select></td>
+  		      </tr>
+  {% endif %}
+  {% if enabled_list %}
+  		      <tr>
+                <td>enabled</td>
+                <td><select name="enabled">
+                  <option value="all">all</option>
+            {% for item in enabled_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+                </select></td>
+  		      </tr>
+  {% endif %}
+  {% if tsfresh_version_list %}
+  		      <tr>
+                <td>tsfresh_version</td>
+                <td><select name="tsfresh_version">
+                  <option value="all">all</option>
+            {% for item in tsfresh_version_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+                </select></td>
+  		      </tr>
+  {% endif %}
+  {% if generation_list %}
+  		      <tr>
+                <td>generation:</td>
+                <td><select name="generation">
+                  <option value="all">all</option>
+            {% for item in generation_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+                </select></td>
+  		      </tr>
+  {% endif %}
+  		      <tr>
+              <td>Features profiles count by metric:</td>
+              <td><select name="count_by_metric">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by matched:</td>
+              <td><select name="count_by_matched">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by checked:</td>
+              <td><select name="count_by_checked">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+                <td>Features profiles count by generation:</td>
+                <td><select name="count_by_generation">
+                  <option value="false">false</option>
+                  <option value="true">true</option>
+                </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+
+  		      <tr>
+                <td>limit</td>
+                <td><input type="number" name="limit" min="1" max="100" value="30" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>order by:</td>
+  		        <td><select name="order">
+                <option value="DESC">DESC</option>
+                <option value="ASC">ASC</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+      </div>
+    </div>
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere/fp_veiw=true&fp_search=true block -->
+{% endblock %}

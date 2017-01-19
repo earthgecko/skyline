@@ -21,6 +21,14 @@ from mysql.connector import errorcode
 import settings
 from skyline_functions import fail_check, mkdir_p
 
+# @added 20170115 - Feature #1854: Ionosphere learn - generations
+# Added determination of the learn related variables so that any new metrics
+# that Panorama adds to the Skyline database, it adds the default
+# IONOSPHERE_LEARN_DEFAULT_ values or the namespace specific values matched
+# from settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG to the metric database
+# entry.
+from ionosphere_functions import get_ionosphere_learn_details
+
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -673,8 +681,44 @@ class Panorama(Thread):
                             query_cache_key, str(determined_id)))
                 return int(determined_id)
 
+            # @added 20170115 - Feature #1854: Ionosphere learn - generations
+            # Added determination of the learn related variables
+            # learn_full_duration_days, learn_valid_ts_older_than,
+            # max_generations and max_percent_diff_from_origin value to the
+            # insert statement if the table is the metrics table.
+            if table == 'metrics' and key == 'metric':
+                # Set defaults
+                learn_full_duration_days = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS)
+                valid_learning_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS)
+                max_generations = int(settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS)
+                max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
+                try:
+                    use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(skyline_app, value)
+                    learn_full_duration_days = use_full_duration_days
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get_ionosphere_learn_details for %s' % value)
+
+                logger.info('metric learn details determined for %s' % value)
+                logger.info('learn_full_duration_days     :: %s days' % (str(learn_full_duration_days)))
+                logger.info('valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
+                logger.info('max_generations              :: %s' % (str(max_generations)))
+                logger.info('max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
+
             # INSERT because no known id
-            insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)
+            # @modified 20170115 - Feature #1854: Ionosphere learn - generations
+            # Added the learn_full_duration_days, learn_valid_ts_older_than,
+            # max_generations and max_percent_diff_from_origin value to the
+            # insert statement if the table is the metrics table.
+            # insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)
+            if table == 'metrics' and key == 'metric':
+                insert_query = 'insert into %s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
+                    table, key, value, str(learn_full_duration_days),
+                    str(valid_learning_duration), str(max_generations),
+                    str(max_percent_diff_from_origin))
+            else:
+                insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)
+
             logger.info('inserting %s into %s table' % (value, table))
             try:
                 results = self.mysql_insert(insert_query)

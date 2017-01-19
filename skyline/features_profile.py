@@ -14,6 +14,7 @@ import pandas as pd
 
 from tsfresh.feature_extraction import (
     extract_features, ReasonableFeatureExtractionSettings)
+from tsfresh import __version__ as tsfresh_version
 
 import settings
 import skyline_version
@@ -71,18 +72,25 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         log_context = 'features profile data'
     if context == 'ionosphere':
         log_context = 'ionosphere'
+    # @added 20170114 - Feature #1854: Ionosphere learn
+    if context == 'ionosphere_learn':
+        log_context = 'ionosphere :: learn'
+
     current_logger.info('%s feature profile creation requested for %s at %s' % (
         log_context, base_name, timestamp))
 
     timeseries_dir = base_name.replace('.', '/')
     if context == 'training_data' or context == 'ionosphere':
         metric_data_dir = '%s/%s/%s' % (
-            settings.IONOSPHERE_DATA_FOLDER, timestamp,
-            timeseries_dir)
+            settings.IONOSPHERE_DATA_FOLDER, timestamp, timeseries_dir)
     if context == 'features_profiles':
         metric_data_dir = '%s/%s/%s' % (
-            settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
-            timestamp)
+            settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir, timestamp)
+
+    # @added 20170113 - Feature #1854: Ionosphere learn
+    if context == 'ionosphere_learn':
+        metric_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_LEARN_FOLDER, timestamp, timeseries_dir)
 
     features_profile_created_file = '%s/%s.%s.fp.created.txt' % (
         metric_data_dir, str(timestamp), base_name)
@@ -355,7 +363,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         # Added the ts_full_duration here as it was not added here on the 20170104
         # when it was added the webapp and ionosphere
         data = '[%s, \'%s\', %s, %s, %s, %s]' % (
-            str(int(time.time())), str(TSFRESH_VERSION), str(calc_time),
+            str(int(time.time())), str(tsfresh_version), str(calc_time),
             str(features_count), str(features_sum), str(ts_full_duration))
         write_data_to_file(current_skyline_app, features_profile_details_file, 'w', data)
     except:
@@ -367,5 +375,9 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     if os.path.isfile(ts_csv):
         os.remove(ts_csv)
         current_logger.info('removed the created csv - %s' % ts_csv)
+
+    # @added 20170112 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+    # Ionosphere learn needs Redis works sets, but this was moved to
+    # ionosphere_backend.py and learn.py not done here
 
     return str(t_fname_out), True, fp_created, fp_id, 'none', 'none', str(calc_time)

@@ -41,10 +41,20 @@ from skyline_functions import get_graphite_metric
 from backend import panorama_request, get_list
 from ionosphere_backend import (
     ionosphere_data, ionosphere_metric_data,
-    ionosphere_get_metrics_dir, create_features_profile,
-    features_profile_details)
+    # @modified 20170114 - Feature #1854: Ionosphere learn
+    # Decoupled create_features_profile from ionosphere_backend
+    # ionosphere_get_metrics_dir, create_features_profile,
+    ionosphere_get_metrics_dir,
+    features_profile_details,
+    # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+    ionosphere_search_defaults)
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
+
+# @added 20170114 - Feature #1854: Ionosphere learn
+# Decoupled the create_features_profile from ionosphere_backend and moved to
+# ionosphere_functions so it can be used by ionosphere/learn
+from ionosphere_functions import create_features_profile
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -184,9 +194,9 @@ def internal_error(message, traceback_format_exc):
     and log.
 
     As per:
-    - Show flask traceback when running on production server -
-      https://gist.github.com/probonopd/8616a8ff05c8a75e4601 - Python traceback
-      rendered nicely by Jinja2
+    Show flask traceback when running on production server
+    https://gist.github.com/probonopd/8616a8ff05c8a75e4601 - Python traceback
+    rendered nicely by Jinja2
 
     This can be tested by hitting SKYLINE_URL/a_500
 
@@ -201,7 +211,6 @@ def internal_error(message, traceback_format_exc):
     logger.debug('debug :: %s' % str(message))
     logger.debug('debug :: request url :: %s' % str(request.url))
     logger.debug('debug :: request referrer :: %s' % str(request.referrer))
-
     resp = '<pre>%s</pre><pre>%s</pre>' % (str(message), str(traceback_format_exc))
 #    return(resp), 500
     server_name = settings.SERVER_METRICS_NAME
@@ -779,10 +788,12 @@ def ionosphere():
     except:
         request_args_len = 0
 
+    # @modified 20170118 - Feature #1862: Ionosphere features profiles search page
+    # Added fp_search parameter
     IONOSPHERE_REQUEST_ARGS = [
         'timestamp', 'metric', 'metric_td', 'a_dated_list', 'timestamp_td',
         'requested_timestamp', 'fp_view', 'calc_features', 'add_fp',
-        'features_profiles']
+        'features_profiles', 'fp_search']
 
     determine_metric = False
     dated_list = False
@@ -792,6 +803,8 @@ def ionosphere():
     create_feature_profile = False
     fp_view = False
     fp_profiles = []
+    # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+    fp_search = False
 
     try:
         if request_args_present:
@@ -822,6 +835,12 @@ def ionosphere():
                 if key == 'fp_view':
                     if str(value) == 'true':
                         fp_view = True
+
+                # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+                # Added fp_search parameter
+                if key == 'fp_search':
+                    if str(value) == 'true':
+                        fp_search = True
 
                 if key == 'features_profiles':
                     fp_profiles = str(value)
@@ -1000,6 +1019,35 @@ def ionosphere():
             trace = traceback.format_exc()
             return internal_error(message, trace)
 
+    # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+    # Added fp_search parameter
+    fp_search_param = None
+    if fp_search:
+        fp_search_param = True
+        listed_by = 'search'
+        get_options = [
+            'full_duration', 'enabled', 'tsfresh_version', 'generation']
+        fd_list = None
+        try:
+            fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search_defaults(get_options)
+        except:
+            message = 'Uh oh ... a Skyline 500 :('
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+        if fd_list:
+            try:
+                return render_template(
+                    'ionosphere.html', list_by=listed_by, fp_search=fp_search_param,
+                    full_duration_list=fd_list, enabled_list=en_list,
+                    tsfresh_version_list=tsfresh_list, generation_list=gen_list,
+                    version=skyline_version, duration=(time.time() - start),
+                    print_debug=debug_on), 200
+            except:
+                message = 'Uh oh ... a Skyline 500 :('
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+
     if metric_td_arg:
         listed_by = 'metric_td_dirs'
         try:
@@ -1068,13 +1116,22 @@ def ionosphere():
                     for i, line in enumerate(reader):
                         features.append([str(line[0]), str(line[1])])
 
+        generation_zero = False
         if create_feature_profile or fp_view:
             if create_feature_profile:
                 # Submit to Ionosphere to run tsfresh on
                 create_feature_profile = True
             if not fp_id:
+                # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
+                # Added parent_id and generation as all features profiles that
+                # are created via the UI will be generation 0
+                parent_id = 0
+                generation = 0
+                ionosphere_job = 'learn_fp_human'
                 try:
-                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(requested_timestamp, base_name, context)
+                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation)
+                    if create_feature_profile:
+                        generation_zero = True
                 except:
                     # @modified 20161209 -  - Branch #922: ionosphere
                     #                        Task #1658: Patterning Skyline Ionosphere
@@ -1093,7 +1150,11 @@ def ionosphere():
         fp_details = None
         if fp_view:
             try:
-                fp_details, fp_details_successful, fail_msg, traceback_format_exc = features_profile_details(fp_id)
+                # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
+                # Return the fp_details_object so that webapp can pass the parent_id and
+                # generation to the templates
+                # fp_details, fp_details_successful, fail_msg, traceback_format_exc = features_profile_details(fp_id)
+                fp_details, fp_details_successful, fail_msg, traceback_format_exc, fp_details_object = features_profile_details(fp_id)
             except:
                 # trace = traceback_format_exc
                 trace = traceback.format_exc()
@@ -1109,7 +1170,7 @@ def ionosphere():
             # Added graphite_now_images gimages
             # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
             # Added graphite_matched_images gmimages
-            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
+            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
 
             # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
             # Added the full_duration parameter so that the appropriate graphs can be
@@ -1138,6 +1199,31 @@ def ionosphere():
             # about the metric
             sorted_images = sorted(images)
 
+            # @modified 20170105 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added matched_count and only displaying one graph for each 10
+            # minute period if there are mulitple matches in a 10 minute period
+            # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
+            # Added parent_id and generation
+            par_id = 0
+            gen = 0
+            # Determine the parent_id and generation as they were added to the
+            # fp_details_object
+            if fp_details:
+                try:
+                    par_id = int(fp_details_object['parent_id'])
+                    gen = int(fp_details_object['generation'])
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
+                    return internal_error(message, trace)
+
+            # @added 20170114 -  Feature #1854: Ionosphere learn - generations
+            # The fp_id will be in the fp_details_object, but if this is a
+            # generation zero features profile we what set
+            if generation_zero:
+                par_id = 0
+                gen = 0
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -1153,7 +1239,8 @@ def ionosphere():
                 metric_full_duration_in_hours=m_full_duration_in_hours,
                 metric_second_order_resolution_hours=second_order_resolution_hours,
                 tsfresh_version=TSFRESH_VERSION, graphite_now_images=gimages,
-                graphite_matched_images=gmimages,
+                graphite_matched_images=gmimages, matched_count=times_matched,
+                parent_id=par_id, generation=gen,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

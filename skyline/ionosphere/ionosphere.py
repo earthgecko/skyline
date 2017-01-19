@@ -51,6 +51,12 @@ from database import (
     ionosphere_matched_table_meta)
 from tsfresh_feature_names import TSFRESH_FEATURES
 
+# @added 20170114 - Feature #1854: Ionosphere learn
+# @modified 20170117 - Feature #1854: Ionosphere learn - generations
+# Renamed the function from simple learn to the meme it has become
+# from learn import learn
+from learn import ionosphere_learn
+
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -480,7 +486,7 @@ class Ionosphere(Thread):
 # and bulking up ionosphere.py with more learn parameter to spin_process etc
 # ionosphere.py works, as good as it gets, so extended with learn.py.  This uses
 # the same no memory leak pattern that was adopted for smtp_alerts.
-    def spawn_learn_process(self, i, metric_check_file):
+    def spawn_learn_process(self, i, timestamp):
         """
         Spawn a process to learn.
 
@@ -492,8 +498,10 @@ class Ionosphere(Thread):
         is terminated this prevents any memory leaks in the parent.
 
         """
-
-        learn(metric_check_file)
+        # @modified 20170117 - Feature #1854: Ionosphere learn - generations
+        # Renamed the function from simple learn to the meme it has become
+        # learn(timestamp)
+        ionosphere_learn(timestamp)
 
     def spin_process(self, i, metric_check_file):
         """
@@ -699,6 +707,10 @@ class Ionosphere(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        # @added 20170117 - Feature #1854: Ionosphere learn - generations
+        if str(added_by) == 'ionosphere_learn':
+            logger.info('debug :: metric variable - added_by - %s' % added_by)
+
         try:
             # metric_vars.added_at
             # added_at = str(metric_vars.added_at)
@@ -731,33 +743,38 @@ class Ionosphere(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
-        # @added 20170101 - Feature #1830: Ionosphere alerts
-        # Remove check file is an alert key exists
-        cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
-        last_alert = False
-        try:
-            last_alert = self.redis_conn.get(cache_key)
-        except Exception as e:
-            logger.error('error :: could not query Redis for cache_key: %s' % e)
-        if not last_alert:
-            logger.info('debug :: no alert cache key - %s' % cache_key)
-        else:
-            logger.info('debug :: removing check - alert cache key exists - %s' % cache_key)
-            self.remove_metric_check_file(str(metric_check_file))
-            return
-
-        now = time()
-        anomaly_age = int(now) - int(metric_timestamp)
-        if anomaly_age > max_age_seconds:
-            logger.info(
-                'Ionosphere check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
-                    metric, str(anomaly_age), str(max_age_seconds)))
-            with open(metric_check_file, 'rt') as fr:
-                metric_check_file_contents = fr.readlines()
-                logger.info(
-                    'debug :: metric check file contents\n%s' % (str(metric_check_file_contents)))
+        # @modified 20170116 - Feature #1854: Ionosphere learn
+        # Do not check the cache key or anomaly age if added by ionosphere_learn
+        if added_by != 'ionosphere_learn':
+            # @added 20170101 - Feature #1830: Ionosphere alerts
+            # Remove check file is an alert key exists
+            cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+            last_alert = False
+            try:
+                last_alert = self.redis_conn.get(cache_key)
+            except Exception as e:
+                logger.error('error :: could not query Redis for cache_key: %s' % e)
+            if not last_alert:
+                logger.info('debug :: no alert cache key - %s' % cache_key)
+            else:
+                logger.info('debug :: removing check - alert cache key exists - %s' % cache_key)
                 self.remove_metric_check_file(str(metric_check_file))
                 return
+
+            now = time()
+            anomaly_age = int(now) - int(metric_timestamp)
+            if anomaly_age > max_age_seconds:
+                logger.info(
+                    'Ionosphere check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
+                        metric, str(anomaly_age), str(max_age_seconds)))
+                with open(metric_check_file, 'rt') as fr:
+                    metric_check_file_contents = fr.readlines()
+                    logger.info(
+                        'debug :: metric check file contents\n%s' % (str(metric_check_file_contents)))
+                    self.remove_metric_check_file(str(metric_check_file))
+                    return
+        else:
+            logger.info('processing check_file for ionosphere_learn - %s' % str(metric_check_file))
 
         # @added 20161222 - ionosphere should extract features for every anomaly
         # check that is sent through and calculate a feature_profile ready for
@@ -802,6 +819,13 @@ class Ionosphere(Thread):
 
         metrics_id = None
         metric_ionosphere_enabled = None
+
+        # @added 20170115 - Feature #1854: Ionosphere learn - generations
+        # Create the metrics_db_object so it is available to determine all
+        # the details of all features profiles for the metric, this has all
+        # the generations values avaialble in it.  Here we go! Learn!
+        metrics_db_object = None
+
         try:
             connection = engine.connect()
             # stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))
@@ -810,6 +834,11 @@ class Ionosphere(Thread):
             row = result.fetchone()
             metrics_id = row['id']
             metric_ionosphere_enabled = row['ionosphere_enabled']
+            # @added 20170115 - Feature #1854: Ionosphere learn - generations
+            # Create the metrics_db_object so it is available throughout
+            # Here we go! Learn!
+            metrics_db_object = row
+
             connection.close()
 
             if metric_ionosphere_enabled is not None:
@@ -827,6 +856,27 @@ class Ionosphere(Thread):
             metric_ionosphere_enabled = None
             training_metric = True
             # self.training_metrics.append(base_name)
+
+        # @added 20170116 - Feature #1854: Ionosphere learn - generations
+        # If this is added_by ionosphere_learn the id is only
+        # added if the use_full_duration_days features profile
+        # is less than max_generations as if it is at the max
+        # then a new features profile cannot be created from it
+        # even if it is a match.
+        metric_max_generations = None
+        if added_by == 'ionosphere_learn':
+            try:
+                metric_max_generations = int(metrics_db_object['max_generations'])
+                logger.info('determing max_generations for ionosphere_learn check - %s - %s' % (str(metric_max_generations), base_name))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error ::ionosphere_learn check could not determine the metric max_generations from the metrics_db_object for %s' % base_name)
+            if not metric_max_generations:
+                logger.error('error ::ionosphere_learn check cannot continue without max_generations for %s' % base_name)
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
+                return
 
         # @added 20170108 - Feature #1830: Ionosphere alerts
         # Only process smtp_alerter_metrics
@@ -854,9 +904,36 @@ class Ionosphere(Thread):
         #                   Task #1658: Patterning Skyline Ionosphere
         # Only continue if there is a training data json timeseries file
         metric_timeseries_dir = base_name.replace('.', '/')
-        metric_training_data_dir = '%s/%s/%s' % (
-            settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
-            metric_timeseries_dir)
+
+        # @modified 20170115 - Feature #1854: Ionosphere learn
+        # Allowing the bifurcation of the metric_training_data_dir based on
+        # whether added_by is ionosphere_learn or not, this allows Ionosphere to
+        # be brought online to start evaluating the learn features profiles at
+        # 30 days or whatever the learn_full_duration_days is for the metric
+        # that is being automatically learnt uses these fuller duration features
+        # to determine if a new training data set has been created for an
+        # ionosphere_enabled metric.  Here Ionosphere starts to try and get
+        # clever, let us hope not too clever, but this is where the
+        # max_percent_diff_from_origin and max_generations comes in. So ...
+        # here we go, a really "Crazy feedback loop" @astanway :)  I would say
+        # that this is going to be way more useful than the last referenced one
+        # in https://github.com/etsy/skyline/pull/90#r13592782 ;)  This is it
+        # 20170115202500 UTC Ionosphere really is now really going to begin.
+        # Here we go! Learn!
+        # metric_training_data_dir = '%s/%s/%s' % (
+        #     settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
+        #     metric_timeseries_dir)
+        if added_by != 'ionosphere_learn':
+            metric_training_data_dir = '%s/%s/%s' % (
+                settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
+                metric_timeseries_dir)
+        else:
+            # Here we go! Learn you bugger!  SUCH A BIG THANKS TO tsfresh!
+            # And flowjob and The White Stripes, @matzhouse, her and the Dude.
+            metric_training_data_dir = '%s/%s/%s' % (
+                settings.IONOSPHERE_LEARN_FOLDER, metric_timestamp,
+                metric_timeseries_dir)
+
         anomaly_json = '%s/%s.json' % (metric_training_data_dir, base_name)
         if os.path.isfile(anomaly_json):
             logger.info('training data ts json available - %s' % (anomaly_json))
@@ -950,21 +1027,71 @@ class Ionosphere(Thread):
             # ionosphere.mirage.unique_metrics (NOT at FULL_DURATION)
             all_fp_ids = []
 
+            # @added 20170115 - Feature #1854: Ionosphere learn - generations
+            # Create the fp_ids_db_object so it is available to determine all
+            # the details of all features profiles for the metric, this has all
+            # the generations values avaialble in it.
+            # Here we go! Learn!
+            fp_ids_db_object = None
+
             try:
                 connection = engine.connect()
                 stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
                 result = connection.execute(stmt)
                 for row in result:
+                    # @added 20170116 - Feature #1854: Ionosphere learn
+                    # if a features profiles is not enabled or deleted, skip it
+                    if row['enabled'] != 1:
+                        continue
+                    if row['deleted'] == 1:
+                        continue
+
                     fp_id = row['id']
-                # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
-                # Added all_fp_ids
+
+                    # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
+                    # Added all_fp_ids
                     all_fp_ids.append(int(fp_id))
 
                     if int(row['full_duration']) == int(full_duration):
-                        fp_ids.append(int(fp_id))
-                        logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+                        # @modified 20170116 - Feature #1854: Ionosphere learn - generations
+                        # Handle ionosphere_learn
+                        if added_by != 'ionosphere_learn':
+                            fp_ids.append(int(fp_id))
+                            logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+                        else:
+                            # @added 20170116 - Feature #1854: Ionosphere learn - generations
+                            # If this is added_by ionosphere_learn the id is only
+                            # added if the use_full_duration_days features profile
+                            # is less than max_generations as if it is at the max
+                            # then a new features profile cannot be created from it
+                            # even if it is were to match.  Ionosphere learn is
+                            # limited here on generation.
+                            # Set the default as max e.g. not allowed
+                            try:
+                                current_fp_generation = int(metric_max_generations)
+                                current_fp_generation = row['generation']
+                                if int(current_fp_generation) < int(metric_max_generations):
+                                    fp_ids.append(int(fp_id))
+                                    logger.info(
+                                        'valid ionosphere_learn generation %s - fp id %s matched full_duration %s - %s' % (
+                                            str(current_fp_generation), str(fp_id),
+                                            str(full_duration), base_name))
+                                else:
+                                    logger.info(
+                                        'ionosphere_learn cannot check due to max_generations of %s would be exceeded, current generation %s - fp id %s matched full_duration %s - %s' % (
+                                            str(metric_max_generations), str(current_fp_generation), str(fp_id),
+                                            str(full_duration), base_name))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error(
+                                    'error :: ionosphere_learn check could not determine the fp generation of fp id %s from the row object for %s' % (
+                                        str(fp_id), base_name))
                     else:
                         logger.info('not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+                # @added 20170115 - Feature #1854: Ionosphere learn - generations
+                # Create the fp_ids_db_object so it is available throughout
+                # Here we go! Learn!
+                fp_ids_db_object = row
                 connection.close()
                 fp_count = len(fp_ids)
                 logger.info('determined %s fp ids for %s' % (str(fp_count), base_name))
@@ -974,7 +1101,7 @@ class Ionosphere(Thread):
                 fp_count = 0
 
             if len(fp_ids) == 0:
-                logger.error('error :: there are no fp ids for %s' % base_name)
+                logger.error('error :: there are no fp ids that match full duration for %s' % base_name)
             else:
                 fp_ids_found = True
 
@@ -1001,6 +1128,19 @@ class Ionosphere(Thread):
         if os.path.isfile(calculated_feature_file):
             logger.info('calculated features available - %s' % (calculated_feature_file))
             calculated_feature_file_found = True
+
+        # @added 20170115 - Feature #1854: Ionosphere learn - generations
+        # ionosphere_learn should always provide the features profile csv
+        # Ionosphere does not create features profiles for learn, it only
+        # checks them.
+        # Here we go! Learn!
+        if added_by == 'ionosphere_learn':
+            if not calculated_feature_file_found:
+                logger.error('error :: no ionosphere_learn calculated_feature_file file found - %s' % calculated_feature_file)
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
+                return
 
         if not calculated_feature_file_found:
             if training_metric:
@@ -1211,7 +1351,10 @@ class Ionosphere(Thread):
 
                 if almost_equal:
                     not_anomalous = True
-                    logger.info('common features sums are almost equal, not anomalous' % str(relevant_fp_feature_values_count))
+                    # @modified 20170118 - Bug #1860: Debug learn not matched in ionosphere
+                    # This broke it, no variable was interpolated
+                    # logger.info('common features sums are almost equal, not anomalous' % str(relevant_fp_feature_values_count))
+                    logger.info('common features sums are almost equal, not anomalous')
 
                 # @added 20161229 - Feature #1830: Ionosphere alerts
                 # Update the features profile checked count and time
@@ -1321,14 +1464,66 @@ class Ionosphere(Thread):
                             'error :: could not update ionosphere_matched for %s with with timestamp %s' % (
                                 str(fp_id), str(metric_timestamp)))
 
+                    # @added 20170115 - Feature #1854: Ionosphere learn - generations
+                    # Stop on the first match
+                    break
+
                 # https://docs.scipy.org/doc/numpy/reference/generated/numpy.testing.assert_almost_equal.html
                 # @added 20161214 - Add a between timeframe option, e.g. if
                 # fp match, only see this as not anomalous if hour (and or min)
                 # is between x and y - handle rollovers, cron log archives, etc.
                 logger.info('debug :: %s is a features profile for %s' % (str(fp_id), base_name))
 
+            # @added 20170115 - Feature #1854: Ionosphere learn - generations
+            # If this is an ionosphere_learn check them we handle it before
+            # the others and exit and ionosphere_learn uses the Redis work
+            # queue. Here we go! Learn!
+            if added_by == 'ionosphere_learn':
+                if not_anomalous:
+                    logger.info('an ionosphere_learn metric has been found to be not anomalous before')
+                    logger.info(
+                        'ionosphere_learn metric matches the generation %s features profile id %s - %s' % (
+                            str(current_fp_generation), str(fp_id), base_name))
+                    # Added Redis to work_set, learn will then go off and create
+                    # the features profile with the parent training data if
+                    # less than max_generations, although ionosphere_learn
+                    # should not should Ionosphere any work if the result would
+                    # be greater than max_generations
+                    logger.info('adding work item to Redis set ionosphere.learn.work')
+                    ionosphere_job = 'learn_fp_learnt'
+                    try:
+                        logger.info(
+                            'LEARNT :: adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', %s, %s] to create a learnt features profile' % (
+                                str(ionosphere_job), str(metric_timestamp), base_name,
+                                str(fp_id), str(current_fp_generation)))
+                        self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error(
+                            'error :: failed adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', %s, %s] to make a learn features profile later' % (
+                                str(ionosphere_job), str(metric_timestamp), base_name,
+                                str(fp_id), str(current_fp_generation)))
+
+                # Exit the ionosphere_learn check
+                self.remove_metric_check_file(str(metric_check_file))
+                if engine:
+                    engine_disposal(engine)
+                return
+
             if not not_anomalous:
                 logger.info('anomalous - no feature profiles were matched - %s' % base_name)
+
+                # @added 20170116 - Feature #1854: Ionosphere learn
+                # If this is an ionosphere_learn check an Ionosphere alert will
+                # not be sent back to Analyzer, Mirage or the ionosphere.learn.work
+                # Redis set. We exit, work is done.
+                if added_by == 'ionosphere_learn':
+                    logger.info('ionosphere_learn check complete - %s' % base_name)
+                    self.remove_metric_check_file(str(metric_check_file))
+                    if engine:
+                        engine_disposal(engine)
+                    return
+
                 self.anomalous_metrics.append(base_name)
                 # Send to panorama as Analyzer and Mirage will only alert on the
                 # anomaly, they will not push it to Panorama
@@ -1378,21 +1573,45 @@ class Ionosphere(Thread):
             #     are already created, so just determining ALERTS and firing a
             #     trigger_alert (pull in alerter.py and mirage_alerters.py?)
             #     OR send back to app via Redis
-                cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
-                try:
-                    self.redis_conn.setex(
-                        cache_key, 300,
-                        [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                # @modified 20170116 - Feature #1854: Ionosphere learn
+                # Only do the cache_key if not ionosphere_learn
+                if added_by != 'ionosphere_learn':
+                    cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+                    try:
+                        self.redis_conn.setex(
+                            cache_key, 300,
+                            [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                        logger.info(
+                            'add Redis alert key - %s - [%s, \'%s\', %s, %s]' %
+                            (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
+                                str(triggered_algorithms)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error(
+                            'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s]' %
+                            (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
+                                str(triggered_algorithms)))
+
+                # @added 20170116 - Feature #1854: Ionosphere learn
+                # Added an ionosphere_learn job for the timeseries that did not
+                # match any profiles.  Here we go! Learn!
+                if added_by != 'ionosphere_learn':
+                    ionosphere_job = 'learn_fp_generation'
                     logger.info(
-                        'add Redis alert key - %s - [%s, \'%s\', %s, %s]' %
-                        (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                            str(triggered_algorithms)))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error(
-                        'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s]' %
-                        (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                            str(triggered_algorithms)))
+                        'adding an ionosphere_learn %s job for the timeseries that did not match any profiles - %s' % (
+                            ionosphere_job, base_name))
+                    try:
+                        logger.info(
+                            'adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', None, None] to make a learn features profile later' % (
+                                str(ionosphere_job), str(int(metric_timestamp)),
+                                base_name))
+                        self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error(
+                            'error :: failed adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', None, None] to make a learn features profile later' % (
+                                str(ionosphere_job), str(int(metric_timestamp)),
+                                base_name))
 
                 self.remove_metric_check_file(str(metric_check_file))
                 if engine:
@@ -1480,18 +1699,19 @@ class Ionosphere(Thread):
 
             # @added 20170110 - Feature #1854: Ionosphere learn
             # purge_old_data_dirs learn data
-            try:
-                logger.info('purging any old learning data')
-                self.purge_old_data_dirs(
-                    settings.IONOSPHERE_LEARN_FOLDER,
-                    settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
-            except:
-                logger.error('error :: purge_old_data_dirs learn - %s' % traceback.print_exc())
-                if ENABLE_IONOSPHERE_DEBUG:
-                    logger.info(
-                        'debug :: self.purge_old_data_dirs(%s, %s)' %
+            if settings.IONOSPHERE_LEARN:
+                try:
+                    logger.info('purging any old learning data')
+                    self.purge_old_data_dirs(
                         settings.IONOSPHERE_LEARN_FOLDER,
                         settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                except:
+                    logger.error('error :: purge_old_data_dirs learn - %s' % traceback.print_exc())
+                    if ENABLE_IONOSPHERE_DEBUG:
+                        logger.info(
+                            'debug :: self.purge_old_data_dirs(%s, %s)' %
+                            settings.IONOSPHERE_LEARN_FOLDER,
+                            settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
 
             # self.populate the database metatdata tables
             # What is my host id in the Skyline panorama DB?
@@ -1665,11 +1885,33 @@ class Ionosphere(Thread):
                     self.training_metrics[:] = []
                     self.sent_to_panorama[:] = []
 
+                ionosphere_job = False
+                learn_job = False
+
                 if metric_var_files:
+                    ionosphere_job = True
                     break
 
-            metric_var_files_sorted = sorted(metric_var_files)
-            metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, str(metric_var_files_sorted[0]))
+                # @added 20170113 - Feature #1854: Ionosphere learn
+                # Added the learn variable to spawn a spawn_learn_process when
+                # required.
+                work_queue_items = 0
+                if settings.IONOSPHERE_LEARN:
+                    learn_work = None
+                    try:
+                        learn_work = self.redis_conn.smembers('ionosphere.learn.work')
+                    except Exception as e:
+                        logger.error('error :: could not query Redis for ionosphere.learn.work - %s' % e)
+                    if learn_work:
+                        work_queue_items = len(learn_work)
+                        if work_queue_items > 0:
+                            learn_job = True
+                if learn_job:
+                    break
+
+            if ionosphere_job:
+                metric_var_files_sorted = sorted(metric_var_files)
+                metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, str(metric_var_files_sorted[0]))
 
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics
@@ -1713,15 +1955,23 @@ class Ionosphere(Thread):
             logger.info('smtp_alerter_metrics     :: %s' % str(len(self.ionosphere_smtp_alerter_metrics)))
             logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
 
-            logger.info('processing - %s' % str(metric_var_files_sorted[0]))
+            if ionosphere_job:
+                logger.info('processing - %s' % str(metric_var_files_sorted[0]))
+                function_name = 'spin_process'
 
             # @added 20170109 - Feature #1854: Ionosphere learn
             # Added the learn variable to spawn a spawn_learn_process when
             # required.
-            try:
-                learn = settings.IONOSPHERE_ENABLE_LEARNING
-            except:
-                learn = False
+            # @added 20170112 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+            # Ionosphere learn needs Redis works sets
+            # When a features profile is created there needs to be work added to a Redis
+            # set
+            # When a human makes a features profile, we want Ionosphere to make a
+            # use_full_duration_days features profile valid_learning_duration (e.g.
+            # 3361) later.
+            if learn_job:
+                logger.info('processing - learn work queue - %s' % str(work_queue_items))
+                function_name = 'spawn_learn_process'
 
             # Spawn processes
             pids = []
@@ -1729,17 +1979,40 @@ class Ionosphere(Thread):
             pid_count = 0
             now = time()
             for i in range(1, settings.IONOSPHERE_PROCESSES + 1):
-                try:
-                    p = Process(target=self.spin_process, args=(i, metric_check_file))
-                    pids.append(p)
-                    pid_count += 1
-                    logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(settings.IONOSPHERE_PROCESSES)))
-                    p.start()
-                    spawned_pids.append(p.pid)
-                except:
-                    logger.error('error :: to start spin_process')
-                    logger.info(traceback.format_exc())
-                    continue
+                if ionosphere_job:
+                    try:
+                        p = Process(target=self.spin_process, args=(i, metric_check_file))
+                        pids.append(p)
+                        pid_count += 1
+                        logger.info(
+                            'starting %s of %s %s' % (
+                                str(pid_count),
+                                str(settings.IONOSPHERE_PROCESSES),
+                                function_name))
+                        p.start()
+                        spawned_pids.append(p.pid)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to start %s' % function_name)
+                        continue
+
+                # @added 20170113 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+                if learn_job:
+                    try:
+                        p = Process(target=self.spawn_learn_process, args=(i, int(now)))
+                        pids.append(p)
+                        pid_count += 1
+                        logger.info(
+                            'starting %s of %s %s' % (
+                                str(pid_count),
+                                str(settings.IONOSPHERE_PROCESSES),
+                                function_name))
+                        p.start()
+                        spawned_pids.append(p.pid)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to start %s' % function_name)
+                        continue
 
             # Self monitor processes and terminate if any spin_process has run
             # for to long
@@ -1752,44 +2025,45 @@ class Ionosphere(Thread):
                     # All the processes are done, break now.
                     time_to_run = time() - p_starts
                     logger.info(
-                        '%s :: %s spin_process/es completed in %.2f seconds' % (
-                            skyline_app, str(settings.IONOSPHERE_PROCESSES),
-                            time_to_run))
+                        '%s %s completed in %.2f seconds' % (
+                            str(settings.IONOSPHERE_PROCESSES),
+                            function_name, time_to_run))
                     break
             else:
                 # We only enter this if we didn't 'break' above.
-                logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
+                logger.info('timed out, killing all %s processes' % (function_name))
                 for p in pids:
                     try:
                         p.terminate()
                         # p.join()
-                        logger.info('%s :: killed spin_process process' % (skyline_app))
+                        logger.info('killed %s process' % (function_name))
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: killing all spin_process processes')
+                        logger.error('error :: killing all %s processes' % function_name)
 
-                check_file_name = os.path.basename(str(metric_check_file))
-                if settings.ENABLE_IONOSPHERE_DEBUG:
-                    logger.info('debug :: check_file_name - %s' % check_file_name)
-                check_file_timestamp = check_file_name.split('.', 1)[0]
-                if settings.ENABLE_IONOSPHERE_DEBUG:
-                    logger.info('debug :: check_file_timestamp - %s' % str(check_file_timestamp))
-                check_file_metricname_txt = check_file_name.split('.', 1)[1]
-                if settings.ENABLE_IONOSPHERE_DEBUG:
-                    logger.info('debug :: check_file_metricname_txt - %s' % check_file_metricname_txt)
-                check_file_metricname = check_file_metricname_txt.replace('.txt', '')
-                if settings.ENABLE_IONOSPHERE_DEBUG:
-                    logger.info('debug :: check_file_metricname - %s' % check_file_metricname)
-                check_file_metricname_dir = check_file_metricname.replace('.', '/')
-                if settings.ENABLE_IONOSPHERE_DEBUG:
-                    logger.info('debug :: check_file_metricname_dir - %s' % check_file_metricname_dir)
+                if ionosphere_job:
+                    check_file_name = os.path.basename(str(metric_check_file))
+                    if settings.ENABLE_IONOSPHERE_DEBUG:
+                        logger.info('debug :: check_file_name - %s' % check_file_name)
+                    check_file_timestamp = check_file_name.split('.', 1)[0]
+                    if settings.ENABLE_IONOSPHERE_DEBUG:
+                        logger.info('debug :: check_file_timestamp - %s' % str(check_file_timestamp))
+                    check_file_metricname_txt = check_file_name.split('.', 1)[1]
+                    if settings.ENABLE_IONOSPHERE_DEBUG:
+                        logger.info('debug :: check_file_metricname_txt - %s' % check_file_metricname_txt)
+                    check_file_metricname = check_file_metricname_txt.replace('.txt', '')
+                    if settings.ENABLE_IONOSPHERE_DEBUG:
+                        logger.info('debug :: check_file_metricname - %s' % check_file_metricname)
+                    check_file_metricname_dir = check_file_metricname.replace('.', '/')
+                    if settings.ENABLE_IONOSPHERE_DEBUG:
+                        logger.info('debug :: check_file_metricname_dir - %s' % check_file_metricname_dir)
 
-                metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
-                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                    metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
+                    fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
 
             for p in pids:
                 if p.is_alive():
-                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    logger.info('stopping %s - %s' % (function_name, str(p.is_alive())))
                     p.join()
 
             # @added 20170108 - Feature #1830: Ionosphere alerts

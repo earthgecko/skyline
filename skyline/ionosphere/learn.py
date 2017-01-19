@@ -1,7 +1,7 @@
 from __future__ import division
 import logging
 import os
-from os import kill, getpid, listdir
+from os import getpid, listdir
 from os.path import join, isfile
 from sys import version_info
 from time import time, sleep
@@ -9,25 +9,23 @@ from time import time, sleep
 import re
 import csv
 from ast import literal_eval
+import shutil
+import glob
+import sys
 
 from redis import StrictRedis
-# from msgpack import Unpacker, packb
 import traceback
 import mysql.connector
 from mysql.connector import errorcode
 
 from sqlalchemy.sql import select
-# import requests
-# from requests.auth import HTTPBasicAuth
 
-# To match the new order introduced via the test_tsfresh method
 import numpy as np
-# import pandas as pd
 
 import settings
 from skyline_functions import (
     fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p,
-    get_graphite_metric)
+    get_graphite_metric, send_anomalous_metric_to)
 
 from features_profile import calculate_features_profile
 
@@ -35,6 +33,9 @@ from database import (
     get_engine, ionosphere_table_meta, metrics_table_meta,
     ionosphere_matched_table_meta)
 from tsfresh_feature_names import TSFRESH_FEATURES
+
+# @added 2017014 - Feature #1854: Ionosphere learn
+from ionosphere_functions import create_features_profile
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -63,9 +64,12 @@ except:
     SERVER_METRIC_PATH = ''
 
 try:
-    learn_full_duration = int(settings.IONOSPHERE_DEFAULT_LEARN_FULL_DURATION_DAYS) * 86400
+    learn_full_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS) * 86400
 except:
     learn_full_duration = 86400 * 30  # 2592000
+
+redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+context = 'ionosphere_learn'
 
 
 def learn_load_metric_vars(metric_vars_file):
@@ -79,6 +83,7 @@ def learn_load_metric_vars(metric_vars_file):
 
     """
 
+    logger = logging.getLogger(skyline_app_logger)
     if os.path.isfile(metric_vars_file):
         logger.info(
             'learn :: loading metric variables from metric_check_file - %s' % (
@@ -152,19 +157,21 @@ def learn_load_metric_vars(metric_vars_file):
 
 def get_learn_json(
         learn_json_file, base_name, use_full_duration, metric_timestamp,
-        use_full_duration_days):
+        learn_full_duration_days):
     """
     Called by :func:`~learn` to surface a use_full_duration timeseries for the
     metric from Graphite and save as json.
 
     """
+    logger = logging.getLogger(skyline_app_logger)
     ts_json = None
     try:
-        get_from_timestamp = int(metric_timestamp) - int(use_full_duration)
+        from_timestamp = int(metric_timestamp) - int(use_full_duration)
+        until_timestamp = int(metric_timestamp)
         logger.info(
             'learn :: getting Graphite timeseries json at %s days - from_timestamp - %s, until_timestamp - %s' %
-            (str(use_full_duration_days), str(from_timestamp),
-                str(until_timestamp)))
+            (str(learn_full_duration_days), str(from_timestamp),
+                str(metric_timestamp)))
         ts_json = get_graphite_metric(
             skyline_app, base_name, from_timestamp, until_timestamp, 'json',
             learn_json_file)
@@ -175,26 +182,20 @@ def get_learn_json(
     return ts_json
 
 
-def learn_features(learn_json_file):
+def get_metric_from_metrics(base_name, engine):
     """
-    Called by :func:`~learn` to extract the features from the use_full_duration
-    json timeseries
+    Called by :func:`~learn` and returns the metric id and metric db object
 
+    :param timestamp: timestamp at which learn was called
+    :type timestamp: int
+    :return: tuple
+    :rtype: (int, object)
 
-    """
-
-    learn_features_file = learn_features(learn_json_file, use_full_duration, metric_timestamp)
-    calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
-
-    return
-
-
-def get_metric_id(base_name, engine):
-    """
-    Called by :func:`~learn` and returns the metric id
     """
 
+    logger = logging.getLogger(skyline_app_logger)
     metrics_id = 0
+    metric_db_object = None
 
     # Get the metrics_table metadata
     metrics_table = None
@@ -211,6 +212,7 @@ def get_metric_id(base_name, engine):
         stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
         result = connection.execute(stmt)
         row = result.fetchone()
+        metric_db_object = row
         metrics_id = row['id']
         connection.close()
     except:
@@ -218,17 +220,19 @@ def get_metric_id(base_name, engine):
         logger.error('error :: learn :: could not determine id from metrics table for - %s' % base_name)
         return False
 
-    return metrics_id
+    return metrics_id, metric_db_object
 
 
-def get_learning_fp_ids(base_name, metrics_id, use_full_duration, engine):
+# @added 20170117 - Feature #1854: Ionosphere learn - learn_fp_learnt
+# To determine origin fp features sum
+def get_ionosphere_fp_ids(base_name, metrics_id, engine):
     """
-    Called by :func:`~learn` and returns a list of learn 30 day feature_profile
-    ids.
+    Called by :func:`~learn` and returns the fp_ids list
 
     """
 
-    learn_fp_ids = []
+    logger = logging.getLogger(skyline_app_logger)
+    fp_ids = []
 
     try:
         ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
@@ -237,308 +241,1007 @@ def get_learning_fp_ids(base_name, metrics_id, use_full_duration, engine):
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: learn :: failed to get ionosphere_table meta for %s' % base_name)
-        return learn_fp_ids
+        return fp_ids
 
     try:
         connection = engine.connect()
         stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
-        result = connection.execute(stmt)
-        for row in result:
-            fp_id = row['id']
-            if int(row['full_duration']) == int(use_full_duration):
-                learn_fp_ids.append(int(fp_id))
-                logger.info('learn :: using fp id %s matched full_duration %s - %s' % (str(fp_id), str(use_full_duration), base_name))
-            else:
-                logger.info('learn :: not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(use_full_duration), base_name))
+        results = connection.execute(stmt)
+        for row in results:
+            fp_ids.append(row['id'])
         connection.close()
-        learn_fp_count = len(learn_fp_ids)
-        logger.info('learn :: determined %s learn fp ids for %s' % (str(fp_count), base_name))
+        fp_ids_count = len(fp_ids)
+        logger.info('learn :: detemined %s fp ids for %s' % (str(fp_ids_count), base_name))
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: could not determine learn fp ids from DB for %s' % base_name)
+        logger.error('error :: could not get the fp_ids_db_object_count from the DB for %s' % base_name)
 
-    return learn_fp_ids
+    return fp_ids
 
 
-def learn(metric_check_file):
+# @added 20170114 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+def get_ionosphere_record(fp_id, engine):
+    """
+    Called by :func:`~learn` and returns the fp row object
+
+    """
+
+    logger = logging.getLogger(skyline_app_logger)
+    row = None
+
+    try:
+        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: learn :: failed to get ionosphere_table meta for %s' % base_name)
+        return row
+
+    try:
+        connection = engine.connect()
+        stmt = select([ionosphere_table]).where(ionosphere_table.c.id == fp_id)
+        result = connection.execute(stmt)
+        row = result.fetchone()
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not get the fp_ids_db_object_count from the DB for %s' % base_name)
+
+    return row
+
+# @added 20170114 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+# Make a reusable function to remove the work from the Redis set
+
+
+def remove_work_list_from_redis_set(learn_metric_list):
+    """
+    Called by :func:`~learn` to remove a work item from the Redis set
+
+    """
+
+    logger = logging.getLogger(skyline_app_logger)
+    work_set = 'ionosphere.learn.work'
+    try:
+        redis_conn.srem(work_set, learn_metric_list)
+        logger.info('learn :: removed work item - %s - from Redis set - %s' % (str(learn_metric_list), work_set))
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: learn :: failed to remove work item list from Redis set - %s' % work_set)
+        return False
+
+    return True
+
+# @modified 20170113 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+# Added work deadlines and changed to learn.py understanding and mangaing its
+# own work queue so that anything can just queue work to learn.  Under this
+# methodolgy, learn will run every minute if there is work in its queue that
+# is nearing deadline, let us add and do some real-time computing
+
+
+# def learn(metric_check_file):
+# @modified 20170117 - Feature #1854: Ionosphere learn - generations
+# Renamed the function from simple learn to the meme it has become
+# learn(timestamp)
+# def learn(timestamp):
+def ionosphere_learn(timestamp):
+
     """
     Called by :class:`~skyline.skyline.Ionosphere.spawn_learn_process` to
-    re-evaluate anomalies
+    re-evaluate anomalies and such, like creating learning features profiles,
+    when a human makes a features profile and the automated creation of learnt
+    features profiles and learn features profiles.
 
-    :param metric_check_file: the path and filename
-    :type metric_check_file: str
+    :param timestamp: timestamp at which learn was called
+    :type timestamp: int
+    :return: True or False
+    :rtype: boolean
+
+    learn uses a Redis set as a work queue.  This set is populated with the
+    learn jobs, jobs being pieces of work that learn needs to do.  The learn
+    Redis work set list item has the following elements:
+
+    ``[str(deadline_type), str(job_type), int(metric_timestamp), str(base_name), int(parent_id), int(generation)]``
+
+    Each job_type has a deadline_time that learn calculates from the job_type
+
+    ionosphere.learn.work deadlines - deadline_types
+
+    - Hard - missing a deadline is a total system failure.
+    - Firm - infrequent deadline misses are tolerable, but may degrade the
+      system's quality of service. The usefulness of a result is zero after
+      its deadline.
+    - Soft - the usefulness of a result degrades after its deadline, thereby
+      degrading the system's quality of service.
+
+    references:
+
+    - Brian L. Troutwine @bltroutwine - seminal Belgium 2014 devopsdays
+      presentation - Automation with Humans in Mind: Making Complex Systems Predictable, Reliable and Humane -
+      https://legacy.devopsdays.org/events/2014-belgium/proposals/automation-with-humans-in-mind/ -
+      video - http://www.ustream.tv/recorded/54703629
+    - https://en.wikipedia.org/wiki/Real-time_computing#Criteria_for_real-time_computing
+
+    learn work types:
+
+    - **learn_fp_human** - Create a features profile for the human created features profile
+      after ``LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS`` at ``LEARN_FULL_DURATION_DAYS``
+      whatever those maybe it, will find out.  Copy the training_data dir to
+      :mod:`settings.IONOSPHERE_LEARN_FOLDER` and the metric_check_file is rewritten
+      with the determined (``LEARN_FULL_DURATION_DAYS`` * 86400) as the new
+      full_duration.  Then this features profile is created as a generation 0
+      features profile at the learn use_full_duration seconds.  This jobs is
+      only ever add via the Ionosphere UI
+      `~skyline.skyline.Webapp.ionosphere_backend.create_features_profile`
+      TODO: now_timestamp/ where the now_timestamp relaces the metric_timestamp
+      context and as the metric_check_file has been replaced and this features
+      profile was created later.  This prevents the pollution of metric_timestamp
+      training data features profile.  This is a new features profile.  Is it
+      generation 0 or generation 1?  The more I think I am edging to generation
+      1, however as long as the first automated full_duration profiles that they
+      create are generation 1 as well... hmm the generation game... TDB
+      - deadline: 'Soft'
+
+    - **learn_fp_automatic** - Create a features profile for the automatic
+      created features profile as per the learn_fp_human above.
+      - deadline: 'Soft'
+
+    - **learn_fp_generation** - Create a features profile for the Ionosphere
+      training_data metric after ``LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS`` at
+      ``LEARN_FULL_DURATION_DAYS`` have passed and compare to other known
+      ``LEARN_FULL_DURATION_DAYS`` features profiles.  If it matches any, then the
+      metric training_data is added as features profile incremented by 1
+      generation if ``MAX_GENERATIONS`` is not breached.
+      - deadline: 'Soft'
+
+    - **learn_fp_learnt** - Create a features profile for the Ionosphere learnt
+      features profile after ``LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS`` at ``LEARN_FULL_DURATION_DAYS``
+      whatever those maybe it, will find out.  Copies the training_data dir to
+      :mod:`settings.IONOSPHERE_LEARN_FOLDER`/now_timestamp/ where the now_timestamp
+      relaces the metric_timestamp context and the metric_check_file has the
+      full_duration replace by the relevant use_full_duration.  Then this
+      features profile is created as an incremented generation features profile
+      at use_full_duration via learn.
+      - deadline: 'Soft'
 
     """
-
+    logger = logging.getLogger(skyline_app_logger)
     child_process_pid = os.getpid()
     logger.info('learn :: child_process_pid - %s' % str(child_process_pid))
-    logger.info('learn :: processing metric check - %s' % metric_check_file)
 
-    if not os.path.isfile(str(metric_check_file)):
-        logger.error('error :: learn :: file not found - metric_check_file - %s' % (str(metric_check_file)))
-        return False
+    def learn_get_an_engine():
 
-    check_file_name = os.path.basename(str(metric_check_file))
-    if settings.ENABLE_IONOSPHERE_DEBUG:
-        logger.info('debug :: learn :: check_file_name - %s' % check_file_name)
-    check_file_timestamp = check_file_name.split('.', 1)[0]
-    if settings.ENABLE_IONOSPHERE_DEBUG:
-        logger.info('debug :: learn :: check_file_timestamp - %s' % str(check_file_timestamp))
-    check_file_metricname_txt = check_file_name.split('.', 1)[1]
-    if settings.ENABLE_IONOSPHERE_DEBUG:
-        logger.info('debug :: learn :: check_file_metricname_txt - %s' % check_file_metricname_txt)
-    check_file_metricname = check_file_metricname_txt.replace('.txt', '')
-    if settings.ENABLE_IONOSPHERE_DEBUG:
-        logger.info('debug :: learn :: check_file_metricname - %s' % check_file_metricname)
-    check_file_metricname_dir = check_file_metricname.replace('.', '/')
-    if settings.ENABLE_IONOSPHERE_DEBUG:
-        logger.info('debug :: learn :: check_file_metricname_dir - %s' % check_file_metricname_dir)
-
-    if settings.ENABLE_IONOSPHERE_DEBUG:
-        logger.info('debug :: learn :: failed_check_file - %s' % failed_check_file)
-
-    metric_vars_array = None
-    try:
-        metric_vars_array = learn_load_metric_vars(str(metric_check_file))
-    except:
-        logger.info(traceback.format_exc())
-        logger.error('error :: learn :: failed to load metric variables from check file - %s' % (metric_check_file))
-        return False
-
-    if not metric_vars_array:
-        logger.error('error :: learn :: no metric_vars_array available from check file - %s' % (metric_check_file))
-        return False
-
-    # Test metric variables
-    # We use a pythonic methodology to test if the variables are defined,
-    # this ensures that if any of the variables are not set for some reason
-    # we can handle unexpected data or situations gracefully and try and
-    # ensure that the process does not hang.
-    metric = None
-    try:
-        key = 'metric'
-        value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
-        metric = str(value_list[0])
-        base_name = metric
-        if settings.ENABLE_IONOSPHERE_DEBUG:
-            logger.info('debug :: learn :: metric variable - metric - %s' % metric)
-    except:
-        logger.info(traceback.format_exc())
-        logger.error('error :: learn :: failed to read metric variable from check file - %s' % (metric_check_file))
-        metric = None
-
-    if not metric:
-        logger.error('error :: learn :: failed to load metric variable from check file - %s' % (metric_check_file))
-        return False
-
-    from_timestamp = None
-    try:
-        key = 'from_timestamp'
-        value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
-        from_timestamp = int(value_list[0])
-        if settings.ENABLE_IONOSPHERE_DEBUG:
-            logger.info('debug :: learn :: metric variable - from_timestamp - %s' % from_timestamp)
-    except:
-        logger.info(traceback.format_exc())
-        logger.error('error :: learn :: failed to read from_timestamp variable from check file - %s' % (metric_check_file))
-        return False
-
-    if not from_timestamp:
-        logger.error('error :: learn :: failed to load from_timestamp variable from check file - %s' % (metric_check_file))
-        return False
-
-    metric_timestamp = None
-    try:
-        key = 'metric_timestamp'
-        value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
-        metric_timestamp = int(value_list[0])
-        if settings.ENABLE_IONOSPHERE_DEBUG:
-            logger.info('debug :: learn :: metric variable - metric_timestamp - %s' % metric_timestamp)
-    except:
-        logger.info(traceback.format_exc())
-        logger.error('error :: learn :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
-        metric_timestamp = None
-
-    if not metric_timestamp:
-        logger.error('error :: learn :: failed to load metric_timestamp variable from check file - %s' % (metric_check_file))
-        return False
-
-    try:
-        key = 'added_at'
-        value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
-        added_at = int(value_list[0])
-        if settings.ENABLE_IONOSPHERE_DEBUG:
-            logger.info('debug :: learn :: metric variable - added_at - %s' % added_at)
-    except:
-        logger.error('error :: learn :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
-        added_at = metric_timestamp
-
-    full_duration = None
-    try:
-        key = 'full_duration'
-        value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
-        full_duration = int(value_list[0])
-        if settings.ENABLE_IONOSPHERE_DEBUG:
-            logger.info('debug :: learn :: metric variable - full_duration - %s' % full_duration)
-    except:
-        logger.error('error :: learn :: failed to read full_duration variable from check file - %s' % (metric_check_file))
-        full_duration = None
-
-    if not full_duration:
-        return False
-
-    # The metric variables now known so we can process the metric
-    # Determine if the metric namespace has a configured specific
-    # LEARN_FULL_DURATION_DAYS and LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS
-    use_full_duration = learn_full_duration
-    valid_learning_duration = int(settings.IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS)
-    use_full_duration_days = int(int(valid_learning_duration) / 86400)
-    for namespace_config in settings.IONOSPHERE_LEARNING_NAMESPACE_CONFIG:
-        NAMESPACE_MATCH_PATTERN = str(namespace_config[0])
-        METRIC_PATTERN = base_name
-        pattern_match = False
         try:
-            # Match by regex
-            namespace_match_pattern = re.compile(NAMESPACE_MATCH_PATTERN)
-            pattern_match = namespace_match_pattern.match(base_name)
-            if pattern_match:
+            engine, fail_msg, trace = get_engine(skyline_app)
+            return engine, fail_msg, trace
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: learn :: get_an_engine :: failed to get MySQL engine'
+            logger.error('%s' % fail_msg)
+            return None, fail_msg, trace
+
+    def learn_engine_disposal(engine):
+        try:
+            if engine:
                 try:
-                    use_full_duration_days = int(namespace_config[1])
-                    use_full_duration = int(namespace_config[1]) * 86400
-                    valid_learning_duration = int(namespace_config[2])
-                    logger.info('learn :: %s matches %s' % (base_name, str(namespace_config)))
-                    break
+                    engine.dispose()
+                    logger.info('learn :: MySQL engine disposed of')
+                    return True
                 except:
-                    pattern_match = False
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: calling engine.dispose()')
+            else:
+                logger.info('learn :: no MySQL engine to dispose of')
+                return True
         except:
-            pattern_match = False
-        if not pattern_match:
-            # Match by substring
-            if str(namespace_config[0]) in base_name:
-                try:
-                    use_full_duration_days = int(namespace_config[1])
-                    use_full_duration = int(namespace_config[1]) * 86400
-                    logger.info('learn :: %s matches %s' % (base_name, str(namespace_config[0])))
-                    break
-                except:
-                    pattern_match = False
-        if not pattern_match:
-            logger.info('learn :: no specific namespace full_duration found, using default')
-    logger.info('learn :: use_full_duration - %s seconds' % (str(use_full_duration)))
-
-    # Is a valid_learning_timeseries, a valid timeseries is older than
-    # settings.IONOSPHERE_DEFAULT_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS or a
-    # matched IONOSPHERE_LEARNING_NAMESPACE_CONFIG LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS
-    valid_learning_timeseries = False
-    now = int(time())
-    timeseries_age = now - int(metric_timestamp)
-    if int(valid_learning_duration) < timeseries_age:
-        logger.info(
-            'learn :: the timeseries is only %s seconds old, the valid age for this timeseries is %s - %s' %
-            (str(timeseries_age), str(valid_learning_duration),
-                metric_check_file))
+            return False
         return False
 
-    # To ensure that the IONOSPHERE_DATA_FOLDER is not populated and learn
-    # namespace resources do not conflict with any training dataa resources a
-    # learn directory is created? As the new use_full_duration_days transposed
-    # csv will overwrite the training data transposed csv
-    # TODO
-    # Create learn dir and copy check file?
-    # Make learn dir /opt/skyline/ionosphere/learn/ where s/data/learn/ ?
-    # hmmm calculate_features_profile is going to populate the training data dir
-    # useless it is handled in features_profiles.py under a new context, messy.
+    # @added 20170112 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+    # Ionosphere learn needs Redis works sets
+    # When a features profile is created there needs to be work added to a Redis
+    # set
+    # When a human makes a features profile, we want Ionosphere to make a
+    # use_full_duration_days features profile valid_learning_duration (e.g.
+    # 3361) later. Jack White style Redis work queue why not?  A departure from
+    # check files the normal check files method, but this is fairly lite weight
+    # in Redis terms.
+    # @added 20170113 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
+    # work_set and work deadlines
+    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    work_set = 'ionosphere.learn.work'
+    learn_work = None
+    try:
+        learn_work = redis_conn.smembers(work_set)
+        logger.info('learn :: got Redis %s set' % work_set)
+    except Exception as e:
+        logger.error('error :: learn :: could not query Redis for ionosphere.learn.work - %s' % (work_set, e))
 
-    # Create a learn json data
-    got_learn_json = False
-    metric_timeseries_dir = base_name.replace('.', '/')
-    # TODO
-    metric_learn_data_dir = '%s/%s/%s' % (
-        str(settings.IONOSPHERE_LEARN_FOLDER), metric_timestamp,
-        metric_timeseries_dir)
-    if not os.path.exists(metric_learn_data_dir):
-        mkdir_p(metric_learn_data_dir)
-    learn_metric_check_file = '%s/%s' % (metric_learn_data_dir, check_file_name)
-    if not os.path.isfile(learn_metric_check_file):
-        # TODO - write a new metric check file with the use_full_duration?
-        lines = []
-        try:
-            logger.info('learn :: reading metric_check_file to replace full_duration - %s' % metric_check_file)
-            with open(metric_check_file) as fr:
-                for line in fr:
-                    if 'full_duration' in line:
-                        line = line.replace(str(full_duration), str(use_full_duration))
-                    lines.append(line)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: learn :: failed to read metric_check_file')
+    if not learn_work:
+        logger.info('learn :: no work ready to be done')
+        return
 
-        try:
-            logger.info('learn :: writing learn_metric_check_file to replace full_duration - %s' % learn_metric_check_file)
-            with open(learn_metric_check_file, 'w') as outfile:
-                for line in lines:
-                    outfile.write(line)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: learn :: failed to write learn_metric_check_file')
+    work_items_todo = len(learn_work)
 
-    if not os.path.isfile(learn_metric_check_file):
-        return False
-
-    learn_json_file = '%s/%s.json' % (metric_learn_data_dir, base_name)
-    if os.path.isfile(learn_json_file):
-        logger.info('learn :: learning data ts json available - %s' % (learn_json_file))
-        got_learn_json = True
+    if work_items_todo == 0:
+        logger.info('learn :: no work do')
+        return
     else:
+        logger.info('learn :: work items in queue - %s' % str(work_items_todo))
+
+    for index, ionosphere_learn_work in enumerate(learn_work):
         try:
-            logger.info('learn :: need learning data ts json from Graphite - %s' % (learn_json_file))
-            got_learn_json = learn_json(
-                learn_json_file, base_name, use_full_duration, metric_timestamp,
-                use_full_duration_days)
+            learn_metric_list = literal_eval(ionosphere_learn_work)
+            deadline = str(learn_metric_list[0])
+            work = str(learn_metric_list[1])
+            learn_metric_timestamp = int(learn_metric_list[2])
+            learn_base_name = str(learn_metric_list[3])
+            if str(work) != 'learn_fp_generation':
+                learn_parent_id = int(learn_metric_list[4])
+                learn_generation = int(learn_metric_list[5])
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: learn :: learn_json call failed')
-            got_learn_json = False
+            logger.error('error :: learn :: could not determine details from work item')
+            continue
 
-    if not got_learn_json:
-        logger.error(
-            'error :: learn :: failed to get timeseries json from Graphite for %s at %s second for anomaly at %s' %
-            (base_name, str(use_full_duration), str(metric_timestamp)))
-        return False
+        logger.info('learn :: checking work item - %s' % (str(learn_metric_list)))
 
-    # Calculate the features and a features profile for the learn_json_file
-    fp_csv = None
-    if got_learn_json:
-        learn_features_file = learn_features(learn_json_file, use_full_duration, metric_timestamp)
-        calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
-        f_calc = None
-        if not calculated_feature_file_found:
+        # The metric learn work variables now known so we can process the metric
+        # Determine the metric details from the database
+        metrics_id = None
+        metric_db_object = None
+        engine = None
+        # Get a MySQL engine
+        try:
+            engine, log_msg, trace = learn_get_an_engine()
+            logger.info('learn :: %s' % log_msg)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: learn :: could not get a MySQL engine to get metric_db_object')
+
+        if not engine:
+            logger.error('error :: learn :: engine not obtained to get metric_db_object')
+            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+            continue
+
+        try:
+            metrics_id, metric_db_object = get_metric_from_metrics(learn_base_name, engine)
+            learn_engine_disposal(engine)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: learn :: failed get the metric details from the database')
+            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+
+        if not metrics_id:
+            logger.error('error :: learn :: failed get the metrics_id from the database')
+            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+            learn_engine_disposal(engine)
+            continue
+
+        if not metric_db_object:
+            logger.error('error :: learn :: failed get the metric_db_object from the database')
+            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+            learn_engine_disposal(engine)
+            continue
+
+        learn_valid_ts_older_than = None
+        try:
+            _learn_valid_ts_older_than = metric_db_object['learn_valid_ts_older_than']
+            learn_valid_ts_older_than = int(_learn_valid_ts_older_than)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: learn :: failed get the determine the learn_valid_ts_older_than from the metric_db_object')
+            use_full_duration = None
+        if not learn_valid_ts_older_than:
+            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+            learn_engine_disposal(engine)
+            continue
+
+        time_check = int(time())
+        work_age = time_check - int(learn_metric_timestamp)
+        if work_age < int(learn_valid_ts_older_than):
+            logger.info('learn :: this work is not ready')
+            continue
+        else:
+            logger.info('learn :: this work is ready - work_age - %s' % str(work_age))
+
+        logger.info('learn :: processing %s for %s - %s' % (work, learn_base_name, str(learn_metric_list)))
+
+        # First learn checks if the metric_training_data_dir exists, if it does not
+        # there is nothing to learn with.
+        metric_timeseries_dir = learn_base_name.replace('.', '/')
+        metric_training_data_dir = '%s/%s/%s' % (
+            str(settings.IONOSPHERE_DATA_FOLDER), str(learn_metric_timestamp),
+            metric_timeseries_dir)
+        if not os.path.exists(metric_training_data_dir):
+            logger.info('learn :: cannot process as the training data directory no longer exists - %s' % (metric_training_data_dir))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+        else:
+            logger.info('learn :: metric_training_data_dir exists - %s' % (metric_training_data_dir))
+
+        # If a learning directory does not exist, create it and populate it with the
+        # training data directory image files and the check file, this is required
+        # to ensure that the IONOSPHERE_DATA_FOLDER is not polluted and learn
+        # namespace resources do not conflict with any training data resources a
+        # learn directory is created.  As otherwise the new use_full_duration_days
+        # transposed csv would overwrite the training data transposed csv
+        if str(work) != 'learn_fp_learnt':
+            metric_learn_data_dir = '%s/%s/%s' % (
+                str(settings.IONOSPHERE_LEARN_FOLDER), str(learn_metric_timestamp),
+                metric_timeseries_dir)
+        else:
+            metric_learn_data_dir = '%s/%s/%s' % (
+                str(settings.IONOSPHERE_DATA_FOLDER), str(learn_metric_timestamp),
+                metric_timeseries_dir)
+
+        original_metric_check_file = '%s/%s.txt' % (metric_training_data_dir, learn_base_name)
+        metric_check_file = '%s/%s.txt' % (metric_learn_data_dir, learn_base_name)
+
+        if not os.path.exists(metric_learn_data_dir):
             try:
-                fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
+                mkdir_p(metric_learn_data_dir)
+                logger.info('learn :: learning data dir created - %s' % metric_learn_data_dir)
+            except:
+                logger.error('error :: learn :: failed to create learning data dir - %s' % metric_learn_data_dir)
 
-    # Get a MySQL engine
-    try:
-        engine, log_msg, trace = get_an_engine()
-        logger.info('learn :: %s' % log_msg)
-    except:
-        logger.error(traceback.format_exc())
-        logger.error('error :: learn :: could not get a MySQL engine to determine learning fp ids')
+        if not os.path.isfile(metric_check_file):
+            try:
+                # @modified 20170117 - Feature #1854: Ionosphere learn
+                # This is causing a bug where if the check file or dir is
+                # present shutil is creating a dir with the full learn/opt/skyline
+                # path. TODO: fixed DONE
+                # shutil.copy(original_metric_check_file, metric_learn_data_dir)
+                lines = []
+                try:
+                    logger.info('learn :: reading original_metric_check_file to metric_check_file - %s' % metric_check_file)
+                    with open(original_metric_check_file) as fr:
+                        for line in fr:
+                            lines.append(line)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: failed to read original_metric_check_file' % original_metric_check_file)
+                try:
+                    logger.info('learn :: writing metric_check_file - %s' % metric_check_file)
+                    with open(metric_check_file, 'w') as outfile:
+                        for line in lines:
+                            outfile.write(line)
+                    logger.info('learn :: created metric_check_file from training data - %s' % (original_metric_check_file))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: failed to write metric_check_file')
+            # except shutil.Error as e:
+            #    trace = traceback.format_exc()
+            #    logger.error('%s' % trace)
+            #    logger.error('error :: learn :: shutil error - training data not copied to %s' % metric_learn_data_dir)
+            #    logger.error('error :: learn :: %s' % (e))
+            # # Any error saying that the directory doesn't exist
+            # except OSError as e:
+            #    trace = traceback.format_exc()
+            #    logger.error('%s' % trace)
+            #    logger.error('error :: learn :: OSError error - training data not copied to %s' % metric_learn_data_dir)
+            #    logger.error('error :: %s' % (e))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: failed to write the metric_check_file')
 
-    if not engine:
-        logger.error('error :: learn :: engine not obtained to determine learning fp ids')
-        return False
+        if str(work) != 'learn_fp_learnt':
+            if os.path.isdir(metric_learn_data_dir):
+                data_files = []
+                try:
+                    glob_path = '%s/*.*' % metric_training_data_dir
+                    data_files = glob.glob(glob_path)
+                except:
+                    trace = traceback.format_exc()
+                    logger.error('%s' % trace)
+                    logger.error('error :: learn :: glob training data not copied to %s' % metric_learn_data_dir)
 
-    metrics_id = None
-    if fp_csv:
-        metrics_id = get_metric_id(base_name, engine)
+                for i_file in data_files:
+                    # Only copy images, no data
+                    if i_file.endswith('.png'):
+                        copying_filename = os.path.basename(i_file)
+                        dest_file = '%s/%s' % (metric_learn_data_dir, copying_filename)
+                        if not os.path.isfile(dest_file):
+                            try:
+                                shutil.copy(i_file, metric_learn_data_dir)
+                                logger.info('learn :: training data copied - %s' % (i_file))
+                            except shutil.Error as e:
+                                trace = traceback.format_exc()
+                                logger.error('%s' % trace)
+                                logger.error('error :: learn :: shutil error - training data not copied to %s' % metric_learn_data_dir)
+                                logger.error('error :: learn :: %s' % (e))
+                            # Any error saying that the directory doesn't exist
+                            except OSError as e:
+                                trace = traceback.format_exc()
+                                logger.error('%s' % trace)
+                                logger.error('error :: learn :: OSError error - training data not copied to %s' % metric_learn_data_dir)
+                                logger.error('error :: %s' % (e))
+            else:
+                logger.error('error :: learn :: training data not copied to %s' % metric_learn_data_dir)
 
-    # Check if any use_full_duration feature_profiles exist for the metric
-    learn_fp_ids = []
-    if metrics_id:
-        learn_fp_ids = get_learning_fp_ids(base_name, metrics_id, engine)
+        if not os.path.isfile(str(metric_check_file)):
+            logger.error('error :: learn :: file not found - metric_check_file - %s' % (str(metric_check_file)))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
 
-    if len(learn_fp_ids) == 0:
+        check_file_name = os.path.basename(str(metric_check_file))
+        if settings.ENABLE_IONOSPHERE_DEBUG:
+            logger.info('debug :: learn :: check_file_name - %s' % check_file_name)
+        check_file_timestamp = check_file_name.split('.', 1)[0]
+        if settings.ENABLE_IONOSPHERE_DEBUG:
+            logger.info('debug :: learn :: check_file_timestamp - %s' % str(check_file_timestamp))
+        check_file_metricname_txt = check_file_name.split('.', 1)[1]
+        if settings.ENABLE_IONOSPHERE_DEBUG:
+            logger.info('debug :: learn :: check_file_metricname_txt - %s' % check_file_metricname_txt)
+        check_file_metricname = check_file_metricname_txt.replace('.txt', '')
+        if settings.ENABLE_IONOSPHERE_DEBUG:
+            logger.info('debug :: learn :: check_file_metricname - %s' % check_file_metricname)
+        check_file_metricname_dir = check_file_metricname.replace('.', '/')
+        if settings.ENABLE_IONOSPHERE_DEBUG:
+            logger.info('debug :: learn :: check_file_metricname_dir - %s' % check_file_metricname_dir)
+
+        if settings.ENABLE_IONOSPHERE_DEBUG:
+            logger.info('debug :: learn :: failed_check_file - %s' % failed_check_file)
+
+        metric_vars_array = None
+        try:
+            metric_vars_array = learn_load_metric_vars(str(metric_check_file))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: learn :: failed to load metric variables from check file - %s' % (metric_check_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        if not metric_vars_array:
+            logger.error('error :: learn :: no metric_vars_array available from check file - %s' % (metric_check_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        # Test metric variables
+        # We use a pythonic methodology to test if the variables are defined,
+        # this ensures that if any of the variables are not set for some reason
+        # we can handle unexpected data or situations gracefully and try and
+        # ensure that the process does not hang.
+        metric = None
+        try:
+            key = 'metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric = str(value_list[0])
+            base_name = metric
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: learn :: metric variable - metric - %s' % metric)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: learn :: failed to read metric variable from check file - %s' % (metric_check_file))
+            metric = None
+
+        if not metric:
+            logger.error('error :: learn :: failed to load metric variable from check file - %s' % (metric_check_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        value = None
+        try:
+            key = 'value'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            value = float(value_list[0])
+            anomalous_value = value
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: learn :: metric variable - value - %s' % (value))
+        except:
+            logger.error('error :: learn :: failed to read value variable from check file - %s' % (metric_check_file))
+            value = None
+
+        if not value:
+            logger.error('error :: learn :: failed to load value variable from check file - %s' % (metric_check_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        from_timestamp = None
+        try:
+            key = 'from_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            from_timestamp = int(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: learn :: metric variable - from_timestamp - %s' % from_timestamp)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: learn :: failed to read from_timestamp variable from check file - %s' % (metric_check_file))
+
+        metric_timestamp = None
+        try:
+            key = 'metric_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric_timestamp = int(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: learn :: metric variable - metric_timestamp - %s' % metric_timestamp)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: learn :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
+            metric_timestamp = None
+
+        if not metric_timestamp:
+            logger.error('error :: learn :: failed to load metric_timestamp variable from check file - %s' % (metric_check_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        # @added 20170117 - Feature #1854: Ionosphere learn - generations
+        # This metric var is required as it was contirbuting to ionosphere_learn
+        # not logging some 2nd generation work due to send_anomalous_metric_to
+        # being sent ionosphere_learn which has no own logger per se
+        added_by = None
+        try:
+            key = 'added_by'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_by = str(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: metric variable - added_by - %s' % added_by)
+        except:
+            logger.error('error :: failed to read added_by variable from check file - %s' % (metric_check_file))
+            added_by = None
+
+        if not added_by:
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        try:
+            key = 'added_at'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_at = int(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: learn :: metric variable - added_at - %s' % added_at)
+        except:
+            logger.error('error :: learn :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
+            added_at = metric_timestamp
+
+        full_duration = None
+        try:
+            key = 'full_duration'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            full_duration = int(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: learn :: metric variable - full_duration - %s' % full_duration)
+        except:
+            logger.error('error :: learn :: failed to read full_duration variable from check file - %s' % (metric_check_file))
+            full_duration = None
+
+        if not full_duration:
+            logger.error('error :: learn :: failed to determine full_duration variable from check file - %s' % (metric_check_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        # Before we continue, now that we have the actual metric_db_object
+        learn_full_duration_days = None
+        learn_full_duration = None
+        use_full_duration = None
+        try:
+            learn_full_duration_days = metric_db_object['learn_full_duration_days']
+            learn_full_duration = int(learn_full_duration_days) * 86400
+            use_full_duration = learn_full_duration
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: learn :: failed get the determine the learn_full_duration_days from the metric_db_object')
+            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+            continue
+
+        if str(work) == 'learn_fp_learnt':
+            learn_metric_check_file = '%s/%s' % (metric_learn_data_dir, check_file_name)
+
+        if str(work) != 'learn_fp_learnt':
+            # Write a new metric check file with the learn_full_duration
+            old_metric_check_file = '%s.original.training' % metric_check_file
+            if not os.path.isfile(old_metric_check_file):
+                try:
+                    shutil.move(metric_check_file, old_metric_check_file)
+                except:
+                    logger.error('error :: learn :: moving metric_check_file in the learning data dir')
+                    remove_work_list_from_redis_set(learn_metric_list)
+                    continue
+
+            learn_metric_check_file = '%s/%s' % (metric_learn_data_dir, check_file_name)
+            if not os.path.isfile(learn_metric_check_file):
+                lines = []
+                try:
+                    logger.info('learn :: reading metric_check_file to replace full_duration - %s' % old_metric_check_file)
+                    with open(old_metric_check_file) as fr:
+                        for line in fr:
+                            if 'full_duration' in line:
+                                line = line.replace(str(full_duration), str(learn_full_duration))
+                            lines.append(line)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: failed to read metric_check_file')
+
+                try:
+                    logger.info('learn :: writing learn_metric_check_file to replace full_duration - %s' % learn_metric_check_file)
+                    with open(learn_metric_check_file, 'w') as outfile:
+                        for line in lines:
+                            outfile.write(line)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: failed to write learn_metric_check_file')
+
+        if not os.path.isfile(learn_metric_check_file):
+            logger.error('error :: learn :: learn_metric_check_file not created')
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        # Create a learn json data if it does not exist
+        got_learn_json = False
+        learn_json_file = '%s/%s.json' % (metric_learn_data_dir, base_name)
+        if os.path.isfile(learn_json_file):
+            logger.info('learn :: learning data ts json available - %s' % (learn_json_file))
+            got_learn_json = True
+        else:
+            try:
+                logger.info(
+                    'learn :: need learning data ts json from Graphite at %s days - %s' % (
+                        str(learn_full_duration_days), learn_json_file))
+                got_learn_json = get_learn_json(
+                    learn_json_file, base_name, use_full_duration, metric_timestamp,
+                    learn_full_duration_days)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: learn_json call failed')
+                got_learn_json = False
+
+        if not got_learn_json:
+            logger.error(
+                'error :: learn :: failed to get timeseries json from Graphite for %s at %s second for anomaly at %s' %
+                (base_name, str(use_full_duration), str(metric_timestamp)))
+            logger.info('learn :: exiting this work but not removing work item, as Graphite may be available again before the work expires')
+            continue
+
+        # Calculate the features and a features profile for the learn_json_file
+        calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_learn_data_dir, base_name)
+        calculated_feature_file_found = False
+        fp_csv = None
+        if os.path.isfile(calculated_feature_file):
+            calculated_feature_file_found = True
+            fp_csv = calculated_feature_file
+            logger.info('learn :: calculated features file is available - %s' % (calculated_feature_file))
+
+        if got_learn_json:
+            if not calculated_feature_file_found:
+                logger.info('learn :: need to calculate features from learning data ts json - %s' % (learn_json_file))
+                try:
+                    fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: failed to calculate features')
+                    remove_work_list_from_redis_set(learn_metric_list)
+                    continue
+            else:
+                logger.info('learn :: using available calculated features file')
+
+        if os.path.isfile(calculated_feature_file):
+            calculated_feature_file_found = True
+            fp_csv = calculated_feature_file
+
+        # @added 20170116 - Feature #1854: Ionosphere learn - generations
+        # Rate limit by generation and by max_percent_diff_from_origin
+        max_generations = None
+        try:
+            _max_generations = metric_db_object['max_generations']
+            max_generations = int(_max_generations)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: learn :: failed to determine the max_generations from the metric_db_object')
+            use_full_duration = None
+        if not max_generations:
+            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+            learn_engine_disposal(engine)
+            continue
+        if str(work) == 'learn_fp_learnt' and calculated_feature_file_found:
+            if int(learn_generation) >= max_generations:
+                logger.error(
+                    'error :: learn :: a %s job has been added to try and create a %s generation features profile from features profile id %s' % (
+                        str(work), str(learn_generation), str(learn_parent_id)))
+                logger.info('debug :: learn :: a %s job was %s' % (
+                    str(work), str(learn_metric_list)))
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+            max_percent_diff_from_origin = None
+            try:
+                _max_percent_diff_from_origin = metric_db_object['max_percent_diff_from_origin']
+                max_percent_diff_from_origin = float(_max_percent_diff_from_origin)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: failed to determine the max_percent_diff_from_origin from the metric_db_object')
+                max_percent_diff_from_origin = None
+            if not max_percent_diff_from_origin:
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                learn_engine_disposal(engine)
+                continue
+
+            # The metric learn work variables now known so we can process the metric
+            # Determine the metric details from the database
+            fp_ids = None
+            engine = None
+            # Get a MySQL engine
+            try:
+                engine, log_msg, trace = learn_get_an_engine()
+                logger.info('learn :: %s' % log_msg)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: could not get a MySQL engine to get fp_ids_db_object')
+
+            if not engine:
+                logger.error('error :: learn :: engine not obtained to get fp_ids_db_object')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                continue
+
+            try:
+                fp_ids = get_ionosphere_fp_ids(learn_base_name, metrics_id, engine)
+                # learn_engine_disposal(engine)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: failed get the fp_ids from the database')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                learn_engine_disposal(engine)
+                continue
+
+            # if not fp_ids:
+            if fp_ids == []:
+                logger.error('error :: learn :: failed get the fp_ids from the database')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                learn_engine_disposal(engine)
+                continue
+
+            # Determine the sum of the origin features profile which means
+            # having to trace back from the learn_parent_id to the origin
+            origin_fp_id = None
+            origin_features_profile_sum = None
+            origin_fp_full_duration = None
+            current_parent_id = learn_parent_id
+            current_generation = learn_generation
+            if int(current_generation) == 0:
+                logger.error('error :: learn :: ionosphere_learn doe not handle generation %s profiles' % str(current_generation))
+                logger.info('learn :: exiting this work and removing work item')
+                remove_work_list_from_redis_set(learn_metric_list)
+                learn_engine_disposal(engine)
+                continue
+
+            logger.info('learn :: determining the id and features sum value for the origin features profile from the fp_ids for fp id %s' % str(learn_parent_id))
+            while current_generation != 0:
+                for fp_id in fp_ids:
+                    try:
+                        if int(current_parent_id) == int(fp_id):
+                            row = get_ionosphere_record(int(fp_id), engine)
+                            current_fp_parent_id = int(row['parent_id'])
+                            current_fp_generation = int(row['generation'])
+                            if current_fp_parent_id == 0:
+                                origin_features_profile_sum = float(row['features_sum'])
+                                origin_fp_id = int(current_parent_id)
+                                origin_fp_full_duration = int(row['full_duration'])
+                                logger.info(
+                                    'learn :: origin fp id %s of generation %s' % (
+                                        str(current_parent_id),
+                                        str(current_fp_generation)))
+                                logger.info(
+                                    'learn :: origin fp id features sum - %s' % (
+                                        str(origin_features_profile_sum)))
+                                current_generation = current_fp_generation
+                            else:
+                                logger.info('learn :: fp id %s of generation %s has parent fp id %s of generation %s' % (
+                                    str(current_parent_id), str(current_generation),
+                                    str(current_fp_parent_id), str(current_fp_generation)))
+                                current_parent_id = current_fp_parent_id
+                                current_generation = current_fp_generation
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: learn :: determining parent id of the 0 generation origin')
+                        break
+
+            learn_engine_disposal(engine)
+
+            if not origin_features_profile_sum:
+                logger.info('learn :: exiting this work and removing as the origin fp features sum could not be determined')
+                # TODO: remove this just testing
+                # remove_work_list_from_redis_set(learn_metric_list)
+                learn_engine_disposal(engine)
+                continue
+            logger.info(
+                'learn :: the origin zero generation features profile %s - features_sum - %s' % (
+                    str(origin_fp_id), str(origin_features_profile_sum)))
+            # Determine the features sum from the training data features profile
+            # details file
+            learnt_features_profile_details_file = '%s/%s.%s.fp.details.txt' % (
+                metric_learn_data_dir, str(metric_timestamp),
+                base_name)
+            if not os.path.isfile(learnt_features_profile_details_file):
+                logger.error('error :: learn :: the learnt features profile fp details file is no longer available - %s' % learnt_features_profile_details_file)
+                logger.info('learn :: cannot calculate the percent diff of the learnt features_profiles to the origin')
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+
+            learnt_fp_features_sum = None
+            try:
+                with open(learnt_features_profile_details_file, 'r') as f:
+                    fp_details_str = f.read()
+                fp_details_array = literal_eval(fp_details_str)
+                learnt_fp_features_sum = float(fp_details_array[4])
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error(
+                    'error: failed to read from %s' % (features_profile_details_file))
+
+            if not learnt_fp_features_sum:
+                logger.error('error :: learn :: could not determine the features sum from the learnt features profile fp details file - %s' % learnt_features_profile_details_file)
+                logger.info('learn :: cannot calculate the percent diff of the learnt features_profiles to the origin')
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+
+            # TODO: base this on common features
+            logger.info('learn :: checking the percent difference for the origin features sum')
+            percent_different = 100
+            sums_array = np.array([origin_features_profile_sum, learnt_fp_features_sum], dtype=float)
+            try:
+                calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
+                percent_different = calc_percent_different[0]
+                logger.info(
+                    'learn :: percent_different between features sums of the learnt training data and origin fp_id %s is %s' % (
+                        str(origin_fp_id), str(percent_different)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to calculate percent_different')
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+            # Check that the max_percent_diff_from_origin is not breached
+            if percent_different < 0:
+                new_pdiff = percent_different * -1
+                percent_different = new_pdiff
+
+            if float(percent_different) > float(max_percent_diff_from_origin):
+                logger.info(
+                    'learn :: the calculated features sum breaches the max_percent_diff_from_origin of %s for %s' % (
+                        str(max_percent_diff_from_origin), base_name))
+                logger.info('learn :: cannot use training_data as a learnt features profile - %s' % learnt_features_profile_details_file)
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+
+        # @modified 20170116 - Feature #1854: Ionosphere learn - generations
+        # A features profile can be created in the learn_fp_human and in the
+        # learn_fp_learnt context
+        # if str(work) == 'learn_fp_human' and calculated_feature_file_found:
+        create_a_learn_features_profile = False
+        if calculated_feature_file_found:
+            if str(work) == 'learn_fp_human':
+                create_a_learn_features_profile = True
+                profile_context = 'human generated'
+                ionosphere_job = 'none'
+            if str(work) == 'learn_fp_automatic':
+                create_a_learn_features_profile = True
+                profile_context = 'automatically generated'
+                ionosphere_job = 'none'
+            if str(work) == 'learn_fp_learnt':
+                create_a_learn_features_profile = True
+                profile_context = 'automatically generated'
+                ionosphere_job = 'learn_fp_automatic'
+                # TODO: make Graphite NOW graphs.  A simple requests call?
+
+        # @added 20170118 - Feature #1854: Ionosphere learn - generations
+        #                   Feature #1842: Ionosphere - Graphite now graphs
+        if str(work) == 'learn_fp_learnt':
+            logger.info('learn :: requesting Ionosphere webapp training_data page to generate Graphite NOW graphs')
+            import requests
+            url = '%s/ionosphere?timestamp=%smetric=%s' % (
+                settings.SKYLINE_URL, str(learn_base_name), str(metric_timestamp))
+            logger.info('learn :: training_data URL - %s' % str(url))
+            ionosphere_resp = None
+            if settings.WEBAPP_AUTH_ENABLED:
+                user = str(settings.WEBAPP_AUTH_USER)
+                password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
+            try:
+                if settings.WEBAPP_AUTH_ENABLED:
+                    r = requests.get(url, timeout=10, auth=(user, password))
+                else:
+                    r = requests.get(url, timeout=10)
+                if int(r.status_code) == 200:
+                    ionosphere_resp = True
+                    logger.info('learn :: Graphite NOW graphs for training_data created')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get anomaly id from panorama: %s' % str(url))
+
+        if create_a_learn_features_profile:
+            if fp_csv:
+                logger.info('learn :: %s :: fp_csv for create_features_profile - %s' % (profile_context, str(fp_csv)))
+            if str(work) == 'learn_fp_learnt':
+                fp_created_at = int(metric_timestamp)
+
+            if str(work) != 'learn_fp_learnt':
+                fp_created_at = int(time())
+                metric_new_fp_data_dir = '%s/%s/%s' % (
+                    str(settings.IONOSPHERE_LEARN_FOLDER), str(fp_created_at),
+                    metric_timeseries_dir)
+
+                # Create a new timestamped directory at the timestamp that this features
+                # profile is created
+                if not os.path.exists(metric_new_fp_data_dir):
+                    logger.info('learn :: %s :: creating new timestamped learning dir - %s' % (profile_context, metric_new_fp_data_dir))
+                    try:
+                        shutil.move(metric_learn_data_dir, metric_new_fp_data_dir)
+                        logger.info('learn :: %s :: moved original learning dir to new timestamped learning dir' % profile_context)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: learn :: %s :: failed to create the new features profile learn directory' % profile_context)
+                        remove_work_list_from_redis_set(learn_metric_list)
+                        continue
+
+                original_fp_details_file = '%s/%s.%s.fp.details.txt' % (
+                    metric_new_fp_data_dir, str(metric_timestamp), base_name)
+                new_fp_details_file = '%s/%s.%s.fp.details.txt' % (
+                    metric_new_fp_data_dir, str(fp_created_at), base_name)
+                if not os.path.isfile(new_fp_details_file):
+                    try:
+                        shutil.move(original_fp_details_file, new_fp_details_file)
+                    except:
+                        logger.error('error :: learn :: %s :: renaming features details file to the new timestamp' % profile_context)
+
+                if not os.path.isfile(new_fp_details_file):
+                    logger.error('error :: learn :: %s :: the new_fp_details_file does not exist - %s' % (profile_context, new_fp_details_file))
+                    remove_work_list_from_redis_set(learn_metric_list)
+                    continue
+
+            # Create a use_full_duration learn features profile
+            generation = int(learn_generation) + 1
+            if int(generation) >= int(max_generations):
+                logger.error(
+                    'error :: learn :: %s :: not creating a features profile as it would breach max_generations as would be generation %s' % (
+                        profile_context, str(generation)))
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+            try:
+                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: %s :: failed to create a features profile' % profile_context)
+            if not fp_in_successful:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: %s :: create_features_profile failed' % profile_context)
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+            else:
+                logger.info(
+                    'learn :: %s :: new generation %s features profile with id %s using %s days data based on the human generated parent feature profile with id %s' % (
+                        profile_context, str(generation), str(fp_id),
+                        str(learn_full_duration_days), str(learn_parent_id)))
+
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+
+        # @added 20170116 - Feature #1854: Ionosphere learn - generations
+        # This is it.  Here we go! Learn!
+        if str(work) == 'learn_fp_generation' and calculated_feature_file_found:
+            logger.info('learn :: fp_csv for create_features_profile - %s' % str(fp_csv))
+            logger.info('learn :: adding an Ionosphere check file')
+            # These are not required in the Ionosphere check context
+            triggered_algorithms = 'None'
+            timeseries = []
+            try:
+                send_anomalous_metric_to(
+                    # @modified 20170118 - Feature #1854: Ionosphere learn - generations
+                    # Fixed bug, as the current_skyline_app must have a logger
+                    # and added send_to_app as ionosphere_learn_to_ionosphere
+                    # which is handled in the send_anomalous_metric_to function
+                    # now.
+                    # 'ionosphere_learn', 'ionosphere', metric_learn_data_dir,
+                    'ionosphere', 'ionosphere_learn_to_ionosphere',
+                    str(metric_learn_data_dir), str(metric_timestamp),
+                    base_name, str(value), str(from_timestamp),
+                    triggered_algorithms, timeseries, str(use_full_duration))
+                logger.info(
+                    'learn :: ionosphere check added at %s full_duration for %s' % (
+                        str(use_full_duration), str(fp_csv)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: failed to send_anomalous_metric_to to Ionosphere at %s full_duration for %s' % (
+                    str(use_full_duration), str(fp_csv)))
+
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
 
     if engine:
-        engine_disposal(engine)
+        learn_engine_disposal(engine)
     return

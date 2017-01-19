@@ -14,6 +14,7 @@ from ast import literal_eval
 import traceback
 from flask import request
 import requests
+from redis import StrictRedis
 
 from sqlalchemy import (
     create_engine, Column, Table, Integer, String, MetaData, DateTime)
@@ -77,6 +78,17 @@ def ionosphere_get_metrics_dir(requested_timestamp, context):
         data_dir = '%s' % settings.IONOSPHERE_DATA_FOLDER
     if context == 'features_profiles':
         data_dir = '%s' % (settings.IONOSPHERE_PROFILES_FOLDER)
+        # @added 20160113 - Feature #1858: Ionosphere - autobuild features_profiles dir
+        if settings.IONOSPHERE_AUTOBUILD:
+            # TODO: see ionosphere docs page.  Create any deleted/missing
+            #       features_profiles dir with best effort with the data that is
+            #       available and DB data on-demand
+            # Build the expected features_profiles dirs from the DB and auto
+            # provision any that are not present
+            if not path.exists(data_dir):
+                # provision features_profiles image resources
+                mkdir_p(data_dir)
+
     metric_paths = []
     metrics = []
     timestamps = []
@@ -222,7 +234,8 @@ def get_an_engine():
         logger.error('%s' % trace)
         fail_msg = 'error :: failed to get MySQL engine for'
         logger.error('%s' % fail_msg)
-        return None, fail_msg, trace
+        # return None, fail_msg, trace
+        raise  # to webapp to return in the UI
 
 
 def engine_disposal(engine):
@@ -318,6 +331,30 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 logger.info(
                     'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
 
+        # @added 20170113 - Feature #1842: Ionosphere - Graphite now graphs
+        # Handle features profiles that were created pre the addition of
+        # full_duration
+        full_duration_present = False
+        for key, value in metric_vars_array:
+            if key == 'full_duration':
+                full_duration_present = True
+        if not full_duration_present:
+            try:
+                for key, value in metric_vars_array:
+                    if key == 'from_timestamp':
+                        value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+                        use_from_timestamp = int(value_list[0])
+                    if key == 'metric_timestamp':
+                        value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+                        use_metric_timestamp = int(value_list[0])
+                round_full_duration_days = int((use_metric_timestamp - use_from_timestamp) / 86400)
+                round_full_duration = int(round_full_duration_days) * 86400
+                logger.info('debug :: calculated missing full_duration')
+                metric_vars_array.append(['full_duration', round_full_duration])
+            except:
+                logger.error('error :: could not calculate missing full_duration')
+                metric_vars_array.append(['full_duration', 'unknown'])
+
         logger.info('debug :: metric_vars for %s' % str(metric))
         logger.info('debug :: %s' % str(metric_vars_array))
 
@@ -341,6 +378,16 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
             str(requested_timestamp))
+
+        # @added 20160113 - Feature #1858: Ionosphere - autobuild features_profiles dir
+        if settings.IONOSPHERE_AUTOBUILD:
+            # TODO: see ionosphere docs page.  Create any deleted/missing
+            #       features_profiles dir with best effort with the data that is
+            #       available and DB data on-demand
+            if not path.exists(metric_data_dir):
+                # provision features_profiles image resources
+                mkdir_p(metric_data_dir)
+
     human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(requested_timestamp)))
     metric_var_filename = '%s.txt' % str(base_name)
     metric_vars_file = False
@@ -438,7 +485,12 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     graphite_now_images = []
     graphite_now = int(time.time())
     graph_resolutions = []
-    if context == 'training_data':
+    # @modified 20170116 - Feature #1854: Ionosphere learn - generations
+    #                      Feature #1842: Ionosphere - Graphite now graphs
+    # Also include the Graphite NOW graphs in the features_profile page as
+    # graphs WHEN CREATED
+    # if context == 'training_data':
+    if context == 'training_data' or context == 'features_profiles':
         graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
         # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
         # Exclude if matches TARGET_HOURS - unique only
@@ -448,23 +500,31 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     for target_hours in graph_resolutions:
         graph_image = False
         try:
-            target_seconds = int((target_hours * 60) * 60)
-            from_timestamp = str(graphite_now - target_seconds)
-            until_timestamp = str(graphite_now)
             graph_image_file = '%s/%s.graphite_now.%sh.png' % (metric_data_dir, base_name, str(target_hours))
             # These are NOW graphs, so if the graph_image_file exists, remove it
+            # @modified 20170116 - Feature #1854: Ionosphere learn - generations
+            #                      Feature #1842: Ionosphere - Graphite now graphs
+            # Only remove if this is the training_data context and match on the
+            # graph_image_file rather than graph_image response
+            if context == 'training_data':
+                target_seconds = int((target_hours * 60) * 60)
+                from_timestamp = str(graphite_now - target_seconds)
+                until_timestamp = str(graphite_now)
+                if path.isfile(graph_image_file):
+                    try:
+                        remove(str(graph_image_file))
+                        logger.info('graph_image_file removed - %s' % str(graph_image_file))
+                    except OSError:
+                        pass
+                logger.info('getting Graphite graph for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+                graph_image = get_graphite_metric(
+                    skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                    graph_image_file)
+
+            # if graph_image:
             if path.isfile(graph_image_file):
-                try:
-                    remove(str(graph_image_file))
-                    logger.info('graph_image_file removed - %s' % str(graph_image_file))
-                except OSError:
-                    pass
-            logger.info('getting Graphite graph for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
-            graph_image = get_graphite_metric(
-                skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                graph_image_file)
-            if graph_image:
                 graphite_now_images.append(graph_image_file)
+
             # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
             # TODO: Un/fortunately there is no simple method by which to annotate
             # these Graphite NOW graphs at the anomaly timestamp, if these were
@@ -487,6 +547,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # Get the last 9 matched timestamps for the metric and get graphite graphs
     # for them
     graphite_matched_images = []
+    matched_count = 0
     if context == 'features_profiles':
         logger.info('getting MySQL engine')
         try:
@@ -512,9 +573,11 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not get a MySQL engine to get fp_ids')
+            raise  # to webapp to return in the UI
 
         if not engine:
             logger.error('error :: engine not obtained to get fp_ids')
+            raise  # to webapp to return in the UI
 
         try:
             ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
@@ -523,6 +586,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get ionosphere_checked_table meta for %s' % base_name)
+            raise  # to webapp to return in the UI
 
         matched_timestamps = []
 
@@ -548,15 +612,25 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             logger.error('error :: could not determine timestamps from ionosphere_matched for fp_id %s' % str(fp_id))
 
         len_matched_timestamps = len(matched_timestamps)
+        matched_count = len_matched_timestamps
         logger.info('determined %s matched timestamps for fp_id %s' % (str(len_matched_timestamps), str(fp_id)))
 
         last_matched_timestamps = []
         if len_matched_timestamps > 0:
+            last_graph_timestamp = int(time.time())
+            skip_if_last_graph_timestamp_less_than = 600
             sorted_matched_timestamps = sorted(matched_timestamps)
-            get_matched_timestamps = sorted_matched_timestamps[-4:]
+#            get_matched_timestamps = sorted_matched_timestamps[-4:]
+            get_matched_timestamps = sorted_matched_timestamps[-20:]
             # Order newest first
             for ts in get_matched_timestamps[::-1]:
-                last_matched_timestamps.append(ts)
+                if len(get_matched_timestamps) > 4:
+                    graph_time_diff = int(last_graph_timestamp) - int(ts)
+                    if graph_time_diff > 600:
+                        last_matched_timestamps.append(ts)
+                else:
+                    last_matched_timestamps.append(ts)
+                last_graph_timestamp = int(ts)
 
         for matched_timestamp in last_matched_timestamps:
             # Get Graphite images
@@ -583,452 +657,16 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
 
     return (
         metric_paths, images, human_date, metric_vars, ts_json, data_to_process,
-        panorama_anomaly_id, graphite_now_images, graphite_matched_images)
+        panorama_anomaly_id, graphite_now_images, graphite_matched_images,
+        matched_count)
 
-
-def create_features_profile(requested_timestamp, data_for_metric, context):
-    """
-    Add a features_profile to the Skyline DB.
-    """
-
-    base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
-
-    if context == 'training_data':
-        log_context = 'training data'
-    if context == 'features_profiles':
-        log_context = 'features profile data'
-    logger.info('%s requested for %s at %s' % (
-        context, str(base_name), str(requested_timestamp)))
-
-    metric_timeseries_dir = base_name.replace('.', '/')
-    if context == 'training_data':
-        metric_training_data_dir = '%s/%s/%s' % (
-            settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
-            metric_timeseries_dir)
-    if context == 'features_profiles':
-        metric_training_data_dir = '%s/%s/%s' % (
-            settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
-            str(requested_timestamp))
-    features_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (
-        metric_training_data_dir, base_name)
-
-    features_profile_dir = '%s/%s' % (
-        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir)
-
-    ts_features_profile_dir = '%s/%s/%s' % (
-        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
-        str(requested_timestamp))
-
-    features_profile_created_file = '%s/%s.%s.fp.created.txt' % (
-        metric_training_data_dir, str(requested_timestamp), base_name)
-
-    features_profile_details_file = '%s/%s.%s.fp.details.txt' % (
-        metric_training_data_dir, str(requested_timestamp), base_name)
-
-    trace = 'none'
-    fail_msg = 'none'
-    new_fp_id = False
-    calculated_with_tsfresh = False
-    calculated_time = False
-    fcount = None
-    fsum = None
-    # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
-    # Added the ts_full_duration parameter so that the appropriate graphs can be
-    # embedded for the user in the training data page
-    ts_full_duration = '0'
-
-    if path.isfile(features_profile_details_file):
-        logger.info('getting features profile details from from - %s' % features_profile_details_file)
-        # Read the details file
-        with open(features_profile_details_file, 'r') as f:
-            fp_details_str = f.read()
-        fp_details = literal_eval(fp_details_str)
-        calculated_with_tsfresh = fp_details[1]
-        calculated_time = str(fp_details[2])
-        fcount = str(fp_details[3])
-        fsum = str(fp_details[4])
-        try:
-            ts_full_duration = str(fp_details[5])
-        except:
-            logger.error('error :: could not determine the full duration from - %s' % features_profile_details_file)
-            ts_full_duration = '0'
-
-        if ts_full_duration == '0':
-            anomaly_check_file = '%s/%s.txt' % (
-                metric_training_data_dir, base_name)
-
-            if path.isfile(anomaly_check_file):
-                logger.info('determining the full duration from anomaly_check_file - %s' % anomaly_check_file)
-                # Read the details file
-                with open(anomaly_check_file, 'r') as f:
-                    anomaly_details = f.readlines()
-                    for i, line in enumerate(anomaly_details):
-                        if 'full_duration' in line:
-                            _ts_full_duration = '%s' % str(line).split("'", 2)
-                            full_duration_array = literal_eval(_ts_full_duration)
-                            ts_full_duration = str(int(full_duration_array[1]))
-                            logger.info('determined the full duration as - %s' % str(ts_full_duration))
-
-    if path.isfile(features_profile_created_file):
-        # Read the created file
-        with open(features_profile_created_file, 'r') as f:
-            fp_created_str = f.read()
-        fp_created = literal_eval(fp_created_str)
-        new_fp_id = fp_created[0]
-
-        return str(new_fp_id), True, True, fail_msg, trace
-
-    # Have data
-    if path.isfile(features_file):
-        logger.info('features_file exists: %s' % features_file)
-    else:
-        trace = traceback.format_exc()
-        logger.error(trace)
-        fail_msg = 'error :: features_file does not exist: %s' % features_file
-        logger.error('%s' % fail_msg)
-        raise
-
-    features_data = []
-    with open(features_file, 'rb') as fr:
-        reader = csv.reader(fr, delimiter=',')
-        for i, line in enumerate(reader):
-            feature_name_item = False
-            fname_id = False
-            f_value = False
-            feature_name = str(line[0])
-            feature_name_item = filter(
-                lambda x: x[1] == feature_name, TSFRESH_FEATURES)
-            if feature_name_item:
-                feature_name_id = feature_name_item[0]
-            if feature_name_item:
-                feature_name_list = feature_name_item[0]
-                fname_id = int(feature_name_list[0])
-            f_value = str(line[1])
-            if fname_id and f_value:
-                features_data.append([fname_id, f_value])
-
-    logger.info('getting MySQL engine')
-    try:
-        engine, fail_msg, trace = get_an_engine()
-        logger.info(fail_msg)
-    except:
-        trace = traceback.format_exc()
-        logger.error(trace)
-        fail_msg = 'error :: could not get a MySQL engine'
-        logger.error('%s' % fail_msg)
-        raise
-
-    if not engine:
-        trace = 'none'
-        fail_msg = 'error :: engine not obtained'
-        logger.error(fail_msg)
-        raise
-
-    # Get metric id
-    metrics_id = False
-    metrics_table = None
-    try:
-        metrics_table, fail_msg, trace = metrics_table_meta(skyline_app, engine)
-        logger.info(fail_msg)
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to get metrics_table meta for %s' % base_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    logger.info('metrics_table OK')
-
-    try:
-        connection = engine.connect()
-        # @modified 20161209 -  - Branch #922: ionosphere
-        #                        Task #1658: Patterning Skyline Ionosphere
-        # result = connection.execute('select id from metrics where metric=\'%s\'' % base_name)
-#        for row in result:
-#            while not metrics_id:
-#                metrics_id = row['id']
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-        result = connection.execute(stmt)
-        # row = result.fetchone()
-        for row in result:
-            metrics_id = row['id']
-        connection.close()
-        logger.info('determined metric id: %s' % str(metrics_id))
-    except:
-        trace = traceback.format_exc()
-        logger.error(trace)
-        fail_msg = 'error :: could not determine id of metric from DB: %s' % base_name
-        logger.error('%s' % fail_msg)
-        # @modified 20161209 -  - Branch #922: ionosphere
-        #                        Task #1658: Patterning Skyline Ionosphere
-        # Turned all these to use raise and traceback.format_exc() to carry
-        # ionosphere_backend.py through to the rendered page for the user, e.g
-        # me.
-#        return False, False, False, fail_msg, trace
-        raise
-
-    ionosphere_table = None
-    try:
-        ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
-        logger.info(fail_msg)
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to get ionosphere_table meta for %s' % base_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    logger.info('ionosphere_table OK')
-
-    new_fp_id = False
-    try:
-        connection = engine.connect()
-        ins = ionosphere_table.insert().values(
-            metric_id=int(metrics_id), full_duration=int(ts_full_duration),
-            enabled=1, tsfresh_version=str(tsfresh_version),
-            calc_time=calculated_time, features_count=fcount,
-            features_sum=fsum)
-        result = connection.execute(ins)
-        connection.close()
-        new_fp_id = result.inserted_primary_key[0]
-        logger.info('new ionosphere fp_id: %s' % str(new_fp_id))
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to insert a new record into the ionosphere table for %s' % base_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    if not RepresentsInt(new_fp_id):
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: unknown new ionosphere new_fp_id for %s' % base_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    # Create z_fp_<metric_id> table
-    fp_table_created = False
-    fp_table_name = 'z_fp_%s' % str(metrics_id)
-    try:
-        fp_meta = MetaData()
-        # @modified 20161222 - Task #1812: z_fp table type
-        # Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
-        # up, there can be LOTS of file_per_table z_fp_ tables/files without
-        # the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
-        # in the table cache as required.
-        fp_metric_table = Table(
-            fp_table_name, fp_meta,
-            Column('id', Integer, primary_key=True),
-            Column('fp_id', Integer, nullable=False, key='fp_id'),
-            Column('feature_id', Integer, nullable=False),
-            Column('value', DOUBLE(), nullable=True),
-            mysql_charset='utf8',
-            mysql_key_block_size='255',
-            mysql_engine='InnoDB')
-        fp_metric_table.create(engine, checkfirst=True)
-        fp_table_created = True
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to create table - %s' % fp_table_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    if not fp_table_created:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to determine True for create table - %s' % fp_table_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    # Insert features and values
-    insert_statement = []
-    for fname_id, f_value in features_data:
-        insert_statement.append({'fp_id': new_fp_id, 'feature_id': fname_id, 'value': f_value},)
-    if insert_statement == []:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: empty insert_statement for %s inserts' % fp_table_name
-        logger.error('%s' % fail_msg)
-        raise
-    # else:
-        # feature_count = sum(1 for x in a if isinstance(x, insert_statement))
-        # logger.info(
-        #     'fp_id - %s - %s feature values in insert_statement for %s ' %
-        #     (str(feature_count), str(new_fp_id), fp_table_name))
-        # feature_count = sum(1 for x in a if isinstance(x, insert_statement))
-        # logger.info(
-        #     'fp_id - %s - feature values in insert_statement for %s ' %
-        #     (str(new_fp_id), fp_table_name))
-
-    try:
-        connection = engine.connect()
-        connection.execute(fp_metric_table.insert(), insert_statement)
-        connection.close()
-        logger.info('fp_id - %s - feature values inserted into %s' % (str(new_fp_id), fp_table_name))
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to insert a feature values into %s' % fp_table_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    # Create metric ts table if not exists ts_<metric_id>
-    # Create z_ts_<metric_id> table
-    ts_table_created = False
-    ts_table_name = 'z_ts_%s' % str(metrics_id)
-    try:
-        ts_meta = MetaData()
-        # @modified 20161222 - Task #1812: z_fp table type
-        # Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
-        # up, there can be LOTS of file_per_table z_fp_ tables/files without
-        # the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
-        # in the table cache as required.
-        ts_metric_table = Table(
-            ts_table_name, ts_meta,
-            Column('id', Integer, primary_key=True),
-            Column('fp_id', Integer, nullable=False, key='fp_id'),
-            Column('timestamp', Integer, nullable=False),
-            Column('value', DOUBLE(), nullable=True),
-            mysql_charset='utf8',
-            mysql_key_block_size='255',
-            mysql_engine='InnoDB')
-        ts_metric_table.create(engine, checkfirst=True)
-        ts_table_created = True
-        logger.info('metric ts table created OK - %s' % (ts_table_name))
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to create table - %s' % ts_table_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    # Insert timeseries that the features profile was created from
-    anomaly_json = '%s/%s.json' % (metric_training_data_dir, base_name)
-    if path.isfile(anomaly_json):
-        logger.info('metric anomaly json found OK - %s' % (anomaly_json))
-        try:
-            # Read the timeseries json file
-            with open(anomaly_json, 'r') as f:
-                raw_timeseries = f.read()
-        except:
-            trace = traceback.format_exc()
-            logger.error(trace)
-            fail_msg = 'error :: failed to read timeseries data from %s' % anomaly_json
-            logger.error('%s' % (fail_msg))
-            fail_msg = 'error: failed to read timeseries data from %s' % anomaly_json
-            end = timer()
-            raise
-    else:
-        trace = 'none'
-        fail_msg = 'error: file not found - %s' % (anomaly_json)
-        logger.error(fail_msg)
-        raise
-
-    # Convert the timeseries to csv
-    timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
-    timeseries = literal_eval(timeseries_array_str)
-
-    datapoints = timeseries
-    validated_timeseries = []
-    for datapoint in datapoints:
-        try:
-            new_datapoint = [str(int(datapoint[0])), float(datapoint[1])]
-            validated_timeseries.append(new_datapoint)
-        except:
-            continue
-
-    insert_statement = []
-    for ts, value in validated_timeseries:
-        insert_statement.append({'fp_id': new_fp_id, 'timestamp': ts, 'value': value},)
-    try:
-        connection = engine.connect()
-        connection.execute(ts_metric_table.insert(), insert_statement)
-        connection.close()
-        logger.info('fp_id - %s - timeseries inserted into %s' % (str(new_fp_id), ts_table_name))
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to insert the timeseries into %s' % ts_table_name
-        logger.error('%s' % fail_msg)
-        raise
-
-    # Create a created features profile file
-    try:
-        # data = '[%s, %s, ]' % (new_fp_id, str(int(time.time())))
-        # write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
-        data = '[%s, %s, \'%s\', %s, %s, %s, %s]' % (
-            new_fp_id, str(int(time.time())), str(tsfresh_version),
-            str(calculated_time), str(fcount), str(fsum), str(ts_full_duration))
-        write_data_to_file(skyline_app, features_profile_created_file, 'w', data)
-    except:
-        trace = traceback.format_exc()
-        logger.error('%s' % trace)
-        fail_msg = 'error :: failed to write fp.created file' % ts_table_name
-        logger.error('%s' % fail_msg)
-
-    # Set ionosphere_enabled for the metric
-    try:
-        # update_statement = 'UPDATE metrics SET ionosphere_enabled=1 WHERE id=%s' % str(metrics_id)
-        connection = engine.connect()
-        # result = connection.execute('UPDATE metrics SET ionosphere_enabled=1 WHERE id=%s' % str(metrics_id))
-        # connection.execute(ts_metric_table.insert(), insert_statement)
-        connection.execute(
-            metrics_table.update(
-                metrics_table.c.id == metrics_id).values(ionosphere_enabled=1))
-        connection.close()
-        logger.info('ionosphere_enabled set on metric id: %s' % str(metrics_id))
-    except:
-        trace = traceback.format_exc()
-        logger.error(trace)
-        fail_msg = 'error :: could not update metrics table and set ionosphere_enabled on id %s' % str(metrics_id)
-        logger.error('%s' % fail_msg)
-        raise
-
-    # Copy data from training data dir to features_profiles dir
-    if not path.isdir(ts_features_profile_dir):
-        mkdir_p(ts_features_profile_dir)
-
-    if path.isdir(ts_features_profile_dir):
-        logger.info('fp_id - %s - features profile dir created - %s' % (str(new_fp_id), ts_features_profile_dir))
-        # src_files = os.listdir(src)
-        # for file_name in src_files:
-        #    full_file_name = path.join(src, file_name)
-        #    if (path.isfile(full_file_name)):
-        #        shutil.copy(full_file_name, dest)
-
-        data_files = []
-        try:
-            glob_path = '%s/*.*' % metric_training_data_dir
-            data_files = glob.glob(glob_path)
-        except:
-            trace = traceback.format_exc()
-            logger.error('%s' % trace)
-            logger.error('error :: glob - fp_id - %s - training data not copied to %s' % (str(new_fp_id), ts_features_profile_dir))
-
-        for i_file in data_files:
-            try:
-                shutil.copy(i_file, ts_features_profile_dir)
-                logger.info('fp_id - %s - training data copied - %s' % (str(new_fp_id), i_file))
-            except shutil.Error as e:
-                trace = traceback.format_exc()
-                logger.error('%s' % trace)
-                logger.error('error :: shutil error - fp_id - %s - training data not copied to %s' % (str(new_fp_id), ts_features_profile_dir))
-                logger.error('error :: %s' % (e))
-            # Any error saying that the directory doesn't exist
-            except OSError as e:
-                trace = traceback.format_exc()
-                logger.error('%s' % trace)
-                logger.error('error :: OSError error - fp_id - %s - training data not copied to %s' % (str(new_fp_id), ts_features_profile_dir))
-                logger.error('error :: %s' % (e))
-        logger.info('fp_id - %s - training data copied to %s' % (str(new_fp_id), ts_features_profile_dir))
-    else:
-        logger.error('error :: fp_id - %s - training data not copied to %s' % (str(new_fp_id), ts_features_profile_dir))
-
-    if engine:
-        engine_disposal(engine)
-
-    return str(new_fp_id), True, False, fail_msg, trace
+# @modified 20170114 - Feature #1854: Ionosphere learn
+# DEPRECATED create_features_profile here as this function has been migrated in
+# order to decouple the creation of features profiles from the webapp as
+# ionosphere/learn now requires access to this function as well.  Moved to a
+# shared function in ionosphere_functions.py
+# REMOVED
+# def create_features_profile(requested_timestamp, data_for_metric, context):
 
 
 def features_profile_details(fp_id):
@@ -1041,6 +679,7 @@ def features_profile_details(fp_id):
     :rtype:  (str, boolean, str, str)
 
     """
+    logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: features_profile_details'
 
@@ -1057,13 +696,15 @@ def features_profile_details(fp_id):
         logger.error(trace)
         fail_msg = 'error :: could not get a MySQL engine'
         logger.error('%s' % fail_msg)
-        return False, False, fail_msg, trace
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
 
     if not engine:
         trace = 'none'
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
-        return False, False, fail_msg, trace
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
     ionosphere_table = None
     try:
         ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
@@ -1075,7 +716,8 @@ def features_profile_details(fp_id):
         logger.error('%s' % fail_msg)
         if engine:
             engine_disposal(engine)
-        return False, False, fail_msg, trace
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
 
     logger.info('%s :: ionosphere_table OK' % function_str)
 
@@ -1108,6 +750,10 @@ def features_profile_details(fp_id):
         else:
             checked_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_checked)))
         checked_count = row['checked_count']
+        # @modified 20170114 - Feature #1854: Ionosphere learn
+        # Added parent_id and generation
+        parent_id = row['parent_id']
+        generation = row['generation']
         fp_details = '''
 tsfresh_version   :: %s | calc_time :: %s
 features_count    :: %s
@@ -1119,11 +765,12 @@ created_timestamp :: %s
 full_duration     :: %s
 checked_count     :: %s
 last_checked      :: %s | human_date :: %s
+parent_id         :: %s | generation :: %s
 ''' % (str(tsfresh_version), str(calc_time), str(features_count),
             str(features_sum), str(deleted), str(matched_count),
             str(last_matched), str(human_date), str(created_timestamp),
             str(full_duration), str(checked_count), str(last_checked),
-            str(checked_human_date))
+            str(checked_human_date), str(parent_id), str(generation))
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -1131,9 +778,112 @@ last_checked      :: %s | human_date :: %s
         logger.error('%s' % fail_msg)
         if engine:
             engine_disposal(engine)
-        return False, False, fail_msg, trace
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
 
     if engine:
         engine_disposal(engine)
 
-    return fp_details, True, fail_msg, trace
+    # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
+    # Return the fp_details_object so that webapp can pass the parent_id and
+    # generation to the templates
+    # return fp_details, True, fail_msg, trace
+    return fp_details, True, fail_msg, trace, fp_details_object
+
+
+# @added 20170118 - Feature #1862: Ionosphere features profiles search page
+# Added fp_search parameter
+def ionosphere_search_defaults(get_options):
+
+    """
+    Get the default values to populate the search_features_profiles.html options
+
+    :param get_options: list of options to get
+    :type get_options: list of strings
+    :return: tuple
+    :rtype:  (list, list, list, list)
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: ionosphere_search_defaults'
+
+    trace = 'none'
+    fail_msg = 'none'
+
+    full_duration_list = []
+    enabled_list = []
+    tsfresh_version_list = []
+    generation_list = []
+
+    possible_options = [
+        'full_duration', 'enabled', 'tsfresh_version', 'generation']
+
+    engine_needed = False
+    for possible_option in possible_options:
+        if possible_option in get_options:
+            engine_needed = True
+            logger.info('%s :: options for %s required from database' % (function_str, possible_option))
+
+    engine = None
+    if engine_needed:
+        logger.info('%s :: getting MySQL engine' % function_str)
+        try:
+            engine, fail_msg, trace = get_an_engine()
+            logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: could not get a MySQL engine'
+            logger.error('%s' % fail_msg)
+            raise
+
+        if not engine:
+            trace = 'none'
+            fail_msg = 'error :: engine not obtained'
+            logger.error(fail_msg)
+            raise
+
+        ionosphere_table = None
+        try:
+            ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+            logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: failed to get ionosphere_table meta for options'
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise
+        logger.info('%s :: ionosphere_table OK' % function_str)
+
+    for required_option in get_options:
+        if engine_needed and engine:
+            all_list = []
+            try:
+                stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)
+                connection = engine.connect()
+                for row in engine.execute(stmt):
+                    value = row[str(required_option)]
+                    all_list.append(value)
+                connection.close()
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: failed to get ionosphere_table meta for options'
+                logger.error('%s' % fail_msg)
+                if engine:
+                    engine_disposal(engine)
+                raise
+
+            if required_option == 'full_duration':
+                full_duration_list = set(all_list)
+            if required_option == 'enabled':
+                enabled_list = set(all_list)
+            if required_option == 'tsfresh_version':
+                tsfresh_version_list = set(all_list)
+            if required_option == 'generation':
+                generation_list = set(all_list)
+
+    return full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace
