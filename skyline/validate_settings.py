@@ -1,5 +1,6 @@
 import logging
 import traceback
+import pytz
 import settings
 
 
@@ -244,6 +245,16 @@ def validate_settings_variables(current_skyline_app):
             current_logger.info(traceback.format_exc())
             current_logger.error('error :: exiting, please fix setting.py')
             print ('error :: IONOSPHERE_FEATURES_PERCENT_SIMILAR is not set in settings.py')
+            invalid_variables = True
+
+        # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
+        try:
+            TEST_SERVER_PYTZ_TIMEZONE = pytz.timezone(settings.SERVER_PYTZ_TIMEZONE)
+        except:
+            current_logger.error('error :: SERVER_PYTZ_TIMEZONE is not set to a pytz timezone in settings.py')
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: exiting, please fix setting.py')
+            print ('error :: SERVER_PYTZ_TIMEZONE is not set to a pytz timezone in settings.py')
             invalid_variables = True
 
         # @added 20170109 - Feature #1854: Ionosphere learn

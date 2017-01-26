@@ -236,8 +236,19 @@ Also note:
 		<div class="col-md-10">
   {% if data_ok == True %}
 		<div class="container">
+<!-- # @modified 20170122 - Feature #1876: Ionosphere - training_data learn countdown -->
+    {% if print_debug == True %}
+<code> DEBUG </code> :: countdown :: {{ countdown }}</br>
+    {% endif %}
+    {% if countdown == False %}
 		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span>  (aka: "That's not what I call an anomaly")</h4>
-		  <p>Train Skyline on this timeseries if this data is not anomalous.</p>
+		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>True</h4>
+    {% else %}
+		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span>  (aka: "That's not what I call an anomaly")</h4>
+		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>False - Ionosphere will attempt
+      to learn if this is <code>not anomalous</code> from the {{ use_full_duration_days }} days features profiles that exist in:</h4>
+      <div class="countdown styled"></div>
+    {% endif %}
 		  <table class="table table-hover">
 		    <thead>
 		      <tr>
@@ -254,26 +265,57 @@ Also note:
 		        <td><b><span class="logo"><span class="sky">features ::</span> <span class="re">extracted</span></span></span></b>
 						</td>
 	{% else %}
-		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&calc_features=true">
+		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&calc_features=true&learn=true">
 						<button type="button">Extract features</button></a> - <code>if not anomalous:</code> press this button first</td>
 		      </tr>
 	{% endif %}
+
 		      <tr>
-		        <td>Create features profile</td>
-		        <td>Then add the extracted features profile as <strong>NOT anomalous</strong></td>
+		        <td>Create features profile and <b><span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</b></td>
+		        <td>Then create the full_duration extracted features profile as <strong>NOT anomalous</strong>
+            and <span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</strong> or,</td>
   {% if extracted_features %}
     {% if not features_profile_id %}
-		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_fp=true">
-						<button type="button">Create features profile</button></a></td>
+		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_fp=true&learn=false">
+						<button type="button">Create features profile and <b>do NOT learn</b></button></a></td>
     {% else %}
             <td><b><span class="logo"><span class="sky">profile ::</span> <span class="re">created</span></span></span></b>
             </td>
     {% endif %}
   {% else %}
-		        <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
-						<button type="button" onclick="return confirm('Are you sure you want to try and click the Create features profile button before you have extracted the features? Especially after being advise to not do it?');">Create features profile</button></a><br>
-You first have to extract features before this button will work properly.<br>
-	{% endif %}
+            <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
+            <button type="button" onclick="return confirm('Are you sure you want to try and click the Create features profile button before you have extracted the features? Especially after being advise to not do it?');">Create features profile and <b>DO NOT learn</b></button></a><br>
+            You first have to extract features before this button will work properly.<br>
+  {% endif %}
+<!--
+# @added 20170119 - Feature #1854: Ionosphere learn - generations
+# Allow for a features profile to NOT be learnt at use_full_duration_days this
+# allows a not anomalous timeseries at full_duration to have a features profile
+# created for it but the user 30 day or use_full_duration_days timeseries may
+# not want to add that to be learnt.
+-->
+		      <tr>
+		        <td>Create features profile and and <b><span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</b></td>
+		        <td>Or create a features profile as <strong>NOT anomalous</strong>
+            and <span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</strong></td>
+    {% if not features_profile_id %}
+      {% if extracted_features %}
+		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_fp=true&learn=true">
+						<button type="button">Create features profile and <b>LEARN</b></button></a></td>
+      {% else %}
+            <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
+            <button type="button" onclick="return confirm('Are you sure you want to try and click the Create features profile button before you have extracted the features? Especially after being advise to not do it?');">Create features profile and <b>LEARN</b></button></a><br>
+            You first have to extract features before this button will work properly.<br></td>
+      {% endif %}
+    {% else %}
+            <td>
+      {% if learn %}
+            <b><span class="logo"><span class="sky">profile ::</span> <span class="re">created and learning</span></span></span></b>
+      {% else %}
+            <b><span class="logo"><span class="sky">profile ::</span> <span class="re">created and NOT learning</span></span></span></b>
+      {% endif %}
+            </td>
+	 {% endif %}
 		      </tr>
 		    </tbody>
 		  </table>
@@ -313,7 +355,7 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
 	  </div>
     {% else %}
 	  <div class="alert alert-warning">
-	    <strong>A features profile has already been created</strong> from this training data set with fp_id {{ features_profile_id }}.
+	    <strong>A features profile has already been created or learnt</strong> from this training data set with fp_id {{ features_profile_id }}.
       This training data set will be removed by the normal Ionosphere training data roomba that removes old training data dirs and files.
       <strong>However it is good to know</strong> that you thought this was not anomalous <strong>as well or again :)</strong>.  This training data set is now a features_profiles
       data set and can be viewed in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric}}">features profile page for fp_id {{ features_profile_id }}</a>
@@ -431,8 +473,9 @@ Image file: {{ image }}<br><br>
       </table>
   {% if data_ok == True %}
       <br><p>
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">available</span></h4>
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available</span></h4>
       {{ timeseries }}
+
   {% endif %}
   </div>
   <div class="known_bugs">

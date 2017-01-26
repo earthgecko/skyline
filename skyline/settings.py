@@ -1383,6 +1383,16 @@ SKYLINE_URL = 'http://skyline.example.com:8080'
 # :vartype TSFRESH_BASELINE_VERSION: str
 # """
 
+SERVER_PYTZ_TIMEZONE = 'UTC'
+"""
+:var SERVER_PYTZ_TIMEZONE: You must specific a pytz timezone you want Ionosphere to
+    use for the creation of features profiles and converting datetimes to utc.
+    This must be a valid pytz timezone name, see:
+    https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst
+    http://earthgecko-skyline.readthedocs.io/en/ionosphere/development/pytz.html#timezones-list-for-pytz-version
+:vartype SERVER_PYTZ_TIMEZONE: str
+"""
+
 IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1.0
 """
 :var IONOSPHERE_FEATURES_PERCENT_SIMILAR: The percentage difference between a

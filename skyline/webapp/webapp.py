@@ -28,6 +28,12 @@ from flask import session, g, url_for, flash, Markup, json
 # For secret_key
 import uuid
 
+# @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
+# Determine the features profile dir path for a fp_id
+import datetime
+from pytz import timezone
+import pytz
+
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 import os.path
@@ -54,7 +60,8 @@ from tsfresh_feature_names import TSFRESH_VERSION
 # @added 20170114 - Feature #1854: Ionosphere learn
 # Decoupled the create_features_profile from ionosphere_backend and moved to
 # ionosphere_functions so it can be used by ionosphere/learn
-from ionosphere_functions import create_features_profile
+from ionosphere_functions import (
+    create_features_profile, get_ionosphere_learn_details)
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -790,10 +797,12 @@ def ionosphere():
 
     # @modified 20170118 - Feature #1862: Ionosphere features profiles search page
     # Added fp_search parameter
+    # @modified 20170122 - Feature #1872: Ionosphere - features profile page by id only
+    # Added fp_id parameter
     IONOSPHERE_REQUEST_ARGS = [
         'timestamp', 'metric', 'metric_td', 'a_dated_list', 'timestamp_td',
         'requested_timestamp', 'fp_view', 'calc_features', 'add_fp',
-        'features_profiles', 'fp_search']
+        'features_profiles', 'fp_search', 'learn', 'fp_id']
 
     determine_metric = False
     dated_list = False
@@ -805,6 +814,11 @@ def ionosphere():
     fp_profiles = []
     # @added 20170118 - Feature #1862: Ionosphere features profiles search page
     fp_search = False
+    # @added 20170120 -  Feature #1854: Ionosphere learn - generations
+    # Added fp_learn and fp_fd_days parameters to allow the user to not learn at
+    # use_full_duration_days
+    fp_learn = False
+    fp_fd_days = settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
 
     try:
         if request_args_present:
@@ -815,6 +829,58 @@ def ionosphere():
 
             if 'fp_view' in request.args:
                 fp_view = request.args.get(str('fp_view'), None)
+                base_name = request.args.get(str('metric'), None)
+
+                # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
+                # Determine the features profile dir path for a fp_id
+                if 'fp_id' in request.args:
+                    fp_id = request.args.get(str('fp_id'), None)
+                    metric_timestamp = 0
+                    try:
+                        fp_details, fp_details_successful, fail_msg, traceback_format_exc, fp_details_object = features_profile_details(fp_id)
+                        anomaly_timestamp = int(fp_details_object['anomaly_timestamp'])
+                        created_timestamp = fp_details_object['created_timestamp']
+                    except:
+                        trace = traceback.format_exc()
+                        message = 'failed to get features profile details for id %s' % str(fp_id)
+                        return internal_error(message, trace)
+                    if not fp_details_successful:
+                        trace = traceback.format_exc()
+                        fail_msg = 'error :: features_profile_details failed'
+                        return internal_error(fail_msg, trace)
+
+                    use_timestamp = 0
+                    metric_timeseries_dir = base_name.replace('.', '/')
+                    features_profiles_data_dir = '%s/%s/%s' % (
+                        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                        str(anomaly_timestamp))
+                    if os.path.exists(features_profiles_data_dir):
+                        use_timestamp = int(anomaly_timestamp)
+                    else:
+                        logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
+                    if use_timestamp == 0:
+                        dt = str(created_timestamp)
+                        naive = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+                        pytz_tz = settings.SERVER_PYTZ_TIMEZONE
+                        local = pytz.timezone(pytz_tz)
+                        local_dt = local.localize(naive, is_dst=None)
+                        utc_dt = local_dt.astimezone(pytz.utc)
+                        unix_created_timestamp = utc_dt.strftime('%s')
+                        features_profiles_data_dir = '%s/%s/%s' % (
+                            settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                            str(unix_created_timestamp))
+                        if os.path.exists(features_profiles_data_dir):
+                            use_timestamp = int(unix_created_timestamp)
+                        else:
+                            logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
+
+                    if use_timestamp == 0:
+                        logger.error('no timestamp feature profiles data dir found for feature profile id - %s' % str(fp_id))
+                        resp = json.dumps(
+                            {'results': 'Error: no timestamp feature profiles data dir found for feature profile id - ' + str(fp_id) + ' - go on... nothing here.'})
+                        return resp, 400
+                    redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
+                    return redirect(redirect_url, code=302)
 
             for i in request.args:
                 key = str(i)
@@ -841,6 +907,12 @@ def ionosphere():
                 if key == 'fp_search':
                     if str(value) == 'true':
                         fp_search = True
+
+                # @added 20170120 -  Feature #1854: Ionosphere learn - generations
+                # Added fp_learn parameter
+                if key == 'learn':
+                    if str(value) == 'true':
+                        fp_learn = True
 
                 if key == 'features_profiles':
                     fp_profiles = str(value)
@@ -1129,7 +1201,11 @@ def ionosphere():
                 generation = 0
                 ionosphere_job = 'learn_fp_human'
                 try:
-                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation)
+                    # @modified 20170120 -  Feature #1854: Ionosphere learn - generations
+                    # Added fp_learn parameter to allow the user to not learn the
+                    # use_full_duration_days
+                    # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
+                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
                     if create_feature_profile:
                         generation_zero = True
                 except:
@@ -1165,12 +1241,18 @@ def ionosphere():
                 fail_msg = 'error :: features_profile_details failed'
                 return internal_error(fail_msg, trace)
 
+        valid_learning_duration = None
         try:
             # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
             # Added graphite_now_images gimages
             # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
             # Added graphite_matched_images gmimages
             mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
+
+            # @added 20170120 -  Feature #1854: Ionosphere learn - generations
+            # Added fp_learn parameter to allow the user to not learn the
+            # use_full_duration_days so added fp_fd_days
+            use_full_duration, valid_learning_duration, fp_fd_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(skyline_app, base_name)
 
             # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
             # Added the full_duration parameter so that the appropriate graphs can be
@@ -1224,6 +1306,21 @@ def ionosphere():
                 par_id = 0
                 gen = 0
 
+            # @added 20170122 - Feature #1876: Ionosphere - training_data learn countdown
+            # Add a countdown until Ionosphere will learn
+            countdown_to = False
+            if requested_timestamp and valid_learning_duration:
+                try:
+                    request_time = int(time.time())
+                    vaild_learning_timestamp = int(requested_timestamp) + int(valid_learning_duration)
+                    if request_time < vaild_learning_timestamp:
+                        countdown_to = time.strftime(
+                            '%Y-%m-%d %H:%M:%S', time.localtime(vaild_learning_timestamp))
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
+                    return internal_error(message, trace)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -1240,7 +1337,8 @@ def ionosphere():
                 metric_second_order_resolution_hours=second_order_resolution_hours,
                 tsfresh_version=TSFRESH_VERSION, graphite_now_images=gimages,
                 graphite_matched_images=gmimages, matched_count=times_matched,
-                parent_id=par_id, generation=gen,
+                parent_id=par_id, generation=gen, learn=fp_learn,
+                use_full_duration_days=fp_fd_days, countdown=countdown_to,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

@@ -205,6 +205,13 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 # be profiled on Redis timeseries data at FULL_DURATION
 */
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries on which the features profile was created',
+/*
+# @modified 20170120 - Feature #1854: Ionosphere learn - generations
+# Added the anomaly_timestamp as the created_timestamp is different and in terms
+# of the features profile data dir the anomaly_timestamp is required to be
+# known.
+*/
+  `anomaly_timestamp` INT(10) DEFAULT 0 COMMENT 'anomaly unix timestamp, see notes on historic dates above',
   `enabled` tinyint(1) DEFAULT NULL COMMENT 'the features profile is enabled 1 or not enabled 0',
   `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
   `calc_time` FLOAT DEFAULT NULL COMMENT 'the time taken in seconds to calcalute the features',

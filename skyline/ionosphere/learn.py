@@ -22,6 +22,11 @@ from sqlalchemy.sql import select
 
 import numpy as np
 
+# @added 20170123 - Feature #1854: Ionosphere learn - generations
+# Required for ionosphere_learn to test that use_full_duration_days data is
+# available
+import json
+
 import settings
 from skyline_functions import (
     fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p,
@@ -370,7 +375,7 @@ def ionosphere_learn(timestamp):
       full_duration.  Then this features profile is created as a generation 0
       features profile at the learn use_full_duration seconds.  This jobs is
       only ever add via the Ionosphere UI
-      `~skyline.skyline.Webapp.ionosphere_backend.create_features_profile`
+      `~skyline.ionosphere_functions.create_features_profile`
       TODO: now_timestamp/ where the now_timestamp relaces the metric_timestamp
       context and as the metric_check_file has been replaced and this features
       profile was created later.  This prevents the pollution of metric_timestamp
@@ -891,6 +896,38 @@ def ionosphere_learn(timestamp):
             logger.info('learn :: exiting this work but not removing work item, as Graphite may be available again before the work expires')
             continue
 
+        # @added 20170123 - Feature #1854: Ionosphere learn - generations
+        # TODO
+        # ionosphere_learn needs to test that use_full_duration_days data is available
+        # before any use_full_duration_days features profiles are created a metric, this
+        # ensures that newly added metrics are not learnt in the use_full_duration_days
+        # until there is use_full_duration_days available
+        with open((learn_json_file), 'r') as f:
+            timeseries = json.loads(f.read())
+            logger.info('learn :: data points surfaced :: %s' % (len(timeseries)))
+        # Tested and Graphite retruns null, the Mirage json converted pattern
+        # discards null.
+        # [1483552680.0, 0.0]
+        # gary@mc11:/tmp$ date -d @1483552680
+        # Wed Jan  4 17:58:00 GMT 2017
+        # gary@mc11:/tmp$
+        # This should be 24 Dec 2016 as that is a request for 30 days data, so a simple check would be...
+        # If first data point not on the first day of the use_full_duration_days then not valid to learn.
+        first_timestamp = 0
+        try:
+            first_timestamp = int(timeseries[0][0])
+        except IndexError:
+            logger.error(traceback.format_exc())
+            logger.error('error :: learn :: failed to determine the first timestamp from learning data ts json - %s' % (learn_json_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+        if first_timestamp == 0:
+            logger.error('error :: learn :: no first timestamp from learning data ts json - %s' % (learn_json_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+        # TODO still calculate age and discard if no data from the first day of
+        # use_full_duration_days
+
         # Calculate the features and a features profile for the learn_json_file
         calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_learn_data_dir, base_name)
         calculated_feature_file_found = False
@@ -1125,8 +1162,14 @@ def ionosphere_learn(timestamp):
         if str(work) == 'learn_fp_learnt':
             logger.info('learn :: requesting Ionosphere webapp training_data page to generate Graphite NOW graphs')
             import requests
-            url = '%s/ionosphere?timestamp=%smetric=%s' % (
-                settings.SKYLINE_URL, str(learn_base_name), str(metric_timestamp))
+            # @modified 20170122 - Feature #1854: Ionosphere learn - generations
+            #                      Feature #1842: Ionosphere - Graphite now graphs
+            # Corrected typos in url
+            # url = '%s/ionosphere?timestamp=%smetric=%s' % (
+            #    settings.SKYLINE_URL, str(learn_base_name), str(metric_timestamp))
+            url = '%s/ionosphere?timestamp=%s&metric=%s' % (
+                settings.SKYLINE_URL, str(metric_timestamp), str(learn_base_name))
+
             logger.info('learn :: training_data URL - %s' % str(url))
             ionosphere_resp = None
             if settings.WEBAPP_AUTH_ENABLED:
@@ -1193,7 +1236,11 @@ def ionosphere_learn(timestamp):
                 remove_work_list_from_redis_set(learn_metric_list)
                 continue
             try:
-                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation)
+                # @modified 20170120 -  Feature #1854: Ionosphere learn - generations
+                # Added fp_learn parameter to allow the user to not learn the
+                # use_full_duration_days, this can be passed via the UI as False
+                fp_learn = True
+                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: %s :: failed to create a features profile' % profile_context)

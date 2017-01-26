@@ -176,7 +176,7 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
     return use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin
 
 
-def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation):
+def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn):
     """
     Add a features_profile to the Skyline ionosphere database table.
 
@@ -186,11 +186,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     :param data_for_metric: The base_name of the metric
     :param context: The context of the caller
     :param ionosphere_job: The ionosphere_job name related to creation request
+        valid jobs are ``learn_fp_human``, ``learn_fp_generation``,
+        ``learn_fp_learnt`` and ``learn_fp_automatic``.
     :param fp_parent_id: The id of the parent features profile that this was
         learnt from, 0 being an original human generated features profile
     :param fp_generation: The number of generations away for the original
         human generated features profile, 0 being an original human generated
-        features profile
+        features profile.
+    :param fp_learn: Whether Ionosphere should learn at use_full_duration_days
     :type current_skyline_app: str
     :type requested_timestamp: int
     :type data_for_metric: str
@@ -198,6 +201,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     :type ionosphere_job: str
     :type fp_parent_id: int
     :type fp_generation: int
+    :type fp_learn: boolean
     :return: fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc
     :rtype: str, boolean, boolean, str, str
 
@@ -261,6 +265,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     features_profile_details_file = '%s/%s.%s.fp.details.txt' % (
         metric_training_data_dir, str(requested_timestamp), base_name)
 
+    anomaly_check_file = '%s/%s.txt' % (metric_training_data_dir, base_name)
+
     trace = 'none'
     fail_msg = 'none'
     new_fp_id = False
@@ -296,9 +302,6 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
         if context != 'ionosphere_learn':
             if ts_full_duration == '0':
-                anomaly_check_file = '%s/%s.txt' % (
-                    metric_training_data_dir, base_name)
-
                 if path.isfile(anomaly_check_file):
                     current_logger.info('create_features_profile :: determining the full duration from anomaly_check_file - %s' % anomaly_check_file)
                     # Read the details file
@@ -478,6 +481,22 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     current_logger.info('create_features_profile :: generation info - max_generations              :: %s' % (str(max_generations)))
     current_logger.info('create_features_profile :: generation info - max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
 
+    # @added 20170120 - Feature #1854: Ionosphere learn
+    # Always use the timestamp from the anomaly file
+    use_anomaly_timestamp = int(requested_timestamp)
+    if context == 'ionosphere_learn':
+        if path.isfile(anomaly_check_file):
+            current_logger.info('create_features_profile :: determining the full duration from anomaly_check_file - %s' % anomaly_check_file)
+            # Read the details file
+            with open(anomaly_check_file, 'r') as f:
+                anomaly_details = f.readlines()
+                for i, line in enumerate(anomaly_details):
+                    if 'metric_timestamp' in line:
+                        _metric_timestamp = '%s' % str(line).split("'", 2)
+                        metric_timestamp_array = literal_eval(_metric_timestamp)
+                        use_anomaly_timestamp = (int(metric_timestamp_array[1]))
+                        current_logger.info('create_features_profile :: determined the anomaly metric_timestamp as - %s' % str(use_anomaly_timestamp))
+
     ionosphere_table = None
     try:
         ionosphere_table, fail_msg, trace = ionosphere_table_meta(current_skyline_app, engine)
@@ -502,8 +521,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         connection = engine.connect()
         # @added 20170113 - Feature #1854: Ionosphere learn
         # Added learn values parent_id, generation
+        # @modified 20170120 - Feature #1854: Ionosphere learn
+        # Added anomaly_timestamp
         ins = ionosphere_table.insert().values(
             metric_id=int(metrics_id), full_duration=int(ts_full_duration),
+            anomaly_timestamp=int(use_anomaly_timestamp),
             enabled=1, tsfresh_version=str(tsfresh_version),
             calc_time=calculated_time, features_count=fcount,
             features_sum=fsum, parent_id=fp_parent_id,
@@ -619,6 +641,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     # Create metric ts table if not exists ts_<metric_id>
     # Create z_ts_<metric_id> table
+    # @modified 20170121 - Feature #1854: Ionosphere learn - generations
+    # TODO Adding the option to not save timeseries to DB, as default?
     ts_table_created = False
     ts_table_name = 'z_ts_%s' % str(metrics_id)
     try:
@@ -803,6 +827,13 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         create_redis_work_item = False
         if context == 'training_data' and ionosphere_job == 'learn_fp_human':
             create_redis_work_item = True
+            # @modified 20170120 -  Feature #1854: Ionosphere learn - generations
+            # Added fp_learn parameter to allow the user to not learn the
+            # use_full_duration_days
+            if not fp_learn:
+                create_redis_work_item = False
+                current_logger.info('fp_learn is False not adding an item to Redis ionosphere.learn.work set')
+
         if ionosphere_job == 'learn_fp_automatic':
             create_redis_work_item = True
         if create_redis_work_item:
