@@ -851,26 +851,33 @@ def ionosphere():
 
                     use_timestamp = 0
                     metric_timeseries_dir = base_name.replace('.', '/')
+                    # @modified 20170126 - Feature #1872: Ionosphere - features profile page by id only
+                    # The the incorrect logic, first it should be checked if
+                    # there is a use_full_duration parent timestamp
+                    dt = str(created_timestamp)
+                    naive = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+                    pytz_tz = settings.SERVER_PYTZ_TIMEZONE
+                    local = pytz.timezone(pytz_tz)
+                    local_dt = local.localize(naive, is_dst=None)
+                    utc_dt = local_dt.astimezone(pytz.utc)
+                    unix_created_timestamp = utc_dt.strftime('%s')
+                    features_profiles_data_dir = '%s/%s/%s' % (
+                        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                        str(unix_created_timestamp))
+                    if os.path.exists(features_profiles_data_dir):
+                        use_timestamp = int(unix_created_timestamp)
+                    else:
+                        logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
+
                     features_profiles_data_dir = '%s/%s/%s' % (
                         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
                         str(anomaly_timestamp))
-                    if os.path.exists(features_profiles_data_dir):
-                        use_timestamp = int(anomaly_timestamp)
-                    else:
-                        logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
+                    # @modified 20170126 - Feature #1872: Ionosphere - features profile page by id only
+                    # This was the incorrect logic, first it should be checked if
+                    # there is a use_full_duration parent timestamp
                     if use_timestamp == 0:
-                        dt = str(created_timestamp)
-                        naive = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
-                        pytz_tz = settings.SERVER_PYTZ_TIMEZONE
-                        local = pytz.timezone(pytz_tz)
-                        local_dt = local.localize(naive, is_dst=None)
-                        utc_dt = local_dt.astimezone(pytz.utc)
-                        unix_created_timestamp = utc_dt.strftime('%s')
-                        features_profiles_data_dir = '%s/%s/%s' % (
-                            settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
-                            str(unix_created_timestamp))
                         if os.path.exists(features_profiles_data_dir):
-                            use_timestamp = int(unix_created_timestamp)
+                            use_timestamp = int(anomaly_timestamp)
                         else:
                             logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
 
@@ -1669,8 +1676,8 @@ def rebrow_key(host, port, db, key):
         type=t,
         size=size,
         ttl=ttl / 1000.0,
-        now=datetime.utcnow(),
-        expiration=datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
+        now=datetime.datetime.utcnow(),
+        expiration=datetime.datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
         version=skyline_version,
         duration=(time.time() - start),
         msg_packed_key=msg_pack_key)

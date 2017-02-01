@@ -675,12 +675,14 @@ def get_graphite_metric(
 # Added full_duration which needs to be recorded to allow Mirage metrics
 # to be profiled on Redis timeseries data at FULL_DURATION
 # e.g. mirage.redis.24h.json
+# @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+# Added parent_id, always zero from Analyzer and Mirage
 
 
 def send_anomalous_metric_to(
     current_skyline_app, send_to_app, timeseries_dir, metric_timestamp,
         base_name, datapoint, from_timestamp, triggered_algorithms, timeseries,
-        full_duration):
+        full_duration, parent_id):
     """
     Assign a metric and timeseries to Crucible or Ionosphere.
     """
@@ -761,6 +763,8 @@ def send_anomalous_metric_to(
     # Added full_duration
     # @modified 20170116 - Feature #1854: Ionosphere learn
     # Changed added_by parameter from current_skyline_app to added_by_context
+    # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+    # Added ionosphere_parent_id, always zero from Analyzer and Mirage
     anomaly_data = 'metric = \'%s\'\n' \
                    'value = \'%s\'\n' \
                    'from_timestamp = \'%s\'\n' \
@@ -773,10 +777,11 @@ def send_anomalous_metric_to(
                    'added_by = \'%s\'\n' \
                    'added_at = \'%s\'\n' \
                    'full_duration = \'%s\'\n' \
+                   'ionosphere_parent_id = \'%s\'\n' \
         % (str(base_name), str(datapoint), str(from_timestamp),
             str(metric_timestamp), str(settings.ALGORITHMS),
             str(triggered_algorithms), anomaly_dir, added_by_context,
-            str(now_timestamp), str(int(full_duration)))
+            str(now_timestamp), str(int(full_duration)), str(parent_id))
 
     # @modified 20170116 - Feature #1854: Ionosphere learn
     # In the Ionosphere context there is no requirement to create a timeseries

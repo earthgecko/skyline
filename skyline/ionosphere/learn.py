@@ -110,7 +110,11 @@ def learn_load_metric_vars(metric_vars_file):
 
     string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
     float_keys = ['value']
-    int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
+    # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+    # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+    int_keys = [
+        'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
+        'ionosphere_parent_id']
     array_keys = ['algorithms', 'triggered_algorithms']
     boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
@@ -149,10 +153,6 @@ def learn_load_metric_vars(metric_vars_file):
                 'error :: learn :: loading metric variables - none found' % (
                     str(metric_vars_file)))
             return False
-
-        if settings.ENABLE_DEBUG:
-            logger.info(
-                'debug :: learn :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
 
     logger.info('debug :: learn :: metric_vars for %s' % str(metric))
     logger.info('debug :: learn :: %s' % str(metric_vars_array))
@@ -490,6 +490,9 @@ def ionosphere_learn(timestamp):
 
         logger.info('learn :: checking work item - %s' % (str(learn_metric_list)))
 
+        # @added 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+        # If the work is older than 7200 seconds
+
         # The metric learn work variables now known so we can process the metric
         # Determine the metric details from the database
         metrics_id = None
@@ -731,7 +734,7 @@ def ionosphere_learn(timestamp):
             value = float(value_list[0])
             anomalous_value = value
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: learn :: metric variable - value - %s' % (value))
+                logger.info('debug :: learn :: metric variable - value - %s' % str(value))
         except:
             logger.error('error :: learn :: failed to read value variable from check file - %s' % (metric_check_file))
             value = None
@@ -747,7 +750,7 @@ def ionosphere_learn(timestamp):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             from_timestamp = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: learn :: metric variable - from_timestamp - %s' % from_timestamp)
+                logger.info('debug :: learn :: metric variable - from_timestamp - %s' % str(from_timestamp))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: learn :: failed to read from_timestamp variable from check file - %s' % (metric_check_file))
@@ -758,7 +761,7 @@ def ionosphere_learn(timestamp):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             metric_timestamp = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: learn :: metric variable - metric_timestamp - %s' % metric_timestamp)
+                logger.info('debug :: learn :: metric variable - metric_timestamp - %s' % str(metric_timestamp))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: learn :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
@@ -793,7 +796,7 @@ def ionosphere_learn(timestamp):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             added_at = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: learn :: metric variable - added_at - %s' % added_at)
+                logger.info('debug :: learn :: metric variable - added_at - %s' % str(added_at))
         except:
             logger.error('error :: learn :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
             added_at = metric_timestamp
@@ -804,7 +807,7 @@ def ionosphere_learn(timestamp):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             full_duration = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: learn :: metric variable - full_duration - %s' % full_duration)
+                logger.info('debug :: learn :: metric variable - full_duration - %s' % str(full_duration))
         except:
             logger.error('error :: learn :: failed to read full_duration variable from check file - %s' % (metric_check_file))
             full_duration = None
@@ -902,10 +905,34 @@ def ionosphere_learn(timestamp):
         # before any use_full_duration_days features profiles are created a metric, this
         # ensures that newly added metrics are not learnt in the use_full_duration_days
         # until there is use_full_duration_days available
-        with open((learn_json_file), 'r') as f:
-            timeseries = json.loads(f.read())
-            logger.info('learn :: data points surfaced :: %s' % (len(timeseries)))
-        # Tested and Graphite retruns null, the Mirage json converted pattern
+        try:
+            with open((learn_json_file), 'r') as f:
+                # @modified 20170131 - Feature #1854: Ionosphere learn - generations
+                #                      Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
+                # Corrected method
+                # timeseries = json.loads(f.read())
+                raw_timeseries = f.read()
+                timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                timeseries = literal_eval(timeseries_array_str)
+                datapoints = timeseries
+                validated_timeseries = []
+                for datapoint in datapoints:
+                    try:
+                        new_datapoint = [int(datapoint[0]), float(datapoint[1])]
+                        validated_timeseries.append(new_datapoint)
+                    except:
+                        continue
+                timeseries = validated_timeseries
+
+                # @modified 20170129 - Bug #1898: Ionosphere - missing json
+                # logger.info('learn :: data points surfaced :: %s' % (len(timeseries)))
+                logger.info('learn :: data points surfaced :: %s' % (str(len(timeseries))))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: learn :: failed to read learning data ts json - %s' % (learn_json_file))
+            remove_work_list_from_redis_set(learn_metric_list)
+            continue
+        # Tested and Graphite returns null, the Mirage json converted pattern
         # discards null.
         # [1483552680.0, 0.0]
         # gary@mc11:/tmp$ date -d @1483552680
@@ -953,6 +980,9 @@ def ionosphere_learn(timestamp):
         if os.path.isfile(calculated_feature_file):
             calculated_feature_file_found = True
             fp_csv = calculated_feature_file
+
+        # @added 20170131 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
+        allowed_to_learn = False
 
         # @added 20170116 - Feature #1854: Ionosphere learn - generations
         # Rate limit by generation and by max_percent_diff_from_origin
@@ -1032,7 +1062,7 @@ def ionosphere_learn(timestamp):
             current_parent_id = learn_parent_id
             current_generation = learn_generation
             if int(current_generation) == 0:
-                logger.error('error :: learn :: ionosphere_learn doe not handle generation %s profiles' % str(current_generation))
+                logger.error('error :: learn :: ionosphere_learn does not handle generation %s profiles' % str(current_generation))
                 logger.info('learn :: exiting this work and removing work item')
                 remove_work_list_from_redis_set(learn_metric_list)
                 learn_engine_disposal(engine)
@@ -1068,6 +1098,29 @@ def ionosphere_learn(timestamp):
                         logger.error(traceback.format_exc())
                         logger.error('error :: learn :: determining parent id of the 0 generation origin')
                         break
+
+            # @added 20170131 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
+            # TODO: here a check may be required to evaluate whether the origin_fp_id
+            #       had a use_full_duration features profile created, however
+            #       due to the fact that it is in learn, suggests that it did
+            #       have, not 100% sure.
+            child_use_full_duration_count_of_origin_fp_id = 0
+            try:
+                connection = engine.connect()
+                result = connection.execute(
+                    'SELECT COUNT(id) FROM ionosphere WHERE parent_id=%s AND full_duration=%s' % (
+                        str(origin_fp_id), str(use_full_duration)))
+                for row in result:
+                    child_fp_count = row['COUNT(id)']
+                child_use_full_duration_count_of_origin_fp_id = int(child_fp_count)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: determining parent id of the 0 generation origin')
+            if child_use_full_duration_count_of_origin_fp_id > 0:
+                logger.info('learn :: the origin_fp_id %s was allowed to learn, allowing to learn' % str(origin_fp_id))
+                allowed_to_learn = True
+            else:
+                logger.info('learn :: the origin_fp_id %s was not allowed to learn, not allowing learning' % str(origin_fp_id))
 
             learn_engine_disposal(engine)
 
@@ -1226,6 +1279,7 @@ def ionosphere_learn(timestamp):
                     logger.error('error :: learn :: %s :: the new_fp_details_file does not exist - %s' % (profile_context, new_fp_details_file))
                     remove_work_list_from_redis_set(learn_metric_list)
                     continue
+                logger.info('learn :: %s :: timestamped learning dir exists' % profile_context)
 
             # Create a use_full_duration learn features profile
             generation = int(learn_generation) + 1
@@ -1235,11 +1289,42 @@ def ionosphere_learn(timestamp):
                         profile_context, str(generation)))
                 remove_work_list_from_redis_set(learn_metric_list)
                 continue
+            else:
+                logger.info('learn :: %s :: generation limit OK at %s' % (profile_context, str(generation)))
+
+            # @added 20170129 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
+            # Before a features profile can be created by a child, a check must
+            # be made to determine if the parent was allowed to learn.  If a
+            # features profile was initially created but not set to learn, then
+            # the child should not pass learn either, by default, unless the
+            # child features profile is later found to match a KNOWN learn
+            # use_full_duration profile that DOES match.  At this point the
+            # timeseries has reached maturity in its current state.  It could be
+            # considered that the timeseries has achieved a more stable Active
+            # Brownian Motion https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801
+            # Whatever anomalies the operator did not want to ship in or learn
+            # are no longer part of the use_full_duration_days profile.  At this
+            # point even if the parent could not learn, other generations agree
+            # that the current timeseries has now matured since the original
+            # parent generation that use_full_duration_days is now normal.
+            # At this point the generation restriction is removed and Skyline
+            # can learn at use_full_duration_days as well.  Easier than it
+            # sounds...
+            do_not_learn = False
+            if not allowed_to_learn:
+                logger.info('learn :: the origin parent was not allowed to learn so setting do_not_learn to True')
+                do_not_learn = True
+            else:
+                logger.info('learn :: the origin parent was allowed to learn so do_not_learn is set to False')
+
             try:
                 # @modified 20170120 -  Feature #1854: Ionosphere learn - generations
                 # Added fp_learn parameter to allow the user to not learn the
                 # use_full_duration_days, this can be passed via the UI as False
                 fp_learn = True
+                # @added 20170129 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
+                if do_not_learn:
+                    fp_learn = False
                 fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn)
             except:
                 logger.error(traceback.format_exc())
@@ -1266,6 +1351,10 @@ def ionosphere_learn(timestamp):
             # These are not required in the Ionosphere check context
             triggered_algorithms = 'None'
             timeseries = []
+            # @modified 20170129 - Feature #1854: Ionosphere learn - generations
+            #                      Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+            # For learn_fp_generation the learn_parent_id is not set so set to 0
+            learn_parent_id = 0
             try:
                 send_anomalous_metric_to(
                     # @modified 20170118 - Feature #1854: Ionosphere learn - generations
@@ -1274,10 +1363,13 @@ def ionosphere_learn(timestamp):
                     # which is handled in the send_anomalous_metric_to function
                     # now.
                     # 'ionosphere_learn', 'ionosphere', metric_learn_data_dir,
+                    # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+                    # Added parent_id
                     'ionosphere', 'ionosphere_learn_to_ionosphere',
                     str(metric_learn_data_dir), str(metric_timestamp),
                     base_name, str(value), str(from_timestamp),
-                    triggered_algorithms, timeseries, str(use_full_duration))
+                    triggered_algorithms, timeseries, str(use_full_duration),
+                    str(learn_parent_id))
                 logger.info(
                     'learn :: ionosphere check added at %s full_duration for %s' % (
                         str(use_full_duration), str(fp_csv)))

@@ -358,11 +358,15 @@ class Analyzer(Thread):
                         try:
                             # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
                             # Added full_duration
+                            # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+                            # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+                            ionosphere_parent_id = 0
                             send_anomalous_metric_to(
                                 skyline_app, 'ionosphere', timeseries_dir,
                                 metric_timestamp, base_name, str(datapoint),
                                 from_timestamp, triggered_algorithms,
-                                timeseries, str(settings.FULL_DURATION))
+                                timeseries, str(settings.FULL_DURATION),
+                                str(ionosphere_parent_id))
                             self.sent_to_ionosphere.append(base_name)
                         except:
                             logger.info(traceback.format_exc())

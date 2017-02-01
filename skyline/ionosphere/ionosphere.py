@@ -431,7 +431,11 @@ class Ionosphere(Thread):
 
         string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
         float_keys = ['value']
-        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
+        # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+        # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+        int_keys = [
+            'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
+            'ionosphere_parent_id']
         array_keys = ['algorithms', 'triggered_algorithms']
         boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
@@ -470,10 +474,6 @@ class Ionosphere(Thread):
                     'error :: loading metric variables - none found' % (
                         str(metric_vars_file)))
                 return False
-
-            if settings.ENABLE_DEBUG:
-                logger.info(
-                    'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
 
         logger.info('debug :: metric_vars for %s' % str(metric))
         logger.info('debug :: %s' % str(metric_vars_array))
@@ -616,7 +616,7 @@ class Ionosphere(Thread):
             value = float(value_list[0])
             anomalous_value = value
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: metric variable - value - %s' % (value))
+                logger.info('debug :: metric variable - value - %s' % str(value))
         except:
             logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
             value = None
@@ -634,7 +634,7 @@ class Ionosphere(Thread):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             from_timestamp = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: metric variable - from_timestamp - %s' % from_timestamp)
+                logger.info('debug :: metric variable - from_timestamp - %s' % str(from_timestamp))
         except:
             # @added 20160822 - Bug #1460: panorama check file fails
             # Added exception handling here
@@ -656,7 +656,7 @@ class Ionosphere(Thread):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             metric_timestamp = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: metric variable - metric_timestamp - %s' % metric_timestamp)
+                logger.info('debug :: metric variable - metric_timestamp - %s' % str(metric_timestamp))
         except:
             logger.error('error :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
             metric_timestamp = None
@@ -718,7 +718,7 @@ class Ionosphere(Thread):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             added_at = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: metric variable - added_at - %s' % added_at)
+                logger.info('debug :: metric variable - added_at - %s' % str(added_at))
         except:
             logger.error('error :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
             added_at = metric_timestamp
@@ -734,12 +734,31 @@ class Ionosphere(Thread):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             full_duration = int(value_list[0])
             if settings.ENABLE_IONOSPHERE_DEBUG:
-                logger.info('debug :: metric variable - full_duration - %s' % full_duration)
+                logger.info('debug :: metric variable - full_duration - %s' % str(full_duration))
         except:
             logger.error('error :: failed to read full_duration variable from check file - %s' % (metric_check_file))
             full_duration = None
 
         if not full_duration:
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        # @added 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+        # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+        ionosphere_parent_id = None
+        ionosphere_parent_id_determined = False
+        try:
+            key = 'ionosphere_parent_id'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            ionosphere_parent_id = int(value_list[0])
+            ionosphere_parent_id_determined = True
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: metric variable - ionosphere_parent_id - %s' % str(ionosphere_parent_id))
+        except:
+            logger.error('error :: failed to read ionosphere_parent_id variable from check file - %s' % (metric_check_file))
+            ionosphere_parent_id = None
+
+        if not ionosphere_parent_id_determined:
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -1067,8 +1086,8 @@ class Ionosphere(Thread):
                             # even if it is were to match.  Ionosphere learn is
                             # limited here on generation.
                             # Set the default as max e.g. not allowed
+                            current_fp_generation = int(metric_max_generations)
                             try:
-                                current_fp_generation = int(metric_max_generations)
                                 current_fp_generation = row['generation']
                                 if int(current_fp_generation) < int(metric_max_generations):
                                     fp_ids.append(int(fp_id))

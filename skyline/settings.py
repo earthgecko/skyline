@@ -1385,9 +1385,9 @@ SKYLINE_URL = 'http://skyline.example.com:8080'
 
 SERVER_PYTZ_TIMEZONE = 'UTC'
 """
-:var SERVER_PYTZ_TIMEZONE: You must specific a pytz timezone you want Ionosphere to
-    use for the creation of features profiles and converting datetimes to utc.
-    This must be a valid pytz timezone name, see:
+:var SERVER_PYTZ_TIMEZONE: You must specify a pytz timezone you want Ionosphere
+    to use for the creation of features profiles and converting datetimes to
+    UTC.  This must be a valid pytz timezone name, see:
     https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst
     http://earthgecko-skyline.readthedocs.io/en/ionosphere/development/pytz.html#timezones-list-for-pytz-version
 :vartype SERVER_PYTZ_TIMEZONE: str

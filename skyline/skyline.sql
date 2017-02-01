@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `metrics` (
 # related features profiles
 */
   `learn_full_duration_days` INT DEFAULT 30 COMMENT 'Ionosphere learn - the number days data to be used for learning the metric',
-  `learn_valid_ts_older_than` INT DEFAULT 3361 COMMENT 'Ionosphere learn - the age in seconds of a timeseries before it is valid to learn from',
+  `learn_valid_ts_older_than` INT DEFAULT 3661 COMMENT 'Ionosphere learn - the age in seconds of a timeseries before it is valid to learn from',
   `max_generations` INT DEFAULT 5 COMMENT 'Ionosphere learn - the maximum number of generations that can be learnt for this metric',
   `max_percent_diff_from_origin` DOUBLE DEFAULT 7.0 COMMENT 'Ionosphere learn - the maximum percentage difference that a learn features profile sum can be from the original human generated features profile',
   PRIMARY KEY (id),

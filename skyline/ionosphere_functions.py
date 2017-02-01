@@ -836,6 +836,19 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
         if ionosphere_job == 'learn_fp_automatic':
             create_redis_work_item = True
+            # @added 20170131 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
+            # TODO: here a check may be required to evaluate whether the origin_fp_id
+            #       had a use_full_duration features profile created, however
+            #       due to the fact that it is in learn, suggests that it did
+            #       have, not 100% sure.
+            origin_fp_id_was_allowed_to_learn = False
+            child_use_full_duration_count_of_origin_fp_id = 1
+            # TODO: Determine the state
+            # child_use_full_duration_count_of_origin_fp_id = SELECT COUNT(id) FROM ionosphere WHERE parent_id=origin_fp_id AND full_duration=use_full_duration
+            if child_use_full_duration_count_of_origin_fp_id == 0:
+                current_logger.info('the origin parent was not allowed to learn not adding to Redis ionosphere.learn.work set')
+                create_redis_work_item = False
+
         if create_redis_work_item:
             try:
                 current_logger.info(

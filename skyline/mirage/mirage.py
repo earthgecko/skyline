@@ -198,6 +198,78 @@ class Mirage(Thread):
 
         return False
 
+    # @added 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+    #                   Bug #1460: panorama check file fails
+    #                   Panorama check file fails #24
+    # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+    def mirage_load_metric_vars(self, metric_vars_file):
+        """
+        Load the metric variables for a check from a metric check variables file
+
+        :param metric_vars_file: the path and filename to the metric variables files
+        :type metric_vars_file: str
+        :return: the metric_vars list or ``False``
+        :rtype: list
+
+        """
+        if os.path.isfile(metric_vars_file):
+            logger.info(
+                'loading metric variables from metric_check_file - %s' % (
+                    str(metric_vars_file)))
+        else:
+            logger.error(
+                'error :: loading metric variables from metric_check_file - file not found - %s' % (
+                    str(metric_vars_file)))
+            return False
+
+        metric_vars = []
+        with open(metric_vars_file) as f:
+            for line in f:
+                no_new_line = line.replace('\n', '')
+                no_equal_line = no_new_line.replace(' = ', ',')
+                array = str(no_equal_line.split(',', 1))
+                add_line = literal_eval(array)
+                metric_vars.append(add_line)
+
+        string_keys = ['metric']
+        float_keys = ['value']
+        int_keys = ['hours_to_resolve', 'metric_timestamp']
+
+        metric_vars_array = []
+        for var_array in metric_vars:
+            key = None
+            value = None
+            if var_array[0] in string_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = str(value_str)
+                if var_array[0] == 'metric':
+                    metric = value
+            if var_array[0] in float_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = float(value_str)
+            if var_array[0] in int_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = int(float(value_str))
+            if key:
+                metric_vars_array.append([key, value])
+
+            if len(metric_vars_array) == 0:
+                logger.error(
+                    'error :: loading metric variables - none found' % (
+                        str(metric_vars_file)))
+                return False
+
+        logger.info('debug :: metric_vars for %s' % str(metric))
+        logger.info('debug :: %s' % str(metric_vars_array))
+
+        return metric_vars_array
+
     def dump_garbage(self):
         """
         DEVELOPMENT ONLY
@@ -268,7 +340,12 @@ class Mirage(Thread):
         # self.load_metric_vars(metric_check_file)
         # Load and validate metric variables
         try:
-            metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+            #                      Bug #1460: panorama check file fails
+            #                      Panorama check file fails #24
+            # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+            # metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            metric_vars_array = self.mirage_load_metric_vars(str(metric_check_file))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
@@ -276,38 +353,95 @@ class Mirage(Thread):
             return
 
         # Test metric variables
-        if len(metric_vars.metric) == 0:
-            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
-            return
-        else:
-            metric = metric_vars.metric
-            metric_name = ['metric_name', metric_vars.metric]
+#        if len(metric_vars.metric) == 0:
+#            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
+#            return
+#        else:
+#            metric = metric_vars.metric
+#            metric_name = ['metric_name', metric_vars.metric]
+#            self.metric_variables.append(metric_name)
+#            logger.info('debug :: added metric_name %s from check file - %s' % (metric_name, metric_check_file))
+        metric = None
+        try:
+            key = 'metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric = str(value_list[0])
+            metric_name = ['metric_name', metric]
             self.metric_variables.append(metric_name)
             logger.info('debug :: added metric_name %s from check file - %s' % (metric_name, metric_check_file))
-        if len(metric_vars.value) == 0:
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to read metric variable from check file - %s' % (metric_check_file))
             return
-        else:
-            metric_value = ['metric_value', metric_vars.value]
-            self.metric_variables.append(metric_value)
-        if len(metric_vars.hours_to_resolve) == 0:
+        if not metric:
+            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
             return
-        else:
-            hours_to_resolve = ['hours_to_resolve', metric_vars.hours_to_resolve]
-            self.metric_variables.append(hours_to_resolve)
-        if len(metric_vars.metric_timestamp) == 0:
-            return
-        else:
-            metric_timestamp = ['metric_timestamp', metric_vars.metric_timestamp]
-            self.metric_variables.append(metric_timestamp)
 
-        metric_data_dir = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, str(metric_vars.metric))
+#        if len(metric_vars.value) == 0:
+#            return
+#        else:
+#            metric_value = ['metric_value', metric_vars.value]
+#            self.metric_variables.append(metric_value)
+        value = None
+        try:
+            key = 'value'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            value = float(value_list[0])
+            metric_value = ['metric_value', value]
+            self.metric_variables.append(metric_value)
+        except:
+            logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
+            return
+        if not value:
+            logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
+            return
+
+#        if len(metric_vars.hours_to_resolve) == 0:
+#            return
+#        else:
+#            hours_to_resolve = ['hours_to_resolve', metric_vars.hours_to_resolve]
+#            self.metric_variables.append(hours_to_resolve)
+        hours_to_resolve = None
+        try:
+            key = 'hours_to_resolve'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            hours_to_resolve = int(value_list[0])
+            hours_to_resolve_list = ['hours_to_resolve', hours_to_resolve]
+            self.metric_variables.append(hours_to_resolve_list)
+        except:
+            logger.error('error :: failed to read hours_to_resolve variable from check file - %s' % (metric_check_file))
+            return
+        if not hours_to_resolve:
+            logger.error('error :: failed to load hours_to_resolve variable from check file - %s' % (metric_check_file))
+            return
+
+#        if len(metric_vars.metric_timestamp) == 0:
+#            return
+#        else:
+#            metric_timestamp = ['metric_timestamp', metric_vars.metric_timestamp]
+#            self.metric_variables.append(metric_timestamp)
+        metric_timestamp = None
+        try:
+            key = 'metric_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric_timestamp = int(value_list[0])
+            metric_timestamp_list = ['metric_timestamp', metric_timestamp]
+            self.metric_variables.append(metric_timestamp_list)
+        except:
+            logger.error('error :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
+            return
+        if not metric_timestamp:
+            logger.error('error :: failed to load metric_timestamp variable from check file - %s' % (metric_check_file))
+            return
+
+        metric_data_dir = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, str(metric))
 
         # Ignore any metric check with a timestamp greater than MIRAGE_STALE_SECONDS
-        int_metric_timestamp = int(float(metric_vars.metric_timestamp))
+        int_metric_timestamp = int(metric_timestamp)
         int_run_timestamp = int(run_timestamp)
         metric_timestamp_age = int_run_timestamp - int_metric_timestamp
         if metric_timestamp_age > settings.MIRAGE_STALE_SECONDS:
-            logger.info('stale check :: %s check request is %s seconds old - discarding' % (metric_vars.metric, str(metric_timestamp_age)))
+            logger.info('stale check :: %s check request is %s seconds old - discarding' % (metric, str(metric_timestamp_age)))
             # Remove metric check file
 #            try:
 #                os.remove(metric_check_file)
@@ -330,16 +464,16 @@ class Mirage(Thread):
             return
 
         # Calculate hours second order resolution to seconds
-        second_order_resolution_seconds = int(metric_vars.hours_to_resolve) * 3600
+        second_order_resolution_seconds = int(hours_to_resolve) * 3600
 
         # Calculate graphite from and until parameters from the metric timestamp
-        graphite_until = datetime.datetime.fromtimestamp(int(float(metric_vars.metric_timestamp))).strftime('%H:%M_%Y%m%d')
+        graphite_until = datetime.datetime.fromtimestamp(int(float(metric_timestamp))).strftime('%H:%M_%Y%m%d')
         int_second_order_resolution_seconds = int(float(second_order_resolution_seconds))
         second_resolution_timestamp = int_metric_timestamp - int_second_order_resolution_seconds
         graphite_from = datetime.datetime.fromtimestamp(int(second_resolution_timestamp)).strftime('%H:%M_%Y%m%d')
 
         # Remove any old json file related to the metric
-        metric_json_file = '%s/%s.json' % (metric_data_dir, str(metric_vars.metric))
+        metric_json_file = '%s/%s.json' % (metric_data_dir, str(metric))
         try:
             os.remove(metric_json_file)
         except OSError:
@@ -348,14 +482,14 @@ class Mirage(Thread):
         # Get data from graphite
         logger.info(
             'retrieve data :: surfacing %s timeseries from graphite for %s seconds' % (
-                metric_vars.metric, second_order_resolution_seconds))
-        self.surface_graphite_metric_data(metric_vars.metric, graphite_from, graphite_until)
+                metric, second_order_resolution_seconds))
+        self.surface_graphite_metric_data(metric, graphite_from, graphite_until)
 
         # Check there is a json timeseries file to test
         if not os.path.isfile(metric_json_file):
             logger.error(
                 'error :: retrieve failed - failed to surface %s timeseries from graphite' % (
-                    metric_vars.metric))
+                    metric))
             # Remove metric check file
             try:
                 os.remove(metric_check_file)
@@ -371,7 +505,7 @@ class Mirage(Thread):
             return
         else:
             logger.info('retrieved data :: for %s at %s seconds' % (
-                metric_vars.metric, second_order_resolution_seconds))
+                metric, second_order_resolution_seconds))
 
         # Make process-specific dicts
         exceptions = defaultdict(int)
@@ -384,8 +518,8 @@ class Mirage(Thread):
             logger.info('data points surfaced :: %s' % (len(timeseries)))
 
         try:
-            logger.info('analyzing :: %s at %s seconds' % (metric_vars.metric, second_order_resolution_seconds))
-            anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_vars.metric, second_order_resolution_seconds)
+            logger.info('analyzing :: %s at %s seconds' % (metric, second_order_resolution_seconds))
+            anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
         # It could have been deleted by the Roomba
         except TypeError:
             exceptions['DeletedByRoomba'] += 1
@@ -408,7 +542,7 @@ class Mirage(Thread):
             base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
             not_anomalous_metric = [datapoint, base_name]
             self.not_anomalous_metrics.append(not_anomalous_metric)
-            logger.info('not anomalous     :: %s with %s' % (metric_vars.metric, metric_vars.value))
+            logger.info('not anomalous     :: %s with %s' % (metric, value))
 
         # If it's anomalous, add it to list
         if anomalous:
@@ -417,7 +551,7 @@ class Mirage(Thread):
             metric_timestamp = int_metric_timestamp
             anomalous_metric = [datapoint, base_name, metric_timestamp]
             self.anomalous_metrics.append(anomalous_metric)
-            logger.info('anomaly detected  :: %s with %s' % (metric_vars.metric, metric_vars.value))
+            logger.info('anomaly detected  :: %s with %s' % (metric, str(value)))
             # It runs so fast, this allows us to process 30 anomalies/min
             sleep(2)
 
@@ -577,11 +711,14 @@ class Mirage(Thread):
                     # to be profiled on Redis timeseries data at FULL_DURATION
                     # e.g. mirage.redis.24h.json
                     full_duration = str(second_order_resolution_seconds)
+                    # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+                    # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+                    ionosphere_parent_id = 0
                     send_anomalous_metric_to(
                         skyline_app, 'ionosphere', timeseries_dir,
                         str(int_metric_timestamp), base_name, str(datapoint),
                         from_timestamp, triggered_algorithms, timeseries,
-                        full_duration)
+                        full_duration, str(ionosphere_parent_id))
                     self.sent_to_ionosphere.append(base_name)
                 else:
                     logger.info('alert expiry key exists not sending to Ionosphere :: %s' % base_name)

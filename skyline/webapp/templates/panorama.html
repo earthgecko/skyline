@@ -6,9 +6,13 @@
 
 <!-- @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
 momentjs to handle date ticker in the timezone in Dygraph
--->
+@modified 20170130 - Bug #1524: Panorama dygraph not aligning correctly
+Have Skyline serve the js, tried of allowing cloudflare scripts
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.5/moment-timezone-with-data.min.js"></script>
+-->
+  <script type="text/javascript" src="/static/moment-2.14.1/moment.min.js"></script>
+  <script type="text/javascript" src="/static/moment-timezone-0.5.5/moment-timezone-with-data.min.js"></script>
 
 	<ol class="breadcrumb">
   	<div class="breadcrumb">

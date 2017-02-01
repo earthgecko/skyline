@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
 */
 ALTER TABLE `metrics` ADD COLUMN `learn_full_duration_days` INT DEFAULT 30 COMMENT 'Ionosphere learn - the number days data to be used for learning the metric' AFTER `created_timestamp`;
 COMMIT;
-ALTER TABLE `metrics` ADD COLUMN `learn_valid_ts_older_than` INT DEFAULT 3361 COMMENT 'Ionosphere learn - the age in seconds of a timeseries before it is valid to learn from' AFTER `learn_full_duration_days`;
+ALTER TABLE `metrics` ADD COLUMN `learn_valid_ts_older_than` INT DEFAULT 3661 COMMENT 'Ionosphere learn - the age in seconds of a timeseries before it is valid to learn from' AFTER `learn_full_duration_days`;
 COMMIT;
 /*
 # @modified 20170116 - Feature #1854: Ionosphere learn - generations
