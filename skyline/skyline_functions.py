@@ -669,6 +669,21 @@ def get_graphite_metric(
 
     return True
 
+
+# @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+def filesafe_metricname(metricname):
+    '''
+    Returns a file system safe name for a metric name in terms of creating
+    check files, etc
+    '''
+    keepchars = ('.', '_', '-')
+    try:
+        sane_metricname = ''.join(c for c in str(metricname) if c.isalnum() or c in keepchars).rstrip()
+        return str(sane_metricname)
+    except:
+        return False
+
+
 # @added 20160922 - Branch #922: Ionosphere
 # Added the send_anomalous_metric_to function for Analyzer and Mirage
 # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
@@ -711,11 +726,14 @@ def send_anomalous_metric_to(
         new_send_to_app = 'ionosphere'
         send_to_app = new_send_to_app
 
+    # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+    sane_metricname = filesafe_metricname(str(base_name))
+
     if str(send_to_app) == 'crucible':
         anomaly_dir = '%s/%s/%s' % (
             settings.CRUCIBLE_DATA_FOLDER, str(timeseries_dir), str(metric_timestamp))
         check_file = '%s/%s.%s.txt' % (
-            settings.CRUCIBLE_CHECK_PATH, str(metric_timestamp), str(base_name))
+            settings.CRUCIBLE_CHECK_PATH, str(metric_timestamp), str(sane_metricname))
         check_dir = '%s' % (settings.CRUCIBLE_CHECK_PATH)
     if str(send_to_app) == 'ionosphere':
         # @modified 20161121 - Branch #922: ionosphere
@@ -728,7 +746,7 @@ def send_anomalous_metric_to(
             str(timeseries_dir))
         check_file = '%s/%s.%s.txt' % (
             settings.IONOSPHERE_CHECK_PATH, str(metric_timestamp),
-            str(base_name))
+            str(sane_metricname))
         check_dir = '%s' % (settings.IONOSPHERE_CHECK_PATH)
 
         # @added 20170116 - Feature #1854: Ionosphere learn
@@ -832,6 +850,7 @@ def RepresentsInt(s):
         return True
     except ValueError:
         return False
+
 
 ################################################################################
 

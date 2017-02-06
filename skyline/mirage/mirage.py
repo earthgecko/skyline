@@ -37,7 +37,7 @@ import settings
 # Added the send_anomalous_metric_to skyline_functions.py
 from skyline_functions import (
     write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to,
-    mkdir_p, send_graphite_metric)
+    mkdir_p, send_graphite_metric, filesafe_metricname)
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
@@ -563,6 +563,9 @@ class Mirage(Thread):
                     anomaly_breakdown[algorithm] += 1
                     triggered_algorithms.append(algorithm)
 
+            # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+            sane_metricname = filesafe_metricname(str(base_name))
+
             # If Crucible or Panorama are enabled determine details
             determine_anomaly_details = False
             if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
@@ -622,8 +625,7 @@ class Mirage(Thread):
 
                 # Create an anomaly file with details about the anomaly
                 panaroma_anomaly_file = '%s/%s.%s.txt' % (
-                    settings.PANORAMA_CHECK_PATH, added_at,
-                    base_name)
+                    settings.PANORAMA_CHECK_PATH, added_at, sane_metricname)
                 try:
                     write_data_to_file(
                         skyline_app, panaroma_anomaly_file, 'w',
@@ -669,7 +671,7 @@ class Mirage(Thread):
                        skyline_app, added_at)
 
                 # Create an anomaly file with details about the anomaly
-                crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, base_name)
+                crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, sane_metricname)
                 try:
                     write_data_to_file(
                         skyline_app, crucible_anomaly_file, 'w',
@@ -691,7 +693,7 @@ class Mirage(Thread):
                     logger.info(traceback.format_exc())
 
                 # Create a crucible check file
-                crucible_check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
+                crucible_check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, sane_metricname)
                 try:
                     write_data_to_file(
                         skyline_app, crucible_check_file, 'w',

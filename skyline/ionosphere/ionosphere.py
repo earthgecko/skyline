@@ -1120,7 +1120,7 @@ class Ionosphere(Thread):
                 fp_count = 0
 
             if len(fp_ids) == 0:
-                logger.error('error :: there are no fp ids that match full duration for %s' % base_name)
+                logger.info('there are no fp ids that match full duration for %s' % base_name)
             else:
                 fp_ids_found = True
 

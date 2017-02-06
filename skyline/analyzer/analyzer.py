@@ -23,7 +23,8 @@ from ast import literal_eval
 
 import settings
 from skyline_functions import (
-    send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p)
+    send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
+    filesafe_metricname)
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -266,6 +267,9 @@ class Analyzer(Thread):
                             anomaly_breakdown[algorithm] += 1
                             triggered_algorithms.append(algorithm)
 
+                    # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+                    sane_metricname = filesafe_metricname(str(base_name))
+
                     # If Crucible or Panorama are enabled determine details
                     determine_anomaly_details = False
                     if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
@@ -408,7 +412,7 @@ class Analyzer(Thread):
                         # Create an anomaly file with details about the anomaly
                         panaroma_anomaly_file = '%s/%s.%s.txt' % (
                             settings.PANORAMA_CHECK_PATH, added_at,
-                            base_name)
+                            sane_metricname)
                         try:
                             write_data_to_file(
                                 skyline_app, panaroma_anomaly_file, 'w',
@@ -458,8 +462,11 @@ class Analyzer(Thread):
                                triggered_algorithms, crucible_anomaly_dir,
                                skyline_app, metric_timestamp)
 
+                        # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+                        sane_metricname = filesafe_metricname(str(base_name))
+
                         # Create an anomaly file with details about the anomaly
-                        crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, base_name)
+                        crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, sane_metricname)
                         try:
                             write_data_to_file(
                                 skyline_app, crucible_anomaly_file, 'w',
@@ -480,7 +487,7 @@ class Analyzer(Thread):
                             logger.info(traceback.format_exc())
 
                         # Create a crucible check file
-                        crucible_check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
+                        crucible_check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, sane_metricname)
                         try:
                             write_data_to_file(
                                 skyline_app, crucible_check_file, 'w',
@@ -1107,22 +1114,39 @@ class Analyzer(Thread):
 
                             # metric_timestamp = int(time())
                             # anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
-                            anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, str(metric[2]), metric[1])
-                            with open(anomaly_check_file, 'w') as fh:
-                                # metric_name, anomalous datapoint, hours to resolve, timestamp
-                                fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
-                            if LOCAL_DEBUG:
-                                logger.info(
-                                    'debug :: Memory usage in run after writing mirage check file: %s (kb)' %
-                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-                            if python_version == 2:
-                                os.chmod(anomaly_check_file, 0644)
-                            if python_version == 3:
-                                os.chmod(anomaly_check_file, mode=0o644)
-                            if LOCAL_DEBUG:
-                                logger.info(
-                                    'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %
-                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                            # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+                            anomaly_check_file = None
+                            try:
+                                sane_metricname = filesafe_metricname(str(metric[1]))
+                                anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, str(int(metric[2])), sane_metricname)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to determine anomaly_check_file')
+
+                            if anomaly_check_file:
+                                anomaly_check_file_created = False
+                                try:
+                                    with open(anomaly_check_file, 'w') as fh:
+                                        # metric_name, anomalous datapoint, hours to resolve, timestamp
+                                        fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
+                                    anomaly_check_file_created = True
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to write anomaly_check_file')
+                                if LOCAL_DEBUG:
+                                    logger.info(
+                                        'debug :: Memory usage in run after writing mirage check file: %s (kb)' %
+                                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+                                if anomaly_check_file_created:
+                                    if python_version == 2:
+                                        os.chmod(anomaly_check_file, 0644)
+                                    if python_version == 3:
+                                        os.chmod(anomaly_check_file, mode=0o644)
+                                    if LOCAL_DEBUG:
+                                        logger.info(
+                                            'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %
+                                            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
                             logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
                             try:
