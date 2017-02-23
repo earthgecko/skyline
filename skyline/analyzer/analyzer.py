@@ -424,6 +424,9 @@ class Analyzer(Thread):
                             logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                             logger.info(traceback.format_exc())
                     else:
+                        # @modified 20160207 - Branch #922: Ionosphere
+                        # Handle if all other apps are not enabled
+                        other_app = 'none'
                         if mirage_metric:
                             other_app = 'Mirage'
                         if ionosphere_metric:
@@ -783,7 +786,10 @@ class Analyzer(Thread):
                         logger.info('failed to fetch the mirage.unique_metrics Redis set')
                         mirage_unique_metrics == []
                         mirage_unique_metrics_count = len(mirage_unique_metrics)
-
+            # @modified 20160207 - Branch #922: Ionosphere
+            # Handle if Mirage is not enabled
+            else:
+                mirage_unique_metrics = []
             # END Redis mirage.unique_metrics_set
 
             if LOCAL_DEBUG:
@@ -984,8 +990,12 @@ class Analyzer(Thread):
 
             # @added 20161229 - Feature #1830: Ionosphere alerts
             # Determine if Ionosphere added any alerts to be sent
-            for metric in self.anomalous_metrics:
-                self.all_anomalous_metrics.append(metric)
+            try:
+                for metric in self.anomalous_metrics:
+                    self.all_anomalous_metrics.append(metric)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add to self.all_anomalous_metrics')
             ionosphere_alerts = []
             ionosphere_alerts_returned = True
             context = 'Analyzer'
@@ -1263,6 +1273,10 @@ class Analyzer(Thread):
                                 logger.error(
                                     'error :: failed to trigger_alert :: %s %s via %s' %
                                     (metric[1], metric[0], alert[1]))
+            # @modified 20160207 - Branch #922: Ionosphere
+            # Handle if alerts are not enabled
+            else:
+                logger.info('alerts not enabled')
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run after alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
