@@ -34,15 +34,19 @@
 <!--	<div class="col-md-9 col-md-pull-3"> -->
 	<div class="col-md-12">
 		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
-		  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+		  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
+		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
-		  <li class="active"><a href="?fp_search=true">Search</a></li>
 		</ul>
 		<div class="tab-content">
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
   		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles</span></span></span></h4>
+  {% if fp_search_results %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  {% endif %}
         <form action="ionosphere">
   		  <table class="table table-hover">
   		    <thead>
@@ -63,13 +67,6 @@
   		        <td><input type="text" name="metric" value="all" /></td>
   		      </tr>
   		      <tr>
-  		        <td>Features profile count by metric</td>
-  		        <td><select name="count_by_metric">
-                <option value="false">false</option>
-                <option value="true">true</option>
-              </select></td>
-  		      </tr>
-  		      <tr>
   		        <td>Metric like</td>
   		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
   		      </tr>
@@ -77,12 +74,31 @@
   		        <td>from_timestamp</td>
   		        <td><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
   		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>generation_greater_than</td>
+  		        <td><input type="text" name="generation_greater_than" value="0"></td>
+  		      </tr>
   {% if full_duration_list %}
   		      <tr>
   		        <td>full_duration</td>
   		        <td><select name="full_duration">
                 <option value="all">all</option>
           {% for item in full_duration_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select></td>
+  		      </tr>
+  {% endif %}
+  {% if generation_list %}
+  		      <tr>
+  		        <td>generation</td>
+  		        <td><select name="generation">
+                <option value="all">all</option>
+          {% for item in generation_list %}
                 <option value="{{ item }}">{{ item }}</option>
           {% endfor %}
               </select></td>
@@ -152,7 +168,7 @@
 
   		      <tr>
                 <td>limit</td>
-                <td><input type="number" name="limit" min="1" max="100" value="30" /></td>
+                <td><input type="number" name="limit" min="0" max="100" value="30" /> use 0 for unlimited</td>
   		      </tr>
   		      <tr>
   		        <td>order by:</td>
@@ -166,8 +182,178 @@
         <br>
         <input type="submit" value="Search">
       </form>
+  {% if fp_search_results %}
+<!-- collapse button div -->
       </div>
-    </div>
+  {% endif %}
+      </div>
+{% if fp_search_results %}
+<!-- TODO results tables
+id
+metric
+count
+-->
+  {% if features_profiles_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>
+          by count - limtied to {{ features_profiles_count|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>Number of features profiles</th>
+            <th>metric_id</th>
+            <th>metric features profiles</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in features_profiles_count %}
+          <tr>
+            <td><code>{{ item[0] }}</code></td>
+            <td>{{ item[1] }}</td>
+            <td onclick="window.location='?fp_search=true&metric={{ item[2] }}'">
+              <a href="?fp_search=true&metric={{ item[2] }}">{{ item[2] }}</a>
+            </td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if matched_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Matched ::</span> <span class="re">features profiles :: </span></span></span>
+          by count - limtied to {{ matched_count|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>fp_id</th>
+            <th>matched_count</th>
+            <th>metric</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in matched_count %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}">{{ item[1] }}</a>
+            </td>
+            <td>{{ item[0] }}</td>
+            <td><code>{{ item[2] }}</code></td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if checked_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Checked ::</span> <span class="re">features profiles :: </span></span></span>
+          by count - limtied to {{ checked_count|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>fp_id</th>
+            <th>checked_count</th>
+            <th>metric</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in checked_count %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}">{{ item[1] }}</a>
+            </td>
+            <td>{{ item[0] }}</td>
+            <td><code>{{ item[2] }}</code></td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if generation_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Generations ::</span> <span class="re">count :: </span></span></span>
+          ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>generation</th>
+            <th>count</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in generation_count %}
+          <tr>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[0] }}</td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if features_profiles %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
+          limited by {{ features_profiles|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+<!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
+      tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
+      matched_count10, human_date11, created_timestamp12, checked_count13,
+      checked_human_date14, parent_id15, generation16] -->
+            <th>fp_ip</th>
+            <th>metric</th>
+            <th>parent_id</th>
+            <th>generation</th>
+            <th>origin</th>
+            <th>full_duration</th>
+            <th>match_count</th>
+            <th>last_matched</th>
+            <th>checked_count</th>
+            <th>last_checked</th>
+            <th>created</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in features_profiles %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[0] }}</a>
+            </td>
+            <td><code>{{ item[2] }}</code></td>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}">{{ item[15] }}</a>
+            </td>
+            <td onclick="window.location='?generation_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
+              <a href="?generation_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[16] }}</a> <span class="logo">
+            </td>
+    {% if item[16] == 0 or item[16] == 1 %}
+            <td><span class="logo"><span class="sky">trained</span></span></td>
+    {% else %}
+            <td><span class="logo"><span class="re">learnt</span></span></td>
+    {% endif %}
+            <td>{{ item[3] }}</td>
+            <td>{{ item[10] }}</td>
+            <td>{{ item[11] }}</td>
+            <td>{{ item[13] }}</td>
+            <td>{{ item[14] }}</td>
+            <td>{{ item[12] }}</td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+{% endif %}
+    </div> <!-- END div class="col-md-12" -->
 
 	</div>
 	</div>

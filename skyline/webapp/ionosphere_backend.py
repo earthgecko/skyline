@@ -793,20 +793,25 @@ parent_id         :: %s | generation :: %s
 
 # @added 20170118 - Feature #1862: Ionosphere features profiles search page
 # Added fp_search parameter
-def ionosphere_search_defaults(get_options):
+# @modified 20170220 - Feature #1862: Ionosphere features profiles search page
 
+def ionosphere_search(default_query, search_query):
     """
-    Get the default values to populate the search_features_profiles.html options
+    Gets the details features profiles from the database, using the URL arguments
+    that are passed in by the :obj:`request.args` to build the MySQL select
+    query string and queries the database, parse the results and creates an
+    array of the features profiles that matched the query.
 
-    :param get_options: list of options to get
-    :type get_options: list of strings
-    :return: tuple
-    :rtype:  (list, list, list, list)
+    :param None: determined from :obj:`request.args`
+    :return: array
+    :rtype: array
 
     """
     logger = logging.getLogger(skyline_app_logger)
+    import time
+    import datetime
 
-    function_str = 'ionoshere_backend.py :: ionosphere_search_defaults'
+    function_str = 'ionoshere_backend.py :: ionosphere_search'
 
     trace = 'none'
     fail_msg = 'none'
@@ -815,15 +820,154 @@ def ionosphere_search_defaults(get_options):
     enabled_list = []
     tsfresh_version_list = []
     generation_list = []
+    features_profiles = []
+    features_profiles_count = []
 
     possible_options = [
-        'full_duration', 'enabled', 'tsfresh_version', 'generation']
+        'full_duration', 'enabled', 'tsfresh_version', 'generation', 'count']
 
-    engine_needed = False
-    for possible_option in possible_options:
-        if possible_option in get_options:
-            engine_needed = True
-            logger.info('%s :: options for %s required from database' % (function_str, possible_option))
+    logger.info('determining search parameters')
+    query_string = 'SELECT * FROM ionosphere'
+# id, metric_id, full_duration, anomaly_timestamp, enabled, tsfresh_version,
+# calc_time, features_sum, matched_count, last_matched, created_timestamp,
+# last_checked, checked_count, parent_id, generation
+    needs_and = False
+
+    count_request = False
+    matched_count = None
+    checked_count = None
+    generation_count = None
+
+    count_by_metric = None
+    if 'count_by_metric' in request.args:
+        count_by_metric = request.args.get('count_by_metric', None)
+        if count_by_metric and count_by_metric != 'false':
+            count_request = True
+            count_by_metric = True
+            features_profiles_count = []
+            query_string = 'SELECT COUNT(*), metric_id FROM ionosphere GROUP BY metric_id'
+        else:
+            count_by_metric = False
+
+    count_by_matched = None
+    if 'count_by_matched' in request.args:
+        count_by_matched = request.args.get('count_by_matched', None)
+        if count_by_matched and count_by_matched != 'false':
+            count_request = True
+            count_by_matched = True
+            matched_count = []
+#            query_string = 'SELECT COUNT(*), id FROM ionosphere GROUP BY matched_count ORDER BY COUNT(*)'
+            query_string = 'SELECT matched_count, id FROM ionosphere ORDER BY matched_count'
+        else:
+            count_by_matched = False
+
+    count_by_checked = None
+    if 'count_by_checked' in request.args:
+        count_by_checked = request.args.get('count_by_checked', None)
+        if count_by_checked and count_by_checked != 'false':
+            count_request = True
+            count_by_checked = True
+            checked_count = []
+            query_string = 'SELECT COUNT(*), id FROM ionosphere GROUP BY checked_count ORDER BY COUNT(*)'
+            query_string = 'SELECT checked_count, id FROM ionosphere ORDER BY checked_count'
+        else:
+            count_by_checked = False
+
+    count_by_generation = None
+    if 'count_by_generation' in request.args:
+        count_by_generation = request.args.get('count_by_generation', None)
+        if count_by_generation and count_by_generation != 'false':
+            count_request = True
+            count_by_generation = True
+            generation_count = []
+            query_string = 'SELECT COUNT(*), generation FROM ionosphere GROUP BY generation ORDER BY COUNT(*)'
+        else:
+            count_by_generation = False
+
+    get_metric_profiles = None
+    metric = None
+    if 'metric' in request.args:
+        metric = request.args.get('metric', None)
+        if metric and metric != 'all' and metric != '*':
+            # A count_request always takes preference over a metric
+            if not count_request:
+                get_metric_profiles = True
+                query_string = 'SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID'
+            else:
+                new_query_string = 'SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID'
+                query_string = new_query_string
+
+    if 'from_timestamp' in request.args:
+        from_timestamp = request.args.get('from_timestamp', None)
+        if from_timestamp and from_timestamp != 'all':
+
+            if ":" in from_timestamp:
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+                from_timestamp = str(int(new_from_timestamp))
+
+            if needs_and:
+                new_query_string = '%s AND anomaly_timestamp >= %s' % (query_string, from_timestamp)
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE anomaly_timestamp >= %s' % (query_string, from_timestamp)
+                query_string = new_query_string
+                needs_and = True
+
+    if 'until_timestamp' in request.args:
+        until_timestamp = request.args.get('until_timestamp', None)
+        if until_timestamp and until_timestamp != 'all':
+            if ":" in until_timestamp:
+                new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+                until_timestamp = str(int(new_until_timestamp))
+
+            if needs_and:
+                new_query_string = '%s AND anomaly_timestamp <= %s' % (query_string, until_timestamp)
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE anomaly_timestamp <= %s' % (query_string, until_timestamp)
+                query_string = new_query_string
+                needs_and = True
+
+    if 'generation_greater_than' in request.args:
+        generation_greater_than = request.args.get('generation_greater_than', None)
+        if generation_greater_than and generation_greater_than != '0':
+            if needs_and:
+                new_query_string = '%s AND generation > %s' % (query_string, generation_greater_than)
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE generation > %s' % (query_string, generation_greater_than)
+                query_string = new_query_string
+                needs_and = True
+
+    ordered_by = None
+    if 'order' in request.args:
+        order = request.args.get('order', 'DESC')
+        if str(order) == 'DESC':
+            ordered_by = 'DESC'
+        if str(order) == 'ASC':
+            ordered_by = 'ASC'
+
+    if ordered_by:
+        if count_request and search_query:
+            new_query_string = '%s %s' % (query_string, ordered_by)
+        else:
+            new_query_string = '%s ORDER BY id %s' % (query_string, ordered_by)
+        query_string = new_query_string
+
+    if 'limit' in request.args:
+        limit = request.args.get('limit', '30')
+        try:
+            test_limit = int(limit) + 0
+            if int(limit) != 0:
+                new_query_string = '%s LIMIT %s' % (query_string, str(limit))
+                query_string = new_query_string
+        except:
+            logger.error('error :: limit is not an integer - %s' % str(limit))
+
+    engine_needed = True
 
     engine = None
     if engine_needed:
@@ -844,6 +988,40 @@ def ionosphere_search_defaults(get_options):
             logger.error(fail_msg)
             raise
 
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('metrics_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get metrics_table meta')
+            raise  # to webapp to return in the UI
+
+        metrics = []
+        try:
+            connection = engine.connect()
+            stmt = select([metrics_table]).where(metrics_table.c.id != 0)
+            result = connection.execute(stmt)
+            for row in result:
+                metric_id = int(row['id'])
+                metric_name = str(row['metric'])
+                metrics.append([metric_id, metric_name])
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine metrics from metrics table')
+
+        if get_metric_profiles:
+            metrics_id = None
+            for metric_obj in metrics:
+                if metrics_id:
+                    break
+                if metric == str(metric_obj[1]):
+                    metrics_id = str(metric_obj[0])
+            new_query_string = query_string.replace('REPLACE_WITH_METRIC_ID', metrics_id)
+            query_string = new_query_string
+            logger.debug('debug :: query_string - %s' % query_string)
+
         ionosphere_table = None
         try:
             ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
@@ -858,9 +1036,232 @@ def ionosphere_search_defaults(get_options):
             raise
         logger.info('%s :: ionosphere_table OK' % function_str)
 
-    for required_option in get_options:
+    all_fps = []
+    try:
+        connection = engine.connect()
+        stmt = select([ionosphere_table]).where(ionosphere_table.c.id != 0)
+        result = connection.execute(stmt)
+        for row in result:
+            try:
+                fp_id = int(row['id'])
+                fp_metric_id = int(row['metric_id'])
+                for metric_obj in metrics:
+                    if fp_metric_id == int(metric_obj[0]):
+                        fp_metric = metric_obj[1]
+                        break
+                full_duration = int(row['full_duration'])
+                anomaly_timestamp = int(row['anomaly_timestamp'])
+                tsfresh_version = str(row['tsfresh_version'])
+                # These handle MySQL NULL
+                try:
+                    calc_time = float(row['calc_time'])
+                except:
+                    calc_time = 0
+                try:
+                    features_count = int(row['features_count'])
+                except:
+                    features_count = 0
+                try:
+                    features_sum = float(row['features_sum'])
+                except:
+                    features_sum = 0
+                try:
+                    deleted = int(row['deleted'])
+                except:
+                    deleted = 0
+                fp_matched_count = int(row['matched_count'])
+                last_matched = int(row['last_matched'])
+                if str(last_matched) == '0':
+                    human_date = 'never matched'
+                else:
+                    human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_matched)))
+                created_timestamp = str(row['created_timestamp'])
+                last_checked = int(row['last_checked'])
+                if str(last_checked) == '0':
+                    checked_human_date = 'never checked'
+                else:
+                    checked_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_checked)))
+                fp_checked_count = int(row['checked_count'])
+                fp_parent_id = int(row['parent_id'])
+                fp_generation = int(row['generation'])
+                all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation])
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                logger.error('error :: bad row data')
+        connection.close()
+        all_fps.sort(key=operator.itemgetter(int(0)))
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        logger.error('error :: bad row data')
+
+    if count_request and search_query:
+        features_profiles = None
+        features_profiles_count = None
+        full_duration_list = None
+        enabled_list = None
+        tsfresh_version_list = None
+        generation_list = None
+
+    if count_by_metric and search_query:
+        features_profiles_count = []
         if engine_needed and engine:
+            try:
+                stmt = query_string
+                connection = engine.connect()
+                for row in engine.execute(stmt):
+                    fp_count = int(row[0])
+                    fp_metric_id = int(row['metric_id'])
+                    for metric_obj in metrics:
+                        if fp_metric_id == metric_obj[0]:
+                            fp_metric = metric_obj[1]
+                            break
+                    features_profiles_count.append([fp_count, fp_metric_id, str(fp_metric)])
+                connection.close()
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: failed to count features profiles'
+                logger.error('%s' % fail_msg)
+                if engine:
+                    engine_disposal(engine)
+                raise
+        features_profiles_count.sort(key=operator.itemgetter(int(0)))
+
+    if count_request and search_query:
+        if not count_by_metric:
+            if engine_needed and engine:
+                try:
+                    stmt = query_string
+                    connection = engine.connect()
+                    for row in engine.execute(stmt):
+                        item_count = int(row[0])
+                        item_id = int(row[1])
+                        if count_by_matched or count_by_checked:
+                            for fp_obj in all_fps:
+                                if item_id == fp_obj[0]:
+                                    metric_name = fp_obj[2]
+                                    break
+                        if count_by_matched:
+                            matched_count.append([item_count, item_id, metric_name])
+                        if count_by_checked:
+                            checked_count.append([item_count, item_id, metric_name])
+                        if count_by_generation:
+                            generation_count.append([item_count, item_id])
+                    connection.close()
+                except:
+                    trace = traceback.format_exc()
+                    logger.error('%s' % trace)
+                    fail_msg = 'error :: failed to get ionosphere_table meta for options'
+                    logger.error('%s' % fail_msg)
+                    if engine:
+                        engine_disposal(engine)
+                    raise
+
+    if count_request and search_query:
+        if engine:
+            engine_disposal(engine)
+        del all_fps
+        del metrics
+        return (features_profiles, features_profiles_count, matched_count,
+                checked_count, generation_count, full_duration_list,
+                enabled_list, tsfresh_version_list, generation_list, fail_msg,
+                trace)
+
+    features_profiles = []
+    if engine_needed and engine and search_query:
+        try:
+            connection = engine.connect()
+            if get_metric_profiles:
+#                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))
+                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metrics_id))
+                logger.debug('debug :: stmt - is abstracted')
+            else:
+                stmt = query_string
+                logger.debug('debug :: stmt - %s' % stmt)
+            result = connection.execute(stmt)
+            for row in result:
+#            for row in engine.execute(stmt):
+                try:
+                    fp_id = int(row['id'])
+                    metric_id = int(row['metric_id'])
+                    for metric_obj in metrics:
+                        if metric_id == int(metric_obj[0]):
+                            metric = metric_obj[1]
+                            break
+                    full_duration = int(row['full_duration'])
+                    anomaly_timestamp = int(row['anomaly_timestamp'])
+                    tsfresh_version = str(row['tsfresh_version'])
+                    # These handle MySQL NULL
+                    try:
+                        calc_time = float(row['calc_time'])
+                    except:
+                        calc_time = 0
+                    try:
+                        features_count = int(row['features_count'])
+                    except:
+                        features_count = 0
+                    try:
+                        features_sum = float(row['features_sum'])
+                    except:
+                        features_sum = 0
+                    try:
+                        deleted = int(row['deleted'])
+                    except:
+                        deleted = 0
+                    fp_matched_count = int(row['matched_count'])
+                    last_matched = int(row['last_matched'])
+                    if str(last_matched) == '0':
+                        human_date = 'never matched'
+                    else:
+                        human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_matched)))
+                    created_timestamp = str(row['created_timestamp'])
+                    last_checked = int(row['last_checked'])
+                    if str(last_checked) == '0':
+                        checked_human_date = 'never checked'
+                    else:
+                        checked_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(last_checked)))
+                    fp_checked_count = int(row['checked_count'])
+                    fp_parent_id = int(row['parent_id'])
+                    fp_generation = int(row['generation'])
+                    features_profiles.append([fp_id, metric_id, str(metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation])
+                except:
+                    trace = traceback.format_exc()
+                    logger.error('%s' % trace)
+                    logger.error('error :: bad row data')
+            connection.close()
+            features_profiles.sort(key=operator.itemgetter(int(0)))
+            logger.debug('debug :: features_profiles length - %s' % str(len(features_profiles)))
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: failed to get ionosphere_table data'
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise
+
+        full_duration_list = None
+        enabled_list = None
+        tsfresh_version_list = None
+        generation_list = None
+        if engine:
+            engine_disposal(engine)
+        del all_fps
+        del metrics
+        return (features_profiles, features_profiles_count, matched_count,
+                checked_count, generation_count, full_duration_list,
+                enabled_list, tsfresh_version_list, generation_list, fail_msg,
+                trace)
+
+    get_options = [
+        'full_duration', 'enabled', 'tsfresh_version', 'generation']
+
+    if engine_needed and engine and default_query:
+        for required_option in get_options:
             all_list = []
+#            required_option = 'full_duration'
             try:
                 stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)
                 connection = engine.connect()
@@ -886,4 +1287,11 @@ def ionosphere_search_defaults(get_options):
             if required_option == 'generation':
                 generation_list = set(all_list)
 
-    return full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace
+    if engine:
+        engine_disposal(engine)
+    del all_fps
+    del metrics
+    return (features_profiles, features_profiles_count, matched_count,
+            checked_count, generation_count, full_duration_list,
+            enabled_list, tsfresh_version_list, generation_list, fail_msg,
+            trace)

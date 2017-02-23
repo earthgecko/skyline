@@ -68,18 +68,18 @@
 		<div class="col-md-9 col-md-pull-3">
 			<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
   {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
+<!-- # @added 20170118 - Feature #1862: Ionosphere features profiles search page -->
+			  <li><a href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 			  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 			  <li class="active"><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
-<!-- # @added 20170118 - Feature #1862: Ionosphere features profiles search page -->
-			  <li><a href="/ionosphere?fp_search=true">Search</a></li>
   {% elif list_by == 'metric' %}
+			  <li><a href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 			  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 			  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
-			  <li><a href="/ionosphere?fp_search=true">Search</a></li>
   {% else %}
+			  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 			  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 			  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
-			  <li class="active"><a href="?fp_search=true">Search</a></li>
   {% endif %}
 			</ul>
 			<div class="tab-content">

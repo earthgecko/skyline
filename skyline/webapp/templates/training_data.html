@@ -9,7 +9,7 @@
     </button>
 			<ul class="nav nav-tabs" role="view_tablist" id="view">
 			  <li class="active"><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
-			  <li><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+			  <li><a href="?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
 			</ul>
 			<div class="tab-content">
   	  	<div class="tab-pane active" id="view">
@@ -249,6 +249,7 @@ Also note:
       to learn if this is <code>not anomalous</code> from the {{ use_full_duration_days }} days features profiles that exist in:</h4>
       <div class="countdown styled"></div>
     {% endif %}
+		  <h4><span class="logo"><span class="sky">Ionosphere ::</span> <span class="re">metric :: </span></span>{{ ionosphere_metric }}</h4>
 		  <table class="table table-hover">
 		    <thead>
 		      <tr>
@@ -406,8 +407,7 @@ you need to try and be quicker next time.
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
   {% elif panorama_anomaly_id == 'None' %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
-{{ for_metric }} has no Panorama anomaly recorded at this timestamp, this can
-happen see <b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b> below
+{{ for_metric }} has no Panorama anomaly recorded at this timestamp
   {% else %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
   {% endif %}

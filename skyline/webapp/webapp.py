@@ -53,7 +53,7 @@ from ionosphere_backend import (
     ionosphere_get_metrics_dir,
     features_profile_details,
     # @added 20170118 - Feature #1862: Ionosphere features profiles search page
-    ionosphere_search_defaults)
+    ionosphere_search)
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
 
@@ -795,6 +795,131 @@ def ionosphere():
     except:
         request_args_len = 0
 
+    # @added 20170220 - Feature #1862: Ionosphere features profiles search page
+    # Ionosphere features profiles by generations
+    fp_search_req = None
+    if 'fp_search' in request.args:
+        fp_search_req = request.args.get(str('fp_search'), None)
+        if fp_search_req == 'true':
+            fp_search_req = True
+        else:
+            fp_search_req = False
+    if fp_search_req and request_args_len > 1:
+        REQUEST_ARGS = ['fp_search',
+                        'metric',
+                        'metric_like',
+                        'from_timestamp',
+                        'until_timestamp',
+                        'generation_greater_than',
+                        'full_duration',
+                        'enabled',
+                        'tsfresh_version',
+                        'generation',
+                        'count_by_metric',
+                        'count_by_matched',
+                        'count_by_generation',
+                        'count_by_checked',
+                        'limit',
+                        'order',
+                        ]
+
+        count_by_metric = None
+        ordered_by = None
+        limited_by = None
+        get_metric_profiles = False
+        not_metric_wildcard = True
+        for i in request.args:
+            key = str(i)
+            if key not in REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                return 'Bad Request', 400
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+
+            if key == 'order':
+                order = str(value)
+                if order == 'DESC':
+                    ordered_by = 'DESC'
+                if order == 'ASC':
+                    ordered_by = 'ASC'
+            if key == 'limit':
+                limit = str(value)
+                try:
+                    test_limit = int(limit) + 0
+                    limited_by = test_limit
+                except:
+                    logger.error('error :: limit is not an integer - %s' % str(limit))
+                    limited_by = '30'
+
+            if key == 'from_timestamp' or key == 'until_timestamp':
+                timestamp_format_invalid = True
+                if value == 'all':
+                    timestamp_format_invalid = False
+                # unix timestamp
+                if value.isdigit():
+                    timestamp_format_invalid = False
+                # %Y%m%d %H:%M timestamp
+                if timestamp_format_invalid:
+                    value_strip_colon = value.replace(':', '')
+                    new_value = value_strip_colon.replace(' ', '')
+                    if new_value.isdigit():
+                        timestamp_format_invalid = False
+                if timestamp_format_invalid:
+                    error_string = 'error :: invalid %s value passed %s' % (key, value)
+                    logger.error('error :: invalid %s value passed %s' % (key, value))
+                    return 'Bad Request', 400
+
+            if key == 'count_by_metric':
+                count_by_metric = request.args.get(str('count_by_metric'), None)
+                if count_by_metric == 'true':
+                    count_by_metric = True
+                else:
+                    count_by_metric = False
+
+            if key == 'metric':
+                if str(value) == 'all' or str(value) == '*':
+                    not_metric_wildcard = False
+                    get_metric_profiles = True
+                    metric = str(value)
+
+            if key == 'metric' and not_metric_wildcard:
+                try:
+                    unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                except:
+                    logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                    logger.info(traceback.format_exc())
+                    return 'Internal Server Error', 500
+                metric_name = settings.FULL_NAMESPACE + str(value)
+                if metric_name not in unique_metrics:
+                    error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 404
+                else:
+                    get_metric_profiles = True
+                    metric = str(value)
+
+        if count_by_metric:
+            features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            return render_template(
+                'ionosphere.html', fp_search=fp_search_req,
+                fp_search_results=fp_search_req,
+                features_profiles_count=fps_count, order=ordered_by,
+                limit=limited_by, matched_count=mc, checked_count=cc,
+                generation_count=gc, version=skyline_version,
+                duration=(time.time() - start), print_debug=False), 200
+
+        if get_metric_profiles:
+            fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            return render_template(
+                'ionosphere.html', fp_search=fp_search_req,
+                fp_search_results=fp_search_req, features_profiles=fps,
+                for_metric=metric, order=ordered_by, limit=limited_by,
+                matched_count=mc, checked_count=cc, generation_count=gc,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=False), 200
+
     # @modified 20170118 - Feature #1862: Ionosphere features profiles search page
     # Added fp_search parameter
     # @modified 20170122 - Feature #1872: Ionosphere - features profile page by id only
@@ -892,7 +1017,7 @@ def ionosphere():
             for i in request.args:
                 key = str(i)
                 if key not in IONOSPHERE_REQUEST_ARGS:
-                    logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                    logger.error('error :: invalid request argument - %s' % (key))
                     return 'Bad Request', 400
                 value = request.args.get(key, None)
                 logger.info('request argument - %s=%s' % (key, str(value)))
@@ -1102,13 +1227,17 @@ def ionosphere():
     # Added fp_search parameter
     fp_search_param = None
     if fp_search:
+        logger.debug('debug :: fp_search was True')
         fp_search_param = True
         listed_by = 'search'
         get_options = [
             'full_duration', 'enabled', 'tsfresh_version', 'generation']
         fd_list = None
         try:
-            fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search_defaults(get_options)
+            # @modified 20170221 - Feature #1862: Ionosphere features profiles search page
+            # fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search_defaults(get_options)
+            features_profiles, fp_count, mc, cc, gc, fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search(True, False)
+            logger.debug('debug :: fd_list - %s' % str(fd_list))
         except:
             message = 'Uh oh ... a Skyline 500 :('
             trace = traceback.format_exc()
@@ -1328,6 +1457,16 @@ def ionosphere():
                     message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
                     return internal_error(message, trace)
 
+            iono_metric = False
+            if base_name:
+                try:
+                    ionosphere_metrics = list(REDIS_CONN.smembers('ionosphere.unique_metrics'))
+                except:
+                    logger.warn('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
+                metric_name = settings.FULL_NAMESPACE + str(base_name)
+                if metric_name in ionosphere_metrics:
+                    iono_metric = True
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -1346,6 +1485,7 @@ def ionosphere():
                 graphite_matched_images=gmimages, matched_count=times_matched,
                 parent_id=par_id, generation=gen, learn=fp_learn,
                 use_full_duration_days=fp_fd_days, countdown=countdown_to,
+                ionosphere_metric=iono_metric,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
