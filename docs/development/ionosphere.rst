@@ -286,7 +286,7 @@ Well it took a year :)  But... it works :)
 * Task #1658: Patterning Skyline Ionosphere
 
 ionosphere.log
-~~~~~~~~~~~~~~
+--------------
 
 .. code-block: bash
 
@@ -353,3 +353,40 @@ ionosphere.log
     2016-12-31 06:43:56 :: 31856 :: ionosphere :: 1 spin_process/es completed in 1.35 seconds
     2016-12-31 06:43:56 :: 31856 :: updated Redis key for ionosphere up
     2016-12-31 06:43:56 :: 31856 :: purging any old training data
+
+
+Then along came learn
+=====================
+
+After achieving the above first milestone and then the second, etc, etc.  A
+significant amount of time has gone into improving the data presentation to the
+operator in terms of providing Graphite NOW graphs at various resolutions, etc.
+
+So that I could make better more informed decisions with a fuller picture of the
+metric and the point anomaly in context, to decide as to whether the alert was
+anomalous or not.  I would open Graphite link and looks at -7h and then change
+to -24h, -7d and then -30d.  So added to Ionosphere UI.
+
+And in that process, one can see learn.  Decisions as to whether a point anomaly is
+contextually anomalous are based on longer than Skyline analyses, which is fine.
+However if we define that a human operator should not create a features profile
+if they cannot say that the point anomalous is NOT anomalous at all resolutions,
+we give Ionosphere multiple resolutions to enable it to train itself.
+
+Ionosphere does not attempt to achieve statistical or scientific accuracy it
+merely attempts to make 3sigma based anomaly detection methods better.  That
+said there may be some within the data science arena that may wish to argue
+that a number of things in the Ionosphere learning method would not necessarily
+hold up to some UCR review or Kaggle competition.  Luckily Ionosphere makes no
+bones in this regard as this is not Ionosphere's domain space. Ionosphere's
+domain space is machine and application metrics, with ambitions for bigger
+things.  Skyline and Ionosphere will find a timeseries Rebra (I reckon) :)
+
+Ionosphere is the culmination of over 24 months of deconstruction and refitting
+of Etsy's now much aged Skyline simple Python anomaly detection (complicated
+stack) application.
+
+Ionosphere began with a very, very small goal.  To teach Skyline what things
+were not anomalous.  The journey of trying to build something that would do that
+went from confused, impossible, no idea .... to a multi-generation one-step
+learning system, like a timeseries Rebra finder.

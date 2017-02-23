@@ -1427,7 +1427,7 @@ IONOSPHERE_LEARN = True
 
 """
 
-IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS = 5
+IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS = 16
 """
 :var IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS: The maximum number of generations
     that Ionosphere can automatically learn up to from the original human created
@@ -1437,7 +1437,10 @@ IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS = 5
 :vartype IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS: int
 """
 
-IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 7.0
+# TODO - testing to 100, tested and set as default, leaving 7 as a very
+# conservative option for anyone initial scared of what it may do :)
+# IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 7.0
+IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 100.0
 """
 :var IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN: The maximum percent
     that an automatically generated features profile can be from the original
@@ -1449,7 +1452,11 @@ IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 7.0
 
 .. note:: This percent value will match -/+ e.g. works both ways x percent above
     or below.  In terms of comparisons, a negative percent is simply multiplied
-    by -1.0
+    by -1.0.  The lower the value, the less Ionosphere can learn, to literally
+    disable Ionosphere learning set this to 0.  The difference can be much
+    greater than 100, but between 7 and 100 is reasonable for learning.  However
+    to really disable learning, also set all max_generations settings to 1.
+
 """
 
 IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS = 30
@@ -1471,9 +1478,11 @@ IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3661
 """
 
 IONOSPHERE_LEARN_NAMESPACE_CONFIG = (
-    ('skyline_test.alerters.test', 30, 3661, 5, 7),
-    # Learn all Ionosphere enabled metrics at 30 days
-    ('\*', 30, 3661, 5, 7),
+    ('skyline_test.alerters.test', 30, 3661, 16, 100.0),
+    # Learn all Ionosphere enabled metrics at 30 days, allow 16 generations and
+    # a learnt features profile can be 100% different for the origin features
+    # profile
+    ('\*', 30, 3661, 16, 100.0),
 )
 """
 :var IONOSPHERE_LEARN_NAMESPACE_CONFIG: Configures specific namespaces at
@@ -1500,14 +1509,14 @@ to 0
         #  LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS, MAX_GENERATIONS,
         #  MAX_PERCENT_DIFF_FROM_ORIGIN),
         # Wildcard namespaces can be used as well
-        ('metric3.thing\..*', 90, 3661, 5, 7),
-        ('metric4.thing\..*.\.requests', 14, 3661, 5, 7),
+        ('metric3.thing\..*', 90, 3661, 16, 100.0),
+        ('metric4.thing\..*.\.requests', 14, 3661, 16, 100.0),
         # However beware of wildcards as the above wildcard should really be
-        ('metric4.thing\..*.\.requests', 14, 7261, 3, 5),
+        ('metric4.thing\..*.\.requests', 14, 7261, 3, 7.0),
         # Disable learning on a namespace
-        ('metric5.thing\..*.\.rpm', 0, 3661, 5, 7),
+        ('metric5.thing\..*.\.rpm', 0, 3661, 5, 7.0),
         # Learn all Ionosphere enabled metrics at 30 days
-        ('.*', 30, 3661, 5, 7),
+        ('.*', 30, 3661, 16, 100.0),
     )
 
 - Namespace tuple parameters are:

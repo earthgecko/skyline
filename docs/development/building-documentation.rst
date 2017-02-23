@@ -104,9 +104,11 @@ Build
     # Build the pytz.rst page to generate the pytz timezone list for Skyline
     # Ionosphere and tsfresh, creates "$APPDIR/docs/development/pytz.rst"
 
-    python${PYTHON_MAJOR_VERSION} "$APPDIR/skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py"
+    python${PYTHON_MAJOR_VERSION} "$APPDIR/skyline/tsfresh_features/scripts/make-pytz.all_timezones-rst.py"
 
     # Run tests
+    ORIGINAL_DIR=$(pwd)
+    cd "$APPDIR"
     python${PYTHON_MAJOR_VERSION} -m pytest tests/
     if [ $? -ne 0 ]; then
       echo "Tests failed not building documentation"
@@ -137,7 +139,7 @@ Build
     do
       rm -rf "$i"
     done
-    cd
+    cd "$ORIGINAL_DIR"
   }
 
   # Usage: build_docs <app_dir>
@@ -153,7 +155,7 @@ This may be a little unconventional but it probably beats trying to do it via
 Sphinx support custom extensions, without using generates or includes or Jinga
 templating, which may or may not work with readthedocs.
 
-The script skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py introduces a
+The script skyline/tsfresh_features/scripts/make-pytz.all_timezones-rst.py introduces a
 novel way to automatically generate the docs/development/pytz.rst during the
 local build process to provide a list of all pytz timezones at the current
 version.

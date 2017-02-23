@@ -8,6 +8,7 @@ Development
 	webapp.rst
 	debugging.rst
 	ionosphere.rst
+	tsfresh.rst
 	pytz.rst
 
 DRY
