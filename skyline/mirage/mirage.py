@@ -517,9 +517,28 @@ class Mirage(Thread):
             timeseries = json.loads(f.read())
             logger.info('data points surfaced :: %s' % (len(timeseries)))
 
+        # @added 20170212 - Feature #1886: Ionosphere learn
+        # Only process if the metric has sufficient data
+        first_timestamp = None
         try:
-            logger.info('analyzing :: %s at %s seconds' % (metric, second_order_resolution_seconds))
-            anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
+            first_timestamp = int(timeseries[0][0])
+        except:
+            logger.error('error :: could not determine first timestamp')
+        timestamp_now = int(time())
+        valid_if_before_timestamp = timestamp_now - int(settings.FULL_DURATION)
+        valid_mirage_timeseries = True
+        if first_timestamp:
+            if first_timestamp > valid_if_before_timestamp:
+                valid_mirage_timeseries = False
+
+        try:
+            if valid_mirage_timeseries:
+                logger.info('analyzing :: %s at %s seconds' % (metric, second_order_resolution_seconds))
+                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
+            else:
+                logger.info('not analyzing :: %s at %s seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries' % (metric, second_order_resolution_seconds))
+                anomalous = False
+                datapoint = timeseries[-1][1]
         # It could have been deleted by the Roomba
         except TypeError:
             exceptions['DeletedByRoomba'] += 1
