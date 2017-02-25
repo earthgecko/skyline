@@ -1,3 +1,4 @@
+from __future__ import division
 import logging
 from smtplib import SMTP
 import mirage_alerters
@@ -6,6 +7,7 @@ try:
 except ImportError:
     import urllib.request
     import urllib.error
+from ast import literal_eval
 from requests.utils import quote
 
 # Added for graphs showing Redis data
@@ -17,16 +19,19 @@ import datetime as dt
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.pylab import rcParams
-from matplotlib.dates import DateFormatter
-import io
-import numpy as np
-import pandas as pd
-import syslog
-import os.path
-import sys
-import resource
+# @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+# Handle flake8 E402
+if True:
+    import matplotlib.pyplot as plt
+    from matplotlib.pylab import rcParams
+    from matplotlib.dates import DateFormatter
+    import io
+    import numpy as np
+    import pandas as pd
+    import syslog
+    import os.path
+    import sys
+    import resource
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -41,8 +46,12 @@ if python_version == 3:
     from email.mime.text import MIMEText
     from email.mime.image import MIMEImage
 
-import settings
-import skyline_version
+# @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+# Handle flake8 E402
+if True:
+    import settings
+    import skyline_version
+    from skyline_functions import write_data_to_file, mkdir_p
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -53,16 +62,22 @@ skyline_version = skyline_version.__absolute_version__
 
 """
 Create any alerter you want here. The function will be invoked from trigger_alert.
-Two arguments will be passed, both of them tuples: alert and metric.
+Four arguments will be passed, two of them tuples: alert and metric.
 
-alert: the tuple specified in your settings:
-    alert[0]: The matched substring of the anomalous metric
-    alert[1]: the name of the strategy being used to alert
-    alert[2]: The timeout of the alert that was triggered
-    alert[3]: The SECOND_ORDER_RESOLUTION_HOURS
-metric: information about the anomaly itself
-    metric[0]: the anomalous value
-    metric[1]: The full name of the anomalous metric
+alert: the tuple specified in your settings:\n
+    alert[0]: The matched substring of the anomalous metric\n
+    alert[1]: the name of the strategy being used to alert\n
+    alert[2]: The timeout of the alert that was triggered\n
+    alert[3]: The SECOND_ORDER_RESOLUTION_HOURS\n
+metric: information about the anomaly itself\n
+    metric[0]: the anomalous value\n
+    metric[1]: The full name of the anomalous metric\n
+    metric[2]: anomaly timestamp\n
+
+second_order_resolution_seconds: int
+
+context: the app name
+
 """
 
 # FULL_DURATION to hours so that Mirage can surface the relevant timeseries data
@@ -74,7 +89,7 @@ except:
 full_duration_in_hours = full_duration_seconds / 60 / 60
 
 
-def alert_smtp(alert, metric, second_order_resolution_seconds):
+def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     """
     Called by :func:`~trigger_alert` and sends an alert via smtp to the
     recipients that are configured for the metric.
@@ -89,6 +104,24 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
     # SECOND_ORDER_RESOLUTION_SECONDS to hours so that Mirage surfaces the
     # relevant timeseries data in the graph
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
+
+    # @added 20161229 - Feature #1830: Ionosphere alerts
+    # Added Ionosphere variables
+    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    if settings.IONOSPHERE_ENABLED:
+        timeseries_dir = base_name.replace('.', '/')
+        training_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
+            timeseries_dir)
+        graphite_image_file = '%s/%s.%s.graphite.%sh.png' % (
+            training_data_dir, base_name, skyline_app,
+            str(int(second_order_resolution_in_hours)))
+        json_file = '%s/%s.%s.redis.%sh.json' % (
+            training_data_dir, base_name, skyline_app,
+            str(int(full_duration_in_hours)))
+        training_data_redis_image = '%s/%s.%s.redis.plot.%sh.png' % (
+            training_data_dir, base_name, skyline_app,
+            str(int(full_duration_in_hours)))
 
     # For backwards compatibility
     if '@' in alert[1]:
@@ -118,29 +151,54 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
     if type(recipients) is str:
         recipients = [recipients]
 
-    unencoded_graph_title = 'Skyline Mirage - ALERT at %s hours - anomalous data point - %s' % (
-        second_order_resolution_in_hours, metric[0])
+    # @modified 20161228 - Feature #1830: Ionosphere alerts
+    # Ionosphere alerts
+    unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
+        context, str(int(second_order_resolution_in_hours)), str(metric[0]))
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
 
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)),
+            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            str(int(second_order_resolution_in_hours)), metric[1],
+            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
     image_data = None
     if settings.SMTP_OPTS.get('embed-images'):
-        try:
-            image_data = urllib2.urlopen(link).read()
-            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                logger.info('debug :: alert_smtp - image data OK')
-        except urllib2.URLError:
-            image_data = None
-            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                logger.info('debug :: alert_smtp - image data None')
+        # @added 20161229 - Feature #1830: Ionosphere alerts
+        # Use existing data if files exist
+        if os.path.isfile(graphite_image_file):
+            try:
+                with open(graphite_image_file, 'r') as f:
+                    image_data = f.read()
+                logger.info('alert_smtp - using existing png - %s' % graphite_image_file)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_smtp - failed to read image data from existing png - %s' % graphite_image_file)
+                logger.error('error :: alert_smtp - %s' % str(link))
+                image_data = None
+
+        if image_data is None:
+            try:
+                image_data = urllib2.urlopen(link).read()
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - image data OK')
+            except urllib2.URLError:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_smtp - failed to get image graph')
+                logger.error('error :: alert_smtp - %s' % str(link))
+                image_data = None
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - image data None')
 
     # If we failed to get the image or if it was explicitly disabled,
     # use the image URL instead of the content.
@@ -150,6 +208,26 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
         img_tag = '<img src="cid:%s"/>' % content_id
         if settings.ENABLE_DEBUG or LOCAL_DEBUG:
             logger.info('debug :: alert_smtp - img_tag: %s' % img_tag)
+
+        if settings.IONOSPHERE_ENABLED:
+            # Create Ionosphere Graphite image
+            # @modified 20161229 - Feature #1830: Ionosphere alerts
+            # Only write the data to the file if it does not exist
+            if not os.path.isfile(graphite_image_file):
+                try:
+                    write_data_to_file(skyline_app, graphite_image_file, 'w', image_data)
+                    logger.info(
+                        'added %s Ionosphere Graphite image :: %s' % (
+                            skyline_app, graphite_image_file))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error(
+                        'error :: failed to add %s Ionosphere Graphite image' % (
+                            skyline_app, graphite_image_file))
+            else:
+                logger.info(
+                    '%s Ionosphere Graphite image already exists :: %s' % (
+                        skyline_app, graphite_image_file))
 
     redis_image_data = None
     try:
@@ -187,6 +265,55 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
         except:
             logger.error('error :: alert_smtp - unpack timeseries failed')
             timeseries = None
+
+        if settings.IONOSPHERE_ENABLED and timeseries:
+            '''
+            .. todo: this is possibly to be used to allow the user to submit the
+                FULL_DURATION duration data set for the features profile to be
+                created against IF it is a Mirage metric.  This would allow for
+                additional granularity in Mirage metrics, thereby maintaining
+                their seasonality, but allow user and Skyline to analyze the
+                anomaly at a FULL_DURATION resolution as well.  Not sure how to
+                code that in Ionosphere context yet but could just be additonal
+                flag in the Ionosphere record.  In the Ionosphere frontend, the
+                user would be given an option to either create the features
+                profile on the Mirage timeseries or the redis FULL_DURATION
+                timeseries.  It is a little complicated, but doable.
+                # @modified 20161229 - Feature #1828: ionosphere - mirage Redis data features
+                However that ^^ is UNDESIRABLE in the Mirage/Ionosphere context
+                at the moment.  Ionosphere must only profile SECOND_ORDER_RESOLUTION_HOURS
+                currently so as to not pollute the seasonality aspect of Mirage
+            '''
+            # Create Ionosphere redis timeseries json if is does not exist
+            # @modified 20161229 - Feature #1830: Ionosphere alerts
+            # Only write the data to the file if it does not exist and replace
+            # the timeseries object if a json file exists
+            if not os.path.isfile(json_file):
+                timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+                try:
+                    write_data_to_file(skyline_app, json_file, 'w', timeseries_json)
+                    logger.info('added %s Ionosphere Redis data timeseries json file :: %s' % (skyline_app, json_file))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s Ionosphere Redis data timeseries json file' % (skyline_app, json_file))
+            else:
+                # Replace the timeseries object
+                logger.info('%s Ionosphere Redis data timeseries json file already exists, using :: %s' % (skyline_app, json_file))
+                anomaly_json = json_file
+                try:
+                    # Read the timeseries json file
+                    with open(anomaly_json, 'r') as f:
+                        raw_timeseries = f.read()
+                    timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                    timeseries = literal_eval(timeseries_array_str)
+                    logger.info('%s Redis timeseries replaced with timeseries from :: %s' % (skyline_app, anomaly_json))
+                    timeseries_x = [float(item[0]) for item in timeseries]
+                    timeseries_y = [item[1] for item in timeseries]
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: %s failed to read timeseries data from %s' % (skyline_app, anomaly_json))
+                    timeseries = None
 
         pd_series_values = None
         if timeseries:
@@ -238,7 +365,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
                 mean_series = None
 
         if mean_series:
-            graph_title = 'Skyline Mirage - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (full_duration_in_hours, metric[1], metric[0])
+            graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))
             if python_version == 3:
                 buf = io.StringIO()
             else:
@@ -310,6 +437,28 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
                 ax.margins(y=.02, x=.03)
                 # tight_layout removes the legend box
                 # fig.tight_layout()
+
+                if settings.IONOSPHERE_ENABLED:
+                    if not os.path.exists(training_data_dir):
+                        mkdir_p(training_data_dir)
+                        logger.info('created dir - %s' % training_data_dir)
+
+                    if not os.path.isfile(training_data_redis_image):
+                        try:
+                            plt.savefig(training_data_redis_image, format='png')
+                            logger.info(
+                                'alert_smtp - save Redis training data image - %s' % (
+                                    training_data_redis_image))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error(
+                                'error :: alert_smtp - could not save - %s' % (
+                                    training_data_redis_image))
+                    else:
+                        logger.info(
+                            'alert_smtp - Redis training data image already exists - %s' % (
+                                training_data_redis_image))
+
                 try:
                     plt.savefig(buf, format='png')
                     # @added 20160814 - Bug #1558: Memory leak in Analyzer
@@ -326,23 +475,40 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                         logger.info('debug :: alert_smtp - savefig: %s' % 'OK')
                 except:
+                    logger.info(traceback.format_exc())
                     logger.error('error :: alert_smtp - plt.savefig: %s' % 'FAIL')
             except:
+                logger.error(traceback.format_exc())
                 logger.error('error :: alert_smtp - could not build plot')
-                logger.info(traceback.format_exc())
 
     if redis_image_data:
         redis_img_tag = '<img src="cid:%s"/>' % redis_graph_content_id
         if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-            logger.info('debug :: alert_smtp - redis_img_tag: %s' % redis_img_tag)
+            logger.info('debug :: alert_smtp - redis_img_tag: %s' % str(redis_img_tag))
     else:
+        # @modified 20161229 - Feature #1830: Ionosphere alerts
+        # @modified 20170108 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+        # Restored the previous redis_img_tag method as some smtp alerts were
+        # coming without a Redis graph, not all but some and for some reason,
+        # I am pretty certain retrospectively that it was done that way from
+        # testing I just wanted to try and be cleaner.
+        # The redis_img_tag was changed at
+        # https://github.com/earthgecko/skyline/commit/31bcacf3f90f0953ebed0d57260cb937e01f887c#diff-520bf2a218f65074ffead4d8184c138dR489
         redis_img_tag = '<img src="%s"/>' % 'none'
+        # redis_img_tag = '<img src="none"/>'
 
-    body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> Mirage alert</font></h3><br>'
+    body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
     body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
     body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
-    body += '<font color="black">At hours: %s</font><br>' % str(second_order_resolution_in_hours)
+    body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
+    body += '<font color="black">At hours: %s</font><br>' % str(int(second_order_resolution_in_hours))
     body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+    if settings.IONOSPHERE_ENABLED:
+        body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
+        ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+            settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
+        body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+        body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
     if image_data:
         body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
         body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
@@ -354,6 +520,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
         body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
             str(sigma3_upper_bound), str(sigma3_lower_bound))
         body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
+
         body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
         body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
         body += 'however do note that will remove the 3-sigma and mean value too.</font>'
@@ -362,9 +529,8 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
 
     for recipient in recipients:
         try:
-
             msg = MIMEMultipart('alternative')
-            msg['Subject'] = '[Skyline alert] - Mirage ALERT - ' + metric[1]
+            msg['Subject'] = '[Skyline alert] - %s ALERT - %s' % (context, metric[1])
             msg['From'] = sender
             msg['To'] = recipient
 
@@ -411,19 +577,19 @@ def alert_smtp(alert, metric, second_order_resolution_seconds):
         return
 
 
-def alert_pagerduty(alert, metric, second_order_resolution_seconds):
+def alert_pagerduty(alert, metric, second_order_resolution_seconds, context):
     """
     Called by :func:`~trigger_alert` and sends an alert via PagerDuty
     """
     if settings.PAGERDUTY_ENABLED:
         import pygerduty
         pager = pygerduty.PagerDuty(settings.PAGERDUTY_OPTS['subdomain'], settings.PAGERDUTY_OPTS['auth_token'])
-        pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], "Mirage alert - %s - %s" % (metric[0], metric[1]))
+        pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
     else:
         return False
 
 
-def alert_hipchat(alert, metric, second_order_resolution_seconds):
+def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
     """
     Called by :func:`~trigger_alert` and sends an alert the hipchat room that is
     configured in settings.py.
@@ -438,28 +604,27 @@ def alert_hipchat(alert, metric, second_order_resolution_seconds):
         import hipchat
         hipster = hipchat.HipChat(token=settings.HIPCHAT_OPTS['auth_token'])
         rooms = settings.HIPCHAT_OPTS['rooms'][alert[0]]
-
-        unencoded_graph_title = 'Skyline Mirage - ALERT at %s hours - anomalous data point - %s' % (
-            second_order_resolution_in_hours, metric[0])
+        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
+            context, str(int(second_order_resolution_in_hours)), str(metric[0]))
         graph_title_string = quote(unencoded_graph_title, safe='')
         graph_title = '&title=%s' % graph_title_string
 
         if settings.GRAPHITE_PORT != '':
-            link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         else:
-            link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
         for room in rooms:
-            hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - Mirage - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, metric[1], metric[0], second_order_resolution_in_hours, embed_graph)})
+            hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - %s - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, context, metric[1], str(metric[0]), str(int(second_order_resolution_in_hours)), embed_graph)})
     else:
         return False
 
 
-def alert_syslog(alert, metric, second_order_resolution_seconds):
+def alert_syslog(alert, metric, second_order_resolution_seconds, context):
     if settings.SYSLOG_ENABLED:
         syslog_ident = settings.SYSLOG_OPTS['ident']
-        message = str('Mirage - Anomalous metric: %s (value: %s)' % (metric[1], metric[0]))
+        message = '%s - Anomalous metric: %s (value: %s)' % (context, metric[1], str(metric[0]))
         if sys.version_info[:2] == (2, 6):
             syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
         elif sys.version_info[:2] == (2, 7):
@@ -473,7 +638,7 @@ def alert_syslog(alert, metric, second_order_resolution_seconds):
         return False
 
 
-def trigger_alert(alert, metric, second_order_resolution_seconds):
+def trigger_alert(alert, metric, second_order_resolution_seconds, context):
     """
     Called by :class:`~skyline.skyline.Mirage.run` to trigger an alert,
     Mirage passes two arguments, both of them tuples.  The alerting strategy
@@ -488,8 +653,11 @@ def trigger_alert(alert, metric, second_order_resolution_seconds):
         alert[3]: The SECOND_ORDER_RESOLUTION_HOURS\n
     :param meric:
         The metric tuple.\n
-        metric[0]: the anomalous value
-        metric[1]: The full name of the anomalous metric
+        metric[0]: the anomalous value\n
+        metric[1]: The full name of the anomalous metric\n
+        metric[2]: anomaly timestamp\n
+    :param context: app name
+    :type context: str
 
     """
 
@@ -499,7 +667,7 @@ def trigger_alert(alert, metric, second_order_resolution_seconds):
         strategy = 'alert_%s' % alert[1]
 
     try:
-        getattr(mirage_alerters, strategy)(alert, metric, second_order_resolution_seconds)
+        getattr(mirage_alerters, strategy)(alert, metric, second_order_resolution_seconds, context)
     except:
         logger.error('error :: alerters - %s - getattr error' % strategy)
         logger.info(traceback.format_exc())

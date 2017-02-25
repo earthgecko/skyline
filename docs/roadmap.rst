@@ -26,6 +26,12 @@ to using machine learning to train Skyline on anomalies.  Using the entire data
 set for training it, perhaps even using an entire namespace to increase the
 accuracy of the anomaly detection via multiple avenues of analysis.
 
+In progress
+-----------
+
+See `Ionosphere <ionosphere.html>`__ and `Development - Ionosphere
+<development/ionosphere.html>`__
+
 Meteor
 ======
 
@@ -46,6 +52,8 @@ requirement for the additional overheads of ruby and Elasticsearch.
 
 This would allow for the correlations to be determined for any metrics
 at any point within the ``FULL_DURATION`` period.
+
+Help wanted.
 
 Skyline and NASA/FITS data
 ==========================
@@ -92,7 +100,7 @@ a thing) at times. NuPIC and the Cortical Learning Algorithm are really
 amazing, if not a little difficult upfront.
 
 NuPIC predictions and Graphite timeseries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------
 
 Feeding NuPIC prediction data back into Graphite helps our own Neocortex
 to visually analyse the results too (data courtesy of
@@ -160,8 +168,21 @@ added or applied to Skyline in the future, e.g:
 
 Automated NAB benchmark metrics would be a nice thing to have :)
 
+**Update 20170225**: Skyline can no longer necessarily be NAB-ed due to it now
+functioning in multiple temporal resolutions as a whole.
+
 Machine learning
 ================
 
 Bring additional dimensions of machine learning capabilities into Skyline, too
 many avenues to mention...
+
+Grumpy
+======
+
+Investigate if any elements could benefit performance wise from being
+implemented in Grumpy - go running Python -
+https://opensource.googleblog.com/2017/01/grumpy-go-running-python.html there
+may be some mileage in using go instead of multiprocessing in some cases,
+algorithms, ionosphere, tsfresh chunks to go in extract_features rather than
+multiprocessing, scope for investigation.

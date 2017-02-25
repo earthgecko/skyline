@@ -4,8 +4,12 @@ Development
 
 .. toctree::
 
+	building-documentation.rst
 	webapp.rst
 	debugging.rst
+	ionosphere.rst
+	tsfresh.rst
+	pytz.rst
 
 DRY
 ###

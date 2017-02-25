@@ -1,9 +1,12 @@
 """
 version info
 """
-__version_info__ = ('1', '0', '8')
-__branch__ = 'crucible'
-__version_tag__ = 'beta'
+# @modified 20170109 - Feature #1854: Ionosphere learn
+# Added learn
+# __version_info__ = ('1', '1', '0')
+__version_info__ = ('1', '1', '1')
+__branch__ = 'ionosphere'
+__version_tag__ = 'alpha'
 
 __version__ = '.'.join(__version_info__)
 __absolute_version__ = 'Skyline (%s v%s-%s)' % (__branch__, __version__, __version_tag__)

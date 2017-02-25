@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - Debugging &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>Development - Debugging &mdash; Skyline 1.1.0-dev documentation</title>
   
 
   
@@ -32,9 +32,12 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="../index.html"/>
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Roadmap" href="../roadmap.html"/>
+        <link rel="next" title="Development - Ionosphere" href="ionosphere.html"/>
         <link rel="prev" title="Development - Webapp" href="webapp.html"/> 
 
   
@@ -63,7 +66,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -90,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -101,6 +104,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -109,10 +114,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Development - Debugging</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#code-profiling">Code profiling</a></li>
@@ -132,6 +137,8 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
 </ul>
@@ -392,7 +399,7 @@ in agent.py could not get any Trackable outputs in analyzer.py all None?</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../roadmap.html" class="btn btn-neutral float-right" title="Roadmap" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ionosphere.html" class="btn btn-neutral float-right" title="Development - Ionosphere" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="webapp.html" class="btn btn-neutral" title="Development - Webapp" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -426,7 +433,7 @@ in agent.py could not get any Trackable outputs in analyzer.py all None?</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.1.0-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

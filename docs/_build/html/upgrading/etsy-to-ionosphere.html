@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Upgrading - Etsy to Ionosphere &mdash; Skyline 1.1.0-dev documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
+        <link rel="up" title="Upgrading" href="index.html"/>
+        <link rel="next" title="Upgrading - Etsy to Crucible" href="etsy-to-crucible.html"/>
+        <link rel="prev" title="Upgrading - Crucible to Ionosphere" href="crucible-to-ionosphere.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Upgrading</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="crucible-to-ionosphere.html">Upgrading - Crucible to Ionosphere</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Upgrading - Etsy to Ionosphere</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#upgrade-steps">Upgrade steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="etsy-to-crucible.html">Upgrading - Etsy to Crucible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#upgrading-from-the-etsy-version-of-skyline">Upgrading from the Etsy version of Skyline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Upgrading</a> &raquo;</li>
+      
+    <li>Upgrading - Etsy to Ionosphere</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/upgrading/etsy-to-ionosphere.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="upgrading-etsy-to-ionosphere">
+<h1>Upgrading - Etsy to Ionosphere<a class="headerlink" href="#upgrading-etsy-to-ionosphere" title="Permalink to this headline">¶</a></h1>
+<p>First review <a class="reference external" href="index.html">Upgrading from the Etsy version of Skyline</a> section.</p>
+<div class="section" id="upgrade-steps">
+<h2>Upgrade steps<a class="headerlink" href="#upgrade-steps" title="Permalink to this headline">¶</a></h2>
+<p>These step describe an in-situ manual upgrade process (use sudo where
+appropriate for your environment).</p>
+<p>Due to virtualenv being the default and recommended way to now run Skyline, in
+order to upgrade most of the installation steps in the Installation
+documentation are still appropriate.</p>
+<ul class="simple">
+<li>Setup a Python virtualenv for Skyline - see <a class="reference external" href="../running-in-python-virtualenv.html#howto-python-virtualenv-skyline">Running in Python
+virtualenv - HOWTO</a></li>
+<li>Go through the installation process, ignoring the Redis install part and
+breaking out of installation where instructed to and returning to here.</li>
+<li>Stop all your original Skyline apps, ensuring that something like monit or
+supervisord, etc does not start them again.</li>
+<li>At this point you can either move your current Skyline directory and replace
+it with the new Skyline directory <strong>or</strong> just use the new path and just start
+the apps from their new location.</li>
+<li>If you want to move it, this is the PATH to <strong>your</strong> current Skyline, which
+contains:</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">skyline</span><span class="o">/</span><span class="nb">bin</span>
+<span class="n">skyline</span><span class="o">/</span><span class="n">src</span>
+<span class="c1"># etc</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>We are moving your skyline/ directory here.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">SKYLINE_DIR</span><span class="o">=</span>&lt;YOUR_SKYLINE_DIR&gt;
+mv <span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">SKYLINE_DIR</span><span class="si">}</span><span class="s2">.etsy.master&quot;</span>
+mv /opt/skyline/github/skyline <span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Copy or move your existing Skyline whisper files to their new
+namespaces on your Graphite server/s (as mentioned above.) Or use
+Graphite&#8217;s whisper-fill.py to populate the new metric namespaces from
+the old ones after starting the new Skyline apps.</li>
+<li>Start the Skyline apps, either from your path if moved or from the new
+location, whichever you used</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/horizon.d start
+<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/analyzer.d start
+<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/webapp.d start
+<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/pnorama.d start  <span class="c1"># if you have the MySQL DB set up</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check the log files to ensure things started OK and are running and there are
+no errors.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When checking a log make sure you check the log for the appropriate
+time, Skyline can log lots fast, so short tails may miss some event you
+expect between that restart and tail.</p>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Check what the logs reported when the apps started</span>
+head -n <span class="m">20</span> /var/log/skyline/*.log
+
+<span class="c1"># How are they running</span>
+tail -n <span class="m">20</span> /var/log/skyline/*.log
+
+<span class="c1"># Any errors - each app</span>
+cat /var/log/skyline/horizon.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/analyzer.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/webapp.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/panorama.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+
+<span class="c1"># If you have the other services running</span>
+cat /var/log/skyline/mirage.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/boundary.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+cat /var/log/skyline/crucible.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+</pre></div>
+</div>
+<ul class="simple">
+<li>If you added the new <code class="docutils literal"><span class="pre">skyline_test.alerters.test</span></code> alerts tuples to your
+<code class="docutils literal"><span class="pre">settings.py</span></code> you can test them now, see <a class="reference external" href="../alert-testing.html">Alert testing</a></li>
+<li>Look at implementing the other new features at your leisure</li>
+<li>Panorama is probably the quickest win if you opted to not install it</li>
+<li>Boundary and Mirage will take a little assessment to see what metrics
+you want to configure them for.</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="etsy-to-crucible.html" class="btn btn-neutral float-right" title="Upgrading - Etsy to Crucible" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="crucible-to-ionosphere.html" class="btn btn-neutral" title="Upgrading - Crucible to Ionosphere" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.1.0-dev',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

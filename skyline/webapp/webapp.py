@@ -1,12 +1,16 @@
+from __future__ import division
 import redis
 import logging
 import simplejson as json
 import sys
 import re
+import csv
 import traceback
 from msgpack import Unpacker
 from functools import wraps
-from flask import Flask, request, render_template, redirect, Response, abort, flash
+from flask import (
+    Flask, request, render_template, redirect, Response, abort, flash,
+    send_file)
 from daemon import runner
 from os.path import isdir
 from os import path
@@ -24,6 +28,12 @@ from flask import session, g, url_for, flash, Markup, json
 # For secret_key
 import uuid
 
+# @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
+# Determine the features profile dir path for a fp_id
+import datetime
+from pytz import timezone
+import pytz
+
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 import os.path
@@ -35,6 +45,23 @@ import skyline_version
 from skyline_functions import get_graphite_metric
 
 from backend import panorama_request, get_list
+from ionosphere_backend import (
+    ionosphere_data, ionosphere_metric_data,
+    # @modified 20170114 - Feature #1854: Ionosphere learn
+    # Decoupled create_features_profile from ionosphere_backend
+    # ionosphere_get_metrics_dir, create_features_profile,
+    ionosphere_get_metrics_dir,
+    features_profile_details,
+    # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+    ionosphere_search)
+from features_profile import feature_name_id, calculate_features_profile
+from tsfresh_feature_names import TSFRESH_VERSION
+
+# @added 20170114 - Feature #1854: Ionosphere learn
+# Decoupled the create_features_profile from ionosphere_backend and moved to
+# ionosphere_functions so it can be used by ionosphere/learn
+from ionosphere_functions import (
+    create_features_profile, get_ionosphere_learn_details)
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -54,6 +81,11 @@ REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 # ENABLE_WEBAPP_DEBUG = True
 
 app = Flask(__name__)
+
+gunicorn_error_logger = logging.getLogger('gunicorn.error')
+logger.handlers.extend(gunicorn_error_logger.handlers)
+logger.setLevel(logging.DEBUG)
+
 # app.secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
 secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
 app.secret_key = secret_key
@@ -86,6 +118,31 @@ except:
 
 
 @app.before_request
+#def setup_logging():
+#    if not app.debug:
+#        stream_handler = logging.StreamHandler()
+#        stream_handler.setLevel(logging.DEBUG)
+#        app.logger.addHandler(stream_handler)
+#        import logging
+#        from logging.handlers import TimedRotatingFileHandler, MemoryHandler
+#        file_handler = MemoryHandler(app_logfile, mode='a')
+#        file_handler.setLevel(logging.DEBUG)
+#        app.logger.addHandler(file_handler)
+#
+#        formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+#        handler = logging.handlers.TimedRotatingFileHandler(
+#            app_logfile,
+#            when="midnight",
+#            interval=1,
+#            backupCount=5)
+#        handler.setLevel(logging.DEBUG)
+#
+#        memory_handler = logging.handlers.MemoryHandler(100,
+#                                                        flushLevel=logging.DEBUG,
+#                                                        target=handler)
+#        handler.setFormatter(formatter)
+#        app.logger.addHandler(memory_handler)
+#        app.logger.addHandler(handler)
 def limit_remote_addr():
     """
     This function is called to check if the requesting IP address is in the
@@ -133,6 +190,42 @@ def requires_auth(f):
     return decorated
 
 
+@app.errorhandler(500)
+def internal_error(message, traceback_format_exc):
+    """
+    Show traceback in the browser when running a flask app on a production
+    server.
+    By default, flask does not show any useful information when running on a
+    production server.
+    By adding this view, we output the Python traceback to the error 500 page
+    and log.
+
+    As per:
+    Show flask traceback when running on production server
+    https://gist.github.com/probonopd/8616a8ff05c8a75e4601 - Python traceback
+    rendered nicely by Jinja2
+
+    This can be tested by hitting SKYLINE_URL/a_500
+
+    """
+    fail_msg = str(message)
+    trace = str(traceback_format_exc)
+    logger.debug('debug :: returning 500 as there was an error, why else would 500 be returned...')
+    logger.debug('debug :: sending the user that caused the error to happen, this useful information')
+    logger.debug('debug :: but they or I may have already emailed it to you, you should check your inbox')
+    logger.debug('%s' % str(traceback_format_exc))
+    logger.debug('debug :: which is accompanied with the message')
+    logger.debug('debug :: %s' % str(message))
+    logger.debug('debug :: request url :: %s' % str(request.url))
+    logger.debug('debug :: request referrer :: %s' % str(request.referrer))
+    resp = '<pre>%s</pre><pre>%s</pre>' % (str(message), str(traceback_format_exc))
+#    return(resp), 500
+    server_name = settings.SERVER_METRICS_NAME
+    return render_template(
+        'traceback.html', version=skyline_version,
+        message=fail_msg, traceback=trace, bad_machine=server_name), 500
+
+
 @app.route("/")
 @requires_auth
 def index():
@@ -156,6 +249,32 @@ def index():
         error_string = traceback.format_exc()
         logger.error('error :: failed to render index.html: %s' % str(error_string))
         return 'Uh oh ... a Skyline 500 :(', 500
+
+
+@app.route("/a_500")
+@requires_auth
+def a_500():
+
+    if 'message' in request.args:
+        message = request.args.get(str('message'), None)
+        logger.debug('debug :: message - %s' % str(message))
+        test_500_string = message
+    else:
+        logger.debug('debug :: testing /a_500 route and app.errorhandler(500) internal_error function')
+        message = 'Testing app.errorhandler(500) internal_error function, if you are seeing this it works - OK'
+        test_500_string = 'This is a test to generate a ValueError and a HTTP response of 500 and display the traceback'
+
+    try:
+        test_errorhandler_500_internal_error = int(test_500_string)
+    except:
+        trace = traceback.format_exc()
+        logger.debug('debug :: test OK')
+        return internal_error(message, trace)
+
+    error_msg = 'failed test of /a_500 route and app.errorhandler(500) internal_error function'
+    logger.error('error :: %s' % error_msg)
+    resp = json.dumps({'results': error_msg})
+    return resp, 501
 
 
 @app.route("/now")
@@ -408,8 +527,11 @@ def panorama():
                     'algorithm',
                     'limit',
                     'order',
+                    # @added 20161127 - Branch #922: ionosphere
+                    'panorama_anomaly_id',
                     ]
 
+    get_anomaly_id = False
     if request_args_present:
         for i in request.args:
             key = str(i)
@@ -418,6 +540,11 @@ def panorama():
                 return 'Bad Request', 400
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
+
+            # @added 20161127 - Branch #922: ionosphere
+            if key == 'panorama_anomaly_id':
+                if str(value) == 'true':
+                    get_anomaly_id = True
 
             if key == 'metric' and value != 'all':
                 if value != '':
@@ -561,6 +688,24 @@ def panorama():
                         {'results': error_string})
                     return resp, 400
 
+    # @added 20161127 - Branch #922: ionosphere
+    if get_anomaly_id:
+        try:
+            query, panorama_data = panorama_request()
+            logger.info('debug :: panorama_data - %s' % str(panorama_data))
+        except:
+            logger.error('error :: failed to get panorama: ' + traceback.format_exc())
+            return 'Uh oh ... a Skyline 500 :(', 500
+
+        try:
+            duration = (time.time() - start)
+            logger.info('debug :: duration - %s' % str(duration))
+            resp = str(panorama_data)
+            return resp, 200
+        except:
+            logger.error('error :: failed to render panorama.html: ' + traceback.format_exc())
+            return 'Uh oh ... a Skyline 500 :(', 500
+
     if request_args_len == 0:
         try:
             panorama_data = panorama_request()
@@ -615,6 +760,7 @@ def panorama():
 @app.route("/crucible", methods=['GET'])
 @requires_auth
 def crucible():
+
     crucible_web_ui_implemented = False
     if crucible_web_ui_implemented:
         try:
@@ -625,6 +771,799 @@ def crucible():
             return render_template(
                 'uh_oh.html', version=skyline_version,
                 message="Sorry the Crucible web UI is not completed yet"), 200
+
+# @added 20161123 - Branch #922: ionosphere
+
+
+@app.route("/ionosphere", methods=['GET'])
+@requires_auth
+def ionosphere():
+    if not settings.IONOSPHERE_ENABLED:
+        try:
+            return render_template(
+                'uh_oh.html', version=skyline_version,
+                message="Ionosphere is not enabled, please see the Ionosphere section in the docs and settings.py"), 200
+        except:
+            return 'Uh oh ... a Skyline 500 :(', 500
+
+    start = time.time()
+
+    request_args_present = False
+    try:
+        request_args_len = len(request.args)
+        request_args_present = True
+    except:
+        request_args_len = 0
+
+    # @added 20170220 - Feature #1862: Ionosphere features profiles search page
+    # Ionosphere features profiles by generations
+    fp_search_req = None
+    if 'fp_search' in request.args:
+        fp_search_req = request.args.get(str('fp_search'), None)
+        if fp_search_req == 'true':
+            fp_search_req = True
+        else:
+            fp_search_req = False
+    if fp_search_req and request_args_len > 1:
+        REQUEST_ARGS = ['fp_search',
+                        'metric',
+                        'metric_like',
+                        'from_timestamp',
+                        'until_timestamp',
+                        'generation_greater_than',
+                        'full_duration',
+                        'enabled',
+                        'tsfresh_version',
+                        'generation',
+                        'count_by_metric',
+                        'count_by_matched',
+                        'count_by_generation',
+                        'count_by_checked',
+                        'limit',
+                        'order',
+                        ]
+
+        count_by_metric = None
+        ordered_by = None
+        limited_by = None
+        get_metric_profiles = False
+        not_metric_wildcard = True
+        for i in request.args:
+            key = str(i)
+            if key not in REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                return 'Bad Request', 400
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+
+            if key == 'order':
+                order = str(value)
+                if order == 'DESC':
+                    ordered_by = 'DESC'
+                if order == 'ASC':
+                    ordered_by = 'ASC'
+            if key == 'limit':
+                limit = str(value)
+                try:
+                    test_limit = int(limit) + 0
+                    limited_by = test_limit
+                except:
+                    logger.error('error :: limit is not an integer - %s' % str(limit))
+                    limited_by = '30'
+
+            if key == 'from_timestamp' or key == 'until_timestamp':
+                timestamp_format_invalid = True
+                if value == 'all':
+                    timestamp_format_invalid = False
+                # unix timestamp
+                if value.isdigit():
+                    timestamp_format_invalid = False
+                # %Y%m%d %H:%M timestamp
+                if timestamp_format_invalid:
+                    value_strip_colon = value.replace(':', '')
+                    new_value = value_strip_colon.replace(' ', '')
+                    if new_value.isdigit():
+                        timestamp_format_invalid = False
+                if timestamp_format_invalid:
+                    error_string = 'error :: invalid %s value passed %s' % (key, value)
+                    logger.error('error :: invalid %s value passed %s' % (key, value))
+                    return 'Bad Request', 400
+
+            if key == 'count_by_metric':
+                count_by_metric = request.args.get(str('count_by_metric'), None)
+                if count_by_metric == 'true':
+                    count_by_metric = True
+                else:
+                    count_by_metric = False
+
+            if key == 'metric':
+                if str(value) == 'all' or str(value) == '*':
+                    not_metric_wildcard = False
+                    get_metric_profiles = True
+                    metric = str(value)
+
+            if key == 'metric' and not_metric_wildcard:
+                try:
+                    unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                except:
+                    logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                    logger.info(traceback.format_exc())
+                    return 'Internal Server Error', 500
+                metric_name = settings.FULL_NAMESPACE + str(value)
+                if metric_name not in unique_metrics:
+                    error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 404
+                else:
+                    get_metric_profiles = True
+                    metric = str(value)
+
+        if count_by_metric:
+            features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            return render_template(
+                'ionosphere.html', fp_search=fp_search_req,
+                fp_search_results=fp_search_req,
+                features_profiles_count=fps_count, order=ordered_by,
+                limit=limited_by, matched_count=mc, checked_count=cc,
+                generation_count=gc, version=skyline_version,
+                duration=(time.time() - start), print_debug=False), 200
+
+        if get_metric_profiles:
+            fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            return render_template(
+                'ionosphere.html', fp_search=fp_search_req,
+                fp_search_results=fp_search_req, features_profiles=fps,
+                for_metric=metric, order=ordered_by, limit=limited_by,
+                matched_count=mc, checked_count=cc, generation_count=gc,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=False), 200
+
+    # @modified 20170118 - Feature #1862: Ionosphere features profiles search page
+    # Added fp_search parameter
+    # @modified 20170122 - Feature #1872: Ionosphere - features profile page by id only
+    # Added fp_id parameter
+    IONOSPHERE_REQUEST_ARGS = [
+        'timestamp', 'metric', 'metric_td', 'a_dated_list', 'timestamp_td',
+        'requested_timestamp', 'fp_view', 'calc_features', 'add_fp',
+        'features_profiles', 'fp_search', 'learn', 'fp_id']
+
+    determine_metric = False
+    dated_list = False
+    td_requested_timestamp = False
+    feature_profile_view = False
+    calculate_features = False
+    create_feature_profile = False
+    fp_view = False
+    fp_profiles = []
+    # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+    fp_search = False
+    # @added 20170120 -  Feature #1854: Ionosphere learn - generations
+    # Added fp_learn and fp_fd_days parameters to allow the user to not learn at
+    # use_full_duration_days
+    fp_learn = False
+    fp_fd_days = settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
+
+    try:
+        if request_args_present:
+            timestamp_arg = False
+            metric_arg = False
+            metric_td_arg = False
+            timestamp_td_arg = False
+
+            if 'fp_view' in request.args:
+                fp_view = request.args.get(str('fp_view'), None)
+                base_name = request.args.get(str('metric'), None)
+
+                # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
+                # Determine the features profile dir path for a fp_id
+                if 'fp_id' in request.args:
+                    fp_id = request.args.get(str('fp_id'), None)
+                    metric_timestamp = 0
+                    try:
+                        fp_details, fp_details_successful, fail_msg, traceback_format_exc, fp_details_object = features_profile_details(fp_id)
+                        anomaly_timestamp = int(fp_details_object['anomaly_timestamp'])
+                        created_timestamp = fp_details_object['created_timestamp']
+                    except:
+                        trace = traceback.format_exc()
+                        message = 'failed to get features profile details for id %s' % str(fp_id)
+                        return internal_error(message, trace)
+                    if not fp_details_successful:
+                        trace = traceback.format_exc()
+                        fail_msg = 'error :: features_profile_details failed'
+                        return internal_error(fail_msg, trace)
+
+                    use_timestamp = 0
+                    metric_timeseries_dir = base_name.replace('.', '/')
+                    # @modified 20170126 - Feature #1872: Ionosphere - features profile page by id only
+                    # The the incorrect logic, first it should be checked if
+                    # there is a use_full_duration parent timestamp
+                    dt = str(created_timestamp)
+                    naive = datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+                    pytz_tz = settings.SERVER_PYTZ_TIMEZONE
+                    local = pytz.timezone(pytz_tz)
+                    local_dt = local.localize(naive, is_dst=None)
+                    utc_dt = local_dt.astimezone(pytz.utc)
+                    unix_created_timestamp = utc_dt.strftime('%s')
+                    features_profiles_data_dir = '%s/%s/%s' % (
+                        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                        str(unix_created_timestamp))
+                    if os.path.exists(features_profiles_data_dir):
+                        use_timestamp = int(unix_created_timestamp)
+                    else:
+                        logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
+
+                    features_profiles_data_dir = '%s/%s/%s' % (
+                        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                        str(anomaly_timestamp))
+                    # @modified 20170126 - Feature #1872: Ionosphere - features profile page by id only
+                    # This was the incorrect logic, first it should be checked if
+                    # there is a use_full_duration parent timestamp
+                    if use_timestamp == 0:
+                        if os.path.exists(features_profiles_data_dir):
+                            use_timestamp = int(anomaly_timestamp)
+                        else:
+                            logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
+
+                    if use_timestamp == 0:
+                        logger.error('no timestamp feature profiles data dir found for feature profile id - %s' % str(fp_id))
+                        resp = json.dumps(
+                            {'results': 'Error: no timestamp feature profiles data dir found for feature profile id - ' + str(fp_id) + ' - go on... nothing here.'})
+                        return resp, 400
+                    redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
+                    return redirect(redirect_url, code=302)
+
+            for i in request.args:
+                key = str(i)
+                if key not in IONOSPHERE_REQUEST_ARGS:
+                    logger.error('error :: invalid request argument - %s' % (key))
+                    return 'Bad Request', 400
+                value = request.args.get(key, None)
+                logger.info('request argument - %s=%s' % (key, str(value)))
+
+                if key == 'calc_features':
+                    if str(value) == 'true':
+                        calculate_features = True
+
+                if key == 'add_fp':
+                    if str(value) == 'true':
+                        create_feature_profile = True
+
+                if key == 'fp_view':
+                    if str(value) == 'true':
+                        fp_view = True
+
+                # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+                # Added fp_search parameter
+                if key == 'fp_search':
+                    if str(value) == 'true':
+                        fp_search = True
+
+                # @added 20170120 -  Feature #1854: Ionosphere learn - generations
+                # Added fp_learn parameter
+                if key == 'learn':
+                    if str(value) == 'true':
+                        fp_learn = True
+
+                if key == 'features_profiles':
+                    fp_profiles = str(value)
+
+                if key == 'a_dated_list':
+                    if str(value) == 'true':
+                        dated_list = True
+
+                if key == 'requested_timestamp':
+                    valid_rt_timestamp = False
+                    if str(value) == 'False':
+                        valid_rt_timestamp = True
+                    if not valid_rt_timestamp:
+                        if not len(str(value)) == 10:
+                            logger.info('bad request argument - %s=%s not an epoch timestamp' % (str(key), str(value)))
+                            resp = json.dumps(
+                                {'results': 'Error: not an epoch timestamp for ' + str(key) + ' - ' + str(value) + ' - please pass a proper epoch timestamp'})
+                        else:
+                            try:
+                                timestamp_numeric = int(value) + 1
+                                valid_rt_timestamp = True
+                            except:
+                                valid_timestamp = False
+                                logger.info('bad request argument - %s=%s not numeric' % (str(key), str(value)))
+                                resp = json.dumps(
+                                    {'results': 'Error: not a numeric epoch timestamp for ' + str(key) + ' - ' + str(value) + ' - please pass a proper epoch timestamp'})
+
+                    if not valid_rt_timestamp:
+                        return resp, 400
+
+                if key == 'timestamp' or key == 'timestamp_td':
+                    valid_timestamp = True
+                    if not len(str(value)) == 10:
+                        valid_timestamp = False
+                        logger.info('bad request argument - %s=%s not an epoch timestamp' % (str(key), str(value)))
+                        resp = json.dumps(
+                            {'results': 'Error: not an epoch timestamp for ' + str(key) + ' - ' + str(value) + ' - please pass a proper epoch timestamp'})
+                    if valid_timestamp:
+                        try:
+                            timestamp_numeric = int(value) + 1
+                        except:
+                            valid_timestamp = False
+                            logger.info('bad request argument - %s=%s not numeric' % (str(key), str(value)))
+                            resp = json.dumps(
+                                {'results': 'Error: not a numeric epoch timestamp for ' + str(key) + ' - ' + str(value) + ' - please pass a proper epoch timestamp'})
+
+                    if not valid_timestamp:
+                        return resp, 400
+
+                    if not fp_view:
+                        ionosphere_data_dir = '%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, str(value))
+                        if not isdir(ionosphere_data_dir):
+                            valid_timestamp = False
+                            now = time.time()
+                            purged_timestamp = int(now) - int(settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                            if int(value) < purged_timestamp:
+                                logger.info('%s=%s timestamp it to old to have training data' % (key, str(value)))
+                                resp = json.dumps(
+                                    {'results': 'Error: timestamp too old no training data exists, training data has been purged'})
+                            else:
+                                logger.error('%s=%s no timestamp training data dir found - %s' % (key, str(value), ionosphere_data_dir))
+                                resp = json.dumps(
+                                    {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
+
+                    if not valid_timestamp:
+                        return resp, 404
+
+                if key == 'timestamp':
+                    requested_timestamp = str(value)
+                    timestamp_arg = True
+
+                if key == 'timestamp_td':
+                    timestamp_td_arg = True
+                    requested_timestamp_td = str(value)
+                    # determine_metric = True
+
+                if key == 'requested_timestamp':
+                    td_requested_timestamp = str(value)
+
+                if key == 'metric' or key == 'metric_td':
+                    try:
+                        unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                    except:
+                        logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                        logger.info(traceback.format_exc())
+                        return 'Internal Server Error', 500
+                    metric_name = settings.FULL_NAMESPACE + str(value)
+                    if metric_name not in unique_metrics:
+                        error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
+
+                if key == 'metric':
+                    metric_arg = True
+
+                if key == 'metric_td':
+                    metric_td_arg = True
+
+                if metric_arg or metric_td_arg:
+                    if key == 'metric' or key == 'metric_td':
+                        base_name = str(value)
+
+                if timestamp_arg and metric_arg:
+                    timeseries_dir = base_name.replace('.', '/')
+
+                    if not fp_view:
+                        ionosphere_data_dir = '%s/%s/%s' % (
+                            settings.IONOSPHERE_DATA_FOLDER,
+                            requested_timestamp, timeseries_dir)
+
+                        if not isdir(ionosphere_data_dir):
+                            logger.info(
+                                '%s=%s no timestamp metric training data dir found - %s' %
+                                (key, str(value), ionosphere_data_dir))
+                            resp = json.dumps(
+                                {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
+                            return resp, 404
+                    else:
+                        ionosphere_profiles_dir = '%s/%s/%s' % (
+                            settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
+                            requested_timestamp, )
+
+                        if not isdir(ionosphere_profiles_dir):
+                            logger.info(
+                                '%s=%s no timestamp metric features profile dir found - %s' %
+                                (key, str(value), ionosphere_profiles_dir))
+                            resp = json.dumps(
+                                {'results': 'Error: no features profile dir exists - ' + ionosphere_profiles_dir + ' - go on... nothing here.'})
+                            return resp, 404
+
+        logger.debug('arguments validated - OK')
+
+    except:
+        message = 'Uh oh ... a Skyline 500 :('
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
+    debug_on = False
+
+    if fp_view:
+        context = 'features_profiles'
+    else:
+        context = 'training_data'
+    fp_view_on = fp_view
+
+    do_first = False
+    if fp_view:
+        do_first = True
+        args = [
+            'timestamp', 'metric', 'metric_td', 'timestamp_td',
+            'requested_timestamp', 'features_profiles']
+        for i_arg in args:
+            if i_arg in request.args:
+                do_first = False
+
+    if request_args_len == 0 or dated_list:
+        do_first = True
+
+    if do_first:
+        listed_by = 'metric'
+        if dated_list:
+            listed_by = 'date'
+        try:
+            mpaths, unique_m, unique_ts, hdates = ionosphere_data(False, 'all', context)
+            return render_template(
+                'ionosphere.html', unique_metrics=unique_m, list_by=listed_by,
+                unique_timestamps=unique_ts, human_dates=hdates,
+                metric_td_dirs=zip(unique_ts, hdates), td_files=mpaths,
+                requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=debug_on), 200
+        except:
+            message = 'Uh oh ... a Skyline 500 :('
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+    # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+    # Added fp_search parameter
+    fp_search_param = None
+    if fp_search:
+        logger.debug('debug :: fp_search was True')
+        fp_search_param = True
+        listed_by = 'search'
+        get_options = [
+            'full_duration', 'enabled', 'tsfresh_version', 'generation']
+        fd_list = None
+        try:
+            # @modified 20170221 - Feature #1862: Ionosphere features profiles search page
+            # fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search_defaults(get_options)
+            features_profiles, fp_count, mc, cc, gc, fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search(True, False)
+            logger.debug('debug :: fd_list - %s' % str(fd_list))
+        except:
+            message = 'Uh oh ... a Skyline 500 :('
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+        if fd_list:
+            try:
+                return render_template(
+                    'ionosphere.html', list_by=listed_by, fp_search=fp_search_param,
+                    full_duration_list=fd_list, enabled_list=en_list,
+                    tsfresh_version_list=tsfresh_list, generation_list=gen_list,
+                    version=skyline_version, duration=(time.time() - start),
+                    print_debug=debug_on), 200
+            except:
+                message = 'Uh oh ... a Skyline 500 :('
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+
+    if metric_td_arg:
+        listed_by = 'metric_td_dirs'
+        try:
+            mpaths, unique_m, unique_ts, hdates = ionosphere_data(False, base_name, context)
+            return render_template(
+                'ionosphere.html', metric_td_dirs=zip(unique_ts, hdates),
+                list_by=listed_by, for_metric=base_name, td_files=mpaths,
+                requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=debug_on), 200
+        except:
+            message = 'Uh oh ... a Skyline 500 :('
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+    if timestamp_td_arg:
+        # Note to self.  Can we carry the referring timestamp through and when
+        # a metric is selected the time is the only one wrapped in <code> .e.g red?
+        listed_by = 'timestamp_td_dirs'
+        try:
+            mpaths, unique_m, unique_ts, hdates = ionosphere_get_metrics_dir(requested_timestamp_td, context)
+            return render_template(
+                'ionosphere.html', unique_metrics=unique_m, list_by=listed_by,
+                unique_timestamps=unique_ts, human_dates=hdates, td_files=mpaths,
+                metric_td_dirs=zip(unique_ts, hdates),
+                requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=debug_on), 200
+        except:
+            message = 'Uh oh ... a Skyline 500 :('
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+    if timestamp_arg and metric_arg:
+        try:
+            # @modified 20170104 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added the full_duration_in_hours and changed graph color from blue to orange
+#full_duration_in_hours
+#GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
+# A regex is required to change the TARGET_HOURS, no? extend do not modify?
+# Not certain will review after Dude morning excersion
+            graph_url = '%scactiStyle(%s)%s&colorList=blue' % (
+                settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
+        except:
+            graph_url = False
+
+        features = None
+        f_calc = 'none'
+        fp_exists = False
+        fp_id = None
+
+        if calculate_features or create_feature_profile or fp_view:
+            try:
+                fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, requested_timestamp, base_name, context)
+            except:
+                trace = traceback.format_exc()
+                message = 'failed to calculate features'
+                return internal_error(message, trace)
+
+            if not successful:
+                return internal_error(fail_msg, traceback_format_exc)
+            if os.path.isfile(str(fp_csv)):
+                features = []
+                with open(fp_csv, 'rb') as fr:
+                    reader = csv.reader(fr, delimiter=',')
+                    for i, line in enumerate(reader):
+                        features.append([str(line[0]), str(line[1])])
+
+        generation_zero = False
+        if create_feature_profile or fp_view:
+            if create_feature_profile:
+                # Submit to Ionosphere to run tsfresh on
+                create_feature_profile = True
+            if not fp_id:
+                # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
+                # Added parent_id and generation as all features profiles that
+                # are created via the UI will be generation 0
+                parent_id = 0
+                generation = 0
+                ionosphere_job = 'learn_fp_human'
+                try:
+                    # @modified 20170120 -  Feature #1854: Ionosphere learn - generations
+                    # Added fp_learn parameter to allow the user to not learn the
+                    # use_full_duration_days
+                    # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
+                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
+                    if create_feature_profile:
+                        generation_zero = True
+                except:
+                    # @modified 20161209 -  - Branch #922: ionosphere
+                    #                        Task #1658: Patterning Skyline Ionosphere
+                    # Use raise and traceback.format_exc() to carry
+                    # ionosphere_backend.py through to the rendered page for the user, e.g
+                    # me.
+                    # trace = traceback_format_exc
+                    trace = traceback.format_exc()
+                    message = 'failed to create features profile'
+                    return internal_error(message, trace)
+                if not fp_in_successful:
+                    trace = traceback.format_exc()
+                    fail_msg = 'error :: create_features_profile failed'
+                    return internal_error(fail_msg, 'no traceback available')
+
+        fp_details = None
+        if fp_view:
+            try:
+                # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
+                # Return the fp_details_object so that webapp can pass the parent_id and
+                # generation to the templates
+                # fp_details, fp_details_successful, fail_msg, traceback_format_exc = features_profile_details(fp_id)
+                fp_details, fp_details_successful, fail_msg, traceback_format_exc, fp_details_object = features_profile_details(fp_id)
+            except:
+                # trace = traceback_format_exc
+                trace = traceback.format_exc()
+                message = 'failed to get features profile details'
+                return internal_error(message, trace)
+            if not fp_details_successful:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: features_profile_details failed'
+                return internal_error(fail_msg, trace)
+
+        valid_learning_duration = None
+        try:
+            # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added graphite_now_images gimages
+            # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+            # Added graphite_matched_images gmimages
+            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
+
+            # @added 20170120 -  Feature #1854: Ionosphere learn - generations
+            # Added fp_learn parameter to allow the user to not learn the
+            # use_full_duration_days so added fp_fd_days
+            use_full_duration, valid_learning_duration, fp_fd_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(skyline_app, base_name)
+
+            # @added 20170104 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added the full_duration parameter so that the appropriate graphs can be
+            # embedded for the user in the training data page
+            full_duration = settings.FULL_DURATION
+            full_duration_in_hours = int(full_duration / 3600)
+            second_order_resolution_hours = False
+            try:
+                key = 'full_duration'
+                value_list = [var_array[1] for var_array in m_vars if var_array[0] == key]
+                m_full_duration = int(value_list[0])
+                m_full_duration_in_hours = int(m_full_duration / 3600)
+                if m_full_duration != full_duration:
+                    second_order_resolution_hours = m_full_duration_in_hours
+            except:
+                m_full_duration = False
+                m_full_duration_in_hours = False
+                message = 'Uh oh ... a Skyline 500 :( :: m_vars - %s' % str(m_vars)
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+
+            # @added 20170105 - Feature #1842: Ionosphere - Graphite now graphs
+            # We want to sort the images so that the Graphite image is always
+            # displayed first in he training_data.html page AND we want Graphite
+            # now graphs at TARGET_HOURS, 24h, 7d, 30d to inform the operator
+            # about the metric
+            sorted_images = sorted(images)
+
+            # @modified 20170105 - Feature #1842: Ionosphere - Graphite now graphs
+            # Added matched_count and only displaying one graph for each 10
+            # minute period if there are mulitple matches in a 10 minute period
+            # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
+            # Added parent_id and generation
+            par_id = 0
+            gen = 0
+            # Determine the parent_id and generation as they were added to the
+            # fp_details_object
+            if fp_details:
+                try:
+                    par_id = int(fp_details_object['parent_id'])
+                    gen = int(fp_details_object['generation'])
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
+                    return internal_error(message, trace)
+
+            # @added 20170114 -  Feature #1854: Ionosphere learn - generations
+            # The fp_id will be in the fp_details_object, but if this is a
+            # generation zero features profile we what set
+            if generation_zero:
+                par_id = 0
+                gen = 0
+
+            # @added 20170122 - Feature #1876: Ionosphere - training_data learn countdown
+            # Add a countdown until Ionosphere will learn
+            countdown_to = False
+            if requested_timestamp and valid_learning_duration:
+                try:
+                    request_time = int(time.time())
+                    vaild_learning_timestamp = int(requested_timestamp) + int(valid_learning_duration)
+                    if request_time < vaild_learning_timestamp:
+                        countdown_to = time.strftime(
+                            '%Y-%m-%d %H:%M:%S', time.localtime(vaild_learning_timestamp))
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
+                    return internal_error(message, trace)
+
+            iono_metric = False
+            if base_name:
+                try:
+                    ionosphere_metrics = list(REDIS_CONN.smembers('ionosphere.unique_metrics'))
+                except:
+                    logger.warn('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
+                metric_name = settings.FULL_NAMESPACE + str(base_name)
+                if metric_name in ionosphere_metrics:
+                    iono_metric = True
+
+            return render_template(
+                'ionosphere.html', timestamp=requested_timestamp,
+                for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
+                metric_images=sorted_images, human_date=hdate, timeseries=ts_json,
+                data_ok=data_to_process, td_files=mpaths,
+                panorama_anomaly_id=p_id, graphite_url=graph_url,
+                extracted_features=features, calc_time=f_calc,
+                features_profile_id=fp_id, features_profile_exists=fp_exists,
+                fp_view=fp_view_on, features_profile_details=fp_details,
+                redis_full_duration=full_duration,
+                redis_full_duration_in_hours=full_duration_in_hours,
+                metric_full_duration=m_full_duration,
+                metric_full_duration_in_hours=m_full_duration_in_hours,
+                metric_second_order_resolution_hours=second_order_resolution_hours,
+                tsfresh_version=TSFRESH_VERSION, graphite_now_images=gimages,
+                graphite_matched_images=gmimages, matched_count=times_matched,
+                parent_id=par_id, generation=gen, learn=fp_learn,
+                use_full_duration_days=fp_fd_days, countdown=countdown_to,
+                ionosphere_metric=iono_metric,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=debug_on), 200
+        except:
+            message = 'Uh oh ... a Skyline 500 :('
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+    try:
+        message = 'Unknown request'
+        return render_template(
+            'ionosphere.html', display_message=message,
+            version=skyline_version, duration=(time.time() - start),
+            print_debug=debug_on), 200
+    except:
+        message = 'Uh oh ... a Skyline 500 :('
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
+
+@app.route('/ionosphere_images')
+def ionosphere_images():
+
+    request_args_present = False
+    try:
+        request_args_len = len(request.args)
+        request_args_present = True
+    except:
+        request_args_len = 0
+
+    IONOSPHERE_REQUEST_ARGS = ['image']
+
+    if request_args_present:
+        for i in request.args:
+            key = str(i)
+            if key not in IONOSPHERE_REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                return 'Bad Request', 400
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+
+            if key == 'image':
+                filename = str(value)
+                if os.path.isfile(filename):
+                    try:
+                        return send_file(filename, mimetype='image/png')
+                    except:
+                        message = 'Uh oh ... a Skyline 500 :( - could not return %s' % filename
+                        trace = traceback.format_exc()
+                        return internal_error(message, trace)
+                else:
+                    image_404_path = 'webapp/static/images/skyline.ionosphere.image.404.png'
+                    filename = path.abspath(
+                        path.join(path.dirname(__file__), '..', image_404_path))
+                    try:
+                        return send_file(filename, mimetype='image/png')
+                    except:
+                        message = 'Uh oh ... a Skyline 500 :( - could not return %s' % filename
+                        trace = traceback.format_exc()
+                        return internal_error(message, trace)
+
+    return 'Bad Request', 400
+
+# @added 20170102 - Feature #1838: utilites - ALERTS matcher
+#                   Branch #922: ionosphere
+#                   Task #1658: Patterning Skyline Ionosphere
+# Added utilities TODO
+
+
+@app.route("/utilities")
+@requires_auth
+def utilities():
+    start = time.time()
+    try:
+        return render_template('utilities.html'), 200
+    except:
+        error_string = traceback.format_exc()
+        logger.error('error :: failed to render utilities.html: %s' % str(error_string))
+        return 'Uh oh ... a Skyline 500 :(', 500
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow
@@ -877,8 +1816,8 @@ def rebrow_key(host, port, db, key):
         type=t,
         size=size,
         ttl=ttl / 1000.0,
-        now=datetime.utcnow(),
-        expiration=datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
+        now=datetime.datetime.utcnow(),
+        expiration=datetime.datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
         version=skyline_version,
         duration=(time.time() - start),
         msg_packed_key=msg_pack_key)
@@ -1030,12 +1969,17 @@ def run():
 
     webapp = App()
 
-    if len(sys.argv) > 1 and sys.argv[1] == 'run':
-        webapp.run()
-    else:
-        daemon_runner = runner.DaemonRunner(webapp)
-        daemon_runner.daemon_context.files_preserve = [handler.stream]
-        daemon_runner.do_action()
+# Does this make it log?
+#    if len(sys.argv) > 1 and sys.argv[1] == 'run':
+#        webapp.run()
+#    else:
+#        daemon_runner = runner.DaemonRunner(webapp)
+#        daemon_runner.daemon_context.files_preserve = [handler.stream]
+#        daemon_runner.do_action()
+
+    daemon_runner = runner.DaemonRunner(webapp)
+    daemon_runner.daemon_context.files_preserve = [handler.stream]
+    daemon_runner.do_action()
 
 if __name__ == "__main__":
     run()

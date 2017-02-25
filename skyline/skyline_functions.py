@@ -4,12 +4,14 @@ Skyline functions
 These are shared functions that are required in multiple modules.
 """
 import logging
-import traceback
-from time import time
-import socket
-
 from os.path import dirname, join, abspath, isfile
 from os import path
+from time import time
+import socket
+import datetime
+import errno
+
+import traceback
 import json
 import requests
 try:
@@ -21,7 +23,6 @@ try:
 except ImportError:
     import urllib.request
     import urllib.error
-import datetime
 
 import settings
 
@@ -74,7 +75,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
         except socket.error:
             sock.settimeout(None)
             endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
-            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(
                 'error :: cannot connect to Graphite at %s' % endpoint)
@@ -88,7 +89,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
             return True
         except:
             endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
-            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(
                 'error :: could not send data to Graphite at %s' % endpoint)
@@ -111,16 +112,7 @@ def mkdir_p(path):
     except:
         import os
     try:
-        python_version
-    except:
-        from sys import version_info
-        python_version = int(version_info[0])
-    try:
-        if python_version == 2:
-            mode_arg = int('0755')
-        if python_version == 3:
-            mode_arg = mode=0o755
-        os.makedirs(path, mode_arg)
+        os.makedirs(path, mode=0o755)
         return True
     # Python >2.5
     except OSError as exc:
@@ -152,8 +144,10 @@ def load_metric_vars(current_skyline_app, metric_vars_file):
     except:
         import imp
 
+    metric_vars = False
+    metric_vars_got = False
     if os.path.isfile(metric_vars_file):
-        current_skyline_app_logger = current_skyline_app + 'Log'
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.info(
             'loading metric variables from import - metric_check_file - %s' % (
@@ -164,15 +158,19 @@ def load_metric_vars(current_skyline_app, metric_vars_file):
         with open(metric_vars_file) as f:
             try:
                 metric_vars = imp.load_source('metric_vars', '', f)
-                if settings.ENABLE_DEBUG:
-                    current_logger.info(
-                        'metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+                metric_vars_got = True
             except:
                 current_logger.info(traceback.format_exc())
                 msg = 'failed to import metric variables - metric_check_file'
                 current_logger.error(
                     'error :: %s - %s' % (msg, str(metric_vars_file)))
                 metric_vars = False
+
+        if settings.ENABLE_DEBUG and metric_vars_got:
+            current_logger.info(
+                'metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+    else:
+        current_logger.error('error :: metric_vars_file not found - %s' % (str(metric_vars_file)))
 
     return metric_vars
 
@@ -207,11 +205,7 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
     file_dir = os.path.dirname(write_to_file)
     if not os.path.exists(file_dir):
         try:
-            if python_version == 2:
-                mode_arg = int('0755')
-            if python_version == 3:
-                mode_arg = mode=0o755
-            os.makedirs(file_dir, mode_arg)
+            os.makedirs(file_dir, mode=0o755)
         # Python >2.5
         except OSError as exc:
             if exc.errno == errno.EEXIST and os.path.isdir(path):
@@ -220,7 +214,7 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
                 raise
 
     if not os.path.exists(file_dir):
-        current_skyline_app_logger = current_skyline_app + 'Log'
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error(
             'error :: could not create directory - %s' % (str(file_dir)))
@@ -229,10 +223,9 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
         with open(write_to_file, mode) as fh:
             fh.write(data)
         if python_version == 2:
-            mode_arg = int('0644')
+            os.chmod(write_to_file, 0644)
         if python_version == 3:
-            mode_arg = '0o644'
-        os.chmod(write_to_file, mode_arg)
+            os.chmod(write_to_file, mode=0o644)
 
         return True
     except:
@@ -271,20 +264,19 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
         from sys import version_info
         python_version = int(version_info[0])
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     if not os.path.exists(failed_check_dir):
         try:
             mkdir_p(failed_check_dir)
-            if settings.ENABLE_PANORAMA_DEBUG or settings.ENABLE_CRUCIBLE_DEBUG:
-                current_logger.info(
-                    'created failed_check_dir - %s' % str(failed_check_dir))
+            current_logger.info(
+                'created failed_check_dir - %s' % str(failed_check_dir))
         except:
+            current_logger.info(traceback.format_exc())
             current_logger.error(
                 'error :: failed to create failed_check_dir - %s' %
                 str(failed_check_dir))
-            current_logger.info(traceback.format_exc())
             return False
 
     check_file_name = os.path.basename(str(check_file_to_fail))
@@ -293,17 +285,16 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
     try:
         shutil.move(check_file_to_fail, failed_check_file)
         if python_version == 2:
-            mode_arg = int('0644')
+            os.chmod(failed_check_file, 0644)
         if python_version == 3:
-            mode_arg = '0o644'
-        os.chmod(failed_check_file, mode_arg)
+            os.chmod(failed_check_file, mode=0o644)
 
         current_logger.info('moved check file to - %s' % failed_check_file)
         return True
     except OSError:
+        current_logger.info(traceback.format_exc())
         msg = 'failed to move check file to -%s' % failed_check_file
         current_logger.error('error :: %s' % msg)
-        current_logger.info(traceback.format_exc())
         pass
 
     return False
@@ -337,10 +328,10 @@ def alert_expiry_check(current_skyline_app, metric, metric_timestamp, added_by):
     except:
         import re
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
-    cache_key = 'last_alert.%s.%s.%s' % (current_skyline_app, added_by, metric)
+    cache_key = 'last_alert.%s.%s.%s' % (str(current_skyline_app), added_by, metric)
     try:
         last_alert = self.redis_conn.get(cache_key)
     except:
@@ -395,11 +386,11 @@ def alert_expiry_check(current_skyline_app, metric, metric_timestamp, added_by):
                             msg = 'the check is older than EXPIRATION_TIME for the metric - not checking - check_expired'
                             current_logger.info('%s' % msg)
 
-    cache_key = '%s.last_check.%s.%s' % (current_skyline_app, added_by, metric)
+    cache_key = '%s.last_check.%s.%s' % (str(current_skyline_app), added_by, metric)
     if settings.ENABLE_DEBUG:
         current_logger.info(
             'debug :: cache_key - %s.last_check.%s.%s' % (
-                current_skyline_app, added_by, metric))
+                str(current_skyline_app), added_by, metric))
 
     # Only use the cache_key EXPIRATION_TIME if this is not a request to
     # run_crucible_tests on a timeseries
@@ -464,7 +455,23 @@ def get_graphite_metric(
     except:
         import os
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
+    try:
+        quote(skyline_app, safe='')
+    except:
+        from requests.utils import quote
+
+    try:
+        time.time()
+    except:
+        import time
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
 #    if settings.ENABLE_DEBUG:
@@ -489,10 +496,12 @@ def get_graphite_metric(
 
     current_logger.info('read_timeout - %s' % str(read_timeout))
 
+    graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    current_logger.info('graphite_from - %s' % str(graphite_from))
+
     graphite_until = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     current_logger.info('graphite_until - %s' % str(graphite_until))
 
-    graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     output_format = data_type
 
     # graphite URL
@@ -514,6 +523,7 @@ def get_graphite_metric(
         else:
             if settings.ENABLE_DEBUG:
                 current_logger.info('graph file exists - %s' % str(output_object))
+            return True
 
     if get_image:
         current_logger.info(
@@ -525,6 +535,39 @@ def get_graphite_metric(
             image_url += '&width=586'
         if 'height' not in image_url:
             image_url += '&height=308'
+        # @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+        # settings, color and title
+        if str(current_skyline_app) == 'webapp':
+            get_ionosphere_graphs = False
+            if 'graphite_now' in output_object:
+                get_ionosphere_graphs = True
+            # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+            # Added graphite_matched_images matched.fp_id
+            if 'matched.fp_id' in output_object:
+                get_ionosphere_graphs = True
+            if get_ionosphere_graphs:
+                int_hours = int((int(until_timestamp) - int(from_timestamp)) / 60 / 60)
+                if 'graphite_now' in output_object:
+                    no_extension = os.path.splitext(output_object)[0]
+                    _hours = os.path.splitext(no_extension)[1]
+                    hours = _hours.replace('.', '')
+                    int_hours = hours.replace('h', '')
+                str_value = str(int_hours)
+                period = 'hours'
+                if int(int_hours) > 24:
+                    str_value = str(int(int_hours) / 24)
+                    period = 'days'
+                if 'graphite_now' in output_object:
+                    unencoded_graph_title = 'Graphite NOW at %s %s' % (str_value, period)
+                if 'matched.fp_id' in output_object:
+                    human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(until_timestamp)))
+                    unencoded_graph_title = '%s at %s hours' % (str(human_date), str(int_hours))
+                graph_title_string = quote(unencoded_graph_title, safe='')
+                graph_title = '&title=%s' % graph_title_string
+                add_parameters = '%s&colorList=blue%s' % (settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                image_url += add_parameters
+                current_logger.info('Ionosphere graphite NOW url - %s' % (image_url))
+
         if settings.ENABLE_DEBUG:
             current_logger.info('graphite image url - %s' % (str(image_url)))
         image_url_timeout = int(connect_timeout)
@@ -543,10 +586,9 @@ def get_graphite_metric(
                 f.write(image_data)
             current_logger.info('retrieved - %s' % (graphite_image_file))
             if python_version == 2:
-                mode_arg = int('0644')
+                os.chmod(graphite_image_file, 0644)
             if python_version == 3:
-                mode_arg = '0o644'
-            os.chmod(graphite_image_file, mode_arg)
+                os.chmod(graphite_image_file, mode=0o644)
         else:
             current_logger.error(
                 'error :: failed to retrieved - %s' % (graphite_image_file))
@@ -554,6 +596,14 @@ def get_graphite_metric(
         if not os.path.isfile(graphite_image_file):
             msg = 'retrieve failed to surface %s graph from Graphite' % (metric)
             current_logger.error('error :: %s' % msg)
+        # @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs
+        # In order to determine whether a Graphite image was retrieved or not
+        # this needs to return here.  This should not be backwards incompatible
+        # as it has never been used to determine the outcome before it appears,
+        # which as they say is my bad.
+            return False
+        else:
+            return True
 
     if data_type == 'json':
 
@@ -601,10 +651,9 @@ def get_graphite_metric(
             with open(output_object, 'w') as f:
                 f.write(json.dumps(converted))
             if python_version == 2:
-                mode_arg = int('0644')
+                os.chmod(output_object, 0644)
             if python_version == 3:
-                mode_arg = '0o644'
-            os.chmod(output_object, mode_arg)
+                os.chmod(output_object, mode=0o644)
             if settings.ENABLE_DEBUG:
                 current_logger.info('json file - %s' % output_object)
         else:
@@ -617,6 +666,191 @@ def get_graphite_metric(
             return False
         else:
             return True
+
+    return True
+
+
+# @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+def filesafe_metricname(metricname):
+    '''
+    Returns a file system safe name for a metric name in terms of creating
+    check files, etc
+    '''
+    keepchars = ('.', '_', '-')
+    try:
+        sane_metricname = ''.join(c for c in str(metricname) if c.isalnum() or c in keepchars).rstrip()
+        return str(sane_metricname)
+    except:
+        return False
+
+
+# @added 20160922 - Branch #922: Ionosphere
+# Added the send_anomalous_metric_to function for Analyzer and Mirage
+# @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
+# Added full_duration which needs to be recorded to allow Mirage metrics
+# to be profiled on Redis timeseries data at FULL_DURATION
+# e.g. mirage.redis.24h.json
+# @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+# Added parent_id, always zero from Analyzer and Mirage
+
+
+def send_anomalous_metric_to(
+    current_skyline_app, send_to_app, timeseries_dir, metric_timestamp,
+        base_name, datapoint, from_timestamp, triggered_algorithms, timeseries,
+        full_duration, parent_id):
+    """
+    Assign a metric and timeseries to Crucible or Ionosphere.
+    """
+    try:
+        os.getpid()
+    except:
+        import os
+
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # @added 20170116 - Feature #1854: Ionosphere learn
+    added_by_context = str(current_skyline_app)
+
+    # @added 20170117 - Feature #1854: Ionosphere learn
+    # Added the ionosphere_learn_to_ionosphere to fix ionosphere_learn not being
+    # logged.
+    if str(send_to_app) == 'ionosphere_learn_to_ionosphere':
+        added_by_context = 'ionosphere_learn'
+        new_send_to_app = 'ionosphere'
+        send_to_app = new_send_to_app
+
+    # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+    sane_metricname = filesafe_metricname(str(base_name))
+
+    if str(send_to_app) == 'crucible':
+        anomaly_dir = '%s/%s/%s' % (
+            settings.CRUCIBLE_DATA_FOLDER, str(timeseries_dir), str(metric_timestamp))
+        check_file = '%s/%s.%s.txt' % (
+            settings.CRUCIBLE_CHECK_PATH, str(metric_timestamp), str(sane_metricname))
+        check_dir = '%s' % (settings.CRUCIBLE_CHECK_PATH)
+    if str(send_to_app) == 'ionosphere':
+        # @modified 20161121 - Branch #922: ionosphere
+        # Use the timestamp as the parent dir for training_data, it is easier
+        # to manage and clean on timestamps.  Walking through 1000s of Graphite
+        # style dirs with dotted metric namespaces for timestamps.
+        # anomaly_dir = settings.IONOSPHERE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+        anomaly_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
+            str(timeseries_dir))
+        check_file = '%s/%s.%s.txt' % (
+            settings.IONOSPHERE_CHECK_PATH, str(metric_timestamp),
+            str(sane_metricname))
+        check_dir = '%s' % (settings.IONOSPHERE_CHECK_PATH)
+
+        # @added 20170116 - Feature #1854: Ionosphere learn
+        # So as to not have to backport a context to all the instances of
+        # send_anomalous_metric_to identify what this was added_by, here the
+        # learn directory path string overrides the dirs if it is a learn
+        # related check
+        # @modified 20170117 - Feature #1854: Ionosphere learn
+        # The ionosphere_learn_to_ionosphere to fix ionosphere_learn not being
+        # logged.
+        # if str(settings.IONOSPHERE_LEARN_FOLDER) in anomaly_dir:
+        #     added_by_context = 'ionosphere_learn'
+        if added_by_context == 'ionosphere_learn':
+            current_logger.info('send_anomalous_metric_to :: this is an ionosphere_learn check')
+
+    if not os.path.exists(check_dir):
+        os.makedirs(check_dir, mode=0o755)
+
+    if not os.path.exists(anomaly_dir):
+        os.makedirs(anomaly_dir, mode=0o755)
+
+    # Note:
+    # The values are enclosed is single quoted intentionally
+    # as the imp.load_source used in crucible results in a
+    # shift in the decimal position when double quoted, e.g.
+    # value = "5622.0" gets imported as
+    # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+    # single quoting results in the desired,
+    # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+    now_timestamp = int(time())
+    # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
+    # Added full_duration
+    # @modified 20170116 - Feature #1854: Ionosphere learn
+    # Changed added_by parameter from current_skyline_app to added_by_context
+    # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+    # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+    anomaly_data = 'metric = \'%s\'\n' \
+                   'value = \'%s\'\n' \
+                   'from_timestamp = \'%s\'\n' \
+                   'metric_timestamp = \'%s\'\n' \
+                   'algorithms = %s\n' \
+                   'triggered_algorithms = %s\n' \
+                   'anomaly_dir = \'%s\'\n' \
+                   'graphite_metric = True\n' \
+                   'run_crucible_tests = False\n' \
+                   'added_by = \'%s\'\n' \
+                   'added_at = \'%s\'\n' \
+                   'full_duration = \'%s\'\n' \
+                   'ionosphere_parent_id = \'%s\'\n' \
+        % (str(base_name), str(datapoint), str(from_timestamp),
+            str(metric_timestamp), str(settings.ALGORITHMS),
+            str(triggered_algorithms), anomaly_dir, added_by_context,
+            str(now_timestamp), str(int(full_duration)), str(parent_id))
+
+    # @modified 20170116 - Feature #1854: Ionosphere learn
+    # In the Ionosphere context there is no requirement to create a timeseries
+    # json file or anomaly_file, just the check
+    if added_by_context != 'ionosphere_learn':
+
+        # Create an anomaly file with details about the anomaly
+        anomaly_file = '%s/%s.txt' % (anomaly_dir, str(base_name))
+        try:
+            write_data_to_file(str(current_skyline_app), anomaly_file, 'w', anomaly_data)
+            current_logger.info('added %s anomaly file :: %s' % (str(send_to_app), anomaly_file))
+        except:
+            current_logger.info(traceback.format_exc())
+            current_logger.error(
+                'error :: failed to add %s anomaly file :: %s' %
+                (str(send_to_app), anomaly_file))
+
+        # Create timeseries json file with the timeseries
+        json_file = '%s/%s.json' % (anomaly_dir, str(base_name))
+        timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+        try:
+            write_data_to_file(str(current_skyline_app), json_file, 'w', timeseries_json)
+            current_logger.info('added %s timeseries file :: %s' % (str(send_to_app), json_file))
+        except:
+            current_logger.error(
+                'error :: failed to add %s timeseries file :: %s' %
+                (str(send_to_app), json_file))
+            current_logger.info(traceback.format_exc())
+
+    # Create a check file
+    try:
+        write_data_to_file(str(current_skyline_app), check_file, 'w', anomaly_data)
+        current_logger.info(
+            'added %s check :: %s,%s' % (
+                str(send_to_app), str(base_name), str(metric_timestamp)))
+    except:
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: failed to add %s check file :: %s' % (str(send_to_app), check_file))
+
+
+def RepresentsInt(s):
+    '''
+    As per http://stackoverflow.com/a/1267145 and @Aivar I must agree with
+    @Triptycha > "This 5 line function is not a complex mechanism."
+    '''
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 
 ################################################################################
 
@@ -662,8 +896,13 @@ def mysql_select(current_skyline_app, select):
             ENABLE_DEBUG = True
     except:
         nothing_to_do = True
+    try:
+        if settings.ENABLE_IONOSPHERE_DEBUG:
+            ENABLE_DEBUG = True
+    except:
+        nothing_to_do = True
 
-    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
     if ENABLE_DEBUG:
         current_logger.info('debug :: entering mysql_select')

@@ -22,21 +22,27 @@ try:
 except ImportError:
     import urllib.parse
 import os
-import errno
+# import errno
 import imp
 from os import listdir
 import datetime
 
 import os.path
 import resource
+from shutil import rmtree
+from ast import literal_eval
 
 import settings
-from skyline_functions import write_data_to_file, load_metric_vars, fail_check
+# @modified 20160922 - Branch #922: Ionosphere
+# Added the send_anomalous_metric_to skyline_functions.py
+from skyline_functions import (
+    write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to,
+    mkdir_p, send_graphite_metric, filesafe_metricname)
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
 from mirage_algorithms import run_selected_algorithm
-from algorithm_exceptions import *
+from algorithm_exceptions import TooShort, Stale, Boring
 from os.path import join, isfile
 
 """
@@ -83,6 +89,7 @@ except:
     SERVER_METRIC_PATH = ''
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
+failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
 
 
 class Mirage(Thread):
@@ -99,6 +106,10 @@ class Mirage(Thread):
         self.mirage_anomaly_breakdown_q = Queue()
         self.not_anomalous_metrics = Manager().list()
         self.metric_variables = Manager().list()
+        self.ionosphere_metrics = Manager().list()
+        self.sent_to_crucible = Manager().list()
+        self.sent_to_panorama = Manager().list()
+        self.sent_to_ionosphere = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -110,7 +121,7 @@ class Mirage(Thread):
         except:
             exit(0)
 
-    def spawn_alerter_process(self, alert, metric, second_order_resolution_seconds):
+    def spawn_alerter_process(self, alert, metric, second_order_resolution_seconds, context):
         """
         Spawn a process to trigger an alert.  This is used by smtp alerters so
         that matplotlib objects are cleared down and the alerter cannot create
@@ -123,18 +134,7 @@ class Mirage(Thread):
         # https://github.com/earthgecko/skyline/issues/21
         """
 
-        trigger_alert(alert, metric, second_order_resolution_seconds)
-
-    def mkdir_p(self, path):
-        try:
-            os.makedirs(path)
-            return True
-        # Python >2.5
-        except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise
+        trigger_alert(alert, metric, second_order_resolution_seconds, context)
 
     def surface_graphite_metric_data(self, metric_name, graphite_from, graphite_until):
 
@@ -172,7 +172,7 @@ class Mirage(Thread):
         target = urlparse.parse_qs(parsed.query)['target'][0]
 
         metric_data_folder = settings.MIRAGE_DATA_FOLDER + "/" + target
-        self.mkdir_p(metric_data_folder)
+        mkdir_p(metric_data_folder)
         with open(metric_data_folder + "/" + target + '.json', 'w') as f:
             f.write(json.dumps(converted))
             f.close()
@@ -192,10 +192,83 @@ class Mirage(Thread):
                 # return True
                 return metric_vars
             except:
-                logger.error('error :: failed to load metric_vars')
                 logger.info(traceback.format_exc())
+                logger.error('error :: failed to load metric_vars')
+                f.close()
 
         return False
+
+    # @added 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+    #                   Bug #1460: panorama check file fails
+    #                   Panorama check file fails #24
+    # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+    def mirage_load_metric_vars(self, metric_vars_file):
+        """
+        Load the metric variables for a check from a metric check variables file
+
+        :param metric_vars_file: the path and filename to the metric variables files
+        :type metric_vars_file: str
+        :return: the metric_vars list or ``False``
+        :rtype: list
+
+        """
+        if os.path.isfile(metric_vars_file):
+            logger.info(
+                'loading metric variables from metric_check_file - %s' % (
+                    str(metric_vars_file)))
+        else:
+            logger.error(
+                'error :: loading metric variables from metric_check_file - file not found - %s' % (
+                    str(metric_vars_file)))
+            return False
+
+        metric_vars = []
+        with open(metric_vars_file) as f:
+            for line in f:
+                no_new_line = line.replace('\n', '')
+                no_equal_line = no_new_line.replace(' = ', ',')
+                array = str(no_equal_line.split(',', 1))
+                add_line = literal_eval(array)
+                metric_vars.append(add_line)
+
+        string_keys = ['metric']
+        float_keys = ['value']
+        int_keys = ['hours_to_resolve', 'metric_timestamp']
+
+        metric_vars_array = []
+        for var_array in metric_vars:
+            key = None
+            value = None
+            if var_array[0] in string_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = str(value_str)
+                if var_array[0] == 'metric':
+                    metric = value
+            if var_array[0] in float_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = float(value_str)
+            if var_array[0] in int_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = int(float(value_str))
+            if key:
+                metric_vars_array.append([key, value])
+
+            if len(metric_vars_array) == 0:
+                logger.error(
+                    'error :: loading metric variables - none found' % (
+                        str(metric_vars_file)))
+                return False
+
+        logger.info('debug :: metric_vars for %s' % str(metric))
+        logger.info('debug :: %s' % str(metric_vars_array))
+
+        return metric_vars_array
 
     def dump_garbage(self):
         """
@@ -229,12 +302,12 @@ class Mirage(Thread):
                     # print type(x), "\n  ", s
                     try:
                         log_string = type(x), "\n  ", s
+                        log_string = 'unused variable for testing only'
                     except:
-                        logger.error('error :: print x and s')
                         logger.info(traceback.format_exc())
-
-                    # if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                    #     logger.info(log_string)
+                        logger.error('error :: print x and s')
+                    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                        logger.info(log_string)
         else:
             return None
 
@@ -254,13 +327,25 @@ class Mirage(Thread):
         metric_check_file = '%s/%s' % (
             settings.MIRAGE_CHECK_PATH, str(metric_var_files_sorted[0]))
 
+        check_file_name = os.path.basename(str(metric_check_file))
+        check_file_timestamp = check_file_name.split('.', 1)[0]
+        check_file_metricname_txt = check_file_name.split('.', 1)[1]
+        check_file_metricname = check_file_metricname_txt.replace('.txt', '')
+        check_file_metricname_dir = check_file_metricname.replace('.', '/')
+        metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
+
         # Load metric variables
         # @modified 20160822 - Bug #1460: panorama check file fails
         # Changed to panorama style skyline_functions load_metric_vars
         # self.load_metric_vars(metric_check_file)
         # Load and validate metric variables
         try:
-            metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+            #                      Bug #1460: panorama check file fails
+            #                      Panorama check file fails #24
+            # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+            # metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            metric_vars_array = self.mirage_load_metric_vars(str(metric_check_file))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
@@ -268,59 +353,127 @@ class Mirage(Thread):
             return
 
         # Test metric variables
-        if len(metric_vars.metric) == 0:
-            return
-        else:
-            metric = metric_vars.metric
-            metric_name = ['metric_name', metric_vars.metric]
+#        if len(metric_vars.metric) == 0:
+#            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
+#            return
+#        else:
+#            metric = metric_vars.metric
+#            metric_name = ['metric_name', metric_vars.metric]
+#            self.metric_variables.append(metric_name)
+#            logger.info('debug :: added metric_name %s from check file - %s' % (metric_name, metric_check_file))
+        metric = None
+        try:
+            key = 'metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric = str(value_list[0])
+            metric_name = ['metric_name', metric]
             self.metric_variables.append(metric_name)
-        if len(metric_vars.value) == 0:
+            logger.info('debug :: added metric_name %s from check file - %s' % (metric_name, metric_check_file))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to read metric variable from check file - %s' % (metric_check_file))
             return
-        else:
-            metric_value = ['metric_value', metric_vars.value]
-            self.metric_variables.append(metric_value)
-        if len(metric_vars.hours_to_resolve) == 0:
+        if not metric:
+            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
             return
-        else:
-            hours_to_resolve = ['hours_to_resolve', metric_vars.hours_to_resolve]
-            self.metric_variables.append(hours_to_resolve)
-        if len(metric_vars.metric_timestamp) == 0:
-            return
-        else:
-            metric_timestamp = ['metric_timestamp', metric_vars.metric_timestamp]
-            self.metric_variables.append(metric_timestamp)
 
-        # Ignore any metric check with a timestamp greater than 10 minutes ago
-        int_metric_timestamp = int(metric_vars.metric_timestamp)
+#        if len(metric_vars.value) == 0:
+#            return
+#        else:
+#            metric_value = ['metric_value', metric_vars.value]
+#            self.metric_variables.append(metric_value)
+        value = None
+        try:
+            key = 'value'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            value = float(value_list[0])
+            metric_value = ['metric_value', value]
+            self.metric_variables.append(metric_value)
+        except:
+            logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
+            return
+        if not value:
+            logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
+            return
+
+#        if len(metric_vars.hours_to_resolve) == 0:
+#            return
+#        else:
+#            hours_to_resolve = ['hours_to_resolve', metric_vars.hours_to_resolve]
+#            self.metric_variables.append(hours_to_resolve)
+        hours_to_resolve = None
+        try:
+            key = 'hours_to_resolve'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            hours_to_resolve = int(value_list[0])
+            hours_to_resolve_list = ['hours_to_resolve', hours_to_resolve]
+            self.metric_variables.append(hours_to_resolve_list)
+        except:
+            logger.error('error :: failed to read hours_to_resolve variable from check file - %s' % (metric_check_file))
+            return
+        if not hours_to_resolve:
+            logger.error('error :: failed to load hours_to_resolve variable from check file - %s' % (metric_check_file))
+            return
+
+#        if len(metric_vars.metric_timestamp) == 0:
+#            return
+#        else:
+#            metric_timestamp = ['metric_timestamp', metric_vars.metric_timestamp]
+#            self.metric_variables.append(metric_timestamp)
+        metric_timestamp = None
+        try:
+            key = 'metric_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric_timestamp = int(value_list[0])
+            metric_timestamp_list = ['metric_timestamp', metric_timestamp]
+            self.metric_variables.append(metric_timestamp_list)
+        except:
+            logger.error('error :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
+            return
+        if not metric_timestamp:
+            logger.error('error :: failed to load metric_timestamp variable from check file - %s' % (metric_check_file))
+            return
+
+        metric_data_dir = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, str(metric))
+
+        # Ignore any metric check with a timestamp greater than MIRAGE_STALE_SECONDS
+        int_metric_timestamp = int(metric_timestamp)
         int_run_timestamp = int(run_timestamp)
         metric_timestamp_age = int_run_timestamp - int_metric_timestamp
         if metric_timestamp_age > settings.MIRAGE_STALE_SECONDS:
-            logger.info('stale check :: %s check request is %s seconds old - discarding' % (metric_vars.metric, metric_timestamp_age))
+            logger.info('stale check :: %s check request is %s seconds old - discarding' % (metric, str(metric_timestamp_age)))
             # Remove metric check file
 #            try:
 #                os.remove(metric_check_file)
 #            except OSError:
 #                pass
 #            return
-            if os.path.exists(metric_check_file):
+            if os.path.isfile(metric_check_file):
                 os.remove(metric_check_file)
-                logger.info('removed %s' % (metric_check_file))
+                logger.info('removed check file - %s' % (metric_check_file))
             else:
-                logger.info('could not remove %s' % (metric_check_file))
+                logger.info('could not remove check file - %s' % (metric_check_file))
+
+            # Remove the metric directory
+            if os.path.exists(metric_data_dir):
+                try:
+                    rmtree(metric_data_dir)
+                    logger.info('removed data dir - %s' % metric_data_dir)
+                except:
+                    logger.error('error :: failed to rmtree - %s' % metric_data_dir)
+            return
 
         # Calculate hours second order resolution to seconds
-        second_order_resolution_seconds = int(metric_vars.hours_to_resolve) * 3600
+        second_order_resolution_seconds = int(hours_to_resolve) * 3600
 
         # Calculate graphite from and until parameters from the metric timestamp
-        graphite_until = datetime.datetime.fromtimestamp(int(metric_vars.metric_timestamp)).strftime('%H:%M_%Y%m%d')
-        int_second_order_resolution_seconds = int(second_order_resolution_seconds)
+        graphite_until = datetime.datetime.fromtimestamp(int(float(metric_timestamp))).strftime('%H:%M_%Y%m%d')
+        int_second_order_resolution_seconds = int(float(second_order_resolution_seconds))
         second_resolution_timestamp = int_metric_timestamp - int_second_order_resolution_seconds
         graphite_from = datetime.datetime.fromtimestamp(int(second_resolution_timestamp)).strftime('%H:%M_%Y%m%d')
 
         # Remove any old json file related to the metric
-        metric_json_file = '%s/%s/%s.json' % (
-            settings.MIRAGE_DATA_FOLDER, str(metric_vars.metric),
-            str(metric_vars.metric))
+        metric_json_file = '%s/%s.json' % (metric_data_dir, str(metric))
         try:
             os.remove(metric_json_file)
         except OSError:
@@ -329,23 +482,30 @@ class Mirage(Thread):
         # Get data from graphite
         logger.info(
             'retrieve data :: surfacing %s timeseries from graphite for %s seconds' % (
-                metric_vars.metric, second_order_resolution_seconds))
-        self.surface_graphite_metric_data(metric_vars.metric, graphite_from, graphite_until)
+                metric, second_order_resolution_seconds))
+        self.surface_graphite_metric_data(metric, graphite_from, graphite_until)
 
         # Check there is a json timeseries file to test
         if not os.path.isfile(metric_json_file):
             logger.error(
                 'error :: retrieve failed - failed to surface %s timeseries from graphite' % (
-                    metric_vars.metric))
+                    metric))
             # Remove metric check file
             try:
                 os.remove(metric_check_file)
             except OSError:
                 pass
+            # Remove the metric directory
+            try:
+                rmtree(metric_data_dir)
+                logger.info('removed data dir - %s' % metric_data_dir)
+            except:
+                logger.error('error :: failed to rmtree %s' % metric_data_dir)
+
             return
         else:
             logger.info('retrieved data :: for %s at %s seconds' % (
-                metric_vars.metric, second_order_resolution_seconds))
+                metric, second_order_resolution_seconds))
 
         # Make process-specific dicts
         exceptions = defaultdict(int)
@@ -357,162 +517,28 @@ class Mirage(Thread):
             timeseries = json.loads(f.read())
             logger.info('data points surfaced :: %s' % (len(timeseries)))
 
+        # @added 20170212 - Feature #1886: Ionosphere learn
+        # Only process if the metric has sufficient data
+        first_timestamp = None
         try:
-            logger.info('analyzing :: %s at %s seconds' % (metric_vars.metric, second_order_resolution_seconds))
-            anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_vars.metric, second_order_resolution_seconds)
+            first_timestamp = int(timeseries[0][0])
+        except:
+            logger.error('error :: could not determine first timestamp')
+        timestamp_now = int(time())
+        valid_if_before_timestamp = timestamp_now - int(settings.FULL_DURATION)
+        valid_mirage_timeseries = True
+        if first_timestamp:
+            if first_timestamp > valid_if_before_timestamp:
+                valid_mirage_timeseries = False
 
-            # If it's anomalous, add it to list
-            if anomalous:
-                base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-                anomalous_metric = [datapoint, base_name]
-                self.anomalous_metrics.append(anomalous_metric)
-                logger.info('anomaly detected  :: %s with %s' % (metric_vars.metric, metric_vars.value))
-                # It runs so fast, this allows us to process 30 anomalies/min
-                sleep(2)
-
-                # Get the anomaly breakdown - who returned True?
-                triggered_algorithms = []
-                for index, value in enumerate(ensemble):
-                    if value:
-                        algorithm = settings.MIRAGE_ALGORITHMS[index]
-                        anomaly_breakdown[algorithm] += 1
-                        triggered_algorithms.append(algorithm)
-
-                # If Crucible or Panorama are enabled determine details
-                determine_anomaly_details = False
-                if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
-                    determine_anomaly_details = True
-                if settings.PANORAMA_ENABLED:
-                    determine_anomaly_details = True
-
-                if determine_anomaly_details:
-                    metric_timestamp = str(int(timeseries[-1][0]))
-                    from_timestamp = str(int(timeseries[1][0]))
-                    timeseries_dir = base_name.replace('.', '/')
-
-                # If Panorama is enabled - create a Panorama check
-                if settings.PANORAMA_ENABLED:
-                    if not os.path.exists(settings.PANORAMA_CHECK_PATH):
-                        if python_version == 2:
-                            mode_arg = int('0755')
-                        if python_version == 3:
-                            mode_arg = mode=0o755
-                        os.makedirs(settings.PANORAMA_CHECK_PATH, mode_arg)
-
-                    # Note:
-                    # The values are enclosed is single quoted intentionally
-                    # as the imp.load_source used results in a shift in the
-                    # decimal position when double quoted, e.g.
-                    # value = "5622.0" gets imported as
-                    # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
-                    # single quoting results in the desired,
-                    # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
-                    added_at = str(int(time()))
-                    source = 'graphite'
-                    panaroma_anomaly_data = 'metric = \'%s\'\n' \
-                                            'value = \'%s\'\n' \
-                                            'from_timestamp = \'%s\'\n' \
-                                            'metric_timestamp = \'%s\'\n' \
-                                            'algorithms = %s\n' \
-                                            'triggered_algorithms = %s\n' \
-                                            'app = \'%s\'\n' \
-                                            'source = \'%s\'\n' \
-                                            'added_by = \'%s\'\n' \
-                                            'added_at = \'%s\'\n' \
-                        % (base_name, str(datapoint), from_timestamp,
-                           metric_timestamp, str(settings.MIRAGE_ALGORITHMS),
-                           triggered_algorithms, skyline_app, source,
-                           this_host, added_at)
-
-                    # Create an anomaly file with details about the anomaly
-                    panaroma_anomaly_file = '%s/%s.%s.txt' % (
-                        settings.PANORAMA_CHECK_PATH, added_at,
-                        base_name)
-                    try:
-                        write_data_to_file(
-                            skyline_app, panaroma_anomaly_file, 'w',
-                            panaroma_anomaly_data)
-                        logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
-                    except:
-                        logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
-                        logger.info(traceback.format_exc())
-
-                # If crucible is enabled - save timeseries and create a
-                # crucible check
-                if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
-                    metric_timestamp = str(int(timeseries[-1][0]))
-                    from_timestamp = str(int(timeseries[1][0]))
-                    timeseries_dir = base_name.replace('.', '/')
-                    crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
-                    if not os.path.exists(crucible_anomaly_dir):
-                        if python_version == 2:
-                            mode_arg = int('0755')
-                        if python_version == 3:
-                            mode_arg = mode=0o755
-                        os.makedirs(crucible_anomaly_dir, mode_arg)
-
-                    # Note:
-                    # The value is enclosed is single quoted intentionally
-                    # as the imp.load_source used in crucible results in a
-                    # shift in the decimal position when double quoted, e.g.
-                    # value = "5622.0" gets imported as
-                    # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
-                    # single quoting results in the desired,
-                    # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
-
-                    crucible_anomaly_data = 'metric = \'%s\'\n' \
-                                            'value = \'%s\'\n' \
-                                            'from_timestamp = \'%s\'\n' \
-                                            'metric_timestamp = \'%s\'\n' \
-                                            'algorithms = %s\n' \
-                                            'triggered_algorithms = %s\n' \
-                                            'anomaly_dir = \'%s\'\n' \
-                                            'graphite_metric = True\n' \
-                                            'run_crucible_tests = False\n' \
-                                            'added_by = \'%s\'\n' \
-                                            'added_at = \'%s\'\n' \
-                        % (base_name, str(datapoint), from_timestamp,
-                           metric_timestamp, str(settings.MIRAGE_ALGORITHMS),
-                           triggered_algorithms, crucible_anomaly_dir,
-                           skyline_app, metric_timestamp)
-
-                    # Create an anomaly file with details about the anomaly
-                    crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, base_name)
-                    try:
-                        write_data_to_file(
-                            skyline_app, crucible_anomaly_file, 'w',
-                            crucible_anomaly_data)
-                        logger.info('added crucible anomaly file :: %s' % (crucible_anomaly_file))
-                    except:
-                        logger.error('error :: failed to add crucible anomaly file :: %s' % (crucible_anomaly_file))
-                        logger.info(traceback.format_exc())
-
-                    # Create timeseries json file with the timeseries
-                    json_file = '%s/%s.json' % (crucible_anomaly_dir, base_name)
-                    timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
-                    try:
-                        write_data_to_file(skyline_app, json_file, 'w', timeseries_json)
-                        logger.info('added crucible timeseries file :: %s' % (json_file))
-                    except:
-                        logger.error('error :: failed to add crucible timeseries file :: %s' % (json_file))
-                        logger.info(traceback.format_exc())
-
-                    # Create a crucible check file
-                    crucible_check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, base_name)
-                    try:
-                        write_data_to_file(
-                            skyline_app, crucible_check_file, 'w',
-                            crucible_anomaly_data)
-                        logger.info('added crucible check :: %s,%s' % (base_name, metric_timestamp))
-                    except:
-                        logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
-                        logger.info(traceback.format_exc())
+        try:
+            if valid_mirage_timeseries:
+                logger.info('analyzing :: %s at %s seconds' % (metric, second_order_resolution_seconds))
+                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
             else:
-                base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-                not_anomalous_metric = [datapoint, base_name]
-                self.not_anomalous_metrics.append(not_anomalous_metric)
-                logger.info('not anomalous     :: %s with %s' % (metric_vars.metric, metric_vars.value))
-
+                logger.info('not analyzing :: %s at %s seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries' % (metric, second_order_resolution_seconds))
+                anomalous = False
+                datapoint = timeseries[-1][1]
         # It could have been deleted by the Roomba
         except TypeError:
             exceptions['DeletedByRoomba'] += 1
@@ -531,6 +557,193 @@ class Mirage(Thread):
             logger.info('exceptions        :: Other')
             logger.info(traceback.format_exc())
 
+        if not anomalous:
+            base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            not_anomalous_metric = [datapoint, base_name]
+            self.not_anomalous_metrics.append(not_anomalous_metric)
+            logger.info('not anomalous     :: %s with %s' % (metric, value))
+
+        # If it's anomalous, add it to list
+        if anomalous:
+            base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            # metric_timestamp = int(timeseries[-1][0])
+            metric_timestamp = int_metric_timestamp
+            anomalous_metric = [datapoint, base_name, metric_timestamp]
+            self.anomalous_metrics.append(anomalous_metric)
+            logger.info('anomaly detected  :: %s with %s' % (metric, str(value)))
+            # It runs so fast, this allows us to process 30 anomalies/min
+            sleep(2)
+
+            # Get the anomaly breakdown - who returned True?
+            triggered_algorithms = []
+            for index, value in enumerate(ensemble):
+                if value:
+                    algorithm = settings.MIRAGE_ALGORITHMS[index]
+                    anomaly_breakdown[algorithm] += 1
+                    triggered_algorithms.append(algorithm)
+
+            # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+            sane_metricname = filesafe_metricname(str(base_name))
+
+            # If Crucible or Panorama are enabled determine details
+            determine_anomaly_details = False
+            if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
+                determine_anomaly_details = True
+            if settings.PANORAMA_ENABLED:
+                determine_anomaly_details = True
+
+            # If Ionosphere is enabled determine details
+            try:
+                ionosphere_enabled = settings.IONOSPHERE_ENABLED
+                if settings.IONOSPHERE_ENABLED:
+                    determine_anomaly_details = True
+            except:
+                ionosphere_enabled = False
+
+            if determine_anomaly_details:
+                # metric_timestamp = str(int(timeseries[-1][0]))
+                from_timestamp = str(int(timeseries[1][0]))
+                timeseries_dir = base_name.replace('.', '/')
+
+            cache_key = 'mirage.last_alert.smtp.%s' % (base_name)
+            last_alert = False
+            try:
+                last_alert = self.redis_conn.get(cache_key)
+            except Exception as e:
+                logger.error('error :: could not query Redis for cache_key: %s' % str(e))
+
+            added_at = str(int(time()))
+            # If Panorama is enabled - create a Panorama check
+            if settings.PANORAMA_ENABLED:
+                if not os.path.exists(settings.PANORAMA_CHECK_PATH):
+                    mkdir_p(settings.PANORAMA_CHECK_PATH)
+
+                # Note:
+                # The values are enclosed is single quoted intentionally
+                # as the imp.load_source used results in a shift in the
+                # decimal position when double quoted, e.g.
+                # value = "5622.0" gets imported as
+                # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+                # single quoting results in the desired,
+                # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+                source = 'graphite'
+                panaroma_anomaly_data = 'metric = \'%s\'\n' \
+                                        'value = \'%s\'\n' \
+                                        'from_timestamp = \'%s\'\n' \
+                                        'metric_timestamp = \'%s\'\n' \
+                                        'algorithms = %s\n' \
+                                        'triggered_algorithms = %s\n' \
+                                        'app = \'%s\'\n' \
+                                        'source = \'%s\'\n' \
+                                        'added_by = \'%s\'\n' \
+                                        'added_at = \'%s\'\n' \
+                    % (base_name, str(datapoint), from_timestamp,
+                       str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
+                       triggered_algorithms, skyline_app, source,
+                       this_host, added_at)
+
+                # Create an anomaly file with details about the anomaly
+                panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                    settings.PANORAMA_CHECK_PATH, added_at, sane_metricname)
+                try:
+                    write_data_to_file(
+                        skyline_app, panaroma_anomaly_file, 'w',
+                        panaroma_anomaly_data)
+                    logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                    self.sent_to_panorama.append(base_name)
+                except:
+                    logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                    logger.info(traceback.format_exc())
+
+            # If crucible is enabled - save timeseries and create a
+            # crucible check
+            if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
+                from_timestamp = str(int(timeseries[1][0]))
+                timeseries_dir = base_name.replace('.', '/')
+                crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+                if not os.path.exists(crucible_anomaly_dir):
+                    mkdir_p(crucible_anomaly_dir)
+
+                # Note:
+                # The value is enclosed is single quoted intentionally
+                # as the imp.load_source used in crucible results in a
+                # shift in the decimal position when double quoted, e.g.
+                # value = "5622.0" gets imported as
+                # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+                # single quoting results in the desired,
+                # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+
+                crucible_anomaly_data = 'metric = \'%s\'\n' \
+                                        'value = \'%s\'\n' \
+                                        'from_timestamp = \'%s\'\n' \
+                                        'metric_timestamp = \'%s\'\n' \
+                                        'algorithms = %s\n' \
+                                        'triggered_algorithms = %s\n' \
+                                        'anomaly_dir = \'%s\'\n' \
+                                        'graphite_metric = True\n' \
+                                        'run_crucible_tests = False\n' \
+                                        'added_by = \'%s\'\n' \
+                                        'added_at = \'%s\'\n' \
+                    % (base_name, str(datapoint), from_timestamp,
+                       str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
+                       triggered_algorithms, crucible_anomaly_dir,
+                       skyline_app, added_at)
+
+                # Create an anomaly file with details about the anomaly
+                crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, sane_metricname)
+                try:
+                    write_data_to_file(
+                        skyline_app, crucible_anomaly_file, 'w',
+                        crucible_anomaly_data)
+                    logger.info('added crucible anomaly file :: %s' % (crucible_anomaly_file))
+                    self.sent_to_crucible.append(base_name)
+                except:
+                    logger.error('error :: failed to add crucible anomaly file :: %s' % (crucible_anomaly_file))
+                    logger.info(traceback.format_exc())
+
+                # Create timeseries json file with the timeseries
+                json_file = '%s/%s.json' % (crucible_anomaly_dir, base_name)
+                timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+                try:
+                    write_data_to_file(skyline_app, json_file, 'w', timeseries_json)
+                    logger.info('added crucible timeseries file :: %s' % (json_file))
+                except:
+                    logger.error('error :: failed to add crucible timeseries file :: %s' % (json_file))
+                    logger.info(traceback.format_exc())
+
+                # Create a crucible check file
+                crucible_check_file = '%s/%s.%s.txt' % (settings.CRUCIBLE_CHECK_PATH, metric_timestamp, sane_metricname)
+                try:
+                    write_data_to_file(
+                        skyline_app, crucible_check_file, 'w',
+                        crucible_anomaly_data)
+                    logger.info('added crucible check :: %s,%s' % (base_name, metric_timestamp))
+                except:
+                    logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
+                    logger.info(traceback.format_exc())
+
+            # @added 20160922 - Branch #922: Ionosphere
+            # Also added the send_anomalous_metric_to skyline_functions.py
+            # function
+            if ionosphere_enabled:
+                if not last_alert:
+                    # @modified 20161228 Feature #1830: Ionosphere alerts
+                    # Added full_duration which needs to be recorded to allow Mirage metrics
+                    # to be profiled on Redis timeseries data at FULL_DURATION
+                    # e.g. mirage.redis.24h.json
+                    full_duration = str(second_order_resolution_seconds)
+                    # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+                    # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+                    ionosphere_parent_id = 0
+                    send_anomalous_metric_to(
+                        skyline_app, 'ionosphere', timeseries_dir,
+                        str(int_metric_timestamp), base_name, str(datapoint),
+                        from_timestamp, triggered_algorithms, timeseries,
+                        full_duration, str(ionosphere_parent_id))
+                    self.sent_to_ionosphere.append(base_name)
+                else:
+                    logger.info('alert expiry key exists not sending to Ionosphere :: %s' % base_name)
+
         # Add values to the queue so the parent process can collate
         for key, value in anomaly_breakdown.items():
             self.mirage_anomaly_breakdown_q.put((key, value))
@@ -541,11 +754,22 @@ class Mirage(Thread):
         metric_var_files = []
         timeseries = []
 
-        # Remove metric check file
-        try:
-            os.remove(metric_check_file)
-        except OSError:
-            pass
+        if os.path.isfile(metric_check_file):
+            # Remove metric check file
+            try:
+                os.remove(metric_check_file)
+                logger.info('removed check file - %s' % metric_check_file)
+            except OSError:
+                logger.error('error :: failed to remove check file - %s' % metric_check_file)
+                pass
+
+        # Remove the metric directory
+        if os.path.exists(metric_data_dir):
+            try:
+                rmtree(metric_data_dir)
+                logger.info('removed data dir - %s' % metric_data_dir)
+            except:
+                logger.error('error :: failed to rmtree %s' % metric_data_dir)
 
     def run(self):
         """
@@ -582,13 +806,13 @@ class Mirage(Thread):
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
-        def smtp_trigger_alert(alert, metric, second_order_resolution_seconds):
+        def smtp_trigger_alert(alert, metric, second_order_resolution_seconds, context):
             # Spawn processes
             pids = []
             spawned_pids = []
             pid_count = 0
             try:
-                p = Process(target=self.spawn_alerter_process, args=(alert, metric, second_order_resolution_seconds))
+                p = Process(target=self.spawn_alerter_process, args=(alert, metric, second_order_resolution_seconds, context))
                 pids.append(p)
                 pid_count += 1
                 p.start()
@@ -609,6 +833,11 @@ class Mirage(Thread):
                 logger.info('%s :: timed out, killing the spawn_trigger_alert process' % (skyline_app))
                 for p in pids:
                     p.terminate()
+                    # p.join()
+
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
                     p.join()
 
         """
@@ -662,6 +891,8 @@ class Mirage(Thread):
                 sleep(10)
                 logger.info('connecting to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                if self.redis_conn.ping():
+                    logger.info('connected to redis')
                 continue
 
             """
@@ -672,10 +903,33 @@ class Mirage(Thread):
                 # Report app up
                 self.redis_conn.setex(skyline_app, 120, now)
 
+                # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+                # If Ionosphere is going to pass alerts back to the app
+                # here we are going to have break out and force a alerting
+                # only run.
+                ionosphere_alerts = None
+                ionosphere_alerts_returned = False
+
                 metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
                 if len(metric_var_files) == 0:
-                    logger.info('sleeping no metrics...')
-                    sleep(10)
+                    # @modified 20161228 - Feature #1830: Ionosphere alerts
+                    ionosphere_alerts = []
+                    ionosphere_alerts_returned = False
+                    try:
+                        ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                        ionosphere_alerts_returned = True
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to scan ionosphere.mirage.alert.* from Redis')
+
+                    if len(ionosphere_alerts) == 0:
+                        ionosphere_alerts_returned = False
+                    else:
+                        logger.info('Ionosphere alert requested :: %s' % str(ionosphere_alerts))
+
+                    if not ionosphere_alerts_returned:
+                        logger.info('sleeping no metrics...')
+                        sleep(10)
                 else:
                     sleep(1)
 
@@ -689,167 +943,270 @@ class Mirage(Thread):
                         # delete file if older than a week
                         if c < stale_age:
                                 os.remove(settings.MIRAGE_CHECK_PATH + "/" + current_file)
-                                logger.info('removed %s' % (current_file))
+                                logger.info('removed stale check - %s' % (current_file))
 
                 # Discover metric to analyze
                 metric_var_files = ''
+                # @added 20161228 - Feature #1830: Ionosphere alerts
+                # Prioritises Ionosphere alerts
+                if ionosphere_alerts_returned:
+                    break
+
                 metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
                 if len(metric_var_files) > 0:
                     break
 
-            metric_var_files_sorted = sorted(metric_var_files)
-            # metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
+            # @modified 20161228 - Feature #1830: Ionosphere alerts
+            # Only spawn process if this is not an Ionosphere alert
+            if not ionosphere_alerts_returned:
+                metric_var_files_sorted = sorted(metric_var_files)
+                # metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
 
-            logger.info('processing %s' % metric_var_files_sorted[0])
+                processing_check_file = metric_var_files_sorted[0]
+                logger.info('processing %s' % processing_check_file)
 
-            # Remove any existing algorithm.error files from any previous runs
-            # that did not cleanup for any reason
-            pattern = '%s.*.algorithm.error' % skyline_app
-            try:
-                for f in os.listdir(settings.SKYLINE_TMP_DIR):
-                    if re.search(pattern, f):
-                        try:
-                            os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
-                            logger.info('cleaning up old error file - %s' % (str(f)))
-                        except OSError:
-                            pass
-            except:
-                logger.error('failed to cleanup mirage_algorithm.error files - %s' % (traceback.format_exc()))
-
-            # Spawn processes
-            pids = []
-            spawned_pids = []
-            pid_count = 0
-            MIRAGE_PROCESSES = 1
-            run_timestamp = int(now)
-            for i in range(1, MIRAGE_PROCESSES + 1):
-                p = Process(target=self.spin_process, args=(i, run_timestamp))
-                pids.append(p)
-                pid_count += 1
-                logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(MIRAGE_PROCESSES)))
-                p.start()
-                spawned_pids.append(p.pid)
-
-            # Send wait signal to zombie processes
-            # for p in pids:
-            #     p.join()
-            # Self monitor processes and terminate if any spin_process has run
-            # for longer than 180 seconds - 20160512 @earthgecko
-            p_starts = time()
-            while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
-                if any(p.is_alive() for p in pids):
-                    # Just to avoid hogging the CPU
-                    sleep(.1)
-                else:
-                    # All the processes are done, break now.
-                    time_to_run = time() - p_starts
-                    logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (
-                        skyline_app, str(MIRAGE_PROCESSES), time_to_run))
-                    break
-            else:
-                # We only enter this if we didn't 'break' above.
-                logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
-                for p in pids:
-                    p.terminate()
-                    p.join()
-
-            # Log the last reported error by any algorithms that errored in the
-            # spawned processes from algorithms.py
-            for completed_pid in spawned_pids:
-                logger.info('spin_process with pid %s completed' % (str(completed_pid)))
-                for algorithm in settings.MIRAGE_ALGORITHMS:
-                    algorithm_error_file = '%s/%s.%s.%s.algorithm.error' % (
-                        settings.SKYLINE_TMP_DIR, skyline_app,
-                        str(completed_pid), algorithm)
-                    if os.path.isfile(algorithm_error_file):
-                        logger.info(
-                            'error - spin_process with pid %s has reported an error with the %s algorithm' % (
-                                str(completed_pid), algorithm))
-                        try:
-                            with open(algorithm_error_file, 'r') as f:
-                                error_string = f.read()
-                            logger.error('%s' % str(error_string))
-                        except:
-                            logger.error('failed to read %s error file' % algorithm)
-                        try:
-                            os.remove(algorithm_error_file)
-                        except OSError:
-                            pass
-
-            # Grab data from the queue and populate dictionaries
-            exceptions = dict()
-            anomaly_breakdown = dict()
-            while 1:
+                # Remove any existing algorithm.error files from any previous runs
+                # that did not cleanup for any reason
+                pattern = '%s.*.algorithm.error' % skyline_app
                 try:
-                    key, value = self.mirage_anomaly_breakdown_q.get_nowait()
-                    if key not in anomaly_breakdown.keys():
-                        anomaly_breakdown[key] = value
-                    else:
-                        anomaly_breakdown[key] += value
-                except Empty:
-                    break
-
-            while 1:
-                try:
-                    key, value = self.mirage_exceptions_q.get_nowait()
-                    if key not in exceptions.keys():
-                        exceptions[key] = value
-                    else:
-                        exceptions[key] += value
-                except Empty:
-                    break
-
-            for metric_variable in self.metric_variables:
-                if metric_variable[0] == 'metric_name':
-                    metric_name = metric_variable[1]
-                if metric_variable[0] == 'metric_value':
-                    metric_value = metric_variable[1]
-                if metric_variable[0] == 'hours_to_resolve':
-                    hours_to_resolve = metric_variable[1]
-                # if metric_variable[0] == 'metric_timestamp':
-                #     metric_timestamp = metric_variable[1]
-
-            logger.info('analysis done - %s' % metric_name)
-
-            # Send alerts
-            # Calculate hours second order resolution to seconds
-            logger.info('analyzed at %s hours resolution' % hours_to_resolve)
-            second_order_resolution_seconds = int(hours_to_resolve) * 3600
-            logger.info('analyzed at %s seconds resolution' % second_order_resolution_seconds)
-
-            if settings.MIRAGE_ENABLE_ALERTS:
-                for alert in settings.ALERTS:
-                    for metric in self.anomalous_metrics:
-                        ALERT_MATCH_PATTERN = alert[0]
-                        METRIC_PATTERN = metric[1]
-                        try:
-                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                        except:
-                            pattern_match = False
-                        # @modified 20160806 - Reintroduced the original
-                        # substring matching after wildcard matching, to allow
-                        # more flexibility
-                        if not pattern_match:
-                            if alert[0] in metric[1]:
-                                pattern_match = True
-                        if pattern_match:
-                            cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
+                    for f in os.listdir(settings.SKYLINE_TMP_DIR):
+                        if re.search(pattern, f):
                             try:
-                                last_alert = self.redis_conn.get(cache_key)
-                                if not last_alert:
-                                    self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                    # trigger_alert(alert, metric, second_order_resolution_seconds)
+                                os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
+                                logger.info('cleaning up old error file - %s' % (str(f)))
+                            except OSError:
+                                pass
+                except:
+                    logger.error('failed to cleanup mirage_algorithm.error files - %s' % (traceback.format_exc()))
+
+                # Spawn processes
+                pids = []
+                spawned_pids = []
+                pid_count = 0
+                MIRAGE_PROCESSES = 1
+                # @modified 20161224 - send mirage metrics to graphite
+                # run_timestamp = int(now)
+                run_timestamp = int(time())
+                for i in range(1, MIRAGE_PROCESSES + 1):
+                    p = Process(target=self.spin_process, args=(i, run_timestamp))
+                    pids.append(p)
+                    pid_count += 1
+                    logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(MIRAGE_PROCESSES)))
+                    p.start()
+                    spawned_pids.append(p.pid)
+
+                # Send wait signal to zombie processes
+                # for p in pids:
+                #     p.join()
+                # Self monitor processes and terminate if any spin_process has run
+                # for longer than 180 seconds - 20160512 @earthgecko
+                p_starts = time()
+                while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
+                    if any(p.is_alive() for p in pids):
+                        # Just to avoid hogging the CPU
+                        sleep(.1)
+                    else:
+                        # All the processes are done, break now.
+                        time_to_run = time() - p_starts
+                        logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (
+                            skyline_app, str(MIRAGE_PROCESSES), time_to_run))
+                        break
+                else:
+                    # We only enter this if we didn't 'break' above.
+                    logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
+                    for p in pids:
+                        p.terminate()
+                        # p.join()
+
+                for p in pids:
+                    if p.is_alive():
+                        logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                        p.join()
+
+                # Log the last reported error by any algorithms that errored in the
+                # spawned processes from algorithms.py
+                for completed_pid in spawned_pids:
+                    logger.info('spin_process with pid %s completed' % (str(completed_pid)))
+                    for algorithm in settings.MIRAGE_ALGORITHMS:
+                        algorithm_error_file = '%s/%s.%s.%s.algorithm.error' % (
+                            settings.SKYLINE_TMP_DIR, skyline_app,
+                            str(completed_pid), algorithm)
+                        if os.path.isfile(algorithm_error_file):
+                            logger.info(
+                                'error - spin_process with pid %s has reported an error with the %s algorithm' % (
+                                    str(completed_pid), algorithm))
+                            try:
+                                with open(algorithm_error_file, 'r') as f:
+                                    error_string = f.read()
+                                logger.error('%s' % str(error_string))
+                            except:
+                                logger.error('failed to read %s error file' % algorithm)
+                            try:
+                                os.remove(algorithm_error_file)
+                            except OSError:
+                                pass
+
+                # Grab data from the queue and populate dictionaries
+                exceptions = dict()
+                anomaly_breakdown = dict()
+                while 1:
+                    try:
+                        key, value = self.mirage_anomaly_breakdown_q.get_nowait()
+                        if key not in anomaly_breakdown.keys():
+                            anomaly_breakdown[key] = value
+                        else:
+                            anomaly_breakdown[key] += value
+                    except Empty:
+                        break
+
+                while 1:
+                    try:
+                        key, value = self.mirage_exceptions_q.get_nowait()
+                        if key not in exceptions.keys():
+                            exceptions[key] = value
+                        else:
+                            exceptions[key] += value
+                    except Empty:
+                        break
+
+                for metric_variable in self.metric_variables:
+                    if metric_variable[0] == 'metric_name':
+                        metric_name = metric_variable[1]
+                    if metric_variable[0] == 'metric_value':
+                        metric_value = metric_variable[1]
+                    if metric_variable[0] == 'hours_to_resolve':
+                        hours_to_resolve = metric_variable[1]
+                    # if metric_variable[0] == 'metric_timestamp':
+                    #     metric_timestamp = metric_variable[1]
+
+                logger.info('analysis done - %s' % metric_name)
+
+                # Send alerts
+                # Calculate hours second order resolution to seconds
+                logger.info('analyzed at %s hours resolution' % hours_to_resolve)
+                second_order_resolution_seconds = int(hours_to_resolve) * 3600
+                logger.info('analyzed at %s seconds resolution' % second_order_resolution_seconds)
+
+                # Remove metric check file
+                metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
+                if os.path.isfile(metric_check_file):
+                    try:
+                        os.remove(metric_check_file)
+                        logger.info('removed check file - %s' % metric_check_file)
+                    except OSError:
+                        pass
+
+                # Remove the metric directory
+                timeseries_dir = metric_name.replace('.', '/')
+                metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
+                if os.path.exists(metric_data_dir):
+                    try:
+                        rmtree(metric_data_dir)
+                        logger.info('removed - %s' % metric_data_dir)
+                    except:
+                        logger.error('error :: failed to rmtree %s' % metric_data_dir)
+
+                if settings.MIRAGE_ENABLE_ALERTS:
+                    # @added 20161228 - Feature #1830: Ionosphere alerts
+                    #                   Branch #922: Ionosphere
+                    # Bringing Ionosphere online - do alert on Ionosphere metrics
+                    try:
+                        ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+                        ionosphere_unique_metrics = []
+
+            # @added 20161228 - Feature #1830: Ionosphere alerts
+            #                   Branch #922: Ionosphere
+            # Send alerts for Ionosphere
+            alert_context = 'Mirage'
+            if ionosphere_alerts_returned:
+                alert_context = 'Ionosphere'
+                ionosphere_unique_metrics = []
+                logger.info('Ionosphere alerts requested emptying ionosphere_unique_metrics so Mirage will alert')
+                exceptions = dict()
+                run_timestamp = int(time())
+                ionosphere_alert_on = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                for cache_key in ionosphere_alert_on:
+                    try:
+                        alert_on = self.redis_conn.get(cache_key)
+                        send_alert_for = literal_eval(alert_on)
+                        value = float(send_alert_for[0])
+                        base_name = str(send_alert_for[1])
+                        metric_timestamp = int(float(send_alert_for[2]))
+                        triggered_algorithms = send_alert_for[3]
+                        second_order_resolution_seconds = int(send_alert_for[4])
+                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
+                        self.anomalous_metrics.append(anomalous_metric)
+                        anomaly_breakdown = dict()
+                        for algorithm in triggered_algorithms:
+                            anomaly_breakdown[algorithm] = 1
+                        self.redis_conn.delete(cache_key)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % base_name)
+
+            for alert in settings.ALERTS:
+                for metric in self.anomalous_metrics:
+                    # @added 20161228 - Feature #1830: Ionosphere alerts
+                    #                   Branch #922: Ionosphere
+                    # Bringing Ionosphere online - do alert on Ionosphere
+                    # metrics if Ionosphere is up
+                    metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                    if metric_name in ionosphere_unique_metrics:
+                        ionosphere_up = False
+                        try:
+                            ionosphere_up = self.redis_conn.get('ionosphere')
+                        except Exception as e:
+                            logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
+                        if ionosphere_up:
+                            logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                            continue
+                        else:
+                            logger.error('error :: Ionosphere not report up')
+                            logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
+                    else:
+                        logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+
+                    ALERT_MATCH_PATTERN = alert[0]
+                    METRIC_PATTERN = metric[1]
+                    try:
+                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                    except:
+                        pattern_match = False
+                    # @modified 20160806 - Reintroduced the original
+                    # substring matching after wildcard matching, to allow
+                    # more flexibility
+                    if not pattern_match:
+                        if alert[0] in metric[1]:
+                            pattern_match = True
+                    if pattern_match:
+                        cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
+                        try:
+                            last_alert = self.redis_conn.get(cache_key)
+                            if not last_alert:
+                                if ionosphere_alerts_returned:
                                     try:
-                                        if alert[1] != 'smtp':
-                                            trigger_alert(alert, metric, second_order_resolution_seconds)
-                                        else:
-                                            smtp_trigger_alert(alert, metric, second_order_resolution_seconds)
-                                        logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
-                                    except Exception as e:
-                                        logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
-                            except Exception as e:
-                                logger.error('error :: could not query Redis for cache_key')
+                                        second_order_resolution_seconds = metric[3]
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to determine full_duration from the Ionosphere alert for %s' % (metric[1]))
+                                        logger.info('using settings.FULL_DURATION - %s' % (str(settings.FULL_DURATION)))
+                                        second_order_resolution_seconds = settings.FULL_DURATION
+                                self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                # trigger_alert(alert, metric, second_order_resolution_seconds, context)
+                                try:
+                                    if alert[1] != 'smtp':
+                                        trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
+                                    else:
+                                        smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
+                                    logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
+                                except Exception as e:
+                                    logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
+                        except Exception as e:
+                            logger.error('error :: could not query Redis for cache_key')
 
             if settings.NEGATE_ANALYZER_ALERTS:
                 if len(self.anomalous_metrics) == 0:
@@ -867,12 +1224,45 @@ class Mirage(Thread):
                                     logger.error('error :: could not send alert: %s' % e)
 
             # Log progress
-
             if len(self.anomalous_metrics) > 0:
                 logger.info('seconds since last anomaly :: %.2f' % (time() - now))
-                logger.info('total anomalies   :: %d' % len(self.anomalous_metrics))
-                logger.info('exception stats   :: %s' % exceptions)
-                logger.info('anomaly breakdown :: %s' % anomaly_breakdown)
+                logger.info('total anomalies    :: %d' % len(self.anomalous_metrics))
+                logger.info('exception stats    :: %s' % exceptions)
+                logger.info('anomaly breakdown  :: %s' % anomaly_breakdown)
+
+            # Log to Graphite
+            run_time = time() - run_timestamp
+            logger.info('seconds to run    :: %.2f' % run_time)
+            graphite_run_time = '%.2f' % run_time
+            send_metric_name = skyline_app_graphite_namespace + '.run_time'
+            send_graphite_metric(skyline_app, send_metric_name, graphite_run_time)
+
+            if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
+                try:
+                    sent_to_crucible = str(len(self.sent_to_crucible))
+                except:
+                    sent_to_crucible = '0'
+                logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
+                send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
+
+            if settings.PANORAMA_ENABLED:
+                try:
+                    sent_to_panorama = str(len(self.sent_to_panorama))
+                except:
+                    sent_to_panorama = '0'
+                logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
+                send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
+
+            if settings.IONOSPHERE_ENABLED:
+                try:
+                    sent_to_ionosphere = str(len(self.sent_to_ionosphere))
+                except:
+                    sent_to_ionosphere = '0'
+                logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
+                send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
 
             # Reset counters
             self.anomalous_metrics[:] = []
@@ -880,6 +1270,10 @@ class Mirage(Thread):
 
             # Reset metric_variables
             self.metric_variables[:] = []
+
+            self.sent_to_crucible[:] = []
+            self.sent_to_panorama[:] = []
+            self.sent_to_ionosphere[:] = []
 
             """
             DEVELOPMENT ONLY

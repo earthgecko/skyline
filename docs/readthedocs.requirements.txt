@@ -77,3 +77,10 @@ gunicorn>=19.6.0
 pipdeptree>=0.6.0
 
 recommonmark
+
+# @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs
+# readthedocs build is failing as they are Running Sphinx v1.3.5 and returns
+# Sphinx version error:
+# This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
+Sphinx==1.4.8
+sphinx-rtd-theme==0.1.9

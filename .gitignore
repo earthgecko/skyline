@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 *.log
+*.bak
 dump.rdb
 nohup.out
 docs/_build/doctrees

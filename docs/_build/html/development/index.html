@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>Development &mdash; Skyline 1.1.0-dev documentation</title>
   
 
   
@@ -32,8 +32,11 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="../index.html"/>
-        <link rel="next" title="Development - Webapp" href="webapp.html"/>
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
+        <link rel="next" title="Building documentation" href="building-documentation.html"/>
         <link rel="prev" title="What’s new" href="../whats-new.html"/> 
 
   
@@ -62,7 +65,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -89,7 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -100,6 +103,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -108,12 +113,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
 <li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dry">DRY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-going-refactoring">On going refactoring</a></li>
 </ul>
@@ -168,6 +175,15 @@
 <h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#install-docs-requirements-txt">Install docs-requirements.txt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#your-python-interpretor">Your Python interpretor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#rst-and-md-wtf">.rst and .md wtf?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#build">Build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#auto-generating-rst-files">Auto generating .rst files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#building-workflow-diagrams-with-uml">Building workflow diagrams with UML</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Development - Webapp</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html#flask">Flask</a></li>
 </ul>
@@ -186,6 +202,30 @@
 <li class="toctree-l3"><a class="reference internal" href="debugging.html#pytracker">pytracker</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debugging.html#objgraph">objgraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="debugging.html#guppy-and-heapy">guppy and heapy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html#what-ionosphere-is-for">What Ionosphere is for</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html#almost-a-year-in-review">Almost a year in review</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ionosphere.html#ramblings-the-development-of-ionosphere">Ramblings - the development of Ionosphere</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ionosphere.html#requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ionosphere.html#determining-timeseries-similarities-20160719">Determining timeseries similarities - 20160719</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ionosphere.html#small-steps">Small steps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ionosphere.html#simple-ionosphere">Simple Ionosphere</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ionosphere.html#workflow">Workflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ionosphere.html#maybe-we-took-a-step-fresh">Maybe we took a step - FRESH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ionosphere.html#task-1718-review-tsfresh-still-in-progress">Task #1718: review.tsfresh - still in progress</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pytz.html">Development - pytz</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pytz.html#pytz-all-timezones">pytz.all_timezones</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pytz.html#timezones-list-for-pytz-version">Timezones list for pytz version</a></li>
 </ul>
 </li>
 </ul>
@@ -255,7 +295,7 @@ becomes desired.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="webapp.html" class="btn btn-neutral float-right" title="Development - Webapp" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="building-documentation.html" class="btn btn-neutral float-right" title="Building documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../whats-new.html" class="btn btn-neutral" title="What’s new" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -289,7 +329,7 @@ becomes desired.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.1.0-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

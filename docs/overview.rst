@@ -32,8 +32,20 @@ removes the "without the need to configure a model/thresholds" element somewhat.
 
 So why continue developing Skyline?
 
-The architecture/pipeline works very well at doing what it does.  It is solid and battle tested.
-To overcome some of the limitations of Skyline.  This project extends it.
+The architecture/pipeline works very well at doing what it does.  It is solid
+and battle tested.  To overcome some of the limitations of Skyline.  This
+project extends it.
+
+And...
+
+Skyline is **FAST**!!!  Faster enough to handle 10s of 1000s of timeseries in
+near real-time.  In the world of Python, data analysis, R and most machine
+learning, Skyline is FAST.  Processing and analyzing 1000s and 1000s of
+constantly changing timeseries, every minute of every day and it can do it in
+multiple resolutions, on a fairly low end commodity server.
+
+Skyline learns using a timeseries similarities comparison method based on
+features extraction and comparison using the `tsfresh`_ package.
 
 The new look of Skyline apps
 ----------------------------
@@ -47,6 +59,7 @@ The new look of Skyline apps
 * Panorama - anomalies database and historical views
 * Webapp - frontend to view current and histroical anomalies and browse Redis
   with :red:`re`:brow:`brow`
+* Ionosphere - timeseries fingerprinting and learning
 
 Skyline is still a near real-time anomaly detection system, however it has
 various modes of operation that are modular and self contained, so that only the
@@ -98,6 +111,7 @@ Skyline uses to following technologies and libraries at its core:
 6. **mysql/mariadb** - a database - `MySQL`_ or `MariaDB`_
 7. :red:`re`:brow:`brow` - Skyline uses a modified port of Marian
    Steinbach's excellent `rebrow`_
+8. **tsfresh** - `tsfresh`_ - Automatic extraction of relevant features from time series
 
 .. _Etsy: https://www.etsy.com/
 .. _github/etsy: https://github.com/etsy/skyline
@@ -110,3 +124,4 @@ Skyline uses to following technologies and libraries at its core:
 .. _MySQL: https://www.mysql.com/
 .. _rebrow: https://github.com/marians/rebrow
 .. _MariaDB: https://mariadb.org/
+.. _tsfresh: https://github.com/blue-yonder/tsfresh

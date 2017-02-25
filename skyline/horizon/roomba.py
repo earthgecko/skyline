@@ -1,3 +1,4 @@
+from __future__ import division
 from os import kill, getpid
 from redis import StrictRedis, WatchError
 from multiprocessing import Process

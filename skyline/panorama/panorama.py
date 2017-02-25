@@ -3,21 +3,31 @@ try:
     from Queue import Empty
 except:
     from queue import Empty
-from redis import StrictRedis
 from time import time, sleep
 from threading import Thread
 from multiprocessing import Process, Manager
-from msgpack import Unpacker, packb
 import os
 from os import kill, getpid, listdir
 from os.path import join, isfile
+from ast import literal_eval
+
+from redis import StrictRedis
+from msgpack import Unpacker, packb
 import traceback
 from sys import version_info
 import mysql.connector
 from mysql.connector import errorcode
 
 import settings
-from skyline_functions import load_metric_vars, fail_check
+from skyline_functions import fail_check, mkdir_p
+
+# @added 20170115 - Feature #1854: Ionosphere learn - generations
+# Added determination of the learn related variables so that any new metrics
+# that Panorama adds to the Skyline database, it adds the default
+# IONOSPHERE_LEARN_DEFAULT_ values or the namespace specific values matched
+# from settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG to the metric database
+# entry.
+from ionosphere_functions import get_ionosphere_learn_details
 
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
@@ -230,6 +240,90 @@ class Panorama(Thread):
 
         return False
 
+    # @added 20170101 - Feature #1830: Ionosphere alerts
+    #                   Bug #1460: panorama check file fails
+    #                   Panorama check file fails #24
+    # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+    def new_load_metric_vars(self, metric_vars_file):
+        """
+        Load the metric variables for a check from a metric check variables file
+
+        :param metric_vars_file: the path and filename to the metric variables files
+        :type metric_vars_file: str
+        :return: the metric_vars module object or ``False``
+        :rtype: list
+
+        """
+        if os.path.isfile(metric_vars_file):
+            logger.info(
+                'loading metric variables from metric_check_file - %s' % (
+                    str(metric_vars_file)))
+        else:
+            logger.error(
+                'error :: loading metric variables from metric_check_file - file not found - %s' % (
+                    str(metric_vars_file)))
+            return False
+
+        metric_vars = []
+        with open(metric_vars_file) as f:
+            for line in f:
+                no_new_line = line.replace('\n', '')
+                no_equal_line = no_new_line.replace(' = ', ',')
+                array = str(no_equal_line.split(',', 1))
+                add_line = literal_eval(array)
+                metric_vars.append(add_line)
+
+        string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
+        float_keys = ['value']
+        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
+        array_keys = ['algorithms', 'triggered_algorithms']
+        boolean_keys = ['graphite_metric', 'run_crucible_tests']
+
+        metric_vars_array = []
+        for var_array in metric_vars:
+            key = None
+            value = None
+            if var_array[0] in string_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = str(value_str)
+                if var_array[0] == 'metric':
+                    metric = value
+            if var_array[0] in float_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = float(value_str)
+            if var_array[0] in int_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = int(value_str)
+            if var_array[0] in array_keys:
+                key = var_array[0]
+                value = literal_eval(str(var_array[1]))
+            if var_array[0] in boolean_keys:
+                key = var_array[0]
+                if str(var_array[1]) == 'True':
+                    value = True
+                else:
+                    value = False
+            if key:
+                metric_vars_array.append([key, value])
+
+            if len(metric_vars_array) == 0:
+                logger.error(
+                    'error :: loading metric variables - none found' % (
+                        str(metric_vars_file)))
+                return False
+
+            if settings.ENABLE_DEBUG:
+                logger.info(
+                    'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+
+        logger.info('debug :: metric_vars for %s' % str(metric))
+        logger.info('debug :: %s' % str(metric_vars_array))
+
+        return metric_vars_array
+
     def spin_process(self, i, metric_check_file):
         """
         Assign a metric anomaly to process.
@@ -276,7 +370,13 @@ class Panorama(Thread):
 
         # Load and validate metric variables
         try:
-            metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            # @modified 20170101 - Feature #1830: Ionosphere alerts
+            #                      Bug #1460: panorama check file fails
+            #                      Panorama check file fails #24
+            # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+            # Use def new_load_metric_vars(self, metric_vars_file):
+            # metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            metric_vars_array = self.new_load_metric_vars(str(metric_check_file))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
@@ -288,9 +388,13 @@ class Panorama(Thread):
         # this ensures that if any of the variables are not set for some reason
         # we can handle unexpected data or situations gracefully and try and
         # ensure that the process does not hang.
+        metric = None
         try:
-            metric_vars.metric
-            metric = str(metric_vars.metric)
+            # metric_vars.metric
+            # metric = str(metric_vars.metric)
+            key = 'metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric = str(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - metric - %s' % metric)
         except:
@@ -298,9 +402,18 @@ class Panorama(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not metric:
+            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        value = None
         try:
-            metric_vars.value
-            value = str(metric_vars.value)
+            # metric_vars.value
+            # value = str(metric_vars.value)
+            key = 'value'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            value = float(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - value - %s' % (value))
         except:
@@ -308,9 +421,17 @@ class Panorama(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not value:
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        from_timestamp = None
         try:
-            metric_vars.from_timestamp
-            from_timestamp = str(metric_vars.from_timestamp)
+            # metric_vars.from_timestamp
+            # from_timestamp = str(metric_vars.from_timestamp)
+            key = 'from_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            from_timestamp = int(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - from_timestamp - %s' % from_timestamp)
         except:
@@ -321,9 +442,18 @@ class Panorama(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not from_timestamp:
+            logger.error('error :: failed to load from_timestamp variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        metric_timestamp = None
         try:
-            metric_vars.metric_timestamp
-            metric_timestamp = str(metric_vars.metric_timestamp)
+            # metric_vars.metric_timestamp
+            # metric_timestamp = str(metric_vars.metric_timestamp)
+            key = 'metric_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric_timestamp = int(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - metric_timestamp - %s' % metric_timestamp)
         except:
@@ -331,63 +461,122 @@ class Panorama(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not metric_timestamp:
+            logger.error('error :: failed to load metric_timestamp variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        algorithms = None
         try:
-            metric_vars.algorithms
-            algorithms = metric_vars.algorithms
+            # metric_vars.algorithms
+            # algorithms = metric_vars.algorithms
+            key = 'algorithms'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            algorithms = value_list[0]
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - algorithms - %s' % str(algorithms))
         except:
-            logger.error('error :: failed to read algorithms variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read algorithms variable from check file setting to all - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not algorithms:
+            logger.error('error :: failed to load algorithms variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        triggered_algorithms = None
         try:
-            metric_vars.triggered_algorithms
-            triggered_algorithms = metric_vars.triggered_algorithms
+            # metric_vars.triggered_algorithms
+            # triggered_algorithms = metric_vars.triggered_algorithms
+            key = 'triggered_algorithms'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            triggered_algorithms = value_list[0]
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - triggered_algorithms - %s' % str(triggered_algorithms))
         except:
-            logger.error('error :: failed to read triggered_algorithms variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read triggered_algorithms variable from check file setting to all - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not triggered_algorithms:
+            logger.error('error :: failed to load triggered_algorithms variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        app = None
         try:
-            metric_vars.app
-            app = str(metric_vars.app)
+            # metric_vars.app
+            # app = str(metric_vars.app)
+            key = 'app'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            app = str(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - app - %s' % app)
         except:
-            logger.error('error :: failed to read app variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read app variable from check file setting to all  - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not app:
+            logger.error('error :: failed to load app variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        source = None
         try:
-            metric_vars.source
-            source = str(metric_vars.source)
+            # metric_vars.source
+            # source = str(metric_vars.source)
+            key = 'source'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            source = str(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - source - %s' % source)
         except:
-            logger.error('error :: failed to read source variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read source variable from check file setting to all  - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not app:
+            logger.error('error :: failed to load app variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        added_by = None
         try:
-            metric_vars.added_by
-            added_by = str(metric_vars.added_by)
+            # metric_vars.added_by
+            # added_by = str(metric_vars.added_by)
+            key = 'added_by'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_by = str(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - added_by - %s' % added_by)
         except:
-            logger.error('error :: failed to read added_by variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read added_by variable from check file setting to all - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        if not added_by:
+            logger.error('error :: failed to load added_by variable from check file - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        added_at = None
         try:
-            metric_vars.added_at
-            added_at = str(metric_vars.added_at)
+            # metric_vars.added_at
+            # added_at = str(metric_vars.added_at)
+            key = 'added_at'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_at = str(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - added_at - %s' % added_at)
         except:
-            logger.error('error :: failed to read added_at variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read added_at variable from check file setting to all - %s' % (metric_check_file))
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
+        if not added_at:
+            logger.error('error :: failed to load added_at variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -492,8 +681,44 @@ class Panorama(Thread):
                             query_cache_key, str(determined_id)))
                 return int(determined_id)
 
+            # @added 20170115 - Feature #1854: Ionosphere learn - generations
+            # Added determination of the learn related variables
+            # learn_full_duration_days, learn_valid_ts_older_than,
+            # max_generations and max_percent_diff_from_origin value to the
+            # insert statement if the table is the metrics table.
+            if table == 'metrics' and key == 'metric':
+                # Set defaults
+                learn_full_duration_days = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS)
+                valid_learning_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS)
+                max_generations = int(settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS)
+                max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
+                try:
+                    use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(skyline_app, value)
+                    learn_full_duration_days = use_full_duration_days
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get_ionosphere_learn_details for %s' % value)
+
+                logger.info('metric learn details determined for %s' % value)
+                logger.info('learn_full_duration_days     :: %s days' % (str(learn_full_duration_days)))
+                logger.info('valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
+                logger.info('max_generations              :: %s' % (str(max_generations)))
+                logger.info('max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
+
             # INSERT because no known id
-            insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)
+            # @modified 20170115 - Feature #1854: Ionosphere learn - generations
+            # Added the learn_full_duration_days, learn_valid_ts_older_than,
+            # max_generations and max_percent_diff_from_origin value to the
+            # insert statement if the table is the metrics table.
+            # insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)
+            if table == 'metrics' and key == 'metric':
+                insert_query = 'insert into %s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
+                    table, key, value, str(learn_full_duration_days),
+                    str(valid_learning_duration), str(max_generations),
+                    str(max_percent_diff_from_origin))
+            else:
+                insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)
+
             logger.info('inserting %s into %s table' % (value, table))
             try:
                 results = self.mysql_insert(insert_query)
@@ -796,11 +1021,7 @@ class Panorama(Thread):
                 os.path.exists(settings.PANORAMA_CHECK_PATH)
             except:
                 logger.error('error :: check dir did not exist - %s' % settings.PANORAMA_CHECK_PATH)
-                if python_version == 2:
-                    mode_arg = int('0755')
-                if python_version == 3:
-                    mode_arg = mode=0o755
-                os.makedirs(settings.PANORAMA_CHECK_PATH, mode_arg)
+                mkdir_p(settings.PANORAMA_CHECK_PATH)
 
                 logger.info('check dir created - %s' % settings.PANORAMA_CHECK_PATH)
                 os.path.exists(settings.PANORAMA_CHECK_PATH)
@@ -878,7 +1099,7 @@ class Panorama(Thread):
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
                     p.terminate()
-                    p.join()
+                    # p.join()
 
                 check_file_name = os.path.basename(str(metric_check_file))
                 if settings.ENABLE_PANORAMA_DEBUG:
@@ -899,3 +1120,8 @@ class Panorama(Thread):
                 metric_failed_check_dir = '%s/%s/%s' % (failed_checks_dir, check_file_metricname_dir, check_file_timestamp)
 
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                    p.join()

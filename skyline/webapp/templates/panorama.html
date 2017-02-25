@@ -6,9 +6,13 @@
 
 <!-- @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
 momentjs to handle date ticker in the timezone in Dygraph
--->
+@modified 20170130 - Bug #1524: Panorama dygraph not aligning correctly
+Have Skyline serve the js, tried of allowing cloudflare scripts
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.5/moment-timezone-with-data.min.js"></script>
+-->
+  <script type="text/javascript" src="/static/moment-2.14.1/moment.min.js"></script>
+  <script type="text/javascript" src="/static/moment-timezone-0.5.5/moment-timezone-with-data.min.js"></script>
 
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
@@ -18,9 +22,15 @@ momentjs to handle date ticker in the timezone in Dygraph
     </div>
 	</ol>
 
+<!-- @modified 20161125 - Branch #922: ionosphere
+# Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
         <div class="container main_container"></p>
           <div class="container search_container"></p>
             <h4>Anomaly Search</h4>
+-->
+        <div class="container main_container">
+          <div class="container search_container">
+            <h4><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></span></h4>
             <form action="panorama">
               <label>metric:</label><input type="text" name="metric" value="all" /><br>
               <label>Anomaly count by metric:</label>
@@ -85,8 +95,17 @@ momentjs to handle date ticker in the timezone in Dygraph
           <p>
 {% if anomalies %}
           <div class="container search_results_container"></p>
+<!-- @modified 20161125 - Branch #922: ionosphere
+# Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
+            <h4>Anomaly Search</h4>
+-->
+            <h4><span class="logo"><span class="sky">Found</span> <span class="re">anomalies</span></span></span></h4>
+            <h6>{{ results }} :: {{ anomalies|length }} anomalies</h6>
             <table>
+<!-- @modified 20161125 - Branch #922: ionosphere
+# Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
                 <caption><b>{{ results }}</b></caption>
+-->
                 <tr>
   {% if count_request == 'true' %}
                     <th>anomaly count</th>
@@ -121,7 +140,11 @@ momentjs to handle date ticker in the timezone in Dygraph
           <p>
   {% if count_request != 'true' %}
           <div class="container panorama_graph_container">
+<!-- @added 20161125 - Branch #922: ionosphere
+# Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
+-->
             <div id="graph_title_container">
+                <h5><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly</span></span></span></h5>
                 <span id="graph_title">anomaly id: </span>
             </div>
             <div id="graph_subtitle_container">
@@ -139,6 +162,8 @@ momentjs to handle date ticker in the timezone in Dygraph
             </div>
 
 <!--            <div id="graph_container">-->
+            <br>
+            <h5><span class="logo"><span class="sky">Plot ::</span> <span class="re">anomaly</span></span></span></h5>
             <div id="p_graph_container">
                 <div id="big_label"></div>
                 <div id="graph"></div>
@@ -148,7 +173,11 @@ momentjs to handle date ticker in the timezone in Dygraph
                 <div class="duration">Timeseries at full duration (time shifted) for the anomalous datapoint</div>
             </div>
             <br>
+<!-- @modified 20161125 - Branch #922: ionosphere
+# Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
             <span class="logo"><span class="sky">Found</span> <span class="re">anomalies</span></span></span>
+-->
+            <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalies ::</span></span></span> {{ anomalies|length }} x Graphite timeseries data sets</h4>
             <div id="metrics_main">
 <!--
                 <div id="legend">

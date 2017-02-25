@@ -1,3 +1,4 @@
+from __future__ import division
 import pandas
 import numpy as np
 import scipy
@@ -107,6 +108,15 @@ def grubbs(timeseries, end_timestamp, full_duration):
     try:
         series = scipy.array([x[1] for x in timeseries])
         stdDev = scipy.std(series)
+
+        # Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27
+        # This change avoids spewing warnings on agent.py tests:
+        # RuntimeWarning: invalid value encountered in double_scalars
+        # If stdDev is 0 division returns nan which is not > grubbs_score so
+        # return False here
+        if stdDev == 0:
+            return False
+
         mean = np.mean(series)
         tail_average = tail_avg(timeseries, end_timestamp, full_duration)
         z_score = (tail_average - mean) / stdDev
@@ -428,11 +438,7 @@ def run_algorithms(
     results_dir = os.path.dirname(timeseries_file)
 
     if not os.path.exists(results_dir):
-        if python_version == 2:
-            mode_arg = int('0755')
-        if python_version == 3:
-            mode_arg = mode=0o755
-        os.makedirs(results_dir, mode_arg)
+        os.makedirs(results_dir, mode=0o755)
 
     start_analysis = int(time.time())
 
@@ -483,10 +489,9 @@ def run_algorithms(
             plt.savefig(results_filename, dpi=100)
     #            logger.info('%s :: %s' % (algorithm, results_filename))
             if python_version == 2:
-                mode_arg = int('0644')
+                os.chmod(results_filename, 0644)
             if python_version == 3:
-                mode_arg = '0o644'
-            os.chmod(results_filename, mode_arg)
+                os.chmod(results_filename, mode=0o644)
         except:
             logger.error('error :: %s' % (traceback.format_exc()))
             logger.info('info :: error thrown in algorithm running and plotting - %s' % (str(algorithm)))

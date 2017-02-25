@@ -1,17 +1,14 @@
+from __future__ import division
+import logging
+from time import time
+from os import getpid
+from timeit import default_timer as timer
+
 import pandas
 import numpy as np
 import scipy
 import statsmodels.api as sm
 import traceback
-import logging
-from time import time
-import os.path
-import sys
-from os import getpid
-
-from timeit import default_timer as timer
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-sys.path.insert(0, os.path.dirname(__file__))
 
 from settings import (
     ALGORITHMS,
@@ -30,7 +27,7 @@ from settings import (
     ENABLE_ALL_ALGORITHMS_RUN_METRICS,
 )
 
-from algorithm_exceptions import *
+from algorithm_exceptions import TooShort, Stale, Boring
 
 if ENABLE_SECOND_ORDER:
     from redis import StrictRedis
@@ -134,6 +131,15 @@ def grubbs(timeseries):
     try:
         series = scipy.array([x[1] for x in timeseries])
         stdDev = scipy.std(series)
+
+        # Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27
+        # This change avoids spewing warnings on agent.py tests:
+        # RuntimeWarning: invalid value encountered in double_scalars
+        # If stdDev is 0 division returns nan which is not > grubbs_score so
+        # return False here
+        if stdDev == 0:
+            return False
+
         mean = np.mean(series)
         tail_average = tail_avg(timeseries)
         z_score = (tail_average - mean) / stdDev
@@ -233,10 +239,12 @@ def mean_subtraction_cumulation(timeseries):
         series = pandas.Series([x[1] if x[1] else 0 for x in timeseries])
         series = series - series[0:len(series) - 1].mean()
         stdDev = series[0:len(series) - 1].std()
-        if PANDAS_VERSION < '0.18.0':
-            expAverage = pandas.stats.moments.ewma(series, com=15)
-        else:
-            expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
+        # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+        # This expAverage is unused
+        # if PANDAS_VERSION < '0.18.0':
+        #     expAverage = pandas.stats.moments.ewma(series, com=15)
+        # else:
+        #     expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
 
         if PANDAS_VERSION < '0.17.0':
             return abs(series.iget(-1)) > 3 * stdDev
@@ -259,8 +267,10 @@ def least_squares(timeseries):
         x = np.array([t[0] for t in timeseries])
         y = np.array([t[1] for t in timeseries])
         A = np.vstack([x, np.ones(len(x))]).T
-        results = np.linalg.lstsq(A, y)
-        residual = results[1]
+        # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+        # This results and residual are unused
+        # results = np.linalg.lstsq(A, y)
+        # residual = results[1]
         m, c = np.linalg.lstsq(A, y)[0]
         errors = []
         # Evaluate append once, not every time in the loop - this gains ~0.020 s on
@@ -356,6 +366,7 @@ def ks_test(timeseries):
         return None
 
     return False
+
 
 """
 THE END of NO MAN'S LAND

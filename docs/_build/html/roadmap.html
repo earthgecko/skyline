@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Roadmap &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>Roadmap &mdash; Skyline 1.1.0-dev documentation</title>
   
 
   
@@ -32,9 +32,12 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
         <link rel="next" title="skyline package" href="skyline.html"/>
-        <link rel="prev" title="Development - Debugging" href="development/debugging.html"/> 
+        <link rel="prev" title="Development - pytz" href="development/pytz.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -62,7 +65,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -89,7 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -100,6 +103,8 @@
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -108,13 +113,12 @@
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Roadmap</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#further-performance-improvements-and-python-3-5">Further performance improvements and Python-3.5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ionosphere">Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ionosphere-in-development">Ionosphere - in development</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#meteor">Meteor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#constellations">Constellations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skyline-and-nasa-fits-data">Skyline and NASA/FITS data</a></li>
@@ -191,12 +195,13 @@ were possible, so cython where applicable is the obvious choice.</p>
 <p>Continue updating the code base to ensure that everything can be run on
 &gt;= Python-3.5.x</p>
 </div>
-<div class="section" id="ionosphere">
-<h2>Ionosphere<a class="headerlink" href="#ionosphere" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ionosphere-in-development">
+<h2>Ionosphere - in development<a class="headerlink" href="#ionosphere-in-development" title="Permalink to this headline">¶</a></h2>
 <p>Functionality to allow the operator to flag false positives, with a view
 to using machine learning to train Skyline on anomalies.  Using the entire data
 set for training it, perhaps even using an entire namespace to increase the
 accuracy of the anomaly detection via multiple avenues of analysis.</p>
+<p>Some possible movement - see <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a></p>
 </div>
 <div class="section" id="meteor">
 <h2>Meteor<a class="headerlink" href="#meteor" title="Permalink to this headline">¶</a></h2>
@@ -215,6 +220,7 @@ implementation of Oculus functionality within Skyline would remove the
 requirement for the additional overheads of ruby and Elasticsearch.</p>
 <p>This would allow for the correlations to be determined for any metrics
 at any point within the <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> period.</p>
+<p>Help wanted.</p>
 </div>
 <div class="section" id="skyline-and-nasa-fits-data">
 <h2>Skyline and NASA/FITS data<a class="headerlink" href="#skyline-and-nasa-fits-data" title="Permalink to this headline">¶</a></h2>
@@ -333,7 +339,7 @@ many avenues to mention...</p>
         <a href="skyline.html" class="btn btn-neutral float-right" title="skyline package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="development/debugging.html" class="btn btn-neutral" title="Development - Debugging" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="development/pytz.html" class="btn btn-neutral" title="Development - pytz" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -364,7 +370,7 @@ many avenues to mention...</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.1.0-dev',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
