@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Building documentation &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>Building documentation &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development - Webapp" href="webapp.html"/>
         <link rel="prev" title="Development" href="index.html"/> 
@@ -118,6 +118,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Building documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#part-of-the-build">Part of the build</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-docs-requirements-txt">Install docs-requirements.txt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#your-python-interpretor">Your Python interpretor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rst-and-md-wtf">.rst and .md wtf?</a></li>
@@ -129,6 +130,7 @@
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
 <li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tsfresh.html">Development - tsfresh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
@@ -196,7 +198,13 @@ not be required.  However, it is working and in the future this should be
 figured and fixed.  Perhaps the below edit of the auto generated .rst files
 could be achieved with a sphinx <cite>conf.py</cite> setting, if anyone knows please do
 let us know :)</p>
+<div class="section" id="part-of-the-build">
+<h2>Part of the build<a class="headerlink" href="#part-of-the-build" title="Permalink to this headline">¶</a></h2>
+<p>The below documentation script not only builds the documentation, it also auto
+generates some documentation and it can also auto generates some Python code too
+when updates are required, such as the compilation of the tsfresh_features.py</p>
 <p>For now...</p>
+</div>
 <div class="section" id="install-docs-requirements-txt">
 <h2>Install docs-requirements.txt<a class="headerlink" href="#install-docs-requirements-txt" title="Permalink to this headline">¶</a></h2>
 <p>In your Python virtualenv first pip install the required modules in
@@ -261,12 +269,21 @@ the full functionality of Sphinx documentation.</p>
     <span class="k">return</span> 1
   <span class="k">fi</span>
 
-<span class="c1"># @added 20161119 - Branch #922: ionosphere</span>
-<span class="c1">#                   Task #1718: review.tsfresh</span>
-<span class="c1"># Build the pytz.rst page to generate the pytz timezone list for Skyline</span>
-<span class="c1"># Ionosphere and tsfresh</span>
-  python <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py&quot;</span>
-<span class="c1"># That creates &quot;$APPDIR/docs/development/pytz.rst&quot;</span>
+  <span class="c1"># @added 20161119 - Branch #922: ionosphere</span>
+  <span class="c1">#                   Task #1718: review.tsfresh</span>
+  <span class="c1"># Build the pytz.rst page to generate the pytz timezone list for Skyline</span>
+  <span class="c1"># Ionosphere and tsfresh, creates &quot;$APPDIR/docs/development/pytz.rst&quot;</span>
+
+  python<span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/skyline/tsfresh_features/scripts/make-pytz.all_timezones-rst.py&quot;</span>
+
+  <span class="c1"># Run tests</span>
+  <span class="nv">ORIGINAL_DIR</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>
+  <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span>
+  python<span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span> -m pytest tests/
+  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">&quot;Tests failed not building documentation&quot;</span>
+    <span class="k">return</span> 1
+  <span class="k">fi</span>
 
   <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
   <span class="nb">echo</span> <span class="s2">&quot;Building Skyline documentation - in </span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
@@ -292,7 +309,7 @@ the full functionality of Sphinx documentation.</p>
   <span class="k">do</span>
     rm -rf <span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
   <span class="k">done</span>
-  <span class="nb">cd</span>
+  <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$ORIGINAL_DIR</span><span class="s2">&quot;</span>
 <span class="o">}</span>
 
 <span class="c1"># Usage: build_docs &lt;app_dir&gt;</span>
@@ -307,7 +324,7 @@ the full functionality of Sphinx documentation.</p>
 <p>This may be a little unconventional but it probably beats trying to do it via
 Sphinx support custom extensions, without using generates or includes or Jinga
 templating, which may or may not work with readthedocs.</p>
-<p>The script skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py introduces a
+<p>The script skyline/tsfresh_features/scripts/make-pytz.all_timezones-rst.py introduces a
 novel way to automatically generate the docs/development/pytz.rst during the
 local build process to provide a list of all pytz timezones at the current
 version.</p>
@@ -371,7 +388,7 @@ right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ion
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -393,7 +410,7 @@ right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ion
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -239,7 +239,7 @@
         <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
             <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
             <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">)</span>
-            <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+            <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
             <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s1">&#39;error :: cannot connect to Graphite at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
@@ -253,7 +253,7 @@
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">)</span>
-            <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+            <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
             <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s1">&#39;error :: could not send data to Graphite at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
@@ -308,8 +308,10 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">imp</span>
 
+    <span class="n">metric_vars</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">metric_vars_got</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">):</span>
-        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
         <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s1">&#39;loading metric variables from import - metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -320,15 +322,19 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
-                    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                        <span class="s1">&#39;metric_vars determined - metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">))</span>
+                <span class="n">metric_vars_got</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;failed to import metric variables - metric_check_file&#39;</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
                 <span class="n">metric_vars</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">and</span> <span class="n">metric_vars_got</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;metric_vars determined - metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: metric_vars_file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">metric_vars</span></div>
 
@@ -363,11 +369,7 @@
     <span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">write_to_file</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_dir</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span><span class="p">)</span>
         <span class="c1"># Python &gt;2.5</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -376,7 +378,7 @@
                 <span class="k">raise</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_dir</span><span class="p">):</span>
-        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
         <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
             <span class="s1">&#39;error :: could not create directory - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_dir</span><span class="p">)))</span>
@@ -385,10 +387,9 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">write_to_file</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">write_to_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">write_to_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">write_to_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
@@ -427,20 +428,19 @@
         <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
         <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">failed_check_dir</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">mkdir_p</span><span class="p">(</span><span class="n">failed_check_dir</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s1">&#39;created failed_check_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">failed_check_dir</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;created failed_check_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">failed_check_dir</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s1">&#39;error :: failed to create failed_check_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">failed_check_dir</span><span class="p">))</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="n">check_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">check_file_to_fail</span><span class="p">))</span>
@@ -449,17 +449,16 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">check_file_to_fail</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
 
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;failed to move check file to -</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="k">pass</span>
 
     <span class="k">return</span> <span class="kc">False</span></div>
@@ -493,10 +492,10 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">re</span>
 
-    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
-    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;last_alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">added_by</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;last_alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">added_by</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
@@ -551,11 +550,11 @@
                             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;the check is older than EXPIRATION_TIME for the metric - not checking - check_expired&#39;</span>
                             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
 
-    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">added_by</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">added_by</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s1">&#39;debug :: cache_key - </span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">added_by</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">added_by</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
 
     <span class="c1"># Only use the cache_key EXPIRATION_TIME if this is not a request to</span>
     <span class="c1"># run_crucible_tests on a timeseries</span>
@@ -620,7 +619,23 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">os</span>
 
-    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">python_version</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+        <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">quote</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">requests.utils</span> <span class="k">import</span> <span class="n">quote</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">time</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
 <span class="c1">#    if settings.ENABLE_DEBUG:</span>
@@ -645,10 +660,12 @@
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;read_timeout - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
 
+    <span class="n">graphite_from</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">))</span>
+
     <span class="n">graphite_until</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_until - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">))</span>
 
-    <span class="n">graphite_from</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">output_format</span> <span class="o">=</span> <span class="n">data_type</span>
 
     <span class="c1"># graphite URL</span>
@@ -670,6 +687,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graph file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_object</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">get_image</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -681,6 +699,39 @@
             <span class="n">image_url</span> <span class="o">+=</span> <span class="s1">&#39;&amp;width=586&#39;</span>
         <span class="k">if</span> <span class="s1">&#39;height&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">image_url</span><span class="p">:</span>
             <span class="n">image_url</span> <span class="o">+=</span> <span class="s1">&#39;&amp;height=308&#39;</span>
+        <span class="c1"># @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs</span>
+        <span class="c1"># settings, color and title</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+            <span class="n">get_ionosphere_graphs</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="s1">&#39;graphite_now&#39;</span> <span class="ow">in</span> <span class="n">output_object</span><span class="p">:</span>
+                <span class="n">get_ionosphere_graphs</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs</span>
+            <span class="c1"># Added graphite_matched_images matched.fp_id</span>
+            <span class="k">if</span> <span class="s1">&#39;matched.fp_id&#39;</span> <span class="ow">in</span> <span class="n">output_object</span><span class="p">:</span>
+                <span class="n">get_ionosphere_graphs</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">get_ionosphere_graphs</span><span class="p">:</span>
+                <span class="n">int_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;graphite_now&#39;</span> <span class="ow">in</span> <span class="n">output_object</span><span class="p">:</span>
+                    <span class="n">no_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">output_object</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">_hours</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">no_extension</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">hours</span> <span class="o">=</span> <span class="n">_hours</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="n">int_hours</span> <span class="o">=</span> <span class="n">hours</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">str_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_hours</span><span class="p">)</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="s1">&#39;hours&#39;</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">int_hours</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
+                    <span class="n">str_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">int_hours</span><span class="p">)</span> <span class="o">/</span> <span class="mi">24</span><span class="p">)</span>
+                    <span class="n">period</span> <span class="o">=</span> <span class="s1">&#39;days&#39;</span>
+                <span class="k">if</span> <span class="s1">&#39;graphite_now&#39;</span> <span class="ow">in</span> <span class="n">output_object</span><span class="p">:</span>
+                    <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Graphite NOW at </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">str_value</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;matched.fp_id&#39;</span> <span class="ow">in</span> <span class="n">output_object</span><span class="p">:</span>
+                    <span class="n">human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)))</span>
+                    <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">human_date</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_hours</span><span class="p">))</span>
+                <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
+                <span class="n">add_parameters</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;colorList=blue</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+                <span class="n">image_url</span> <span class="o">+=</span> <span class="n">add_parameters</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Ionosphere graphite NOW url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite image url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">image_url</span><span class="p">)))</span>
         <span class="n">image_url_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">)</span>
@@ -699,10 +750,9 @@
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s1">&#39;error :: failed to retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
@@ -710,6 +760,14 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">):</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;retrieve failed to surface </span><span class="si">%s</span><span class="s1"> graph from Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="c1"># @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs</span>
+        <span class="c1"># In order to determine whether a Graphite image was retrieved or not</span>
+        <span class="c1"># this needs to return here.  This should not be backwards incompatible</span>
+        <span class="c1"># as it has never been used to determine the outcome before it appears,</span>
+        <span class="c1"># which as they say is my bad.</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;json&#39;</span><span class="p">:</span>
 
@@ -757,10 +815,9 @@
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_object</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">converted</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">output_object</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">output_object</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">output_object</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">output_object</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -772,15 +829,39 @@
                 <span class="s1">&#39;error :: failed to surface </span><span class="si">%s</span><span class="s1"> json from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span></div>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
+<div class="viewcode-block" id="filesafe_metricname"><a class="viewcode-back" href="../skyline.html#skyline_functions.filesafe_metricname">[docs]</a><span class="k">def</span> <span class="nf">filesafe_metricname</span><span class="p">(</span><span class="n">metricname</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns a file system safe name for a metric name in terms of creating</span>
+<span class="sd">    check files, etc</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">keepchars</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sane_metricname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">metricname</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">keepchars</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">sane_metricname</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
 
 <span class="c1"># @added 20160922 - Branch #922: Ionosphere</span>
 <span class="c1"># Added the send_anomalous_metric_to function for Analyzer and Mirage</span>
+<span class="c1"># @modified 20161228 Feature #1828: ionosphere - mirage Redis data features</span>
+<span class="c1"># Added full_duration which needs to be recorded to allow Mirage metrics</span>
+<span class="c1"># to be profiled on Redis timeseries data at FULL_DURATION</span>
+<span class="c1"># e.g. mirage.redis.24h.json</span>
+<span class="c1"># @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity</span>
+<span class="c1"># Added parent_id, always zero from Analyzer and Mirage</span>
 
 
 <div class="viewcode-block" id="send_anomalous_metric_to"><a class="viewcode-back" href="../skyline.html#skyline_functions.send_anomalous_metric_to">[docs]</a><span class="k">def</span> <span class="nf">send_anomalous_metric_to</span><span class="p">(</span>
     <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">send_to_app</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span>
-        <span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">):</span>
+        <span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span>
+        <span class="n">full_duration</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Assign a metric and timeseries to Crucible or Ionosphere.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -795,22 +876,61 @@
         <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
         <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">send_to_app</span> <span class="o">==</span> <span class="s1">&#39;crucible&#39;</span><span class="p">:</span>
-        <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">timeseries_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric_timestamp</span>
-        <span class="n">check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">send_to_app</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
-        <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">timeseries_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric_timestamp</span>
-        <span class="n">check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn</span>
+    <span class="n">added_by_context</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+
+    <span class="c1"># @added 20170117 - Feature #1854: Ionosphere learn</span>
+    <span class="c1"># Added the ionosphere_learn_to_ionosphere to fix ionosphere_learn not being</span>
+    <span class="c1"># logged.</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn_to_ionosphere&#39;</span><span class="p">:</span>
+        <span class="n">added_by_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_learn&#39;</span>
+        <span class="n">new_send_to_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+        <span class="n">send_to_app</span> <span class="o">=</span> <span class="n">new_send_to_app</span>
+
+    <span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
+    <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;crucible&#39;</span><span class="p">:</span>
+        <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">))</span>
+        <span class="n">check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sane_metricname</span><span class="p">))</span>
+        <span class="n">check_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+        <span class="c1"># @modified 20161121 - Branch #922: ionosphere</span>
+        <span class="c1"># Use the timestamp as the parent dir for training_data, it is easier</span>
+        <span class="c1"># to manage and clean on timestamps.  Walking through 1000s of Graphite</span>
+        <span class="c1"># style dirs with dotted metric namespaces for timestamps.</span>
+        <span class="c1"># anomaly_dir = settings.IONOSPHERE_DATA_FOLDER + &#39;/&#39; + timeseries_dir + &#39;/&#39; + metric_timestamp</span>
+        <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">))</span>
+        <span class="n">check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">sane_metricname</span><span class="p">))</span>
+        <span class="n">check_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">)</span>
+
+        <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn</span>
+        <span class="c1"># So as to not have to backport a context to all the instances of</span>
+        <span class="c1"># send_anomalous_metric_to identify what this was added_by, here the</span>
+        <span class="c1"># learn directory path string overrides the dirs if it is a learn</span>
+        <span class="c1"># related check</span>
+        <span class="c1"># @modified 20170117 - Feature #1854: Ionosphere learn</span>
+        <span class="c1"># The ionosphere_learn_to_ionosphere to fix ionosphere_learn not being</span>
+        <span class="c1"># logged.</span>
+        <span class="c1"># if str(settings.IONOSPHERE_LEARN_FOLDER) in anomaly_dir:</span>
+        <span class="c1">#     added_by_context = &#39;ionosphere_learn&#39;</span>
+        <span class="k">if</span> <span class="n">added_by_context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;send_anomalous_metric_to :: this is an ionosphere_learn check&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">check_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">check_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span><span class="p">)</span>
 
     <span class="c1"># Note:</span>
     <span class="c1"># The values are enclosed is single quoted intentionally</span>
@@ -821,6 +941,12 @@
     <span class="c1"># single quoting results in the desired,</span>
     <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
     <span class="n">now_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+    <span class="c1"># @modified 20161228 Feature #1828: ionosphere - mirage Redis data features</span>
+    <span class="c1"># Added full_duration</span>
+    <span class="c1"># @modified 20170116 - Feature #1854: Ionosphere learn</span>
+    <span class="c1"># Changed added_by parameter from current_skyline_app to added_by_context</span>
+    <span class="c1"># @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity</span>
+    <span class="c1"># Added ionosphere_parent_id, always zero from Analyzer and Mirage</span>
     <span class="n">anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                    <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                    <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
@@ -832,40 +958,62 @@
                    <span class="s1">&#39;run_crucible_tests = False</span><span class="se">\n</span><span class="s1">&#39;</span> \
                    <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                    <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-        <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">anomaly_dir</span><span class="p">,</span>
-            <span class="n">current_skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">now_timestamp</span><span class="p">))</span>
+                   <span class="s1">&#39;full_duration = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                   <span class="s1">&#39;ionosphere_parent_id = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+        <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">triggered_algorithms</span><span class="p">),</span> <span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">added_by_context</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">now_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">parent_id</span><span class="p">))</span>
 
-    <span class="c1"># Create an anomaly file with details about the anomaly</span>
-    <span class="n">anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">anomaly_data</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">anomaly_file</span><span class="p">))</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
-            <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">anomaly_file</span><span class="p">))</span>
+    <span class="c1"># @modified 20170116 - Feature #1854: Ionosphere learn</span>
+    <span class="c1"># In the Ionosphere context there is no requirement to create a timeseries</span>
+    <span class="c1"># json file or anomaly_file, just the check</span>
+    <span class="k">if</span> <span class="n">added_by_context</span> <span class="o">!=</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
 
-    <span class="c1"># Create timeseries json file with the timeseries</span>
-    <span class="n">json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-    <span class="n">timeseries_json</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;(&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">timeseries_json</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">))</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
-            <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">))</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="c1"># Create an anomaly file with details about the anomaly</span>
+        <span class="n">anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">write_data_to_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">anomaly_data</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">),</span> <span class="n">anomaly_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">),</span> <span class="n">anomaly_file</span><span class="p">))</span>
+
+        <span class="c1"># Create timeseries json file with the timeseries</span>
+        <span class="n">json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+        <span class="n">timeseries_json</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;(&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">write_data_to_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">json_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">timeseries_json</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">),</span> <span class="n">json_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">),</span> <span class="n">json_file</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
     <span class="c1"># Create a check file</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">anomaly_data</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
+        <span class="n">write_data_to_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="n">check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">anomaly_data</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> check file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">check_file</span><span class="p">))</span></div>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> check file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">send_to_app</span><span class="p">),</span> <span class="n">check_file</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="RepresentsInt"><a class="viewcode-back" href="../skyline.html#skyline_functions.RepresentsInt">[docs]</a><span class="k">def</span> <span class="nf">RepresentsInt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    As per http://stackoverflow.com/a/1267145 and @Aivar I must agree with</span>
+<span class="sd">    @Triptycha &gt; &quot;This 5 line function is not a complex mechanism.&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
 
 <span class="c1">################################################################################</span>
@@ -918,7 +1066,7 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ENABLE_DEBUG</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: entering mysql_select&#39;</span><span class="p">)</span>
@@ -1022,7 +1170,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -1044,7 +1192,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

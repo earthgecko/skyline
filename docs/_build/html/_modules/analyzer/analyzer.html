@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.analyzer &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>analyzer.analyzer &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -162,7 +162,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for analyzer.analyzer</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="k">except</span><span class="p">:</span>
@@ -182,13 +183,16 @@
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">resource</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span> <span class="n">mkdir_p</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
+    <span class="n">filesafe_metricname</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
 <span class="kn">from</span> <span class="nn">algorithms</span> <span class="k">import</span> <span class="n">run_selected_algorithm</span>
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALGORITHM_RUN_METRICS</span>
@@ -260,7 +264,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_ionosphere</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_data_sets</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
+        <span class="c1"># Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Analyzer.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -272,7 +281,7 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Analyzer.spawn_alerter_process"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.spawn_alerter_process">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_alerter_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+<div class="viewcode-block" id="Analyzer.spawn_alerter_process"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.spawn_alerter_process">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_alerter_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Spawn a process to trigger an alert.</span>
 
@@ -293,82 +302,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Analyzer.send_anomalous_metric_to"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.send_anomalous_metric_to">[docs]</a>    <span class="k">def</span> <span class="nf">send_anomalous_metric_to</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">send_to_app</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span>
-            <span class="n">datapoint</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Assign a metric and timeseries to Crucible or Ionosphere.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">send_to_app</span> <span class="o">==</span> <span class="s1">&#39;crucible&#39;</span><span class="p">:</span>
-            <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
-            <span class="n">check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">send_to_app</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
-            <span class="c1"># @modified 20161119 - Branch #922: ionosphere</span>
-            <span class="c1"># Use the timestamp as the parent dir for training_data</span>
-            <span class="c1"># anomaly_dir = &#39;%s/%s/%s&#39; % (settings.IONOSPHERE_DATA_FOLDER, timeseries_dir, metric_timestamp)</span>
-            <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">)</span>
-            <span class="n">check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">):</span>
-            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">)</span>
-
-        <span class="c1"># Note:</span>
-        <span class="c1"># The values are enclosed is single quoted intentionally</span>
-        <span class="c1"># as the imp.load_source used in crucible results in a</span>
-        <span class="c1"># shift in the decimal position when double quoted, e.g.</span>
-        <span class="c1"># value = &quot;5622.0&quot; gets imported as</span>
-        <span class="c1"># 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2</span>
-        <span class="c1"># single quoting results in the desired,</span>
-        <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
-        <span class="n">now_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
-        <span class="n">anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;anomaly_dir = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;graphite_metric = True</span><span class="se">\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;run_crucible_tests = False</span><span class="se">\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-                       <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
-            <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">anomaly_dir</span><span class="p">,</span>
-                <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">now_timestamp</span><span class="p">))</span>
-
-        <span class="c1"># Create an anomaly file with details about the anomaly</span>
-        <span class="n">anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">anomaly_data</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">anomaly_file</span><span class="p">))</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
-                <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">anomaly_file</span><span class="p">))</span>
-
-        <span class="c1"># Create timeseries json file with the timeseries</span>
-        <span class="n">json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-        <span class="n">timeseries_json</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;(&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">timeseries_json</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">))</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> timeseries file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
-                <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-
-        <span class="c1"># Create a check file</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">anomaly_data</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> check file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_to_app</span><span class="p">,</span> <span class="n">check_file</span><span class="p">))</span></div>
+        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Analyzer.spin_process"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">unique_metrics</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -399,6 +333,9 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process started&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage spin_process start: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
+        <span class="c1"># TESTING removal of p.join() from p.terminate()</span>
+        <span class="c1"># sleep(4)</span>
 
         <span class="c1"># @modified 20160801 - Adding additional exception handling to Analyzer</span>
         <span class="c1"># Check the unique_metrics list is valid</span>
@@ -482,7 +419,8 @@
                 <span class="c1"># If it&#39;s anomalous, add it to list</span>
                 <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
                     <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">]</span>
+                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
 
                     <span class="c1"># Get the anomaly breakdown - who returned True?</span>
@@ -492,6 +430,9 @@
                             <span class="n">algorithm</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
                             <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                             <span class="n">triggered_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
+                    <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
 
                     <span class="c1"># If Crucible or Panorama are enabled determine details</span>
                     <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="kc">False</span>
@@ -519,13 +460,34 @@
                     <span class="c1"># Analyzer should handle/route anomalies</span>
                     <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">mirage_metric</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">crucible_metric</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">panorama_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="c1"># crucible_metric = False</span>
+                    <span class="c1"># panorama_metric = False</span>
                     <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="c1"># send_to_panaroma = False</span>
+                    <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
 
-                    <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">mirage_unique_metrics</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                        <span class="c1"># @modified 20170101 - Feature #1830: Ionosphere alerts</span>
+                        <span class="c1"># Correct rate limitining Ionosphere on last_alert cache key</span>
+                        <span class="c1"># Do not set analyzer_metric to False until after last_alert</span>
+                        <span class="c1"># key has been checked otherwise Ionosphere will get every</span>
+                        <span class="c1"># anomaly and as it will not be rate limited by the alert</span>
+                        <span class="c1"># cache key</span>
+                        <span class="c1"># analyzer_metric = False</span>
+                        <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">mirage_unique_metrics</span><span class="p">:</span>
                         <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">mirage_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
+                    <span class="c1"># Only send smtp_alerter_metrics to Ionosphere</span>
+                    <span class="n">smtp_alert_enabled_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span><span class="p">:</span>
+                        <span class="n">smtp_alert_enabled_metric</span> <span class="o">=</span> <span class="kc">False</span>
 
                     <span class="k">if</span> <span class="n">ionosphere_enabled</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">analyzer_metric</span><span class="p">:</span>
@@ -533,7 +495,8 @@
                             <span class="c1"># Ionosphere if they are not being alerted on as</span>
                             <span class="c1"># they will be pointless they will have no alert if</span>
                             <span class="c1"># it is within the EXPIRATION_TIME and there will be</span>
-                            <span class="c1"># no reference in an alert for the user to action.</span>
+                            <span class="c1"># no reference graphs from an alert for the user to</span>
+                            <span class="c1"># action.</span>
                             <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;last_alert.smtp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
                             <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="k">try</span><span class="p">:</span>
@@ -542,39 +505,46 @@
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
 
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">last_alert</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">send_anomalous_metric_to</span><span class="p">(</span>
-                                    <span class="s1">&#39;ionosphere&#39;</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span>
-                                    <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
-                                    <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
-
-                            <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">]</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
-
+                                <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">if</span> <span class="n">ionosphere_metric</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not sending to Ionosphere - alert key exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not sending to Ionosphere - Mirage metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                            <span class="k">if</span> <span class="n">mirage_metric</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not sending to Ionosphere - Mirage metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                                <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
 
-                    <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                    <span class="c1"># @modified 20170108 - Feature #1830: Ionosphere alerts</span>
+                    <span class="c1"># Only send smtp_alerter_metrics to Ionosphere</span>
+                    <span class="c1"># if send_to_ionosphere:</span>
+                    <span class="k">if</span> <span class="n">send_to_ionosphere</span> <span class="ow">and</span> <span class="n">smtp_alert_enabled_metric</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sending an ionosphere metric to Ionosphere - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sending an analyzer metric to Ionosphere for training - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># @modified 20161228 Feature #1828: ionosphere - mirage Redis data features</span>
+                            <span class="c1"># Added full_duration</span>
+                            <span class="c1"># @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity</span>
+                            <span class="c1"># Added ionosphere_parent_id, always zero from Analyzer and Mirage</span>
+                            <span class="n">ionosphere_parent_id</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">send_anomalous_metric_to</span><span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span>
+                                <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span>
+                                <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span>
+                                <span class="n">timeseries</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_parent_id</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_ionosphere</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to send_anomalous_metric_to to ionosphere&#39;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">ionosphere_metric</span><span class="p">:</span>
                         <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">False</span>
-                        <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="kc">True</span>
-
-                    <span class="c1"># If Panorama is enabled - create a Panorama check</span>
-                    <span class="c1"># @modified 20160922 - Branch #922: Ionosphere</span>
-                    <span class="c1"># Only create a Panorama check if it is an Analyzer metric</span>
-                    <span class="c1"># not leaving Mirage to Panorama checks for its own metrics</span>
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
-                        <span class="c1"># Only send Analyzer metrics and not Mirage metrics</span>
-                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_MIRAGE</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">mirage_unique_metrics_fetched</span><span class="p">:</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics&#39;</span><span class="p">))</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-
-                            <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">mirage_unique_metrics</span><span class="p">:</span>
-                                <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">False</span>
 
                     <span class="c1"># Only send Analyzer metrics</span>
-                    <span class="k">if</span> <span class="n">analyzer_metric</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">analyzer_metric</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">):</span>
                             <span class="n">mkdir_p</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
 
@@ -606,17 +576,26 @@
                         <span class="c1"># Create an anomaly file with details about the anomaly</span>
                         <span class="n">panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span>
-                            <span class="n">base_name</span><span class="p">)</span>
+                            <span class="n">sane_metricname</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">write_data_to_file</span><span class="p">(</span>
                                 <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
                                 <span class="n">panaroma_anomaly_data</span><span class="p">)</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not adding panorama anomaly file for Mirage metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                        <span class="c1"># @modified 20160207 - Branch #922: Ionosphere</span>
+                        <span class="c1"># Handle if all other apps are not enabled</span>
+                        <span class="n">other_app</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+                        <span class="k">if</span> <span class="n">mirage_metric</span><span class="p">:</span>
+                            <span class="n">other_app</span> <span class="o">=</span> <span class="s1">&#39;Mirage&#39;</span>
+                        <span class="k">if</span> <span class="n">ionosphere_metric</span><span class="p">:</span>
+                            <span class="n">other_app</span> <span class="o">=</span> <span class="s1">&#39;Ionosphere&#39;</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not adding panorama anomaly file for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">other_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
 
                     <span class="c1"># If Crucible is enabled - save timeseries and create a</span>
                     <span class="c1"># Crucible check</span>
@@ -650,8 +629,11 @@
                                <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">crucible_anomaly_dir</span><span class="p">,</span>
                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
 
+                        <span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
+                        <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
                         <span class="c1"># Create an anomaly file with details about the anomaly</span>
-                        <span class="n">crucible_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">crucible_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">sane_metricname</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">write_data_to_file</span><span class="p">(</span>
                                 <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
@@ -672,12 +654,13 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
                         <span class="c1"># Create a crucible check file</span>
-                        <span class="n">crucible_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">crucible_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">sane_metricname</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">write_data_to_file</span><span class="p">(</span>
                                 <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
                                 <span class="n">crucible_anomaly_data</span><span class="p">)</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_crucible</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add crucible check file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_check_file</span><span class="p">))</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -771,13 +754,13 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
-        <span class="k">def</span> <span class="nf">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
             <span class="c1"># Spawn processes</span>
             <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spawn_alerter_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spawn_alerter_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
                 <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                 <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -798,6 +781,11 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing the spawn_trigger_alert process&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="c1"># p.join()</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: stopping spawn_trigger_alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
         <span class="c1"># Initiate the algorithm timings if Analyzer is configured to send the</span>
@@ -856,31 +844,61 @@
             <span class="c1"># @added 20160922 - Branch #922: Ionosphere</span>
             <span class="c1"># Add a Redis set of mirage.unique_metrics</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_MIRAGE</span><span class="p">:</span>
+                <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
+                <span class="c1"># Self manage the Mirage metrics set</span>
+                <span class="n">manage_mirage_unique_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">manage_mirage_unique_metrics_key</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">manage_mirage_unique_metrics_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;analyzer.manage_mirage_unique_metrics&#39;</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">manage_mirage_unique_metrics_key</span><span class="p">:</span>
+                    <span class="n">manage_mirage_unique_metrics_key</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">manage_mirage_unique_metrics_key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">manage_mirage_unique_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics&#39;</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: fetched the mirage.unique_metrics Redis set&#39;</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to fetch the mirage.unique_metrics Redis set&#39;</span><span class="p">)</span>
+                    <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="n">mirage_unique_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics Redis set count - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_unique_metrics_count</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="n">manage_mirage_unique_metrics</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleting Redis mirage.unique_metrics set to refresh&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics&#39;</span><span class="p">)</span>
+                        <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
                 <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
                         <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">metric</span>
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">base_name</span>
                         <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;not matched&#39;</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
                             <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
-                            <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;regex&#39;</span>
-                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                                <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;regex&#39;</span>
+                                <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
 
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_match</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
                                 <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
                                 <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;substring&#39;</span>
 
@@ -903,6 +921,11 @@
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to mirage.unique_metrics set&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">key_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;analyzer.manage_mirage_unique_metrics&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">key_timestamp</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set key :: analyzer.manage_mirage_unique_metrics&#39;</span><span class="p">)</span>
 
                         <span class="c1"># Do we use list or dict, which is better performance?</span>
                         <span class="c1"># With dict - Use EAFP (easier to ask forgiveness than</span>
@@ -913,10 +936,63 @@
                         <span class="k">except</span><span class="p">:</span>
                             <span class="c1"># key doesn&#39;t exist in dict</span>
                             <span class="n">blah</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># If they were refresh set them again</span>
+                <span class="k">if</span> <span class="n">mirage_unique_metrics</span> <span class="o">==</span> <span class="p">[]:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics&#39;</span><span class="p">))</span>
+                        <span class="n">mirage_unique_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics Redis set count - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_unique_metrics_count</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: fetched the mirage.unique_metrics Redis set&#39;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to fetch the mirage.unique_metrics Redis set&#39;</span><span class="p">)</span>
+                        <span class="n">mirage_unique_metrics</span> <span class="o">==</span> <span class="p">[]</span>
+                        <span class="n">mirage_unique_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">)</span>
+            <span class="c1"># @modified 20160207 - Branch #922: Ionosphere</span>
+            <span class="c1"># Handle if Mirage is not enabled</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># END Redis mirage.unique_metrics_set</span>
 
             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage in run after unique_metrics: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage in run after unique_metrics: </span><span class="si">%s</span><span class="s1"> (kb), using blah </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">blah</span><span class="p">))</span>
+
+            <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
+            <span class="c1"># Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics</span>
+            <span class="c1"># Timed this takes 0.013319 seconds on 689 unique_metrics</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
+                    <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
+                        <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">base_name</span>
+                        <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># Match by regex</span>
+                            <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
+                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                                <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_match</span><span class="p">:</span>
+                            <span class="c1"># Match by substring</span>
+                            <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;smtp_alerter_metrics     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;non_smtp_alerter_metrics :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span><span class="p">)))</span>
 
             <span class="c1"># Using count files rather that multiprocessing.Value to enable metrics for</span>
             <span class="c1"># metrics for algorithm run times, etc</span>
@@ -986,6 +1062,8 @@
             <span class="c1"># Self monitor processes and terminate if any spin_process has run</span>
             <span class="c1"># for longer than 180 seconds - 20160512 @earthgecko</span>
             <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="c1"># TESTING p.join removal</span>
+            <span class="c1"># while time() - p_starts &lt;= 1:</span>
             <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MAX_ANALYZER_PROCESS_RUNTIME</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
                     <span class="c1"># Just to avoid hogging the CPU</span>
@@ -999,7 +1077,14 @@
                 <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all spin_process processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: killing spin_process process&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="c1"># p.join()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: killed spin_process process&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: stopping spin_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
             <span class="c1"># Log the last reported error by any algorithms that errored in the</span>
@@ -1054,13 +1139,79 @@
             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage in run before alerts: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
+            <span class="c1"># @added 20161228 - Feature #1830: Ionosphere alerts</span>
+            <span class="c1">#                   Branch #922: Ionosphere</span>
+            <span class="c1"># Bringing Ionosphere online - do not alert on Ionosphere metrics</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.unique_metrics from Redis&#39;</span><span class="p">)</span>
+                <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">ionosphere_unique_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_unique_metrics</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics Redis set count - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_unique_metrics_count</span><span class="p">))</span>
+
+            <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
+            <span class="c1"># Determine if Ionosphere added any alerts to be sent</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add to self.all_anomalous_metrics&#39;</span><span class="p">)</span>
+            <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;Analyzer&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;ionosphere.analyzer.alert.*&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to scan ionosphere.analyzer.alert.* from Redis&#39;</span><span class="p">)</span>
+                <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts</span><span class="p">:</span>
+                <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">ionosphere_metric_alerts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_alerts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Ionosphere alert/s requested :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_alerts</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="n">ionosphere_alerts</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">alert_on</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                        <span class="n">send_alert_for</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">alert_on</span><span class="p">)</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">send_alert_for</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">send_alert_for</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">send_alert_for</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                        <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="n">send_alert_for</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">triggered_algorithms</span><span class="p">:</span>
+                            <span class="n">key</span> <span class="o">=</span> <span class="n">algorithm</span>
+                            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                                <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alerting for Ionosphere on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">ionosphere_metric_alerts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add an Ionosphere anomalous_metric for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+
             <span class="c1"># Send alerts</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALERTS</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">:</span>
+                    <span class="c1"># @modified 20161229 - Feature #1830: Ionosphere alerts</span>
+                    <span class="c1"># Handle alerting for Ionosphere</span>
+                    <span class="c1"># for metric in self.anomalous_metrics:</span>
+                    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span><span class="p">:</span>
                         <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="c1"># Absolute match</span>
-                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                             <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
 
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_match</span><span class="p">:</span>
@@ -1135,35 +1286,60 @@
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add mirage.metrics Redis key&#39;</span><span class="p">)</span>
 
-                            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
-                            <span class="n">anomaly_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-                                <span class="c1"># metric_name, anomalous datapoint, hours to resolve, timestamp</span>
-                                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;metric = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">value = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">hours_to_resolve = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">metric_timestamp = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">metric_timestamp</span><span class="p">))</span>
-                            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                                    <span class="s1">&#39;debug :: Memory usage in run after writing mirage check file: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span>
-                                    <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                                <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                                    <span class="s1">&#39;debug :: Memory usage in run after chmod mirage check file: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span>
-                                    <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+                            <span class="c1"># metric_timestamp = int(time())</span>
+                            <span class="c1"># anomaly_check_file = &#39;%s/%s.%s.txt&#39; % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])</span>
+                            <span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
+                            <span class="n">anomaly_check_file</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                <span class="n">anomaly_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="n">sane_metricname</span><span class="p">)</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine anomaly_check_file&#39;</span><span class="p">)</span>
+
+                            <span class="k">if</span> <span class="n">anomaly_check_file</span><span class="p">:</span>
+                                <span class="n">anomaly_check_file_created</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                                        <span class="c1"># metric_name, anomalous datapoint, hours to resolve, timestamp</span>
+                                        <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;metric = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">value = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">hours_to_resolve = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">metric_timestamp = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+                                    <span class="n">anomaly_check_file_created</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to write anomaly_check_file&#39;</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                        <span class="s1">&#39;debug :: Memory usage in run after writing mirage check file: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span>
+                                        <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
+                                <span class="k">if</span> <span class="n">anomaly_check_file_created</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                            <span class="s1">&#39;debug :: Memory usage in run after chmod mirage check file: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span>
+                                            <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added mirage check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_mirage</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                    <span class="s1">&#39;error :: failed update self.sent_to_mirage.append with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                    <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
                             <span class="c1"># Alert for analyzer if enabled</span>
                             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_FULL_DURATION_ALERTS</span><span class="p">:</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;triggering alert ENABLE_FULL_DURATION_ALERTS :: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
-                                        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
                                     <span class="k">else</span><span class="p">:</span>
-                                        <span class="n">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                        <span class="n">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                                         <span class="s1">&#39;error :: failed to trigger_alert ENABLE_FULL_DURATION_ALERTS :: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
@@ -1171,6 +1347,38 @@
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: ENABLE_FULL_DURATION_ALERTS not enabled&#39;</span><span class="p">)</span>
+                            <span class="k">continue</span>
+
+                        <span class="c1"># @added 20161228 - Feature #1830: Ionosphere alerts</span>
+                        <span class="c1">#                   Branch #922: Ionosphere</span>
+                        <span class="c1"># Bringing Ionosphere online - do alert on Ionosphere</span>
+                        <span class="c1"># metrics if Ionosphere is up</span>
+                        <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                        <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                            <span class="n">ionosphere_up</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">ionosphere_up</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere&#39;</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for ionosphere key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                            <span class="k">if</span> <span class="n">ionosphere_up</span><span class="p">:</span>
+                                <span class="c1"># @modified 20161229 - Feature #1830: Ionosphere alerts</span>
+                                <span class="c1"># Do alert if Ionosphere created a Redis</span>
+                                <span class="c1"># ionosphere.analyzer.alert key</span>
+                                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">in</span> <span class="n">ionosphere_metric_alerts</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alerting as in ionosphere_alerts - Ionosphere metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                    <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;Ionosphere&#39;</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not alerting - Ionosphere metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                    <span class="k">continue</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Ionosphere not report up&#39;</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;taking over alerting from Ionosphere if alert is matched on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+                        <span class="c1"># @added 20161231 - Feature #1830: Ionosphere alerts</span>
+                        <span class="c1">#                   Analyzer also alerting on Mirage metrics now #22</span>
+                        <span class="c1"># Do not alert on Mirage metrics</span>
+                        <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">mirage_unique_metrics</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not alerting - skipping Mirage metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                             <span class="k">continue</span>
 
                         <span class="k">if</span> <span class="n">analyzer_metric</span><span class="p">:</span>
@@ -1197,6 +1405,9 @@
                                 <span class="k">continue</span>
 
                             <span class="k">if</span> <span class="n">last_alert</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">in</span> <span class="n">ionosphere_metric_alerts</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not alerting on ionosphere_alerts Ionosphere metric - last_alert key exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;so alert resources will not be created for this ionosphere_alerts Ionosphere metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                 <span class="k">continue</span>
 
                             <span class="k">try</span><span class="p">:</span>
@@ -1212,9 +1423,9 @@
                                     <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
-                                    <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                    <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
                                 <span class="k">else</span><span class="p">:</span>
-                                    <span class="n">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                    <span class="n">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
                                     <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: smtp_trigger_alert spawned&#39;</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
@@ -1226,6 +1437,10 @@
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                                     <span class="s1">&#39;error :: failed to trigger_alert :: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                                     <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="c1"># @modified 20160207 - Branch #922: Ionosphere</span>
+            <span class="c1"># Handle if alerts are not enabled</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alerts not enabled&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage in run after alerts: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
@@ -1347,12 +1562,12 @@
             <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">))</span>
 
             <span class="c1"># Log progress</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;seconds to run    :: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_time</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total metrics     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_metrics</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total analyzed    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_analyzed</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total anomalies   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_anomalies</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exception stats   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">exceptions</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly breakdown :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_breakdown</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;seconds to run     :: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_time</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total metrics      :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_metrics</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total analyzed     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_analyzed</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total anomalies    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_anomalies</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exception stats    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">exceptions</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly breakdown  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_breakdown</span><span class="p">)</span>
 
             <span class="c1"># Log to Graphite</span>
             <span class="n">graphite_run_time</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_time</span>
@@ -1385,16 +1600,23 @@
                     <span class="n">sent_to_mirage</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sent_to_mirage</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">sent_to_mirage</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_mirage    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_mirage</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_mirage     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_mirage</span><span class="p">)</span>
                 <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_mirage&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">sent_to_mirage</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">mirage_unique_metrics_count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_unique_metrics_count</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">mirage_unique_metrics_count_str</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Mirage metrics     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">mirage_unique_metrics_count_str</span><span class="p">)</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.mirage_metrics&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">mirage_unique_metrics_count_str</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_CRUCIBLE_ENABLED</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sent_to_crucible</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_crucible  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_crucible</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_crucible   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_crucible</span><span class="p">)</span>
                 <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_crucible&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">sent_to_crucible</span><span class="p">)</span>
 
@@ -1403,7 +1625,7 @@
                     <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_panorama  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_panorama</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_panorama   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_panorama</span><span class="p">)</span>
                 <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_panorama&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">sent_to_panorama</span><span class="p">)</span>
 
@@ -1415,6 +1637,13 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_ionosphere :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_ionosphere</span><span class="p">)</span>
                 <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_ionosphere&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">sent_to_ionosphere</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ionosphere_unique_metrics_count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_unique_metrics_count</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">ionosphere_unique_metrics_count_str</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Ionosphere metrics :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_unique_metrics_count_str</span><span class="p">)</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.ionosphere_metrics&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">ionosphere_unique_metrics_count_str</span><span class="p">)</span>
 
             <span class="c1"># Check canary metric</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1430,7 +1659,7 @@
                     <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
                     <span class="n">time_human</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3600</span>
                     <span class="n">projected</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span><span class="p">)</span> <span class="o">/</span> <span class="n">time_human</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;canary duration   :: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time_human</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;canary duration    :: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time_human</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                         <span class="s1">&#39;error :: failed to unpack/calculate canary duration&#39;</span><span class="p">)</span>
@@ -1454,7 +1683,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_crucible</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_ionosphere</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_data_sets</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
+            <span class="c1"># Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="n">unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1506,7 +1740,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -1528,7 +1762,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

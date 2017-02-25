@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - Ionosphere &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>Development - Ionosphere &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Development - pytz" href="pytz.html"/>
+        <link rel="next" title="Development - tsfresh" href="tsfresh.html"/>
         <link rel="prev" title="Development - Debugging" href="debugging.html"/> 
 
   
@@ -126,8 +126,14 @@
 <li class="toctree-l4"><a class="reference internal" href="#ramblings-the-development-of-ionosphere">Ramblings - the development of Ionosphere</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#the-first">THE FIRST</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionosphere-log">ionosphere.log</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#then-along-came-learn">Then along came learn</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tsfresh.html">Development - tsfresh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
@@ -397,6 +403,52 @@ Ionosphere as described above.</p>
 </div>
 </div>
 </div>
+<div class="section" id="the-first">
+<h2>THE FIRST<a class="headerlink" href="#the-first" title="Permalink to this headline">¶</a></h2>
+<p>o/ before the end of the year!!!</p>
+<p>This was the first production Ionosphere matched tsfresh features profile after
+a year in the waiting and making.</p>
+<p>A special thanks to &#64;MaxBenChrist, &#64;nils-braun and &#64;jneuff over at
+<a class="reference external" href="https://github.com/blue-yonder/tsfresh">https://github.com/blue-yonder/tsfresh</a></p>
+<p>Well it took a year :)  But... it works :)</p>
+<ul class="simple">
+<li>Branch #922: ionosphere - created 2015-12-26 11:21 AM</li>
+<li>Task #1658: Patterning Skyline Ionosphere</li>
+</ul>
+<div class="section" id="ionosphere-log">
+<h3>ionosphere.log<a class="headerlink" href="#ionosphere-log" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="then-along-came-learn">
+<h2>Then along came learn<a class="headerlink" href="#then-along-came-learn" title="Permalink to this headline">¶</a></h2>
+<p>After achieving the above first milestone and then the second, etc, etc.  A
+significant amount of time has gone into improving the data presentation to the
+operator in terms of providing Graphite NOW graphs at various resolutions, etc.</p>
+<p>So that I could make better more informed decisions with a fuller picture of the
+metric and the point anomaly in context, to decide as to whether the alert was
+anomalous or not.  I would open Graphite link and looks at -7h and then change
+to -24h, -7d and then -30d.  So added to Ionosphere UI.</p>
+<p>And in that process, one can see learn.  Decisions as to whether a point anomaly is
+contextually anomalous are based on longer than Skyline analyses, which is fine.
+However if we define that a human operator should not create a features profile
+if they cannot say that the point anomalous is NOT anomalous at all resolutions,
+we give Ionosphere multiple resolutions to enable it to train itself.</p>
+<p>Ionosphere does not attempt to achieve statistical or scientific accuracy it
+merely attempts to make 3sigma based anomaly detection methods better.  That
+said there may be some within the data science arena that may wish to argue
+that a number of things in the Ionosphere learning method would not necessarily
+hold up to some UCR review or Kaggle competition.  Luckily Ionosphere makes no
+bones in this regard as this is not Ionosphere&#8217;s domain space. Ionosphere&#8217;s
+domain space is machine and application metrics, with ambitions for bigger
+things.  Skyline and Ionosphere will find a timeseries Rebra (I reckon) :)</p>
+<p>Ionosphere is the culmination of over 24 months of deconstruction and refitting
+of Etsy&#8217;s now much aged Skyline simple Python anomaly detection (complicated
+stack) application.</p>
+<p>Ionosphere began with a very, very small goal.  To teach Skyline what things
+were not anomalous.  The journey of trying to build something that would do that
+went from confused, impossible, no idea .... to a multi-generation one-step
+learning system, like a timeseries Rebra finder.</p>
+</div>
 </div>
 
 
@@ -406,7 +458,7 @@ Ionosphere as described above.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pytz.html" class="btn btn-neutral float-right" title="Development - pytz" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tsfresh.html" class="btn btn-neutral float-right" title="Development - tsfresh" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="debugging.html" class="btn btn-neutral" title="Development - Debugging" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -418,7 +470,7 @@ Ionosphere as described above.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -440,7 +492,7 @@ Ionosphere as described above.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

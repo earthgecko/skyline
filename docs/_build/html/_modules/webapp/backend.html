@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.backend &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>webapp.backend &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -163,17 +163,19 @@
             
   <h1>Source code for webapp.backend</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
+<span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">request</span>
 <span class="c1"># import mysql.connector</span>
 <span class="c1"># from mysql.connector import errorcode</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">get_graphite_metric</span><span class="p">,</span> <span class="n">mysql_select</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">mysql_select</span>
 
 <span class="kn">import</span> <span class="nn">skyline_version</span>
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
@@ -181,6 +183,8 @@
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
 
 <span class="n">REQUEST_ARGS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;from_date&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;from_time&#39;</span><span class="p">,</span>
@@ -193,6 +197,8 @@
                 <span class="s1">&#39;source&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;host&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;algorithm&#39;</span><span class="p">,</span>
+                <span class="c1"># @added 20161127 - Branch #922: ionosphere</span>
+                <span class="s1">&#39;panorama_anomaly_id&#39;</span><span class="p">,</span>
                 <span class="p">]</span>
 
 <span class="c1"># Converting one settings variable into a local variable, just because it is a</span>
@@ -585,7 +591,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -607,7 +613,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

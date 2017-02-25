@@ -1,0 +1,797 @@
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Montserrat-Regular'), url(/static/fonts/montserrat-regular.woff) format('woff');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Montserrat-Bold'), url(/static/fonts/montserrat-bold.woff) format('woff');
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-top: 70px;
+  margin-bottom: 60px;
+  background: #f5f5f1;
+/* @added 20160704 */
+  height: 100%;
+}
+
+.navbar-brand {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+	font-size: 18px;
+	color: #000;
+}
+.navbar-brand .re {
+	color: #dd3023;
+}
+
+.navbar-brand .sky {
+	color: #6698FF;
+}
+
+.renavbar-brand {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+	font-size: 18px;
+/*
+	color: #000;
+*/
+	color: #f5f5f1;
+}
+.renavbar-brand .re {
+	color: #dd3023;
+}
+
+.logo {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+}
+.logo .re {
+	color: #dd3023;
+}
+.logo .sky {
+	color: #6698FF;
+}
+
+.selected {
+    background: #CCE9F0;
+}
+
+/*
+.selected > a > .name {
+    color: black;
+}
+*/
+.selected .count {
+    color: black;
+}
+.selected .oculus {
+    color: black;
+}
+.selected .anomaly_id {
+    color: black;
+}
+.selected > a > .anomaly_id {
+    color: blue;
+}
+.selected .selected_anomaly_id {
+    color: black;
+}
+.selected .metric_name {
+    color: black;
+}
+
+.sub {
+    width: 100%;
+    padding: 3px 0px;
+    color: gray;
+}
+
+.oculus {
+    margin-left: -20px;
+}
+
+.container {
+/*
+    padding-left: 40px;
+    padding-right: 40px;
+*/
+}
+
+.anomaly_id {
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+.name {
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-right: 20px;
+    max-width: 66%;
+    padding-left: 5px;
+}
+
+.count {
+    margin-top: 1px;
+    float: right;
+    padding-right: 5px;
+}
+
+.from_timestamp {
+    display: none;
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+.until_timestamp {
+    display: none;
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+.created_date {
+    display: none;
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+.full_duration {
+    display: none;
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+.time_shift {
+    display: none;
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+.metric_name {
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+.selected_anomaly_id {
+    display: none;
+    margin-top: 1px;
+    float: left;
+    padding-right: 5px;
+}
+
+.badge {
+    background: #67BED3;
+}
+
+.container {
+/*
+    width: 1400px;
+*/
+    width: 90%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+a {
+    color: gray;
+}
+
+a:hover {
+    color: gray;
+    text-decoration: none;
+}
+
+.oculus:hover {
+    color: #728BC0;
+}
+
+/*
+#navbar {
+    height: 35px;
+    background: #1C1C1C;
+}
+
+#logo {
+    font-weight: bold;
+    font-size: 25px;
+    color: #F9F9F9;
+    position: relative;
+    top: 6px;
+}
+
+#menu_item {
+    font-weight: normal;
+    font-size: 16px;
+    color: #dcdcdc;
+    position: relative;
+    top: 6px;
+}
+*/
+#version {
+    font-weight: bold;
+    font-size: 14px;
+    color: #080808;
+    position: relative;
+    top: 10px;
+    right: 6px;
+}
+
+#wat {
+    position: relative;
+    top: 4px;
+    left: 5px;
+}
+
+#wat:hover {
+    color: white;
+}
+
+#title_container{
+    padding-top: 10px;
+    padding-bottom: 15px;
+    font-weight: bold;
+/*
+    font-size: 20px; ?
+*/
+    font-size: 14px;
+    text-align: left;
+}
+
+#search_container{
+/*
+    padding-top: 25px;
+    padding-bottom: 20px;
+    padding-left:5em
+*/
+    font-weight: bold;
+    font-size: 12px;
+    text-align: left;
+}
+
+input {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display:inline-block;
+    *display: inline;     /* for IE7*/
+    zoom:1;              /* for IE7*/
+    vertical-align:middle;
+    margin-left:20px
+}
+
+select {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display:inline-block;
+    *display: inline;     /* for IE7*/
+    zoom:1;              /* for IE7*/
+    vertical-align:middle;
+    margin-left:20px
+}
+
+label {
+    display:inline-block;
+    *display: inline;     /* for IE7*/
+    zoom:1;              /* for IE7*/
+    float: left;
+    padding-top: 5px;
+    text-align: right;
+    width: 140px;
+}
+
+#search_results_container{
+    display: inline-block;
+    padding-top: 25px;
+    padding-bottom: 20px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+th,td {
+    border-style: solid;
+    border-width: 2px;
+    border-color: #BCBCBC;
+    word-wrap: break-word;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+.link-wrap {
+  height: 100%;
+  display: table;
+}
+
+.link {
+  display: table-cell;
+  vertical-align: middle;
+  background: #afa;
+}
+
+#graph_title_container {
+/*
+    font-size: 14px;
+*/
+    font-size: 14px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    padding-top: 20px;
+}
+#graph_subtitle_container {
+    font-size: 14px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    padding-top: 20px;
+}
+#graph_subtitle_anomalous_datapoint_container {
+    font-size: 14px;
+    font-weight: bold;
+    padding-bottom: 0px;
+    padding-top: 19px;
+}
+#graph_subtitle_created_date_container {
+    font-size: 14px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    padding-top: 1px;
+}
+#graph_subtitle_full_duration_container {
+    font-size: 14px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    padding-top: 1px;
+}
+
+#search_graphs_container{
+    display: inline-block;
+    max-width: 95%;
+    padding-top: 25px;
+    padding-bottom: 20px;
+    font-weight: bold;
+    font-size: 20px;
+    text-align: left;
+}
+
+#graph_title {
+    float: left;
+    display: inline-block;
+    max-width: 95%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 24px;
+}
+
+#graph_subtitle {
+    float: left;
+    display: inline-block;
+    max-width: 95%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 20px;
+}
+
+#graph_subtitle_anomalous_datapoint {
+    float: left;
+    display: inline-block;
+    max-width: 95%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 20px;
+}
+
+#graph_subtitle_created_date {
+    float: left;
+    display: inline-block;
+    max-width: 95%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 20px;
+}
+#graph_subtitle_full_duration {
+    float: left;
+    display: inline-block;
+    max-width: 95%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 20px;
+}
+
+#search_graph_title {
+    display: inline-block;
+    max-width: 95%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 24px;
+}
+
+#graph_link {
+    padding-top: 3px;
+    font-size: 16px;
+    display: inline-block;
+    margin: 0 auto;
+    text-align: center;
+    padding-left: 10px;
+    float: left;
+    display: inline-block;
+}
+
+#search_graph_link {
+    padding-top: 3px;
+    font-size: 16px;
+    display: inline-block;
+    margin: 0 auto;
+    text-align: center;
+    padding-left: 10px;
+    display: inline-block;
+}
+
+#deviance {
+    float: right;
+    display: inline-block;
+}
+
+#legend {
+    font-weight: bold;
+    font-size: 15px;
+    text-align: left;
+    padding-bottom: 25px;
+    margin: 0 5px 0 5px;
+}
+
+#legend_id {
+    display: inline-block;
+    float: left;
+}
+
+#legend_name {
+    display: inline-block;
+    float: left;
+}
+
+#legend_coefficient {
+    display: inline-block;
+    float: right;
+}
+
+.metric_container {
+    display: inline-block;
+    position: relative;
+    float: left;
+    padding-bottom: 30px;
+}
+
+.form-element label {
+    display: inline-block;
+    width: 150px;
+}
+
+#m8, #m9 {
+    margin-right: 0;
+}
+
+#graph_container {
+/*
+    height: 280px;
+*/
+    height: 420px;
+    width: 100%;
+    margin-bottom: 90px;
+/*
+    margin-top: 15px;
+*/
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+#p_graph_container {
+    height: 300px;
+    width: 100%;
+    margin-bottom: 90px;
+    margin-top: 15px;
+    border-radius: 4px;
+}
+
+#panorama_graph_container {
+    height: 280px;
+    width: 100%;
+    margin-bottom: 90px;
+    margin-top: 15px;
+    border-radius: 4px;
+}
+
+#mini_graphite {
+    height: 200px;
+    width: 100%;
+}
+
+#graphite {
+    height: 140px;
+    width: 100%;
+}
+
+#panorama_graphite {
+    height: 200px;
+    width: 100%;
+}
+
+#metrics_listings {
+    border: 1px solid #DDD;
+    border-radius: 4px;
+    background: #fff;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+#metrics_main {
+    padding: 0px;
+    margin: 0px;
+    height: 400px;
+    padding-bottom: 50px;
+}
+
+#graph_inline_canvas_text {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+#m0 > .sub:first-child {
+    border-top-left-radius: 4px;
+}
+
+@media (max-width: 1450px) {
+    .sub {
+        font-size: 12px;
+    }
+
+    .count {
+        font-size: 12px;
+    }
+
+    .anomaly_id {
+        font-size: 12px;
+    }
+    .metric_name {
+        font-size: 12px;
+    }
+    .from_timestamp {
+        font-size: 12px;
+    }
+    .until_timestamp {
+        font-size: 12px;
+    }
+
+    .badge {
+        padding: 2px 5px;
+        font-size: 10px;
+        line-height 11px;
+    }
+
+    .container {
+/*
+        width: 1040px;
+*/
+        width: 100%;
+    }
+
+    #search_results_container {
+        height: 390px;
+        width: 100%;
+    }
+
+    #metrics_main {
+        height: 390px;
+    }
+
+    #mini_graphite {
+        height: 145px;
+        width: 100%;
+    }
+
+    #graphite {
+        height: 100px;
+        width: 100%;
+    }
+
+    #graph_container {
+/*
+        height: 245px;
+*/
+        height: 720px;
+    }
+
+    #panorama_graph_container {
+        height: 160px;
+    }
+}
+
+.dygraph-axis-label-y1 {
+    display: none;
+}
+
+#mini {
+    height: 340px;
+    width: 100%;
+    margin-bottom: 15px;
+    margin-top: 5px;
+    padding-bottom: 7px;
+    padding-right: 5px;
+    border-radius: 4px;
+    background: white;
+    border: 1px solid #DDD;
+}
+
+#graph {
+/*
+    height: 160px;
+*/
+    height: 340px;
+    width: 100%;
+    margin-bottom: 15px;
+    margin-top: 5px;
+    padding-bottom: 7px;
+    padding-right: 5px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #DDD;
+}
+
+#panorama_graph {
+    height: 160px;
+    width: 100%;
+    margin-bottom: 15px;
+    margin-top: 5px;
+    padding-bottom: 7px;
+    padding-right: 5px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #DDD;
+}
+
+#duration {
+    font-size: 12px;
+//    padding-left: 5px;
+}
+#time_shift {
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 0px;
+}
+
+#mini_label, #big_label {
+    display: inline;
+    font-size: 12px;
+    float: right;
+    margin-top: -20px;
+}
+
+//#mini > div > div {
+//    width: 15px;
+//    text-overflow: ellipsis;
+//}
+//
+//#graph > div > div {
+//    width: 15px;
+//    text-overflow: ellipsis;
+//}
+
+.footer .re {
+	color: #dd3023;
+}
+
+.footer {
+/*  position: absolute;*/
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #f5f5f5;
+  font-size: 12px;
+}
+
+.footer > div {
+	margin-top: 10px;
+}
+
+/*#footer {
+  position: relative;
+  width: 100%;
+  display: block;
+  clear: both;
+}*/
+#footer {
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #f5f5f5;
+  font-size: 12px;
+}
+
+.relogo {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+}
+.logo .re {
+	color: #dd3023;
+}
+.relogo .re {
+	color: #dd3023;
+}
+
+.skylogo {
+	font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+}
+
+.embed-docs {
+    position: relative;
+    padding-bottom: 100%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+    min-height: 100%;
+}
+.embed-docs iframe, .embed-docs object, .embed-docs embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* @added 20170122 - @added 20170122 - Feature #1876: Ionosphere - training_data learn countdown
+countdown css
+*/
+.callback,
+.simple,
+.offset {
+  font-size: 20px;
+  background: #27ae60;
+  padding: 0.5em 0.7em;
+  color: #ecf0f1;
+  margin-bottom: 50px;
+  -webkit-transition: background 0.5s ease-out;
+  transition: background 0.5s ease-out;
+}
+.offset {
+  margin-bottom: 10px;
+}
+.callback{
+  cursor: pointer;
+}
+.ended {
+  background: #c0392b;
+}
+.styled{
+  margin-bottom: 50px;
+}
+.styled div {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 30px;
+  font-weight: 100;
+  line-height: 1;
+  text-align: right;
+}
+/* IE7 inline-block hack */
+*+html .styled div{
+  display: inline;
+  zoom: 1;
+}
+.styled div:first-child {
+  margin-left: 0;
+}
+.styled div span {
+  display: block;
+  border-top: 1px solid #cecece;
+  padding-top: 3px;
+  font-size: 12px;
+  font-weight: normal;
+  text-transform: uppercase;
+  text-align: left;
+}

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.mirage package &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>skyline.mirage package &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.panorama package" href="skyline.panorama.html"/>
         <link rel="prev" title="skyline.ionosphere package" href="skyline.ionosphere.html"/> 
@@ -137,14 +137,19 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
 </ul>
@@ -233,7 +238,7 @@
 
 <dl class="method">
 <dt id="mirage.mirage.Mirage.spawn_alerter_process">
-<code class="descname">spawn_alerter_process</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.spawn_alerter_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.spawn_alerter_process" title="Permalink to this definition">¶</a></dt>
+<code class="descname">spawn_alerter_process</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.spawn_alerter_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.spawn_alerter_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Spawn a process to trigger an alert.  This is used by smtp alerters so
 that matplotlib objects are cleared down and the alerter cannot create
 a memory leak in this manner and plt.savefig keeps the object in memory
@@ -246,11 +251,6 @@ and handling prevents any memory leaks in the parent.
 </dd></dl>
 
 <dl class="method">
-<dt id="mirage.mirage.Mirage.mkdir_p">
-<code class="descname">mkdir_p</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.mkdir_p"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.mkdir_p" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="mirage.mirage.Mirage.surface_graphite_metric_data">
 <code class="descname">surface_graphite_metric_data</code><span class="sig-paren">(</span><em>metric_name</em>, <em>graphite_from</em>, <em>graphite_until</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.surface_graphite_metric_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.surface_graphite_metric_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -259,6 +259,24 @@ and handling prevents any memory leaks in the parent.
 <dt id="mirage.mirage.Mirage.load_metric_vars">
 <code class="descname">load_metric_vars</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.load_metric_vars" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="mirage.mirage.Mirage.mirage_load_metric_vars">
+<code class="descname">mirage_load_metric_vars</code><span class="sig-paren">(</span><em>metric_vars_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.mirage_load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.mirage_load_metric_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the metric variables for a check from a metric check variables file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars list or <code class="docutils literal"><span class="pre">False</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mirage.mirage.Mirage.dump_garbage">
@@ -288,49 +306,54 @@ and handling prevents any memory leaks in the parent.
 <span id="skyline-mirage-mirage-alerters-module"></span><h2>skyline.mirage.mirage_alerters module<a class="headerlink" href="#module-mirage.mirage_alerters" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
 <dt id="mirage.mirage_alerters.skyline_version">
-<code class="descname">skyline_version</code><em class="property"> = 'Skyline (ionosphere v1.1.0-alpha)'</em><a class="headerlink" href="#mirage.mirage_alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
+<code class="descname">skyline_version</code><em class="property"> = 'Skyline (ionosphere v1.1.1-alpha)'</em><a class="headerlink" href="#mirage.mirage_alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create any alerter you want here. The function will be invoked from trigger_alert.
-Two arguments will be passed, both of them tuples: alert and metric.</p>
-<dl class="docutils">
-<dt>alert: the tuple specified in your settings:</dt>
-<dd>alert[0]: The matched substring of the anomalous metric
-alert[1]: the name of the strategy being used to alert
-alert[2]: The timeout of the alert that was triggered
-alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</dd>
-<dt>metric: information about the anomaly itself</dt>
-<dd>metric[0]: the anomalous value
-metric[1]: The full name of the anomalous metric</dd>
-</dl>
+Four arguments will be passed, two of them tuples: alert and metric.</p>
+<p>alert: the tuple specified in your settings:</p>
+<blockquote>
+<div><p>alert[0]: The matched substring of the anomalous metric</p>
+<p>alert[1]: the name of the strategy being used to alert</p>
+<p>alert[2]: The timeout of the alert that was triggered</p>
+<p>alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</p>
+</div></blockquote>
+<p>metric: information about the anomaly itself</p>
+<blockquote>
+<div><p>metric[0]: the anomalous value</p>
+<p>metric[1]: The full name of the anomalous metric</p>
+<p>metric[2]: anomaly timestamp</p>
+</div></blockquote>
+<p>second_order_resolution_seconds: int</p>
+<p>context: the app name</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_smtp">
-<code class="descname">alert_smtp</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_smtp</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert via smtp to the
 recipients that are configured for the metric.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_pagerduty">
-<code class="descname">alert_pagerduty</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_pagerduty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_pagerduty" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_pagerduty</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_pagerduty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_pagerduty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert via PagerDuty</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_hipchat">
-<code class="descname">alert_hipchat</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_hipchat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_hipchat" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_hipchat</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_hipchat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_hipchat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends an alert the hipchat room that is
 configured in settings.py.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.alert_syslog">
-<code class="descname">alert_syslog</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_syslog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_syslog" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_syslog</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_syslog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_syslog" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="mirage.mirage_alerters.trigger_alert">
-<code class="descname">trigger_alert</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trigger_alert</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>second_order_resolution_seconds</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">run</span></code> to trigger an alert,
 Mirage passes two arguments, both of them tuples.  The alerting strategy
 is determined and the approriate alert def is then called and passed the
@@ -347,9 +370,11 @@ tuples.</p>
 <p>alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</p>
 </li>
 <li><strong>meric</strong> &#8211; <p>The metric tuple.</p>
-<p>metric[0]: the anomalous value
-metric[1]: The full name of the anomalous metric</p>
+<p>metric[0]: the anomalous value</p>
+<p>metric[1]: The full name of the anomalous metric</p>
+<p>metric[2]: anomaly timestamp</p>
 </li>
+<li><strong>context</strong> (<em>str</em>) &#8211; app name</li>
 </ul>
 </td>
 </tr>
@@ -573,7 +598,7 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -595,7 +620,7 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

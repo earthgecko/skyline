@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>panorama.panorama &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>panorama.panorama &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -167,21 +167,31 @@
     <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">packb</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">listdir</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
+<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">packb</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
 <span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="k">import</span> <span class="n">errorcode</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">load_metric_vars</span><span class="p">,</span> <span class="n">fail_check</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">mkdir_p</span>
+
+<span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
+<span class="c1"># Added determination of the learn related variables so that any new metrics</span>
+<span class="c1"># that Panorama adds to the Skyline database, it adds the default</span>
+<span class="c1"># IONOSPHERE_LEARN_DEFAULT_ values or the namespace specific values matched</span>
+<span class="c1"># from settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG to the metric database</span>
+<span class="c1"># entry.</span>
+<span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="k">import</span> <span class="n">get_ionosphere_learn_details</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;panorama&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -394,6 +404,90 @@
 
         <span class="k">return</span> <span class="kc">False</span></div>
 
+    <span class="c1"># @added 20170101 - Feature #1830: Ionosphere alerts</span>
+    <span class="c1">#                   Bug #1460: panorama check file fails</span>
+    <span class="c1">#                   Panorama check file fails #24</span>
+    <span class="c1"># Get rid of the skyline_functions imp as imp is deprecated in py3 anyway</span>
+<div class="viewcode-block" id="Panorama.new_load_metric_vars"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.new_load_metric_vars">[docs]</a>    <span class="k">def</span> <span class="nf">new_load_metric_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the metric variables for a check from a metric check variables file</span>
+
+<span class="sd">        :param metric_vars_file: the path and filename to the metric variables files</span>
+<span class="sd">        :type metric_vars_file: str</span>
+<span class="sd">        :return: the metric_vars module object or ``False``</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;loading metric variables from metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: loading metric variables from metric_check_file - file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">metric_vars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">no_new_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">no_equal_line</span> <span class="o">=</span> <span class="n">no_new_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; = &#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">no_equal_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">add_line</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+                <span class="n">metric_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_line</span><span class="p">)</span>
+
+        <span class="n">string_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;anomaly_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;added_by&#39;</span><span class="p">,</span> <span class="s1">&#39;app&#39;</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">]</span>
+        <span class="n">float_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="n">int_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;added_at&#39;</span><span class="p">,</span> <span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
+        <span class="n">array_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">,</span> <span class="s1">&#39;triggered_algorithms&#39;</span><span class="p">]</span>
+        <span class="n">boolean_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;graphite_metric&#39;</span><span class="p">,</span> <span class="s1">&#39;run_crucible_tests&#39;</span><span class="p">]</span>
+
+        <span class="n">metric_vars_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">string_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;metric&#39;</span><span class="p">:</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">float_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">int_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">array_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">boolean_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">metric_vars_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_vars_array</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: loading metric variables - none found&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;debug :: metric_vars determined - metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric_vars for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_array</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">metric_vars_array</span></div>
+
 <div class="viewcode-block" id="Panorama.spin_process"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign a metric anomaly to process.</span>
@@ -440,7 +534,13 @@
 
         <span class="c1"># Load and validate metric variables</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="c1"># @modified 20170101 - Feature #1830: Ionosphere alerts</span>
+            <span class="c1">#                      Bug #1460: panorama check file fails</span>
+            <span class="c1">#                      Panorama check file fails #24</span>
+            <span class="c1"># Get rid of the skyline_functions imp as imp is deprecated in py3 anyway</span>
+            <span class="c1"># Use def new_load_metric_vars(self, metric_vars_file):</span>
+            <span class="c1"># metric_vars = load_metric_vars(skyline_app, str(metric_check_file))</span>
+            <span class="n">metric_vars_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_load_metric_vars</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load metric variables from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
@@ -452,9 +552,13 @@
         <span class="c1"># this ensures that if any of the variables are not set for some reason</span>
         <span class="c1"># we can handle unexpected data or situations gracefully and try and</span>
         <span class="c1"># ensure that the process does not hang.</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span>
-            <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span>
+            <span class="c1"># metric_vars.metric</span>
+            <span class="c1"># metric = str(metric_vars.metric)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;metric&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
@@ -462,9 +566,18 @@
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load metric variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">value</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="c1"># metric_vars.value</span>
+            <span class="c1"># value = str(metric_vars.value)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;value&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - value - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
@@ -472,9 +585,17 @@
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">from_timestamp</span>
-            <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">from_timestamp</span><span class="p">)</span>
+            <span class="c1"># metric_vars.from_timestamp</span>
+            <span class="c1"># from_timestamp = str(metric_vars.from_timestamp)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;from_timestamp&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - from_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">from_timestamp</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
@@ -485,9 +606,18 @@
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">from_timestamp</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load from_timestamp variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric_timestamp</span>
-            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric_timestamp</span><span class="p">)</span>
+            <span class="c1"># metric_vars.metric_timestamp</span>
+            <span class="c1"># metric_timestamp = str(metric_vars.metric_timestamp)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;metric_timestamp&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - metric_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_timestamp</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
@@ -495,63 +625,122 @@
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_timestamp</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load metric_timestamp variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">algorithms</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">algorithms</span>
-            <span class="n">algorithms</span> <span class="o">=</span> <span class="n">metric_vars</span><span class="o">.</span><span class="n">algorithms</span>
+            <span class="c1"># metric_vars.algorithms</span>
+            <span class="c1"># algorithms = metric_vars.algorithms</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;algorithms&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">algorithms</span> <span class="o">=</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read algorithms variable from check file setting to all&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read algorithms variable from check file setting to all - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithms</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load algorithms variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">triggered_algorithms</span>
-            <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="n">metric_vars</span><span class="o">.</span><span class="n">triggered_algorithms</span>
+            <span class="c1"># metric_vars.triggered_algorithms</span>
+            <span class="c1"># triggered_algorithms = metric_vars.triggered_algorithms</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;triggered_algorithms&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - triggered_algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">triggered_algorithms</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read triggered_algorithms variable from check file setting to all&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read triggered_algorithms variable from check file setting to all - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">triggered_algorithms</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load triggered_algorithms variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">app</span>
-            <span class="n">app</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">app</span><span class="p">)</span>
+            <span class="c1"># metric_vars.app</span>
+            <span class="c1"># app = str(metric_vars.app)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;app&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">app</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - app - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">app</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read app variable from check file setting to all&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read app variable from check file setting to all  - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">app</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load app variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">source</span>
-            <span class="n">source</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+            <span class="c1"># metric_vars.source</span>
+            <span class="c1"># source = str(metric_vars.source)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;source&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - source - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">source</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read source variable from check file setting to all&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read source variable from check file setting to all  - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">app</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load app variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">added_by</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">added_by</span>
-            <span class="n">added_by</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">added_by</span><span class="p">)</span>
+            <span class="c1"># metric_vars.added_by</span>
+            <span class="c1"># added_by = str(metric_vars.added_by)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;added_by&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">added_by</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - added_by - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read added_by variable from check file setting to all&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read added_by variable from check file setting to all - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">added_by</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load added_by variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="n">added_at</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">added_at</span>
-            <span class="n">added_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">added_at</span><span class="p">)</span>
+            <span class="c1"># metric_vars.added_at</span>
+            <span class="c1"># added_at = str(metric_vars.added_at)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;added_at&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">added_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - added_at - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_at</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read added_at variable from check file setting to all&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read added_at variable from check file setting to all - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">added_at</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load added_at variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
@@ -656,8 +845,44 @@
                             <span class="n">query_cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">determined_id</span><span class="p">)))</span>
                 <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">determined_id</span><span class="p">)</span>
 
+            <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
+            <span class="c1"># Added determination of the learn related variables</span>
+            <span class="c1"># learn_full_duration_days, learn_valid_ts_older_than,</span>
+            <span class="c1"># max_generations and max_percent_diff_from_origin value to the</span>
+            <span class="c1"># insert statement if the table is the metrics table.</span>
+            <span class="k">if</span> <span class="n">table</span> <span class="o">==</span> <span class="s1">&#39;metrics&#39;</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;metric&#39;</span><span class="p">:</span>
+                <span class="c1"># Set defaults</span>
+                <span class="n">learn_full_duration_days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</span><span class="p">)</span>
+                <span class="n">valid_learning_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS</span><span class="p">)</span>
+                <span class="n">max_generations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</span><span class="p">)</span>
+                <span class="n">max_percent_diff_from_origin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">use_full_duration</span><span class="p">,</span> <span class="n">valid_learning_duration</span><span class="p">,</span> <span class="n">use_full_duration_days</span><span class="p">,</span> <span class="n">max_generations</span><span class="p">,</span> <span class="n">max_percent_diff_from_origin</span> <span class="o">=</span> <span class="n">get_ionosphere_learn_details</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="n">learn_full_duration_days</span> <span class="o">=</span> <span class="n">use_full_duration_days</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get_ionosphere_learn_details for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric learn details determined for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn_full_duration_days     :: </span><span class="si">%s</span><span class="s1"> days&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;valid_learning_duration      :: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_learning_duration</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max_generations              :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">max_generations</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max_percent_diff_from_origin :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">max_percent_diff_from_origin</span><span class="p">)))</span>
+
             <span class="c1"># INSERT because no known id</span>
-            <span class="n">insert_query</span> <span class="o">=</span> <span class="s1">&#39;insert into </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) VALUES (</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="c1"># @modified 20170115 - Feature #1854: Ionosphere learn - generations</span>
+            <span class="c1"># Added the learn_full_duration_days, learn_valid_ts_older_than,</span>
+            <span class="c1"># max_generations and max_percent_diff_from_origin value to the</span>
+            <span class="c1"># insert statement if the table is the metrics table.</span>
+            <span class="c1"># insert_query = &#39;insert into %s (%s) VALUES (\&#39;%s\&#39;)&#39; % (table, key, value)</span>
+            <span class="k">if</span> <span class="n">table</span> <span class="o">==</span> <span class="s1">&#39;metrics&#39;</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;metric&#39;</span><span class="p">:</span>
+                <span class="n">insert_query</span> <span class="o">=</span> <span class="s1">&#39;insert into </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">table</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">valid_learning_duration</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_generations</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">max_percent_diff_from_origin</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">insert_query</span> <span class="o">=</span> <span class="s1">&#39;insert into </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) VALUES (</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inserting </span><span class="si">%s</span><span class="s1"> into </span><span class="si">%s</span><span class="s1"> table&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">table</span><span class="p">))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mysql_insert</span><span class="p">(</span><span class="n">insert_query</span><span class="p">)</span>
@@ -960,11 +1185,7 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: check dir did not exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
 
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check dir created - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
@@ -1042,7 +1263,7 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all spin_process processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                    <span class="c1"># p.join()</span>
 
                 <span class="n">check_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
@@ -1062,7 +1283,12 @@
 
                 <span class="n">metric_failed_check_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">failed_checks_dir</span><span class="p">,</span> <span class="n">check_file_metricname_dir</span><span class="p">,</span> <span class="n">check_file_timestamp</span><span class="p">)</span>
 
-                <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span></div></div>
+                <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: stopping spin_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>
@@ -1074,7 +1300,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -1096,7 +1322,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
