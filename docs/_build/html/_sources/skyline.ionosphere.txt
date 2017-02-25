@@ -20,6 +20,14 @@ skyline.ionosphere.ionosphere module
     :undoc-members:
     :show-inheritance:
 
+skyline.ionosphere.learn module
+-------------------------------
+
+.. automodule:: ionosphere.learn
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

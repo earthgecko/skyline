@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Upgrading - Etsy to Crucible &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>Upgrading - Etsy to Crucible &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
         <link rel="up" title="Upgrading" href="index.html"/>
         <link rel="next" title="Getting data into Skyline" href="../getting-data-into-skyline.html"/>
         <link rel="prev" title="Upgrading - Etsy to Ionosphere" href="etsy-to-ionosphere.html"/> 
@@ -241,15 +241,14 @@ head -n <span class="m">20</span> /var/log/skyline/*.log
 tail -n <span class="m">20</span> /var/log/skyline/*.log
 
 <span class="c1"># Any errors - each app</span>
-cat /var/log/skyline/horizon.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/analyzer.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/webapp.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/panorama.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-
-<span class="c1"># If you have the other services running</span>
-cat /var/log/skyline/mirage.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/boundary.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/crucible.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> skyline_logfile
+<span class="k">do</span>
+  <span class="nb">echo</span> <span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+  cat <span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span> <span class="p">|</span> grep -B2 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -282,7 +281,7 @@ you want to configure them for.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -304,7 +303,7 @@ you want to configure them for.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>Installation &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -338,7 +338,7 @@ and when metrics are triggering as anomalous.</li>
 <li>Edit the <code class="docutils literal"><span class="pre">settings.py</span></code> file and enter your appropriate settings,
 specifically ensure you set the following variables to the correct
 setting for your environment, see the documentation links and docstrings in
-the <cite>settings.py</cite> file forthe full descriptions of each variable:<ul>
+the <cite>settings.py</cite> file for the full descriptions of each variable:<ul>
 <li><a class="reference internal" href="skyline.html#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_HOST</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.GRAPHITE_PROTOCOL" title="settings.GRAPHITE_PROTOCOL"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_PROTOCOL</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.GRAPHITE_PORT" title="settings.GRAPHITE_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_PORT</span></code></a></li>
@@ -355,8 +355,12 @@ other Panorama related variables as appropriate.</li>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.SERVER_PYTZ_TIMEZONE" title="settings.SERVER_PYTZ_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.SERVER_PYTZ_TIMEZONE</span></code></a></li>
 </ul>
 </li>
+<li>For later implementing and working with Ionosphere and setting up learning (see
+<a class="reference external" href="ionosphere.html">Ionosphere</a>) after you have the other Skyline apps up and
+running.</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /opt/skyline/github/skyline/skyline
 vi settings.py
@@ -375,6 +379,7 @@ access.</li>
 /opt/skyline/github/skyline/bin/webapp.d start
 <span class="c1"># And Panorama if you have setup in the DB at this stage</span>
 /opt/skyline/github/skyline/bin/panorama.d start
+/opt/skyline/github/skyline/bin/ionosphere.d start
 </pre></div>
 </div>
 <ul class="simple">
@@ -394,15 +399,14 @@ head -n <span class="m">20</span> /var/log/skyline/*.log
 tail -n <span class="m">20</span> /var/log/skyline/*.log
 
 <span class="c1"># Any errors - each app</span>
-cat /var/log/skyline/horizon.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/analyzer.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/webapp.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/panorama.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-
-<span class="c1"># If you have the other services running</span>
-cat /var/log/skyline/mirage.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/boundary.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
-cat /var/log/skyline/crucible.log <span class="p">|</span> grep -B1 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> skyline_logfile
+<span class="k">do</span>
+  <span class="nb">echo</span> <span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+  cat <span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span> <span class="p">|</span> grep -B2 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -433,6 +437,7 @@ Skyline</a></li>
 <a class="reference external" href="panorama.html">Panorama</a></li>
 <li>For Mirage setup see <a class="reference external" href="mirage.html">Mirage</a></li>
 <li>For Boundary setup see <a class="reference external" href="boundary.html">Boundary</a></li>
+<li>For Ionosphere setup see <a class="reference external" href="ionosphere.html">Ionosphere</a></li>
 </ul>
 </div>
 <div class="section" id="automation-and-configuration-management-notes">
@@ -482,7 +487,7 @@ the dependency is fulfilled.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -504,7 +509,7 @@ the dependency is fulfilled.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

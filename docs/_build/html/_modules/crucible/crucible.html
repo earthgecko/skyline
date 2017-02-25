@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crucible.crucible &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>crucible.crucible &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -200,7 +200,7 @@
 <span class="c1"># sys.path.insert(0, os.path.dirname(__file__))</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">load_metric_vars</span><span class="p">,</span> <span class="n">fail_check</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">load_metric_vars</span><span class="p">,</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">mkdir_p</span>
 
 <span class="kn">from</span> <span class="nn">crucible_algorithms</span> <span class="k">import</span> <span class="n">run_algorithms</span>
 
@@ -542,11 +542,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">)):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># mkdir_p(skyline_app, str(anomaly_dir))</span>
-                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;created anomaly dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_dir</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
@@ -687,10 +683,9 @@
                         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -734,10 +729,10 @@
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">converted</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
 
@@ -786,10 +781,9 @@
                     <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzipped - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json_gz</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
@@ -842,10 +836,9 @@
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json done&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No gzip - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json_gz</span><span class="p">)</span>
@@ -867,10 +860,9 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
                 <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
@@ -923,10 +915,9 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">crucible_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated crucible anomaly file - </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
 
         <span class="c1"># gzip the json timeseries data after analysis</span>
@@ -940,10 +931,9 @@
                     <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0644&#39;</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="n">mode_arg</span> <span class="o">=</span> <span class="s1">&#39;0o644&#39;</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzipped - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Failed to gzip data file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
@@ -1013,11 +1003,7 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: check dir did not exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="n">mode_arg</span> <span class="o">=</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check dir created - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span>
                 <span class="c1"># continue</span>
@@ -1098,6 +1084,11 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all spin_process processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="c1"># p.join()</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: stopping spin_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
             <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">):</span>
@@ -1113,7 +1104,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -1135,7 +1126,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

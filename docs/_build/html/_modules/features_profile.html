@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>features_profile &mdash; Skyline 1.1.1-beta documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>features_profile</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for features_profile</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="k">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">tsfresh.feature_extraction</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">extract_features</span><span class="p">,</span> <span class="n">ReasonableFeatureExtractionSettings</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">tsfresh</span> <span class="k">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">tsfresh_version</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">write_data_to_file</span>
+<span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_FEATURES</span><span class="p">,</span> <span class="n">TSFRESH_VERSION</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+
+
+<div class="viewcode-block" id="feature_name_id"><a class="viewcode-back" href="../skyline.html#features_profile.feature_name_id">[docs]</a><span class="k">def</span> <span class="nf">feature_name_id</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the Skyline id of a tsfresh feature name</span>
+
+<span class="sd">    :param feature_name: the tsfresh feature name</span>
+<span class="sd">    :type feature_name: str</span>
+<span class="sd">    :return: id</span>
+<span class="sd">    :rtype: int</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># f_name = &#39;value__spkt_welch_density__coeff_8&#39;</span>
+    <span class="n">f_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">TSFRESH_FEATURES</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="n">f_name</span><span class="p">:</span>
+            <span class="n">fn_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">f_name</span>
+            <span class="k">del</span> <span class="n">feature</span>
+            <span class="k">return</span> <span class="n">fn_id</span>
+
+    <span class="k">del</span> <span class="n">feature</span>
+    <span class="k">del</span> <span class="n">f_name</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="calculate_features_profile"><a class="viewcode-back" href="../skyline.html#features_profile.calculate_features_profile">[docs]</a><span class="k">def</span> <span class="nf">calculate_features_profile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates a tsfresh features profile from a training data set</span>
+
+<span class="sd">    :param timestamp: the timestamp of metric anomaly with training data</span>
+<span class="sd">    :type timestamp: str</span>
+<span class="sd">    :param metric: the base_name of the metric</span>
+<span class="sd">    :type metric: str</span>
+<span class="sd">    :return: (features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    :rtype: (str, boolean, str, str, str)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;training data&#39;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profiles&#39;</span><span class="p">:</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features profile data&#39;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+    <span class="c1"># @added 20170114 - Feature #1854: Ionosphere learn</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere :: learn&#39;</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> feature profile creation requested for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">log_context</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">))</span>
+
+    <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+        <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profiles&#39;</span><span class="p">:</span>
+        <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+
+    <span class="c1"># @added 20170113 - Feature #1854: Ionosphere learn</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+        <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_FOLDER</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">)</span>
+
+    <span class="n">features_profile_created_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.fp.created.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_data_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="n">features_profile_details_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.fp.details.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_data_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="c1"># @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs</span>
+    <span class="c1"># Added metric_check_file and ts_full_duration is needed to be determined</span>
+    <span class="c1"># and added the to features_profile_details_file as it was not added here on</span>
+    <span class="c1"># the 20170104 when it was added the webapp and ionosphere</span>
+    <span class="n">metric_var_filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="n">anomaly_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric_var_filename</span><span class="p">)</span>
+    <span class="n">ts_full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">):</span>
+        <span class="c1"># Read the details file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">anomaly_details</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">anomaly_details</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s1">&#39;full_duration&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">_ts_full_duration</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">full_duration_array</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">_ts_full_duration</span><span class="p">)</span>
+                    <span class="n">ts_full_duration</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="n">anomaly_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="n">ts_csv</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.tsfresh.input.csv&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+<span class="c1">#    anomaly_json = &#39;/opt/skyline/ionosphere/data/1480104000/stats/statsd/graphiteStats/calculationtime/stats.statsd.graphiteStats.calculationtime.json&#39;</span>
+<span class="c1">#    ts_csv = &#39;/opt/skyline/ionosphere/data/1480104000/stats/statsd/graphiteStats/calculationtime/stats.statsd.graphiteStats.calculationtime.tsfresh.input.csv&#39;</span>
+    <span class="c1"># This is simply to stay in line with tsfresh naming conventions in their</span>
+    <span class="c1"># docs and examples</span>
+    <span class="n">fname_in</span> <span class="o">=</span> <span class="n">ts_csv</span>
+    <span class="n">t_fname_out</span> <span class="o">=</span> <span class="n">fname_in</span> <span class="o">+</span> <span class="s1">&#39;.features.transposed.csv&#39;</span>
+
+    <span class="n">fp_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">f_calc</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">):</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features profile details file exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">fp_details_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">fp_details_array</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_details_str</span><span class="p">)</span>
+            <span class="n">f_calc</span> <span class="o">=</span> <span class="s1">&#39; (previously calculated by Ionosphere) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_details_array</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error: failed to read from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;OK no features profile details file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">))</span>
+
+    <span class="n">fp_created</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">):</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features profile created file exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">fp_created_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">fp_created_array</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_created_str</span><span class="p">)</span>
+            <span class="n">fp_id</span> <span class="o">=</span> <span class="n">fp_created_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">fp_created</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error: failed to read fp_id from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;OK no features profile created file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">t_fname_out</span><span class="p">):</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;transposed features already exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t_fname_out</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_fname_out</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">f_calc</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Read the timeseries json file</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">))</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+
+    <span class="c1"># Convert the timeseries to csv</span>
+    <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+
+    <span class="n">datapoints</span> <span class="o">=</span> <span class="n">timeseries</span>
+    <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">new_datapoint</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">converted</span><span class="p">:</span>
+        <span class="c1"># print(&#39;%s,%s&#39; % (str(int(ts)), str(value)))</span>
+        <span class="n">utc_ts_line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">utc_ts_line</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">])</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;DataFrame created with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to create a pandas DataFrame with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+
+<span class="c1"># @added 20161207 - Task #1658: Patterning Skyline Ionosphere</span>
+<span class="c1"># Coverting the Dataframe types to suit MySQL data types</span>
+<span class="c1"># For anyone in here if you have done a code review of Skyline there are</span>
+<span class="c1"># a number of questions that arise from the decision to deviate from json or</span>
+<span class="c1"># storing msgppack as BLOB etc.  tsfresh used csv and we can csv from Graphite</span>
+<span class="c1"># etc.  Skyline should be able to handle csv.  As for how data is stored in</span>
+<span class="c1"># MySQL, this was given considerable review and thought.  Given that Ionosphere</span>
+<span class="c1"># and Skyline in general should not be limited to the domain of analyzing</span>
+<span class="c1"># Graphite machine metrics but other timeseries data sources too.</span>
+<span class="c1">#    df[&#39;feature_name&#39;] = df[&#39;feature_name&#39;].astype(string)</span>
+<span class="c1">#    df[&#39;value&#39;] = df[&#39;value&#39;].astype(float)</span>
+
+    <span class="c1"># Test the DataFrame</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df_created</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">df_created</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to read the pandas DataFrame created with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
+
+    <span class="n">start_feature_extraction</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting extract_features&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># @modified 20161226 - Bug #1822: tsfresh extract_features process stalling</span>
+        <span class="c1"># Changed to use the new ReasonableFeatureExtractionSettings that was</span>
+        <span class="c1"># introduced in tsfresh-0.4.0 to exclude the computationally high cost</span>
+        <span class="c1"># of extracting features from very static timeseries that has little to</span>
+        <span class="c1"># no variation is the values, which results in features taking up to</span>
+        <span class="c1"># almost 600 seconds to calculate on a timeseries of length 10075</span>
+        <span class="c1"># (168h - 1 datapoint per 60s)</span>
+        <span class="c1"># In terms of inline feature calculatation, always exclude</span>
+        <span class="c1"># high_comp_cost features.</span>
+        <span class="c1"># df_features = extract_features(df, column_id=&#39;metric&#39;, column_sort=&#39;timestamp&#39;, column_kind=None, column_value=None)</span>
+        <span class="n">tsf_settings</span> <span class="o">=</span> <span class="n">ReasonableFeatureExtractionSettings</span><span class="p">()</span>
+        <span class="c1"># Disable tqdm progress bar</span>
+        <span class="n">tsf_settings</span><span class="o">.</span><span class="n">disable_progressbar</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">df_features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">column_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">column_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feature_extraction_settings</span><span class="o">=</span><span class="n">tsf_settings</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features extracted from </span><span class="si">%s</span><span class="s1"> data&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: extracting features with tsfresh from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">end_feature_extraction</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;feature extraction failed in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">end_feature_extraction</span> <span class="o">-</span> <span class="n">start_feature_extraction</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+
+    <span class="n">end_feature_extraction</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">feature_extraction_time</span> <span class="o">=</span> <span class="n">end_feature_extraction</span> <span class="o">-</span> <span class="n">start_feature_extraction</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;feature extraction took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">feature_extraction_time</span><span class="p">))</span>
+
+    <span class="c1"># write to disk</span>
+    <span class="n">fname_out</span> <span class="o">=</span> <span class="n">fname_in</span> <span class="o">+</span> <span class="s1">&#39;.features.csv&#39;</span>
+    <span class="c1"># df_features.to_csv(fname_out)</span>
+
+    <span class="c1"># Transpose</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df_t</span> <span class="o">=</span> <span class="n">df_features</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features transposed&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: transposing tsfresh features from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+
+    <span class="c1"># Create transposed features csv</span>
+    <span class="n">t_fname_out</span> <span class="o">=</span> <span class="n">fname_in</span> <span class="o">+</span> <span class="s1">&#39;.features.transposed.csv&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df_t</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">t_fname_out</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: saving transposed tsfresh features from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
+
+    <span class="c1"># Calculate the count and sum of the features values</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df_sum</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">t_fname_out</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">])</span>
+        <span class="n">df_sum</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create Dataframe to sum&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">features_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to count number of features, set to 0&#39;</span><span class="p">)</span>
+        <span class="n">features_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">features_sum</span> <span class="o">=</span> <span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to sum feature values, set to 0&#39;</span><span class="p">)</span>
+        <span class="n">features_sum</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features saved to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fname_out</span><span class="p">))</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;transposed features saved to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t_fname_out</span><span class="p">))</span>
+    <span class="n">total_calc_time</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+    <span class="n">calc_time</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">feature_extraction_time</span><span class="p">)</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total feature profile completed in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_calc_time</span><span class="p">))</span>
+
+    <span class="c1"># Create a features profile details file</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># @modified 20170108 - Feature #1842: Ionosphere - Graphite now graphs</span>
+        <span class="c1"># Added the ts_full_duration here as it was not added here on the 20170104</span>
+        <span class="c1"># when it was added the webapp and ionosphere</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tsfresh_version</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_time</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">features_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">features_sum</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">))</span>
+        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">features_profile_details_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to write </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">features_profile_details_file</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed the created csv - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+
+    <span class="c1"># @added 20170112 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace</span>
+    <span class="c1"># Ionosphere learn needs Redis works sets, but this was moved to</span>
+    <span class="c1"># ionosphere_backend.py and learn.py not done here</span>
+
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_fname_out</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc_time</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.1.1-beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

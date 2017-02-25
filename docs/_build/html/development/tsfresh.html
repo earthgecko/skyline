@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Development - tsfresh &mdash; Skyline 1.1.1-beta documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
+        <link rel="up" title="Development" href="index.html"/>
+        <link rel="next" title="Development - pytz" href="pytz.html"/>
+        <link rel="prev" title="Development - Ionosphere" href="ionosphere.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Development - tsfresh</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsfresh-in-the-skyline-context">tsfresh in the Skyline context</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#how-skyline-was-over-complicatedly-upgraded-from-tsfresh-0-1-2-to-tsfresh-0-3-0">How Skyline was over complicatedly upgraded from tsfresh-0.1.2 to tsfresh-0.3.0</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Development</a> &raquo;</li>
+      
+    <li>Development - tsfresh</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/development/tsfresh.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="development-tsfresh">
+<h1>Development - tsfresh<a class="headerlink" href="#development-tsfresh" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tsfresh-in-the-skyline-context">
+<h2>tsfresh in the Skyline context<a class="headerlink" href="#tsfresh-in-the-skyline-context" title="Permalink to this headline">¶</a></h2>
+<p>Skyline uses its own internal list of tsfresh feature names.  When a tsfresh
+update is required, this internal list of tsfresh feature names may need
+additions in Skyline as well in skyline/tsfresh_feature_names.py</p>
+<div class="section" id="how-skyline-was-over-complicatedly-upgraded-from-tsfresh-0-1-2-to-tsfresh-0-3-0">
+<h3>How Skyline was over complicatedly upgraded from tsfresh-0.1.2 to tsfresh-0.3.0<a class="headerlink" href="#how-skyline-was-over-complicatedly-upgraded-from-tsfresh-0-1-2-to-tsfresh-0-3-0" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Locally upgrade your tsfresh version in your Skyline Python virtualenv</li>
+<li>Run tests and if they fail we need to ensure that any new feature names are
+updated in skyline/tsfresh_feature_names.py</li>
+<li>Calculate the features of the baseline data set and compare the last version
+baseline e.g. tests/tsfresh-0.1.2.stats.statsd.bad_lines_seen.20161110.csv.features.transposed.csv</li>
+</ul>
+<ul class="simple">
+<li>If you have verified that only new feature names have been added, to generate
+the TSFRESH_FEATURES list</li>
+</ul>
+<ul class="simple">
+<li>Update skyline/tsfresh_feature_names.py with new feature names AND tsfresh
+versions</li>
+<li>Add the new baseline for the version of tsfresh</li>
+</ul>
+<ul class="simple">
+<li>Run tests</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pytz.html" class="btn btn-neutral float-right" title="Development - pytz" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ionosphere.html" class="btn btn-neutral" title="Development - Ionosphere" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.1.1-beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

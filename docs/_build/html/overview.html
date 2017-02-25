@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>Overview &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
         <link rel="next" title="Requirements" href="requirements.html"/>
         <link rel="prev" title="Skyline documentation" href="index.html"/> 
 
@@ -204,6 +204,8 @@ near real-time.  In the world of Python, data analysis, R and most machine
 learning, Skyline is FAST.  Processing and analyzing 1000s and 1000s of
 constantly changing timeseries, every minute of every day and it can do it in
 multiple resolutions, on a fairly low end commodity server.</p>
+<p>Skyline learns using a timeseries similarities comparison method based on
+features extraction and comparison using the <a class="reference external" href="https://github.com/blue-yonder/tsfresh">tsfresh</a> package.</p>
 </div>
 <div class="section" id="the-new-look-of-skyline-apps">
 <h2>The new look of Skyline apps<a class="headerlink" href="#the-new-look-of-skyline-apps" title="Permalink to this headline">¶</a></h2>
@@ -217,6 +219,7 @@ timeseries</li>
 <li>Panorama - anomalies database and historical views</li>
 <li>Webapp - frontend to view current and histroical anomalies and browse Redis
 with <span class="red">re</span><span class="brow">brow</span></li>
+<li>Ionosphere - timeseries fingerprinting and learning</li>
 </ul>
 <p>Skyline is still a near real-time anomaly detection system, however it has
 various modes of operation that are modular and self contained, so that only the
@@ -263,6 +266,7 @@ building blocks from the scientific community.</p>
 <li><strong>mysql/mariadb</strong> - a database - <a class="reference external" href="https://www.mysql.com/">MySQL</a> or <a class="reference external" href="https://mariadb.org/">MariaDB</a></li>
 <li><span class="red">re</span><span class="brow">brow</span> - Skyline uses a modified port of Marian
 Steinbach&#8217;s excellent <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a></li>
+<li><strong>tsfresh</strong> - <a class="reference external" href="https://github.com/blue-yonder/tsfresh">tsfresh</a> - Automatic extraction of relevant features from time series</li>
 </ol>
 </div>
 </div>
@@ -286,7 +290,7 @@ Steinbach&#8217;s excellent <a class="reference external" href="https://github.c
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -308,7 +312,7 @@ Steinbach&#8217;s excellent <a class="reference external" href="https://github.c
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

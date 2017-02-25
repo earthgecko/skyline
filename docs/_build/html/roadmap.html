@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Roadmap &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>Roadmap &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
         <link rel="next" title="skyline package" href="skyline.html"/>
         <link rel="prev" title="Development - pytz" href="development/pytz.html"/> 
 
@@ -118,7 +118,10 @@
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Roadmap</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#further-performance-improvements-and-python-3-5">Further performance improvements and Python-3.5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ionosphere-in-development">Ionosphere - in development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ionosphere">Ionosphere</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#in-progress">In progress</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#meteor">Meteor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#constellations">Constellations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skyline-and-nasa-fits-data">Skyline and NASA/FITS data</a></li>
@@ -130,10 +133,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#overlaid">Overlaid</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#update-the-nab-scoreboard">Update the NAB Scoreboard</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#machine-learning">Machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grumpy">Grumpy</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -195,13 +198,16 @@ were possible, so cython where applicable is the obvious choice.</p>
 <p>Continue updating the code base to ensure that everything can be run on
 &gt;= Python-3.5.x</p>
 </div>
-<div class="section" id="ionosphere-in-development">
-<h2>Ionosphere - in development<a class="headerlink" href="#ionosphere-in-development" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ionosphere">
+<h2>Ionosphere<a class="headerlink" href="#ionosphere" title="Permalink to this headline">¶</a></h2>
 <p>Functionality to allow the operator to flag false positives, with a view
 to using machine learning to train Skyline on anomalies.  Using the entire data
 set for training it, perhaps even using an entire namespace to increase the
 accuracy of the anomaly detection via multiple avenues of analysis.</p>
-<p>Some possible movement - see <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a></p>
+<div class="section" id="in-progress">
+<h3>In progress<a class="headerlink" href="#in-progress" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="ionosphere.html">Ionosphere</a> and <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a></p>
+</div>
 </div>
 <div class="section" id="meteor">
 <h2>Meteor<a class="headerlink" href="#meteor" title="Permalink to this headline">¶</a></h2>
@@ -304,10 +310,8 @@ axis as above)</p>
 <p>Quite amazing.  It a not beyond the realms of possibility to have a Horizon
 feeding specific metrics to various NuPIC HTM Cortical Learning
 Algorithms models...</p>
-</div>
-</div>
 <div class="section" id="update-the-nab-scoreboard">
-<h3>Update the NAB Scoreboard<a class="headerlink" href="#update-the-nab-scoreboard" title="Permalink to this headline">¶</a></h3>
+<h5>Update the NAB Scoreboard<a class="headerlink" href="#update-the-nab-scoreboard" title="Permalink to this headline">¶</a></h5>
 <p>Look at the automated running of the Numenta Anomaly Benchmark (NAB)
 data and frequently determine the Standard Profile, Reward Low FP and
 Reward Low FN scores (metrics). This will only aid and improve the
@@ -320,12 +324,25 @@ added or applied to Skyline in the future, e.g:</p>
 (<a class="reference external" href="https://github.com/nicolasmiller/pyculiarity">https://github.com/nicolasmiller/pyculiarity</a>)</li>
 </ul>
 <p>Automated NAB benchmark metrics would be a nice thing to have :)</p>
+<p><strong>Update 20170225</strong>: Skyline can no longer necessarily be NAB-ed due to it now
+functioning in multiple temporal resolutions as a whole.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="section" id="machine-learning">
 <h2>Machine learning<a class="headerlink" href="#machine-learning" title="Permalink to this headline">¶</a></h2>
 <p>Bring additional dimensions of machine learning capabilities into Skyline, too
 many avenues to mention...</p>
+</div>
+<div class="section" id="grumpy">
+<h2>Grumpy<a class="headerlink" href="#grumpy" title="Permalink to this headline">¶</a></h2>
+<p>Investigate if any elements could benefit performance wise from being
+implemented in Grumpy - go running Python -
+<a class="reference external" href="https://opensource.googleblog.com/2017/01/grumpy-go-running-python.html">https://opensource.googleblog.com/2017/01/grumpy-go-running-python.html</a> there
+may be some mileage in using go instead of multiprocessing in some cases,
+algorithms, ionosphere, tsfresh chunks to go in extract_features rather than
+multiprocessing, scope for investigation.</p>
 </div>
 </div>
 
@@ -348,7 +365,7 @@ many avenues to mention...</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -370,7 +387,7 @@ many avenues to mention...</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

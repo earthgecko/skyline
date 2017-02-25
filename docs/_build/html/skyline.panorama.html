@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.panorama package &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>skyline.panorama package &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
-        <link rel="next" title="skyline.webapp package" href="skyline.webapp.html"/>
+        <link rel="next" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/>
         <link rel="prev" title="skyline.mirage package" href="skyline.mirage.html"/> 
 
   
@@ -134,14 +134,19 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-panorama">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
 </ul>
@@ -258,10 +263,10 @@
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -298,10 +303,10 @@
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -310,6 +315,24 @@
 </li>
 </ul>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="panorama.panorama.Panorama.new_load_metric_vars">
+<code class="descname">new_load_metric_vars</code><span class="sig-paren">(</span><em>metric_vars_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/panorama/panorama.html#Panorama.new_load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#panorama.panorama.Panorama.new_load_metric_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the metric variables for a check from a metric check variables file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars module object or <code class="docutils literal"><span class="pre">False</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -356,7 +379,7 @@ blah</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="skyline.webapp.html" class="btn btn-neutral float-right" title="skyline.webapp package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="skyline.tsfresh_features.html" class="btn btn-neutral float-right" title="skyline.tsfresh_features package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="skyline.mirage.html" class="btn btn-neutral" title="skyline.mirage package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -368,7 +391,7 @@ blah</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -390,7 +413,7 @@ blah</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

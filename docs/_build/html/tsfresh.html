@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tsfresh &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>tsfresh &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
         <link rel="next" title="Redis integration" href="redis-integration.html"/>
         <link rel="prev" title="Ionosphere" href="ionosphere.html"/> 
 
@@ -105,8 +105,10 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">tsfresh</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#graphite-integration">Graphite integration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skyline-tsfresh-scripts-tsfresh-graphite-csv-py">skyline/tsfresh/scripts/tsfresh_graphite_csv.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tsfresh-and-graphite-integration">tsfresh and Graphite integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py">skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -169,26 +171,27 @@
   <div class="section" id="tsfresh">
 <h1>tsfresh<a class="headerlink" href="#tsfresh" title="Permalink to this headline">¶</a></h1>
 <p>EXPERIMENTAL</p>
-<p>The Ionosphere branch introduces tsfresh to the Skyline stack.</p>
+<p>The Ionosphere branch introduced tsfresh to the Skyline stack to enable the
+creation of feature profiles for timeseries that the user deems to be not
+anomalous.</p>
 <p><a class="reference external" href="https://github.com/blue-yonder/tsfresh/">https://github.com/blue-yonder/tsfresh/</a></p>
 <p>See <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a> for the long
 trail that lead to tsfresh.</p>
-<div class="section" id="graphite-integration">
-<h2>Graphite integration<a class="headerlink" href="#graphite-integration" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tsfresh-and-graphite-integration">
+<h2>tsfresh and Graphite integration<a class="headerlink" href="#tsfresh-and-graphite-integration" title="Permalink to this headline">¶</a></h2>
 <p>Skyline needs to tie Graphite, Redis and tsfresh together.  However these is
 fairly straight forward really, but to save any others having to reverse
-engineer the process the skyline/tsfresh/scripts are written is a generic type
-of way that does not require downloading Skyline, they should run standalone
-so that others can use them if they want some simple Graphite -&gt; tsfresh
-capabilities.</p>
+engineer the process the skyline/tsfresh_features/scripts are written is a
+generic type of way that does not require downloading Skyline, they should run
+standalone so that others can use them if they want some simple Graphite -&gt;
+tsfresh feature extraction capabilities.</p>
 <p>See:</p>
 <ul class="simple">
-<li>skyline/tsfresh/scripts/tsfresh_graphite_csv.py</li>
-<li>skyline/tsfresh/scripts/tsfresh_graphite_csv.requirements.txt</li>
+<li>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py</li>
+<li>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.requirements.txt</li>
 </ul>
-</div>
-<div class="section" id="skyline-tsfresh-scripts-tsfresh-graphite-csv-py">
-<h2>skyline/tsfresh/scripts/tsfresh_graphite_csv.py<a class="headerlink" href="#skyline-tsfresh-scripts-tsfresh-graphite-csv-py" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py">
+<h3>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py<a class="headerlink" href="#skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py" title="Permalink to this headline">¶</a></h3>
 <p>Assign a Graphite single tiemseries metric csv file to tsfresh to process and
 calculate the features for.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -211,10 +214,14 @@ and find yours.</td>
 </tr>
 </tbody>
 </table>
-<p>Run the script with:</p>
-<p><code class="docutils literal"><span class="pre">`</span>
-<span class="pre">python</span> <span class="pre">tsfresh/scripts/tsfresh_graphite_csv</span> <span class="pre">path_to_your_graphite_csv</span> <span class="pre">[pytz_timezone]</span>
-<span class="pre">`</span></code></p>
+<p>Run the script with, a virtualenv example is shown but you can run just with
+Python-2.7 from wherever you save the script:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+bin/python2.7 tsfresh_features/scripts/tsfresh_graphite_csv path_to_your_graphite_csv <span class="o">[</span>pytz_timezone<span class="o">]</span>
+deactivate
+</pre></div>
+</div>
 <p>Where path_to_your_graphite_csv.csv is a single metric timeseries that has been
 from retrieved from Graphite with the &amp;format=csv request parameter and saved to
 a file.</p>
@@ -233,6 +240,7 @@ format) you look at this csv :)</li>
 <p class="first admonition-title">Warning</p>
 <p class="last">Please note that if your timeseries are recorded in a daylight savings
 timezone, this has not been tested the DST changes.</p>
+</div>
 </div>
 </div>
 </div>
@@ -256,7 +264,7 @@ timezone, this has not been tested the DST changes.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -278,7 +286,7 @@ timezone, this has not been tested the DST changes.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

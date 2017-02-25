@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>skyline package &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -127,14 +127,19 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-features_profile">skyline.features_profile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
@@ -235,8 +240,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#skyline-ionosphere-agent-module">skyline.ionosphere.agent module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#skyline-ionosphere-ionosphere-module">skyline.ionosphere.ionosphere module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.agent">skyline.ionosphere.agent module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.ionosphere">skyline.ionosphere.ionosphere module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.learn">skyline.ionosphere.learn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere">Module contents</a></li>
 </ul>
 </li>
@@ -257,10 +263,18 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.panorama.html#module-panorama">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="skyline.tsfresh_features.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.tsfresh_features.html#module-tsfresh_features.generate_tsfresh_features">skyline.tsfresh_features.generate_tsfresh_features module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.tsfresh_features.html#module-tsfresh_features">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.backend">skyline.webapp.backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.ionosphere_backend">skyline.webapp.ionosphere_backend module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.utilities">skyline.webapp.utilities module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.webapp">skyline.webapp.webapp module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp">Module contents</a></li>
 </ul>
@@ -289,6 +303,166 @@
 <dt id="algorithm_exceptions.Boring">
 <em class="property">exception </em><code class="descname">Boring</code><a class="reference internal" href="_modules/algorithm_exceptions.html#Boring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithm_exceptions.Boring" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-database">
+<span id="skyline-database-module"></span><h2>skyline.database module<a class="headerlink" href="#module-database" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="database.get_engine">
+<code class="descname">get_engine</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#get_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.get_engine" title="Permalink to this definition">¶</a></dt>
+<dd><p># &#64;added 20161209 - Branch #922: ionosphere
+#                   Task #1658: Patterning Skyline Ionosphere
+# Use SQLAlchemy, mysql.connector is still around but starting the
+# move to SQLAlchemy now that all the webapp Ionosphere SQLAlchemy patterns
+# work</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="database.ionosphere_table_meta">
+<code class="descname">ionosphere_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#ionosphere_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.ionosphere_table_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="database.metrics_table_meta">
+<code class="descname">metrics_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#metrics_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.metrics_table_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="database.anomalies_table_meta">
+<code class="descname">anomalies_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#anomalies_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.anomalies_table_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="database.ionosphere_matched_table_meta">
+<code class="descname">ionosphere_matched_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#ionosphere_matched_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.ionosphere_matched_table_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-features_profile">
+<span id="skyline-features-profile-module"></span><h2>skyline.features_profile module<a class="headerlink" href="#module-features_profile" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="features_profile.feature_name_id">
+<code class="descname">feature_name_id</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>feature_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/features_profile.html#feature_name_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#features_profile.feature_name_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the Skyline id of a tsfresh feature name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature_name</strong> (<em>str</em>) &#8211; the tsfresh feature name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">id</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="features_profile.calculate_features_profile">
+<code class="descname">calculate_features_profile</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>timestamp</em>, <em>metric</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/features_profile.html#calculate_features_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#features_profile.calculate_features_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a tsfresh features profile from a training data set</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>timestamp</strong> (<em>str</em>) &#8211; the timestamp of metric anomaly with training data</li>
+<li><strong>metric</strong> (<em>str</em>) &#8211; the base_name of the metric</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">int</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(str, boolean, str, str, str)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ionosphere_functions">
+<span id="skyline-ionosphere-functions-module"></span><h2>skyline.ionosphere_functions module<a class="headerlink" href="#module-ionosphere_functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ionosphere_functions.fp_create_get_an_engine">
+<code class="descname">fp_create_get_an_engine</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#fp_create_get_an_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.fp_create_get_an_engine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ionosphere_functions.fp_create_engine_disposal">
+<code class="descname">fp_create_engine_disposal</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#fp_create_engine_disposal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.fp_create_engine_disposal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ionosphere_functions.get_ionosphere_learn_details">
+<code class="descname">get_ionosphere_learn_details</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#get_ionosphere_learn_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.get_ionosphere_learn_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines what the default <code class="docutils literal"><span class="pre">IONOSPHERE_LEARN_DEFAULT_</span></code> values and what the
+specific override values are if the metric matches a pattern defined in
+<a class="reference internal" href="#settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG" title="settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</span></code></a>. This is used in Panorama,
+webapp/ionosphere_backend</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the Skyline app name calling the function</li>
+<li><strong>base_name</strong> (<em>str</em>) &#8211; thee base_name of the metric</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(int, int, int, int, float)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ionosphere_functions.create_features_profile">
+<code class="descname">create_features_profile</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>requested_timestamp</em>, <em>data_for_metric</em>, <em>context</em>, <em>ionosphere_job</em>, <em>fp_parent_id</em>, <em>fp_generation</em>, <em>fp_learn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#create_features_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.create_features_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a features_profile to the Skyline ionosphere database table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; Skyline app name</li>
+<li><strong>requested_timestamp</strong> (<em>int</em>) &#8211; The timestamp of the dir that the features
+profile data is in</li>
+<li><strong>data_for_metric</strong> (<em>str</em>) &#8211; The base_name of the metric</li>
+<li><strong>context</strong> (<em>str</em>) &#8211; The context of the caller</li>
+<li><strong>ionosphere_job</strong> (<em>str</em>) &#8211; The ionosphere_job name related to creation request
+valid jobs are <code class="docutils literal"><span class="pre">learn_fp_human</span></code>, <code class="docutils literal"><span class="pre">learn_fp_generation</span></code>,
+<code class="docutils literal"><span class="pre">learn_fp_learnt</span></code> and <code class="docutils literal"><span class="pre">learn_fp_automatic</span></code>.</li>
+<li><strong>fp_parent_id</strong> (<em>int</em>) &#8211; The id of the parent features profile that this was
+learnt from, 0 being an original human generated features profile</li>
+<li><strong>fp_generation</strong> (<em>int</em>) &#8211; The number of generations away for the original
+human generated features profile, 0 being an original human generated
+features profile.</li>
+<li><strong>fp_learn</strong> (<em>boolean</em>) &#8211; Whether Ionosphere should learn at use_full_duration_days</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str, boolean, boolean, str, str</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -641,20 +815,6 @@ anomalies to for crucible to check to a file on disk - absolute path</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_PATH" title="settings.PANORAMA_CHECK_PATH"><strong>PANORAMA_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
 anomalies to for Panorama to check to a file on disk - absolute path</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
-<dt id="settings.IONOSPHERE_CHECK_PATH">
-<code class="descname">IONOSPHERE_CHECK_PATH</code><em class="property"> = '/opt/skyline/ionosphere/check'</em><a class="headerlink" href="#settings.IONOSPHERE_CHECK_PATH" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><strong>IONOSPHERE_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
-anomalies to for Ionosphere to check to a file on disk - absolute path</td>
 </tr>
 </tbody>
 </table>
@@ -1118,6 +1278,8 @@ trigger again.</p>
     <span class="p">(</span><span class="s1">&#39;stats.&#39;</span><span class="p">,</span> <span class="s1">&#39;syslog&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="c1"># Wildcard namespaces can be used as well</span>
     <span class="p">(</span><span class="s1">&#39;metric4.thing.*.requests&#39;</span><span class="p">,</span> <span class="s1">&#39;stmp&#39;</span><span class="p">,</span> <span class="mi">900</span><span class="p">),</span>
+    <span class="c1"># However beware of wildcards as the above wildcard should really be</span>
+    <span class="p">(</span><span class="s1">&#39;metric4.thing\..*.\.requests&#39;</span><span class="p">,</span> <span class="s1">&#39;stmp&#39;</span><span class="p">,</span> <span class="mi">900</span><span class="p">),</span>
     <span class="c1"># mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and Mirage is enabled</span>
     <span class="p">(</span><span class="s1">&#39;metric5.thing.*.rpm&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">900</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>
 <span class="p">)</span>
@@ -1133,7 +1295,7 @@ trigger again.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>metric</strong> (<em>str</em>) &#8211; metric name.</li>
-<li><strong>alerter</strong> (<em>str</em>) &#8211; alerter name.</li>
+<li><strong>alerter</strong> (<em>str</em>) &#8211; the alerter name e.g. smtp, syslog, hipchat, pagerduty</li>
 <li><strong>EXPIRATION_TIME</strong> (<em>int</em>) &#8211; Alerts will not fire twice within this amount of
 seconds, even if they trigger again.</li>
 <li><strong>SECOND_ORDER_RESOLUTION_HOURS</strong> (<em>int</em>) &#8211; (optional) The number of hours that Mirage
@@ -2086,76 +2248,6 @@ anomaly data for timeseries will be stored - absolute path</td>
 </dd></dl>
 
 <dl class="data">
-<dt id="settings.IONOSPHERE_ENABLED">
-<code class="descname">IONOSPHERE_ENABLED</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_ENABLED" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ENABLED" title="settings.IONOSPHERE_ENABLED"><strong>IONOSPHERE_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enable Ionosphere</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
-<dt id="settings.IONOSPHERE_PROCESSES">
-<code class="descname">IONOSPHERE_PROCESSES</code><em class="property"> = 1</em><a class="headerlink" href="#settings.IONOSPHERE_PROCESSES" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROCESSES" title="settings.IONOSPHERE_PROCESSES"><strong>IONOSPHERE_PROCESSES</strong></a> &#8211; Number of processes to assign to Panorama, should never
-need more than 1</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
-<dt id="settings.ENABLE_IONOSPHERE_DEBUG">
-<code class="descname">ENABLE_IONOSPHERE_DEBUG</code><em class="property"> = False</em><a class="headerlink" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="settings.ENABLE_IONOSPHERE_DEBUG"><strong>ENABLE_IONOSPHERE_DEBUG</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - enables additional debug logging
-useful for development only, this should definitely be set to <code class="docutils literal"><span class="pre">False</span></code> on
-production system as LOTS of output</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
-<dt id="settings.IONOSPHERE_DATA_FOLDER">
-<code class="descname">IONOSPHERE_DATA_FOLDER</code><em class="property"> = '/opt/skyline/ionosphere/data'</em><a class="headerlink" href="#settings.IONOSPHERE_DATA_FOLDER" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_DATA_FOLDER" title="settings.IONOSPHERE_DATA_FOLDER"><strong>IONOSPHERE_DATA_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Ionosphere data folder
-where anomaly data for timeseries will be stored - absolute path</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
-<dt id="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR">
-<code class="descname">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</code><em class="property"> = 86400</em><a class="headerlink" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><strong>IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</strong></a> (<em>int</em>) &#8211; Ionosphere will keep timeseries
-data files for this long, for the operator to review.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
 <dt id="settings.WEBAPP_SERVER">
 <code class="descname">WEBAPP_SERVER</code><em class="property"> = 'gunicorn'</em><a class="headerlink" href="#settings.WEBAPP_SERVER" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -2326,6 +2418,399 @@ timezone so that the Webapp graphs are the same in any location.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_CHECK_PATH">
+<code class="descname">IONOSPHERE_CHECK_PATH</code><em class="property"> = '/opt/skyline/ionosphere/check'</em><a class="headerlink" href="#settings.IONOSPHERE_CHECK_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><strong>IONOSPHERE_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
+anomalies to for Ionosphere to check to a file on disk - absolute path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_ENABLED">
+<code class="descname">IONOSPHERE_ENABLED</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ENABLED" title="settings.IONOSPHERE_ENABLED"><strong>IONOSPHERE_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enable Ionosphere</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_PROCESSES">
+<code class="descname">IONOSPHERE_PROCESSES</code><em class="property"> = 1</em><a class="headerlink" href="#settings.IONOSPHERE_PROCESSES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROCESSES" title="settings.IONOSPHERE_PROCESSES"><strong>IONOSPHERE_PROCESSES</strong></a> &#8211; Number of processes to assign to Panorama, should never
+need more than 1</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.ENABLE_IONOSPHERE_DEBUG">
+<code class="descname">ENABLE_IONOSPHERE_DEBUG</code><em class="property"> = False</em><a class="headerlink" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="settings.ENABLE_IONOSPHERE_DEBUG"><strong>ENABLE_IONOSPHERE_DEBUG</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - enables additional debug logging
+useful for development only, this should definitely be set to <code class="docutils literal"><span class="pre">False</span></code> on
+production system as LOTS of output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_DATA_FOLDER">
+<code class="descname">IONOSPHERE_DATA_FOLDER</code><em class="property"> = '/opt/skyline/ionosphere/data'</em><a class="headerlink" href="#settings.IONOSPHERE_DATA_FOLDER" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_DATA_FOLDER" title="settings.IONOSPHERE_DATA_FOLDER"><strong>IONOSPHERE_DATA_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Ionosphere data folder
+where anomaly data for timeseries will be stored - absolute path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_PROFILES_FOLDER">
+<code class="descname">IONOSPHERE_PROFILES_FOLDER</code><em class="property"> = '/opt/skyline/ionosphere/features_profiles'</em><a class="headerlink" href="#settings.IONOSPHERE_PROFILES_FOLDER" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROFILES_FOLDER" title="settings.IONOSPHERE_PROFILES_FOLDER"><strong>IONOSPHERE_PROFILES_FOLDER</strong></a> &#8211; This is the path for the Ionosphere data folder
+where anomaly data for timeseries will be stored - absolute path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LEARN_FOLDER">
+<code class="descname">IONOSPHERE_LEARN_FOLDER</code><em class="property"> = '/opt/skyline/ionosphere/learn'</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_FOLDER" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_FOLDER" title="settings.IONOSPHERE_LEARN_FOLDER"><strong>IONOSPHERE_LEARN_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Ionosphere learning data
+folder where learning data for timeseries will be processed - absolute path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_CHECK_MAX_AGE">
+<code class="descname">IONOSPHERE_CHECK_MAX_AGE</code><em class="property"> = 300</em><a class="headerlink" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="settings.IONOSPHERE_CHECK_MAX_AGE"><strong>IONOSPHERE_CHECK_MAX_AGE</strong></a> (<em>int</em>) &#8211; Ionosphere will only process a check file if it is
+not older than IONOSPHERE_CHECK_MAX_AGE seconds.  If it is set to 0 it does
+all.  This setting just ensures if Ionosphere stalls for some hours and is
+restarted, the user can choose to discard older checks and miss anomalies
+being recorded if they so choose to, to prevent Ionosphere stampeding.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR">
+<code class="descname">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</code><em class="property"> = 86400</em><a class="headerlink" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><strong>IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</strong></a> (<em>int</em>) &#8211; Ionosphere will keep timeseries
+data files for this long, for the operator to review.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SKYLINE_URL">
+<code class="descname">SKYLINE_URL</code><em class="property"> = 'http://skyline.example.com:8080'</em><a class="headerlink" href="#settings.SKYLINE_URL" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_URL" title="settings.SKYLINE_URL"><strong>SKYLINE_URL</strong></a> (<em>str</em>) &#8211; The http or https URL (and port if required) to access your
+Skyline on (no trailing slash).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SERVER_PYTZ_TIMEZONE">
+<code class="descname">SERVER_PYTZ_TIMEZONE</code><em class="property"> = 'UTC'</em><a class="headerlink" href="#settings.SERVER_PYTZ_TIMEZONE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SERVER_PYTZ_TIMEZONE" title="settings.SERVER_PYTZ_TIMEZONE"><strong>SERVER_PYTZ_TIMEZONE</strong></a> (<em>str</em>) &#8211; You must specify a pytz timezone you want Ionosphere
+to use for the creation of features profiles and converting datetimes to
+UTC.  This must be a valid pytz timezone name, see:
+<a class="reference external" href="https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst">https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst</a>
+<a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/development/pytz.html#timezones-list-for-pytz-version">http://earthgecko-skyline.readthedocs.io/en/ionosphere/development/pytz.html#timezones-list-for-pytz-version</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR">
+<code class="descname">IONOSPHERE_FEATURES_PERCENT_SIMILAR</code><em class="property"> = 1.0</em><a class="headerlink" href="#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><strong>IONOSPHERE_FEATURES_PERCENT_SIMILAR</strong></a> (<em>float</em>) &#8211; The percentage difference between a
+features profile sum and a calculated profile sum to result in a match.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LEARN">
+<code class="descname">IONOSPHERE_LEARN</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN" title="settings.IONOSPHERE_LEARN"><strong>IONOSPHERE_LEARN</strong></a> (<em>boolean</em>) &#8211; Whether Ionosphere is set to learn</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The below <code class="docutils literal"><span class="pre">IONOSPHERE_LEARN_DEFAULT_</span></code> variables are all overrideable in
+the IONOSPHERE_LEARN_NAMESPACE_CONFIG tuple per defined metric namespace
+further to this ALL metrics and their settings in terms of the Ionosphere
+learning context can also be modified via the webapp UI Ionosphere section.
+These settings are the defaults that are used in the creation of learnt
+features profiles and new metrics, HOWEVER the database is the preferred
+source of truth and will always be referred to first and the default or
+settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG values shall only be used if
+database values are not determined. These settings are here so that it is
+easy to paint all metrics and others specifically as a whole, once a metric
+is added to Ionosphere via the creation of a features profile, it is painted
+with these defaults or the appropriate namespace settings in
+settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Changes made to a metric settings in the database directly via the
+UI or your own SQL will not be overridden <code class="docutils literal"><span class="pre">IONOSPHERE_LEARN_DEFAULT_</span></code>
+variables or the IONOSPHERE_LEARN_NAMESPACE_CONFIG tuple per defined metric
+namespace even if the metric matches the namespace, the database is the
+source of truth.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS">
+<code class="descname">IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</code><em class="property"> = 16</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS"><strong>IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</strong></a> (<em>int</em>) &#8211; The maximum number of generations
+that Ionosphere can automatically learn up to from the original human created
+features profile within the IONOSPHERE_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN
+Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+and via webapp UI to update DB</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN">
+<code class="descname">IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</code><em class="property"> = 100.0</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><strong>IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</strong></a> (<em>float</em>) &#8211; The maximum percent
+that an automatically generated features profile can be from the original
+human created features profile, any automatically generated features profile
+with the a greater percent difference above this value when summed common
+features are calculated will be discarded.  Anything below this value will
+be considered a valid learned features profile.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This percent value will match -/+ e.g. works both ways x percent above
+or below.  In terms of comparisons, a negative percent is simply multiplied
+by -1.0.  The lower the value, the less Ionosphere can learn, to literally
+disable Ionosphere learning set this to 0.  The difference can be much
+greater than 100, but between 7 and 100 is reasonable for learning.  However
+to really disable learning, also set all max_generations settings to 1.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS">
+<code class="descname">IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</code><em class="property"> = 30</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS" title="settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS"><strong>IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</strong></a> (<em>int</em>) &#8211; The default full duration in
+in days at which Ionosphere should learn, the default is 30 days.
+Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS">
+<code class="descname">IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS</code><em class="property"> = 3661</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</strong> &#8211; The number of seconds that
+Ionosphere should wait before surfacing the metric timeseries for to learn
+from.  What Graphite aggregration do you want the retention at before
+querying it to learn from?
+Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG">
+<code class="descname">IONOSPHERE_LEARN_NAMESPACE_CONFIG</code><em class="property"> = (('skyline_test.alerters.test', 30, 3661, 16, 100.0), ('\\*', 30, 3661, 16, 100.0))</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG" title="settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG"><strong>IONOSPHERE_LEARN_NAMESPACE_CONFIG</strong></a> &#8211; Configures specific namespaces at
+specific learning full duration in days.
+Overrides settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS,
+settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS,
+settings.IONOSPHERE_MAX_GENERATIONS and settings.IONOSPHERE_MAX_PERCENT_DIFF_FROM_ORIGIN
+per defined namespace, first matched, used.  Order highest to lowest
+namespace resoultion. Like settings.ALERTS, you know how this works now...</td>
+</tr>
+</tbody>
+</table>
+<p>This is the config by which each declared namespace can be assigned a learning
+full duration in days.  It is here to allow for overrides so that if a metric
+does not suit being learned at say 30 days, it could be learned at say 14 days
+instead if 14 days was a better suited learning full duration.</p>
+<p>To specifically disable learning on a namespace, set LEARN_FULL_DURATION_DAYS
+to 0</p>
+<ul>
+<li><p class="first"><strong>Tuple schema example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">IONOSPHERE_LEARN_NAMESPACE_CONFIG</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="c1"># (&#39;&lt;metric_namespace&gt;&#39;, LEARN_FULL_DURATION_DAYS,</span>
+    <span class="c1">#  LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS, MAX_GENERATIONS,</span>
+    <span class="c1">#  MAX_PERCENT_DIFF_FROM_ORIGIN),</span>
+    <span class="c1"># Wildcard namespaces can be used as well</span>
+    <span class="p">(</span><span class="s1">&#39;metric3.thing\..*&#39;</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">3661</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;metric4.thing\..*.\.requests&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">3661</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">),</span>
+    <span class="c1"># However beware of wildcards as the above wildcard should really be</span>
+    <span class="p">(</span><span class="s1">&#39;metric4.thing\..*.\.requests&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">7261</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">),</span>
+    <span class="c1"># Disable learning on a namespace</span>
+    <span class="p">(</span><span class="s1">&#39;metric5.thing\..*.\.rpm&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3661</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">),</span>
+    <span class="c1"># Learn all Ionosphere enabled metrics at 30 days</span>
+    <span class="p">(</span><span class="s1">&#39;.*&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">3661</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Namespace tuple parameters are:</p>
+</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>metric_namespace</strong> (<em>str</em>) &#8211; metric_namespace pattern</li>
+<li><strong>LEARN_FULL_DURATION_DAYS</strong> (<em>int</em>) &#8211; The number of days that Ionosphere should
+should surface the metric timeseries for</li>
+<li><strong>LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</strong> (<em>int</em>) &#8211; The number of seconds that
+Ionosphere should wait before surfacing the metric timeseries for to learn
+from.  What Graphite aggregration do you want the retention at before
+querying it to learn from?  REQUIRED, NOT optional, we could use the
+settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS but
+that be some more conditionals, that we do not need, be precise, by now if
+you are training Skyline well you will understand, be precise helps :)</li>
+<li><strong>MAX_GENERATIONS</strong> (<em>int</em>) &#8211; The maximum number of generations that Ionosphere can
+automatically learn up to from the original human created features profile
+on this metric namespace.</li>
+<li><strong>MAX_PERCENT_DIFF_FROM_ORIGIN</strong> &#8211; The maximum percent that an automatically
+generated features profile can be from the original human created features
+profile for a metric in the namespace.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_AUTOBUILD">
+<code class="descname">IONOSPHERE_AUTOBUILD</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_AUTOBUILD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_AUTOBUILD" title="settings.IONOSPHERE_AUTOBUILD"><strong>IONOSPHERE_AUTOBUILD</strong></a> (<em>boolean</em>) &#8211; Make best effort attempt to auto provision any
+features_profiles directory and resources that have been deleted or are
+missing.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is highlighted as a setting as the number of features_profiles
+dirs that Ionosphere learn could spawn and the amount of data storage that
+would result is unknown at this point. It is possible the operator is going
+to need to prune this data a lot of which will probably never be looked
+at. Or a Skyline node is going to fail, not have the features_profiles dirs
+backed up and all the data is going to be lost or deleted. So it is possible for
+Ionosphere to created all the human interrupted resources for the features
+profile back under a best effort methodology. Although the original Redis graph
+image would not be available, nor the Graphite graphs in the resolution at which
+the features profile was created, however the fp_ts is available so the Redis
+plot could be remade and all the Graphite graphs could be made as best effort
+with whatever resoultion is available for that time period.
+This allows the operator to delete/prune feature profile dirs by possibly least
+matched by age, etc or all and still be able to surface the available features
+profile page data on-demand.</p>
+</div>
 </dd></dl>
 
 </div>
@@ -2515,9 +3000,23 @@ object, the object is returned</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="skyline_functions.filesafe_metricname">
+<code class="descname">filesafe_metricname</code><span class="sig-paren">(</span><em>metricname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#filesafe_metricname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.filesafe_metricname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a file system safe name for a metric name in terms of creating
+check files, etc</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="skyline_functions.send_anomalous_metric_to">
-<code class="descname">send_anomalous_metric_to</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>send_to_app</em>, <em>timeseries_dir</em>, <em>metric_timestamp</em>, <em>base_name</em>, <em>datapoint</em>, <em>from_timestamp</em>, <em>triggered_algorithms</em>, <em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#send_anomalous_metric_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.send_anomalous_metric_to" title="Permalink to this definition">¶</a></dt>
+<code class="descname">send_anomalous_metric_to</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>send_to_app</em>, <em>timeseries_dir</em>, <em>metric_timestamp</em>, <em>base_name</em>, <em>datapoint</em>, <em>from_timestamp</em>, <em>triggered_algorithms</em>, <em>timeseries</em>, <em>full_duration</em>, <em>parent_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#send_anomalous_metric_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.send_anomalous_metric_to" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign a metric and timeseries to Crucible or Ionosphere.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.RepresentsInt">
+<code class="descname">RepresentsInt</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#RepresentsInt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.RepresentsInt" title="Permalink to this definition">¶</a></dt>
+<dd><p>As per <a class="reference external" href="http://stackoverflow.com/a/1267145">http://stackoverflow.com/a/1267145</a> and &#64;Aivar I must agree with
+&#64;Triptycha &gt; &#8220;This 5 line function is not a complex mechanism.&#8221;</p>
 </dd></dl>
 
 <dl class="function">
@@ -2562,10 +3061,10 @@ object, the object is returned</li>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -2580,6 +3079,65 @@ object, the object is returned</li>
 <div class="section" id="module-skyline_version">
 <span id="skyline-skyline-version-module"></span><h2>skyline.skyline_version module<a class="headerlink" href="#module-skyline_version" title="Permalink to this headline">¶</a></h2>
 <p>version info</p>
+</div>
+<div class="section" id="module-tsfresh_feature_names">
+<span id="skyline-tsfresh-feature-names-module"></span><h2>skyline.tsfresh_feature_names module<a class="headerlink" href="#module-tsfresh_feature_names" title="Permalink to this headline">¶</a></h2>
+<dl class="data">
+<dt id="tsfresh_feature_names.TSFRESH_VERSION">
+<code class="descname">TSFRESH_VERSION</code><em class="property"> = '0.4.0'</em><a class="headerlink" href="#tsfresh_feature_names.TSFRESH_VERSION" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_VERSION" title="tsfresh_feature_names.TSFRESH_VERSION"><strong>TSFRESH_VERSION</strong></a> (<em>str</em>) &#8211; The version of tsfresh installed by pip, this is important
+in terms of feature extraction baselines</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="tsfresh_feature_names.TSFRESH_BASELINE_VERSION">
+<code class="descname">TSFRESH_BASELINE_VERSION</code><em class="property"> = '0.4.0'</em><a class="headerlink" href="#tsfresh_feature_names.TSFRESH_BASELINE_VERSION" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_BASELINE_VERSION" title="tsfresh_feature_names.TSFRESH_BASELINE_VERSION"><strong>TSFRESH_BASELINE_VERSION</strong></a> (<em>str</em>) &#8211; The version of tsfresh that was used to generate
+feature extraction baselines on.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="tsfresh_feature_names.TSFRESH_FEATURES">
+<code class="descname">TSFRESH_FEATURES</code><em class="property"> = [[1, 'value__symmetry_looking__r_0.65'], [2, 'value__first_location_of_maximum'], [3, 'value__absolute_sum_of_changes'], [4, 'value__large_number_of_peaks__n_1'], [5, 'value__large_number_of_peaks__n_3'], [6, 'value__large_number_of_peaks__n_5'], [7, 'value__last_location_of_minimum'], [8, 'value__mean_abs_change_quantiles__qh_0.4__ql_0.0'], [9, 'value__mean_abs_change_quantiles__qh_0.4__ql_0.2'], [10, 'value__mean_abs_change_quantiles__qh_0.4__ql_0.4'], [11, 'value__mean_abs_change_quantiles__qh_0.4__ql_0.6'], [12, 'value__mean_abs_change_quantiles__qh_0.4__ql_0.8'], [13, 'value__maximum'], [14, 'value__value_count__value_-inf'], [15, 'value__skewness'], [16, 'value__number_peaks__n_3'], [17, 'value__longest_strike_above_mean'], [18, 'value__number_peaks__n_5'], [19, 'value__first_location_of_minimum'], [20, 'value__large_standard_deviation__r_0.25'], [21, 'value__augmented_dickey_fuller'], [22, 'value__count_above_mean'], [23, 'value__symmetry_looking__r_0.75'], [24, 'value__percentage_of_reoccurring_datapoints_to_all_datapoints'], [25, 'value__mean_abs_change'], [26, 'value__mean_change'], [27, 'value__value_count__value_1'], [28, 'value__value_count__value_0'], [29, 'value__minimum'], [30, 'value__autocorrelation__lag_5'], [31, 'value__median'], [32, 'value__symmetry_looking__r_0.85'], [33, 'value__mean_abs_change_quantiles__qh_0.8__ql_0.4'], [34, 'value__symmetry_looking__r_0.05'], [35, 'value__mean_abs_change_quantiles__qh_0.8__ql_0.6'], [36, 'value__value_count__value_inf'], [37, 'value__mean_abs_change_quantiles__qh_0.8__ql_0.0'], [38, 'value__mean_abs_change_quantiles__qh_0.8__ql_0.2'], [39, 'value__large_standard_deviation__r_0.45'], [40, 'value__mean_abs_change_quantiles__qh_0.8__ql_0.8'], [41, 'value__autocorrelation__lag_6'], [42, 'value__autocorrelation__lag_7'], [43, 'value__autocorrelation__lag_4'], [44, 'value__last_location_of_maximum'], [45, 'value__autocorrelation__lag_2'], [46, 'value__autocorrelation__lag_3'], [47, 'value__autocorrelation__lag_0'], [48, 'value__autocorrelation__lag_1'], [49, 'value__autocorrelation__lag_8'], [50, 'value__autocorrelation__lag_9'], [51, 'value__range_count__max_1__min_-1'], [52, 'value__variance'], [53, 'value__mean'], [54, 'value__standard_deviation'], [55, 'value__mean_abs_change_quantiles__qh_0.6__ql_0.6'], [56, 'value__mean_abs_change_quantiles__qh_0.6__ql_0.4'], [57, 'value__mean_abs_change_quantiles__qh_0.6__ql_0.2'], [58, 'value__mean_abs_change_quantiles__qh_0.6__ql_0.0'], [59, 'value__symmetry_looking__r_0.15'], [60, 'value__ratio_value_number_to_time_series_length'], [61, 'value__mean_second_derivate_central'], [62, 'value__number_peaks__n_1'], [63, 'value__length'], [64, 'value__mean_abs_change_quantiles__qh_1.0__ql_0.0'], [65, 'value__mean_abs_change_quantiles__qh_1.0__ql_0.2'], [66, 'value__mean_abs_change_quantiles__qh_1.0__ql_0.4'], [67, 'value__time_reversal_asymmetry_statistic__lag_3'], [68, 'value__mean_abs_change_quantiles__qh_1.0__ql_0.6'], [69, 'value__mean_abs_change_quantiles__qh_1.0__ql_0.8'], [70, 'value__sum_of_reoccurring_values'], [71, 'value__abs_energy'], [72, 'value__variance_larger_than_standard_deviation'], [73, 'value__mean_abs_change_quantiles__qh_0.6__ql_0.8'], [74, 'value__kurtosis'], [75, 'value__approximate_entropy__m_2__r_0.7'], [76, 'value__approximate_entropy__m_2__r_0.5'], [77, 'value__symmetry_looking__r_0.25'], [78, 'value__approximate_entropy__m_2__r_0.3'], [79, 'value__percentage_of_reoccurring_values_to_all_values'], [80, 'value__approximate_entropy__m_2__r_0.1'], [81, 'value__time_reversal_asymmetry_statistic__lag_2'], [82, 'value__approximate_entropy__m_2__r_0.9'], [83, 'value__time_reversal_asymmetry_statistic__lag_1'], [84, 'value__symmetry_looking__r_0.35'], [85, 'value__large_standard_deviation__r_0.3'], [86, 'value__large_standard_deviation__r_0.2'], [87, 'value__large_standard_deviation__r_0.1'], [88, 'value__large_standard_deviation__r_0.0'], [89, 'value__large_standard_deviation__r_0.4'], [90, 'value__large_standard_deviation__r_0.15'], [91, 'value__mean_autocorrelation'], [92, 'value__binned_entropy__max_bins_10'], [93, 'value__large_standard_deviation__r_0.35'], [94, 'value__symmetry_looking__r_0.95'], [95, 'value__longest_strike_below_mean'], [96, 'value__sum_values'], [97, 'value__symmetry_looking__r_0.45'], [98, 'value__symmetry_looking__r_0.6'], [99, 'value__symmetry_looking__r_0.7'], [100, 'value__symmetry_looking__r_0.4'], [101, 'value__symmetry_looking__r_0.5'], [102, 'value__symmetry_looking__r_0.2'], [103, 'value__symmetry_looking__r_0.3'], [104, 'value__symmetry_looking__r_0.0'], [105, 'value__symmetry_looking__r_0.1'], [106, 'value__has_duplicate'], [107, 'value__symmetry_looking__r_0.8'], [108, 'value__symmetry_looking__r_0.9'], [109, 'value__value_count__value_nan'], [110, 'value__mean_abs_change_quantiles__qh_0.2__ql_0.8'], [111, 'value__large_standard_deviation__r_0.05'], [112, 'value__mean_abs_change_quantiles__qh_0.2__ql_0.2'], [113, 'value__has_duplicate_max'], [114, 'value__mean_abs_change_quantiles__qh_0.2__ql_0.0'], [115, 'value__mean_abs_change_quantiles__qh_0.2__ql_0.6'], [116, 'value__mean_abs_change_quantiles__qh_0.2__ql_0.4'], [117, 'value__number_cwt_peaks__n_5'], [118, 'value__number_cwt_peaks__n_1'], [119, 'value__sample_entropy'], [120, 'value__has_duplicate_min'], [121, 'value__symmetry_looking__r_0.55'], [122, 'value__count_below_mean'], [123, 'value__quantile__q_0.1'], [124, 'value__quantile__q_0.2'], [125, 'value__quantile__q_0.3'], [126, 'value__quantile__q_0.4'], [127, 'value__quantile__q_0.6'], [128, 'value__quantile__q_0.7'], [129, 'value__quantile__q_0.8'], [130, 'value__quantile__q_0.9'], [131, 'value__ar_coefficient__k_10__coeff_0'], [132, 'value__ar_coefficient__k_10__coeff_1'], [133, 'value__ar_coefficient__k_10__coeff_2'], [134, 'value__ar_coefficient__k_10__coeff_3'], [135, 'value__ar_coefficient__k_10__coeff_4'], [136, 'value__index_mass_quantile__q_0.1'], [137, 'value__index_mass_quantile__q_0.2'], [138, 'value__index_mass_quantile__q_0.3'], [139, 'value__index_mass_quantile__q_0.4'], [140, 'value__index_mass_quantile__q_0.6'], [141, 'value__index_mass_quantile__q_0.7'], [142, 'value__index_mass_quantile__q_0.8'], [143, 'value__index_mass_quantile__q_0.9'], [144, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_0__w_2&quot;'], [145, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_1__w_2&quot;'], [146, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_2__w_2&quot;'], [147, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_3__w_2&quot;'], [148, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_4__w_2&quot;'], [149, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_5__w_2&quot;'], [150, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_6__w_2&quot;'], [151, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_7__w_2&quot;'], [152, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_8__w_2&quot;'], [153, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_9__w_2&quot;'], [154, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_10__w_2&quot;'], [155, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_11__w_2&quot;'], [156, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_12__w_2&quot;'], [157, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_13__w_2&quot;'], [158, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_14__w_2&quot;'], [159, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_0__w_5&quot;'], [160, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_1__w_5&quot;'], [161, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_2__w_5&quot;'], [162, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_3__w_5&quot;'], [163, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_4__w_5&quot;'], [164, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_5__w_5&quot;'], [165, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_6__w_5&quot;'], [166, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_7__w_5&quot;'], [167, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_8__w_5&quot;'], [168, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_9__w_5&quot;'], [169, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_10__w_5&quot;'], [170, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_11__w_5&quot;'], [171, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_12__w_5&quot;'], [172, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_13__w_5&quot;'], [173, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_14__w_5&quot;'], [174, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_0__w_10&quot;'], [175, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_1__w_10&quot;'], [176, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_2__w_10&quot;'], [177, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_3__w_10&quot;'], [178, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_4__w_10&quot;'], [179, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_5__w_10&quot;'], [180, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_6__w_10&quot;'], [181, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_7__w_10&quot;'], [182, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_8__w_10&quot;'], [183, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_9__w_10&quot;'], [184, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_10__w_10&quot;'], [185, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_11__w_10&quot;'], [186, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_12__w_10&quot;'], [187, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_13__w_10&quot;'], [188, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_14__w_10&quot;'], [189, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_0__w_20&quot;'], [190, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_1__w_20&quot;'], [191, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_2__w_20&quot;'], [192, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_3__w_20&quot;'], [193, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_4__w_20&quot;'], [194, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_5__w_20&quot;'], [195, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_6__w_20&quot;'], [196, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_7__w_20&quot;'], [197, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_8__w_20&quot;'], [198, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_9__w_20&quot;'], [199, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_10__w_20&quot;'], [200, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_11__w_20&quot;'], [201, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_12__w_20&quot;'], [202, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_13__w_20&quot;'], [203, '&quot;value__cwt_coefficients__widths_(2, 5, 10, 20)__coeff_14__w_20&quot;'], [204, 'value__spkt_welch_density__coeff_2'], [205, 'value__spkt_welch_density__coeff_5'], [206, 'value__spkt_welch_density__coeff_8'], [207, 'value__fft_coefficient__coeff_0'], [208, 'value__fft_coefficient__coeff_1'], [209, 'value__fft_coefficient__coeff_2'], [210, 'value__fft_coefficient__coeff_3'], [211, 'value__fft_coefficient__coeff_4'], [212, 'value__fft_coefficient__coeff_5'], [213, 'value__fft_coefficient__coeff_6'], [214, 'value__fft_coefficient__coeff_7'], [215, 'value__fft_coefficient__coeff_8'], [216, 'value__fft_coefficient__coeff_9']]</em><a class="headerlink" href="#tsfresh_feature_names.TSFRESH_FEATURES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_FEATURES" title="tsfresh_feature_names.TSFRESH_FEATURES"><strong>TSFRESH_FEATURES</strong></a> (<em>array</em>) &#8211; This array defines the Skyline id for each known tsfresh
+feature.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is array is linked to relational fields in the database and
+ids as such should be consider immutable objects that must not be modified
+after they are created.  This array should only ever be extended.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is a helper script to generate is array for the feature names
+returned by current/running version of tsfresh and compare them to this
+array.  The helper script outputs changes and the full generated array for
+diffing against this array of known feature names. See:
+skyline/tsfresh_features/generate_tsfresh_features.py</p>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="module-validate_settings">
 <span id="skyline-validate-settings-module"></span><h2>skyline.validate_settings module<a class="headerlink" href="#module-validate_settings" title="Permalink to this headline">¶</a></h2>
@@ -2628,7 +3186,7 @@ settings.py are valid</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -2650,7 +3208,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

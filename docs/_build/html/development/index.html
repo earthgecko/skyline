@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>Development &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
         <link rel="next" title="Building documentation" href="building-documentation.html"/>
         <link rel="prev" title="What’s new" href="../whats-new.html"/> 
 
@@ -120,6 +120,7 @@
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
 <li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tsfresh.html">Development - tsfresh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dry">DRY</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-going-refactoring">On going refactoring</a></li>
@@ -176,6 +177,7 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html#part-of-the-build">Part of the build</a></li>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html#install-docs-requirements-txt">Install docs-requirements.txt</a></li>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html#your-python-interpretor">Your Python interpretor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html#rst-and-md-wtf">.rst and .md wtf?</a></li>
@@ -221,6 +223,18 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html#the-first">THE FIRST</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ionosphere.html#ionosphere-log">ionosphere.log</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html#then-along-came-learn">Then along came learn</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">Development - tsfresh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tsfresh.html#tsfresh-in-the-skyline-context">tsfresh in the Skyline context</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tsfresh.html#how-skyline-was-over-complicatedly-upgraded-from-tsfresh-0-1-2-to-tsfresh-0-3-0">How Skyline was over complicatedly upgraded from tsfresh-0.1.2 to tsfresh-0.3.0</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pytz.html">Development - pytz</a><ul>
@@ -243,17 +257,16 @@ different implementations.</p>
 <h2>On going refactoring<a class="headerlink" href="#on-going-refactoring" title="Permalink to this headline">¶</a></h2>
 <p>The code style in the Skyline codebase is somewhat organic, over time more and
 changes have been made mostly in the following contexts.</p>
-<ul>
+<ul class="simple">
 <li><dl class="first docutils">
 <dt>Logging trying to achieve consistency in logging string formats such as</dt>
-<dd><p class="first last"><code class="docutils literal"><span class="pre">error</span> <span class="pre">::</span> <span class="pre">message</span></code>, etc.  Maybe there should be independent standard and
-error logs :)</p>
-</dd>
+<dd><code class="docutils literal"><span class="pre">error</span> <span class="pre">::</span> <span class="pre">message</span></code>, etc.  Maybe there should be independent standard and
+error logs :)</dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt>Quotation style, although there are not any hard and fast rules in this there</dt>
-<dd><p class="first last">has been an attempt to try and refactor any strings that were quoted with
+<dd>has been an attempt to try and refactor any strings that were quoted with
 double quotes to single quoted strings.  This was more to do with try align
 the code so that double quotes can be reserved for strings that interpolate
 the variable in the string not via &#8220;%&#8221;.  Although this is specifically
@@ -261,27 +274,23 @@ Pythonic in a way, it can be and although not covered in any PEP seen, here
 have been some references to this being an acceptable and preferred style by
 some.  Seeing as this is common in other languages too, such a ruby and shell.
 It is not a rule :) and there are still instances of double quoted string in
-places, maybe.</p>
-</dd>
+places, maybe.</dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt><code class="docutils literal"><span class="pre">except:</span></code> - Attempts are always being made to try and <code class="docutils literal"><span class="pre">try:</span></code> and</dt>
-<dd><p class="first last"><code class="docutils literal"><span class="pre">except:</span></code> wherever possible with the goal being that all Skyline apps handle
+<dd><code class="docutils literal"><span class="pre">except:</span></code> wherever possible with the goal being that all Skyline apps handle
 failure gracefully, log informatively, without logging vommiting through an
 entire <code class="docutils literal"><span class="pre">assigned_metrics</span></code> loop and exiting whenever a critical error is
-encountered at start up.</p>
-</dd>
+encountered at start up.</dd>
 </dl>
 </li>
-<li><p class="first">Trying to achieve PEP8, wherever possible and not inconvenient.</p>
-</li>
+<li>Trying to achieve PEP8, wherever possible and not inconvenient.</li>
 <li><dl class="first docutils">
 <dt>Adding any found Python-3 patterns discovered while doing something as long as</dt>
-<dd><p class="first last">it is wrapped in the appropriate conditional, it should have no effect on the
+<dd>it is wrapped in the appropriate conditional, it should have no effect on the
 functioning of the apps with Python2.7 and is there to test when Python3
-becomes desired.</p>
-</dd>
+becomes desired.</dd>
 </dl>
 </li>
 </ul>
@@ -307,7 +316,7 @@ becomes desired.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -329,7 +338,7 @@ becomes desired.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

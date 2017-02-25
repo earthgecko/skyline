@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ionosphere.agent &mdash; Skyline 1.1.1-beta documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>ionosphere.agent</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ionosphere.agent</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">daemon</span> <span class="k">import</span> <span class="n">runner</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">mysql.connector</span>
+<span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="k">import</span> <span class="n">errorcode</span>
+
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="k">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">validate_settings</span> <span class="k">import</span> <span class="n">validate_settings_variables</span>
+
+<span class="kn">from</span> <span class="nn">ionosphere</span> <span class="k">import</span> <span class="n">Ionosphere</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Database configuration - Ionosphere uses the same database settings as Panorama</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
+              <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSERPASS</span><span class="p">,</span>
+              <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span>
+              <span class="s1">&#39;port&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">,</span>
+              <span class="s1">&#39;database&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">,</span>
+              <span class="s1">&#39;raise_on_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error: failed to determine database settings from settings.py&#39;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="IonosphereAgent"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.agent.IonosphereAgent">[docs]</a><span class="k">class</span> <span class="nc">IonosphereAgent</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdin_path</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pidfile_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.pid&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pidfile_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+
+<div class="viewcode-block" id="IonosphereAgent.purge_old_data_dirs"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.agent.IonosphereAgent.purge_old_data_dirs">[docs]</a>    <span class="k">def</span> <span class="nf">purge_old_data_dirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">,</span> <span class="n">older_than</span><span class="p">):</span>
+        <span class="n">time_now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;agent :: checking for old data to remove&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">[:]:</span>
+                <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+                <span class="c1"># if (time_now - os.path.getmtime(folder_path)) &gt; older_than:</span>
+                <span class="c1">#     yield folder_path</span>
+                <span class="k">for</span> <span class="n">i_file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="n">current_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">folder_path</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_file</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">time_now</span> <span class="o">-</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">current_file</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">older_than</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">current_file</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">current_file</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;agent :: removing old data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_file</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;agent :: removing old data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">folder_path</span><span class="p">))</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IonosphereAgent.run"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.agent.IonosphereAgent.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;agent :: starting Skyline Ionosphere&#39;</span><span class="p">)</span>
+        <span class="n">Ionosphere</span><span class="p">(</span><span class="n">getpid</span><span class="p">())</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+            <span class="c1"># Clean up old timeseries data files and folders</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">purge_old_data_dirs</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Start the Ionosphere agent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;pid directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;log directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Panorama check directory does not exist at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> :: </span><span class="si">%(process)s</span><span class="s2"> :: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">TimedRotatingFileHandler</span><span class="p">(</span>
+        <span class="n">logfile</span><span class="p">,</span>
+        <span class="n">when</span><span class="o">=</span><span class="s2">&quot;midnight&quot;</span><span class="p">,</span>
+        <span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">backupCount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">memory_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">MemoryHandler</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span>
+                                                    <span class="n">flushLevel</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+                                                    <span class="n">target</span><span class="o">=</span><span class="n">handler</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">memory_handler</span><span class="p">)</span>
+
+    <span class="c1"># Validate settings variables</span>
+    <span class="n">valid_settings</span> <span class="o">=</span> <span class="n">validate_settings_variables</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_settings</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: invalid variables in settings.py - cannot start&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Make sure mysql is available</span>
+    <span class="n">mysql_up</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">configuration_error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Try connect to mysql</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cnx</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">configuration_error</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">mysql_up</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errorcode</span><span class="o">.</span><span class="n">ER_ACCESS_DENIED_ERROR</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: something is wrong with your user name or password&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errorcode</span><span class="o">.</span><span class="n">ER_BAD_DB_ERROR</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: the </span><span class="si">%s</span><span class="s1"> database does not exist&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mysql error - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">configuration_error</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;The database is not available&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;The database is not available&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">mysql_up</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">ionosphere</span> <span class="o">=</span> <span class="n">IonosphereAgent</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;run&#39;</span><span class="p">:</span>
+        <span class="n">panorama</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">daemon_runner</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">DaemonRunner</span><span class="p">(</span><span class="n">ionosphere</span><span class="p">)</span>
+        <span class="n">daemon_runner</span><span class="o">.</span><span class="n">daemon_context</span><span class="o">.</span><span class="n">files_preserve</span> <span class="o">=</span> <span class="p">[</span><span class="n">handler</span><span class="o">.</span><span class="n">stream</span><span class="p">]</span>
+        <span class="n">daemon_runner</span><span class="o">.</span><span class="n">do_action</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.1.1-beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

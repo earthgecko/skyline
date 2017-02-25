@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_alerters &mdash; Skyline 1.1.0-dev documentation</title>
+  <title>mirage.mirage_alerters &mdash; Skyline 1.1.1-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.0-dev documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -162,7 +162,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for mirage.mirage_alerters</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">smtplib</span> <span class="k">import</span> <span class="n">SMTP</span>
 <span class="kn">import</span> <span class="nn">mirage_alerters</span>
 <span class="k">try</span><span class="p">:</span>
@@ -170,6 +171,7 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">urllib.request</span>
     <span class="kn">import</span> <span class="nn">urllib.error</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 <span class="kn">from</span> <span class="nn">requests.utils</span> <span class="k">import</span> <span class="n">quote</span>
 
 <span class="c1"># Added for graphs showing Redis data</span>
@@ -181,16 +183,19 @@
 <span class="c1"># Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
 <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib.pylab</span> <span class="k">import</span> <span class="n">rcParams</span>
-<span class="kn">from</span> <span class="nn">matplotlib.dates</span> <span class="k">import</span> <span class="n">DateFormatter</span>
-<span class="kn">import</span> <span class="nn">io</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">syslog</span>
-<span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">resource</span>
+<span class="c1"># @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features</span>
+<span class="c1"># Handle flake8 E402</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.pylab</span> <span class="k">import</span> <span class="n">rcParams</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.dates</span> <span class="k">import</span> <span class="n">DateFormatter</span>
+    <span class="kn">import</span> <span class="nn">io</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+    <span class="kn">import</span> <span class="nn">syslog</span>
+    <span class="kn">import</span> <span class="nn">os.path</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">resource</span>
 
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
@@ -205,8 +210,12 @@
     <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="k">import</span> <span class="n">MIMEText</span>
     <span class="kn">from</span> <span class="nn">email.mime.image</span> <span class="k">import</span> <span class="n">MIMEImage</span>
 
-<span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">import</span> <span class="nn">skyline_version</span>
+<span class="c1"># @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features</span>
+<span class="c1"># Handle flake8 E402</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">settings</span>
+    <span class="kn">import</span> <span class="nn">skyline_version</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">mkdir_p</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -217,16 +226,22 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Create any alerter you want here. The function will be invoked from trigger_alert.</span>
-<span class="sd">Two arguments will be passed, both of them tuples: alert and metric.</span>
+<span class="sd">Four arguments will be passed, two of them tuples: alert and metric.</span>
 
-<span class="sd">alert: the tuple specified in your settings:</span>
-<span class="sd">    alert[0]: The matched substring of the anomalous metric</span>
-<span class="sd">    alert[1]: the name of the strategy being used to alert</span>
-<span class="sd">    alert[2]: The timeout of the alert that was triggered</span>
-<span class="sd">    alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</span>
-<span class="sd">metric: information about the anomaly itself</span>
-<span class="sd">    metric[0]: the anomalous value</span>
-<span class="sd">    metric[1]: The full name of the anomalous metric</span>
+<span class="sd">alert: the tuple specified in your settings:\n</span>
+<span class="sd">    alert[0]: The matched substring of the anomalous metric\n</span>
+<span class="sd">    alert[1]: the name of the strategy being used to alert\n</span>
+<span class="sd">    alert[2]: The timeout of the alert that was triggered\n</span>
+<span class="sd">    alert[3]: The SECOND_ORDER_RESOLUTION_HOURS\n</span>
+<span class="sd">metric: information about the anomaly itself\n</span>
+<span class="sd">    metric[0]: the anomalous value\n</span>
+<span class="sd">    metric[1]: The full name of the anomalous metric\n</span>
+<span class="sd">    metric[2]: anomaly timestamp\n</span>
+
+<span class="sd">second_order_resolution_seconds: int</span>
+
+<span class="sd">context: the app name</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># FULL_DURATION to hours so that Mirage can surface the relevant timeseries data</span>
@@ -238,7 +253,7 @@
 <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="n">full_duration_seconds</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span>
 
 
-<div class="viewcode-block" id="alert_smtp"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_smtp">[docs]</a><span class="k">def</span> <span class="nf">alert_smtp</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+<div class="viewcode-block" id="alert_smtp"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_smtp">[docs]</a><span class="k">def</span> <span class="nf">alert_smtp</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :func:`~trigger_alert` and sends an alert via smtp to the</span>
 <span class="sd">    recipients that are configured for the metric.</span>
@@ -253,6 +268,24 @@
     <span class="c1"># SECOND_ORDER_RESOLUTION_SECONDS to hours so that Mirage surfaces the</span>
     <span class="c1"># relevant timeseries data in the graph</span>
     <span class="n">second_order_resolution_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+
+    <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
+    <span class="c1"># Added Ionosphere variables</span>
+    <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
+        <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">training_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+            <span class="n">timeseries_dir</span><span class="p">)</span>
+        <span class="n">graphite_image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.graphite.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)))</span>
+        <span class="n">json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)))</span>
+        <span class="n">training_data_redis_image</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.redis.plot.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)))</span>
 
     <span class="c1"># For backwards compatibility</span>
     <span class="k">if</span> <span class="s1">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
@@ -282,29 +315,54 @@
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">recipients</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">recipients</span> <span class="o">=</span> <span class="p">[</span><span class="n">recipients</span><span class="p">]</span>
 
-    <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Mirage - ALERT at </span><span class="si">%s</span><span class="s1"> hours - anomalous data point - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># @modified 20161228 - Feature #1830: Ionosphere alerts</span>
+    <span class="c1"># Ionosphere alerts</span>
+    <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - unencoded_graph_title: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">unencoded_graph_title</span><span class="p">)</span>
     <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span>
+            <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
 
     <span class="n">content_id</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;embed-images&#39;</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">link</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data OK&#39;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
-            <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data None&#39;</span><span class="p">)</span>
+        <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
+        <span class="c1"># Use existing data if files exist</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">image_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - using existing png - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - failed to read image data from existing png - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
+                <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">link</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data OK&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - failed to get image graph&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
+                <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data None&#39;</span><span class="p">)</span>
 
     <span class="c1"># If we failed to get the image or if it was explicitly disabled,</span>
     <span class="c1"># use the image URL instead of the content.</span>
@@ -314,6 +372,26 @@
         <span class="n">img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;cid:</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">content_id</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - img_tag: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">img_tag</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
+            <span class="c1"># Create Ionosphere Graphite image</span>
+            <span class="c1"># @modified 20161229 - Feature #1830: Ionosphere alerts</span>
+            <span class="c1"># Only write the data to the file if it does not exist</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">image_data</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> Ionosphere Graphite image :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> Ionosphere Graphite image&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Ionosphere Graphite image already exists :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">))</span>
 
     <span class="n">redis_image_data</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
@@ -351,6 +429,55 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - unpack timeseries failed&#39;</span><span class="p">)</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            .. todo: this is possibly to be used to allow the user to submit the</span>
+<span class="sd">                FULL_DURATION duration data set for the features profile to be</span>
+<span class="sd">                created against IF it is a Mirage metric.  This would allow for</span>
+<span class="sd">                additional granularity in Mirage metrics, thereby maintaining</span>
+<span class="sd">                their seasonality, but allow user and Skyline to analyze the</span>
+<span class="sd">                anomaly at a FULL_DURATION resolution as well.  Not sure how to</span>
+<span class="sd">                code that in Ionosphere context yet but could just be additonal</span>
+<span class="sd">                flag in the Ionosphere record.  In the Ionosphere frontend, the</span>
+<span class="sd">                user would be given an option to either create the features</span>
+<span class="sd">                profile on the Mirage timeseries or the redis FULL_DURATION</span>
+<span class="sd">                timeseries.  It is a little complicated, but doable.</span>
+<span class="sd">                # @modified 20161229 - Feature #1828: ionosphere - mirage Redis data features</span>
+<span class="sd">                However that ^^ is UNDESIRABLE in the Mirage/Ionosphere context</span>
+<span class="sd">                at the moment.  Ionosphere must only profile SECOND_ORDER_RESOLUTION_HOURS</span>
+<span class="sd">                currently so as to not pollute the seasonality aspect of Mirage</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="c1"># Create Ionosphere redis timeseries json if is does not exist</span>
+            <span class="c1"># @modified 20161229 - Feature #1830: Ionosphere alerts</span>
+            <span class="c1"># Only write the data to the file if it does not exist and replace</span>
+            <span class="c1"># the timeseries object if a json file exists</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">json_file</span><span class="p">):</span>
+                <span class="n">timeseries_json</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;(&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">timeseries_json</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> Ionosphere Redis data timeseries json file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> Ionosphere Redis data timeseries json file&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Replace the timeseries object</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Ionosphere Redis data timeseries json file already exists, using :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">json_file</span><span class="p">))</span>
+                <span class="n">anomaly_json</span> <span class="o">=</span> <span class="n">json_file</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Read the timeseries json file</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Redis timeseries replaced with timeseries from :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">anomaly_json</span><span class="p">))</span>
+                    <span class="n">timeseries_x</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+                    <span class="n">timeseries_y</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">anomaly_json</span><span class="p">))</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">pd_series_values</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
@@ -402,7 +529,7 @@
                 <span class="n">mean_series</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">mean_series</span><span class="p">:</span>
-            <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Mirage - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
@@ -474,6 +601,28 @@
                 <span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">y</span><span class="o">=.</span><span class="mi">02</span><span class="p">,</span> <span class="n">x</span><span class="o">=.</span><span class="mi">03</span><span class="p">)</span>
                 <span class="c1"># tight_layout removes the legend box</span>
                 <span class="c1"># fig.tight_layout()</span>
+
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">training_data_dir</span><span class="p">):</span>
+                        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">training_data_dir</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;created dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_data_dir</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">training_data_redis_image</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">training_data_redis_image</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;alert_smtp - save Redis training data image - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">training_data_redis_image</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s1">&#39;error :: alert_smtp - could not save - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">training_data_redis_image</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;alert_smtp - Redis training data image already exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">training_data_redis_image</span><span class="p">))</span>
+
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
                     <span class="c1"># @added 20160814 - Bug #1558: Memory leak in Analyzer</span>
@@ -490,23 +639,40 @@
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - savefig: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;OK&#39;</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - plt.savefig: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not build plot&#39;</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
         <span class="n">redis_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;cid:</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_graph_content_id</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - redis_img_tag: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - redis_img_tag: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_img_tag</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># @modified 20161229 - Feature #1830: Ionosphere alerts</span>
+        <span class="c1"># @modified 20170108 - Feature #1852: Ionosphere - features_profile matched graphite graphs</span>
+        <span class="c1"># Restored the previous redis_img_tag method as some smtp alerts were</span>
+        <span class="c1"># coming without a Redis graph, not all but some and for some reason,</span>
+        <span class="c1"># I am pretty certain retrospectively that it was done that way from</span>
+        <span class="c1"># testing I just wanted to try and be cleaner.</span>
+        <span class="c1"># The redis_img_tag was changed at</span>
+        <span class="c1"># https://github.com/earthgecko/skyline/commit/31bcacf3f90f0953ebed0d57260cb937e01f887c#diff-520bf2a218f65074ffead4d8184c138dR489</span>
         <span class="n">redis_img_tag</span> <span class="o">=</span> <span class="s1">&#39;&lt;img src=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;&#39;</span> <span class="o">%</span> <span class="s1">&#39;none&#39;</span>
+        <span class="c1"># redis_img_tag = &#39;&lt;img src=&quot;none&quot;/&gt;&#39;</span>
 
-    <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; Mirage alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; </span><span class="si">%s</span><span class="s1"> alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">context</span>
     <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;metric: &lt;b&gt;</span><span class="si">%s</span><span class="s1">&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomalous value: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;At hours: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomaly timestamp: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;At hours: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">))</span>
     <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Next alert in: </span><span class="si">%s</span><span class="s1"> seconds&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Ionosphere :: &lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span>
+        <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To use this timeseries to train Skyline that this is not anomalous manage this training data at:&lt;br&gt;&#39;</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_link</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">image_data</span><span class="p">:</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)&lt;/font&gt;&lt;/h3&gt;&#39;</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
@@ -518,6 +684,7 @@
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma upper bound: </span><span class="si">%s</span><span class="s1">   | 3-sigma lower bound: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_upper_bound</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_lower_bound</span><span class="p">))</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Redis data at FULL_DURATION&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
+
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;:</span><span class="si">%s</span><span class="s1">&lt;br&gt;&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
@@ -526,9 +693,8 @@
 
     <span class="k">for</span> <span class="n">recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-
             <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;alternative&#39;</span><span class="p">)</span>
-            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] - Mirage ALERT - &#39;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] - </span><span class="si">%s</span><span class="s1"> ALERT - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
 
@@ -575,19 +741,19 @@
         <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="alert_pagerduty"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_pagerduty">[docs]</a><span class="k">def</span> <span class="nf">alert_pagerduty</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+<div class="viewcode-block" id="alert_pagerduty"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_pagerduty">[docs]</a><span class="k">def</span> <span class="nf">alert_pagerduty</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :func:`~trigger_alert` and sends an alert via PagerDuty</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_ENABLED</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">pygerduty</span>
         <span class="n">pager</span> <span class="o">=</span> <span class="n">pygerduty</span><span class="o">.</span><span class="n">PagerDuty</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;subdomain&#39;</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;auth_token&#39;</span><span class="p">])</span>
-        <span class="n">pager</span><span class="o">.</span><span class="n">trigger_incident</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="s2">&quot;Mirage alert - </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">pager</span><span class="o">.</span><span class="n">trigger_incident</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> alert - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="alert_hipchat"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_hipchat">[docs]</a><span class="k">def</span> <span class="nf">alert_hipchat</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+<div class="viewcode-block" id="alert_hipchat"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_hipchat">[docs]</a><span class="k">def</span> <span class="nf">alert_hipchat</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :func:`~trigger_alert` and sends an alert the hipchat room that is</span>
 <span class="sd">    configured in settings.py.</span>
@@ -602,28 +768,27 @@
         <span class="kn">import</span> <span class="nn">hipchat</span>
         <span class="n">hipster</span> <span class="o">=</span> <span class="n">hipchat</span><span class="o">.</span><span class="n">HipChat</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">HIPCHAT_OPTS</span><span class="p">[</span><span class="s1">&#39;auth_token&#39;</span><span class="p">])</span>
         <span class="n">rooms</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">HIPCHAT_OPTS</span><span class="p">[</span><span class="s1">&#39;rooms&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-
-        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Mirage - ALERT at </span><span class="si">%s</span><span class="s1"> hours - anomalous data point - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
 
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
         <span class="n">embed_graph</span> <span class="o">=</span> <span class="s2">&quot;&lt;a href=&#39;&quot;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s2">&quot;&#39;&gt;&lt;img height=&#39;308&#39; src=&#39;&quot;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s2">&quot;&#39;&gt;&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;&lt;/a&gt;&quot;</span>
 
         <span class="k">for</span> <span class="n">room</span> <span class="ow">in</span> <span class="n">rooms</span><span class="p">:</span>
-            <span class="n">hipster</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="s1">&#39;rooms/message&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;room_id&#39;</span><span class="p">:</span> <span class="n">room</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">:</span> <span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">HIPCHAT_OPTS</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">],</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - Mirage - Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">) at </span><span class="si">%s</span><span class="s1"> hours </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">second_order_resolution_in_hours</span><span class="p">,</span> <span class="n">embed_graph</span><span class="p">)})</span>
+            <span class="n">hipster</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="s1">&#39;rooms/message&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;room_id&#39;</span><span class="p">:</span> <span class="n">room</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">:</span> <span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">HIPCHAT_OPTS</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">],</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">) at </span><span class="si">%s</span><span class="s1"> hours </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="n">embed_graph</span><span class="p">)})</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="alert_syslog"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_syslog">[docs]</a><span class="k">def</span> <span class="nf">alert_syslog</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+<div class="viewcode-block" id="alert_syslog"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_syslog">[docs]</a><span class="k">def</span> <span class="nf">alert_syslog</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_ENABLED</span><span class="p">:</span>
         <span class="n">syslog_ident</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_OPTS</span><span class="p">[</span><span class="s1">&#39;ident&#39;</span><span class="p">]</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;Mirage - Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - Anomalous metric: </span><span class="si">%s</span><span class="s1"> (value: </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
             <span class="n">syslog</span><span class="o">.</span><span class="n">openlog</span><span class="p">(</span><span class="n">syslog_ident</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_PID</span><span class="p">,</span> <span class="n">syslog</span><span class="o">.</span><span class="n">LOG_LOCAL4</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
@@ -637,7 +802,7 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="trigger_alert"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.trigger_alert">[docs]</a><span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+<div class="viewcode-block" id="trigger_alert"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.trigger_alert">[docs]</a><span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :class:`~skyline.skyline.Mirage.run` to trigger an alert,</span>
 <span class="sd">    Mirage passes two arguments, both of them tuples.  The alerting strategy</span>
@@ -652,8 +817,11 @@
 <span class="sd">        alert[3]: The SECOND_ORDER_RESOLUTION_HOURS\n</span>
 <span class="sd">    :param meric:</span>
 <span class="sd">        The metric tuple.\n</span>
-<span class="sd">        metric[0]: the anomalous value</span>
-<span class="sd">        metric[1]: The full name of the anomalous metric</span>
+<span class="sd">        metric[0]: the anomalous value\n</span>
+<span class="sd">        metric[1]: The full name of the anomalous metric\n</span>
+<span class="sd">        metric[2]: anomaly timestamp\n</span>
+<span class="sd">    :param context: app name</span>
+<span class="sd">    :type context: str</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -663,7 +831,7 @@
         <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="nb">getattr</span><span class="p">(</span><span class="n">mirage_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="n">mirage_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alerters - </span><span class="si">%s</span><span class="s1"> - getattr error&#39;</span> <span class="o">%</span> <span class="n">strategy</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span></div>
@@ -678,7 +846,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
 
     </p>
   </div>
@@ -700,7 +868,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.0-dev',
+            VERSION:'1.1.1-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

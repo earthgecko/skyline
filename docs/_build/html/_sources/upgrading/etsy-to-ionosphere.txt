@@ -72,15 +72,14 @@ documentation are still appropriate.
     tail -n 20 /var/log/skyline/*.log
 
     # Any errors - each app
-    cat /var/log/skyline/horizon.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
-    cat /var/log/skyline/analyzer.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
-    cat /var/log/skyline/webapp.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
-    cat /var/log/skyline/panorama.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
-
-    # If you have the other services running
-    cat /var/log/skyline/mirage.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
-    cat /var/log/skyline/boundary.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
-    cat /var/log/skyline/crucible.log | grep -B1 -A10 -i "error ::\|traceback" | tail -n 60
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done
 
 - If you added the new ``skyline_test.alerters.test`` alerts tuples to your
   ``settings.py`` you can test them now, see `Alert testing <../alert-testing.html>`__
