@@ -158,7 +158,7 @@ Steps
 - Edit the ``settings.py`` file and enter your appropriate settings,
   specifically ensure you set the following variables to the correct
   setting for your environment, see the documentation links and docstrings in
-  the `settings.py` file forthe full descriptions of each variable:
+  the `settings.py` file for the full descriptions of each variable:
 
   - :mod:`settings.GRAPHITE_HOST`
   - :mod:`settings.GRAPHITE_PROTOCOL`
@@ -177,6 +177,10 @@ Steps
   - :mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
   - :mod:`settings.WEBAPP_ALLOWED_IPS`
   - :mod:`settings.SERVER_PYTZ_TIMEZONE`
+
+- For later implementing and working with Ionosphere and setting up learning (see
+  `Ionosphere <ionosphere.html>`__) after you have the other Skyline apps up and
+  running.
 
 .. code-block:: bash
 
@@ -197,6 +201,7 @@ Steps
     /opt/skyline/github/skyline/bin/webapp.d start
     # And Panorama if you have setup in the DB at this stage
     /opt/skyline/github/skyline/bin/panorama.d start
+    /opt/skyline/github/skyline/bin/ionosphere.d start
 
 - Check the log files to ensure things started OK and are running and there are
   no errors.
@@ -256,6 +261,8 @@ Steps
 - For Mirage setup see `Mirage <mirage.html>`__
 
 - For Boundary setup see `Boundary <boundary.html>`__
+
+- For Ionosphere setup see `Ionosphere <ionosphere.html>`__
 
 Automation and configuration management notes
 ---------------------------------------------
