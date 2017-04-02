@@ -1,17 +1,12 @@
 from __future__ import division
 import logging
 import os
-from os import getpid, listdir
-from os.path import join, isfile
-from sys import version_info
-from time import time, sleep
+from time import time
 
-import re
-import csv
 from ast import literal_eval
 import shutil
 import glob
-import sys
+from sys import version_info
 
 from redis import StrictRedis
 import traceback
@@ -22,22 +17,14 @@ from sqlalchemy.sql import select
 
 import numpy as np
 
-# @added 20170123 - Feature #1854: Ionosphere learn - generations
-# Required for ionosphere_learn to test that use_full_duration_days data is
-# available
-import json
-
 import settings
 from skyline_functions import (
-    fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p,
-    get_graphite_metric, send_anomalous_metric_to)
+    mkdir_p, get_graphite_metric, send_anomalous_metric_to)
 
 from features_profile import calculate_features_profile
 
 from database import (
-    get_engine, ionosphere_table_meta, metrics_table_meta,
-    ionosphere_matched_table_meta)
-from tsfresh_feature_names import TSFRESH_FEATURES
+    get_engine, ionosphere_table_meta, metrics_table_meta)
 
 # @added 2017014 - Feature #1854: Ionosphere learn
 from ionosphere_functions import create_features_profile
@@ -279,7 +266,7 @@ def get_ionosphere_record(fp_id, engine):
         logger.info(log_msg)
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: learn :: failed to get ionosphere_table meta for %s' % base_name)
+        logger.error('error :: learn :: failed to get ionosphere_table meta for %s' % str(fp_id))
         return row
 
     try:
@@ -289,7 +276,7 @@ def get_ionosphere_record(fp_id, engine):
         row = result.fetchone()
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: could not get the fp_ids_db_object_count from the DB for %s' % base_name)
+        logger.error('error :: could not get the fp_ids_db_object_count from the DB for %s' % str(fp_id))
 
     return row
 
@@ -476,7 +463,9 @@ def ionosphere_learn(timestamp):
     for index, ionosphere_learn_work in enumerate(learn_work):
         try:
             learn_metric_list = literal_eval(ionosphere_learn_work)
-            deadline = str(learn_metric_list[0])
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Not currently used
+            # deadline = str(learn_metric_list[0])
             work = str(learn_metric_list[1])
             learn_metric_timestamp = int(learn_metric_list[2])
             learn_base_name = str(learn_metric_list[3])
@@ -687,9 +676,6 @@ def ionosphere_learn(timestamp):
         if settings.ENABLE_IONOSPHERE_DEBUG:
             logger.info('debug :: learn :: check_file_metricname_dir - %s' % check_file_metricname_dir)
 
-        if settings.ENABLE_IONOSPHERE_DEBUG:
-            logger.info('debug :: learn :: failed_check_file - %s' % failed_check_file)
-
         metric_vars_array = None
         try:
             metric_vars_array = learn_load_metric_vars(str(metric_check_file))
@@ -732,7 +718,9 @@ def ionosphere_learn(timestamp):
             key = 'value'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             value = float(value_list[0])
-            anomalous_value = value
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Not currently used
+            # anomalous_value = value
             if settings.ENABLE_IONOSPHERE_DEBUG:
                 logger.info('debug :: learn :: metric variable - value - %s' % str(value))
         except:
@@ -1058,7 +1046,9 @@ def ionosphere_learn(timestamp):
             # having to trace back from the learn_parent_id to the origin
             origin_fp_id = None
             origin_features_profile_sum = None
-            origin_fp_full_duration = None
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Not currently used
+            # origin_fp_full_duration = None
             current_parent_id = learn_parent_id
             current_generation = learn_generation
             if int(current_generation) == 0:
@@ -1079,7 +1069,9 @@ def ionosphere_learn(timestamp):
                             if current_fp_parent_id == 0:
                                 origin_features_profile_sum = float(row['features_sum'])
                                 origin_fp_id = int(current_parent_id)
-                                origin_fp_full_duration = int(row['full_duration'])
+                                # @modified 20170308 - Feature #1960: ionosphere_layers
+                                # Not currently used
+                                # origin_fp_full_duration = int(row['full_duration'])
                                 logger.info(
                                     'learn :: origin fp id %s of generation %s' % (
                                         str(current_parent_id),
@@ -1154,7 +1146,7 @@ def ionosphere_learn(timestamp):
                 trace = traceback.format_exc()
                 logger.error(trace)
                 logger.error(
-                    'error: failed to read from %s' % (features_profile_details_file))
+                    'error: failed to read from %s' % (learnt_features_profile_details_file))
 
             if not learnt_fp_features_sum:
                 logger.error('error :: learn :: could not determine the features sum from the learnt features profile fp details file - %s' % learnt_features_profile_details_file)
@@ -1224,7 +1216,9 @@ def ionosphere_learn(timestamp):
                 settings.SKYLINE_URL, str(metric_timestamp), str(learn_base_name))
 
             logger.info('learn :: training_data URL - %s' % str(url))
-            ionosphere_resp = None
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Not currently used
+            # ionosphere_resp = None
             if settings.WEBAPP_AUTH_ENABLED:
                 user = str(settings.WEBAPP_AUTH_USER)
                 password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
@@ -1234,7 +1228,9 @@ def ionosphere_learn(timestamp):
                 else:
                     r = requests.get(url, timeout=10)
                 if int(r.status_code) == 200:
-                    ionosphere_resp = True
+                    # @modified 20170308 - Feature #1960: ionosphere_layers
+                    # Not currently used
+                    # ionosphere_resp = True
                     logger.info('learn :: Graphite NOW graphs for training_data created')
             except:
                 logger.error(traceback.format_exc())

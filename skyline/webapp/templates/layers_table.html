@@ -1,0 +1,77 @@
+{% block layers_table %}
+
+<!-- # @added 20170308 - Feature #1960: ionosphere_layers
+# To present the operator with the existing layers and algorithms for the metric
+# @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# Moved out of original only begin shown in the if features_profile_id block in
+# training_data and abstracted so that it can be included where relevant and
+# so that the existing layers are always displayed -->
+  {% if metric_layers_count > 0 %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">layers ::</span></span></span> {{ metric_layers_count }}</h4>
+		  <table class="table table-hover">
+		    <thead>
+		      <tr>
+		        <th>layers_id</th>
+		        <th>fp_id</th>
+		        <th>matched_count</th>
+		        <th>check_count</th>
+		        <th>layers_algorithms_id</th>
+		        <th>layer</th>
+		        <th>condition</th>
+		        <th>boundary_limit</th>
+		        <th>times_in_a_row</th>
+		        <th>label</th>
+		      </tr>
+		    </thead>
+		    <tbody>
+    {% for layers_item in existing_layers %}
+		      <tr>
+		        <td>{{ layers_item[0] }}</td>
+<!-- # @added 20170308 - Feature #1960: ionosphere_layers - added link to fp
+		        <td>{{ layers_item[1] }}</td> -->
+            <td onclick="window.location='?fp_view=true&fp_id={{ layers_item[1] }}&metric={{ for_metric }}'">
+              <a href="?fp_view=true&fp_id={{ layers_item[1] }}&metric={{ for_metric }}">{{ layers_item[1] }}</a>
+            </td>
+		        <td>{{ layers_item[3] }}</td>
+		        <td>{{ layers_item[4] }}</td>
+      {% for algorithms_item in existing_algorithms %}
+        {% if algorithms_item[1] == layers_item[0] %}
+          {% if algorithms_item[4] == 'D' %}
+		        <td>{{ algorithms_item[0] }}</td>
+		        <td>{{ algorithms_item[4] }}</td>
+		        <td>{{ algorithms_item[6] }}</td>
+		        <td>{{ algorithms_item[7] }}</td>
+		        <td>{{ algorithms_item[8] }}</td>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+            <td>{{ layers_item[5] }}</td>
+		      </tr>
+		      <tr>
+		        <td>{{ layers_item[0] }}</td>
+            <td onclick="window.location='?fp_view=true&fp_id={{ layers_item[1] }}&metric={{ for_metric }}'">
+              <a href="?fp_view=true&fp_id={{ layers_item[1] }}&metric={{ for_metric }}">{{ layers_item[1] }}</a>
+            </td>
+		        <td>{{ layers_item[3] }}</td>
+		        <td>{{ layers_item[4] }}</td>
+      {% for algorithms_item in existing_algorithms %}
+        {% if algorithms_item[1] == layers_item[0] %}
+          {% if algorithms_item[4] == 'E' %}
+		        <td>{{ algorithms_item[0] }}</td>
+		        <td>{{ algorithms_item[4] }}</td>
+		        <td>{{ algorithms_item[6] }}</td>
+		        <td>{{ algorithms_item[7] }}</td>
+		        <td>{{ algorithms_item[8] }}</td>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+	           <td>{{ layers_item[5] }}</td>
+		      </tr>
+    {% endfor %}
+		    </tbody>
+		  </table>
+  {% else %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">layers ::</span></span></span> None</h4>
+  {% endif %}
+
+{% endblock %}

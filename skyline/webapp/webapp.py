@@ -53,7 +53,17 @@ from ionosphere_backend import (
     ionosphere_get_metrics_dir,
     features_profile_details,
     # @added 20170118 - Feature #1862: Ionosphere features profiles search page
-    ionosphere_search)
+    ionosphere_search,
+    # @added 20170305 - Feature #1960: ionosphere_layers
+    create_ionosphere_layers, feature_profile_layers_detail,
+    feature_profile_layer_alogrithms,
+    # @added 20170308 - Feature #1960: ionosphere_layers
+    # To present the operator with the existing layers and algorithms for the metric
+    metric_layers_alogrithms,
+    # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
+    #                   Task #2002: Review and correct incorrectly defined layers
+    edit_ionosphere_layers)
+
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
 
@@ -423,7 +433,7 @@ def data():
             logger.info('until_timestamp - %s' % str(until_timestamp))
 
         if not valid_request:
-            error = 'Error: not all arguments where passed, missing ' + str(missing_arguments)
+            error = 'Error: not all arguments where passed, missing %s' % str(missing_arguments)
             resp = json.dumps({'results': error})
             return resp, 404
         else:
@@ -435,7 +445,7 @@ def data():
                 skyline_app, metric, from_timestamp, until_timestamp, 'json',
                 'object')
         except:
-            error = "Error: " + traceback.print_exc()
+            error = 'error :: %s' % str(traceback.print_exc())
             resp = json.dumps({'results': error})
             return resp, 500
 
@@ -795,6 +805,12 @@ def ionosphere():
     except:
         request_args_len = 0
 
+    if request_args_len:
+        for i in request.args:
+            key = str(i)
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+
     # @added 20170220 - Feature #1862: Ionosphere features profiles search page
     # Ionosphere features profiles by generations
     fp_search_req = None
@@ -811,6 +827,8 @@ def ionosphere():
                         'from_timestamp',
                         'until_timestamp',
                         'generation_greater_than',
+                        # @added 20170315 - Feature #1960: ionosphere_layers
+                        'layers_id_greater_than',
                         'full_duration',
                         'enabled',
                         'tsfresh_version',
@@ -831,7 +849,7 @@ def ionosphere():
         for i in request.args:
             key = str(i)
             if key not in REQUEST_ARGS:
-                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                logger.error('error :: invalid request argument - %s' % (key))
                 return 'Bad Request', 400
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
@@ -924,10 +942,20 @@ def ionosphere():
     # Added fp_search parameter
     # @modified 20170122 - Feature #1872: Ionosphere - features profile page by id only
     # Added fp_id parameter
+    # @modified 20170305 - Feature #1960: ionosphere_layers
+    # Added layers arguments d_condition to fp_layer
+    # @modified 20160315 - Feature #1972: ionosphere_layers - use D layer boundary for upper limit
+    # Added d_boundary_times
+    # @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers
+    # Added layers_id and edit_fp_layers
     IONOSPHERE_REQUEST_ARGS = [
         'timestamp', 'metric', 'metric_td', 'a_dated_list', 'timestamp_td',
         'requested_timestamp', 'fp_view', 'calc_features', 'add_fp',
-        'features_profiles', 'fp_search', 'learn', 'fp_id']
+        'features_profiles', 'fp_search', 'learn', 'fp_id', 'd_condition',
+        'd_boundary_limit', 'd_boundary_times', 'e_condition', 'e_boundary_limit',
+        'e_boundary_times', 'es_layer', 'es_day', 'f1_layer', 'f1_from_time',
+        'f1_layer', 'f2_until_time', 'fp_layer', 'fp_layer_label',
+        'add_fp_layer', 'layers_id', 'edit_fp_layers']
 
     determine_metric = False
     dated_list = False
@@ -944,6 +972,12 @@ def ionosphere():
     # use_full_duration_days
     fp_learn = False
     fp_fd_days = settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
+
+    # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
+    #                   Task #2002: Review and correct incorrectly defined layers
+    # Added the argument edit_fp_layers
+    edit_fp_layers = False
+    layers_id = None
 
     try:
         if request_args_present:
@@ -1011,8 +1045,26 @@ def ionosphere():
                         resp = json.dumps(
                             {'results': 'Error: no timestamp feature profiles data dir found for feature profile id - ' + str(fp_id) + ' - go on... nothing here.'})
                         return resp, 400
+
                     redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
-                    return redirect(redirect_url, code=302)
+                    # @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers
+                    #                      Task #2002: Review and correct incorrectly defined layers
+                    # Build the query string from the previous parameters
+                    if 'edit_fp_layers' in request.args:
+                        redirect_url = '%s/ionosphere?timestamp=%s' % (settings.SKYLINE_URL, str(use_timestamp))
+                        for i in request.args:
+                            key = str(i)
+                            if key == 'timestamp':
+                                continue
+                            value = request.args.get(key, None)
+                            new_redirect_url = '%s&%s=%s' % (
+                                redirect_url, str(key), str(value))
+                            redirect_url = new_redirect_url
+                    if 'edit_fp_layers' in request.args:
+                        logger.info('not returning redirect as edit_fp_layers request')
+                    else:
+                        logger.info('returned redirect on original request - %s' % str(redirect_url))
+                        return redirect(redirect_url, code=302)
 
             for i in request.args:
                 key = str(i)
@@ -1030,6 +1082,22 @@ def ionosphere():
                     if str(value) == 'true':
                         create_feature_profile = True
 
+                # @added 20170317 - Feature #1960: ionosphere_layers - allow for floats
+                if key == 'd_boundary_limit':
+                    try:
+                        d_boundary_limit = float(value)
+                    except ValueError:
+                        logger.error('error :: invalid request argument - %s is not numeric - %s' % (key, str(value)))
+                        return 'Bad Request\n\ninvalid request argument - %s is not numeric - %s' % (key, str(value)), 400
+                    logger.info('request argument OK - %s=%s' % (key, str(d_boundary_limit)))
+                if key == 'e_boundary_limit':
+                    try:
+                        e_boundary_limit = float(value)
+                    except ValueError:
+                        logger.error('error :: invalid request argument - %s is not numeric - %s' % (key, str(value)))
+                        return 'Bad Request\n\ninvalid request argument - %s is not numeric - %s' % (key, str(value)), 400
+                    logger.info('request argument OK - %s=%s' % (key, str(e_boundary_limit)))
+
                 if key == 'fp_view':
                     if str(value) == 'true':
                         fp_view = True
@@ -1045,9 +1113,33 @@ def ionosphere():
                 if key == 'learn':
                     if str(value) == 'true':
                         fp_learn = True
+                    # @added 20170305 - Feature #1960: ionosphere_layers
+                    # Being passed through as a boolean from the Create features
+                    # profile arguments and I cannot be arsed to track it down
+                    if str(value) == 'True':
+                        fp_learn = True
 
                 if key == 'features_profiles':
                     fp_profiles = str(value)
+
+                # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
+                #                   Task #2002: Review and correct incorrectly defined layers
+                # Added layers and edit_fp_layers
+                if key == 'layers_id':
+                    test_layer_id = str(value)
+                    try:
+                        layers_id = int(test_layer_id)
+                    except:
+                        logger.info('bad request argument - %s=%s not numeric' % (str(key), str(value)))
+                        resp = json.dumps(
+                            {'results': 'Error: not a numeric id for the layers_id argument - %s' + str(value) + ' - please pass a proper id'})
+                if key == 'edit_fp_layers':
+                    if str(value) == 'true':
+                        edit_fp_layers = True
+                    if str(value) == 'True':
+                        edit_fp_layers = True
+                    if edit_fp_layers:
+                        logger.info('edit_fp_layers is set to %s' % (str(edit_fp_layers)))
 
                 if key == 'a_dated_list':
                     if str(value) == 'true':
@@ -1230,8 +1322,8 @@ def ionosphere():
         logger.debug('debug :: fp_search was True')
         fp_search_param = True
         listed_by = 'search'
-        get_options = [
-            'full_duration', 'enabled', 'tsfresh_version', 'generation']
+        # get_options = [
+        #     'full_duration', 'enabled', 'tsfresh_version', 'generation']
         fd_list = None
         try:
             # @modified 20170221 - Feature #1862: Ionosphere features profiles search page
@@ -1293,14 +1385,41 @@ def ionosphere():
         try:
             # @modified 20170104 - Feature #1842: Ionosphere - Graphite now graphs
             # Added the full_duration_in_hours and changed graph color from blue to orange
-#full_duration_in_hours
-#GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
-# A regex is required to change the TARGET_HOURS, no? extend do not modify?
-# Not certain will review after Dude morning excersion
+            # full_duration_in_hours
+            # GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
+            # A regex is required to change the TARGET_HOURS, no? extend do not modify?
+            # Not certain will review after Dude morning excersion
             graph_url = '%scactiStyle(%s)%s&colorList=blue' % (
                 settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
         except:
             graph_url = False
+
+        # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
+        #                   Task #2002: Review and correct incorrectly defined layers
+        layers_updated = False
+        if 'edit_fp_layers' in request.args:
+            edit_fp_layers_arg = request.args.get('edit_fp_layers', False)
+            if edit_fp_layers_arg == 'true':
+                edit_fp_layers = True
+                logger.info('editing layers id - %s' % str(layers_id))
+            else:
+                logger.info('not editing layers id - %s' % str(layers_id))
+
+        if edit_fp_layers:
+            logger.info('editing layers id - %s' % str(layers_id))
+            try:
+                layers_updated, fail_msg, traceback_format_exc = edit_ionosphere_layers(layers_id)
+                logger.info('updated layers id - %s' % str(layers_id))
+            except:
+                trace = traceback.format_exc()
+                message = 'failed to update layer calling edit_ionosphere_layers'
+                return internal_error(message, trace)
+            if not layers_updated:
+                trace = 'none'
+                message = 'failed to update layer'
+                return internal_error(message, trace)
+        else:
+            logger.info('not editing layers')
 
         features = None
         f_calc = 'none'
@@ -1360,6 +1479,13 @@ def ionosphere():
                     return internal_error(fail_msg, 'no traceback available')
 
         fp_details = None
+
+        # @added 20170305  - Feature #1960: ionosphere_layers
+        l_id = None
+        l_details = None
+        l_details_object = False
+        la_details = None
+
         if fp_view:
             try:
                 # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
@@ -1377,13 +1503,79 @@ def ionosphere():
                 fail_msg = 'error :: features_profile_details failed'
                 return internal_error(fail_msg, trace)
 
+            # @added 20170305  - Feature #1960: ionosphere_layers
+            fp_layers_id = None
+            try:
+                fp_layers_id = int(fp_details_object['layers_id'])
+            except:
+                fp_layers_id = 0
+            layer_details = None
+            layer_details_success = False
+            if fp_layers_id:
+                try:
+                    l_details, layer_details_success, fail_msg, traceback_format_exc, l_details_object = feature_profile_layers_detail(fp_layers_id)
+                except:
+                    trace = traceback.format_exc()
+                    message = 'failed to get features profile layers details for id %s' % str(fp_layers_id)
+                    return internal_error(message, trace)
+                try:
+                    la_details, layer_algorithms_success, fail_msg, traceback_format_exc, la_details_object = feature_profile_layer_alogrithms(fp_layers_id)
+                    l_id = fp_layers_id
+                except:
+                    trace = traceback.format_exc()
+                    message = 'failed to get features profile layer algorithm details for id %s' % str(fp_layers_id)
+                    return internal_error(message, trace)
+
         valid_learning_duration = None
+
+        # @added 20170308  - Feature #1960: ionosphere_layers - glm_images to m_app_context
+        glm_images = None
+        l_id_matched = None
+        m_app_context = 'Analyzer'
+        # @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json
+        i_ts_json = None
+        sample_ts_json = None
+        sample_i_ts_json = None
+
+        # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+        #                   Feature #1960: ionosphere_layers
+        anomalous_timeseries = None
+        f_id_matched = None
+        fp_details_list = None
+        f_id_created = None
+        fp_generation_created = None
+
         try:
             # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
             # Added graphite_now_images gimages
             # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
             # Added graphite_matched_images gmimages
-            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Show the latest matched layers graphs as well added glm_images - graphite_layers_matched_images
+            # @modified 20170309 - Feature #1960: ionosphere_layers
+            # Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
+            # based features profile added i_ts_json
+            # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+            #                   Feature #1960: ionosphere_layers
+            # Return the anomalous_timeseries as an array to sample and fp_id_matched
+            # @added 20170401 - Task #1988: Review - Ionosphere layers - added fp_id_created
+            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
+
+            # @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json
+            # Show the last 30
+            if ts_json:
+                sample_ts_json = ts_json[-30:]
+            # @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+            #                      Feature #1960: ionosphere_layers
+            # Return the anomalous_timeseries as an array to sample
+            # if i_ts_json:
+            #     sample_i_ts_json = i_ts_json[-30:]
+            if anomalous_timeseries:
+                sample_i_ts_json = anomalous_timeseries[-30:]
+
+            if fp_details_list:
+                f_id_created = fp_details_list[0]
+                fp_generation_created = fp_details_list[8]
 
             # @added 20170120 -  Feature #1854: Ionosphere learn - generations
             # Added fp_learn parameter to allow the user to not learn the
@@ -1403,6 +1595,8 @@ def ionosphere():
                 m_full_duration_in_hours = int(m_full_duration / 3600)
                 if m_full_duration != full_duration:
                     second_order_resolution_hours = m_full_duration_in_hours
+                    # @added 20170305  - Feature #1960: ionosphere_layers - m_app_context
+                    m_app_context = 'Mirage'
             except:
                 m_full_duration = False
                 m_full_duration_in_hours = False
@@ -1467,6 +1661,63 @@ def ionosphere():
                 if metric_name in ionosphere_metrics:
                     iono_metric = True
 
+            # @added 20170303 - Feature #1960: ionosphere_layers
+            vconds = ['<', '>', '==', '!=', '<=', '>=']
+            condition_list = ['<', '>', '==', '!=', '<=', '>=', 'in', 'not in']
+            crit_types = ['value', 'time', 'day', 'from_time', 'until_time']
+
+            fp_layers = None
+            if 'fp_layer' in request.args:
+                fp_layer_arg = request.args.get(str('fp_layer'), None)
+                if str(fp_layer_arg) == 'true':
+                    fp_layers = True
+            add_fp_layers = None
+            if 'add_fp_layer' in request.args:
+                add_fp_layer_arg = request.args.get(str('add_fp_layer'), None)
+                if str(add_fp_layer_arg) == 'true':
+                    add_fp_layers = True
+            new_l_algos = None
+            new_l_algos_ids = None
+            if add_fp_layers:
+                if 'learn' in request.args:
+                    value = request.args.get(str('learn'))
+                    if str(value) == 'true':
+                        fp_learn = True
+                    if str(value) == 'True':
+                        fp_learn = True
+                if 'fp_id' in request.args:
+                    fp_id = request.args.get(str('fp_id'))
+                l_id, layer_successful, new_l_algos, new_l_algos_ids, fail_msg, trace = create_ionosphere_layers(base_name, fp_id, requested_timestamp)
+                if not layer_successful:
+                    return internal_error(fail_msg, trace)
+
+            # @added 20170308 - Feature #1960: ionosphere_layers
+            # To present the operator with the existing layers and algorithms for the metric
+            # The metric layers algoritms are required to present the user with
+            # if the add_fp=true argument is passed, which if so results in the
+            # local variable of create_feature_profile being set and in the
+            # fp_view
+            metric_layers_details = None
+            metric_layers_algorithm_details = None
+            # @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+            # Set to True so they are always displayed
+            # get_metric_existing_layers = False
+            get_metric_existing_layers = True
+            metric_lc = 0
+            metric_lmc = None
+            if create_feature_profile:
+                get_metric_existing_layers = True
+            if fp_view and fp_details:
+                get_metric_existing_layers = True
+            if 'add_fp' in request.args:
+                get_layers_add_fp = request.args.get(str('add_fp'), None)
+                if get_layers_add_fp == 'true':
+                    get_metric_existing_layers = True
+            if get_metric_existing_layers:
+                metric_layers_details, metric_layers_algorithm_details, metric_lc, metric_lmc, mlad_successful, fail_msg, trace = metric_layers_alogrithms(base_name)
+                if not mlad_successful:
+                    return internal_error(fail_msg, trace)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -1485,7 +1736,24 @@ def ionosphere():
                 graphite_matched_images=gmimages, matched_count=times_matched,
                 parent_id=par_id, generation=gen, learn=fp_learn,
                 use_full_duration_days=fp_fd_days, countdown=countdown_to,
-                ionosphere_metric=iono_metric,
+                ionosphere_metric=iono_metric, value_condition_list=vconds,
+                criteria_types=crit_types, fp_layer=fp_layers,
+                layer_id=l_id, layers_algorithms=new_l_algos,
+                layers_algorithms_ids=new_l_algos_ids,
+                layer_details=l_details,
+                layer_details_object=l_details_object,
+                layer_algorithms_details=la_details,
+                existing_layers=metric_layers_details,
+                existing_algorithms=metric_layers_algorithm_details,
+                metric_layers_count=metric_lc,
+                metric_layers_matched_count=metric_lmc,
+                graphite_layers_matched_images=glm_images,
+                layers_id_matched=l_id_matched, ts_full_duration=ts_fd,
+                app_context=m_app_context, ionosphere_json=i_ts_json,
+                baseline_fd=full_duration, last_ts_json=sample_ts_json,
+                last_i_ts_json=sample_i_ts_json, layers_updated=layers_updated,
+                fp_id_matched=f_id_matched, fp_id_created=f_id_created,
+                fp_generation=fp_generation_created,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

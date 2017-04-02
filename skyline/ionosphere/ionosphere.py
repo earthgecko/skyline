@@ -17,14 +17,11 @@ import csv
 from ast import literal_eval
 
 from redis import StrictRedis
-# from msgpack import Unpacker, packb
 import traceback
 import mysql.connector
-from mysql.connector import errorcode
+# from mysql.connector import errorcode
 
 from sqlalchemy.sql import select
-# import requests
-# from requests.auth import HTTPBasicAuth
 
 # @added 20161213 - Branch #1790: test_tsfresh
 # To match the new order introduced via the test_tsfresh method
@@ -56,6 +53,9 @@ from tsfresh_feature_names import TSFRESH_FEATURES
 # Renamed the function from simple learn to the meme it has become
 # from learn import learn
 from learn import ionosphere_learn
+
+# @added 20170306 - Feature #1960: ionosphere_layers
+from layers import run_layer_algorithms
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -130,6 +130,8 @@ class Ionosphere(Thread):
         # ionosphere_non_smtp_alerter_metrics
         self.ionosphere_smtp_alerter_metrics = Manager().list()
         self.ionosphere_non_smtp_alerter_metrics = Manager().list()
+        # @added 20170306 - Feature #1960: ionosphere_layers
+        self.layers_checked = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -244,10 +246,10 @@ class Ionosphere(Thread):
                 pass
         return
 
+
 # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
 #                   Branch #922: Ionosphere
 # Bringing Ionosphere online - do alert on Ionosphere metrics
-
     def manage_ionosphere_unique_metrics(self):
         """
         Create a Redis set of all Ionosphere enabled metrics.
@@ -567,6 +569,39 @@ class Ionosphere(Thread):
         if settings.ENABLE_IONOSPHERE_DEBUG:
             logger.info('debug :: failed_check_file - %s' % failed_check_file)
 
+        # @added 20170307 - Feature #1960: ionosphere_layers - ionosphere_check_cache_key
+        # This Redis cache key check was added to prevent Ionosphere from
+        # running riot on checks if for some reason the check_file is not
+        # removed which happens if some exception is not handled as found out
+        # again during yesterday's development of run_layer_algorithms.  It was
+        # a good reminder of how fast Skyline can iterate.
+        ionosphere_check_cache_key = 'ionosphere.check.%s' % check_file_name
+        check_done = False
+        try:
+            check_done = self.redis_conn.get(ionosphere_check_cache_key)
+        except Exception as e:
+            logger.error('error :: could not query Redis for cache_key: %s' % e)
+        if not check_done:
+            logger.info('check done check - no check cache key - %s' % ionosphere_check_cache_key)
+        else:
+            logger.error('error :: a check cache key exists - %s' % ionosphere_check_cache_key)
+            logger.error('error :: failing check to prevent multiple iterations over this check')
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+        try:
+            check_process_start = int(time())
+            self.redis_conn.setex(
+                ionosphere_check_cache_key, 300, [check_process_start])
+            logger.info(
+                'added Redis check key - %s' % (ionosphere_check_cache_key))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error(
+                'error :: failed to add Redis check key - %s' % (ionosphere_check_cache_key))
+            logger.error('error :: failing check to prevent multiple iterations over this check')
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
+
         try:
             # Load and validate metric variables
             # @modified 20161231 - Feature #1830: Ionosphere alerts
@@ -759,6 +794,7 @@ class Ionosphere(Thread):
             ionosphere_parent_id = None
 
         if not ionosphere_parent_id_determined:
+            logger.error('error :: failed to determine ionosphere_parent_id variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
@@ -1051,7 +1087,16 @@ class Ionosphere(Thread):
             # the details of all features profiles for the metric, this has all
             # the generations values avaialble in it.
             # Here we go! Learn!
-            fp_ids_db_object = None
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Not currently used - fp_ids_db_object
+            # fp_ids_db_object = None
+
+            # @added 20170306 - Feature #1960: ionosphere_layers
+            # Here we go, let us TEACH you properly.
+            # Set result to None here to fix a interpolation error below
+            result = None
+            fp_layers_ids = []
+            fp_layers_present = False
 
             try:
                 connection = engine.connect()
@@ -1066,6 +1111,13 @@ class Ionosphere(Thread):
                         continue
 
                     fp_id = row['id']
+
+                    # @added 20170306 - Feature #1960: ionosphere_layers
+                    # Here we go, let us TEACH you properly
+                    fp_layers_id = int(row['layers_id'])
+                    if fp_layers_id > 0:
+                        fp_layers_present = True
+                    fp_layers_ids.append(fp_layers_id)
 
                     # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
                     # Added all_fp_ids
@@ -1110,14 +1162,31 @@ class Ionosphere(Thread):
                 # @added 20170115 - Feature #1854: Ionosphere learn - generations
                 # Create the fp_ids_db_object so it is available throughout
                 # Here we go! Learn!
-                fp_ids_db_object = row
+                # @modified 20170308 - Feature #1960: ionosphere_layers
+                # Not currently used - fp_ids_db_object
+                # fp_ids_db_object = row
                 connection.close()
                 fp_count = len(fp_ids)
                 logger.info('determined %s fp ids for %s' % (str(fp_count), base_name))
+                # @added 20170309 - Feature #1960: ionosphere_layers
+                fp_layers_count = len(fp_layers_ids)
+                logger.info('determined %s layers ids for %s' % (str(fp_layers_count), base_name))
+
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: could not determine fp ids from DB for %s' % base_name)
                 fp_count = 0
+                # @added 20170309 - Feature #1960: ionosphere_layers
+                fp_layers_count = 0
+
+            # @added 20170306 - Feature #1960: ionosphere_layers
+            # Corrected the interpolation of the fp_ids_db_object above where it
+            # was set to the last row only, however it was not used anyway.
+            # Here we go, let us TEACH you properly.  We only evaluate
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Not currently used - fp_ids_db_object
+            # if result:
+            #     fp_ids_db_object = result
 
             if len(fp_ids) == 0:
                 logger.info('there are no fp ids that match full duration for %s' % base_name)
@@ -1483,6 +1552,26 @@ class Ionosphere(Thread):
                             'error :: could not update ionosphere_matched for %s with with timestamp %s' % (
                                 str(fp_id), str(metric_timestamp)))
 
+                    # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+                    #                   Feature #1960: ionosphere_layers
+                    # Added mirror functionality of the layers_id_matched_file
+                    # for feature profile matches too as it has proved useful
+                    # in the frontend with regards to training data sets being
+                    # matched by layers and can do the same for in the frontend
+                    # training data for feature profile matches too.
+                    if not_anomalous:
+                        profile_id_matched_file = '%s/%s.profile_id_matched.fp_id' % (
+                            metric_training_data_dir, base_name)
+                        if not os.path.isfile(profile_id_matched_file):
+                            try:
+                                write_data_to_file(skyline_app, profile_id_matched_file, 'w', str(fp_id))
+                                logger.info('added matched fp_id %s - %s' % (
+                                    str(fp_id), profile_id_matched_file))
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: added matched fp_id %s - %s' % (
+                                    str(fp_id), profile_id_matched_file))
+
                     # @added 20170115 - Feature #1854: Ionosphere learn - generations
                     # Stop on the first match
                     break
@@ -1528,6 +1617,99 @@ class Ionosphere(Thread):
                 if engine:
                     engine_disposal(engine)
                 return
+
+            # @added 20170306 - Feature #1960: ionosphere_layers
+            # Here we go, let us TEACH you properly.  We only evaluate
+            # the Ionosphere layer algorithms after Skyline has had an
+            # an opportunity to match the original and learnt features
+            # profiles.  This enables the original, evolutionary,
+            # generations based learning to be continually evaluated.
+            # This needs to happen for any future implemenation of
+            # Feature #1888: Ionosphere learn - evolutionary maturity forget
+            logger.info('layers algorithms check')
+            check_layers_algorithms = False
+            if not not_anomalous:
+                check_layers_algorithms = True
+                if added_by == 'ionosphere_learn':
+                    check_layers_algorithms = False
+                    logger.info('ionosphere_learn - layers algorithms check - False')
+                else:
+                    logger.info('layers algorithms check - True')
+            else:
+                logger.info('a features profile matched as not_anomalous - layers algorithms check - False')
+
+            if check_layers_algorithms and fp_layers_present:
+                full_duration_in_hours = int(settings.FULL_DURATION) / 3600
+                mirage_full_duration_json_file = '%s/%s.mirage.redis.%sh.json' % (
+                    metric_training_data_dir, base_name,
+                    str(int(full_duration_in_hours)))
+                if os.path.isfile(mirage_full_duration_json_file):
+                    full_duration_json_file = mirage_full_duration_json_file
+                else:
+                    full_duration_json_file = '%s/%s.json' % (metric_training_data_dir, base_name)
+
+                anomalous_timeseries = None
+                if os.path.isfile(full_duration_json_file):
+                    logger.info('full duration ts json available for layers check - %s' % (full_duration_json_file))
+                    try:
+                        # Read the timeseries json file
+                        with open((full_duration_json_file), 'r') as f:
+                            raw_timeseries = f.read()
+                        timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        anomalous_timeseries = literal_eval(timeseries_array_str)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not load json for layers check - %s' % (base_name))
+                    logger.info('data points surfaced for layers check - %s' % (len(anomalous_timeseries)))
+                else:
+                    logger.error('error :: full duration ts json for layers was not found - %s' % (full_duration_json_file))
+
+                matched_layers_id = None
+                for layers_id in fp_layers_ids:
+                    if not_anomalous:
+                        continue
+                    if int(layers_id) != 0:
+                        # Get the layers algorithms and run then on the timeseries
+                        # @modified 20170307 - Feature #1960: ionosphere_layers
+                        # Use except on everything, remember how fast Skyline can iterate
+                        try:
+                            self.layers_checked.append(layers_id)
+                            not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries)
+                            if not_anomalous:
+                                matched_layers_id = layers_id
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: run_layer_algorithms failed for layers_id - %s' % (str(layers_id)))
+                        if not_anomalous:
+                            logger.info('not_anomalous :: layers_id %s was matched' % (str(layers_id)))
+                        else:
+                            logger.info('still anomalous :: layers_id %s was NOT matched' % (str(layers_id)))
+                if not not_anomalous:
+                    logger.info('anomalous - no features profiles layers were matched - %s' % base_name)
+
+                # @added 20170308 - Feature #1960: ionosphere_layers
+                #                   Feature #1854: Ionosphere learn
+                # A create a layer_id matched txt file in the training_data dir
+                # to advise the operator if a training_data set has been matched
+                # by a layer.  Further below if app is not ionosphere_learn a
+                # 'learn_fp_generation' ionosphere_job is added so ionosphere_learn
+                # can still try and learning from the existing features profiles
+                # that exist even if a layer matched as not_anomalous.
+                if not_anomalous:
+                    layers_id_matched_file = '%s/%s.layers_id_matched.layers_id' % (
+                        metric_training_data_dir, base_name)
+                    if not os.path.isfile(layers_id_matched_file):
+                        try:
+                            write_data_to_file(skyline_app, layers_id_matched_file, 'w', str(matched_layers_id))
+                            logger.info('added matched layers_id %s - %s' % (
+                                str(matched_layers_id), layers_id_matched_file))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: added matched layers_id %s - %s' % (
+                                str(matched_layers_id), layers_id_matched_file))
+            else:
+                logger.info('no layers algorithm check required')
+            # Ionosphere layers DONE
 
             if not not_anomalous:
                 logger.info('anomalous - no feature profiles were matched - %s' % base_name)
@@ -1879,7 +2061,19 @@ class Ionosphere(Thread):
                         features_profiles_checked = '0'
                     logger.info('fps checked count  :: %s' % features_profiles_checked)
                     send_metric_name = '%s.fps_checked' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, not_anomalous)
+                    # @modified 20170306 - Feature #1960: ionosphere_layers
+                    # Corrected namespace
+                    # send_graphite_metric(skyline_app, send_metric_name, not_anomalous)
+                    send_graphite_metric(skyline_app, send_metric_name, features_profiles_checked)
+
+                    # @added 20170306 - Feature #1960: ionosphere_layers
+                    try:
+                        layers_checked = str(len(self.layers_checked))
+                    except:
+                        layers_checked = '0'
+                    logger.info('layers checked count  :: %s' % layers_checked)
+                    send_metric_name = '%s.layers_checked' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, layers_checked)
 
                     if settings.PANORAMA_ENABLED:
                         try:
@@ -1903,6 +2097,8 @@ class Ionosphere(Thread):
                     self.features_profiles_checked[:] = []
                     self.training_metrics[:] = []
                     self.sent_to_panorama[:] = []
+                    # @added 20170306 - Feature #1960: ionosphere_layers
+                    self.layers_checked[:] = []
 
                 ionosphere_job = False
                 learn_job = False
