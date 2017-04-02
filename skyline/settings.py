@@ -1,5 +1,10 @@
 """
 Shared settings
+
+IMPORTANT NOTE
+
+You may find reading some of these settings documentation strings
+http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings
 """
 
 REDIS_SOCKET_PATH = '/tmp/redis.sock'
@@ -174,7 +179,7 @@ CRUCIBLE_CHECK_PATH = '/opt/skyline/crucible/check'
 :vartype CRUCIBLE_CHECK_PATH: str
 """
 
-PANORAMA_CHECK_PATH = '/opt/skyline/panaroma/check'
+PANORAMA_CHECK_PATH = '/opt/skyline/panorama/check'
 """
 :var PANORAMA_CHECK_PATH: This is the location the Skyline apps will write the
     anomalies to for Panorama to check to a file on disk - absolute path
@@ -673,11 +678,16 @@ MAX_RESOLUTION = 1000
 """
 
 SKIP_LIST = [
-    # Skip anomaly_breakdown
-    'anomaly_breakdown.',
-    'example.statsd.metric',
-    'another.example.metric',
-    # if you use statsd, these can result in many near-equal series
+    # Skip the skyline namespaces, except horizon.  This prevents Skyline
+    # populating a lot of anomalies related to timings, algorithm_breakdowns,
+    # etc.
+    'skyline.analyzer.',
+    'skyline.boundary.',
+    'skyline.ionosphere.',
+    'skyline.mirage.',
+    # If you use statsd, these can result in many near-equal series, however
+    # be careful that you do not skip any of your own application namespaces
+    # if they include these strings.
     # '_90',
     # '.lower',
     # '.upper',
@@ -687,15 +697,49 @@ SKIP_LIST = [
 ]
 """
 :var SKIP_LIST: Metrics to skip
-:vartype SKIP_LIST: array
+:vartype SKIP_LIST: list
 
-These are metrics that, for whatever reason, you do not want to store in
+These are metrics that, for whatever reason, you do not want to analyze in
 Skyline. The Worker will check to see if each incoming metrics contains
 anything in the skip list. It is generally wise to skip entire namespaces by
 adding a '.' at the end of the skipped item - otherwise you might skip things
 you do not intend to.  For example the default
 ``skyline.analyzer.anomaly_breakdown.`` which MUST be skipped to prevent crazy
 feedback.
+
+These SKIP_LIST are also matched just dotted namespace elements too, if a match
+is not found in the string, then the dotted elements are compared.  For example
+if an item such as 'skyline.analyzer.algorithm_breakdown' was added it would
+macth any metric that matched all 3 dotted namespace elements, so it would
+match:
+
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.times_run
+skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run
+
+"""
+
+DO_NOT_SKIP_LIST = [
+    # DO NOT skip these metrics even if they matched in the SKIP_LIST.
+    # These are the key indicator metrics for Skyline, if you want to monitor
+    # Skyline for anomalies, etc. Due to the other Skyline apps only analysing
+    # when required there metrics are more irratic, however all are sent to
+    # Graphite and available under the 'skyline.' namespace
+    'skyline.analyzer.run_time',
+    'skyline.boundary.run_time',
+    'skyline.analyzer.ionosphere_metrics',
+    'skyline.analyzer.mirage_metrics',
+    'skyline.analyzer.total_analyzed',
+    'skyline.analyzer.total_anomalies',
+]
+"""
+:var DO_NOT_SKIP_LIST: Metrics to skip
+:vartype DO_NOT_SKIP_LIST: list
+
+These are metrics that you want Skyline in analyze even if they match a
+namespace in the SKIP_LIST.  Works in the same way that SKIP_LIST does, it
+matches in the string or dotted namespace elements.
+
 """
 
 """
