@@ -212,8 +212,8 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage spin_process after raw_assigned: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         except:
-            logger.error('error :: failed to get assigned_metrics from Redis')
             logger.info(traceback.format_exc())
+            logger.error('error :: failed to get assigned_metrics from Redis')
 
         # Make process-specific dicts
         exceptions = defaultdict(int)
@@ -350,6 +350,35 @@ class Analyzer(Thread):
                             if mirage_metric:
                                 logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
                                 send_to_ionosphere = False
+                                # @added 20170306 - Feature #1960: ionosphere_layers
+                                # Ionosphere layers require the timeseries at
+                                # FULL_DURATION so if this is a Mirage and
+                                # Ionosphere metric, Analyzer needs to provide
+                                # the timeseries file for later (within 60
+                                # seconds) analysis, however we want the data
+                                # that triggered the anomaly, as before this was
+                                # only created by Mirage if an alert was
+                                # triggered, but Ionosphere layers now require
+                                # this file before an alert is triggered
+                                timeseries_dir = base_name.replace('.', '/')
+                                training_dir = '%s/%s/%s' % (
+                                    settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
+                                    str(timeseries_dir))
+                                if not os.path.exists(training_dir):
+                                    mkdir_p(training_dir)
+                                full_duration_in_hours = int(settings.FULL_DURATION) / 3600
+                                ionosphere_json_file = '%s/%s.mirage.redis.%sh.json' % (
+                                    training_dir, base_name,
+                                    str(int(full_duration_in_hours)))
+                                if not os.path.isfile(ionosphere_json_file):
+                                    timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+                                    try:
+                                        write_data_to_file(skyline_app, ionosphere_json_file, 'w', timeseries_json)
+                                        logger.info('%s added Ionosphere Mirage %sh Redis data timeseries json file :: %s' % (
+                                            skyline_app, str(int(full_duration_in_hours)), ionosphere_json_file))
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to add %s Ionosphere Mirage Redis data timeseries json file - %s' % (skyline_app, ionosphere_json_file))
 
                     # @modified 20170108 - Feature #1830: Ionosphere alerts
                     # Only send smtp_alerter_metrics to Ionosphere
