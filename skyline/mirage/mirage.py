@@ -612,9 +612,25 @@ class Mirage(Thread):
             except Exception as e:
                 logger.error('error :: could not query Redis for cache_key: %s' % str(e))
 
+            # @added 20170308 - Feature #1960: ionosphere_layers
+            # Allow Ionosphere to send Panorama checks, it is an ionosphere_metric
+            try:
+                ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            except:
+                ionosphere_unique_metrics = []
+
             added_at = str(int(time()))
             # If Panorama is enabled - create a Panorama check
+            # @modified 20170308 - Feature #1960: ionosphere_layers
+            # Allow Ionosphere to send Panorama checks for ionosphere_metrics
+            # if settings.PANORAMA_ENABLED:
+            send_to_panorama = False
+            redis_metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(base_name))
             if settings.PANORAMA_ENABLED:
+                send_to_panorama = True
+            if redis_metric_name in ionosphere_unique_metrics:
+                send_to_panorama = False
+            if send_to_panorama:
                 if not os.path.exists(settings.PANORAMA_CHECK_PATH):
                     mkdir_p(settings.PANORAMA_CHECK_PATH)
 
@@ -1196,6 +1212,7 @@ class Mirage(Thread):
                                         logger.info('using settings.FULL_DURATION - %s' % (str(settings.FULL_DURATION)))
                                         second_order_resolution_seconds = settings.FULL_DURATION
                                 self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)
                                 try:
                                     if alert[1] != 'smtp':
