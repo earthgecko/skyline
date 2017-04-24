@@ -87,6 +87,15 @@
   		        <td>layers_id_greater_than</td>
   		        <td><input type="number" name="layers_id_greater_than" value="0"></td>
   		      </tr>
+<!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
+  		      <tr>
+  		        <td>validated</td>
+  		        <td><select name="validated_equals">
+                <option value="any">any</option>
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
   {% if full_duration_list %}
   		      <tr>
   		        <td>full_duration</td>
@@ -169,6 +178,13 @@
                   <option value="false">false</option>
                   <option value="true">true</option>
                 </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by metric:</td>
+              <td><select name="count_by_metric">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
   		      </tr>
 
   		      <tr>
@@ -312,7 +328,7 @@ count
 <!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
       tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
       matched_count10, human_date11, created_timestamp12, checked_count13,
-      checked_human_date14, parent_id15, generation16] -->
+      checked_human_date14, parent_id15, generation16, validated17] -->
             <th>fp_ip</th>
             <th>metric</th>
             <th>parent_id</th>
@@ -324,6 +340,8 @@ count
             <th>checked count</th>
             <th>last checked</th>
             <th>created</th>
+<!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
+            <th>validated</th>
             <th>layer id</th>
 <!-- @added 20170322 - Feature #1960: ionosphere_layers
 # Added layers information to the features profiles search results -->
@@ -364,6 +382,7 @@ count
             <td>{{ item[20] }}</td>
             <td>{{ item[21] }}</td>
             <td>{{ item[22] }}</td>
+            <td>{{ item[23] }}</td>
           </tr>
   {% endfor %}
 				</tbody>

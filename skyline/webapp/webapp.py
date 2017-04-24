@@ -62,7 +62,9 @@ from ionosphere_backend import (
     metric_layers_alogrithms,
     # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
     #                   Task #2002: Review and correct incorrectly defined layers
-    edit_ionosphere_layers)
+    edit_ionosphere_layers,
+    # @added 20170402 - Feature #2000: Ionosphere - validated
+    validate_fp)
 
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
@@ -829,6 +831,8 @@ def ionosphere():
                         'generation_greater_than',
                         # @added 20170315 - Feature #1960: ionosphere_layers
                         'layers_id_greater_than',
+                        # @added 20170402 - Feature #2000: Ionosphere - validated
+                        'validated_equals',
                         'full_duration',
                         'enabled',
                         'tsfresh_version',
@@ -948,6 +952,7 @@ def ionosphere():
     # Added d_boundary_times
     # @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers
     # Added layers_id and edit_fp_layers
+    # @added 20170402 - Feature #2000: Ionosphere - validated
     IONOSPHERE_REQUEST_ARGS = [
         'timestamp', 'metric', 'metric_td', 'a_dated_list', 'timestamp_td',
         'requested_timestamp', 'fp_view', 'calc_features', 'add_fp',
@@ -955,7 +960,8 @@ def ionosphere():
         'd_boundary_limit', 'd_boundary_times', 'e_condition', 'e_boundary_limit',
         'e_boundary_times', 'es_layer', 'es_day', 'f1_layer', 'f1_from_time',
         'f1_layer', 'f2_until_time', 'fp_layer', 'fp_layer_label',
-        'add_fp_layer', 'layers_id', 'edit_fp_layers']
+        'add_fp_layer', 'layers_id', 'edit_fp_layers', 'validate_fp',
+        'validated_equals']
 
     determine_metric = False
     dated_list = False
@@ -1486,7 +1492,28 @@ def ionosphere():
         l_details_object = False
         la_details = None
 
+        # @added 20170402 - Feature #2000: Ionosphere - validated
+        validated_fp_success = False
+
         if fp_view:
+
+            # @added 20170402 - Feature #2000: Ionosphere - validated
+            validate = False
+            if 'validate_fp' in request.args:
+                validate_arg = request.args.get('validate_fp', False)
+                if validate_arg == 'true':
+                    validate = True
+                    logger.info('validate - %s' % str(validate))
+            if validate:
+                logger.info('validating - fp_ip %s' % str(fp_id))
+                try:
+                    validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id)
+                    logger.info('validated fp_id - %s' % str(fp_id))
+                except:
+                    trace = traceback.format_exc()
+                    message = 'failed to validate features profile'
+                    return internal_error(message, trace)
+
             try:
                 # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
                 # Return the fp_details_object so that webapp can pass the parent_id and
@@ -1618,12 +1645,17 @@ def ionosphere():
             # Added parent_id and generation
             par_id = 0
             gen = 0
+            # @added 20170402 - Feature #2000: Ionosphere - validated
+            fp_validated = 0
+
             # Determine the parent_id and generation as they were added to the
             # fp_details_object
             if fp_details:
                 try:
                     par_id = int(fp_details_object['parent_id'])
                     gen = int(fp_details_object['generation'])
+                    # @added 20170402 - Feature #2000: Ionosphere - validated
+                    fp_validated = int(fp_details_object['validated'])
                 except:
                     trace = traceback.format_exc()
                     message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
@@ -1753,7 +1785,8 @@ def ionosphere():
                 baseline_fd=full_duration, last_ts_json=sample_ts_json,
                 last_i_ts_json=sample_i_ts_json, layers_updated=layers_updated,
                 fp_id_matched=f_id_matched, fp_id_created=f_id_created,
-                fp_generation=fp_generation_created,
+                fp_generation=fp_generation_created, validated=fp_validated,
+                validated_fp_successful=validated_fp_success,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

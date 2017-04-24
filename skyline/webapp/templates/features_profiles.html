@@ -292,6 +292,26 @@ you need to try and be quicker next time.
   		<pre>No features_profile_details were passed, which is not ideal</pre>
   {% endif %}
 
+<!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
+  {% if validated %}
+  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span></span> True</h4>
+
+    {% if validated_fp_successful %}
+  	  <div class="alert alert-success">
+  	    <strong>Success!</strong> The features profile has now been validated<br>
+  	  </div>
+    {% endif %}
+  {% else %}
+  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span></span> False</h4>
+	  <div class="alert alert-warning">
+    <strong>Warning!</strong> This features profile has not been validated, please review it against
+<a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}"><b>parent features profile id {{ parent_id }}</b></a>
+and validate that it is valid.
+      <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric }}&validate_fp=true">
+      <button type="button">Validate features profile</button></a>
+	  </div>
+  {% endif %}
+
   	  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">details ::</span></span></span> features profile ionosphere_layers id {{ layer_id }}</h4>
   {% if layer_details %}
   		<pre>{{ layer_details }}</pre>

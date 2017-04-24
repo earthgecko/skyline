@@ -516,6 +516,17 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     current_logger.info('create_features_profile :: ionosphere_table OK')
 
+    # @added 20170403 - Feature #2000: Ionosphere - validated
+    # Set all learn_fp_human features profiles to validated.
+    fp_validated = 0
+    if ionosphere_job == 'learn_fp_human':
+        fp_validated = 1
+
+    # @added 20170424 - Feature #2000: Ionosphere - validated
+    # Set all generation 0 and 1 as validated
+    if int(fp_generation) <= 1:
+        fp_validated = 1
+
     new_fp_id = False
     try:
         connection = engine.connect()
@@ -523,13 +534,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # Added learn values parent_id, generation
         # @modified 20170120 - Feature #1854: Ionosphere learn
         # Added anomaly_timestamp
+        # @modified 20170403 - Feature #2000: Ionosphere - validated
         ins = ionosphere_table.insert().values(
             metric_id=int(metrics_id), full_duration=int(ts_full_duration),
             anomaly_timestamp=int(use_anomaly_timestamp),
             enabled=1, tsfresh_version=str(tsfresh_version),
             calc_time=calculated_time, features_count=fcount,
             features_sum=fsum, parent_id=fp_parent_id,
-            generation=fp_generation)
+            generation=fp_generation, validated=fp_validated)
         result = connection.execute(ins)
         connection.close()
         new_fp_id = result.inserted_primary_key[0]

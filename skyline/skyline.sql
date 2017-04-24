@@ -236,12 +236,9 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
   `parent_id` INT(10) DEFAULT 0 COMMENT 'the id of the parent features profile, 0 being the original human generated features profile',
   `generation` INT DEFAULT 0 COMMENT 'the number of generations between this feature profile and the original, 0 being the original human generated features profile',
 /*
-# @added 20170111 - Feature #1854: Ionosphere learn - generations
-# Added max_generations and percent_diff_from_origin for Ionosphere LEARN
-# related features profiles
+# @added 20170402 - Feature #2000: Ionosphere - validated
 */
-  `max_generations` INT DEFAULT 0 COMMENT 'the number of generations between this feature profile and the original, 0 being the original human generated features profile',
-  `max_percent_diff_from_origin` DOUBLE DEFAULT NULL COMMENT 'the maximum percentage difference of the features profile sum for the original human generated features profile',
+  `validated` INT(10) DEFAULT 0 COMMENT 'unix timestamp when validated, 0 being none',
 /* # @added 20170305 - Feature #1960: ionosphere_layers */
   `layers_id` INT(11) DEFAULT 0 COMMENT 'the id of the ionosphere_layers profile, 0 being none',
   PRIMARY KEY (id),
@@ -330,6 +327,10 @@ CREATE TABLE IF NOT EXISTS `ionosphere_layers` (
   `check_count` INT(10) DEFAULT 0 COMMENT 'the number of times this layer has been checked',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   `label` VARCHAR(255) DEFAULT NULL COMMENT 'a label for the layer',
+/*
+# @added 20170402 - Feature #2000: Ionosphere - validated
+*/
+  `validated` INT(10) DEFAULT 0 COMMENT 'unix timestamp when validated, 0 being none',
   PRIMARY KEY (id),
   INDEX `ionosphere_layers` (`id`,`fp_id`,`metric_id`)  KEY_BLOCK_SIZE=255)
   ENGINE=InnoDB;

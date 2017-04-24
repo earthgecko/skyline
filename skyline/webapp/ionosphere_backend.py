@@ -993,6 +993,8 @@ def features_profile_details(fp_id):
         # Added parent_id and generation
         parent_id = row['parent_id']
         generation = row['generation']
+        # @added 20170402 - Feature #2000: Ionosphere - validated
+        validated = row['validated']
         # @added 20170305 - Feature #1960: ionosphere_layers
         layers_id = row['layers_id']
         fp_details = '''
@@ -1006,14 +1008,14 @@ created_timestamp :: %s
 full_duration     :: %s
 checked_count     :: %s
 last_checked      :: %s | human_date :: %s
-parent_id         :: %s | generation :: %s
+parent_id         :: %s | generation :: %s | validated :: %s
 layers_id         :: %s
 ''' % (str(tsfresh_version), str(calc_time), str(features_count),
             str(features_sum), str(deleted), str(matched_count),
             str(last_matched), str(human_date), str(created_timestamp),
             str(full_duration), str(checked_count), str(last_checked),
             str(checked_human_date), str(parent_id), str(generation),
-            str(layers_id))
+            str(validated), str(layers_id))
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -1197,6 +1199,23 @@ def ionosphere_search(default_query, search_query):
                 query_string = new_query_string
                 needs_and = True
 
+    # @added 20170402 - Feature #2000: Ionosphere - validated
+    if 'validated_equals' in request.args:
+        validated_equals = request.args.get('validated_equals', 'any')
+        if validated_equals == 'true':
+            validate_string = 'validated = 1'
+        if validated_equals == 'false':
+            validate_string = 'validated = 0'
+        if validated_equals != 'any':
+            if needs_and:
+                new_query_string = '%s AND %s' % (query_string, validate_string)
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE %s' % (query_string, validate_string)
+                query_string = new_query_string
+                needs_and = True
+
     ordered_by = None
     if 'order' in request.args:
         order = request.args.get('order', 'DESC')
@@ -1339,7 +1358,9 @@ def ionosphere_search(default_query, search_query):
                 fp_checked_count = int(row['checked_count'])
                 fp_parent_id = int(row['parent_id'])
                 fp_generation = int(row['generation'])
-                all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation])
+                # @added 20170402 - Feature #2000: Ionosphere - validated
+                fp_validated = int(row['validated'])
+                all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated])
             except:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
@@ -1483,12 +1504,15 @@ def ionosphere_search(default_query, search_query):
                     fp_checked_count = int(row['checked_count'])
                     fp_parent_id = int(row['parent_id'])
                     fp_generation = int(row['generation'])
+                    # @added 20170402 - Feature #2000: Ionosphere - validated
+                    fp_validated = int(row['validated'])
+
                     fp_layers_id = int(row['layers_id'])
                     # @added 20170322 - Feature #1960: ionosphere_layers
                     # Added layers information to the features_profiles items
                     if fp_layers_id > 0:
                         layers_present = True
-                    features_profiles.append([fp_id, metric_id, str(metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_layers_id])
+                    features_profiles.append([fp_id, metric_id, str(metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id])
                 except:
                     trace = traceback.format_exc()
                     logger.error('%s' % trace)
@@ -1563,7 +1587,8 @@ def ionosphere_search(default_query, search_query):
         # Add the layers information to the features_profiles list
         features_profiles_and_layers = []
         if features_profiles:
-            for fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_layers_id in features_profiles:
+            # @modified 20170402 - Feature #2000: Ionosphere - validated
+            for fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id in features_profiles:
                 default_values = True
                 if int(fp_layers_id) > 0:
                     for layer_id, layer_fp_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in features_profiles_layers:
@@ -1577,7 +1602,7 @@ def ionosphere_search(default_query, search_query):
                     layer_check_count = 0
                     layer_checked_human_date = 'none'
                     layer_label = 'none'
-                features_profiles_and_layers.append([fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label])
+                features_profiles_and_layers.append([fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label])
 
         old_features_profile_list = features_profiles
         features_profiles = features_profiles_and_layers
@@ -2721,5 +2746,73 @@ def edit_ionosphere_layers(layers_id):
 
     if engine:
         engine_disposal(engine)
+
+    return True, fail_msg, trace
+
+
+# @added 20170402 - Feature #2000: Ionosphere - validated
+def validate_fp(fp_id):
+    """
+    Validate a features profile.
+
+    :param fp_id: the features profile id to validate
+    :return: array
+    :rtype: array
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: validate_fp'
+
+    logger.info('%s validating fp_id %s' % (function_str, str(fp_id)))
+
+    trace = 'none'
+    fail_msg = 'none'
+
+    logger.info('%s :: getting MySQL engine' % function_str)
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        logger.error('%s' % fail_msg)
+        raise
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    try:
+        ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    try:
+        connection = engine.connect()
+        connection.execute(
+            ionosphere_table.update(
+                ionosphere_table.c.id == int(fp_id)).
+            values(validated=1))
+        connection.close()
+        logger.info('updated validated for %s' % (str(fp_id)))
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        logger.error('error :: could not update validated for fp_id %s ' % str(fp_id))
+        fail_msg = 'error :: could not update label for fp_id %s ' % str(fp_id)
+        if engine:
+            engine_disposal(engine)
+        raise
 
     return True, fail_msg, trace
