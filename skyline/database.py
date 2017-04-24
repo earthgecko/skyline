@@ -3,7 +3,7 @@ import logging
 import traceback
 from sqlalchemy import (
     create_engine, Column, Table, Integer, String, MetaData, DateTime)
-from sqlalchemy.dialects.mysql import DOUBLE, FLOAT, TINYINT, VARCHAR, FLOAT
+from sqlalchemy.dialects.mysql import DOUBLE, FLOAT, TINYINT, VARCHAR
 
 import settings
 
@@ -141,5 +141,60 @@ def ionosphere_matched_table_meta(current_skyline_app, engine):
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
         fail_msg = 'error :: failed to reflect the ionosphere_matched table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+# @added 20170305 - Feature #1960: ionosphere_layers
+def ionosphere_layers_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the ionosphere_layers table MetaData
+    try:
+        ionosphere_layers_meta = MetaData()
+        ionosphere_layers_table = Table('ionosphere_layers', ionosphere_layers_meta, autoload=True, autoload_with=engine)
+        return ionosphere_layers_table, 'ionosphere_layers_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the ionosphere_layers table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+def layers_algorithms_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the layers_algorithms table MetaData
+    try:
+        layers_algorithms_meta = MetaData()
+        layers_algorithms_table = Table('layers_algorithms', layers_algorithms_meta, autoload=True, autoload_with=engine)
+        return layers_algorithms_table, 'layers_algorithms_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the layers_algorithms table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+def ionosphere_layers_matched_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the ionosphere_layers_matched table MetaData
+    try:
+        ionosphere_layers_matched_meta = MetaData()
+        ionosphere_layers_matched_table = Table('ionosphere_layers_matched', ionosphere_layers_matched_meta, autoload=True, autoload_with=engine)
+        return ionosphere_layers_matched_table, 'ionosphere_layers_matched_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the ionosphere_layers_matched table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace

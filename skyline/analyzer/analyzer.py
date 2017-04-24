@@ -212,8 +212,8 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage spin_process after raw_assigned: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         except:
-            logger.error('error :: failed to get assigned_metrics from Redis')
             logger.info(traceback.format_exc())
+            logger.error('error :: failed to get assigned_metrics from Redis')
 
         # Make process-specific dicts
         exceptions = defaultdict(int)
@@ -350,6 +350,35 @@ class Analyzer(Thread):
                             if mirage_metric:
                                 logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
                                 send_to_ionosphere = False
+                                # @added 20170306 - Feature #1960: ionosphere_layers
+                                # Ionosphere layers require the timeseries at
+                                # FULL_DURATION so if this is a Mirage and
+                                # Ionosphere metric, Analyzer needs to provide
+                                # the timeseries file for later (within 60
+                                # seconds) analysis, however we want the data
+                                # that triggered the anomaly, as before this was
+                                # only created by Mirage if an alert was
+                                # triggered, but Ionosphere layers now require
+                                # this file before an alert is triggered
+                                timeseries_dir = base_name.replace('.', '/')
+                                training_dir = '%s/%s/%s' % (
+                                    settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
+                                    str(timeseries_dir))
+                                if not os.path.exists(training_dir):
+                                    mkdir_p(training_dir)
+                                full_duration_in_hours = int(settings.FULL_DURATION) / 3600
+                                ionosphere_json_file = '%s/%s.mirage.redis.%sh.json' % (
+                                    training_dir, base_name,
+                                    str(int(full_duration_in_hours)))
+                                if not os.path.isfile(ionosphere_json_file):
+                                    timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
+                                    try:
+                                        write_data_to_file(skyline_app, ionosphere_json_file, 'w', timeseries_json)
+                                        logger.info('%s added Ionosphere Mirage %sh Redis data timeseries json file :: %s' % (
+                                            skyline_app, str(int(full_duration_in_hours)), ionosphere_json_file))
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to add %s Ionosphere Mirage Redis data timeseries json file - %s' % (skyline_app, ionosphere_json_file))
 
                     # @modified 20170108 - Feature #1830: Ionosphere alerts
                     # Only send smtp_alerter_metrics to Ionosphere
@@ -372,6 +401,35 @@ class Analyzer(Thread):
                                 timeseries, str(settings.FULL_DURATION),
                                 str(ionosphere_parent_id))
                             self.sent_to_ionosphere.append(base_name)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
+
+                        # @added 20170403 - Feature #1994: Ionosphere training_dir keys
+                        #                   Feature #2000: Ionosphere - validated
+                        #                   Feature #1996: Ionosphere - matches page
+                        # The addition of this key data could be done in
+                        # skyline_function.py, however that would introduce
+                        # Redis requirements in the send_anomalous_metric_to
+                        # function, which is not desirable I think. So this is
+                        # a non-KISS pattern that is replicated in mirage.py as
+                        # well.
+                        # Each training_dir and data set is now Redis keyed to increase efficiency
+                        # in terms of disk I/O for ionosphere.py and making keyed data
+                        # available for each training_dir data set so that transient matched data
+                        # can be surfaced for the webapp along with directory paths, etc
+                        ionosphere_training_data_key = 'ionosphere.training_data.%s.%s' % (str(metric_timestamp), base_name)
+                        ionosphere_training_data_key_data = [
+                            ['metric_timestamp', int(metric_timestamp)],
+                            ['base_name', str(base_name)],
+                            ['timeseries_dir', str(timeseries_dir)],
+                            ['added_by', str(skyline_app)]
+                        ]
+                        try:
+                            self.redis_conn.setex(
+                                ionosphere_training_data_key,
+                                settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR,
+                                ionosphere_training_data_key_data)
                         except:
                             logger.info(traceback.format_exc())
                             logger.error('error :: failed to send_anomalous_metric_to to ionosphere')

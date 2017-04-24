@@ -471,6 +471,11 @@ def get_graphite_metric(
     except:
         import time
 
+    try:
+        re
+    except:
+        import re
+
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -545,6 +550,10 @@ def get_graphite_metric(
             # Added graphite_matched_images matched.fp_id
             if 'matched.fp_id' in output_object:
                 get_ionosphere_graphs = True
+            # @added 20170308 - Feature #1960: ionosphere_layers
+            # Added graphite_layers_matched_images matched.layer
+            if 'matched.layers.fp_id' in output_object:
+                get_ionosphere_graphs = True
             if get_ionosphere_graphs:
                 int_hours = int((int(until_timestamp) - int(from_timestamp)) / 60 / 60)
                 if 'graphite_now' in output_object:
@@ -559,12 +568,34 @@ def get_graphite_metric(
                     period = 'days'
                 if 'graphite_now' in output_object:
                     unencoded_graph_title = 'Graphite NOW at %s %s' % (str_value, period)
+                # @added 20170308 - Feature #1960: ionosphere_layers
+                matched_graph = False
                 if 'matched.fp_id' in output_object:
+                    matched_graph = True
+                if 'matched.layers.fp_id' in output_object:
+                    matched_graph = True
+                # @modified 20170308 - Feature #1960: ionosphere_layers
+                # if 'matched.fp_id' in output_object:
+                if matched_graph:
                     human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(until_timestamp)))
-                    unencoded_graph_title = '%s at %s hours' % (str(human_date), str(int_hours))
+                    if 'matched.fp_id' in output_object:
+                        tail_piece = re.sub('.*\.fp_id-', '', output_object)
+                        matched_fp_id = re.sub('\..*', '', tail_piece)
+                        unencoded_graph_title = 'fp_id %s matched - %s at %s hours' % (
+                            str(matched_fp_id), str(human_date),
+                            str(int_hours))
+                    if 'matched.layers.fp_id' in output_object:
+                        # layers_id
+                        tail_piece = re.sub('.*\.layers_id-', '', output_object)
+                        matched_layers_id = re.sub('\..*', '', tail_piece)
+                        unencoded_graph_title = 'layers_id %s matched - %s at %s hours' % (
+                            str(matched_layers_id), str(human_date),
+                            str(int_hours))
                 graph_title_string = quote(unencoded_graph_title, safe='')
                 graph_title = '&title=%s' % graph_title_string
                 add_parameters = '%s&colorList=blue%s' % (settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                if 'matched.layers.fp_id' in output_object:
+                    add_parameters = '%s&colorList=green%s' % (settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                 image_url += add_parameters
                 current_logger.info('Ionosphere graphite NOW url - %s' % (image_url))
 

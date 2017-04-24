@@ -2,11 +2,11 @@ from __future__ import division
 import logging
 from os import path
 import time
-import string
-import operator
+# import string
+# import operator
 import re
 import csv
-import datetime
+# import datetime
 import shutil
 import glob
 from ast import literal_eval
@@ -18,7 +18,7 @@ from sqlalchemy import (
     create_engine, Column, Table, Integer, String, MetaData, DateTime)
 from sqlalchemy.dialects.mysql import DOUBLE, TINYINT
 from sqlalchemy.sql import select
-import json
+# import json
 from tsfresh import __version__ as tsfresh_version
 
 import settings
@@ -370,8 +370,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(current_skyline_app, base_name)
         learn_full_duration_days = use_full_duration_days
     except:
-        logger.error(traceback.format_exc())
-        logger.error('error :: create_features_profile :: failed to get_ionosphere_learn_details')
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: create_features_profile :: failed to get_ionosphere_learn_details')
 
     current_logger.info('create_features_profile :: learn_full_duration_days     :: %s days' % (str(learn_full_duration_days)))
     current_logger.info('create_features_profile :: valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
@@ -454,7 +454,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             except:
                 current_logger.error('error :: create_features_profile :: failed to determine learn related values from DB for %s' % base_name)
         row = result.fetchone()
-        metric_db_object = row
+        # metric_db_object = row
         connection.close()
         current_logger.info('create_features_profile :: determined db metric id: %s' % str(metrics_id))
         current_logger.info('create_features_profile :: determined db metric learn_full_duration_days: %s' % str(metric_learn_full_duration_days))
@@ -469,7 +469,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     if metric_learn_full_duration_days:
         learn_full_duration_days = metric_learn_full_duration_days
-        learn_full_duration = int(learn_full_duration_days) * 86400
+        # learn_full_duration = int(learn_full_duration_days) * 86400
     if metric_learn_valid_ts_older_than:
         learn_valid_ts_older_than = metric_learn_valid_ts_older_than
     if metric_max_generations:
@@ -516,6 +516,17 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     current_logger.info('create_features_profile :: ionosphere_table OK')
 
+    # @added 20170403 - Feature #2000: Ionosphere - validated
+    # Set all learn_fp_human features profiles to validated.
+    fp_validated = 0
+    if ionosphere_job == 'learn_fp_human':
+        fp_validated = 1
+
+    # @added 20170424 - Feature #2000: Ionosphere - validated
+    # Set all generation 0 and 1 as validated
+    if int(fp_generation) <= 1:
+        fp_validated = 1
+
     new_fp_id = False
     try:
         connection = engine.connect()
@@ -523,13 +534,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # Added learn values parent_id, generation
         # @modified 20170120 - Feature #1854: Ionosphere learn
         # Added anomaly_timestamp
+        # @modified 20170403 - Feature #2000: Ionosphere - validated
         ins = ionosphere_table.insert().values(
             metric_id=int(metrics_id), full_duration=int(ts_full_duration),
             anomaly_timestamp=int(use_anomaly_timestamp),
             enabled=1, tsfresh_version=str(tsfresh_version),
             calc_time=calculated_time, features_count=fcount,
             features_sum=fsum, parent_id=fp_parent_id,
-            generation=fp_generation)
+            generation=fp_generation, validated=fp_validated)
         result = connection.execute(ins)
         connection.close()
         new_fp_id = result.inserted_primary_key[0]
@@ -643,7 +655,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # Create z_ts_<metric_id> table
     # @modified 20170121 - Feature #1854: Ionosphere learn - generations
     # TODO Adding the option to not save timeseries to DB, as default?
-    ts_table_created = False
+    # ts_table_created = False
     ts_table_name = 'z_ts_%s' % str(metrics_id)
     try:
         ts_meta = MetaData()
@@ -662,7 +674,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             mysql_key_block_size='255',
             mysql_engine='InnoDB')
         ts_metric_table.create(engine, checkfirst=True)
-        ts_table_created = True
+        # ts_table_created = True
         current_logger.info('create_features_profile :: metric ts table created OK - %s' % (ts_table_name))
     except:
         trace = traceback.format_exc()
@@ -690,7 +702,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             fail_msg = 'error :: create_features_profile :: failed to read timeseries data from %s' % anomaly_json
             current_logger.error('%s' % (fail_msg))
             fail_msg = 'error: failed to read timeseries data from %s' % anomaly_json
-            end = timer()
+            # end = timer()
             if context == 'training' or context == 'features_profile':
                 # Raise to webbapp I believe to provide traceback to user in UI
                 raise

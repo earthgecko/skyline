@@ -240,16 +240,51 @@ Also note:
     {% if print_debug == True %}
 <code> DEBUG </code> :: countdown :: {{ countdown }}</br>
     {% endif %}
+
+    {% if fp_id_created %}
+      {% if fp_generation > 1 %}
+		    <h4><span class="logo"><span class="sky">LEARNT ::</span> <span class="re">not anomalous :: </span></span></span>this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
+    	  <div class="alert alert-success">
+    	    <strong>LEARNT</strong> this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b>
+    	  </div>
+      {% else %}
+		    <h4><span class="logo"><span class="sky">TRAINED ::</span> <span class="re">not anomalous :: </span></span></span>trained and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
+    	  <div class="alert alert-warning">
+    	    <strong>Trained</strong> this training data has already been used to create <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b>
+    	  </div>
+      {% endif %}
+    {% else %}
+		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span> (aka: "That's not what I call an anomaly")</h4>
+    {% endif %}
+
     {% if countdown == False %}
-		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span>  (aka: "That's not what I call an anomaly")</h4>
 		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>True</h4>
     {% else %}
-		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span>  (aka: "That's not what I call an anomaly")</h4>
 		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>False - Ionosphere will attempt
       to learn if this is <code>not anomalous</code> from the {{ use_full_duration_days }} days features profiles that exist in:</h4>
       <div class="countdown styled"></div>
     {% endif %}
+
 		  <h4><span class="logo"><span class="sky">Ionosphere ::</span> <span class="re">metric :: </span></span>{{ ionosphere_metric }}</h4>
+
+<!-- # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# To present the operator with information as to whether an existing features
+# profile has already matched a training data set -->
+    {% if fp_id_matched == None %}
+		  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">NOT matched :: </span></span>no features profiles matched this training data</h4>
+    {% else %}
+		  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">matched :: </span></span>True - <a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> has already <b><font color="green">MATCHED</font></b> this training data as <code>not anomalous</code></h4>
+    {% endif %}
+
+<!-- # @added 20170308 - Feature #1960: ionosphere_layers
+# To present the operator with information as to whether an existing layer has
+already matched a training data set -->
+    {% if layers_id_matched == None %}
+		  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">NOT matched :: </span></span>no layers matched this training data</h4>
+    {% else %}
+		  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">matched :: </span></span>True - layers_id {{ layers_id_matched }} has already <b><font color="green">MATCHED</font></b> this training data as <code>not anomalous</code></h4>
+    {% endif %}
+
 		  <table class="table table-hover">
 		    <thead>
 		      <tr>
@@ -270,7 +305,6 @@ Also note:
 						<button type="button">Extract features</button></a> - <code>if not anomalous:</code> press this button first</td>
 		      </tr>
 	{% endif %}
-
 		      <tr>
 		        <td>Create features profile and <b><span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</b></td>
 		        <td>Then create the full_duration extracted features profile as <strong>NOT anomalous</strong>
@@ -296,7 +330,7 @@ Also note:
 # not want to add that to be learnt.
 -->
 		      <tr>
-		        <td>Create features profile and and <b><span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</b></td>
+		        <td>Create features profile and <b><span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</b></td>
 		        <td>Or create a features profile as <strong>NOT anomalous</strong>
             and <span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</strong></td>
     {% if not features_profile_id %}
@@ -320,6 +354,13 @@ Also note:
 		      </tr>
 		    </tbody>
 		  </table>
+<!-- # @added 20170308 - Feature #1960: ionosphere_layers
+# To present the operator with the existing layers and algorithms for the metric
+# @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# Moved the layer table block so that they are always displayed where relevant -->
+  {% if not layers_id_matched %}
+      {% include "layers_table.html" %}
+  {% endif %}
 
   {% if extracted_features %}
 	  <h4><span class="logo"><span class="sky">Extracted ::</span> <span class="re">features ::</span></span></span> created OK</h4>
@@ -359,16 +400,174 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
 	    <strong>A features profile has already been created or learnt</strong> from this training data set with fp_id {{ features_profile_id }}.
       This training data set will be removed by the normal Ionosphere training data roomba that removes old training data dirs and files.
       <strong>However it is good to know</strong> that you thought this was not anomalous <strong>as well or again :)</strong>.  This training data set is now a features_profiles
-      data set and can be viewed in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric}}">features profile page for fp_id {{ features_profile_id }}</a>
-      or view under the {{ for_metric }} and {{ timestamp }}  dir in ionosphere/features_profiles/
+      data set and can be viewed via this link in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric }}"><strong>features profile page for fp_id {{ features_profile_id }}</strong></a>
 	  </div>
     {% endif %}
-	  <h3><span class="logo"><span class="sky">Skyline ::</span> <span class="re">trained :: </span></span></span>{{ for_metric }}</h4>
+
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">profile :: </span></span></span>{{ for_metric }}</h3>
+
   {% endif %}
 
-		</div>
+
+<!-- @added 20170303 - Feature #1960: ionosphere_layers -->
+  {% if features_profile_id %}
+    {% if layer_id %}
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">layers :: </span></span></span>{{ for_metric }}</h3>
+      {% if layers_algorithms_ids %}
+  	  <div class="alert alert-success">
+  	    <strong>Success!</strong> The features profile layers were created with id {{ layer_id }}<br>
+        Layers created :: {{ layers_algorithms }}<br>
+        Layers algorithm id :: {{ layers_algorithms_ids }}<br>
+  	  </div>
+      {% else %}
+  	  <div class="alert alert-warning">
+  	    <strong>The features profile layers have already been created for this profile layers id {{ layer_id }}.</strong>
+  	  </div>
+      {% endif %}
+    {% else %}
+	  <h3><span class="logo"><span class="sky">Train ::</span> <span class="re">layers :: </span></span></span>[optional] - {{ for_metric }}</h3>
+Optionally you now can create an Ionosphere layers profile which allows you to specify conditions that are <code>not anomalous</code><br>
+This does not stop Skyline learning, it reduces Ionosphere alerts and enables the creation of custom Boundary type algorithms per metric.<br>
+For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b>every enabled</b> layer must be matched.
+
+<!-- # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# Added the Redis data plot here to present the operator with the max, min,
+# mean, and 3sigma limits can be evaluted and inform to aid in the layers
+# creation and remind them that layer operate in the FULL_DURATION scope/
+# To present the operator with the existing layers and algorithms for the metric -->
+      {% for image in metric_images %}
+        {% if '.redis.plot' in image %}
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+        {% endif %}
+      {% endfor %}
+
+      <form action="ionosphere">
+			<input type="hidden" name="timestamp" value="{{ timestamp }}" />
+			<input type="hidden" name="metric" value="{{ for_metric }}" />
+    {% if requested_timestamp %}
+			<input type="hidden" name="requested_timestamp" value="{{ requested_timestamp }}" />
+    {% endif %}
+    {% if add_fp %}
+			<input type="hidden" name="add_fp" value="{{ add_fp }}" />
+    {% endif %}
+    {% if learn %}
+			<input type="hidden" name="learn" value="{{ learn }}" />
+    {% endif %}
+		  <table class="table table-hover">
+		    <thead>
+		      <tr>
+		        <th>Layer</th>
+		        <th>Criteria</th>
+		      </tr>
+		    </thead>
+		    <tbody>
+		      <tr>
+		        <td>D layer <code>[required]</code></td>
+		        <td>if value <select name="d_condition">
+              <option value="==">==</option>
+            {% for item in value_condition_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+<!-- @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats
+              <input type="number" name="d_boundary_limit" value="0" /> in the last-->
+  		        <input type="text" name="d_boundary_limit" value="0" /> in the last
+              <select name="d_boundary_times">
+              <option value="1">1</option></select> values in the timeseries - <code>DISCARD - not_anomalous</code> False<br>
+            The D layer can be used as the upper limit, if value > x (probably or certainly anomalous)<br>
+            Or this can be used if this metric operates in the negative range or<br>
+            if you want it too not discard on 0 as you want to match 0, set it to -1 or > 0.1 or > 1<br>
+            On a high constant rate metric the D layer can be used to discard if < x so the the layer <b>does not silence a drop</b><br>
+            <code>Remember a match here disables any of the other below layers being checked</code><br>
+            </td>
+		      </tr>
+		      <tr>
+		        <td>E layer <code>[required]</code></td>
+		        <td>if value <select name="e_condition">
+              <option value="<"><</option>
+            {% for item in value_condition_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+<!-- @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats
+              <input type="number" name="e_boundary_limit" value="0" /> in the last-->
+  		        <input type="text" name="e_boundary_limit" value="0" /> in the last
+            <input type="number" name="e_boundary_times" value="3" /> values in the timeseries - <code>not anomalous</code>
+            </select></td>
+		      </tr>
+		      <tr>
+		        <td>Es layer <code>[optional]</code><br>
+            This layer allows to match a day in a list<br>
+            <code>NOT IMPLEMENTED YET</code>
+            </td>
+		        <td>Enabled: <select name="es_layer">
+              <option value="false">false</option>
+              </select>
+		          if day in <input type="text" name="es_day" value="['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']" /> - <code>not anomalous</code><br>
+              A Python list - example <code>['tue']</code> or <code>['sat', 'sun']</code><br>
+              <code>NOT IMPLEMENTED YET</code>
+            </td>
+		      </tr>
+		      <tr>
+		        <td>F1 layer <code>[optional]</code><br>
+              This layer and the F2 layer<br>
+              allow for excluding a time period<br>
+              <code>NOT IMPLEMENTED YET</code>
+            </td>
+		        <td>Enabled: <select name="f1_layer">
+              <option value="false">false</option>
+              </select>
+              if from_time > <input type="text" name="f1_from_time" value="0000" /> (format HHMM) - <code>not anomalous</code><br>
+              <code>NOT IMPLEMENTED YET</code>
+            </td>
+		      </tr>
+		      <tr>
+		        <td>F2 layer <code>[optional]</code><br>
+              <code>NOT IMPLEMENTED YET</code></td>
+		        <td>Enabled: <select name="f1_layer">
+              <option value="false">false</option>
+              </select>
+              if until_time < <input type="text" name="f2_until_time" value="2359" /> (format HHMM) - <code>not anomalous</code><br>
+              <code>NOT IMPLEMENTED YET</code>
+            </td>
+		      </tr>
+		      <tr>
+		        <td>Create layers</td>
+		        <td><select name="fp_layer">
+              <option value="true">true</option>
+              </select>
+              for fp_id <select name="fp_id"><option value="{{ features_profile_id }}">{{ features_profile_id }}</option></select><br>
+			        Label: <input type="text" name="fp_layer_label" value="none" /> - optional label, e.g. gt_10-4_in_3 or tuesday_pentest
+			        <input type="hidden" name="add_fp_layer" value="true" />
+              <input type="submit" value="Create Ionosphere layers">
+              </form>
+            </td>
+		      </tr>
+		    </tbody>
+		  </table>
+
+<!-- # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# Moved the layer table block so that they are always displayed where relevant -->
+      {% include "layers_table.html" %}
+    {% if last_i_ts_json %}
+	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span></span> at FULL_DURATION of ({{ redis_full_duration }}) for evalution in layers creation</h4>
+    {{ last_i_ts_json }}
+    {% endif %}
+
+    {% endif %}
   {% endif %}
 
+<!-- # @added 20170308 - Feature #1960: ionosphere_layers
+# To present the operator with the existing layers and algorithms for the metric
+# @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# Moved the layer table block so that they are always displayed where relevant -->
+  {% if layers_id_matched %}
+      {% include "layers_table.html" %}
+      {% if last_i_ts_json %}
+  	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span></span> at FULL_DURATION of ({{ redis_full_duration }}) for evalution of the training data timeseries that <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+      {{ last_i_ts_json }}
+      {% endif %}
+  {% endif %}
+
+  {% endif %}
 
   {% if data_ok == False %}
   <h3><span class="logo"><span class="sky">Holy ::</span> <span class="re">shit</span></span></span></h3>
@@ -412,20 +611,28 @@ you need to try and be quicker next time.
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
   {% endif %}
   {% if panorama_anomaly_id == None %}
-	  <div class="alert alert-warning">
-<strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">apologies ::</span></span></b>
- profusely it seems that {{ for_metric }} has no Panorama anomaly recorded at
-this timestamp, this can happen
-see <b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b> at
-the top right of this page.  Here is hoping that this day just gets better.
+    {% if layers_id_matched %}
+	  <div class="alert alert-success">
+	    <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong> therefore there is no Panorama recorded anomaly as this is a training data set only and was <code>not anomalous</code>
 	  </div>
+    {% elif fp_id_matched %}
+	  <div class="alert alert-success">
+	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong> therefore there is no Panorama recorded anomaly as this is a training data set only and was <code>not anomalous</code>
+	  </div>
+    {% else %}
+	  <div class="alert alert-warning">
+<strong>Please note :: </strong> it seems that {{ for_metric }} has no Panorama anomaly recorded at
+this timestamp, this can happen when a Panorama expiry key has not yet expired
+and a metric is checking and found anomalous a number of times in a row.
+	  </div>
+    {% endif %}
   {% endif %}
 
   {% for image in metric_images %}
     {% if not '.redis.plot' in image %}
       {% if metric_second_order_resolution_hours != False %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
-        {% else %}
+      {% else %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
       {% endif %}
       {% if graphite_url != False %}
@@ -437,7 +644,26 @@ Image file: {{ image }}<br><br>
     {% endif %}
   {% endfor %}
 
+  {% if fp_id_matched %}
+    <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> no graph as <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
+	  <div class="alert alert-success">
+	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a></strong> therefore no Graphite image was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
+	  </div>
+  {% endif %}
+  {% if layers_id_matched %}
+    <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> no graph as <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+	  <div class="alert alert-success">
+	    <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong> therefore no Graphite image was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
+	  </div>
+  {% endif %}
+
+  {% if fp_id_matched %}
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
+  {% elif layers_id_matched %}
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+  {% else %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+  {% endif %}
 <!-- @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs -->
   {% for gimage in graphite_now_images %}
 <!--      <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" />
@@ -454,8 +680,27 @@ Image file: {{ image }}<br><br>
       <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
       <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
+
+<!-- # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# Show below Redis plot some they can be evaluted visually against the Redis
+# FULL_DURATION data -->
+    {% include "layers_table.html" %}
+
     {% endif %}
   {% endfor %}
+
+  {% if fp_id_matched %}
+    <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> no data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+	  <div class="alert alert-success">
+	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong> therefore no Redis plot was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
+	  </div>
+  {% endif %}
+  {% if layers_id_matched %}
+    <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> no data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+	  <div class="alert alert-success">
+	    <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong> therefore no Redis plot was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
+	  </div>
+  {% endif %}
 
       <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span></span> files</h4>
       <table>
@@ -473,11 +718,27 @@ Image file: {{ image }}<br><br>
       </table>
   {% if data_ok == True %}
       <br><p>
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available</span></h4>
-      {{ timeseries }}
-
+<!-- # @modified 20170309 - Feature #1960: ionosphere_layers
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>-->
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]]</span></h4>
+      {{ timeseries[-30:] }}
+<!-- # @added 20170309 - Feature #1960: ionosphere_layers
+Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
+based features profile -->
+    {% if ionosphere_json %}
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]]</span></h4>
+      {{ ionosphere_json[-30:] }}
+    {% endif %}
   {% endif %}
+
+<!-- # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
+# Present the operator with the existing layers and algorithms for the metric in
+# where relevant to assist with assessment and decision making -->
+  {% include "layers_table.html" %}
+
+    </div>
   </div>
+
   <div class="known_bugs">
     <table>
         <caption><b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b></caption>
@@ -496,6 +757,7 @@ Image file: {{ image }}<br><br>
         </tr>
     </table>
   </div>
+
 {% endif %}
 
 

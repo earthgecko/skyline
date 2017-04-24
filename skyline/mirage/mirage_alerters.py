@@ -316,6 +316,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                     timeseries = None
 
         pd_series_values = None
+        original_anomalous_datapoint = metric[0]
         if timeseries:
             try:
                 values = pd.Series([x[1] for x in timeseries])
@@ -323,6 +324,13 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                 pd_series_values = True
             except:
                 logger.error('error :: alert_smtp - pandas value series on timeseries failed')
+
+            # @added 20170307 - Feature #1960: ionosphere_layers
+            # To display the original anomalous datapoint value in the Redis plot
+            try:
+                original_anomalous_datapoint = float(timeseries[-1][1])
+            except:
+                logger.error('error :: alert_smtp - falied to determine the original_anomalous_datapoint from the timeseries')
 
         if pd_series_values:
             try:
@@ -365,7 +373,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                 mean_series = None
 
         if mean_series:
-            graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))
+            # @modified 20170307 - Feature #1960: ionosphere_layers
+            # To display the original anomalous datapoint value in the Redis plot
+            # graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))
+            graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
+
             if python_version == 3:
                 buf = io.StringIO()
             else:
@@ -499,7 +511,8 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
 
     body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
     body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
-    body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
+    body += '<font color="black">Anomalous value: %s (Mirage)</font><br>' % str(metric[0])
+    body += '<font color="black">Original anomalous value: %s (Analyzer)</font><br>' % str(original_anomalous_datapoint)
     body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
     body += '<font color="black">At hours: %s</font><br>' % str(int(second_order_resolution_in_hours))
     body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])

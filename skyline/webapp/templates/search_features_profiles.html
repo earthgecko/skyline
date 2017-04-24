@@ -82,6 +82,20 @@
   		        <td>generation_greater_than</td>
   		        <td><input type="text" name="generation_greater_than" value="0"></td>
   		      </tr>
+<!-- # @added 20170315 - Feature #1960: ionosphere_layers -->
+  		      <tr>
+  		        <td>layers_id_greater_than</td>
+  		        <td><input type="number" name="layers_id_greater_than" value="0"></td>
+  		      </tr>
+<!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
+  		      <tr>
+  		        <td>validated</td>
+  		        <td><select name="validated_equals">
+                <option value="any">any</option>
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
   {% if full_duration_list %}
   		      <tr>
   		        <td>full_duration</td>
@@ -164,6 +178,13 @@
                   <option value="false">false</option>
                   <option value="true">true</option>
                 </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by metric:</td>
+              <td><select name="count_by_metric">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
   		      </tr>
 
   		      <tr>
@@ -307,18 +328,28 @@ count
 <!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
       tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
       matched_count10, human_date11, created_timestamp12, checked_count13,
-      checked_human_date14, parent_id15, generation16] -->
+      checked_human_date14, parent_id15, generation16, validated17] -->
             <th>fp_ip</th>
             <th>metric</th>
             <th>parent_id</th>
             <th>generation</th>
             <th>origin</th>
-            <th>full_duration</th>
-            <th>match_count</th>
-            <th>last_matched</th>
-            <th>checked_count</th>
-            <th>last_checked</th>
+            <th>full duration</th>
+            <th>match count</th>
+            <th>last matched</th>
+            <th>checked count</th>
+            <th>last checked</th>
             <th>created</th>
+<!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
+            <th>validated</th>
+            <th>layer id</th>
+<!-- @added 20170322 - Feature #1960: ionosphere_layers
+# Added layers information to the features profiles search results -->
+            <th>layer matched count</th>
+            <th>layer last matched</th>
+            <th>layer checked</th>
+            <th>layer last checked</th>
+            <th>layer label</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -345,6 +376,13 @@ count
             <td>{{ item[13] }}</td>
             <td>{{ item[14] }}</td>
             <td>{{ item[12] }}</td>
+            <td>{{ item[17] }}</td>
+            <td>{{ item[18] }}</td>
+            <td>{{ item[19] }}</td>
+            <td>{{ item[20] }}</td>
+            <td>{{ item[21] }}</td>
+            <td>{{ item[22] }}</td>
+            <td>{{ item[23] }}</td>
           </tr>
   {% endfor %}
 				</tbody>

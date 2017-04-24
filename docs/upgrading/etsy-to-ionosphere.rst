@@ -53,8 +53,11 @@ documentation are still appropriate.
 
     "$SKYLINE_DIR"/bin/horizon.d start
     "$SKYLINE_DIR"/bin/analyzer.d start
-    "$SKYLINE_DIR"/bin/webapp.d start
+    "$SKYLINE_DIR"/bin/mirage.d start
+    "$SKYLINE_DIR"/bin/boundary.d start
+    "$SKYLINE_DIR"/bin/ionosphere.d start
     "$SKYLINE_DIR"/bin/pnorama.d start  # if you have the MySQL DB set up
+    "$SKYLINE_DIR"/bin/webapp.d start
 
 - Check the log files to ensure things started OK and are running and there are
   no errors.
@@ -85,5 +88,5 @@ documentation are still appropriate.
   ``settings.py`` you can test them now, see `Alert testing <../alert-testing.html>`__
 - Look at implementing the other new features at your leisure
 - Panorama is probably the quickest win if you opted to not install it
-- Boundary and Mirage will take a little assessment to see what metrics
-  you want to configure them for.
+- Boundary, Mirage and Ionosphere will take a little assessment over time to see
+  what metrics you want to configure them to monitor.  You cannot rush timeseries.
