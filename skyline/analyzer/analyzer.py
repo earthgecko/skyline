@@ -405,6 +405,35 @@ class Analyzer(Thread):
                             logger.info(traceback.format_exc())
                             logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
 
+                        # @added 20170403 - Feature #1994: Ionosphere training_dir keys
+                        #                   Feature #2000: Ionosphere - validated
+                        #                   Feature #1996: Ionosphere - matches page
+                        # The addition of this key data could be done in
+                        # skyline_function.py, however that would introduce
+                        # Redis requirements in the send_anomalous_metric_to
+                        # function, which is not desirable I think. So this is
+                        # a non-KISS pattern that is replicated in mirage.py as
+                        # well.
+                        # Each training_dir and data set is now Redis keyed to increase efficiency
+                        # in terms of disk I/O for ionosphere.py and making keyed data
+                        # available for each training_dir data set so that transient matched data
+                        # can be surfaced for the webapp along with directory paths, etc
+                        ionosphere_training_data_key = 'ionosphere.training_data.%s.%s' % (str(metric_timestamp), base_name)
+                        ionosphere_training_data_key_data = [
+                            ['metric_timestamp', int(metric_timestamp)],
+                            ['base_name', str(base_name)],
+                            ['timeseries_dir', str(timeseries_dir)],
+                            ['added_by', str(skyline_app)]
+                        ]
+                        try:
+                            self.redis_conn.setex(
+                                ionosphere_training_data_key,
+                                settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR,
+                                ionosphere_training_data_key_data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
+
                     if ionosphere_metric:
                         analyzer_metric = False
 
