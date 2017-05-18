@@ -833,6 +833,8 @@ def ionosphere():
                         'layers_id_greater_than',
                         # @added 20170402 - Feature #2000: Ionosphere - validated
                         'validated_equals',
+                        # @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than
+                        'matched_greater_than',
                         'full_duration',
                         'enabled',
                         'tsfresh_version',

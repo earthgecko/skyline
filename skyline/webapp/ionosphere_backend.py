@@ -1216,6 +1216,20 @@ def ionosphere_search(default_query, search_query):
                 query_string = new_query_string
                 needs_and = True
 
+    # @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than
+    'matched_greater_than',
+    if 'matched_greater_than' in request.args:
+        matched_greater_than = request.args.get('matched_greater_than', None)
+        if matched_greater_than and matched_greater_than != '0':
+            if needs_and:
+                new_query_string = '%s AND matched_count > %s' % (query_string, matched_greater_than)
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE matched_count > %s' % (query_string, matched_greater_than)
+                query_string = new_query_string
+                needs_and = True
+
     ordered_by = None
     if 'order' in request.args:
         order = request.args.get('order', 'DESC')
