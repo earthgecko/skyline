@@ -52,6 +52,9 @@ Overview
   timeseries using |tsfresh| to "fingerprint" the data set.
 - This allows the operator to fingerprint and profile what is not anomalous, but
   normal and to be expected, even if 3sigma will always detect it as anomalous.
+- Ionosphere also allows for the creation of layers rules which allow the
+  operator to define ad-hoc boundaries and conditions that can be considered as
+  not anomalous for each features profile that is created.
 
 Deploying and setting Ionosphere up
 -----------------------------------
@@ -59,8 +62,7 @@ Deploying and setting Ionosphere up
 Ionosphere has a specific section of variables in ``settings.py`` that are
 documented in the settings specific documentation see all the settings below:
 
-- http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH
-- http://earthgecko-skyline.readthedocs.io/en/ionosphere/skyline.html#settings.IONOSPHERE_CHECK_PATH
+- :mod:`settings.IONOSPHERE_CHECK_PATH` - http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH
 
 The Ionosphere settings follow normal Skyline settings conventions in terms of
 being able to paint all metrics with certain defaults and allowing for specific
@@ -198,17 +200,17 @@ So Ionosphere gives you 2 options:
 
 .. figure:: images/ionosphere/create.and.do.not.learn.png
 
-  Only make a features profile based on the ``FULL_DURATION`` data.
+  Only make a features profile based on the :mod:`settings.FULL_DURATION` data.
 
 .. figure:: images/ionosphere/create.and.learn.png
 
   This is not an anomaly now or then or in the forseeable future if it
-  looks anything like the FULL_DURATION or any of the multiple resoluiton
-  Graphite graphs, LEARN it at the ``learn_full_duration``.
+  looks anything like the :mod:`settings.FULL_DURATION` or any of the multiple
+  resolution Graphite graphs, LEARN it at the ``learn_full_duration``.
 
 This means you do not have to ship that earthquake that happened 17 days ago into
 Ionosphere's features profiles and teach it BAD, badly.  You can just tell it
-to see the relevant Analyzer ``FULL_DURATION`` or Mirage the
+to see the relevant Analyzer :mod:`settings.FULL_DURATION` or Mirage the
 ``SECOND_ORDER_RESOLUTION_HOURS`` data as not anomalous and **not** learn at
 the fuller duration of the metric's ``learn_full_duration``.
 
@@ -240,7 +242,7 @@ The features role
     decision on.  More on that below.
 
 - Ionosphere serves the training data set for each triggered anomaly, ready for
-  a human to come along in the webapp Ionosphere UI and say, "that is not
+  a human to come along in the Webapp Ionosphere UI and say, "that is not
   anomalous" (if it is not).
 - At the point the operator makes a features profile, all the features values
   that are created for the not anomalous timeseries are entered into the
@@ -275,9 +277,9 @@ The learning role
 - If Ionosphere finds a match to the features calculated from the metric
   timeseries that it surfaces the from Graphite at ``learn_full_duration``, it
   will use the anomaly training data to create a features profile for the metric
-  at the metric's ``FULL_DURATION`` or ``SECOND_ORDER_RESOLUTION_HOURS``
+  at the metric's :mod:`settings.FULL_DURATION` or ``SECOND_ORDER_RESOLUTION_HOURS``
   (whichever is applicable) **and** it will also create a features profile with
-  the ``learn_full_duration`` data that matched, as long as the ``FULL_DURATION``
+  the ``learn_full_duration`` data that matched, as long as the :mod:`settings.FULL_DURATION`
   or ``SECOND_ORDER_RESOLUTION_HOURS`` features sum as long as the difference is
   within the :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN`
   or the metric specific ``max_percent_diff_from_origin``
@@ -333,13 +335,13 @@ in terms of the amount of "power/energy", range and "movement" there is within
 the timeseries data set.  A fingerprint or signature if you like, but understand
 that neither are perfect.  This timeseries similarities comparison method is not
 perfect in the dynamic, operational arena, but it achieves the goal of being useful.
-However, it must be stated that it **can** be perfect, a |tsfresh| features
-profile sum is (about as) **perfect** as you can get at 0% difference.  However
-using it with 100% perfection is not useful to learning and trying to profile the
-Active Brownian Motion (for want of a better way of explaining it).  Lots of
-dynamic metrics/systems will exhibit a tendency to try an achieve Active
-Brownian Motion, not all but many and definitely at differing and some times
-multiple seasonalities.
+However, it must be stated that it **can** be almost perfect, a |tsfresh| features
+profile sum is (about as) **perfect** as you can get at 0% difference (there may
+be edge cases).  However using it with 100% matching is not useful to learning
+and trying to profile something like the Active Brownian Motion (for want of a
+better way of explaining it).  Lots of dynamic metrics/systems will exhibit a
+tendency to try an achieve Active Brownian Motion, not all but many and
+definitely at differing and some times multiple seasonalities.
 
 For a very good overview of Active Brownian Motion please see the @kempa-liehr
 description at
@@ -349,17 +351,16 @@ description at
   systems would be driven to one of their stable fixed points and stay there for
   ever. So, fixed points resemble an equilibrium state"
 
-Ionosphere enables us to try and profile this Active Brownian Motion as the norm,
-again for want of a better way of trying to explain it.
+Ionosphere enables us to try and profile something similar to Active Brownian
+Motion as the norm, again for want of a better way of trying to explain it.
 
 However, contextually, Ionosphere nor the |tsfresh| implemented method, will ever
 be perfect, unless 2 timeseries have identical data, consistently, without
 change.  But how challenging would that be? :)
 
 Also it may be possible that an identical timeseries reversed may give the same
-or negative of a features sum.
-
-**TODO**: test that theory, reversed timeseries the same or the inverse?
+or negative of a features sum and a mirror image timeseries can have very
+similar calculated feature sums.
 
 Anyway, it is not perfect, by design.  Evolution tends to not achieve perfection,
 attaining a working, functional state is usually the norm in evolution it seems.
@@ -369,18 +370,12 @@ Evolutionary learning - generations
 
 Ionosphere uses an evolutionary learning model that records (and limits) the
 generations of trained and learnt features profiles per metric.  Limits can be
-set in settings.py and played around with.  For veterans of Skyline, these tend
-to be much like ``CONSENSUS``, what is the correct ``CONSENSUS``?
+set in ```settings.py`` and played around with.  For veterans of Skyline, these
+tend to be much like :mod:`settings.CONSENSUS`, what is the correct ``CONSENSUS``?
 
 They are tweak and tunable.  Keep them low, you give Ionosphere less
 leverage to learn.  But you will bump them up so that it can learn more and
 better.
-
-Caveat.  Right now, as of writing, Ionosphere can learn bad incrementally quite
-quickly.  Only when you have a big, bad anomalous event like a spawn.c fork on a
-number of servers or such.  Learning rate limiting is to be introduced, next,
-which shall immediately solve this issue.  But sometimes documentation needs to
-be written so you can release and move on :)
 
 Although this documentation may seem overly chatty and verbose, all things have
 stories.  And why should documentation be overly dull, try explaining Skyline
@@ -401,6 +396,40 @@ However, all Skyline pieces, individually, are relatively simple.  Seeing them
 work helps or hinders depending on your outlook...
 "Shit lots of stuff is anomalous" can often lead to lots of work, debugging,
 fine tuning and making better or polishing a turd or diamante.
+
+Layers
+^^^^^^
+
+Ionosphere layers allow the operator to train Skyline a not anomalous timeseries
+in terms of generating a features profile to be compared to anomalies in the
+future, however Ionosphere also allows the operator to define "layers" rules at
+the time of feature profile creation.
+
+Layers rules allow us to train Skyline on boundaries as well.  For instance, say
+occasionally we can expect to see a spike of 404s status codes on a web app,
+bots or your own scanning, with a layers we can tell Ionosphere that a timeseries
+was not anomalous if the datapoint is less than 120 and a value in the last
+3 datapoints is less than 50.  This allows for a somewhat moving window and an
+alert that would be delayed by say 3 minutes, but it is a signal, rather than
+noise. Let us describe that layer as gt_120-5_in_3
+
+To demonstrate how the above layer would work, an example of 404 counts per minute:
+
+13:10:11 2
+13:11:11 0
+13:12:11 8
+13:13:11 60
+13:14:11 0
+
+With the above described layer, this would be classified as not anomalous,
+however if the data was:
+
+13:10:11 2
+13:11:11 0
+13:12:11 800
+
+The layer would not ever report the timeseries as not anomalous as the 800
+exceeds the gt_120, so the rest of the layer definition would not be evaluated.
 
 No machine learning
 ^^^^^^^^^^^^^^^^^^^
