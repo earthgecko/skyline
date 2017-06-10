@@ -19,7 +19,9 @@ import numpy as np
 
 import settings
 from skyline_functions import (
-    mkdir_p, get_graphite_metric, send_anomalous_metric_to)
+    mkdir_p, get_graphite_metric, send_anomalous_metric_to,
+    # @added 20170603 - Feature #2034: analyse_derivatives
+    nonNegativeDerivative, in_list)
 
 from features_profile import calculate_features_profile
 
@@ -903,6 +905,32 @@ def ionosphere_learn(timestamp):
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
                 timeseries = literal_eval(timeseries_array_str)
                 datapoints = timeseries
+
+            # @added 20170603 - Feature #2034: analyse_derivatives
+            # Convert the values of metrics strictly increasing monotonically
+            # to their deriative products
+            known_derivative_metric = False
+            try:
+                derivative_metrics = list(redis_conn.smembers('derivative_metrics'))
+            except:
+                derivative_metrics = []
+            if metric in derivative_metrics:
+                known_derivative_metric = True
+            if known_derivative_metric:
+                try:
+                    non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+                except:
+                    non_derivative_monotonic_metrics = []
+                skip_derivative = in_list(metric, non_derivative_monotonic_metrics)
+                if skip_derivative:
+                    known_derivative_metric = False
+            if known_derivative_metric:
+                try:
+                    derivative_timeseries = nonNegativeDerivative(timeseries)
+                    datapoints = derivative_timeseries
+                except:
+                    logger.error('error :: nonNegativeDerivative failed')
+
                 validated_timeseries = []
                 for datapoint in datapoints:
                     try:

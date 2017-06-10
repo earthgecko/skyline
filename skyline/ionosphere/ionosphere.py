@@ -15,6 +15,7 @@ import re
 from shutil import rmtree
 import csv
 from ast import literal_eval
+from datetime import datetime
 
 from redis import StrictRedis
 import traceback
@@ -1589,6 +1590,54 @@ class Ionosphere(Thread):
             if added_by == 'ionosphere_learn':
                 if not_anomalous:
                     logger.info('an ionosphere_learn metric has been found to be not anomalous before')
+
+                    # @added 20170607 - Feature #2010: Ionosphere learn - rate limiting profile learning
+                    learning_rate_limited = False
+                    now = int(time())
+                    rate_limit_timestamp = now - 3600
+                    rate_limit_datetime = datetime.fromtimestamp(rate_limit_timestamp)
+                    f = '%Y-%m-%d %H:%M:%S'
+                    after_datetime = rate_limit_datetime.strftime(f)
+                    try:
+                        connection = engine.connect()
+                        result = connection.execute(
+                            'SELECT * FROM ionosphere WHERE metric_id=%s AND created_timestamp > \'%s\' AND generation > 1' % (
+                                str(metrics_id), str(after_datetime)))
+                        for row in result:
+                            last_full_duration = row['full_duration']
+                            if int(full_duration) <= int(last_full_duration):
+                                learning_rate_limited = True
+                                break
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: determining whether learning should be rate limited')
+                    if learning_rate_limited:
+                        logger.info('learning currently dynamically rate limited on %s' % str(base_name))
+                        # Exit the ionosphere_learn check
+                        self.remove_metric_check_file(str(metric_check_file))
+                        if engine:
+                            engine_disposal(engine)
+                        return
+                    else:
+                        logger.info('learning is not currently rate limited on %s' % str(base_name))
+
+                    # @added 20170605 - Bug #2038: Ionosphere learn parent generation incorrect
+                    # Determine generation of the matched fp not the last in the
+                    # list
+                    try:
+                        stmt = 'SELECT generation FROM ionosphere WHERE fp_id=%s' % str(fp_id)
+                        connection = engine.connect()
+                        for row in engine.execute(stmt):
+                            matched_fp_generation = int(row['generation'])
+                        connection.close()
+                        logger.info(
+                            'determined matched fp_id %s is a generation %s profile' % (
+                                str(fp_id), str(matched_fp_generation)))
+                        current_fp_generation = matched_fp_generation
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not determine generation from ionosphere table for fp id %s' % str(fp_id))
+
                     logger.info(
                         'ionosphere_learn metric matches the generation %s features profile id %s - %s' % (
                             str(current_fp_generation), str(fp_id), base_name))
@@ -1599,17 +1648,18 @@ class Ionosphere(Thread):
                     # be greater than max_generations
                     logger.info('adding work item to Redis set ionosphere.learn.work')
                     ionosphere_job = 'learn_fp_learnt'
+                    work_deadline = 'Soft'
                     try:
                         logger.info(
-                            'LEARNT :: adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', %s, %s] to create a learnt features profile' % (
-                                str(ionosphere_job), str(metric_timestamp), base_name,
+                            'LEARNT :: adding work to Redis ionosphere.learn.work set - [\'%s\', \'%s\', %s, \'%s\', %s, %s] to create a learnt features profile' % (
+                                work_deadline, str(ionosphere_job), str(metric_timestamp), base_name,
                                 str(fp_id), str(current_fp_generation)))
                         self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
-                            'error :: failed adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', %s, %s] to make a learn features profile later' % (
-                                str(ionosphere_job), str(metric_timestamp), base_name,
+                            'error :: failed adding work to Redis ionosphere.learn.work set - [\'%s\', \'%s\', %s, \'%s\', %s, %s] to make a learn features profile later' % (
+                                work_deadline, str(ionosphere_job), str(metric_timestamp), base_name,
                                 str(fp_id), str(current_fp_generation)))
 
                 # Exit the ionosphere_learn check
