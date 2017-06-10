@@ -510,6 +510,26 @@ PLOT_REDIS_DATA = True
 
 """
 
+NON_DERIVATIVE_MONOTONIC_METRICS = [
+    'the_namespace_of_the_monotonic_metric_to_not_calculate_the_derivative_for',
+]
+"""
+:var NON_DERIVATIVE_MONOTONIC_METRICS: Strictly increasing monotonically metrics
+    to **not** calculate the derivative values for
+:vartype NON_DERIVATIVE_MONOTONIC_METRICS: list
+
+Skyline by default automatically converts strictly increasingly monotonically
+metric values to their derivative values by calculating the delta between
+subsequent datapoints.  The function ignores datapoints that trend down.  This
+is useful for metrics that increase over time and then reset.
+
+Any strictly increasing monotonically metrics that you do not want Skyline to
+convert to the derivative values are declared here.  This list works in the same
+way that Horizon SKIP_LIST does, it matches in the string or dotted namespace
+elements.
+
+"""
+
 # Each alert module requires additional information.
 SMTP_OPTS = {
     # This specifies the sender of email alerts.

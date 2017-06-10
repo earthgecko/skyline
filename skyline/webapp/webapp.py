@@ -42,7 +42,12 @@ sys.path.insert(0, os.path.dirname(__file__))
 import settings
 from validate_settings import validate_settings_variables
 import skyline_version
-from skyline_functions import get_graphite_metric
+from skyline_functions import (
+    get_graphite_metric,
+    # @added 20170604 - Feature #2034: analyse_derivatives
+    in_list,
+)
+
 
 from backend import panorama_request, get_list
 from ionosphere_backend import (
@@ -833,6 +838,8 @@ def ionosphere():
                         'layers_id_greater_than',
                         # @added 20170402 - Feature #2000: Ionosphere - validated
                         'validated_equals',
+                        # @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than
+                        'matched_greater_than',
                         'full_duration',
                         'enabled',
                         'tsfresh_version',
@@ -1399,6 +1406,32 @@ def ionosphere():
                 settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
         except:
             graph_url = False
+
+        # @added 20170604 - Feature #2034: analyse_derivatives
+        # Added nonNegativeDerivative to strictly
+        # increasing monotonically metrics in graph_url
+        known_derivative_metric = False
+        try:
+            derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+        except:
+            derivative_metrics = []
+        redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+        if redis_metric_name in derivative_metrics:
+            known_derivative_metric = True
+        if known_derivative_metric:
+            try:
+                non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
+            except:
+                non_derivative_metrics = []
+            skip_derivative = in_list(redis_metric_name, non_derivative_metrics)
+            if skip_derivative:
+                known_derivative_metric = False
+        if known_derivative_metric:
+            try:
+                graph_url = '%scactiStyle(nonNegativeDerivative(%s))%s&colorList=blue' % (
+                    settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
+            except:
+                graph_url = False
 
         # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
         #                   Task #2002: Review and correct incorrectly defined layers

@@ -252,7 +252,7 @@ Steps
   getting a data pickle from Graphite see `Getting data into
   Skyline <getting-data-into-skyline.html>`__
 
-- Once you have your ALERTS configured to test them see
+- Once you have your :mod:`settings.ALERTS` configured to test them see
   `Alert testing <alert-testing.html>`__
 
 - If you have opted to not setup Panorama, later see setup

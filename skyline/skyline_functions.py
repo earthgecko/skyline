@@ -509,13 +509,41 @@ def get_graphite_metric(
 
     output_format = data_type
 
+    # @modified 20170603 - Feature #2034: analyse_derivatives
+    # Added deriative functions to convert the values of metrics strictly
+    # increasing monotonically to their deriative products in Graphite now
+    # graphs
+    known_derivative_metric = False
+    from redis import StrictRedis
+    try:
+        REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        current_logger.error('error :: alert_smtp - redis connection failed')
+    try:
+        derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+    except:
+        derivative_metrics = []
+    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
+    if redis_metric_name in derivative_metrics:
+        known_derivative_metric = True
+    if known_derivative_metric:
+        try:
+            non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
+        except:
+            non_derivative_metrics = []
+        if redis_metric_name in non_derivative_metrics:
+            known_derivative_metric = False
+    target_metric = metric
+    if known_derivative_metric:
+        target_metric = 'nonNegativeDerivative(%s)' % str(metric)
+
     # graphite URL
+    graphite_port = '80'
     if settings.GRAPHITE_PORT != '':
-        image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + settings.GRAPHITE_PORT + '/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + metric
-        url = image_url + '&format=' + output_format
-    else:
-        image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + '/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + metric
-        url = image_url + '&format=' + output_format
+        graphite_port = str(settings.GRAPHITE_PORT)
+    image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
+    url = image_url + '&format=' + output_format
+
     if settings.ENABLE_DEBUG:
         current_logger.info('graphite url - %s' % (url))
 
@@ -1024,5 +1052,94 @@ def mysql_select(current_skyline_app, select):
         return False
     except:
         return False
+
+    return False
+
+
+# @added 20170602 - Feature #2034: analyse_derivatives
+def nonNegativeDerivative(timeseries):
+    """
+    This function is used to convert an integral or incrementing count to a
+    derivative by calculating the delta between subsequent datapoints.  The
+    function ignores datapoints that trend down and is useful for metrics that
+    increase over time and then reset.
+    This based on part of the Graphite render function nonNegativeDerivative at:
+    https://github.com/graphite-project/graphite-web/blob/1e5cf9f659f5d4cc0fa53127f756a1916e62eb47/webapp/graphite/render/functions.py#L1627
+    """
+
+    derivative_timeseries = []
+    prev = None
+
+    for timestamp, datapoint in timeseries:
+        if None in (prev, datapoint):
+            # derivative_timeseries.append((timestamp, None))
+            prev = datapoint
+            continue
+
+        diff = datapoint - prev
+        if diff >= 0:
+            derivative_timeseries.append((timestamp, diff))
+        # else:
+        #    derivative_timeseries.append((timestamp, None))
+
+        prev = datapoint
+
+    return derivative_timeseries
+
+
+def strictly_increasing_monotonicity(timeseries):
+    """
+    This function is used to determine whether timeseries is strictly increasing
+    monotonically, it will only return True if the values are strictly
+    increasing, an incrementing count.
+    """
+    import numpy as np
+
+    test_ts = []
+    for timestamp, datapoint in timeseries:
+        # This only identifies and handles positive, strictly increasing
+        # monotonic timeseries
+        if datapoint < 0.0:
+            return False
+        test_ts.append(datapoint)
+
+    # Exclude timeseries that are all the same value, these are not increasing
+    if len(set(test_ts)) == 1:
+        return False
+
+    # Exclude timeseries that sum to 0, these are not increasing
+    ts_sum = sum(test_ts[1:])
+    if ts_sum == 0:
+        return False
+
+    diff_ts = np.asarray(test_ts)
+    return np.all(np.diff(diff_ts) >= 0)
+
+
+def in_list(metric_name, check_list):
+    """
+    Check if the metric is in list.
+
+    # @added 20170602 - Feature #2034: analyse_derivatives
+    #                   Feature #1978: worker - DO_NOT_SKIP_LIST
+    This is a part copy of the SKIP_LIST allows for a string match or a match on
+    dotted elements within the metric namespace used in Horizon/worker
+
+    """
+
+    metric_namespace_elements = metric_name.split('.')
+    metric_in_list = False
+    for in_list in check_list:
+        if in_list in metric_name:
+            metric_in_list = True
+            break
+        in_list_namespace_elements = in_list.split('.')
+        elements_matched = set(metric_namespace_elements) & set(in_list_namespace_elements)
+        if len(elements_matched) == len(in_list_namespace_elements):
+            metric_in_list = True
+            break
+
+    if metric_in_list:
+        return True
 
     return False

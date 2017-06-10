@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Strictly increasing monotonicity &mdash; Skyline 1.1.3-beta documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.1.3-beta documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Strictly increasing monotonicity</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/monotonic-metrics.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="strictly-increasing-monotonicity">
+<h1>Strictly increasing monotonicity<a class="headerlink" href="#strictly-increasing-monotonicity" title="Permalink to this headline">¶</a></h1>
+<p>Skyline specifically handles <strong>positive</strong>, strictly increasing monotonic
+timeseries.  These are metrics that are integral (an incrementing count) in
+Graphite and converts the values to their derivative products.</p>
+<p>In terms of visualisation Graphite has the nonNegativeDerivative function,
+which converts an integral or incrementing count to a derivative by
+calculating the delta between subsequent datapoints.  The function ignores
+datapoints that trend down.  With Skyline&#8217;s new functionality this is a
+requirement for metrics that only increase over time and then at some point
+reset to 0 (e.g. interface packets counts, varnish or haproxy backend
+connections, etc).</p>
+<p>By default, Skyline now identifies and converts monotonically increasing
+timeseries to their derivative products through most of the Skyline
+analysis apps (Analyzer, Mirage and Ionosphere).</p>
+<p>Unless you tell Skyline not to.  You may have some monotonically increasing
+metric that you do not want to be forced to convert to its derivative product
+just because it is more convenient for Skyline to analyse, be taught and learn
+the derivatives.  You may have a metric that does not reset and want analysed
+the way it used to be analysed in the old days as you feel it worked, that is OK,
+you can, using <a class="reference internal" href="skyline.html#settings.NON_DERIVATIVE_MONOTONIC_METRICS" title="settings.NON_DERIVATIVE_MONOTONIC_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.NON_DERIVATIVE_MONOTONIC_METRICS</span></code></a></p>
+<p>However, Skyline will automatically classify metrics into derivative_metrics
+(strictly positive monotonic metrics) and non_derivative_metrics.  This process
+has been automated so that new metrics of this nature will be identified and
+processed via their derivative if a new namespace of this nature should to added
+without the requirement for each namespace pattern to be declared in the settings.</p>
+<div class="section" id="really-why-is-this-important">
+<h2>Really why is this important?<a class="headerlink" href="#really-why-is-this-important" title="Permalink to this headline">¶</a></h2>
+<p>If you are still reading...</p>
+<p>With the original Analyzer/Mirage, single time resolution and 3-sigma based
+algorithms, these types of metrics with strictly increasing monotonicity
+that reset always triggered 3-sigma and alerts (false positives).  That is
+not to say that they were not effective once the metric had
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> seconds of timeseries data, while it was
+sending the incrementing data 3-sigma would work, until it reset :)  So it
+worked most of time and falsely some of the time.  Not ideal.</p>
+<p>Widening the range of the time resolutions that Skyline operates in with
+Mirage and Ionosphere requires that this class of metrics be converted
+otherwise they are limited in terms of the the amount of seasonal analysis,
+profiling and learning that can be done on this type of timeseries data.</p>
+<p>So Skyline now analyses all monotonic metrics via their derivatives as
+these work in terms of more historical analysis, features calculations and
+comparison, and learning patterns due to the step nature of the data and
+the variability of the steps, in terms of profiling features these type of
+data are almost like snowflakes.  The derivatives of these strictly
+increasing metrics are the kind of patterns that lend themselves to
+Skyline&#8217;s timeseries comparison and analysis methods.</p>
+<p>The Skyline nonNegativeDerivative is based on part of the Graphite render
+function nonNegativeDerivative at:
+<a class="reference external" href="https://github.com/graphite-project/graphite-web/blob/1e5cf9f659f5d4cc0fa53127f756a1916e62eb47/webapp/graphite/render/functions.py#L1627">https://github.com/graphite-project/graphite-web/blob/1e5cf9f659f5d4cc0fa53127f756a1916e62eb47/webapp/graphite/render/functions.py#L1627</a></p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1.3-beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
