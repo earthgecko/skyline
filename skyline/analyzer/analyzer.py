@@ -24,7 +24,9 @@ from ast import literal_eval
 import settings
 from skyline_functions import (
     send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
-    filesafe_metricname)
+    filesafe_metricname,
+    # @added 20170602 - Feature #2034: analyse_derivatives
+    nonNegativeDerivative, strictly_increasing_monotonicity, in_list)
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -237,6 +239,28 @@ class Analyzer(Thread):
         except:
             ionosphere_unique_metrics = []
 
+        # @added 20170602 - Feature #2034: analyse_derivatives
+        # In order to convert monotonic, incrementing metrics to a deriative
+        # metric
+        try:
+            derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+        except:
+            derivative_metrics = []
+        try:
+            non_derivative_metrics = list(self.redis_conn.smembers('non_derivative_metrics'))
+        except:
+            non_derivative_metrics = []
+        # This is here to refresh the sets
+        try:
+            manage_derivative_metrics = self.redis_conn.get('analyzer.derivative_metrics_expiry')
+        except Exception as e:
+            if LOCAL_DEBUG:
+                logger.error('error :: could not query Redis for analyzer.derivative_metrics_expiry key: %s' % str(e))
+        try:
+            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+        except:
+            non_derivative_monotonic_metrics = []
+
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
             self.check_if_parent_is_alive()
@@ -248,6 +272,58 @@ class Analyzer(Thread):
                 timeseries = list(unpacker)
             except:
                 timeseries = []
+
+            # @added 20170602 - Feature #2034: analyse_derivatives
+            # In order to convert monotonic, incrementing metrics to a deriative
+            # metric
+            known_derivative_metric = False
+            unknown_deriv_status = True
+            if metric_name in non_derivative_metrics:
+                unknown_deriv_status = False
+            if unknown_deriv_status:
+                if metric_name in derivative_metrics:
+                    known_derivative_metric = True
+                    unknown_deriv_status = False
+            # This is here to refresh the sets
+            if not manage_derivative_metrics:
+                unknown_deriv_status = True
+
+            if unknown_deriv_status:
+                # Determine if it is a strictly increasing monotonically metric
+                is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
+                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                skip_derivative = in_list(base_name, non_derivative_monotonic_metrics)
+                if skip_derivative:
+                    is_strictly_increasing_monotonically = False
+                if is_strictly_increasing_monotonically:
+                    known_derivative_metric = True
+                    try:
+                        self.redis_conn.sadd('derivative_metrics', metric_name)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add metric to Redis derivative_metrics set')
+                    try:
+                        self.redis_conn.sadd('new_derivative_metrics', metric_name)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add metric to Redis new_derivative_metrics set')
+                else:
+                    try:
+                        self.redis_conn.sadd('non_derivative_metrics', metric_name)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add metric to Redis non_derivative_metrics set')
+                    try:
+                        self.redis_conn.sadd('new_non_derivative_metrics', metric_name)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add metric to Redis new_non_derivative_metrics set')
+            if known_derivative_metric:
+                try:
+                    derivative_timeseries = nonNegativeDerivative(timeseries)
+                    timeseries = derivative_timeseries
+                except:
+                    logger.error('error :: nonNegativeDerivative failed')
 
             try:
                 anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
@@ -772,8 +848,8 @@ class Analyzer(Thread):
                         logger.info('deleting Redis mirage.unique_metrics set to refresh')
                         self.redis_conn.delete('mirage.unique_metrics')
                         mirage_unique_metrics = []
-                    except Exception as e:
-                        logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
+                    except:
+                        logger.error('error :: could not query Redis to delete mirage.unique_metric set')
 
                 for alert in settings.ALERTS:
                     for metric in unique_metrics:
@@ -815,6 +891,7 @@ class Analyzer(Thread):
                                 except:
                                     if LOCAL_DEBUG:
                                         logger.error('error :: failed to add %s to mirage.unique_metrics set' % metric)
+
                                 try:
                                     key_timestamp = int(time())
                                     self.redis_conn.setex('analyzer.manage_mirage_unique_metrics', 300, key_timestamp)
@@ -1447,6 +1524,14 @@ class Analyzer(Thread):
                 send_metric_name = use_namespace + '.timing.median_time'
                 send_graphite_metric(skyline_app, send_metric_name, str(median_algorithm_timing))
 
+                # We del all variables that are floats as they become unique objects and
+                # can result in what appears to be a memory leak, but is not, just the
+                # way Python handles floats
+                del _sum_of_algorithm_timings
+                del _median_algorithm_timing
+                del sum_of_algorithm_timings
+                del median_algorithm_timing
+
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run after algorithm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
@@ -1599,6 +1684,45 @@ class Analyzer(Thread):
                 logger.info('debug :: Memory usage after reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                 logger.info('debug :: Memory usage before sleep: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+            # @added 20170602 - Feature #2034: analyse_derivatives
+            # This is here to replace the sets
+            key_timestamp = int(time())
+            try:
+                manage_derivative_metrics = self.redis_conn.get('analyzer.derivative_metrics_expiry')
+            except Exception as e:
+                if LOCAL_DEBUG:
+                    logger.error('error :: could not query Redis for analyzer.derivative_metrics_expiry key: %s' % str(e))
+            if not manage_derivative_metrics:
+                try:
+                    self.redis_conn.setex('analyzer.derivative_metrics_expiry', 120, key_timestamp)
+                except:
+                    logger.error('error :: failed to set key :: analyzer.analyzer.derivative_metrics_expiry')
+
+                try:
+                    self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
+                except Exception as e:
+                    logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
+                try:
+                    self.redis_conn.rename('new_non_derivative_metrics', 'non_derivative_metrics')
+                except Exception as e:
+                    logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
+
+                live_at = 'skyline_set_as_of_%s' % str(key_timestamp)
+                try:
+                    self.redis_conn.sadd('derivative_metrics', live_at)
+                except Exception as e:
+                    logger.error('error :: could not add live at to Redis set derivative_metrics: %s' % str(e))
+                try:
+                    non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+                except:
+                    non_derivative_monotonic_metrics = []
+                try:
+                    for non_derivative_monotonic_metric in non_derivative_monotonic_metrics:
+                        self.redis_conn.sadd('non_derivative_metrics', non_derivative_monotonic_metric)
+                    self.redis_conn.sadd('non_derivative_metrics', live_at)
+                except Exception as e:
+                    logger.error('error :: could not add live at to Redis set non_derivative_metrics: %s' % str(e))
+
             # Sleep if it went too fast
             # if time() - now < 5:
             #    logger.info('sleeping due to low run time...')
@@ -1623,3 +1747,5 @@ class Analyzer(Thread):
                 sleep_for = (analyzer_optimum_run_duration - process_runtime)
                 logger.info('sleeping for %.2f seconds due to low run time...' % sleep_for)
                 sleep(sleep_for)
+                del sleep_for
+            del process_runtime

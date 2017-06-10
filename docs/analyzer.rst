@@ -8,9 +8,13 @@ the total number of metrics stored, and then it fires up a number of
 processes equal to :mod:`settings.ANALYZER_PROCESSES`, assigning each
 processes a number of metrics. Analyzing a metric is a very
 CPU-intensive process, because each timeseries must be decoded from
-Messagepack and then run through the algorithms. As such, it is
-advisable to set :mod:`settings.ANALYZER_PROCESSES` to about the number of cores
-you have - leaving a few for the Horizon service and for Redis.
+Messagepack and then run through the algorithms.  Analyzer is also routes
+metric checks to other services (Mirage, Panorama and Ionosphere) for
+further analysis or recording an anomaly event, as appropriately.
+
+Due to Analyzer being the most CPU-intensive Skyline process, it is advisable to
+set :mod:`settings.ANALYZER_PROCESSES` to about the number of cores you have -
+leaving a few for the Skyline services and Redis.
 
 The original documentation and settings for skyline were based on:
 
@@ -47,7 +51,7 @@ for which picking models by hand would prove infeasible. As such,
 Skyline Analyzer relies upon the consensus of an ensemble of a few
 different algorithms. If the majority of algorithms agree that any given
 metric is anomalous, the metric will be classified as anomalous. It may
-then be surfaced to the Webapp or pushed to mirage, if Mirage is enabled and
+then be surfaced to the Webapp or pushed to Mirage, if Mirage is enabled and
 configured for the namespace of the anomalous metric.
 
 Currently, Skyline does not come with very many algorithmic batteries
@@ -93,11 +97,19 @@ seconds long
 **Other**: There's probably an error in the code, if you've been making
 changes or we have.
 
+Metrics monotonicity
+====================
+
+Analyzer is used to identify what metric timeseries are strictly increasing
+monotonically, metrics that have an incrementing increasing count, so that these
+timeseriers can be handled via their derivative products where appropriate.  For
+full details see `Monotonic metrics <monotonic-metrics.html>`__
+
 Push to Mirage
 ==============
 
 Analyzer can push anomalous metrics that have a seasonality /
-periodicity that is greater than :mod:`settings.FULL_DURATION` to the mirage
+periodicity that is greater than :mod:`settings.FULL_DURATION` to the Mirage
 service, see `Mirage <mirage.html>`__.
 
 Analyzer SMTP alert graphs
@@ -115,7 +127,7 @@ triggered the alert, so having both is clearer.
 The Redis data graph also adds the mean and the 3-sigma boundaries to the plot,
 which is useful for brain training.  This goes against the "less is more
 (effective)" data visualization philosophy, however if the human neocortex is
-present with 3-sigma boundaries enough times, it will probably eventually be
+presented with 3-sigma boundaries enough times, it will probably eventually be
 able to calculate 3-sigma boundaries in any timeseries, reasonably well.
 
 Bearing in mind that when we view anomalous timeseries in the UI we are
@@ -140,27 +152,33 @@ What **Analyzer** does
 ======================
 
 - Analyzer determines all unique metrics in Redis and divides them
-  between ``ANALYZER_PROCESSES`` to be analysed between
+  between :mod:`settings.ANALYZER_PROCESSES` to be analysed between
   ``spin_process`` processes.
 - The spawned ``spin_process`` processes pull the all timeseries for
   their ``assigned_metrics`` they have been assigned from Redis and
   iterate through each metric and analyze the timeseries against the
-  ``ALGORITHMS`` declared in the settings.py
+  :mod:`settings.ALGORITHMS` declared in the settings.py
 - The ``spin_process`` will add any metric that it finds anomalous
-  (triggers ``CONSENSUS`` number of algorithms) to a list of
+  (triggers :mod:`settings.CONSENSUS` number of algorithms) to a list of
   anomalous\_metrics.
 - The parent Analyzer process will then check every metric in the
   anomalous\_metrics list to see if:
 
-  - If the metric matches an ``ALERT`` tuple in settings.py
+  - If the metric matches an :mod:`settings.ALERT` tuple in settings.py
   - If a Mirage parameter is set in the tuple, then Analyzer does not
     alert, but hands the metric off to Mirage by adding a Mirage check
     file.
+  - If a metric is an Ionosphere enabled metric, then Analyzer does not alert,
+    but hands the metric off to Ionosphere by adding an Ionosphere check
+    file.
   - If ``ENABLE_CRUCIBLE`` is True, Analyzer adds timeseries as a json
     file and a Crucible check file.
-  - If no Mirage parameter, but the metric matches an ``ALERT`` tuple
+  - If no Mirage parameter, but the metric matches an :mod:`settings.ALERT` tuple
     namespace, Analyzer then checks if an Analyzer alert key exists for
     the metric by querying the metric's Analyzer alert key in Redis.
   - If no alert key, Analyzer sends alert/s to the configured alerters
-    and sets the metric's Analyzer alert key for ``EXPIRATION_TIME``
+    and sets the metric's Analyzer alert key for :mod:`settings.EXPIRATION_TIME`
     seconds.
+  - Analyzer will alert for an Analyzer metric that has been returned from
+    Ionosphere as anomalous having not matched any known features profile or
+    layers.

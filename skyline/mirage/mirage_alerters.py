@@ -51,7 +51,10 @@ if python_version == 3:
 if True:
     import settings
     import skyline_version
-    from skyline_functions import write_data_to_file, mkdir_p
+    from skyline_functions import (
+        write_data_to_file, mkdir_p,
+        # @added 20170603 - Feature #2034: analyse_derivatives
+        nonNegativeDerivative, in_list)
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -155,21 +158,53 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     # Ionosphere alerts
     unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
         context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+    # @modified 20170603 - Feature #2034: analyse_derivatives
+    # Added deriative functions to convert the values of metrics strictly
+    # increasing monotonically to their deriative products in alert graphs and
+    # specify it in the graph_title
+    known_derivative_metric = False
+    try:
+        REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        logger.error('error :: alert_smtp - redis connection failed')
+    try:
+        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+    except:
+        derivative_metrics = []
+    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+    if redis_metric_name in derivative_metrics:
+        known_derivative_metric = True
+    if known_derivative_metric:
+        try:
+            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+        except:
+            non_derivative_monotonic_metrics = []
+        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+        if skip_derivative:
+            known_derivative_metric = False
+    if known_derivative_metric:
+        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - derivative graph - %s' % (
+            context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
 
+    graphite_port = '80'
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        graphite_port = str(settings.GRAPHITE_PORT)
+
+    link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+        graphite_port, str(int(second_order_resolution_in_hours)),
+        metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    # @added 20170603 - Feature #2034: analyse_derivatives
+    if known_derivative_metric:
+        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)),
+            graphite_port, str(int(second_order_resolution_in_hours)),
             metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-    else:
-        link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
-            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            str(int(second_order_resolution_in_hours)), metric[1],
-            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
     image_data = None
@@ -237,11 +272,6 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
 
     if settings.SMTP_OPTS.get('embed-images') and plot_redis_data:
         # Create graph from Redis data
-        try:
-            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-        except:
-            logger.error('error :: alert_smtp - redis connection failed')
-
         redis_metric_key = '%s%s' % (settings.FULL_NAMESPACE, metric[1])
         try:
             raw_series = REDIS_ALERTER_CONN.get(redis_metric_key)
@@ -265,6 +295,14 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         except:
             logger.error('error :: alert_smtp - unpack timeseries failed')
             timeseries = None
+
+        # @added 20170603 - Feature #2034: analyse_derivatives
+        if known_derivative_metric:
+            try:
+                derivative_timeseries = nonNegativeDerivative(timeseries)
+                timeseries = derivative_timeseries
+            except:
+                logger.error('error :: alert_smtp - nonNegativeDerivative failed')
 
         if settings.IONOSPHERE_ENABLED and timeseries:
             '''
@@ -377,6 +415,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             # To display the original anomalous datapoint value in the Redis plot
             # graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))
             graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
+            # @added 20170603 - Feature #2034: analyse_derivatives
+            if known_derivative_metric:
+                graph_title = 'Skyline %s - ALERT - at %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
 
             if python_version == 3:
                 buf = io.StringIO()
@@ -516,6 +557,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
     body += '<font color="black">At hours: %s</font><br>' % str(int(second_order_resolution_in_hours))
     body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+    # @added 20170603 - Feature #2034: analyse_derivatives
+    if known_derivative_metric:
+        body += '<font color="black">Derivative graph: True</font><br>'
+
     if settings.IONOSPHERE_ENABLED:
         body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
         ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (

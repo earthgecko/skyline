@@ -1,40 +1,20 @@
 Getting started
 ===============
 
-At some point **soon** hopefully it will be `pip install skyline` but for now
-see `Installation`_ **after** reviewing the below
+At some point hopefully it will be `pip install skyline` but for now see the
+`Installation`_ page **after** reviewing the below
 
 .. _Installation: ../html/installation.html
 
-Not just a program
-------------------
+Realistic expectations
+----------------------
 
-Anomaly detection is not easy.
+Anomaly detection is not easy.  Skyline is not easy to set up, it has a number
+of moving parts that need to be orchestrated.  Further to this, for Skyline to
+be configured, trained and start learning takes a lot of time.
 
-> "It seems difficult"
-
-It helps if you start out with realistic expectations.  Anomaly detection takes
-time and effort, it is not simply a case of...
-
-**install = "all singing and dancing anomaly detection system"**
-
-There is no off-the-shelf, panacea, anomaly detection system or framework that
-is going to provide you with "WOW" without some effort, learning and tuning
-your system to your needs.
-
-It is not simple, it is not perfect.  It is difficult.  Skyline configuration is
-probably on par in complexity with other similar "things" such as Riemann or an
-Elasticsearch cluster perhaps... probably less complex, but not easy initially
-either.
-
-That said, there is probably less of a learning curve and, upfront setup and
-configuration and than other machine learning and like projects such as NuPIC,
-scikit-learn, theano, tensorflow, keras, etc and all the similar ilk.
-
-Hopefully Skyline will interface with some of the above in the not too distant
-future - see `roadmap`_
-
-.. _roadmap: ../html/roadmap.html
+Take time to read through the documentation and review ``settings.py`` at the
+same time.
 
 Anomaly detection is a journey not an app
 -----------------------------------------
@@ -56,25 +36,41 @@ Skyline's fault that:
 - that feeding all your metrics to Skyline and setting alerting on all your
   metric namespaces is too noisy to be generally considered useful
 
+Enabling metrics incrementally
+------------------------------
+
+Skyline was originally pitched to automatically monitor #allthethings, all your
+metrics, it can but...
+
+Skyline should have been pitched to monitor your KEY metrics.
+
+To begin with decide what your 10 most important Graphite metrics are and
+**only** configure :mod:`settings.ALERTS` and :mod:`settings.SMTP_OPTS` on those
+to begin with and get to know what Skyline does with those.  Add more key metric
+groups as you get the hang of it.
+
+You cannot rush timeseries.
+
 Enabling Skyline modules incrementally
 --------------------------------------
 
 Skyline's modules do different things differently and understanding the process
 and pipeline helps to tune each Skyline module appropriately for your data.
 
-Each analysis based module, Analyzer, Mirage, Boundary and Crucible, have their
-own specific configurations.  These configurations are not extremely complex, but
-they are not obvious or trivial either when you are starting out.  Bringing
-Skyline modules online incrementally over time, helps one to understand the
-processes and their different configuration settings easier.  Easier than trying
-to get the whole stack up and running straight off.
+Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere (and
+Crucible), have their own specific configurations.  These configurations are not
+extremely complex, but they are not obvious or trivial either when you are
+starting out.  Bringing Skyline modules online incrementally over time, helps
+you to understand the processes and their different configuration settings
+easier.  Easier than trying to get the whole stack up and running straight off.
 
 Start with Horizon, Analyzer, Webapp and Panorama
 -------------------------------------------------
 
 It is advisable to only start the original Horizon, Analyzer and Webapp daemons
-initially and take time to understand what Skyline is doing.  Take some time to
-tune Analyzer's `ALERTS` and learn the patterns in your metrics:
+and Panorama initially and take time to understand what Skyline is doing.  Take
+some time to tune Analyzer's ``ALERTS`` and learn the patterns in your IMPORTANT
+metrics:
 
 - which metrics trigger anomalies?
 - when the metrics trigger anomalies?
@@ -84,27 +80,35 @@ tune Analyzer's `ALERTS` and learn the patterns in your metrics:
 
 Panorama will help you view what things are triggering as anomalous.
 
-Once you have got an idea of what you want to anomaly detect and more
+Once you have got an idea of what you want to anomaly detect on and more
 importantly, on what and when you want to alert, you can start to define the
-settings for other Skyline modules such as Mirage and Boundary and bring them
-online too.
+settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
+bring them online too.
 
-Add Mirage parameters to the `ALERTS`
+Add Mirage parameters to the ``ALERTS``
 -------------------------------------
 
 Once you have an overview of metrics that have seasonalities that are greater
-than the `FULL_DURATION`, you can add their Mirage parameters to the `ALERTS`
-tuples and start the Mirage daemon.
+than the :mod:`settings.FULL_DURATION`, you can add their Mirage parameters to
+the :mod:`settings.ALERTS` tuples and start the Mirage daemon.
 
 Add Boundary settings
 ---------------------
 
 You will know what your **key** metrics are and you can define their acceptable
-boundaries and alerting channels in the `BOUNDARY_METRICS` tuples and start the
-Boundary daemon.
+boundaries and alerting channels in the :mod:`settings.BOUNDARY_METRICS` tuples
+and start the Boundary daemon.
 
-You might want Crucible, you probably do not
---------------------------------------------
+Train Ionosphere
+----------------
+
+Via the alert emails or in the Skyline Ionosphere UI, train Ionosphere on what
+is NOT anomalous.
+
+Ignore Crucible
+---------------
+
+EXPERIMENTAL
 
 By default Crucible is enabled in the ``settings.py`` however, for other Skyline
 modules to send Crucible data, Crucible has to be enabled via the appropriate

@@ -36,8 +36,10 @@ import settings
 # @modified 20160922 - Branch #922: Ionosphere
 # Added the send_anomalous_metric_to skyline_functions.py
 from skyline_functions import (
-    write_data_to_file, load_metric_vars, fail_check, send_anomalous_metric_to,
-    mkdir_p, send_graphite_metric, filesafe_metricname)
+    write_data_to_file, fail_check, send_anomalous_metric_to,
+    mkdir_p, send_graphite_metric, filesafe_metricname,
+    # @added 20170603 - Feature #2034: analyse_derivatives
+    nonNegativeDerivative, in_list)
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
@@ -110,6 +112,8 @@ class Mirage(Thread):
         self.sent_to_crucible = Manager().list()
         self.sent_to_panorama = Manager().list()
         self.sent_to_ionosphere = Manager().list()
+        # @added 20170603 - Feature #2034: analyse_derivatives
+        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
     def check_if_parent_is_alive(self):
         """
@@ -177,24 +181,6 @@ class Mirage(Thread):
             f.write(json.dumps(converted))
             f.close()
             return True
-
-        return False
-
-    def load_metric_vars(self, filename):
-        if os.path.isfile(filename):
-            f = open(filename)
-            # @added 20160822 - Bug #1460: panorama check file fails
-            # Do not make this global
-            # global metric_vars
-            try:
-                metric_vars = imp.load_source('metric_vars', '', f)
-                f.close()
-                # return True
-                return metric_vars
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: failed to load metric_vars')
-                f.close()
 
         return False
 
@@ -530,6 +516,32 @@ class Mirage(Thread):
         if first_timestamp:
             if first_timestamp > valid_if_before_timestamp:
                 valid_mirage_timeseries = False
+
+        # @added 20170603 - Feature #2034: analyse_derivatives
+        # Convert the values of metrics strictly increasing monotonically
+        # to their deriative products
+        known_derivative_metric = False
+        try:
+            derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+        except:
+            derivative_metrics = []
+        redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
+        if redis_metric_name in derivative_metrics:
+            known_derivative_metric = True
+        if known_derivative_metric:
+            try:
+                non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+            except:
+                non_derivative_monotonic_metrics = []
+            skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+            if skip_derivative:
+                known_derivative_metric = False
+        if known_derivative_metric:
+            try:
+                derivative_timeseries = nonNegativeDerivative(timeseries)
+                timeseries = derivative_timeseries
+            except:
+                logger.error('error :: nonNegativeDerivative failed')
 
         try:
             if valid_mirage_timeseries:
