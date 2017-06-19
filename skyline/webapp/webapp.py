@@ -16,7 +16,7 @@ from os.path import isdir
 from os import path
 import string
 from os import remove as os_remove
-from time import time, sleep
+from time import sleep
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 import time
@@ -31,7 +31,7 @@ import uuid
 # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
 # Determine the features profile dir path for a fp_id
 import datetime
-from pytz import timezone
+# from pytz import timezone
 import pytz
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
@@ -47,7 +47,6 @@ from skyline_functions import (
     # @added 20170604 - Feature #2034: analyse_derivatives
     in_list,
 )
-
 
 from backend import panorama_request, get_list
 from ionosphere_backend import (
@@ -69,7 +68,9 @@ from ionosphere_backend import (
     #                   Task #2002: Review and correct incorrectly defined layers
     edit_ionosphere_layers,
     # @added 20170402 - Feature #2000: Ionosphere - validated
-    validate_fp)
+    validate_fp,
+    # @added 20170617 - Feature #2054: ionosphere.save.training_data
+    save_training_data_dir)
 
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
@@ -135,7 +136,7 @@ except:
 
 
 @app.before_request
-#def setup_logging():
+# def setup_logging():
 #    if not app.debug:
 #        stream_handler = logging.StreamHandler()
 #        stream_handler.setLevel(logging.DEBUG)
@@ -968,7 +969,12 @@ def ionosphere():
         'e_boundary_times', 'es_layer', 'es_day', 'f1_layer', 'f1_from_time',
         'f1_layer', 'f2_until_time', 'fp_layer', 'fp_layer_label',
         'add_fp_layer', 'layers_id', 'edit_fp_layers', 'validate_fp',
-        'validated_equals']
+        'validated_equals',
+        # @added 20170616 - Feature #2048: D1 ionosphere layer
+        'd1_condition', 'd1_boundary_limit', 'd1_boundary_times',
+        # @added 20170617 - Feature #2054: ionosphere.save.training_data
+        'save_training_data', 'saved_td_label', 'saved_training_data',
+    ]
 
     determine_metric = False
     dated_list = False
@@ -991,6 +997,10 @@ def ionosphere():
     # Added the argument edit_fp_layers
     edit_fp_layers = False
     layers_id = None
+    # @added 20170617 - Feature #2054: ionosphere.save.training_data
+    save_training_data = False
+    saved_training_data = False
+    saved_td_label = False
 
     try:
         if request_args_present:
@@ -1180,6 +1190,20 @@ def ionosphere():
                     if not valid_rt_timestamp:
                         return resp, 400
 
+                # @added 20170617 - Feature #2054: ionosphere.save.training_data
+                if key == 'save_training_data':
+                    if str(value) == 'true':
+                        save_training_data = True
+                if key == 'saved_td_label':
+                    saved_td_label = str(value)
+                if key == 'saved_training_data':
+                    if str(value) == 'true':
+                        saved_training_data = True
+                check_for_purged = False
+                if not saved_training_data:
+                    if not fp_view:
+                        check_for_purged = True
+
                 if key == 'timestamp' or key == 'timestamp_td':
                     valid_timestamp = True
                     if not len(str(value)) == 10:
@@ -1199,7 +1223,8 @@ def ionosphere():
                     if not valid_timestamp:
                         return resp, 400
 
-                    if not fp_view:
+                    # if not fp_view:
+                    if check_for_purged:
                         ionosphere_data_dir = '%s/%s' % (settings.IONOSPHERE_DATA_FOLDER, str(value))
                         if not isdir(ionosphere_data_dir):
                             valid_timestamp = False
@@ -1262,6 +1287,12 @@ def ionosphere():
                             settings.IONOSPHERE_DATA_FOLDER,
                             requested_timestamp, timeseries_dir)
 
+                        # @added 20170617 - Feature #2054: ionosphere.save.training_data
+                        if saved_training_data:
+                            ionosphere_data_dir = '%s_saved/%s/%s' % (
+                                settings.IONOSPHERE_DATA_FOLDER,
+                                requested_timestamp, timeseries_dir)
+
                         if not isdir(ionosphere_data_dir):
                             logger.info(
                                 '%s=%s no timestamp metric training data dir found - %s' %
@@ -1295,6 +1326,11 @@ def ionosphere():
         context = 'features_profiles'
     else:
         context = 'training_data'
+
+    # @added 20170617 - Feature #2054: ionosphere.save.training_data
+    if saved_training_data:
+        context = 'saved_training_data'
+
     fp_view_on = fp_view
 
     do_first = False
@@ -1783,6 +1819,47 @@ def ionosphere():
                 if not mlad_successful:
                     return internal_error(fail_msg, trace)
 
+            # @added 20170616 - Feature #2048: D1 ionosphere layer
+            fp_layer_algorithms = []
+            if metric_layers_algorithm_details:
+                for i_layer_algorithm in metric_layers_algorithm_details:
+                    try:
+                        if int(i_layer_algorithm[1]) == int(l_id):
+                            fp_layer_algorithms.append(i_layer_algorithm)
+                    except:
+                        logger.warn('warning :: Webapp could not determine layer_algorithm in metric_layers_algorithm_details')
+            fp_current_layer = []
+            if metric_layers_details:
+                for i_layer in metric_layers_details:
+                    try:
+                        if int(i_layer[0]) == int(l_id):
+                            fp_current_layer.append(i_layer)
+                    except:
+                        logger.warn('warning :: Webapp could not determine layer in metric_layers_details')
+
+            # @added 20170617 - Feature #2054: ionosphere.save.training_data
+            training_data_saved = False
+            saved_td_details = False
+            if save_training_data:
+                logger.info('saving training data')
+                try:
+                    request_time = int(time.time())
+                    saved_hdate = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(request_time))
+                    training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, base_name, saved_td_label, saved_hdate)
+                    logger.info('saved training data')
+                except:
+                    logger.error('error :: Webapp could not save_training_data_dir')
+                    return internal_error(fail_msg, trace)
+            saved_td_requested = False
+            if saved_training_data:
+                saved_td_requested = True
+                try:
+                    training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, base_name, None, None)
+                    logger.info('got saved training data details')
+                except:
+                    logger.error('error :: Webapp could not get saved training_data details')
+                    return internal_error(fail_msg, trace)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -1820,6 +1897,14 @@ def ionosphere():
                 fp_id_matched=f_id_matched, fp_id_created=f_id_created,
                 fp_generation=fp_generation_created, validated=fp_validated,
                 validated_fp_successful=validated_fp_success,
+                profile_layer_algorithms=fp_layer_algorithms,
+                current_layer=fp_current_layer,
+                save_metric_td=save_training_data,
+                saved_metric_td_label=saved_td_label,
+                saved_metric_td=saved_training_data,
+                metric_training_data_saved=training_data_saved,
+                saved_metric_td_requested=saved_td_requested,
+                saved_metric_td_details=saved_td_details,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -2186,13 +2271,13 @@ class App():
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
                 pass
 
-        now = time()
+        now = time.time()
 #        log_wait_for = now + 5
         log_wait_for = now + 1
         while now < log_wait_for:
             if os.path.isfile(skyline_app_loglock):
                 sleep(.1)
-                now = time()
+                now = time.time()
             else:
                 now = log_wait_for + 1
 

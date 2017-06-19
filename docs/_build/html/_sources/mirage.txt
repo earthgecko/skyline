@@ -388,6 +388,11 @@ What Mirage does
   ``SECOND_ORDER_RESOLUTION_HOURS``.
 - Mirage then analyses the retrieved metric timeseries against the configured
   :mod:`settings.MIRAGE_ALGORITHMS`.
+- If a metric is an Ionosphere enabled metric, then Mirage does not alert,
+  but hands the metric off to Ionosphere by adding an Ionosphere check
+  file.
 - If the metric is anomalous over ``SECOND_ORDER_RESOLUTION_HOURS`` then alerts
   via the configured alerters for the matching metric :mod:`settings.ALERT`
   tuple and sets the metric alert key for ``EXPIRATION_TIME`` seconds.
+- Mirage will alert for a Mirage metric that has been returned from Ionosphere
+  as anomalous having not matched any known features profile or layers.

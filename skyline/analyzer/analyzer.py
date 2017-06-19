@@ -288,10 +288,39 @@ class Analyzer(Thread):
             if not manage_derivative_metrics:
                 unknown_deriv_status = True
 
+            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+            # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
+            # First check if it has its own Redis z.derivative_metric key
+            # that has not expired
+            derivative_metric_key = 'z.derivative_metric.%s' % str(base_name)
+
             if unknown_deriv_status:
+                # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
+                last_derivative_metric_key = False
+                last_alert = False
+                try:
+                    last_derivative_metric_key = self.redis_conn.get(derivative_metric_key)
+                except Exception as e:
+                    logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+
                 # Determine if it is a strictly increasing monotonically metric
-                is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
-                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                # or has been in last FULL_DURATION via its z.derivative_metric
+                # key
+                if not last_derivative_metric_key:
+                    is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
+                    if is_strictly_increasing_monotonically:
+                        try:
+                            last_expire_set = int(time())
+                            self.redis_conn.setex(
+                                derivative_metric_key, settings.FULL_DURATION, last_expire_set)
+                        except Exception as e:
+                            logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+                else:
+                    # Until the z.derivative_metric key expires, it is classed
+                    # as such
+                    is_strictly_increasing_monotonically = True
+
                 skip_derivative = in_list(base_name, non_derivative_monotonic_metrics)
                 if skip_derivative:
                     is_strictly_increasing_monotonically = False

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>skyline package &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -242,6 +242,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.agent">skyline.ionosphere.agent module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.ionosphere">skyline.ionosphere.ionosphere module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.layers">skyline.ionosphere.layers module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.learn">skyline.ionosphere.learn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere">Module contents</a></li>
 </ul>
@@ -336,6 +337,21 @@
 <dl class="function">
 <dt id="database.ionosphere_matched_table_meta">
 <code class="descname">ionosphere_matched_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#ionosphere_matched_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.ionosphere_matched_table_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="database.ionosphere_layers_table_meta">
+<code class="descname">ionosphere_layers_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#ionosphere_layers_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.ionosphere_layers_table_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="database.layers_algorithms_table_meta">
+<code class="descname">layers_algorithms_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#layers_algorithms_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.layers_algorithms_table_meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="database.ionosphere_layers_matched_table_meta">
+<code class="descname">ionosphere_layers_matched_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#ionosphere_layers_matched_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.ionosphere_layers_matched_table_meta" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -469,6 +485,9 @@ features profile.</li>
 <div class="section" id="module-settings">
 <span id="skyline-settings-module"></span><h2>skyline.settings module<a class="headerlink" href="#module-settings" title="Permalink to this headline">¶</a></h2>
 <p>Shared settings</p>
+<p>IMPORTANT NOTE</p>
+<p>You may find reading some of these settings documentation strings
+<a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings">http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings</a></p>
 <dl class="data">
 <dt id="settings.REDIS_SOCKET_PATH">
 <code class="descname">REDIS_SOCKET_PATH</code><em class="property"> = '/tmp/redis.sock'</em><a class="headerlink" href="#settings.REDIS_SOCKET_PATH" title="Permalink to this definition">¶</a></dt>
@@ -808,7 +827,7 @@ anomalies to for crucible to check to a file on disk - absolute path</td>
 
 <dl class="data">
 <dt id="settings.PANORAMA_CHECK_PATH">
-<code class="descname">PANORAMA_CHECK_PATH</code><em class="property"> = '/opt/skyline/panaroma/check'</em><a class="headerlink" href="#settings.PANORAMA_CHECK_PATH" title="Permalink to this definition">¶</a></dt>
+<code class="descname">PANORAMA_CHECK_PATH</code><em class="property"> = '/opt/skyline/panorama/check'</em><a class="headerlink" href="#settings.PANORAMA_CHECK_PATH" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1340,6 +1359,28 @@ visualisation of the 3sigma boundaries is informative.</p>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.NON_DERIVATIVE_MONOTONIC_METRICS">
+<code class="descname">NON_DERIVATIVE_MONOTONIC_METRICS</code><em class="property"> = ['the_namespace_of_the_monotonic_metric_to_not_calculate_the_derivative_for']</em><a class="headerlink" href="#settings.NON_DERIVATIVE_MONOTONIC_METRICS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.NON_DERIVATIVE_MONOTONIC_METRICS" title="settings.NON_DERIVATIVE_MONOTONIC_METRICS"><strong>NON_DERIVATIVE_MONOTONIC_METRICS</strong></a> (<em>list</em>) &#8211; Strictly increasing monotonically metrics
+to <strong>not</strong> calculate the derivative values for</td>
+</tr>
+</tbody>
+</table>
+<p>Skyline by default automatically converts strictly increasingly monotonically
+metric values to their derivative values by calculating the delta between
+subsequent datapoints.  The function ignores datapoints that trend down.  This
+is useful for metrics that increase over time and then reset.</p>
+<p>Any strictly increasing monotonically metrics that you do not want Skyline to
+convert to the derivative values are declared here.  This list works in the same
+way that Horizon SKIP_LIST does, it matches in the string or dotted namespace
+elements.</p>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.SMTP_OPTS">
 <code class="descname">SMTP_OPTS</code><em class="property"> = {'embed-images': True, 'default_recipient': ['you&#64;your_domain.com'], 'sender': 'skyline&#64;your_domain.com', 'recipients': {'skyline': ['you&#64;your_domain.com', 'them&#64;your_domain.com'], 'skyline_test.alerters.test': ['you&#64;your_domain.com']}}</em><a class="headerlink" href="#settings.SMTP_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -1565,22 +1606,46 @@ timestamp is older than MAX_RESOLUTION seconds ago.</td>
 
 <dl class="data">
 <dt id="settings.SKIP_LIST">
-<code class="descname">SKIP_LIST</code><em class="property"> = ['anomaly_breakdown.', 'example.statsd.metric', 'another.example.metric']</em><a class="headerlink" href="#settings.SKIP_LIST" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SKIP_LIST</code><em class="property"> = ['skyline.analyzer.', 'skyline.boundary.', 'skyline.ionosphere.', 'skyline.mirage.']</em><a class="headerlink" href="#settings.SKIP_LIST" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKIP_LIST" title="settings.SKIP_LIST"><strong>SKIP_LIST</strong></a> (<em>array</em>) &#8211; Metrics to skip</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKIP_LIST" title="settings.SKIP_LIST"><strong>SKIP_LIST</strong></a> (<em>list</em>) &#8211; Metrics to skip</td>
 </tr>
 </tbody>
 </table>
-<p>These are metrics that, for whatever reason, you do not want to store in
+<p>These are metrics that, for whatever reason, you do not want to analyze in
 Skyline. The Worker will check to see if each incoming metrics contains
 anything in the skip list. It is generally wise to skip entire namespaces by
 adding a &#8216;.&#8217; at the end of the skipped item - otherwise you might skip things
 you do not intend to.  For example the default
 <code class="docutils literal"><span class="pre">skyline.analyzer.anomaly_breakdown.</span></code> which MUST be skipped to prevent crazy
 feedback.</p>
+<p>These SKIP_LIST are also matched just dotted namespace elements too, if a match
+is not found in the string, then the dotted elements are compared.  For example
+if an item such as &#8216;skyline.analyzer.algorithm_breakdown&#8217; was added it would
+macth any metric that matched all 3 dotted namespace elements, so it would
+match:</p>
+<p>skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.times_run
+skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.DO_NOT_SKIP_LIST">
+<code class="descname">DO_NOT_SKIP_LIST</code><em class="property"> = ['skyline.analyzer.run_time', 'skyline.boundary.run_time', 'skyline.analyzer.ionosphere_metrics', 'skyline.analyzer.mirage_metrics', 'skyline.analyzer.total_analyzed', 'skyline.analyzer.total_anomalies']</em><a class="headerlink" href="#settings.DO_NOT_SKIP_LIST" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DO_NOT_SKIP_LIST" title="settings.DO_NOT_SKIP_LIST"><strong>DO_NOT_SKIP_LIST</strong></a> (<em>list</em>) &#8211; Metrics to skip</td>
+</tr>
+</tbody>
+</table>
+<p>These are metrics that you want Skyline in analyze even if they match a
+namespace in the SKIP_LIST.  Works in the same way that SKIP_LIST does, it
+matches in the string or dotted namespace elements.</p>
 </dd></dl>
 
 <dl class="data">
@@ -3075,6 +3140,35 @@ check files, etc</p>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="skyline_functions.nonNegativeDerivative">
+<code class="descname">nonNegativeDerivative</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#nonNegativeDerivative"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.nonNegativeDerivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to convert an integral or incrementing count to a
+derivative by calculating the delta between subsequent datapoints.  The
+function ignores datapoints that trend down and is useful for metrics that
+increase over time and then reset.
+This based on part of the Graphite render function nonNegativeDerivative at:
+<a class="reference external" href="https://github.com/graphite-project/graphite-web/blob/1e5cf9f659f5d4cc0fa53127f756a1916e62eb47/webapp/graphite/render/functions.py#L1627">https://github.com/graphite-project/graphite-web/blob/1e5cf9f659f5d4cc0fa53127f756a1916e62eb47/webapp/graphite/render/functions.py#L1627</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.strictly_increasing_monotonicity">
+<code class="descname">strictly_increasing_monotonicity</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#strictly_increasing_monotonicity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.strictly_increasing_monotonicity" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to determine whether timeseries is strictly increasing
+monotonically, it will only return True if the values are strictly
+increasing, an incrementing count.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.in_list">
+<code class="descname">in_list</code><span class="sig-paren">(</span><em>metric_name</em>, <em>check_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#in_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.in_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the metric is in list.</p>
+<p># &#64;added 20170602 - Feature #2034: analyse_derivatives
+#                   Feature #1978: worker - DO_NOT_SKIP_LIST
+This is a part copy of the SKIP_LIST allows for a string match or a match on
+dotted elements within the metric namespace used in Horizon/worker</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_version">
 <span id="skyline-skyline-version-module"></span><h2>skyline.skyline_version module<a class="headerlink" href="#module-skyline_version" title="Permalink to this headline">¶</a></h2>
@@ -3208,7 +3302,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

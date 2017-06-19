@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.learn &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>ionosphere.learn &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -165,17 +165,12 @@
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">listdir</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
@@ -186,22 +181,16 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="c1"># @added 20170123 - Feature #1854: Ionosphere learn - generations</span>
-<span class="c1"># Required for ionosphere_learn to test that use_full_duration_days data is</span>
-<span class="c1"># available</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">fail_check</span><span class="p">,</span> <span class="n">mysql_select</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
-    <span class="n">get_graphite_metric</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">)</span>
+    <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">get_graphite_metric</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span>
+    <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">features_profile</span> <span class="k">import</span> <span class="n">calculate_features_profile</span>
 
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span>
-    <span class="n">ionosphere_matched_table_meta</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_FEATURES</span>
+    <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">)</span>
 
 <span class="c1"># @added 2017014 - Feature #1854: Ionosphere learn</span>
 <span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="k">import</span> <span class="n">create_features_profile</span>
@@ -443,7 +432,7 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed to get ionosphere_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed to get ionosphere_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">row</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -453,7 +442,7 @@
         <span class="n">row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get the fp_ids_db_object_count from the DB for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get the fp_ids_db_object_count from the DB for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">row</span></div>
 
@@ -640,7 +629,9 @@
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">ionosphere_learn_work</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">learn_work</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">learn_metric_list</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">ionosphere_learn_work</span><span class="p">)</span>
-            <span class="n">deadline</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">learn_metric_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Not currently used</span>
+            <span class="c1"># deadline = str(learn_metric_list[0])</span>
             <span class="n">work</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">learn_metric_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">learn_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">learn_metric_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
             <span class="n">learn_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">learn_metric_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
@@ -851,9 +842,6 @@
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: learn :: check_file_metricname_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">check_file_metricname_dir</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: learn :: failed_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
-
         <span class="n">metric_vars_array</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">metric_vars_array</span> <span class="o">=</span> <span class="n">learn_load_metric_vars</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
@@ -896,7 +884,9 @@
             <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;value&#39;</span>
             <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">anomalous_value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Not currently used</span>
+            <span class="c1"># anomalous_value = value</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: learn :: metric variable - value - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
@@ -1079,6 +1069,32 @@
                 <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
                 <span class="n">datapoints</span> <span class="o">=</span> <span class="n">timeseries</span>
+
+            <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+            <span class="c1"># Convert the values of metrics strictly increasing monotonically</span>
+            <span class="c1"># to their deriative products</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+                <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+                    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                    <span class="n">datapoints</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
+
                 <span class="n">validated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
@@ -1222,7 +1238,9 @@
             <span class="c1"># having to trace back from the learn_parent_id to the origin</span>
             <span class="n">origin_fp_id</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">origin_features_profile_sum</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">origin_fp_full_duration</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Not currently used</span>
+            <span class="c1"># origin_fp_full_duration = None</span>
             <span class="n">current_parent_id</span> <span class="o">=</span> <span class="n">learn_parent_id</span>
             <span class="n">current_generation</span> <span class="o">=</span> <span class="n">learn_generation</span>
             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_generation</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1243,7 +1261,9 @@
                             <span class="k">if</span> <span class="n">current_fp_parent_id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                                 <span class="n">origin_features_profile_sum</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;features_sum&#39;</span><span class="p">])</span>
                                 <span class="n">origin_fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_parent_id</span><span class="p">)</span>
-                                <span class="n">origin_fp_full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">])</span>
+                                <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+                                <span class="c1"># Not currently used</span>
+                                <span class="c1"># origin_fp_full_duration = int(row[&#39;full_duration&#39;])</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                                     <span class="s1">&#39;learn :: origin fp id </span><span class="si">%s</span><span class="s1"> of generation </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                         <span class="nb">str</span><span class="p">(</span><span class="n">current_parent_id</span><span class="p">),</span>
@@ -1318,7 +1338,7 @@
                 <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="s1">&#39;error: failed to read from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">))</span>
+                    <span class="s1">&#39;error: failed to read from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">learnt_features_profile_details_file</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">learnt_fp_features_sum</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: could not determine the features sum from the learnt features profile fp details file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">learnt_features_profile_details_file</span><span class="p">)</span>
@@ -1388,7 +1408,9 @@
                 <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">learn_base_name</span><span class="p">))</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: training_data URL - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-            <span class="n">ionosphere_resp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Not currently used</span>
+            <span class="c1"># ionosphere_resp = None</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
                 <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span><span class="p">)</span>
                 <span class="n">password</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span><span class="p">)</span>
@@ -1398,7 +1420,9 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
-                    <span class="n">ionosphere_resp</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+                    <span class="c1"># Not currently used</span>
+                    <span class="c1"># ionosphere_resp = True</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: Graphite NOW graphs for training_data created&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1581,7 +1605,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

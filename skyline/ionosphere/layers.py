@@ -140,6 +140,8 @@ def run_layer_algorithms(base_name, layers_id, timeseries):
     es_layer = False
     f1_layer = False
     f2_layer = False
+    # @added 20170616 - Feature #2048: D1 ionosphere layer
+    d1_layer = False
 
     # @modified 20170307 - Feature #1960: ionosphere_layers
     # Use except on everything, remember how fast Skyline can iterate
@@ -151,6 +153,13 @@ def run_layer_algorithms(base_name, layers_id, timeseries):
             if layer == 'D':
                 d_condition = row['condition']
                 d_boundary_limit = float(row['layer_boundary'])
+            # @added 20170616 - Feature #2048: D1 ionosphere layer
+            if layer == 'D1':
+                d1_condition = row['condition']
+                if str(d1_condition) != 'none':
+                    d1_boundary_limit = float(row['layer_boundary'])
+                    d1_boundary_times = row['times_in_row']
+                    d1_layer = layer_active
             if layer == 'E':
                 e_condition = row['condition']
                 e_boundary_limit = float(row['layer_boundary'])
@@ -337,6 +346,37 @@ def run_layer_algorithms(base_name, layers_id, timeseries):
         if engine:
             layers_engine_disposal(engine)
         return False
+
+    # @added 20170616 - Feature #2048: D1 ionosphere layer
+    if d1_layer:
+        try:
+            op_func = ops[d1_condition]
+            count = 0
+            while count < d1_boundary_times:
+                count += 1
+                if count == 1:
+                    understandable_message_str = 'the last and latest value in the timeseries'
+                if count == 2:
+                    understandable_message_str = 'the 2nd last value in the timeseries'
+                if count == 3:
+                    understandable_message_str = 'the 3rd last value in the timeseries'
+                if count >= 4:
+                    understandable_message_str = 'the %sth last value in the timeseries' % str(count)
+                value = float(timeseries[-count][1])
+                op_func_result = op_func(value, e_boundary_limit)
+                if op_func_result:
+                    if engine:
+                        layers_engine_disposal(engine)
+                    logger.info('layers :: %s was %s and breaches the D1 layer boundary of %s %s' % (
+                        str(understandable_message_str), str(value),
+                        str(d1_condition), str(d1_boundary_limit)))
+                    return False
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: layers :: invalid D1 layer op_func for layers_id %s - %s' % (str(layers_id), base_name))
+            if engine:
+                layers_engine_disposal(engine)
+            return False
 
     # E layer
     # @modified 20170314 - Feature #1960: ionosphere_layers

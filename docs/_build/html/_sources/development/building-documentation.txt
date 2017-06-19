@@ -20,8 +20,8 @@ Part of the build
 =================
 
 The below documentation script not only builds the documentation, it also auto
-generates some documentation and it can also auto generates some Python code too
-when updates are required, such as the compilation of the tsfresh_features.py
+generates some documentation and it also auto generates some Python code when
+updates are required, such as the compilation of the tsfresh_features.py
 
 For now...
 
@@ -83,7 +83,8 @@ Build
 
     # Arguments:
     # APP_DIR - path to your Skyline dir, e.g.
-    # build_docs ~/github/earthgecko/skyline/develop/skyline
+    # build_docs  # e.g. ~/github/earthgecko/skyline/develop/skyline
+    # pyflakes    # run pyflakes if passed
 
     if [ -n "$1" ]; then
       APPDIR=$1
@@ -113,6 +114,15 @@ Build
     if [ $? -ne 0 ]; then
       echo "Tests failed not building documentation"
       return 1
+    fi
+
+    # @added 20170308 - Task #1966: Add pyflakes tests to build_docs
+    #                   Feature #1960: ionosphere_layers
+    if [ -n "$2" ]; then
+      find "$APPDIR" -type f -name "*.py" | while read i_file
+      do
+        pyflakes "$i_file"
+      done
     fi
 
     cd "$APPDIR/docs"

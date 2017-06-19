@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>panorama.agent &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>panorama.agent &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -164,11 +164,12 @@
   <h1>Source code for panorama.agent</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="c1"># import traceback</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getpid</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isdir</span>
+<span class="c1"># from os.path import dirname, abspath, isdir</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
 <span class="kn">from</span> <span class="nn">daemon</span> <span class="k">import</span> <span class="n">runner</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
@@ -182,7 +183,6 @@
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">validate_settings</span> <span class="k">import</span> <span class="n">validate_settings_variables</span>
-
 <span class="kn">from</span> <span class="nn">panorama</span> <span class="k">import</span> <span class="n">Panorama</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;panorama&#39;</span>
@@ -219,6 +219,7 @@
 
         <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">sleep</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span></div></div>
+
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -326,7 +327,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

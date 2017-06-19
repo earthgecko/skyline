@@ -232,7 +232,14 @@ Also note:
     {% if print_debug == 'True' %}
 <code> DEBUG </code> :: /ionosphere metric_files block</br>
     {% endif %}
+<!-- # @added 20170617 - Feature #2054: ionosphere.save.training_data
+# Allow the operator to save a training_data set -->
+    {% if saved_metric_td == False %}
     <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span>{{ for_metric }} - {{ human_date }}</h4>
+    {% else %}
+    <h4><span class="logo"><span class="re">SAVED - </span><span class="sky">Training ::</span> <span class="re">data :: </span>{{ for_metric }} - {{ human_date }}</h4>
+    {% endif %}
+
 		<div class="col-md-10">
   {% if data_ok == True %}
 		<div class="container">
@@ -257,12 +264,14 @@ Also note:
 		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span> (aka: "That's not what I call an anomaly")</h4>
     {% endif %}
 
-    {% if countdown == False %}
+    {% if saved_metric_td == False %}
+      {% if countdown == False %}
 		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>True</h4>
-    {% else %}
+      {% else %}
 		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>False - Ionosphere will attempt
       to learn if this is <code>not anomalous</code> from the {{ use_full_duration_days }} days features profiles that exist in:</h4>
       <div class="countdown styled"></div>
+      {% endif %}
     {% endif %}
 
 		  <h4><span class="logo"><span class="sky">Ionosphere ::</span> <span class="re">metric :: </span></span>{{ ionosphere_metric }}</h4>
@@ -285,6 +294,17 @@ already matched a training data set -->
 		  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">matched :: </span></span>True - layers_id {{ layers_id_matched }} has already <b><font color="green">MATCHED</font></b> this training data as <code>not anomalous</code></h4>
     {% endif %}
 
+    {% if metric_training_data_saved %}
+      {% if saved_metric_td == False %}
+	  <div class="alert alert-success">
+	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ for_metric }}">saved for {{ for_metric }}</a></b>
+	  </div>
+      {% endif %}
+    {% endif %}
+
+<!-- # @modified 20170617 - Feature #2054: ionosphere.save.training_data
+# Do not render the create profiles options on a saved training data page -->
+    {% if saved_metric_td_requested == False %}
 		  <table class="table table-hover">
 		    <thead>
 		      <tr>
@@ -354,6 +374,13 @@ already matched a training data set -->
 		      </tr>
 		    </tbody>
 		  </table>
+    {% else %}
+          <h4><b><span class="logo"><span class="sky">SAVED ::</span> <span class="re">training data</span></span></span></b></h4>
+      {% if saved_metric_td_details %}
+          <pre>{{ saved_metric_td_details }}</pre>
+      {% endif %}
+    {% endif %}
+
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the existing layers and algorithms for the metric
 # @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
@@ -473,11 +500,26 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
   		        <input type="text" name="d_boundary_limit" value="0" /> in the last
               <select name="d_boundary_times">
               <option value="1">1</option></select> values in the timeseries - <code>DISCARD - not_anomalous</code> False<br>
-            The D layer can be used as the upper limit, if value > x (probably or certainly anomalous)<br>
+            The D layer can be used as the upper or lower limit, e.g if value > x (probably or certainly anomalous)<br>
             Or this can be used if this metric operates in the negative range or<br>
             if you want it too not discard on 0 as you want to match 0, set it to -1 or > 0.1 or > 1<br>
             On a high constant rate metric the D layer can be used to discard if < x so the the layer <b>does not silence a drop</b><br>
+            This layer can be complimented by the optional D1 layer below<br>
             <code>Remember a match here disables any of the other below layers being checked</code><br>
+            </td>
+		      </tr>
+<!-- @added 20170616 - Feature #2048: D1 ionosphere layer -->
+		      <tr>
+		        <td>D1 layer <code>[optional]</code></td>
+		        <td>if value <select name="d1_condition">
+              <option value="none">none</option>
+            {% for item in value_condition_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+  		        <input type="text" name="d1_boundary_limit" value="0" /> in the last
+              <input type="number" name="d1_boundary_times" value="1" /> values in the timeseries - <code>DISCARD - not_anomalous</code> False<br>
+            The D1 layer can be used as an upper or lower limit, so the D layer <b>does not silence a drop</b><br>
+            <code>Remember a match here disables any of the other below layer conditions from being checked</code><br>
             </td>
 		      </tr>
 		      <tr>
@@ -490,7 +532,7 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 <!-- @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats
               <input type="number" name="e_boundary_limit" value="0" /> in the last-->
   		        <input type="text" name="e_boundary_limit" value="0" /> in the last
-            <input type="number" name="e_boundary_times" value="3" /> values in the timeseries - <code>not anomalous</code>
+              <input type="number" name="e_boundary_times" value="3" /> values in the timeseries - <code>not anomalous</code>
             </select></td>
 		      </tr>
 		      <tr>
@@ -661,6 +703,8 @@ Image file: {{ image }}<br><br>
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
   {% elif layers_id_matched %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+  {% elif saved_metric_td_requested %}
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs when saved ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
   {% else %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
   {% endif %}
@@ -735,6 +779,47 @@ based features profile -->
 # Present the operator with the existing layers and algorithms for the metric in
 # where relevant to assist with assessment and decision making -->
   {% include "layers_table.html" %}
+
+<!-- # @added 20170617 - Feature #2054: ionosphere.save.training_data
+# Allow the operator to save a training_data set -->
+    {% if saved_metric_td == False %}
+      <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#save_training_data">Save training data</button>
+      <code>NOTE: - this should only be used for debugging, testing or sharing a training data set for demo or training.  It
+      is not generally required.</code>
+
+  		<div class="col-md-12">
+        <div id="save_training_data" class="collapse">
+          <form action="ionosphere">
+    		  <table class="table table-hover">
+    		    <thead>
+    		      <tr>
+    		        <th>Action</th>
+    		        <th>Input</th>
+    		      </tr>
+    		    </thead>
+    		    <tbody>
+    		      <tr>
+    		        <td>Save training data</td>
+    		        <td><select name="save_training_data">
+                  <option value="true">true</option>
+                  </select>
+    			        Label: <input type="text" name="saved_td_label" value="label" /> - optional label, e.g. iowait increase
+    			        <input type="hidden" name="timestamp" value="{{ timestamp }}" />
+    			        <input type="hidden" name="metric" value="{{ for_metric }}" />
+                  <input type="submit" value="Save training data">
+                  </form>
+                </td>
+    		      </tr>
+    		    </tbody>
+    		  </table>
+        </div>
+      </div>
+      {% if metric_training_data_saved %}
+  	  <div class="alert alert-success">
+  	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ for_metric }}">saved for {{ for_metric }}</a></b>
+  	  </div>
+      {% endif %}
+    {% endif %}
 
     </div>
   </div>

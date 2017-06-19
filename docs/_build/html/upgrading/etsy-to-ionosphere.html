@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Upgrading - Etsy to Ionosphere &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>Upgrading - Etsy to Ionosphere &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../index.html"/>
         <link rel="up" title="Upgrading" href="index.html"/>
         <link rel="next" title="Upgrading - Etsy to Crucible" href="etsy-to-crucible.html"/>
         <link rel="prev" title="Upgrading - Crucible to Ionosphere" href="crucible-to-ionosphere.html"/> 
@@ -220,8 +220,11 @@ location, whichever you used</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/horizon.d start
 <span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/analyzer.d start
-<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/webapp.d start
+<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/mirage.d start
+<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/boundary.d start
+<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/ionosphere.d start
 <span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/pnorama.d start  <span class="c1"># if you have the MySQL DB set up</span>
+<span class="s2">&quot;</span><span class="nv">$SKYLINE_DIR</span><span class="s2">&quot;</span>/bin/webapp.d start
 </pre></div>
 </div>
 <ul class="simple">
@@ -256,8 +259,8 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 <code class="docutils literal"><span class="pre">settings.py</span></code> you can test them now, see <a class="reference external" href="../alert-testing.html">Alert testing</a></li>
 <li>Look at implementing the other new features at your leisure</li>
 <li>Panorama is probably the quickest win if you opted to not install it</li>
-<li>Boundary and Mirage will take a little assessment to see what metrics
-you want to configure them for.</li>
+<li>Boundary, Mirage and Ionosphere will take a little assessment over time to see
+what metrics you want to configure them to monitor.  You cannot rush timeseries.</li>
 </ul>
 </div>
 </div>
@@ -303,7 +306,7 @@ you want to configure them for.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

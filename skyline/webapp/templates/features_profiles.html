@@ -325,6 +325,7 @@ and validate that it is valid.
 #                      Task #2002: Review and correct incorrectly defined layers
 layer_algorithms_details_object metric_layers_algorithm_details existing_algorithms
 -->
+
     {% if layers_updated %}
   	  <div class="alert alert-success">
   	    <strong>Success!</strong> The features profile layers were updated - {{ layers_updated }}<br>
@@ -348,28 +349,53 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
     		      <tr>
     		        <td>D layer <code>[required]</code></td>
     		        <td>if value <select name="d_condition">
-                  <option value="{{ existing_algorithms[0][6] }}">{{ existing_algorithms[0][6] }}</option>
+                  <option value="{{ profile_layer_algorithms[0][6] }}">{{ profile_layer_algorithms[0][6] }}</option>
                 {% for item in value_condition_list %}
                       <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
-      		        <input type="text" name="d_boundary_limit" value="{{ existing_algorithms[0][7] }}" /> in the last
-      		        <input type="text" name="d_boundary_times" value="{{ existing_algorithms[0][8] }}"> values in the timeseries - <code>DISCARD - not_anomalous</code> False<br>
+      		        <input type="text" name="d_boundary_limit" value="{{ profile_layer_algorithms[0][7] }}" /> in the last
+      		        <input type="text" name="d_boundary_times" value="{{ profile_layer_algorithms[0][8] }}"> values in the timeseries - <code>DISCARD - not_anomalous</code> False<br>
                 The D layer can be used as the upper limit, if value > x (probably or certainly anomalous)<br>
                 Or this can be used if this metric operates in the negative range or<br>
                 if you want it too not discard on 0 as you want to match 0, set it to -1 or > 0.1 or > 1<br>
                 On a high constant rate metric the D layer can be used to discard if < x so the the layer <b>does not silence a drop</b><br>
+                This layer can be complimented by the optional D1 layer below<br>
                 <code>Remember a match here disables any of the other below layers being checked</code><br>
+                </td>
+    		      </tr>
+              <!-- @added 20170616 - Feature #2048: D1 ionosphere layer
+              Handle backwards compatible for layers that have not D1 layer defined -->
+    		      <tr>
+    		        <td>D1 layer <code>[optional]</code></td>
+    		        <td>if value <select name="d1_condition">
+    {% if profile_layer_algorithms[2] %}
+                  <option value="{{ profile_layer_algorithms[2][6] }}">{{ profile_layer_algorithms[2][6] }}</option>
+    {% else %}
+                  <option value="none">none</option>
+    {% endif %}
+                {% for item in value_condition_list %}
+                      <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+    {% if profile_layer_algorithms[2] %}
+      		        <input type="text" name="d1_boundary_limit" value="{{ profile_layer_algorithms[2][7] }}" /> in the last
+                  <input type="number" name="d1_boundary_times" value="{{ profile_layer_algorithms[2][8] }}" /> values in the timeseries - <code>DISCARD - not_anomalous</code> False<br>
+    {% else %}
+      		        <input type="text" name="d1_boundary_limit" value="0" /> in the last
+                  <input type="number" name="d1_boundary_times" value="0" /> values in the timeseries - <code>DISCARD - not_anomalous</code> False<br>
+    {% endif %}
+                The D1 layer can be used as an upper or lower limit, so the D layer <b>does not silence a drop</b><br>
+                <code>Remember a match here disables any of the other below layer conditions from being checked</code><br>
                 </td>
     		      </tr>
     		      <tr>
     		        <td>E layer <code>[required]</code></td>
     		        <td>if value <select name="e_condition">
-                  <option value="{{ existing_algorithms[1][6] }}">{{ existing_algorithms[1][6] }}</option>
+                  <option value="{{ profile_layer_algorithms[1][6] }}">{{ profile_layer_algorithms[1][6] }}</option>
                 {% for item in value_condition_list %}
                       <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
-      		        <input type="text" name="e_boundary_limit" value="{{ existing_algorithms[1][7] }}" /> in the last
-                <input type="number" name="e_boundary_times" value="{{ existing_algorithms[1][8] }}" /> values in the timeseries - <code>not anomalous</code>
+      		        <input type="text" name="e_boundary_limit" value="{{ profile_layer_algorithms[1][7] }}" /> in the last
+                <input type="number" name="e_boundary_times" value="{{ profile_layer_algorithms[1][8] }}" /> values in the timeseries - <code>not anomalous</code>
                 </select></td>
     		      </tr>
     		      <tr>
@@ -414,7 +440,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
                   <option value="true">true</option>
                   </select>
                   for fp_id <select name="fp_id"><option value="{{ features_profile_id }}">{{ features_profile_id }}</option></select><br>
-    			        Label: <input type="text" name="fp_layer_label" value="{{ existing_layers[0][5] }}" /> - optional label, e.g. tuesday_pentest
+    			        Label: <input type="text" name="fp_layer_label" value="{{ current_layer[0][5] }}" /> - optional label, e.g. tuesday_pentest
     			        <input type="hidden" name="edit_fp_layers" value="true" />
     			        <input type="hidden" name="layers_id" value="{{ layer_id }}" />
     			        <input type="hidden" name="fp_view" value="true" />

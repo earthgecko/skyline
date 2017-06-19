@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -166,11 +166,11 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">string</span>
-<span class="kn">import</span> <span class="nn">operator</span>
+<span class="c1"># import string</span>
+<span class="c1"># import operator</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">csv</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="c1"># import datetime</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
@@ -182,7 +182,7 @@
     <span class="n">create_engine</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy.dialects.mysql</span> <span class="k">import</span> <span class="n">DOUBLE</span><span class="p">,</span> <span class="n">TINYINT</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">select</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span class="c1"># import json</span>
 <span class="kn">from</span> <span class="nn">tsfresh</span> <span class="k">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">tsfresh_version</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
@@ -534,8 +534,8 @@
         <span class="n">use_full_duration</span><span class="p">,</span> <span class="n">valid_learning_duration</span><span class="p">,</span> <span class="n">use_full_duration_days</span><span class="p">,</span> <span class="n">max_generations</span><span class="p">,</span> <span class="n">max_percent_diff_from_origin</span> <span class="o">=</span> <span class="n">get_ionosphere_learn_details</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
         <span class="n">learn_full_duration_days</span> <span class="o">=</span> <span class="n">use_full_duration_days</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: create_features_profile :: failed to get_ionosphere_learn_details&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: create_features_profile :: failed to get_ionosphere_learn_details&#39;</span><span class="p">)</span>
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: learn_full_duration_days     :: </span><span class="si">%s</span><span class="s1"> days&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">)))</span>
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: valid_learning_duration      :: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_learning_duration</span><span class="p">)))</span>
@@ -618,7 +618,7 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: create_features_profile :: failed to determine learn related values from DB for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
-        <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">row</span>
+        <span class="c1"># metric_db_object = row</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: determined db metric id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">))</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: determined db metric learn_full_duration_days: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_learn_full_duration_days</span><span class="p">))</span>
@@ -633,7 +633,7 @@
 
     <span class="k">if</span> <span class="n">metric_learn_full_duration_days</span><span class="p">:</span>
         <span class="n">learn_full_duration_days</span> <span class="o">=</span> <span class="n">metric_learn_full_duration_days</span>
-        <span class="n">learn_full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">)</span> <span class="o">*</span> <span class="mi">86400</span>
+        <span class="c1"># learn_full_duration = int(learn_full_duration_days) * 86400</span>
     <span class="k">if</span> <span class="n">metric_learn_valid_ts_older_than</span><span class="p">:</span>
         <span class="n">learn_valid_ts_older_than</span> <span class="o">=</span> <span class="n">metric_learn_valid_ts_older_than</span>
     <span class="k">if</span> <span class="n">metric_max_generations</span><span class="p">:</span>
@@ -680,6 +680,17 @@
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: ionosphere_table OK&#39;</span><span class="p">)</span>
 
+    <span class="c1"># @added 20170403 - Feature #2000: Ionosphere - validated</span>
+    <span class="c1"># Set all learn_fp_human features profiles to validated.</span>
+    <span class="n">fp_validated</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">ionosphere_job</span> <span class="o">==</span> <span class="s1">&#39;learn_fp_human&#39;</span><span class="p">:</span>
+        <span class="n">fp_validated</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># @added 20170424 - Feature #2000: Ionosphere - validated</span>
+    <span class="c1"># Set all generation 0 and 1 as validated</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">fp_validated</span> <span class="o">=</span> <span class="mi">1</span>
+
     <span class="n">new_fp_id</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -687,13 +698,14 @@
         <span class="c1"># Added learn values parent_id, generation</span>
         <span class="c1"># @modified 20170120 - Feature #1854: Ionosphere learn</span>
         <span class="c1"># Added anomaly_timestamp</span>
+        <span class="c1"># @modified 20170403 - Feature #2000: Ionosphere - validated</span>
         <span class="n">ins</span> <span class="o">=</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">(</span>
             <span class="n">metric_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="n">full_duration</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">),</span>
             <span class="n">anomaly_timestamp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">),</span>
             <span class="n">enabled</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tsfresh_version</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tsfresh_version</span><span class="p">),</span>
             <span class="n">calc_time</span><span class="o">=</span><span class="n">calculated_time</span><span class="p">,</span> <span class="n">features_count</span><span class="o">=</span><span class="n">fcount</span><span class="p">,</span>
             <span class="n">features_sum</span><span class="o">=</span><span class="n">fsum</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="n">fp_parent_id</span><span class="p">,</span>
-            <span class="n">generation</span><span class="o">=</span><span class="n">fp_generation</span><span class="p">)</span>
+            <span class="n">generation</span><span class="o">=</span><span class="n">fp_generation</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="n">fp_validated</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">new_fp_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">inserted_primary_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -807,7 +819,7 @@
     <span class="c1"># Create z_ts_&lt;metric_id&gt; table</span>
     <span class="c1"># @modified 20170121 - Feature #1854: Ionosphere learn - generations</span>
     <span class="c1"># TODO Adding the option to not save timeseries to DB, as default?</span>
-    <span class="n">ts_table_created</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># ts_table_created = False</span>
     <span class="n">ts_table_name</span> <span class="o">=</span> <span class="s1">&#39;z_ts_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">ts_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
@@ -826,7 +838,7 @@
             <span class="n">mysql_key_block_size</span><span class="o">=</span><span class="s1">&#39;255&#39;</span><span class="p">,</span>
             <span class="n">mysql_engine</span><span class="o">=</span><span class="s1">&#39;InnoDB&#39;</span><span class="p">)</span>
         <span class="n">ts_metric_table</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">checkfirst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">ts_table_created</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># ts_table_created = True</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: metric ts table created OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ts_table_name</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
@@ -854,7 +866,7 @@
             <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fail_msg</span><span class="p">))</span>
             <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span>
-            <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="c1"># end = timer()</span>
             <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
                 <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
                 <span class="k">raise</span>
@@ -1062,7 +1074,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
