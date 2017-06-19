@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Upgrading &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>Upgrading &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../index.html"/>
         <link rel="next" title="Upgrading - Crucible to Ionosphere" href="crucible-to-ionosphere.html"/>
         <link rel="prev" title="Installation" href="../installation.html"/> 
 
@@ -97,6 +97,7 @@
 <li class="toctree-l2"><a class="reference internal" href="etsy-to-ionosphere.html">Upgrading - Etsy to Ionosphere</a></li>
 <li class="toctree-l2"><a class="reference internal" href="etsy-to-crucible.html">Upgrading - Etsy to Crucible</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#upgrading-from-the-etsy-version-of-skyline">Upgrading from the Etsy version of Skyline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#do-a-new-install">Do a new install</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#things-to-note">Things to note</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#directory-structure-changes">Directory structure changes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#settings-py">settings.py</a></li>
@@ -207,6 +208,13 @@ implementation. For the sake of fullness this describes the changes from
 the last
 <a class="reference external" href="https://github.com/etsy/skyline/commit/22ae09da716267a65835472da89ac31cc5cc5192">github/etsy/skyline</a>
 commit to date.</p>
+<div class="section" id="do-a-new-install">
+<h3>Do a new install<a class="headerlink" href="#do-a-new-install" title="Permalink to this headline">¶</a></h3>
+<p>If you are upgrading from an Etsy version consider doing a new install, all you
+need is your Redis data.</p>
+<p>However you may have some other monitoring or custom inits, etc set up on your
+Skyline then the below is a best effort guide.</p>
+</div>
 <div class="section" id="things-to-note">
 <h3>Things to note<a class="headerlink" href="#things-to-note" title="Permalink to this headline">¶</a></h3>
 <p>This new version of Skyline sees a lot of changes, however although
@@ -312,7 +320,7 @@ settings.py to see the additions and all the changes you need to make.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

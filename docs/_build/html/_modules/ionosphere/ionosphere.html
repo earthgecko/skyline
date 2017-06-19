@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -179,16 +179,14 @@
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
 <span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
-<span class="c1"># from msgpack import Unpacker, packb</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
-<span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="k">import</span> <span class="n">errorcode</span>
+<span class="c1"># from mysql.connector import errorcode</span>
 
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">select</span>
-<span class="c1"># import requests</span>
-<span class="c1"># from requests.auth import HTTPBasicAuth</span>
 
 <span class="c1"># @added 20161213 - Branch #1790: test_tsfresh</span>
 <span class="c1"># To match the new order introduced via the test_tsfresh method</span>
@@ -220,6 +218,9 @@
 <span class="c1"># Renamed the function from simple learn to the meme it has become</span>
 <span class="c1"># from learn import learn</span>
 <span class="kn">from</span> <span class="nn">learn</span> <span class="k">import</span> <span class="n">ionosphere_learn</span>
+
+<span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+<span class="kn">from</span> <span class="nn">layers</span> <span class="k">import</span> <span class="n">run_layer_algorithms</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -294,6 +295,8 @@
         <span class="c1"># ionosphere_non_smtp_alerter_metrics</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Ionosphere.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -408,10 +411,10 @@
                 <span class="k">pass</span>
         <span class="k">return</span></div>
 
+
 <span class="c1"># @added 20161228 - Feature #1828: ionosphere - mirage Redis data features</span>
 <span class="c1">#                   Branch #922: Ionosphere</span>
 <span class="c1"># Bringing Ionosphere online - do alert on Ionosphere metrics</span>
-
 <div class="viewcode-block" id="Ionosphere.manage_ionosphere_unique_metrics"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">manage_ionosphere_unique_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Redis set of all Ionosphere enabled metrics.</span>
@@ -731,6 +734,39 @@
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: failed_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
 
+        <span class="c1"># @added 20170307 - Feature #1960: ionosphere_layers - ionosphere_check_cache_key</span>
+        <span class="c1"># This Redis cache key check was added to prevent Ionosphere from</span>
+        <span class="c1"># running riot on checks if for some reason the check_file is not</span>
+        <span class="c1"># removed which happens if some exception is not handled as found out</span>
+        <span class="c1"># again during yesterday&#39;s development of run_layer_algorithms.  It was</span>
+        <span class="c1"># a good reminder of how fast Skyline can iterate.</span>
+        <span class="n">ionosphere_check_cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.check.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">check_file_name</span>
+        <span class="n">check_done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">check_done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ionosphere_check_cache_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check_done</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check done check - no check cache key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_check_cache_key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: a check cache key exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_check_cache_key</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failing check to prevent multiple iterations over this check&#39;</span><span class="p">)</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">check_process_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                <span class="n">ionosphere_check_cache_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="p">[</span><span class="n">check_process_start</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;added Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_check_cache_key</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: failed to add Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_check_cache_key</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failing check to prevent multiple iterations over this check&#39;</span><span class="p">)</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Load and validate metric variables</span>
             <span class="c1"># @modified 20161231 - Feature #1830: Ionosphere alerts</span>
@@ -923,6 +959,7 @@
             <span class="n">ionosphere_parent_id</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_parent_id_determined</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine ionosphere_parent_id variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
@@ -1215,7 +1252,16 @@
             <span class="c1"># the details of all features profiles for the metric, this has all</span>
             <span class="c1"># the generations values avaialble in it.</span>
             <span class="c1"># Here we go! Learn!</span>
-            <span class="n">fp_ids_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Not currently used - fp_ids_db_object</span>
+            <span class="c1"># fp_ids_db_object = None</span>
+
+            <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Here we go, let us TEACH you properly.</span>
+            <span class="c1"># Set result to None here to fix a interpolation error below</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">fp_layers_ids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">fp_layers_present</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -1230,6 +1276,13 @@
                         <span class="k">continue</span>
 
                     <span class="n">fp_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+
+                    <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+                    <span class="c1"># Here we go, let us TEACH you properly</span>
+                    <span class="n">fp_layers_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;layers_id&#39;</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">fp_layers_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">fp_layers_present</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">fp_layers_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_layers_id</span><span class="p">)</span>
 
                     <span class="c1"># @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs</span>
                     <span class="c1"># Added all_fp_ids</span>
@@ -1274,14 +1327,31 @@
                 <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
                 <span class="c1"># Create the fp_ids_db_object so it is available throughout</span>
                 <span class="c1"># Here we go! Learn!</span>
-                <span class="n">fp_ids_db_object</span> <span class="o">=</span> <span class="n">row</span>
+                <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+                <span class="c1"># Not currently used - fp_ids_db_object</span>
+                <span class="c1"># fp_ids_db_object = row</span>
                 <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="n">fp_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determined </span><span class="si">%s</span><span class="s1"> fp ids for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+                <span class="c1"># @added 20170309 - Feature #1960: ionosphere_layers</span>
+                <span class="n">fp_layers_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_layers_ids</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determined </span><span class="si">%s</span><span class="s1"> layers ids for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine fp ids from DB for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
                 <span class="n">fp_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1"># @added 20170309 - Feature #1960: ionosphere_layers</span>
+                <span class="n">fp_layers_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Corrected the interpolation of the fp_ids_db_object above where it</span>
+            <span class="c1"># was set to the last row only, however it was not used anyway.</span>
+            <span class="c1"># Here we go, let us TEACH you properly.  We only evaluate</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Not currently used - fp_ids_db_object</span>
+            <span class="c1"># if result:</span>
+            <span class="c1">#     fp_ids_db_object = result</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;there are no fp ids that match full duration for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
@@ -1647,6 +1717,26 @@
                             <span class="s1">&#39;error :: could not update ionosphere_matched for </span><span class="si">%s</span><span class="s1"> with with timestamp </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
 
+                    <span class="c1"># @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers</span>
+                    <span class="c1">#                   Feature #1960: ionosphere_layers</span>
+                    <span class="c1"># Added mirror functionality of the layers_id_matched_file</span>
+                    <span class="c1"># for feature profile matches too as it has proved useful</span>
+                    <span class="c1"># in the frontend with regards to training data sets being</span>
+                    <span class="c1"># matched by layers and can do the same for in the frontend</span>
+                    <span class="c1"># training data for feature profile matches too.</span>
+                    <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                        <span class="n">profile_id_matched_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.profile_id_matched.fp_id&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">profile_id_matched_file</span><span class="p">):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">profile_id_matched_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added matched fp_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">profile_id_matched_file</span><span class="p">))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: added matched fp_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">profile_id_matched_file</span><span class="p">))</span>
+
                     <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
                     <span class="c1"># Stop on the first match</span>
                     <span class="k">break</span>
@@ -1664,6 +1754,54 @@
             <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;an ionosphere_learn metric has been found to be not anomalous before&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20170607 - Feature #2010: Ionosphere learn - rate limiting profile learning</span>
+                    <span class="n">learning_rate_limited</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                    <span class="n">rate_limit_timestamp</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="mi">3600</span>
+                    <span class="n">rate_limit_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">rate_limit_timestamp</span><span class="p">)</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+                    <span class="n">after_datetime</span> <span class="o">=</span> <span class="n">rate_limit_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                            <span class="s1">&#39;SELECT * FROM ionosphere WHERE metric_id=</span><span class="si">%s</span><span class="s1"> AND created_timestamp &gt; </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1"> AND generation &gt; 1&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">after_datetime</span><span class="p">)))</span>
+                        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                            <span class="n">last_full_duration</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_full_duration</span><span class="p">):</span>
+                                <span class="n">learning_rate_limited</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">break</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: determining whether learning should be rate limited&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">learning_rate_limited</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learning currently dynamically rate limited on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="c1"># Exit the ionosphere_learn check</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                        <span class="k">return</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learning is not currently rate limited on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
+                    <span class="c1"># @added 20170605 - Bug #2038: Ionosphere learn parent generation incorrect</span>
+                    <span class="c1"># Determine generation of the matched fp not the last in the</span>
+                    <span class="c1"># list</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT generation FROM ionosphere WHERE id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
+                            <span class="n">matched_fp_generation</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">])</span>
+                        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;determined matched fp_id </span><span class="si">%s</span><span class="s1"> is a generation </span><span class="si">%s</span><span class="s1"> profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_fp_generation</span><span class="p">)))</span>
+                        <span class="n">current_fp_generation</span> <span class="o">=</span> <span class="n">matched_fp_generation</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine generation from ionosphere table for fp id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s1">&#39;ionosphere_learn metric matches the generation </span><span class="si">%s</span><span class="s1"> features profile id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">current_fp_generation</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
@@ -1674,17 +1812,18 @@
                     <span class="c1"># be greater than max_generations</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;adding work item to Redis set ionosphere.learn.work&#39;</span><span class="p">)</span>
                     <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_learnt&#39;</span>
+                    <span class="n">work_deadline</span> <span class="o">=</span> <span class="s1">&#39;Soft&#39;</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                            <span class="s1">&#39;LEARNT :: adding work to Redis ionosphere.learn.work set - [</span><span class="se">\&#39;</span><span class="s1">Soft</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">] to create a learnt features profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
+                            <span class="s1">&#39;LEARNT :: adding work to Redis ionosphere.learn.work set - [</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">] to create a learnt features profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">work_deadline</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_fp_generation</span><span class="p">)))</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_fp_generation</span><span class="p">)])</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="s1">&#39;error :: failed adding work to Redis ionosphere.learn.work set - [</span><span class="se">\&#39;</span><span class="s1">Soft</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">] to make a learn features profile later&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
+                            <span class="s1">&#39;error :: failed adding work to Redis ionosphere.learn.work set - [</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">] to make a learn features profile later&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">work_deadline</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_fp_generation</span><span class="p">)))</span>
 
                 <span class="c1"># Exit the ionosphere_learn check</span>
@@ -1692,6 +1831,99 @@
                 <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                     <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                 <span class="k">return</span>
+
+            <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Here we go, let us TEACH you properly.  We only evaluate</span>
+            <span class="c1"># the Ionosphere layer algorithms after Skyline has had an</span>
+            <span class="c1"># an opportunity to match the original and learnt features</span>
+            <span class="c1"># profiles.  This enables the original, evolutionary,</span>
+            <span class="c1"># generations based learning to be continually evaluated.</span>
+            <span class="c1"># This needs to happen for any future implemenation of</span>
+            <span class="c1"># Feature #1888: Ionosphere learn - evolutionary maturity forget</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers algorithms check&#39;</span><span class="p">)</span>
+            <span class="n">check_layers_algorithms</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                <span class="n">check_layers_algorithms</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+                    <span class="n">check_layers_algorithms</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_learn - layers algorithms check - False&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers algorithms check - True&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;a features profile matched as not_anomalous - layers algorithms check - False&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">check_layers_algorithms</span> <span class="ow">and</span> <span class="n">fp_layers_present</span><span class="p">:</span>
+                <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+                <span class="n">mirage_full_duration_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">mirage_full_duration_json_file</span><span class="p">):</span>
+                    <span class="n">full_duration_json_file</span> <span class="o">=</span> <span class="n">mirage_full_duration_json_file</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">full_duration_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+
+                <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">full_duration_json_file</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;full duration ts json available for layers check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">full_duration_json_file</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Read the timeseries json file</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">full_duration_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                        <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+                        <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not load json for layers check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data points surfaced for layers check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: full duration ts json for layers was not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">full_duration_json_file</span><span class="p">))</span>
+
+                <span class="n">matched_layers_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">layers_id</span> <span class="ow">in</span> <span class="n">fp_layers_ids</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="c1"># Get the layers algorithms and run then on the timeseries</span>
+                        <span class="c1"># @modified 20170307 - Feature #1960: ionosphere_layers</span>
+                        <span class="c1"># Use except on everything, remember how fast Skyline can iterate</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)</span>
+                            <span class="n">not_anomalous</span> <span class="o">=</span> <span class="n">run_layer_algorithms</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">layers_id</span><span class="p">,</span> <span class="n">anomalous_timeseries</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                                <span class="n">matched_layers_id</span> <span class="o">=</span> <span class="n">layers_id</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: run_layer_algorithms failed for layers_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)))</span>
+                        <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not_anomalous :: layers_id </span><span class="si">%s</span><span class="s1"> was matched&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;still anomalous :: layers_id </span><span class="si">%s</span><span class="s1"> was NOT matched&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous - no features profiles layers were matched - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+
+                <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
+                <span class="c1">#                   Feature #1854: Ionosphere learn</span>
+                <span class="c1"># A create a layer_id matched txt file in the training_data dir</span>
+                <span class="c1"># to advise the operator if a training_data set has been matched</span>
+                <span class="c1"># by a layer.  Further below if app is not ionosphere_learn a</span>
+                <span class="c1"># &#39;learn_fp_generation&#39; ionosphere_job is added so ionosphere_learn</span>
+                <span class="c1"># can still try and learning from the existing features profiles</span>
+                <span class="c1"># that exist even if a layer matched as not_anomalous.</span>
+                <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                    <span class="n">layers_id_matched_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.layers_id_matched.layers_id&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">layers_id_matched_file</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">layers_id_matched_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_layers_id</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added matched layers_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">matched_layers_id</span><span class="p">),</span> <span class="n">layers_id_matched_file</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: added matched layers_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">matched_layers_id</span><span class="p">),</span> <span class="n">layers_id_matched_file</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no layers algorithm check required&#39;</span><span class="p">)</span>
+            <span class="c1"># Ionosphere layers DONE</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">not_anomalous</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous - no feature profiles were matched - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
@@ -2043,7 +2275,19 @@
                         <span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fps checked count  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">features_profiles_checked</span><span class="p">)</span>
                     <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.fps_checked&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
-                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">not_anomalous</span><span class="p">)</span>
+                    <span class="c1"># @modified 20170306 - Feature #1960: ionosphere_layers</span>
+                    <span class="c1"># Corrected namespace</span>
+                    <span class="c1"># send_graphite_metric(skyline_app, send_metric_name, not_anomalous)</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">features_profiles_checked</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">layers_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">layers_checked</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers checked count  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">layers_checked</span><span class="p">)</span>
+                    <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.layers_checked&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">layers_checked</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
@@ -2067,6 +2311,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">features_profiles_checked</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">training_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
 
                 <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">learn_job</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2287,7 +2533,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -33,6 +33,20 @@ has been automated so that new metrics of this nature will be identified and
 processed via their derivative if a new namespace of this nature should to added
 without the requirement for each namespace pattern to be declared in the settings.
 
+Further metrics identified as derivative_metrics continue to be identified as
+such even if their metric changes from a strictly increasing monotonic nature,
+like gets reset to zero.  Skyline sets a Redis z.derivative_metric key at an
+expiry time of :mod:`settings.FULL_DURATION` to handle counter resets.
+However there are some edge case that will not become strictly increasing again
+until say a mysql.commands.create_table is run.  So on very slowly changing
+metrics a derivative metric may be analyzed as a non_derivative_metric until
+such a point as it reverts to a strictly increasing monotonic nature again.
+However seeing as it would just revert for a period back to how these types of
+metrics were handled in Skyline for years now, which were not wrong, the method
+was just not conducive to profiling and learning, its deemed a caveat, rather
+than a bug as if any metrics of this extreme nature can be handled via SKIP or
+using :mod:`settings.NON_DERIVATIVE_MONOTONIC_METRICS`
+
 Really why is this important?
 -----------------------------
 

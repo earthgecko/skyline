@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.layers &mdash; Skyline 1.1.3-beta documentation</title>
+  <title>ionosphere.layers &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.3-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -304,6 +304,8 @@
     <span class="n">es_layer</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">f1_layer</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">f2_layer</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># @added 20170616 - Feature #2048: D1 ionosphere layer</span>
+    <span class="n">d1_layer</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># @modified 20170307 - Feature #1960: ionosphere_layers</span>
     <span class="c1"># Use except on everything, remember how fast Skyline can iterate</span>
@@ -315,6 +317,13 @@
             <span class="k">if</span> <span class="n">layer</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
                 <span class="n">d_condition</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;condition&#39;</span><span class="p">]</span>
                 <span class="n">d_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;layer_boundary&#39;</span><span class="p">])</span>
+            <span class="c1"># @added 20170616 - Feature #2048: D1 ionosphere layer</span>
+            <span class="k">if</span> <span class="n">layer</span> <span class="o">==</span> <span class="s1">&#39;D1&#39;</span><span class="p">:</span>
+                <span class="n">d1_condition</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;condition&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">d1_condition</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+                    <span class="n">d1_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;layer_boundary&#39;</span><span class="p">])</span>
+                    <span class="n">d1_boundary_times</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;times_in_row&#39;</span><span class="p">]</span>
+                    <span class="n">d1_layer</span> <span class="o">=</span> <span class="n">layer_active</span>
             <span class="k">if</span> <span class="n">layer</span> <span class="o">==</span> <span class="s1">&#39;E&#39;</span><span class="p">:</span>
                 <span class="n">e_condition</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;condition&#39;</span><span class="p">]</span>
                 <span class="n">e_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;layer_boundary&#39;</span><span class="p">])</span>
@@ -502,6 +511,37 @@
             <span class="n">layers_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
+    <span class="c1"># @added 20170616 - Feature #2048: D1 ionosphere layer</span>
+    <span class="k">if</span> <span class="n">d1_layer</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">op_func</span> <span class="o">=</span> <span class="n">ops</span><span class="p">[</span><span class="n">d1_condition</span><span class="p">]</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="n">d1_boundary_times</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">understandable_message_str</span> <span class="o">=</span> <span class="s1">&#39;the last and latest value in the timeseries&#39;</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">understandable_message_str</span> <span class="o">=</span> <span class="s1">&#39;the 2nd last value in the timeseries&#39;</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">understandable_message_str</span> <span class="o">=</span> <span class="s1">&#39;the 3rd last value in the timeseries&#39;</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">understandable_message_str</span> <span class="o">=</span> <span class="s1">&#39;the </span><span class="si">%s</span><span class="s1">th last value in the timeseries&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">count</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">op_func_result</span> <span class="o">=</span> <span class="n">op_func</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">e_boundary_limit</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">op_func_result</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                        <span class="n">layers_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers :: </span><span class="si">%s</span><span class="s1"> was </span><span class="si">%s</span><span class="s1"> and breaches the D1 layer boundary of </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">understandable_message_str</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">d1_condition</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">d1_boundary_limit</span><span class="p">)))</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: layers :: invalid D1 layer op_func for layers_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">layers_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
     <span class="c1"># E layer</span>
     <span class="c1"># @modified 20170314 - Feature #1960: ionosphere_layers</span>
     <span class="c1"># Changed condition so the correct method to not &quot;unset&quot;</span>
@@ -650,7 +690,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.3-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.webapp &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>webapp.webapp &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -180,7 +180,7 @@
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
 <span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>
 <span class="kn">import</span> <span class="nn">time</span>
@@ -195,7 +195,7 @@
 <span class="c1"># @added 20170122 - Feature #1872: Ionosphere - features profile page by id only</span>
 <span class="c1"># Determine the features profile dir path for a fp_id</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">from</span> <span class="nn">pytz</span> <span class="k">import</span> <span class="n">timezone</span>
+<span class="c1"># from pytz import timezone</span>
 <span class="kn">import</span> <span class="nn">pytz</span>
 
 <span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="k">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
@@ -206,7 +206,11 @@
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">validate_settings</span> <span class="k">import</span> <span class="n">validate_settings_variables</span>
 <span class="kn">import</span> <span class="nn">skyline_version</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">get_graphite_metric</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">get_graphite_metric</span><span class="p">,</span>
+    <span class="c1"># @added 20170604 - Feature #2034: analyse_derivatives</span>
+    <span class="n">in_list</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">backend</span> <span class="k">import</span> <span class="n">panorama_request</span><span class="p">,</span> <span class="n">get_list</span>
 <span class="kn">from</span> <span class="nn">ionosphere_backend</span> <span class="k">import</span> <span class="p">(</span>
@@ -217,7 +221,21 @@
     <span class="n">ionosphere_get_metrics_dir</span><span class="p">,</span>
     <span class="n">features_profile_details</span><span class="p">,</span>
     <span class="c1"># @added 20170118 - Feature #1862: Ionosphere features profiles search page</span>
-    <span class="n">ionosphere_search</span><span class="p">)</span>
+    <span class="n">ionosphere_search</span><span class="p">,</span>
+    <span class="c1"># @added 20170305 - Feature #1960: ionosphere_layers</span>
+    <span class="n">create_ionosphere_layers</span><span class="p">,</span> <span class="n">feature_profile_layers_detail</span><span class="p">,</span>
+    <span class="n">feature_profile_layer_alogrithms</span><span class="p">,</span>
+    <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
+    <span class="c1"># To present the operator with the existing layers and algorithms for the metric</span>
+    <span class="n">metric_layers_alogrithms</span><span class="p">,</span>
+    <span class="c1"># @added 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
+    <span class="c1">#                   Task #2002: Review and correct incorrectly defined layers</span>
+    <span class="n">edit_ionosphere_layers</span><span class="p">,</span>
+    <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
+    <span class="n">validate_fp</span><span class="p">,</span>
+    <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
+    <span class="n">save_training_data_dir</span><span class="p">)</span>
+
 <span class="kn">from</span> <span class="nn">features_profile</span> <span class="k">import</span> <span class="n">feature_name_id</span><span class="p">,</span> <span class="n">calculate_features_profile</span>
 <span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_VERSION</span>
 
@@ -282,7 +300,7 @@
 
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">before_request</span>
-<span class="c1">#def setup_logging():</span>
+<span class="c1"># def setup_logging():</span>
 <span class="c1">#    if not app.debug:</span>
 <span class="c1">#        stream_handler = logging.StreamHandler()</span>
 <span class="c1">#        stream_handler.setLevel(logging.DEBUG)</span>
@@ -587,7 +605,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;until_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_request</span><span class="p">:</span>
-            <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Error: not all arguments where passed, missing &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">missing_arguments</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;Error: not all arguments where passed, missing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">missing_arguments</span><span class="p">)</span>
             <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error</span><span class="p">})</span>
             <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span>
         <span class="k">else</span><span class="p">:</span>
@@ -599,7 +617,7 @@
                 <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;object&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;Error: &quot;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
             <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error</span><span class="p">})</span>
             <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">500</span>
 
@@ -959,6 +977,12 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">request_args_len</span> <span class="o">=</span> <span class="mi">0</span>
 
+    <span class="k">if</span> <span class="n">request_args_len</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
     <span class="c1"># @added 20170220 - Feature #1862: Ionosphere features profiles search page</span>
     <span class="c1"># Ionosphere features profiles by generations</span>
     <span class="n">fp_search_req</span> <span class="o">=</span> <span class="kc">None</span>
@@ -975,6 +999,12 @@
                         <span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;until_timestamp&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;generation_greater_than&#39;</span><span class="p">,</span>
+                        <span class="c1"># @added 20170315 - Feature #1960: ionosphere_layers</span>
+                        <span class="s1">&#39;layers_id_greater_than&#39;</span><span class="p">,</span>
+                        <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
+                        <span class="s1">&#39;validated_equals&#39;</span><span class="p">,</span>
+                        <span class="c1"># @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than</span>
+                        <span class="s1">&#39;matched_greater_than&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;full_duration&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;enabled&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;tsfresh_version&#39;</span><span class="p">,</span>
@@ -995,7 +1025,7 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">REQUEST_ARGS</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">))</span>
                 <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
@@ -1088,10 +1118,27 @@
     <span class="c1"># Added fp_search parameter</span>
     <span class="c1"># @modified 20170122 - Feature #1872: Ionosphere - features profile page by id only</span>
     <span class="c1"># Added fp_id parameter</span>
+    <span class="c1"># @modified 20170305 - Feature #1960: ionosphere_layers</span>
+    <span class="c1"># Added layers arguments d_condition to fp_layer</span>
+    <span class="c1"># @modified 20160315 - Feature #1972: ionosphere_layers - use D layer boundary for upper limit</span>
+    <span class="c1"># Added d_boundary_times</span>
+    <span class="c1"># @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
+    <span class="c1"># Added layers_id and edit_fp_layers</span>
+    <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
     <span class="n">IONOSPHERE_REQUEST_ARGS</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_td&#39;</span><span class="p">,</span> <span class="s1">&#39;a_dated_list&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp_td&#39;</span><span class="p">,</span>
         <span class="s1">&#39;requested_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;fp_view&#39;</span><span class="p">,</span> <span class="s1">&#39;calc_features&#39;</span><span class="p">,</span> <span class="s1">&#39;add_fp&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;features_profiles&#39;</span><span class="p">,</span> <span class="s1">&#39;fp_search&#39;</span><span class="p">,</span> <span class="s1">&#39;learn&#39;</span><span class="p">,</span> <span class="s1">&#39;fp_id&#39;</span><span class="p">]</span>
+        <span class="s1">&#39;features_profiles&#39;</span><span class="p">,</span> <span class="s1">&#39;fp_search&#39;</span><span class="p">,</span> <span class="s1">&#39;learn&#39;</span><span class="p">,</span> <span class="s1">&#39;fp_id&#39;</span><span class="p">,</span> <span class="s1">&#39;d_condition&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;d_boundary_limit&#39;</span><span class="p">,</span> <span class="s1">&#39;d_boundary_times&#39;</span><span class="p">,</span> <span class="s1">&#39;e_condition&#39;</span><span class="p">,</span> <span class="s1">&#39;e_boundary_limit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;e_boundary_times&#39;</span><span class="p">,</span> <span class="s1">&#39;es_layer&#39;</span><span class="p">,</span> <span class="s1">&#39;es_day&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_layer&#39;</span><span class="p">,</span> <span class="s1">&#39;f1_from_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;f1_layer&#39;</span><span class="p">,</span> <span class="s1">&#39;f2_until_time&#39;</span><span class="p">,</span> <span class="s1">&#39;fp_layer&#39;</span><span class="p">,</span> <span class="s1">&#39;fp_layer_label&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;add_fp_layer&#39;</span><span class="p">,</span> <span class="s1">&#39;layers_id&#39;</span><span class="p">,</span> <span class="s1">&#39;edit_fp_layers&#39;</span><span class="p">,</span> <span class="s1">&#39;validate_fp&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;validated_equals&#39;</span><span class="p">,</span>
+        <span class="c1"># @added 20170616 - Feature #2048: D1 ionosphere layer</span>
+        <span class="s1">&#39;d1_condition&#39;</span><span class="p">,</span> <span class="s1">&#39;d1_boundary_limit&#39;</span><span class="p">,</span> <span class="s1">&#39;d1_boundary_times&#39;</span><span class="p">,</span>
+        <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
+        <span class="s1">&#39;save_training_data&#39;</span><span class="p">,</span> <span class="s1">&#39;saved_td_label&#39;</span><span class="p">,</span> <span class="s1">&#39;saved_training_data&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
 
     <span class="n">determine_metric</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">dated_list</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1108,6 +1155,16 @@
     <span class="c1"># use_full_duration_days</span>
     <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">fp_fd_days</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</span>
+
+    <span class="c1"># @added 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
+    <span class="c1">#                   Task #2002: Review and correct incorrectly defined layers</span>
+    <span class="c1"># Added the argument edit_fp_layers</span>
+    <span class="n">edit_fp_layers</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">layers_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
+    <span class="n">save_training_data</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">saved_training_data</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">saved_td_label</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">request_args_present</span><span class="p">:</span>
@@ -1175,8 +1232,26 @@
                         <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
                             <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: no timestamp feature profiles data dir found for feature profile id - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - go on... nothing here.&#39;</span><span class="p">})</span>
                         <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">400</span>
+
                     <span class="n">redirect_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?fp_view=true&amp;timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirect_url</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="mi">302</span><span class="p">)</span>
+                    <span class="c1"># @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
+                    <span class="c1">#                      Task #2002: Review and correct incorrectly defined layers</span>
+                    <span class="c1"># Build the query string from the previous parameters</span>
+                    <span class="k">if</span> <span class="s1">&#39;edit_fp_layers&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                        <span class="n">redirect_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_timestamp</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                            <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span>
+                                <span class="k">continue</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                            <span class="n">new_redirect_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">redirect_url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                            <span class="n">redirect_url</span> <span class="o">=</span> <span class="n">new_redirect_url</span>
+                    <span class="k">if</span> <span class="s1">&#39;edit_fp_layers&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not returning redirect as edit_fp_layers request&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;returned redirect on original request - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redirect_url</span><span class="p">))</span>
+                        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">redirect_url</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="mi">302</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
@@ -1194,6 +1269,22 @@
                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
                         <span class="n">create_feature_profile</span> <span class="o">=</span> <span class="kc">True</span>
 
+                <span class="c1"># @added 20170317 - Feature #1960: ionosphere_layers - allow for floats</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;d_boundary_limit&#39;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">d_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1"> is not numeric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+                        <span class="k">return</span> <span class="s1">&#39;Bad Request</span><span class="se">\n\n</span><span class="s1">invalid request argument - </span><span class="si">%s</span><span class="s1"> is not numeric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)),</span> <span class="mi">400</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument OK - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">d_boundary_limit</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;e_boundary_limit&#39;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">e_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1"> is not numeric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+                        <span class="k">return</span> <span class="s1">&#39;Bad Request</span><span class="se">\n\n</span><span class="s1">invalid request argument - </span><span class="si">%s</span><span class="s1"> is not numeric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)),</span> <span class="mi">400</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument OK - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e_boundary_limit</span><span class="p">)))</span>
+
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;fp_view&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
                         <span class="n">fp_view</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1209,9 +1300,33 @@
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;learn&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
                         <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># @added 20170305 - Feature #1960: ionosphere_layers</span>
+                    <span class="c1"># Being passed through as a boolean from the Create features</span>
+                    <span class="c1"># profile arguments and I cannot be arsed to track it down</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+                        <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;features_profiles&#39;</span><span class="p">:</span>
                     <span class="n">fp_profiles</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+                <span class="c1"># @added 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
+                <span class="c1">#                   Task #2002: Review and correct incorrectly defined layers</span>
+                <span class="c1"># Added layers and edit_fp_layers</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;layers_id&#39;</span><span class="p">:</span>
+                    <span class="n">test_layer_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">layers_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">test_layer_id</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bad request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1"> not numeric&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+                        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                            <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: not a numeric id for the layers_id argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - please pass a proper id&#39;</span><span class="p">})</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;edit_fp_layers&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                        <span class="n">edit_fp_layers</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+                        <span class="n">edit_fp_layers</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">edit_fp_layers</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;edit_fp_layers is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">edit_fp_layers</span><span class="p">)))</span>
 
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;a_dated_list&#39;</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
@@ -1239,6 +1354,20 @@
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_rt_timestamp</span><span class="p">:</span>
                         <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">400</span>
 
+                <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;save_training_data&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                        <span class="n">save_training_data</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;saved_td_label&#39;</span><span class="p">:</span>
+                    <span class="n">saved_td_label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;saved_training_data&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                        <span class="n">saved_training_data</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">check_for_purged</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">saved_training_data</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_view</span><span class="p">:</span>
+                        <span class="n">check_for_purged</span> <span class="o">=</span> <span class="kc">True</span>
+
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;timestamp&#39;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;timestamp_td&#39;</span><span class="p">:</span>
                     <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
@@ -1258,7 +1387,8 @@
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_timestamp</span><span class="p">:</span>
                         <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">400</span>
 
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_view</span><span class="p">:</span>
+                    <span class="c1"># if not fp_view:</span>
+                    <span class="k">if</span> <span class="n">check_for_purged</span><span class="p">:</span>
                         <span class="n">ionosphere_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">ionosphere_data_dir</span><span class="p">):</span>
                             <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1321,6 +1451,12 @@
                             <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span>
                             <span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">)</span>
 
+                        <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
+                        <span class="k">if</span> <span class="n">saved_training_data</span><span class="p">:</span>
+                            <span class="n">ionosphere_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_saved/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span>
+                                <span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">)</span>
+
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">ionosphere_data_dir</span><span class="p">):</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                                 <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1"> no timestamp metric training data dir found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
@@ -1354,6 +1490,11 @@
         <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;features_profiles&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;training_data&#39;</span>
+
+    <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
+    <span class="k">if</span> <span class="n">saved_training_data</span><span class="p">:</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;saved_training_data&#39;</span>
+
     <span class="n">fp_view_on</span> <span class="o">=</span> <span class="n">fp_view</span>
 
     <span class="n">do_first</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1394,8 +1535,8 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: fp_search was True&#39;</span><span class="p">)</span>
         <span class="n">fp_search_param</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">listed_by</span> <span class="o">=</span> <span class="s1">&#39;search&#39;</span>
-        <span class="n">get_options</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">&#39;full_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="s1">&#39;tsfresh_version&#39;</span><span class="p">,</span> <span class="s1">&#39;generation&#39;</span><span class="p">]</span>
+        <span class="c1"># get_options = [</span>
+        <span class="c1">#     &#39;full_duration&#39;, &#39;enabled&#39;, &#39;tsfresh_version&#39;, &#39;generation&#39;]</span>
         <span class="n">fd_list</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># @modified 20170221 - Feature #1862: Ionosphere features profiles search page</span>
@@ -1457,14 +1598,67 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># @modified 20170104 - Feature #1842: Ionosphere - Graphite now graphs</span>
             <span class="c1"># Added the full_duration_in_hours and changed graph color from blue to orange</span>
-<span class="c1">#full_duration_in_hours</span>
-<span class="c1">#GRAPH_URL = GRAPHITE_PROTOCOL + &#39;://&#39; + GRAPHITE_HOST + &#39;:&#39; + GRAPHITE_PORT + &#39;/render/?width=1400&amp;from=-&#39; + TARGET_HOURS + &#39;hour&amp;target=&#39;</span>
-<span class="c1"># A regex is required to change the TARGET_HOURS, no? extend do not modify?</span>
-<span class="c1"># Not certain will review after Dude morning excersion</span>
+            <span class="c1"># full_duration_in_hours</span>
+            <span class="c1"># GRAPH_URL = GRAPHITE_PROTOCOL + &#39;://&#39; + GRAPHITE_HOST + &#39;:&#39; + GRAPHITE_PORT + &#39;/render/?width=1400&amp;from=-&#39; + TARGET_HOURS + &#39;hour&amp;target=&#39;</span>
+            <span class="c1"># A regex is required to change the TARGET_HOURS, no? extend do not modify?</span>
+            <span class="c1"># Not certain will review after Dude morning excersion</span>
             <span class="n">graph_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s</span><span class="s1">&amp;colorList=blue&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">graph_url</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20170604 - Feature #2034: analyse_derivatives</span>
+        <span class="c1"># Added nonNegativeDerivative to strictly</span>
+        <span class="c1"># increasing monotonically metrics in graph_url</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_metrics</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+                <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">graph_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s</span><span class="s1">&amp;colorList=blue&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">graph_url</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
+        <span class="c1">#                   Task #2002: Review and correct incorrectly defined layers</span>
+        <span class="n">layers_updated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s1">&#39;edit_fp_layers&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">edit_fp_layers_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;edit_fp_layers&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">edit_fp_layers_arg</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="n">edit_fp_layers</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;editing layers id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not editing layers id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">edit_fp_layers</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;editing layers id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">layers_updated</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">edit_ionosphere_layers</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated layers id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;failed to update layer calling edit_ionosphere_layers&#39;</span>
+                <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">layers_updated</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;failed to update layer&#39;</span>
+                <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not editing layers&#39;</span><span class="p">)</span>
 
         <span class="n">features</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">f_calc</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
@@ -1524,7 +1718,35 @@
                     <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="s1">&#39;no traceback available&#39;</span><span class="p">)</span>
 
         <span class="n">fp_details</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170305  - Feature #1960: ionosphere_layers</span>
+        <span class="n">l_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">l_details</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">l_details_object</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">la_details</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
+        <span class="n">validated_fp_success</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">if</span> <span class="n">fp_view</span><span class="p">:</span>
+
+            <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
+            <span class="n">validate</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="s1">&#39;validate_fp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">validate_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;validate_fp&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">validate_arg</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                    <span class="n">validate</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validate - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">validate</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validating - fp_ip </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">validated_fp_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">validate_fp</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validated fp_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;failed to validate features profile&#39;</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># @modified 20170114 -  Feature #1854: Ionosphere learn - generations</span>
                 <span class="c1"># Return the fp_details_object so that webapp can pass the parent_id and</span>
@@ -1541,13 +1763,79 @@
                 <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: features_profile_details failed&#39;</span>
                 <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
 
+            <span class="c1"># @added 20170305  - Feature #1960: ionosphere_layers</span>
+            <span class="n">fp_layers_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fp_layers_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;layers_id&#39;</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">fp_layers_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">layer_details</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">layer_details_success</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">fp_layers_id</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">l_details</span><span class="p">,</span> <span class="n">layer_details_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">,</span> <span class="n">l_details_object</span> <span class="o">=</span> <span class="n">feature_profile_layers_detail</span><span class="p">(</span><span class="n">fp_layers_id</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;failed to get features profile layers details for id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_id</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">la_details</span><span class="p">,</span> <span class="n">layer_algorithms_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">,</span> <span class="n">la_details_object</span> <span class="o">=</span> <span class="n">feature_profile_layer_alogrithms</span><span class="p">(</span><span class="n">fp_layers_id</span><span class="p">)</span>
+                    <span class="n">l_id</span> <span class="o">=</span> <span class="n">fp_layers_id</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;failed to get features profile layer algorithm details for id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_id</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
         <span class="n">valid_learning_duration</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170308  - Feature #1960: ionosphere_layers - glm_images to m_app_context</span>
+        <span class="n">glm_images</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">l_id_matched</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">m_app_context</span> <span class="o">=</span> <span class="s1">&#39;Analyzer&#39;</span>
+        <span class="c1"># @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json</span>
+        <span class="n">i_ts_json</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sample_ts_json</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sample_i_ts_json</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers</span>
+        <span class="c1">#                   Feature #1960: ionosphere_layers</span>
+        <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">f_id_matched</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">fp_details_list</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">f_id_created</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">fp_generation_created</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs</span>
             <span class="c1"># Added graphite_now_images gimages</span>
             <span class="c1"># @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs</span>
             <span class="c1"># Added graphite_matched_images gmimages</span>
-            <span class="n">mpaths</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="n">hdate</span><span class="p">,</span> <span class="n">m_vars</span><span class="p">,</span> <span class="n">ts_json</span><span class="p">,</span> <span class="n">data_to_process</span><span class="p">,</span> <span class="n">p_id</span><span class="p">,</span> <span class="n">gimages</span><span class="p">,</span> <span class="n">gmimages</span><span class="p">,</span> <span class="n">times_matched</span> <span class="o">=</span> <span class="n">ionosphere_metric_data</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Show the latest matched layers graphs as well added glm_images - graphite_layers_matched_images</span>
+            <span class="c1"># @modified 20170309 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Also return the Analyzer FULL_DURATION timeseries if available in a Mirage</span>
+            <span class="c1"># based features profile added i_ts_json</span>
+            <span class="c1"># @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers</span>
+            <span class="c1">#                   Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Return the anomalous_timeseries as an array to sample and fp_id_matched</span>
+            <span class="c1"># @added 20170401 - Task #1988: Review - Ionosphere layers - added fp_id_created</span>
+            <span class="n">mpaths</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="n">hdate</span><span class="p">,</span> <span class="n">m_vars</span><span class="p">,</span> <span class="n">ts_json</span><span class="p">,</span> <span class="n">data_to_process</span><span class="p">,</span> <span class="n">p_id</span><span class="p">,</span> <span class="n">gimages</span><span class="p">,</span> <span class="n">gmimages</span><span class="p">,</span> <span class="n">times_matched</span><span class="p">,</span> <span class="n">glm_images</span><span class="p">,</span> <span class="n">l_id_matched</span><span class="p">,</span> <span class="n">ts_fd</span><span class="p">,</span> <span class="n">i_ts_json</span><span class="p">,</span> <span class="n">anomalous_timeseries</span><span class="p">,</span> <span class="n">f_id_matched</span><span class="p">,</span> <span class="n">fp_details_list</span> <span class="o">=</span> <span class="n">ionosphere_metric_data</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json</span>
+            <span class="c1"># Show the last 30</span>
+            <span class="k">if</span> <span class="n">ts_json</span><span class="p">:</span>
+                <span class="n">sample_ts_json</span> <span class="o">=</span> <span class="n">ts_json</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]</span>
+            <span class="c1"># @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers</span>
+            <span class="c1">#                      Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Return the anomalous_timeseries as an array to sample</span>
+            <span class="c1"># if i_ts_json:</span>
+            <span class="c1">#     sample_i_ts_json = i_ts_json[-30:]</span>
+            <span class="k">if</span> <span class="n">anomalous_timeseries</span><span class="p">:</span>
+                <span class="n">sample_i_ts_json</span> <span class="o">=</span> <span class="n">anomalous_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]</span>
+
+            <span class="k">if</span> <span class="n">fp_details_list</span><span class="p">:</span>
+                <span class="n">f_id_created</span> <span class="o">=</span> <span class="n">fp_details_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">fp_generation_created</span> <span class="o">=</span> <span class="n">fp_details_list</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
 
             <span class="c1"># @added 20170120 -  Feature #1854: Ionosphere learn - generations</span>
             <span class="c1"># Added fp_learn parameter to allow the user to not learn the</span>
@@ -1567,6 +1855,8 @@
                 <span class="n">m_full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m_full_duration</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">m_full_duration</span> <span class="o">!=</span> <span class="n">full_duration</span><span class="p">:</span>
                     <span class="n">second_order_resolution_hours</span> <span class="o">=</span> <span class="n">m_full_duration_in_hours</span>
+                    <span class="c1"># @added 20170305  - Feature #1960: ionosphere_layers - m_app_context</span>
+                    <span class="n">m_app_context</span> <span class="o">=</span> <span class="s1">&#39;Mirage&#39;</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">m_full_duration</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">m_full_duration_in_hours</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1588,12 +1878,17 @@
             <span class="c1"># Added parent_id and generation</span>
             <span class="n">par_id</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">gen</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
+            <span class="n">fp_validated</span> <span class="o">=</span> <span class="mi">0</span>
+
             <span class="c1"># Determine the parent_id and generation as they were added to the</span>
             <span class="c1"># fp_details_object</span>
             <span class="k">if</span> <span class="n">fp_details</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">par_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;parent_id&#39;</span><span class="p">])</span>
                     <span class="n">gen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">])</span>
+                    <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
+                    <span class="n">fp_validated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">])</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object&#39;</span>
@@ -1631,6 +1926,104 @@
                 <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_metrics</span><span class="p">:</span>
                     <span class="n">iono_metric</span> <span class="o">=</span> <span class="kc">True</span>
 
+            <span class="c1"># @added 20170303 - Feature #1960: ionosphere_layers</span>
+            <span class="n">vconds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;==&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">]</span>
+            <span class="n">condition_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;==&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="s1">&#39;not in&#39;</span><span class="p">]</span>
+            <span class="n">crit_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span><span class="p">,</span> <span class="s1">&#39;from_time&#39;</span><span class="p">,</span> <span class="s1">&#39;until_time&#39;</span><span class="p">]</span>
+
+            <span class="n">fp_layers</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;fp_layer&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">fp_layer_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;fp_layer&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layer_arg</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                    <span class="n">fp_layers</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">add_fp_layers</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="s1">&#39;add_fp_layer&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">add_fp_layer_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;add_fp_layer&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">add_fp_layer_arg</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                    <span class="n">add_fp_layers</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">new_l_algos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">new_l_algos_ids</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">add_fp_layers</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;learn&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;learn&#39;</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                        <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+                        <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="s1">&#39;fp_id&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                    <span class="n">fp_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;fp_id&#39;</span><span class="p">))</span>
+                <span class="n">l_id</span><span class="p">,</span> <span class="n">layer_successful</span><span class="p">,</span> <span class="n">new_l_algos</span><span class="p">,</span> <span class="n">new_l_algos_ids</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">create_ionosphere_layers</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">layer_successful</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># To present the operator with the existing layers and algorithms for the metric</span>
+            <span class="c1"># The metric layers algoritms are required to present the user with</span>
+            <span class="c1"># if the add_fp=true argument is passed, which if so results in the</span>
+            <span class="c1"># local variable of create_feature_profile being set and in the</span>
+            <span class="c1"># fp_view</span>
+            <span class="n">metric_layers_details</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">metric_layers_algorithm_details</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers</span>
+            <span class="c1"># Set to True so they are always displayed</span>
+            <span class="c1"># get_metric_existing_layers = False</span>
+            <span class="n">get_metric_existing_layers</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">metric_lc</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">metric_lmc</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">create_feature_profile</span><span class="p">:</span>
+                <span class="n">get_metric_existing_layers</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">fp_view</span> <span class="ow">and</span> <span class="n">fp_details</span><span class="p">:</span>
+                <span class="n">get_metric_existing_layers</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="s1">&#39;add_fp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">get_layers_add_fp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;add_fp&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">get_layers_add_fp</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                    <span class="n">get_metric_existing_layers</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">get_metric_existing_layers</span><span class="p">:</span>
+                <span class="n">metric_layers_details</span><span class="p">,</span> <span class="n">metric_layers_algorithm_details</span><span class="p">,</span> <span class="n">metric_lc</span><span class="p">,</span> <span class="n">metric_lmc</span><span class="p">,</span> <span class="n">mlad_successful</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metric_layers_alogrithms</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">mlad_successful</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170616 - Feature #2048: D1 ionosphere layer</span>
+            <span class="n">fp_layer_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">metric_layers_algorithm_details</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i_layer_algorithm</span> <span class="ow">in</span> <span class="n">metric_layers_algorithm_details</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">i_layer_algorithm</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">l_id</span><span class="p">):</span>
+                            <span class="n">fp_layer_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_layer_algorithm</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;warning :: Webapp could not determine layer_algorithm in metric_layers_algorithm_details&#39;</span><span class="p">)</span>
+            <span class="n">fp_current_layer</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">metric_layers_details</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i_layer</span> <span class="ow">in</span> <span class="n">metric_layers_details</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">i_layer</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">l_id</span><span class="p">):</span>
+                            <span class="n">fp_current_layer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_layer</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;warning :: Webapp could not determine layer in metric_layers_details&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
+            <span class="n">training_data_saved</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">saved_td_details</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">save_training_data</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;saving training data&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">request_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+                    <span class="n">saved_hdate</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">request_time</span><span class="p">))</span>
+                    <span class="n">training_data_saved</span><span class="p">,</span> <span class="n">saved_td_details</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">save_training_data_dir</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">saved_td_label</span><span class="p">,</span> <span class="n">saved_hdate</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;saved training data&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Webapp could not save_training_data_dir&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">saved_td_requested</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">saved_training_data</span><span class="p">:</span>
+                <span class="n">saved_td_requested</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">training_data_saved</span><span class="p">,</span> <span class="n">saved_td_details</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">save_training_data_dir</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;got saved training data details&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Webapp could not get saved training_data details&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
                 <span class="s1">&#39;ionosphere.html&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">requested_timestamp</span><span class="p">,</span>
                 <span class="n">for_metric</span><span class="o">=</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_vars</span><span class="o">=</span><span class="n">m_vars</span><span class="p">,</span> <span class="n">metric_files</span><span class="o">=</span><span class="n">mpaths</span><span class="p">,</span>
@@ -1649,7 +2042,33 @@
                 <span class="n">graphite_matched_images</span><span class="o">=</span><span class="n">gmimages</span><span class="p">,</span> <span class="n">matched_count</span><span class="o">=</span><span class="n">times_matched</span><span class="p">,</span>
                 <span class="n">parent_id</span><span class="o">=</span><span class="n">par_id</span><span class="p">,</span> <span class="n">generation</span><span class="o">=</span><span class="n">gen</span><span class="p">,</span> <span class="n">learn</span><span class="o">=</span><span class="n">fp_learn</span><span class="p">,</span>
                 <span class="n">use_full_duration_days</span><span class="o">=</span><span class="n">fp_fd_days</span><span class="p">,</span> <span class="n">countdown</span><span class="o">=</span><span class="n">countdown_to</span><span class="p">,</span>
-                <span class="n">ionosphere_metric</span><span class="o">=</span><span class="n">iono_metric</span><span class="p">,</span>
+                <span class="n">ionosphere_metric</span><span class="o">=</span><span class="n">iono_metric</span><span class="p">,</span> <span class="n">value_condition_list</span><span class="o">=</span><span class="n">vconds</span><span class="p">,</span>
+                <span class="n">criteria_types</span><span class="o">=</span><span class="n">crit_types</span><span class="p">,</span> <span class="n">fp_layer</span><span class="o">=</span><span class="n">fp_layers</span><span class="p">,</span>
+                <span class="n">layer_id</span><span class="o">=</span><span class="n">l_id</span><span class="p">,</span> <span class="n">layers_algorithms</span><span class="o">=</span><span class="n">new_l_algos</span><span class="p">,</span>
+                <span class="n">layers_algorithms_ids</span><span class="o">=</span><span class="n">new_l_algos_ids</span><span class="p">,</span>
+                <span class="n">layer_details</span><span class="o">=</span><span class="n">l_details</span><span class="p">,</span>
+                <span class="n">layer_details_object</span><span class="o">=</span><span class="n">l_details_object</span><span class="p">,</span>
+                <span class="n">layer_algorithms_details</span><span class="o">=</span><span class="n">la_details</span><span class="p">,</span>
+                <span class="n">existing_layers</span><span class="o">=</span><span class="n">metric_layers_details</span><span class="p">,</span>
+                <span class="n">existing_algorithms</span><span class="o">=</span><span class="n">metric_layers_algorithm_details</span><span class="p">,</span>
+                <span class="n">metric_layers_count</span><span class="o">=</span><span class="n">metric_lc</span><span class="p">,</span>
+                <span class="n">metric_layers_matched_count</span><span class="o">=</span><span class="n">metric_lmc</span><span class="p">,</span>
+                <span class="n">graphite_layers_matched_images</span><span class="o">=</span><span class="n">glm_images</span><span class="p">,</span>
+                <span class="n">layers_id_matched</span><span class="o">=</span><span class="n">l_id_matched</span><span class="p">,</span> <span class="n">ts_full_duration</span><span class="o">=</span><span class="n">ts_fd</span><span class="p">,</span>
+                <span class="n">app_context</span><span class="o">=</span><span class="n">m_app_context</span><span class="p">,</span> <span class="n">ionosphere_json</span><span class="o">=</span><span class="n">i_ts_json</span><span class="p">,</span>
+                <span class="n">baseline_fd</span><span class="o">=</span><span class="n">full_duration</span><span class="p">,</span> <span class="n">last_ts_json</span><span class="o">=</span><span class="n">sample_ts_json</span><span class="p">,</span>
+                <span class="n">last_i_ts_json</span><span class="o">=</span><span class="n">sample_i_ts_json</span><span class="p">,</span> <span class="n">layers_updated</span><span class="o">=</span><span class="n">layers_updated</span><span class="p">,</span>
+                <span class="n">fp_id_matched</span><span class="o">=</span><span class="n">f_id_matched</span><span class="p">,</span> <span class="n">fp_id_created</span><span class="o">=</span><span class="n">f_id_created</span><span class="p">,</span>
+                <span class="n">fp_generation</span><span class="o">=</span><span class="n">fp_generation_created</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="n">fp_validated</span><span class="p">,</span>
+                <span class="n">validated_fp_successful</span><span class="o">=</span><span class="n">validated_fp_success</span><span class="p">,</span>
+                <span class="n">profile_layer_algorithms</span><span class="o">=</span><span class="n">fp_layer_algorithms</span><span class="p">,</span>
+                <span class="n">current_layer</span><span class="o">=</span><span class="n">fp_current_layer</span><span class="p">,</span>
+                <span class="n">save_metric_td</span><span class="o">=</span><span class="n">save_training_data</span><span class="p">,</span>
+                <span class="n">saved_metric_td_label</span><span class="o">=</span><span class="n">saved_td_label</span><span class="p">,</span>
+                <span class="n">saved_metric_td</span><span class="o">=</span><span class="n">saved_training_data</span><span class="p">,</span>
+                <span class="n">metric_training_data_saved</span><span class="o">=</span><span class="n">training_data_saved</span><span class="p">,</span>
+                <span class="n">saved_metric_td_requested</span><span class="o">=</span><span class="n">saved_td_requested</span><span class="p">,</span>
+                <span class="n">saved_metric_td_details</span><span class="o">=</span><span class="n">saved_td_details</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span>
                 <span class="n">print_debug</span><span class="o">=</span><span class="n">debug_on</span><span class="p">),</span> <span class="mi">200</span>
         <span class="k">except</span><span class="p">:</span>
@@ -2016,13 +2435,13 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
                 <span class="k">pass</span>
 
-        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="c1">#        log_wait_for = now + 5</span>
         <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
 
@@ -2180,7 +2599,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1625,7 +1625,7 @@ class Ionosphere(Thread):
                     # Determine generation of the matched fp not the last in the
                     # list
                     try:
-                        stmt = 'SELECT generation FROM ionosphere WHERE fp_id=%s' % str(fp_id)
+                        stmt = 'SELECT generation FROM ionosphere WHERE id=%s' % str(fp_id)
                         connection = engine.connect()
                         for row in engine.execute(stmt):
                             matched_fp_generation = int(row['generation'])

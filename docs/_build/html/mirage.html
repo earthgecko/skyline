@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mirage &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>Mirage &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="index.html"/>
         <link rel="next" title="Boundary" href="boundary.html"/>
         <link rel="prev" title="Analyzer Optimizations" href="analyzer-optimizations.html"/> 
 
@@ -403,9 +403,14 @@ variables to the Mirage check file.</li>
 <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>.</li>
 <li>Mirage then analyses the retrieved metric timeseries against the configured
 <a class="reference internal" href="skyline.html#settings.MIRAGE_ALGORITHMS" title="settings.MIRAGE_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_ALGORITHMS</span></code></a>.</li>
+<li>If a metric is an Ionosphere enabled metric, then Mirage does not alert,
+but hands the metric off to Ionosphere by adding an Ionosphere check
+file.</li>
 <li>If the metric is anomalous over <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> then alerts
 via the configured alerters for the matching metric <code class="xref py py-mod docutils literal"><span class="pre">settings.ALERT</span></code>
 tuple and sets the metric alert key for <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds.</li>
+<li>Mirage will alert for a Mirage metric that has been returned from Ionosphere
+as anomalous having not matched any known features profile or layers.</li>
 </ul>
 </div>
 </div>
@@ -451,7 +456,7 @@ tuple and sets the metric alert key for <code class="docutils literal"><span cla
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

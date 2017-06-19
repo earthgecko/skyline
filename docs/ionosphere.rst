@@ -258,8 +258,12 @@ The features role
   If the two values are less than
   :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN`
 
-    - Ionosphere will deem the timeseries as not anomalous and remove the
-      related training data.
+    - Ionosphere will deem the timeseries as not anomalous and update the
+      related training data as MATCHED.
+    - If Ionosphere does **not** find a match, it analyses the timeseries
+      against any defined layers, if there are any and if a match is found
+      Ionosphere will deem the timeseries as not anomalous and update the
+      related training data as MATCHED.
     - If Ionosphere does **not** find a match, it tells the originating app (
       Analyzer or Mirage) to send out the anomaly alert with a
       ``[Skyline alert] - Ionosphere ALERT`` subject field.
@@ -291,7 +295,8 @@ When an anomaly alert is sent out via email, a link to the Ionosphere training
 data is included in the alert.  This link opens the Ionosphere UI with the all
 training data for the specific anomaly where the user can submit the metric
 timeseries as not anomalous and generate have Skyline generate a features
-profile with |tsfresh|.
+profile with |tsfresh| (and optionally some additional layers, which are covered
+further down on this page).
 
 features profiles
 -----------------
@@ -400,36 +405,124 @@ fine tuning and making better or polishing a turd or diamante.
 Layers
 ^^^^^^
 
-Ionosphere layers allow the operator to train Skyline a not anomalous timeseries
+Ionosphere allows the operator to train Skyline a not anomalous timeseries
 in terms of generating a features profile to be compared to anomalies in the
 future, however Ionosphere also allows the operator to define "layers" rules at
 the time of feature profile creation.
 
-Layers rules allow us to train Skyline on boundaries as well.  For instance, say
-occasionally we can expect to see a spike of 404s status codes on a web app,
-bots or your own scanning, with a layers we can tell Ionosphere that a timeseries
-was not anomalous if the datapoint is less than 120 and a value in the last
-3 datapoints is less than 50.  This allows for a somewhat moving window and an
-alert that would be delayed by say 3 minutes, but it is a signal, rather than
-noise. Let us describe that layer as gt_120-5_in_3
+Layers rules allow us to train Skyline on boundaries as well, on the fly via the
+UI at the time of features profile creation, which puts all the work for the
+operator in the one place.  Think of them as metric AND feature profile specific
+algorithms.  A layer should only ever be used to describe the features profile
+:mod:`settings.FULL_DURATION` timeseries.  The operator should limit their
+layers values to within acceptable bounds of the range within the features
+profile.  The operator should not try and use a single layer to try and describe
+the entire range they "think" the metric can go to, a layer is meant to match with
+a features profile, not a metric.  If this methodology is followed, layers and
+features profiles "retire" around the same time as metrics change over time,
+an old features profile that no longer describes the current active motion state
+well no longer ever be matched anymore, neither should its layers.  One of the
+things some way down the road on the Ionosphere roadmap is
+Feature #1888: Ionosphere learn - evolutionary maturity forget
+
+Layers were added to reduce the number of features profiles one has to train
+Skyline on.  They were introduced for humans and to make it easier and more
+useful.  However they come at a cost.  Every layer created reduces Ionosphere's
+opportunities to be trained and learn.  It is a compromise to save on the about
+of monkeys you have to have or need to be to train Skyline properly.  Unfortunately
+someone has to be the monkey, but for every features profile/layer you create,
+you create a Skyline monkey to watch that.  A monkey with fairly simple
+instructions.
+
+A layer consist of a series of simple algorithms that are run against a
+timeseries after Analyzer/Mirage and Ionosphere features comparisons.  The
+layers are defined as:
+
+::
+
+  D layer [required] if last_datapoint [<, >, ==, !=, <=, >=] x
+  DISCARD - not_anomalous False
+
+The D layer can be used as the upper or lower limit, e.g if value > x (probably
+or certainly anomalous). Or this can be used if this metric operates in the
+negative range or if you want it too not discard on 0 as you want to match 0,
+set it to -1 or > 0.1 or > 1. On a high constant rate metric the D layer can be
+used to discard if < x so the the layer does not silence a drop.  This layer can
+be complimented by the optional D1 layer below. Remember a match here disables
+any of the other below layers being checked
+
+::
+
+  D1 layer [optional] if datapoint [<, >, ==, !=, <=, >=] x in the last y values in the timeseries
+  DISCARD - not_anomalous False
+
+The D1 layer can be used as an upper or lower limit, so the D layer does not
+silence a drop.  Remember a match here disables any of the other below layer
+conditions from being checked.
+
+::
+
+  E layer [required] if datapoint [<, >, ==, !=, <=, >=] x in the last y values in the timeseries
+  not anomalous
+
+The Es, F1 and F2 layers shall not be discussed as NOT IMPLEMENTED YET.
+
+An example layer
+
+For instance, say occasionally we can expect to see a spike of 404s status codes
+on a web app due to bots or your own scanning, with layers we can tell Ionosphere
+that a timeseries was not anomalous if the datapoint is less than 120 and has
+values in the last 3 datapoints is less than 50.  This allows for a somewhat
+moving window and an alert that would be delayed by say 3 minutes, but it is a
+signal, rather than noise. Let us describe that layer as gt_120-5_in_3
 
 To demonstrate how the above layer would work, an example of 404 counts per minute:
 
-13:10:11 2
-13:11:11 0
-13:12:11 8
-13:13:11 60
-13:14:11 0
+::
+
+  D layer  :: if value > 120                          :: [do not check]  ::  ['ACTIVE']
+  D1 layer :: if value none none in last none values  :: [do not check]  ::   ['NOT ACTIVE - D1 layer not created']
+  E layer  :: if value < 5 in last 3 values           :: [not_anomalous, if active Es, F1 and F2 layers match]  ::  ['ACTIVE']
+  Es layer :: if day None None                        :: [not_anomalous, if active F1 and F2 layers match]  ::   ['NOT ACTIVE - Es layer not created']
+  F1 layer :: if from_time > None                     :: [not_anomalous, if active F2 layer matchs]  ::   ['NOT ACTIVE - F1 layer not created']
+  F2 layer :: if until_time < None                    :: [not_anomalous]  ::   ['NOT ACTIVE - F2 layer not created']
+
+Apply against
+
+::
+
+    13:10:11 2
+    13:11:11 0
+    13:12:11 8
+    13:13:11 60
+    13:14:11 0
 
 With the above described layer, this would be classified as not anomalous,
 however if the data was:
 
-13:10:11 2
-13:11:11 0
-13:12:11 800
+::
+
+    13:10:11 2
+    13:11:11 0
+    13:12:11 800
 
 The layer would not ever report the timeseries as not anomalous as the 800
 exceeds the gt_120, so the rest of the layer definition would not be evaluated.
+
+.. warning:: Layers may seem simple, but the layers must be thought about
+  carefully as it is possible for a metric to have multiple layers created on
+  multiple features profiles, that could silence any anomalies on the metric.
+  Specifically D layer, however layer D1 was added to remove this possibility,
+  if the layers are properly implemented.  The D1 layer is optional (and is
+  reverse capable with with any existing layers that were created prior to
+  1.1.3-beta) as is there to let the operator set upper and lower bounds where
+  necessary.
+
+Be careful that you do not create another layer later that silences bad, e.g.
+dropped to 0, the above example is not a good example of the as we want and
+expect 0 on the 404 found generally, but if it was status code 200, we would not
+want any layers silencing a drop to 0, please try and use layer D1 wisely were
+required.
 
 No machine learning
 ^^^^^^^^^^^^^^^^^^^

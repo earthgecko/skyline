@@ -23,7 +23,7 @@ except ImportError:
     import urllib.parse
 import os
 # import errno
-import imp
+# import imp
 from os import listdir
 import datetime
 

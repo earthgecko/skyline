@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_alerters &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>mirage.mirage_alerters &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -215,7 +215,10 @@
 <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">settings</span>
     <span class="kn">import</span> <span class="nn">skyline_version</span>
-    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">mkdir_p</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+        <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
+        <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+        <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -319,21 +322,53 @@
     <span class="c1"># Ionosphere alerts</span>
     <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="c1"># @modified 20170603 - Feature #2034: analyse_derivatives</span>
+    <span class="c1"># Added deriative functions to convert the values of metrics strictly</span>
+    <span class="c1"># increasing monotonically to their deriative products in alert graphs and</span>
+    <span class="c1"># specify it in the graph_title</span>
+    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - unencoded_graph_title: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">unencoded_graph_title</span><span class="p">)</span>
     <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
 
+    <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;80&#39;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">)</span>
+
+    <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+        <span class="n">graphite_port</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span>
+        <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+    <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span>
+            <span class="n">graphite_port</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span>
             <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hours&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
 
     <span class="n">content_id</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -401,11 +436,6 @@
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;embed-images&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">plot_redis_data</span><span class="p">:</span>
         <span class="c1"># Create graph from Redis data</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
-
         <span class="n">redis_metric_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">raw_series</span> <span class="o">=</span> <span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">redis_metric_key</span><span class="p">)</span>
@@ -429,6 +459,14 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - unpack timeseries failed&#39;</span><span class="p">)</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - nonNegativeDerivative failed&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
             <span class="sd">&#39;&#39;&#39;</span>
@@ -480,6 +518,7 @@
                     <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">pd_series_values</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">original_anomalous_datapoint</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
@@ -487,6 +526,13 @@
                 <span class="n">pd_series_values</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - pandas value series on timeseries failed&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170307 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># To display the original anomalous datapoint value in the Redis plot</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">original_anomalous_datapoint</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - falied to determine the original_anomalous_datapoint from the timeseries&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">pd_series_values</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -529,7 +575,14 @@
                 <span class="n">mean_series</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">mean_series</span><span class="p">:</span>
-            <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="c1"># @modified 20170307 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># To display the original anomalous datapoint value in the Redis plot</span>
+            <span class="c1"># graph_title = &#39;Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s&#39; % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">original_anomalous_datapoint</span><span class="p">))</span>
+            <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+            <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+                <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data (derivative graph)</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">original_anomalous_datapoint</span><span class="p">))</span>
+
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
@@ -663,10 +716,15 @@
 
     <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; </span><span class="si">%s</span><span class="s1"> alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">context</span>
     <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;metric: &lt;b&gt;</span><span class="si">%s</span><span class="s1">&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomalous value: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomalous value: </span><span class="si">%s</span><span class="s1"> (Mirage)&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Original anomalous value: </span><span class="si">%s</span><span class="s1"> (Analyzer)&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">original_anomalous_datapoint</span><span class="p">)</span>
     <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomaly timestamp: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
     <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;At hours: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">second_order_resolution_in_hours</span><span class="p">))</span>
     <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Next alert in: </span><span class="si">%s</span><span class="s1"> seconds&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Derivative graph: True&lt;/font&gt;&lt;br&gt;&#39;</span>
+
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Ionosphere :: &lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span>
         <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -868,7 +926,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

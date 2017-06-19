@@ -20,6 +20,15 @@ the last
 `github/etsy/skyline <https://github.com/etsy/skyline/commit/22ae09da716267a65835472da89ac31cc5cc5192>`__
 commit to date.
 
+Do a new install
+================
+
+If you are upgrading from an Etsy version consider doing a new install, all you
+need is your Redis data.
+
+However you may have some other monitoring or custom inits, etc set up on your
+Skyline then the below is a best effort guide.
+
 Things to note
 ==============
 

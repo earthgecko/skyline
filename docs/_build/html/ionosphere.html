@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Ionosphere &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>Ionosphere &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="index.html"/>
         <link rel="next" title="tsfresh" href="tsfresh.html"/>
         <link rel="prev" title="Webapp" href="webapp.html"/> 
 
@@ -128,6 +128,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#features-profiles">features profiles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-ionosphere-is-learning">How Ionosphere is &#8220;learning&#8221;?</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#evolutionary-learning-generations">Evolutionary learning - generations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layers">Layers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#no-machine-learning">No machine learning</a></li>
 </ul>
 </li>
@@ -242,6 +243,9 @@ different timeseries for a metric.</li>
 timeseries using <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> to &#8220;fingerprint&#8221; the data set.</li>
 <li>This allows the operator to fingerprint and profile what is not anomalous, but
 normal and to be expected, even if 3sigma will always detect it as anomalous.</li>
+<li>Ionosphere also allows for the creation of layers rules which allow the
+operator to define ad-hoc boundaries and conditions that can be considered as
+not anomalous for each features profile that is created.</li>
 </ul>
 </div>
 <div class="section" id="deploying-and-setting-ionosphere-up">
@@ -249,8 +253,7 @@ normal and to be expected, even if 3sigma will always detect it as anomalous.</l
 <p>Ionosphere has a specific section of variables in <code class="docutils literal"><span class="pre">settings.py</span></code> that are
 documented in the settings specific documentation see all the settings below:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH">http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH</a></li>
-<li><a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/skyline.html#settings.IONOSPHERE_CHECK_PATH">http://earthgecko-skyline.readthedocs.io/en/ionosphere/skyline.html#settings.IONOSPHERE_CHECK_PATH</a></li>
+<li><a class="reference internal" href="skyline.html#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_CHECK_PATH</span></code></a> - <a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH">http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH</a></li>
 </ul>
 <p>The Ionosphere settings follow normal Skyline settings conventions in terms of
 being able to paint all metrics with certain defaults and allowing for specific
@@ -356,17 +359,17 @@ duration.</p>
 <p>So Ionosphere gives you 2 options:</p>
 <div class="figure" id="id1">
 <img alt="_images/create.and.do.not.learn.png" src="_images/create.and.do.not.learn.png" />
-<p class="caption"><span class="caption-text">Only make a features profile based on the <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> data.</span></p>
+<p class="caption"><span class="caption-text">Only make a features profile based on the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> data.</span></p>
 </div>
 <div class="figure" id="id2">
 <img alt="_images/create.and.learn.png" src="_images/create.and.learn.png" />
 <p class="caption"><span class="caption-text">This is not an anomaly now or then or in the forseeable future if it
-looks anything like the FULL_DURATION or any of the multiple resoluiton
-Graphite graphs, LEARN it at the <code class="docutils literal"><span class="pre">learn_full_duration</span></code>.</span></p>
+looks anything like the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> or any of the multiple
+resolution Graphite graphs, LEARN it at the <code class="docutils literal"><span class="pre">learn_full_duration</span></code>.</span></p>
 </div>
 <p>This means you do not have to ship that earthquake that happened 17 days ago into
 Ionosphere&#8217;s features profiles and teach it BAD, badly.  You can just tell it
-to see the relevant Analyzer <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> or Mirage the
+to see the relevant Analyzer <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> or Mirage the
 <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> data as not anomalous and <strong>not</strong> learn at
 the fuller duration of the metric&#8217;s <code class="docutils literal"><span class="pre">learn_full_duration</span></code>.</p>
 <p>You can teach Ionosphere badly, but to unteach it is just a SQL update.</p>
@@ -397,7 +400,7 @@ decision on.  More on that below.</li>
 </ul>
 </li>
 <li><p class="first">Ionosphere serves the training data set for each triggered anomaly, ready for
-a human to come along in the webapp Ionosphere UI and say, &#8220;that is not
+a human to come along in the Webapp Ionosphere UI and say, &#8220;that is not
 anomalous&#8221; (if it is not).</p>
 </li>
 <li><p class="first">At the point the operator makes a features profile, all the features values
@@ -418,8 +421,12 @@ If the two values are less than
 <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a></p>
 <blockquote>
 <div><ul class="simple">
-<li>Ionosphere will deem the timeseries as not anomalous and remove the
-related training data.</li>
+<li>Ionosphere will deem the timeseries as not anomalous and update the
+related training data as MATCHED.</li>
+<li>If Ionosphere does <strong>not</strong> find a match, it analyses the timeseries
+against any defined layers, if there are any and if a match is found
+Ionosphere will deem the timeseries as not anomalous and update the
+related training data as MATCHED.</li>
 <li>If Ionosphere does <strong>not</strong> find a match, it tells the originating app (
 Analyzer or Mirage) to send out the anomaly alert with a
 <code class="docutils literal"><span class="pre">[Skyline</span> <span class="pre">alert]</span> <span class="pre">-</span> <span class="pre">Ionosphere</span> <span class="pre">ALERT</span></code> subject field.</li>
@@ -441,9 +448,9 @@ were created for the metric at the <code class="docutils literal"><span class="p
 <li>If Ionosphere finds a match to the features calculated from the metric
 timeseries that it surfaces the from Graphite at <code class="docutils literal"><span class="pre">learn_full_duration</span></code>, it
 will use the anomaly training data to create a features profile for the metric
-at the metric&#8217;s <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> or <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>
+at the metric&#8217;s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> or <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>
 (whichever is applicable) <strong>and</strong> it will also create a features profile with
-the <code class="docutils literal"><span class="pre">learn_full_duration</span></code> data that matched, as long as the <code class="docutils literal"><span class="pre">FULL_DURATION</span></code>
+the <code class="docutils literal"><span class="pre">learn_full_duration</span></code> data that matched, as long as the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>
 or <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> features sum as long as the difference is
 within the <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a>
 or the metric specific <code class="docutils literal"><span class="pre">max_percent_diff_from_origin</span></code></li>
@@ -456,7 +463,8 @@ or the metric specific <code class="docutils literal"><span class="pre">max_perc
 data is included in the alert.  This link opens the Ionosphere UI with the all
 training data for the specific anomaly where the user can submit the metric
 timeseries as not anomalous and generate have Skyline generate a features
-profile with <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a>.</p>
+profile with <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> (and optionally some additional layers, which are covered
+further down on this page).</p>
 </div>
 <div class="section" id="features-profiles">
 <h2>features profiles<a class="headerlink" href="#features-profiles" title="Permalink to this headline">¶</a></h2>
@@ -495,13 +503,13 @@ in terms of the amount of &#8220;power/energy&#8221;, range and &#8220;movement&
 the timeseries data set.  A fingerprint or signature if you like, but understand
 that neither are perfect.  This timeseries similarities comparison method is not
 perfect in the dynamic, operational arena, but it achieves the goal of being useful.
-However, it must be stated that it <strong>can</strong> be perfect, a <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> features
-profile sum is (about as) <strong>perfect</strong> as you can get at 0% difference.  However
-using it with 100% perfection is not useful to learning and trying to profile the
-Active Brownian Motion (for want of a better way of explaining it).  Lots of
-dynamic metrics/systems will exhibit a tendency to try an achieve Active
-Brownian Motion, not all but many and definitely at differing and some times
-multiple seasonalities.</p>
+However, it must be stated that it <strong>can</strong> be almost perfect, a <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> features
+profile sum is (about as) <strong>perfect</strong> as you can get at 0% difference (there may
+be edge cases).  However using it with 100% matching is not useful to learning
+and trying to profile something like the Active Brownian Motion (for want of a
+better way of explaining it).  Lots of dynamic metrics/systems will exhibit a
+tendency to try an achieve Active Brownian Motion, not all but many and
+definitely at differing and some times multiple seasonalities.</p>
 <p>For a very good overview of Active Brownian Motion please see the &#64;kempa-liehr
 description at</p>
 <div class="admonition seealso">
@@ -511,30 +519,25 @@ description at</p>
 systems would be driven to one of their stable fixed points and stay there for
 ever. So, fixed points resemble an equilibrium state&#8221;</p>
 </div>
-<p>Ionosphere enables us to try and profile this Active Brownian Motion as the norm,
-again for want of a better way of trying to explain it.</p>
+<p>Ionosphere enables us to try and profile something similar to Active Brownian
+Motion as the norm, again for want of a better way of trying to explain it.</p>
 <p>However, contextually, Ionosphere nor the <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> implemented method, will ever
 be perfect, unless 2 timeseries have identical data, consistently, without
 change.  But how challenging would that be? :)</p>
 <p>Also it may be possible that an identical timeseries reversed may give the same
-or negative of a features sum.</p>
-<p><strong>TODO</strong>: test that theory, reversed timeseries the same or the inverse?</p>
+or negative of a features sum and a mirror image timeseries can have very
+similar calculated feature sums.</p>
 <p>Anyway, it is not perfect, by design.  Evolution tends to not achieve perfection,
 attaining a working, functional state is usually the norm in evolution it seems.</p>
 <div class="section" id="evolutionary-learning-generations">
 <h3>Evolutionary learning - generations<a class="headerlink" href="#evolutionary-learning-generations" title="Permalink to this headline">¶</a></h3>
 <p>Ionosphere uses an evolutionary learning model that records (and limits) the
 generations of trained and learnt features profiles per metric.  Limits can be
-set in settings.py and played around with.  For veterans of Skyline, these tend
-to be much like <code class="docutils literal"><span class="pre">CONSENSUS</span></code>, what is the correct <code class="docutils literal"><span class="pre">CONSENSUS</span></code>?</p>
+set in <code class="docutils literal"><span class="pre">`settings.py</span></code> and played around with.  For veterans of Skyline, these
+tend to be much like <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a>, what is the correct <code class="docutils literal"><span class="pre">CONSENSUS</span></code>?</p>
 <p>They are tweak and tunable.  Keep them low, you give Ionosphere less
 leverage to learn.  But you will bump them up so that it can learn more and
 better.</p>
-<p>Caveat.  Right now, as of writing, Ionosphere can learn bad incrementally quite
-quickly.  Only when you have a big, bad anomalous event like a spawn.c fork on a
-number of servers or such.  Learning rate limiting is to be introduced, next,
-which shall immediately solve this issue.  But sometimes documentation needs to
-be written so you can release and move on :)</p>
 <p>Although this documentation may seem overly chatty and verbose, all things have
 stories.  And why should documentation be overly dull, try explaining Skyline
 to someone, good luck.  You should see me at parties.  Anyway not many people
@@ -550,6 +553,110 @@ similarities, it gets quite complicated.</p>
 work helps or hinders depending on your outlook...
 &#8220;Shit lots of stuff is anomalous&#8221; can often lead to lots of work, debugging,
 fine tuning and making better or polishing a turd or diamante.</p>
+</div>
+<div class="section" id="layers">
+<h3>Layers<a class="headerlink" href="#layers" title="Permalink to this headline">¶</a></h3>
+<p>Ionosphere allows the operator to train Skyline a not anomalous timeseries
+in terms of generating a features profile to be compared to anomalies in the
+future, however Ionosphere also allows the operator to define &#8220;layers&#8221; rules at
+the time of feature profile creation.</p>
+<p>Layers rules allow us to train Skyline on boundaries as well, on the fly via the
+UI at the time of features profile creation, which puts all the work for the
+operator in the one place.  Think of them as metric AND feature profile specific
+algorithms.  A layer should only ever be used to describe the features profile
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> timeseries.  The operator should limit their
+layers values to within acceptable bounds of the range within the features
+profile.  The operator should not try and use a single layer to try and describe
+the entire range they &#8220;think&#8221; the metric can go to, a layer is meant to match with
+a features profile, not a metric.  If this methodology is followed, layers and
+features profiles &#8220;retire&#8221; around the same time as metrics change over time,
+an old features profile that no longer describes the current active motion state
+well no longer ever be matched anymore, neither should its layers.  One of the
+things some way down the road on the Ionosphere roadmap is
+Feature #1888: Ionosphere learn - evolutionary maturity forget</p>
+<p>Layers were added to reduce the number of features profiles one has to train
+Skyline on.  They were introduced for humans and to make it easier and more
+useful.  However they come at a cost.  Every layer created reduces Ionosphere&#8217;s
+opportunities to be trained and learn.  It is a compromise to save on the about
+of monkeys you have to have or need to be to train Skyline properly.  Unfortunately
+someone has to be the monkey, but for every features profile/layer you create,
+you create a Skyline monkey to watch that.  A monkey with fairly simple
+instructions.</p>
+<p>A layer consist of a series of simple algorithms that are run against a
+timeseries after Analyzer/Mirage and Ionosphere features comparisons.  The
+layers are defined as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="n">layer</span> <span class="p">[</span><span class="n">required</span><span class="p">]</span> <span class="k">if</span> <span class="n">last_datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span>
+<span class="n">DISCARD</span> <span class="o">-</span> <span class="n">not_anomalous</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p>The D layer can be used as the upper or lower limit, e.g if value &gt; x (probably
+or certainly anomalous). Or this can be used if this metric operates in the
+negative range or if you want it too not discard on 0 as you want to match 0,
+set it to -1 or &gt; 0.1 or &gt; 1. On a high constant rate metric the D layer can be
+used to discard if &lt; x so the the layer does not silence a drop.  This layer can
+be complimented by the optional D1 layer below. Remember a match here disables
+any of the other below layers being checked</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D1</span> <span class="n">layer</span> <span class="p">[</span><span class="n">optional</span><span class="p">]</span> <span class="k">if</span> <span class="n">datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">last</span> <span class="n">y</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">timeseries</span>
+<span class="n">DISCARD</span> <span class="o">-</span> <span class="n">not_anomalous</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p>The D1 layer can be used as an upper or lower limit, so the D layer does not
+silence a drop.  Remember a match here disables any of the other below layer
+conditions from being checked.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">E</span> <span class="n">layer</span> <span class="p">[</span><span class="n">required</span><span class="p">]</span> <span class="k">if</span> <span class="n">datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">last</span> <span class="n">y</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">timeseries</span>
+<span class="ow">not</span> <span class="n">anomalous</span>
+</pre></div>
+</div>
+<p>The Es, F1 and F2 layers shall not be discussed as NOT IMPLEMENTED YET.</p>
+<p>An example layer</p>
+<p>For instance, say occasionally we can expect to see a spike of 404s status codes
+on a web app due to bots or your own scanning, with layers we can tell Ionosphere
+that a timeseries was not anomalous if the datapoint is less than 120 and has
+values in the last 3 datapoints is less than 50.  This allows for a somewhat
+moving window and an alert that would be delayed by say 3 minutes, but it is a
+signal, rather than noise. Let us describe that layer as gt_120-5_in_3</p>
+<p>To demonstrate how the above layer would work, an example of 404 counts per minute:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="n">layer</span>  <span class="p">::</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">120</span>                          <span class="p">::</span> <span class="p">[</span><span class="n">do</span> <span class="ow">not</span> <span class="n">check</span><span class="p">]</span>  <span class="p">::</span>  <span class="p">[</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">]</span>
+<span class="n">D1</span> <span class="n">layer</span> <span class="p">::</span> <span class="k">if</span> <span class="n">value</span> <span class="n">none</span> <span class="n">none</span> <span class="ow">in</span> <span class="n">last</span> <span class="n">none</span> <span class="n">values</span>  <span class="p">::</span> <span class="p">[</span><span class="n">do</span> <span class="ow">not</span> <span class="n">check</span><span class="p">]</span>  <span class="p">::</span>   <span class="p">[</span><span class="s1">&#39;NOT ACTIVE - D1 layer not created&#39;</span><span class="p">]</span>
+<span class="n">E</span> <span class="n">layer</span>  <span class="p">::</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">in</span> <span class="n">last</span> <span class="mi">3</span> <span class="n">values</span>           <span class="p">::</span> <span class="p">[</span><span class="n">not_anomalous</span><span class="p">,</span> <span class="k">if</span> <span class="n">active</span> <span class="n">Es</span><span class="p">,</span> <span class="n">F1</span> <span class="ow">and</span> <span class="n">F2</span> <span class="n">layers</span> <span class="n">match</span><span class="p">]</span>  <span class="p">::</span>  <span class="p">[</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">]</span>
+<span class="n">Es</span> <span class="n">layer</span> <span class="p">::</span> <span class="k">if</span> <span class="n">day</span> <span class="kc">None</span> <span class="kc">None</span>                        <span class="p">::</span> <span class="p">[</span><span class="n">not_anomalous</span><span class="p">,</span> <span class="k">if</span> <span class="n">active</span> <span class="n">F1</span> <span class="ow">and</span> <span class="n">F2</span> <span class="n">layers</span> <span class="n">match</span><span class="p">]</span>  <span class="p">::</span>   <span class="p">[</span><span class="s1">&#39;NOT ACTIVE - Es layer not created&#39;</span><span class="p">]</span>
+<span class="n">F1</span> <span class="n">layer</span> <span class="p">::</span> <span class="k">if</span> <span class="n">from_time</span> <span class="o">&gt;</span> <span class="kc">None</span>                     <span class="p">::</span> <span class="p">[</span><span class="n">not_anomalous</span><span class="p">,</span> <span class="k">if</span> <span class="n">active</span> <span class="n">F2</span> <span class="n">layer</span> <span class="n">matchs</span><span class="p">]</span>  <span class="p">::</span>   <span class="p">[</span><span class="s1">&#39;NOT ACTIVE - F1 layer not created&#39;</span><span class="p">]</span>
+<span class="n">F2</span> <span class="n">layer</span> <span class="p">::</span> <span class="k">if</span> <span class="n">until_time</span> <span class="o">&lt;</span> <span class="kc">None</span>                    <span class="p">::</span> <span class="p">[</span><span class="n">not_anomalous</span><span class="p">]</span>  <span class="p">::</span>   <span class="p">[</span><span class="s1">&#39;NOT ACTIVE - F2 layer not created&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Apply against</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">13</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">11</span> <span class="mi">2</span>
+<span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">11</span> <span class="mi">0</span>
+<span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">11</span> <span class="mi">8</span>
+<span class="mi">13</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">11</span> <span class="mi">60</span>
+<span class="mi">13</span><span class="p">:</span><span class="mi">14</span><span class="p">:</span><span class="mi">11</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>With the above described layer, this would be classified as not anomalous,
+however if the data was:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">13</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">11</span> <span class="mi">2</span>
+<span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">11</span> <span class="mi">0</span>
+<span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">11</span> <span class="mi">800</span>
+</pre></div>
+</div>
+<p>The layer would not ever report the timeseries as not anomalous as the 800
+exceeds the gt_120, so the rest of the layer definition would not be evaluated.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Layers may seem simple, but the layers must be thought about
+carefully as it is possible for a metric to have multiple layers created on
+multiple features profiles, that could silence any anomalies on the metric.
+Specifically D layer, however layer D1 was added to remove this possibility,
+if the layers are properly implemented.  The D1 layer is optional (and is
+reverse capable with with any existing layers that were created prior to
+1.1.3-beta) as is there to let the operator set upper and lower bounds where
+necessary.</p>
+</div>
+<p>Be careful that you do not create another layer later that silences bad, e.g.
+dropped to 0, the above example is not a good example of the as we want and
+expect 0 on the 404 found generally, but if it was status code 200, we would not
+want any layers silencing a drop to 0, please try and use layer D1 wisely were
+required.</p>
 </div>
 <div class="section" id="no-machine-learning">
 <h3>No machine learning<a class="headerlink" href="#no-machine-learning" title="Permalink to this headline">¶</a></h3>
@@ -709,7 +816,7 @@ profile page data on-demand.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

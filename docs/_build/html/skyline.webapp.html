@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.webapp package &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>skyline.webapp package &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="prev" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/> 
 
@@ -332,7 +332,7 @@ folder</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> (<em>str</em>) &#8211; the t feautres profile id</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> (<em>str</em>) &#8211; the features profile id</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
@@ -358,6 +358,140 @@ array of the features profiles that matched the query.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.create_ionosphere_layers">
+<code class="descname">create_ionosphere_layers</code><span class="sig-paren">(</span><em>base_name</em>, <em>fp_id</em>, <em>requested_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#create_ionosphere_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.create_ionosphere_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a layers profile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.feature_profile_layers_detail">
+<code class="descname">feature_profile_layers_detail</code><span class="sig-paren">(</span><em>fp_layers_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#feature_profile_layers_detail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.feature_profile_layers_detail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Ionosphere layers details of a fetures profile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> &#8211; the features profile layers_id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.feature_profile_layer_alogrithms">
+<code class="descname">feature_profile_layer_alogrithms</code><span class="sig-paren">(</span><em>fp_layers_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#feature_profile_layer_alogrithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.feature_profile_layer_alogrithms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Ionosphere layer algorithm details of a layer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> &#8211; the features profile layers_id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.metric_layers_alogrithms">
+<code class="descname">metric_layers_alogrithms</code><span class="sig-paren">(</span><em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#metric_layers_alogrithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.metric_layers_alogrithms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the Ionosphere layer algorithm details of a metric</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) &#8211; the metric base_name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.edit_ionosphere_layers">
+<code class="descname">edit_ionosphere_layers</code><span class="sig-paren">(</span><em>layers_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#edit_ionosphere_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.edit_ionosphere_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edit a layers profile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layers_id</strong> &#8211; the layer id to edit</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.validate_fp">
+<code class="descname">validate_fp</code><span class="sig-paren">(</span><em>fp_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_fp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a features profile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> &#8211; the features profile id to validate</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.save_training_data_dir">
+<code class="descname">save_training_data_dir</code><span class="sig-paren">(</span><em>timestamp</em>, <em>base_name</em>, <em>label</em>, <em>hdate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#save_training_data_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.save_training_data_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save training_data and return details or just return details if exists</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>timestamp</strong> (<em>str</em>) &#8211; the Ionosphere training_data metric timestamp</li>
+<li><strong>base_name</strong> (<em>str</em>) &#8211; metric base_name</li>
+<li><strong>label</strong> (<em>str</em>) &#8211; the saved training_data label</li>
+<li><strong>hdate</strong> (<em>str</em>) &#8211; human date for the saved training_data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">saved_successful, details, fail_msg, trace</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean, list, str, str</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -611,7 +745,7 @@ key is expected to be URL-safe base64 encoded</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

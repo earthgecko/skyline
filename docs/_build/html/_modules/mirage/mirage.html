@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage &mdash; Skyline 1.1.1-beta documentation</title>
+  <title>mirage.mirage &mdash; Skyline 1.1.4-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.1-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -187,7 +187,7 @@
     <span class="kn">import</span> <span class="nn">urllib.parse</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="c1"># import errno</span>
-<span class="kn">import</span> <span class="nn">imp</span>
+<span class="c1"># import imp</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">listdir</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 
@@ -200,8 +200,10 @@
 <span class="c1"># @modified 20160922 - Branch #922: Ionosphere</span>
 <span class="c1"># Added the send_anomalous_metric_to skyline_functions.py</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">load_metric_vars</span><span class="p">,</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span>
-    <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">)</span>
+    <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span>
+    <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">,</span>
+    <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">mirage_alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
 <span class="kn">from</span> <span class="nn">negaters</span> <span class="k">import</span> <span class="n">trigger_negater</span>
@@ -274,6 +276,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_ionosphere</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Mirage.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -341,24 +345,6 @@
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">converted</span><span class="p">))</span>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Mirage.load_metric_vars"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.load_metric_vars">[docs]</a>    <span class="k">def</span> <span class="nf">load_metric_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-            <span class="c1"># @added 20160822 - Bug #1460: panorama check file fails</span>
-            <span class="c1"># Do not make this global</span>
-            <span class="c1"># global metric_vars</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_source</span><span class="p">(</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-                <span class="c1"># return True</span>
-                <span class="k">return</span> <span class="n">metric_vars</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load metric_vars&#39;</span><span class="p">)</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -695,6 +681,32 @@
             <span class="k">if</span> <span class="n">first_timestamp</span> <span class="o">&gt;</span> <span class="n">valid_if_before_timestamp</span><span class="p">:</span>
                 <span class="n">valid_mirage_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+        <span class="c1"># Convert the values of metrics strictly increasing monotonically</span>
+        <span class="c1"># to their deriative products</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+                <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">valid_mirage_timeseries</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzing :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
@@ -776,9 +788,25 @@
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
+            <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Allow Ionosphere to send Panorama checks, it is an ionosphere_metric</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
             <span class="n">added_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
             <span class="c1"># If Panorama is enabled - create a Panorama check</span>
+            <span class="c1"># @modified 20170308 - Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Allow Ionosphere to send Panorama checks for ionosphere_metrics</span>
+            <span class="c1"># if settings.PANORAMA_ENABLED:</span>
+            <span class="n">send_to_panorama</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
+                <span class="n">send_to_panorama</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                <span class="n">send_to_panorama</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">send_to_panorama</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">):</span>
                     <span class="n">mkdir_p</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
 
@@ -1360,6 +1388,7 @@
                                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using settings.FULL_DURATION - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)))</span>
                                         <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
                                 <span class="c1"># trigger_alert(alert, metric, second_order_resolution_seconds, context)</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
@@ -1511,7 +1540,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.1-beta',
+            VERSION:'1.1.4-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

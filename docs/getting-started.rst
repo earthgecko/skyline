@@ -86,7 +86,7 @@ settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
 bring them online too.
 
 Add Mirage parameters to the ``ALERTS``
--------------------------------------
+---------------------------------------
 
 Once you have an overview of metrics that have seasonalities that are greater
 than the :mod:`settings.FULL_DURATION`, you can add their Mirage parameters to

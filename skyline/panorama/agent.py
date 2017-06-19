@@ -1,10 +1,11 @@
 import logging
 import sys
-import traceback
+# import traceback
 from os import getpid
-from os.path import dirname, abspath, isdir
+# from os.path import dirname, abspath, isdir
+from os.path import isdir
 from daemon import runner
-from time import sleep, time
+from time import sleep
 from sys import version_info
 
 import mysql.connector
@@ -18,7 +19,6 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import settings
 from validate_settings import validate_settings_variables
-
 from panorama import Panorama
 
 skyline_app = 'panorama'
@@ -55,6 +55,7 @@ class PanoramaAgent():
 
         while 1:
             sleep(100)
+
 
 if __name__ == "__main__":
     """
