@@ -7,8 +7,8 @@ import time
 import re
 # import csv
 # import datetime
-# import shutil
-# import glob
+import shutil
+import glob
 from ast import literal_eval
 
 import traceback
@@ -27,7 +27,7 @@ import settings
 import skyline_version
 # from skyline_functions import (
 #    RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)
-from skyline_functions import (mkdir_p, get_graphite_metric)
+from skyline_functions import (mkdir_p, get_graphite_metric, write_data_to_file)
 # from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
@@ -385,7 +385,6 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
             str(requested_timestamp))
-
         # @added 20160113 - Feature #1858: Ionosphere - autobuild features_profiles dir
         if settings.IONOSPHERE_AUTOBUILD:
             # TODO: see ionosphere docs page.  Create any deleted/missing
@@ -394,6 +393,12 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             if not path.exists(metric_data_dir):
                 # provision features_profiles image resources
                 mkdir_p(metric_data_dir)
+
+    # @added 20170617 - Feature #2054: ionosphere.save.training_data
+    if context == 'saved_training_data':
+        metric_data_dir = '%s_saved/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
+            timeseries_dir)
 
     human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(requested_timestamp)))
     metric_var_filename = '%s.txt' % str(base_name)
@@ -618,7 +623,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # Also include the Graphite NOW graphs in the features_profile page as
     # graphs WHEN CREATED
     # if context == 'training_data':
-    if context == 'training_data' or context == 'features_profiles':
+    if context == 'training_data' or context == 'features_profiles' or context == 'saved_training_data':
         graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
         # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
         # Exclude if matches TARGET_HOURS - unique only
@@ -1742,6 +1747,50 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         fail_msg = 'error :: d_boundary_times is not an int'
         return False, False, layers_algorithms, layers_added, fail_msg, trace
 
+    # @added 20170616 - Feature #2048: D1 ionosphere layer
+    if 'd1_condition' in request.args:
+        d1_condition = request.args.get('d1_condition', 'none')
+    else:
+        logger.error('no d1_condition argument passed')
+        fail_msg = 'error :: no d1_condition argument passed'
+        return False, False, layers_algorithms, layers_added, fail_msg, trace
+    if str(d1_condition) == 'none':
+        d1_condition = 'none'
+        d1_boundary_limit = 0
+        d1_boundary_times = 0
+    else:
+        if not str(d1_condition) in conditions:
+            logger.error('d1_condition not a valid conditon - %s' % str(d1_condition))
+            fail_msg = 'error :: d1_condition not a valid conditon - %s' % str(d1_condition)
+            return False, False, layers_algorithms, layers_added, fail_msg, trace
+
+        if 'd1_boundary_limit' in request.args:
+            d1_boundary_limit = request.args.get('d1_boundary_limit', '0')
+        else:
+            logger.error('no d1_boundary_limit argument passed')
+            fail_msg = 'error :: no d1_boundary_limit argument passed'
+            return False, False, layers_algorithms, layers_added, fail_msg, trace
+        try:
+            test_d1_boundary_limit = float(d1_boundary_limit) + 1
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: d1_boundary_limit is not an int'
+            return False, False, layers_algorithms, layers_added, fail_msg, trace
+        if 'd1_boundary_times' in request.args:
+            d1_boundary_times = request.args.get('d1_boundary_times', '1')
+        else:
+            logger.error('no d1_boundary_times argument passed')
+            fail_msg = 'error :: no d1_boundary_times argument passed'
+            return False, False, layers_algorithms, layers_added, fail_msg, trace
+        try:
+            test_d1_boundary_times = int(d1_boundary_times) + 1
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: d1_boundary_times is not an int'
+            return False, False, layers_algorithms, layers_added, fail_msg, trace
+
     if 'e_condition' in request.args:
         e_condition = request.args.get('e_condition', None)
     else:
@@ -2023,6 +2072,32 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             engine_disposal(engine)
         raise
 
+    # @added 20170616 - Feature #2048: D1 ionosphere layer
+    # This must be the third created algorithm layer as in the frontend list
+    # D is [0], E is [1], so D1 has to be [2]
+    if d1_condition:
+        try:
+            connection = engine.connect()
+            ins = layers_algorithms_table.insert().values(
+                layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
+                layer='D1', type='value', condition=d1_condition,
+                layer_boundary=str(d1_boundary_limit),
+                times_in_row=int(d1_boundary_times))
+            result = connection.execute(ins)
+            connection.close()
+            new_layer_algorithm_id = result.inserted_primary_key[0]
+            logger.info('new ionosphere_algorithms D1 layer id: %s' % str(new_layer_algorithm_id))
+            new_layer_algorithm_ids.append(new_layer_algorithm_id)
+            layers_added.append('D1')
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: failed to insert a new D1 layer record into the layers_algorithms table for %s' % base_name
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise
+
     # Es layer
     if es_layer:
         try:
@@ -2291,6 +2366,11 @@ def feature_profile_layer_alogrithms(fp_layers_id):
     f1_layer = ' [\'NOT ACTIVE - F1 layer not created\']'
     f2_until_time = None
     f2_layer = ' [\'NOT ACTIVE - F2 layer not created\']'
+    # @added 20170616 - Feature #2048: D1 ionosphere layer
+    d1_layer = ' [\'NOT ACTIVE - D1 layer not created\']'
+    d1_condition = 'none'
+    d1_boundary_limit = 'none'
+    d1_boundary_times = 'none'
 
     try:
         connection = engine.connect()
@@ -2304,6 +2384,16 @@ def feature_profile_layer_alogrithms(fp_layers_id):
             if layer == 'D':
                 d_condition = row['condition']
                 d_boundary_limit = row['layer_boundary']
+            # @added 20170616 - Feature #2048: D1 ionosphere layer
+            if layer == 'D1':
+                d1_condition = row['condition']
+                if str(d1_condition) != 'none':
+                    d1_condition = row['condition']
+                    d1_layer = ' [\'ACTIVE\']'
+                    d1_boundary_limit = row['layer_boundary']
+                    d1_boundary_times = row['times_in_row']
+                else:
+                    d1_condition = 'none'
             if layer == 'E':
                 e_condition = row['condition']
                 e_boundary_limit = row['layer_boundary']
@@ -2321,14 +2411,17 @@ def feature_profile_layer_alogrithms(fp_layers_id):
 
         layer_algorithms_details = '''
 D layer  :: if value %s %s                    :: [do not check]  ::  ['ACTIVE']
+D1 layer :: if value %s %s in last %s values  :: [do not check]  ::  %s
 E layer  :: if value %s %s in last %s values  :: [not_anomalous, if active Es, F1 and F2 layers match]  ::  ['ACTIVE']
 Es layer :: if day %s %s                 :: [not_anomalous, if active F1 and F2 layers match]  ::  %s
 F1 layer :: if from_time > %s              :: [not_anomalous, if active F2 layer matchs]  ::  %s
 F2 layer :: if until_time < %s             :: [not_anomalous]  ::  %s
-''' % (str(d_condition), str(d_boundary_limit), str(e_condition),
-            str(e_boundary_limit), str(e_boundary_times), str(es_condition),
-            str(es_day), str(es_layer), str(f1_from_time), str(f1_layer),
-            str(f2_until_time), str(f2_layer))
+''' % (str(d_condition), str(d_boundary_limit), str(d1_condition),
+            str(d1_boundary_limit), str(d1_boundary_times), str(d1_layer),
+            str(e_condition), str(e_boundary_limit), str(e_boundary_times),
+            str(es_condition), str(es_day),
+            str(es_layer), str(f1_from_time), str(f1_layer), str(f2_until_time),
+            str(f2_layer))
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -2575,6 +2668,49 @@ def edit_ionosphere_layers(layers_id):
         fail_msg = 'error :: d_boundary_times is not an int'
         return False, fail_msg, trace
 
+    # @added 20170616 - Feature #2048: D1 ionosphere layer
+    d1_condition = None
+    if 'd1_condition' in request.args:
+        d1_condition = request.args.get('d1_condition', 'none')
+    else:
+        logger.error('no d1_condition argument passed')
+        fail_msg = 'error :: no d1_condition argument passed'
+        return False, fail_msg, trace
+    if str(d1_condition) == 'none':
+        d1_condition = None
+    else:
+        if not str(d1_condition) in conditions:
+            logger.error('d1_condition not a valid conditon - %s' % str(d1_condition))
+            fail_msg = 'error :: d1_condition not a valid conditon - %s' % str(d1_condition)
+            return False, fail_msg, trace
+
+        if 'd1_boundary_limit' in request.args:
+            d1_boundary_limit = request.args.get('d1_boundary_limit', '0')
+        else:
+            logger.error('no d1_boundary_limit argument passed')
+            fail_msg = 'error :: no d1_boundary_limit argument passed'
+            return False, fail_msg, trace
+        try:
+            test_d1_boundary_limit = float(d1_boundary_limit) + 1
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: d1_boundary_limit is not an int'
+            return False, fail_msg, trace
+        if 'd1_boundary_times' in request.args:
+            d1_boundary_times = request.args.get('d1_boundary_times', '1')
+        else:
+            logger.error('no d1_boundary_times argument passed')
+            fail_msg = 'error :: no d1_boundary_times argument passed'
+            return False, fail_msg, trace
+        try:
+            test_d1_boundary_times = int(d1_boundary_times) + 1
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: d1_boundary_times is not an int'
+            return False, fail_msg, trace
+
     if 'e_condition' in request.args:
         e_condition = request.args.get('e_condition', None)
     else:
@@ -2736,6 +2872,28 @@ def edit_ionosphere_layers(layers_id):
                     engine_disposal(engine)
                 raise
 
+        # @added 20170616 - Feature #2048: D1 ionosphere layer
+        if d1_condition and layer_name == 'D1':
+            try:
+                connection = engine.connect()
+                connection.execute(
+                    layers_algorithms_table.update(
+                        layers_algorithms_table.c.id == algorithm_id).values(
+                            condition=d1_condition, layer_boundary=d1_boundary_limit,
+                            times_in_row=d1_boundary_times))
+                connection.close()
+                logger.info('updated D1 layer for %s - %s, %s, %s' % (
+                    str(layers_id), str(d1_condition), str(d1_boundary_limit),
+                    str(d1_boundary_times)))
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: failed to update D1 layer record into the layers_algorithms table for %s' % str(layers_id)
+                logger.error('%s' % fail_msg)
+                if engine:
+                    engine_disposal(engine)
+                raise
+
         # E layer
         if layer_name == 'E':
             try:
@@ -2830,3 +2988,130 @@ def validate_fp(fp_id):
         raise
 
     return True, fail_msg, trace
+
+
+# @added 20170617 - Feature #2054: ionosphere.save.training_data
+def save_training_data_dir(timestamp, base_name, label, hdate):
+    """
+    Save training_data and return details or just return details if exists
+
+    :param timestamp: the Ionosphere training_data metric timestamp
+    :param base_name: metric base_name
+    :param label: the saved training_data label
+    :param hdate: human date for the saved training_data
+    :type timestamp: str
+    :type base_name: str
+    :type label: str
+    :type hdate: str
+    :return: saved_successful, details, fail_msg, trace
+    :rtype: boolean, list, str, str
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: save_training_data'
+
+    trace = 'none'
+    fail_msg = 'none'
+    training_data_saved = True
+
+    logger.info(
+        '%s :: Saving training_data for %s.%s' % (
+            function_str, (timestamp), str(base_name)))
+    metric_timeseries_dir = base_name.replace('.', '/')
+    metric_training_data_dir = '%s/%s/%s' % (
+        settings.IONOSPHERE_DATA_FOLDER, str(timestamp),
+        metric_timeseries_dir)
+    saved_metric_training_data_dir = '%s_saved/%s/%s' % (
+        settings.IONOSPHERE_DATA_FOLDER, str(timestamp),
+        metric_timeseries_dir)
+    details_file = '%s/%s.%s.saved_training_data_label.txt' % (saved_metric_training_data_dir, str(timestamp), base_name)
+
+    if path.isfile(details_file):
+        logger.info(
+            '%s :: Saved training_data for %s.%s already exists' % (
+                function_str, (timestamp), str(base_name)))
+        saved_training_data_details = []
+        try:
+            with open(details_file) as f:
+                for line in f:
+                    saved_training_data_details.append(line)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = '%s :: error :: failed to read details file %s' % (function_str, details_file)
+            logger.error('%s' % fail_msg)
+            raise
+        return True, saved_training_data_details, fail_msg, trace
+
+    if not path.exists(saved_metric_training_data_dir):
+        try:
+            mkdir_p(saved_metric_training_data_dir)
+            logger.info(
+                '%s :: created %s' % (function_str, saved_metric_training_data_dir))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = '%s :: error :: failed to create %s' % (function_str, saved_metric_training_data_dir)
+            logger.error('%s' % fail_msg)
+            training_data_saved = False
+
+    if training_data_saved:
+        save_data_files = []
+        try:
+            glob_path = '%s/*.*' % metric_training_data_dir
+            save_data_files = glob.glob(glob_path)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error(
+                '%s :: error :: glob %s - training data not copied to %s' % (
+                    function_str, metric_training_data_dir, saved_metric_training_data_dir))
+            fail_msg = 'error :: glob failed to copy'
+            logger.error('%s' % fail_msg)
+            training_data_saved = False
+
+    if not training_data_saved:
+        raise
+
+    for i_file in save_data_files:
+        try:
+            shutil.copy(i_file, saved_metric_training_data_dir)
+            logger.info(
+                '%s :: training data copied to %s/%s' % (
+                    function_str, saved_metric_training_data_dir, i_file))
+        except shutil.Error as e:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            logger.error(
+                '%s :: error :: shutil error - %s - not copied to %s' % (
+                    function_str, i_file, saved_metric_training_data_dir))
+            logger.error('%s :: error :: %s' % (function_str, e))
+            training_data_saved = False
+            fail_msg = 'error :: shutil error'
+        # Any error saying that the directory doesn't exist
+        except OSError as e:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            logger.error(
+                '%s :: error :: OSError error %s - training data not copied to %s' % (
+                    function_str, metric_training_data_dir, saved_metric_training_data_dir))
+            logger.error(
+                '%s :: error :: %s' % (function_str, e))
+            training_data_saved = False
+            fail_msg = 'error :: shutil error'
+
+    if not training_data_saved:
+        raise
+
+    # Create a label file
+    try:
+        saved_training_data_details = '[[label: \'%s\'], [saved_date: \'%s\']]' % (str(label), str(hdate))
+        write_data_to_file(skyline_app, details_file, 'w', saved_training_data_details)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = '%s :: error :: failed to write label file' % (function_str)
+        logger.error('%s' % fail_msg)
+
+    return True, False, fail_msg, trace
