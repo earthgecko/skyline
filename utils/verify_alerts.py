@@ -42,23 +42,25 @@ except:
 print 'Verifying alerts for: "' + options.metric + '"'
 
 # Send alerts
+context = 'Analyzer'
 if alerts_enabled:
     for alert in alerts:
         if alert[0] in options.metric:
             print '    Testing Analyzer alerting - against "' + alert[0] + '" to send via ' + alert[1] + "...triggered"
             if options.trigger:
                 metric = (0, options.metric)
-                trigger_alert(alert, metric)
+                trigger_alert(alert, metric, context)
                 if syslog_enabled:
                     print '    Testing Analyzer alerting - against "' + alert[0] + '" to send via syslog ' + "...triggered"
                     alert = (alert[0], 'syslog')
-                    trigger_alert(alert, metric)
+                    trigger_alert(alert, metric, context)
         else:
             print '    Testing Analyzer alerting - against "' + alert[0] + '" to send via ' + alert[1] + "..."
 else:
     print 'Alerts are disabled'
 
 # Mirage alerts
+context = 'Mirage'
 try:
     mirage_enabled = settings.ENABLE_MIRAGE
     mirage_alerts_enabled = settings.MIRAGE_ENABLE_ALERTS
@@ -75,11 +77,11 @@ if mirage_alerts_enabled:
                 print '    Testing Mirage alerting - against "' + alert[0] + '" to send via ' + alert[1] + "...triggered"
                 if options.trigger:
                     metric = (0, options.metric)
-                    trigger_alert(alert, metric, 86400)
+                    trigger_alert(alert, metric, 86400, context)
                 if syslog_enabled:
                     print '    Testing Mirage alerting - against "' + alert[0] + '" to send via syslog ' + "...triggered"
                     alert = (alert[0], 'syslog')
-                    trigger_alert(alert, metric, 86400)
+                    trigger_alert(alert, metric, 86400, context)
             else:
                 print '    Testing Mirage alerting - against "' + alert[0] + '" to send via ' + alert[1] + "..."
 else:
