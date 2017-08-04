@@ -25,7 +25,7 @@ from skyline_functions import send_graphite_metric, write_data_to_file
 
 from boundary_alerters import trigger_alert
 from boundary_algorithms import run_selected_algorithm
-from algorithm_exceptions import *
+from algorithm_exceptions import (TooShort, Stale, Boring)
 
 skyline_app = 'boundary'
 skyline_app_logger = skyline_app + 'Log'
@@ -460,9 +460,9 @@ class Boundary(Thread):
                         if not os.path.exists(crucible_anomaly_dir):
                             if python_version == 2:
                                 mode_arg = int('0755')
+                                os.makedirs(crucible_anomaly_dir, mode_arg)
                             if python_version == 3:
-                                mode_arg = mode=0o755
-                            os.makedirs(crucible_anomaly_dir, mode_arg)
+                                os.makedirs(crucible_anomaly_dir, mode=0o755)
 
                         # Note:
                         # Due to only one algorithm triggering here the
