@@ -453,9 +453,9 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
       {% endif %}
     {% else %}
 	  <h3><span class="logo"><span class="sky">Train ::</span> <span class="re">layers :: </span></span></span>[optional] - {{ for_metric }}</h3>
-Optionally you now can create an Ionosphere layers profile which allows you to specify conditions that are <code>not anomalous</code><br>
-This does not stop Skyline learning, it reduces Ionosphere alerts and enables the creation of custom Boundary type algorithms per metric.<br>
-For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b>every enabled</b> layer must be matched.
+Optionally you now can create an Ionosphere layers profile which allows you to specify conditions that are <code>not anomalous</code> at <b>FULL_DURATION</b>.<br>
+This does not stop Skyline learning, it reduces Ionosphere alerts and enables the creation of custom Boundary type algorithms per metric and profile<br>
+For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b>every enabled</b> layer must be matched (or not matched in terms of layers D and D1).
 
 <!-- # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
 # Added the Redis data plot here to present the operator with the max, min,
