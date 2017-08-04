@@ -301,14 +301,6 @@ def alert_smtp(alert, metric, context):
             logger.error('error :: alert_smtp - unpack timeseries failed')
             timeseries = None
 
-        # @added 20170603 - Feature #2034: analyse_derivatives
-        if known_derivative_metric:
-            try:
-                derivative_timeseries = nonNegativeDerivative(timeseries)
-                timeseries = derivative_timeseries
-            except:
-                logger.error('error :: alert_smtp - nonNegativeDerivative failed')
-
         if settings.IONOSPHERE_ENABLED and timeseries:
             '''
             .. todo: this is possibly to be used to allow the user to submit the
@@ -357,6 +349,21 @@ def alert_smtp(alert, metric, context):
                     logger.error(
                         'error :: %s failed to read timeseries data from %s' % (skyline_app, anomaly_json))
                     timeseries = None
+
+        # @added 20170603 - Feature #2034: analyse_derivatives
+        if known_derivative_metric:
+            try:
+                derivative_timeseries = nonNegativeDerivative(timeseries)
+                timeseries = derivative_timeseries
+            except:
+                logger.error('error :: alert_smtp - nonNegativeDerivative failed')
+
+        # @added 21070726 - Bug #2068: Analyzer smtp alert error on Redis plot with derivative metrics
+        # If the nonNegativeDerivative has been calculated we need to reset the
+        # x and y as nonNegativeDerivative has to discard the first value as it
+        # has no delta for it so the timeseries is 1 item less.
+        timeseries_x = [float(item[0]) for item in timeseries]
+        timeseries_y = [item[1] for item in timeseries]
 
         pd_series_values = None
         if timeseries:

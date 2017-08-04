@@ -112,6 +112,61 @@ Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than :mod:`settings.FULL_DURATION` to the Mirage
 service, see `Mirage <mirage.html>`__.
 
+Analyzer :mod:`settings.ALERTS`
+===============================
+
+Order Matters
+-------------
+
+In terms of the :mod:`settings.ALERTS` order matters in Analyzer and in the
+Mirage context as well.
+
+.. warning:: It is important to note that Analyzer uses the first alert tuple
+  that matches.
+
+So for example, with some annotation.  Let us say we have a set of metrics
+related to how many requests are made per customer.  We have two very important
+customers which we have tight SLAs and we want to know very quickly if there is
+ANY anomalies in the number of requests they are doing as it has immediate
+effect on our revenue.  We have other customers too, we want to know there is
+a problem but we do not want to be nagged, just reminded about them every hour
+if there are anomalous changes.
+
+.. code-block:: python
+
+  ALERTS = (
+             ('skyline', 'smtp', 3600),
+             ('stats.requests.bigcheese_customer', 'smtp', 600),    # --> alert every 10 mins
+             ('stats.requests.biggercheese_customer', 'smtp', 600), # --> alert every 10 mins
+             ('stats.requests\..*', 'smtp', 3600),                  # --> alert every 60 mins
+  )
+
+The above would ensure if Analyzer found bigcheese_customer or
+biggercheese_customer metrics anomalous, they would fire off an alert every 10
+minutes, but for all other metrics in the namespace, Analyzer would only fire
+off an alert every hour if they were found to be anomalous.
+
+The below would NOT have the desired effect of analysing the metrics for
+bigcheese_customer and biggercheese_customer
+
+.. code-block:: python
+
+  ALERTS = (
+             ('skyline', 'smtp', 3600),
+             ('stats.requests\..*', 'smtp', 3600),                  # --> alert every 60 mins
+             ('stats.requests.bigcheese_customer', 'smtp', 600),    # --> NEVER REACHED
+             ('stats.requests.biggercheese_customer', 'smtp', 600), # --> NEVER REACHED
+  )
+
+Hopefully it is clear that Analyzer would not reach the bigcheese_customer and
+biggercheese_customer alert tuples as in the above example the
+``stats.requests\..*`` tuple would match BEFORE the specific tuples were
+evaluated and the bigcheese metrics would be alerted on every 60 mins instead of
+the desired every 10 minutes.
+
+Please refer to `Mirage - Order Matters <mirage.html#order-matters>`__ section
+for a similar example of how order matters in the Mirage context.
+
 Analyzer SMTP alert graphs
 ==========================
 
@@ -164,7 +219,7 @@ What **Analyzer** does
 - The parent Analyzer process will then check every metric in the
   anomalous\_metrics list to see if:
 
-  - If the metric matches an :mod:`settings.ALERT` tuple in settings.py
+  - If the metric matches an :mod:`settings.ALERTS` tuple in settings.py
   - If a Mirage parameter is set in the tuple, then Analyzer does not
     alert, but hands the metric off to Mirage by adding a Mirage check
     file.
@@ -173,7 +228,7 @@ What **Analyzer** does
     file.
   - If ``ENABLE_CRUCIBLE`` is True, Analyzer adds timeseries as a json
     file and a Crucible check file.
-  - If no Mirage parameter, but the metric matches an :mod:`settings.ALERT` tuple
+  - If no Mirage parameter, but the metric matches an :mod:`settings.ALERTS` tuple
     namespace, Analyzer then checks if an Analyzer alert key exists for
     the metric by querying the metric's Analyzer alert key in Redis.
   - If no alert key, Analyzer sends alert/s to the configured alerters

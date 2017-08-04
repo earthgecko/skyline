@@ -1671,7 +1671,13 @@ def ionosphere():
 
             if fp_details_list:
                 f_id_created = fp_details_list[0]
-                fp_generation_created = fp_details_list[8]
+                # @modified 20170729 - Feature #1854: Ionosphere learn - generations
+                # Make backwards compatible with older features profiles
+                # fp_generation_created = fp_details_list[8]
+                try:
+                    fp_generation_created = fp_details_list[8]
+                except:
+                    fp_generation_created = 0
 
             # @added 20170120 -  Feature #1854: Ionosphere learn - generations
             # Added fp_learn parameter to allow the user to not learn the
