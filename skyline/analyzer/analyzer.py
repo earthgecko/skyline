@@ -298,7 +298,6 @@ class Analyzer(Thread):
             if unknown_deriv_status:
                 # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
                 last_derivative_metric_key = False
-                last_alert = False
                 try:
                     last_derivative_metric_key = self.redis_conn.get(derivative_metric_key)
                 except Exception as e:
@@ -1161,23 +1160,18 @@ class Analyzer(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to add to self.all_anomalous_metrics')
             ionosphere_alerts = []
-            ionosphere_alerts_returned = True
             context = 'Analyzer'
             try:
                 ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.analyzer.alert.*'))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to scan ionosphere.analyzer.alert.* from Redis')
-                ionosphere_alerts_returned = False
 
             if not ionosphere_alerts:
                 ionosphere_alerts = []
-                ionosphere_alerts_returned = False
 
             ionosphere_metric_alerts = []
-            if len(ionosphere_alerts) == 0:
-                ionosphere_alerts_returned = False
-            else:
+            if len(ionosphere_alerts) != 0:
                 logger.info('Ionosphere alert/s requested :: %s' % str(ionosphere_alerts))
                 for cache_key in ionosphere_alerts:
                     try:
