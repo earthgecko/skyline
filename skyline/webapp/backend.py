@@ -358,8 +358,8 @@ def panorama_request():
             anomalous_metrics.append(str(metric))
         if count_request:
             limit_argument = anomaly_count
-            if int(anomaly_count) > 200:
-                limit_argument = 200
+            if int(anomaly_count) > 100:
+                limit_argument = 100
             anomaly_data = (int(anomaly_count), metric, str(limit_argument))
             anomalies.append([int(anomaly_count), str(metric), str(limit_argument)])
 
