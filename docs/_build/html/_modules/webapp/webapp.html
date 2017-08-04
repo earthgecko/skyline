@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.webapp &mdash; Skyline 1.1.4-beta documentation</title>
+  <title>webapp.webapp &mdash; Skyline 1.1.5 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
@@ -1835,7 +1836,13 @@
 
             <span class="k">if</span> <span class="n">fp_details_list</span><span class="p">:</span>
                 <span class="n">f_id_created</span> <span class="o">=</span> <span class="n">fp_details_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">fp_generation_created</span> <span class="o">=</span> <span class="n">fp_details_list</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="c1"># @modified 20170729 - Feature #1854: Ionosphere learn - generations</span>
+                <span class="c1"># Make backwards compatible with older features profiles</span>
+                <span class="c1"># fp_generation_created = fp_details_list[8]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fp_generation_created</span> <span class="o">=</span> <span class="n">fp_details_list</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">fp_generation_created</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="c1"># @added 20170120 -  Feature #1854: Ionosphere learn - generations</span>
             <span class="c1"># Added fp_learn parameter to allow the user to not learn the</span>
@@ -2599,7 +2606,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.4-beta',
+            VERSION:'1.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

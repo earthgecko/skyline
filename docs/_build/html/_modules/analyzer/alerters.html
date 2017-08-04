@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.alerters &mdash; Skyline 1.1.4-beta documentation</title>
+  <title>analyzer.alerters &mdash; Skyline 1.1.5 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.4-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.5 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
@@ -465,14 +466,6 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - unpack timeseries failed&#39;</span><span class="p">)</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
-        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
-                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - nonNegativeDerivative failed&#39;</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
             <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">            .. todo: this is possibly to be used to allow the user to submit the</span>
@@ -521,6 +514,21 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                         <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">anomaly_json</span><span class="p">))</span>
                     <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - nonNegativeDerivative failed&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @added 21070726 - Bug #2068: Analyzer smtp alert error on Redis plot with derivative metrics</span>
+        <span class="c1"># If the nonNegativeDerivative has been calculated we need to reset the</span>
+        <span class="c1"># x and y as nonNegativeDerivative has to discard the first value as it</span>
+        <span class="c1"># has no delta for it so the timeseries is 1 item less.</span>
+        <span class="n">timeseries_x</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+        <span class="n">timeseries_y</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
 
         <span class="n">pd_series_values</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
@@ -1016,7 +1024,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.4-beta',
+            VERSION:'1.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
