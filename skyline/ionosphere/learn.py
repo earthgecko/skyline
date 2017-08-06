@@ -1039,14 +1039,21 @@ def ionosphere_learn(timestamp):
             # The metric learn work variables now known so we can process the metric
             # Determine the metric details from the database
             fp_ids = None
-            engine = None
-            # Get a MySQL engine
-            try:
-                engine, log_msg, trace = learn_get_an_engine()
-                logger.info('learn :: %s' % log_msg)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: learn :: could not get a MySQL engine to get fp_ids_db_object')
+
+            # @modified 20170804 - Bug #2130: MySQL - Aborted_clients
+            # Set a conditional here to only get_an_engine if no engine, this
+            # is probably responsible for the Aborted_clients, as it would have
+            # left the accquired engine orphaned
+            # Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017
+            if not engine:
+                engine = None
+                # Get a MySQL engine
+                try:
+                    engine, log_msg, trace = learn_get_an_engine()
+                    logger.info('learn :: %s' % log_msg)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: could not get a MySQL engine to get fp_ids_db_object')
 
             if not engine:
                 logger.error('error :: learn :: engine not obtained to get fp_ids_db_object')
