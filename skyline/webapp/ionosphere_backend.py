@@ -3001,6 +3001,11 @@ def validate_fp(fp_id):
             engine_disposal(engine)
         raise
 
+    # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+    # Added missing disposal
+    if engine:
+        engine_disposal(engine)
+
     return True, fail_msg, trace
 
 
