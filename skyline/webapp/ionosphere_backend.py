@@ -689,28 +689,15 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         except:
             trace = traceback.format_exc()
             logger.error(trace)
-            fail_msg = 'error :: could not get a MySQL engine'
             logger.error('%s' % fail_msg)
-            raise
+            logger.error('error :: could not get a MySQL engine to get fp_ids')
+            raise  # to webapp to return in the UI
 
         if not engine:
             trace = 'none'
             fail_msg = 'error :: engine not obtained'
             logger.error(fail_msg)
             raise
-
-        logger.info('getting MySQL engine')
-        try:
-            engine, log_msg, trace = get_an_engine()
-            logger.info(log_msg)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: could not get a MySQL engine to get fp_ids')
-            raise  # to webapp to return in the UI
-
-        if not engine:
-            logger.error('error :: engine not obtained to get fp_ids')
-            raise  # to webapp to return in the UI
 
         try:
             ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
@@ -719,6 +706,10 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get ionosphere_checked_table meta for %s' % base_name)
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                engine_disposal(engine)
             raise  # to webapp to return in the UI
 
         matched_timestamps = []
@@ -743,6 +734,11 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine timestamps from ionosphere_matched for fp_id %s' % str(fp_id))
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal and raise
+            if engine:
+                engine_disposal(engine)
+            raise
 
         len_matched_timestamps = len(matched_timestamps)
         matched_count = len_matched_timestamps
@@ -1288,6 +1284,11 @@ def ionosphere_search(default_query, search_query):
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get metrics_table meta')
+
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                engine_disposal(engine)
             raise  # to webapp to return in the UI
 
         metrics = []
@@ -1303,6 +1304,11 @@ def ionosphere_search(default_query, search_query):
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not determine metrics from metrics table')
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal and raise
+            if engine:
+                engine_disposal(engine)
+            raise
 
         if get_metric_profiles:
             metrics_id = None
@@ -1457,8 +1463,18 @@ def ionosphere_search(default_query, search_query):
     if count_request and search_query:
         if engine:
             engine_disposal(engine)
-        del all_fps
-        del metrics
+
+        # @modified 20170809 - Bug #2136: Analyzer stalling on no metrics
+        # Added except to all del methods to prevent stalling if any object does
+        # not exist
+        try:
+            del all_fps
+        except:
+            logger.error('error :: failed to del all_fps')
+        try:
+            del metrics
+        except:
+            logger.error('error :: failed to del metrics')
         return (features_profiles, features_profiles_count, matched_count,
                 checked_count, generation_count, full_duration_list,
                 enabled_list, tsfresh_version_list, generation_list, fail_msg,
@@ -1559,6 +1575,10 @@ def ionosphere_search(default_query, search_query):
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get ionosphere_layers meta')
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                engine_disposal(engine)
             raise  # to webapp to return in the UI
         try:
             connection = engine.connect()
@@ -1632,8 +1652,14 @@ def ionosphere_search(default_query, search_query):
         generation_list = None
         if engine:
             engine_disposal(engine)
-        del all_fps
-        del metrics
+        try:
+            del all_fps
+        except:
+            logger.error('error :: failed to del all_fps')
+        try:
+            del metrics
+        except:
+            logger.error('error :: failed to del metrics')
         return (features_profiles, features_profiles_count, matched_count,
                 checked_count, generation_count, full_duration_list,
                 enabled_list, tsfresh_version_list, generation_list, fail_msg,
@@ -1673,8 +1699,15 @@ def ionosphere_search(default_query, search_query):
 
     if engine:
         engine_disposal(engine)
-    del all_fps
-    del metrics
+    try:
+        del all_fps
+    except:
+        logger.error('error :: failed to del all_fps')
+    try:
+        del metrics
+    except:
+        logger.error('error :: failed to del metrics')
+
     return (features_profiles, features_profiles_count, matched_count,
             checked_count, generation_count, full_duration_list,
             enabled_list, tsfresh_version_list, generation_list, fail_msg,
@@ -2193,6 +2226,10 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         logger.error('%s' % trace)
         fail_msg = 'error :: could not update layers_id for %s ' % str(fp_id)
         logger.error(fail_msg)
+        # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+        # Added missing disposal
+        if engine:
+            engine_disposal(engine)
         raise
 
     if engine:
@@ -2986,6 +3023,11 @@ def validate_fp(fp_id):
         if engine:
             engine_disposal(engine)
         raise
+
+    # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+    # Added missing disposal
+    if engine:
+        engine_disposal(engine)
 
     return True, fail_msg, trace
 

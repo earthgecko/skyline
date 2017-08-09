@@ -2205,7 +2205,13 @@ def rebrow_key(host, port, db, key):
     # if t is None:
     #    abort(404)
     size = len(dump)
-    del dump
+    # @modified 20170809 - Bug #2136: Analyzer stalling on no metrics
+    # Added except to all del methods to prevent stalling if any object does
+    # not exist
+    try:
+        del dump
+    except:
+        logger.error('error :: failed to del dump')
     t = r.type(key)
     ttl = r.pttl(key)
     if t == 'string':

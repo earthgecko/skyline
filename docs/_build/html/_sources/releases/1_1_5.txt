@@ -26,3 +26,11 @@ Changes
   has no delta and resulted a matplotlib/axes/_base.py error in _xy_from_xy
   `raise ValueError("x and y must have same first dimension")`
   (Bug #2068: Analyzer smtp alert error on Redis plot with derivative metrics)
+- Bug fix to handle MySQL Aborted_clients where duplicate engines were being
+  accquired and engines were not being disposed of
+  (Bug #2136: Analyzer stalling on no metrics)
+- Bug fix - All del methods have been wrapped with an except logger.error method
+  to prevent any stalling on the variable/object not existing
+  (Bug #2136: Analyzer stalling on no metrics)
+- Show a human date in alerts.  Added alerted_at, long overdue.
+- Also wrapped the mirage_alerters.alert_smtp body creation in try except

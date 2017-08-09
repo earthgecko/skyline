@@ -422,6 +422,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: failed to get metrics_table meta for %s' % base_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
         else:
@@ -508,6 +512,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
             # Raise to webbapp I believe to provide traceback to user in UI
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             raise
         else:
             current_logger.info('create_features_profile :: disposing of any engine')
@@ -552,6 +560,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: failed to insert a new record into the ionosphere table for %s' % base_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
         else:
@@ -565,6 +577,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: unknown new ionosphere new_fp_id for %s' % base_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
         else:
@@ -599,6 +615,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: failed to create table - %s' % fp_table_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
         else:
@@ -610,6 +630,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: failed to determine True for create table - %s' % fp_table_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
         else:
@@ -646,6 +670,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: failed to insert a feature values into %s' % fp_table_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
         else:
@@ -682,6 +710,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: failed to create table - %s' % ts_table_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
         else:
@@ -704,6 +736,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             fail_msg = 'error: failed to read timeseries data from %s' % anomaly_json
             # end = timer()
             if context == 'training' or context == 'features_profile':
+                # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+                # Added missing disposal
+                if engine:
+                    fp_create_engine_disposal(current_skyline_app, engine)
                 # Raise to webbapp I believe to provide traceback to user in UI
                 raise
     else:
@@ -739,6 +775,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fail_msg = 'error :: create_features_profile :: failed to insert the timeseries into %s' % ts_table_name
         current_logger.error('%s' % fail_msg)
         if context == 'training' or context == 'features_profile':
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
             raise
         else:
             current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
@@ -875,5 +915,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     'error :: failed adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', %s, %s] to make a learn features profile later' % (
                         str(ionosphere_job), str(requested_timestamp), base_name,
                         str(new_fp_id), str(fp_generation)))
+
+        # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+        # Added missing disposal
+        if engine:
+            fp_create_engine_disposal(current_skyline_app, engine)
 
     return str(new_fp_id), True, False, fail_msg, trace

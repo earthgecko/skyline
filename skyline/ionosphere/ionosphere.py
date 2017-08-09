@@ -1054,13 +1054,19 @@ class Ionosphere(Thread):
             # @added 20170101 - Feature #1836: ionosphere - local features profiles disk cache
             # Cache fp ids for 300 seconds?
 
-            logger.info('getting MySQL engine')
-            try:
-                engine, log_msg, trace = get_an_engine()
-                logger.info(log_msg)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not get a MySQL engine to get fp_ids')
+            # @added 20170804 - Bug #2130: MySQL - Aborted_clients
+            # Set a conditional here to only get_an_engine if no engine, this
+            # is probably responsible for the Aborted_clients, as it would have
+            # left the accquired engine orphaned
+            # Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017
+            if not engine:
+                logger.info('getting MySQL engine')
+                try:
+                    engine, log_msg, trace = get_an_engine()
+                    logger.info(log_msg)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not get a MySQL engine to get fp_ids')
 
             if not engine:
                 logger.error('error :: engine not obtained to get fp_ids')
@@ -1335,11 +1341,18 @@ class Ionosphere(Thread):
                 # Get features for fp_id from z_fp_<metric_id> table where the
                 # features profile is the same full_duration
                 metric_fp_table = 'z_fp_%s' % str(metrics_id)
-                try:
-                    engine, log_msg, trace = get_an_engine()
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: could not get a MySQL engine for feature_id and values from %s' % metric_fp_table)
+
+                # @added 20170804 - Bug #2130: MySQL - Aborted_clients
+                # Set a conditional here to only get_an_engine if no engine, this
+                # is probably responsible for the Aborted_clients, as it would have
+                # left the accquired engine orphaned
+                # Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017
+                if not engine:
+                    try:
+                        engine, log_msg, trace = get_an_engine()
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not get a MySQL engine for feature_id and values from %s' % metric_fp_table)
 
                 if not engine:
                     logger.error('error :: engine not obtained for feature_id and values from %s' % metric_fp_table)
@@ -1451,11 +1464,17 @@ class Ionosphere(Thread):
                 # update matched_count in ionosphere_table
                 checked_timestamp = int(time())
 
-                try:
-                    engine, log_msg, trace = get_an_engine()
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: could not get a MySQL engine to update checked details in db for %s' % (str(fp_id)))
+                # @added 20170804 - Bug #2130: MySQL - Aborted_clients
+                # Set a conditional here to only get_an_engine if no engine, this
+                # is probably responsible for the Aborted_clients, as it would have
+                # left the accquired engine orphaned
+                # Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017
+                if not engine:
+                    try:
+                        engine, log_msg, trace = get_an_engine()
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not get a MySQL engine to update checked details in db for %s' % (str(fp_id)))
                 if not engine:
                     logger.error('error :: engine not obtained to update checked details in db for %s' % (str(fp_id)))
 
@@ -1490,11 +1509,17 @@ class Ionosphere(Thread):
                     self.not_anomalous.append(base_name)
                     # update matched_count in ionosphere_table
                     matched_timestamp = int(time())
-                    try:
-                        engine, log_msg, trace = get_an_engine()
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: could not get a MySQL engine to update matched details in db for %s' % (str(fp_id)))
+                    # @added 20170804 - Bug #2130: MySQL - Aborted_clients
+                    # Set a conditional here to only get_an_engine if no engine, this
+                    # is probably responsible for the Aborted_clients, as it would have
+                    # left the accquired engine orphaned
+                    # Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017
+                    if not engine:
+                        try:
+                            engine, log_msg, trace = get_an_engine()
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not get a MySQL engine to update matched details in db for %s' % (str(fp_id)))
                     if not engine:
                         logger.error('error :: engine not obtained to update matched details in db for %s' % (str(fp_id)))
 
@@ -1513,11 +1538,17 @@ class Ionosphere(Thread):
 
                     # @added 20170107 - Feature #1844: ionosphere_matched DB table
                     # Added ionosphere_matched update
-                    try:
-                        engine, log_msg, trace = get_an_engine()
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: could not get a MySQL engine to update ionosphere_matched for %s' % (str(fp_id)))
+                    # @modified 20170804 - Bug #2130: MySQL - Aborted_clients
+                    # Set a conditional here to only get_an_engine if no engine, this
+                    # is probably responsible for the Aborted_clients, as it would have
+                    # left the accquired engine orphaned
+                    # Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017
+                    if not engine:
+                        try:
+                            engine, log_msg, trace = get_an_engine()
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not get a MySQL engine to update ionosphere_matched for %s' % (str(fp_id)))
                     if not engine:
                         logger.error('error :: engine not obtained to update ionosphere_matched for %s' % (str(fp_id)))
 

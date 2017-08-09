@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.1.5 documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.1.5-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.5 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -587,6 +587,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
@@ -673,6 +677,10 @@
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: disposing of any engine&#39;</span><span class="p">)</span>
@@ -717,6 +725,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to insert a new record into the ionosphere table for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
@@ -730,6 +742,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: unknown new ionosphere new_fp_id for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
@@ -764,6 +780,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to create table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fp_table_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
@@ -775,6 +795,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to determine True for create table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fp_table_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
@@ -811,6 +835,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to insert a feature values into </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fp_table_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
@@ -847,6 +875,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to create table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_table_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
@@ -869,6 +901,10 @@
             <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span>
             <span class="c1"># end = timer()</span>
             <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+                <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+                <span class="c1"># Added missing disposal</span>
+                <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
                 <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
                 <span class="k">raise</span>
     <span class="k">else</span><span class="p">:</span>
@@ -904,6 +940,10 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to insert the timeseries into </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_table_name</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: </span><span class="si">%s</span><span class="s1"> - automated so the table should exists continuing&#39;</span> <span class="o">%</span> <span class="n">context</span><span class="p">)</span>
@@ -1041,6 +1081,11 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">)))</span>
 
+        <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+        <span class="c1"># Added missing disposal</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 </pre></div>
 
@@ -1075,7 +1120,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.5',
+            VERSION:'1.1.5-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

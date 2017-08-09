@@ -550,40 +550,51 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         redis_img_tag = '<img src="%s"/>' % 'none'
         # redis_img_tag = '<img src="none"/>'
 
-    body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
-    body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
-    body += '<font color="black">Anomalous value: %s (Mirage)</font><br>' % str(metric[0])
-    body += '<font color="black">Original anomalous value: %s (Analyzer)</font><br>' % str(original_anomalous_datapoint)
-    body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
-    body += '<font color="black">At hours: %s</font><br>' % str(int(second_order_resolution_in_hours))
-    body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
-    # @added 20170603 - Feature #2034: analyse_derivatives
-    if known_derivative_metric:
-        body += '<font color="black">Derivative graph: True</font><br>'
+    # @added 20170806 - Feature #1830: Ionosphere alerts
+    # Show a human date in alerts
+    alerted_at = str(dt.datetime.utcfromtimestamp(int(metric[2])))
 
-    if settings.IONOSPHERE_ENABLED:
-        body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
-        ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
-            settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
-        body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
-        body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
-    if image_data:
-        body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
-        body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
-        body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
-    if redis_image_data:
-        body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
-            str(array_amin), str(array_amax), str(mean))
-        body += '3-sigma: %s <br>' % str(sigma3)
-        body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
-            str(sigma3_upper_bound), str(sigma3_lower_bound))
-        body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
+    try:
+        body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
+        body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
+        body += '<font color="black">Anomalous value: %s (Mirage)</font><br>' % str(metric[0])
+        body += '<font color="black">Original anomalous value: %s (Analyzer)</font><br>' % str(original_anomalous_datapoint)
+        body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
+        # @added 20170806 - Feature #1830: Ionosphere alerts
+        # Show a human date in alerts
+        body += '<font color="black">Anomalous at: %s</font><br>' % alerted_at
+        body += '<font color="black">At hours: %s</font><br>' % str(int(second_order_resolution_in_hours))
+        body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+        # @added 20170603 - Feature #2034: analyse_derivatives
+        if known_derivative_metric:
+            body += '<font color="black">Derivative graph: True</font><br>'
 
-        body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
-        body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
-        body += 'however do note that will remove the 3-sigma and mean value too.</font>'
-    body += '<br>'
-    body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
+        if settings.IONOSPHERE_ENABLED:
+            body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
+            ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+                settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
+            body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+            body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
+        if image_data:
+            body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
+            body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
+            body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
+        if redis_image_data:
+            body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
+                str(array_amin), str(array_amax), str(mean))
+            body += '3-sigma: %s <br>' % str(sigma3)
+            body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
+                str(sigma3_upper_bound), str(sigma3_lower_bound))
+            body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
+
+            body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
+            body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
+            body += 'however do note that will remove the 3-sigma and mean value too.</font>'
+        body += '<br>'
+        body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
+    except:
+        logger.error('error :: alert_smtp - could not build body')
+        logger.info(traceback.format_exc())
 
     for recipient in recipients:
         try:

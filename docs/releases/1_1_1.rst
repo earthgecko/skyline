@@ -167,10 +167,10 @@ Dedicated to my father, Derek, a man of numbers if there ever was one.
 - Send Graphite metrics from mirage and ionosphere
 - Added stop process after terminate, if any still exist as any terminate called
   on extract_features calls terminate, but the pid remains, debugging
-- Added __future__ division to all scopes using division (pep-0238)
+- Added `__future__` division to all scopes using division (pep-0238)
 - Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
-  up, there can be LOTS of file_per_table z_fp_ tables/files without
-  the MyISAM issues.  z_fp_ and z_ts_ tables are mostly read and will be shuffled
+  up, there can be LOTS of file_per_table `z_fp_` tables/files without
+  the MyISAM issues.  `z_fp_` and `z_ts_` tables are mostly read and will be shuffled
   in the table cache as required.
 - Added some additional logging in ionosphere on the slow hunt to determine why
   tsfresh extract_features is sometimes just hanging and needs to be killed
@@ -182,8 +182,8 @@ Dedicated to my father, Derek, a man of numbers if there ever was one.
 - Aligned the alerters HTML format
 - Added the ionosphere context to features_profile.py
 - Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
-  up, there can be LOTS of file_per_table z_fp_ tables/files without
-  the MyISAM issues.  z_fp_ tables are mostly read and will be shuffled
+  up, there can be LOTS of file_per_table `z_fp_` tables/files without
+  the MyISAM issues.  `z_fp_` tables are mostly read and will be shuffled
   in the table cache as required.
 - Enabled feature calculation on all anomaly checks in ionosphere
 - Moved features_profile.py to the skyline dir some can be used by the webapp
@@ -243,7 +243,7 @@ Dedicated to my father, Derek, a man of numbers if there ever was one.
 - mirage.py refactored quite a bit of the conditional blocks workflow to cater
   for Ionosphere
 - Added metric_timestamp to the trigger_alert metric alert tuple and added
-  sent_to_ metrics (analyzer.py and mirage.py) - metric[2]: anomaly timestamp
+  `sent_to_` metrics (analyzer.py and mirage.py) - metric[2]: anomaly timestamp
 - Added Ionosphere training data timeseries json, redis plot png and Ionosphere
   training data link to the Analyzer and Mirage alerters.
 - Mirage alerter creates a Redis timeseries json too - tbd allow user to build

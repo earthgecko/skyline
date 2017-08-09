@@ -568,11 +568,18 @@ def alert_smtp(alert, metric, context):
         redis_img_tag = '<img src="%s"/>' % 'none'
         # redis_img_tag = '<img src="none"/>'
 
+    # @added 20170806 - Feature #1830: Ionosphere alerts
+    # Show a human date in alerts
+    alerted_at = str(dt.datetime.utcfromtimestamp(int(metric[2])))
+
     try:
         body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
         body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
         body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
         body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
+        # @added 20170806 - Feature #1830: Ionosphere alerts
+        # Show a human date in alerts
+        body += '<font color="black">Anomalous at: %s</font><br>' % alerted_at
         body += '<font color="black">At hours: %s</font><br>' % str(int(full_duration_in_hours))
         body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
         # @added 20170603 - Feature #2034: analyse_derivatives
