@@ -1550,10 +1550,22 @@ class Analyzer(Thread):
                 # We del all variables that are floats as they become unique objects and
                 # can result in what appears to be a memory leak, but is not, just the
                 # way Python handles floats
-                del _sum_of_algorithm_timings
-                del _median_algorithm_timing
-                del sum_of_algorithm_timings
-                del median_algorithm_timing
+                try:
+                    del _sum_of_algorithm_timings
+                except:
+                    logger.error('error :: failed to del _sum_of_algorithm_timings')
+                try:
+                    del _median_algorithm_timing
+                except:
+                    logger.error('error :: failed to del _median_algorithm_timing')
+                try:
+                    del sum_of_algorithm_timings
+                except:
+                    logger.error('error :: failed to del sum_of_algorithm_timings')
+                try:
+                    del median_algorithm_timing
+                except:
+                    logger.error('error :: failed to del median_algorithm_timing')
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run after algorithm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -1654,6 +1666,7 @@ class Analyzer(Thread):
                 logger.error('error :: failed to get CANARY_METRIC from Redis')
                 raw_series = None
 
+            projected = None
             if raw_series is not None:
                 try:
                     unpacker = Unpacker(use_list=False)
@@ -1694,14 +1707,32 @@ class Analyzer(Thread):
 
             unique_metrics = []
             raw_series = None
-            del timeseries[:]
             unpacker = None
             # We del all variables that are floats as they become unique objects and
-            # can result in what appears to be a memory leak, but in not, just the
-            # way Python handles floats
-            del time_human
-            del projected
-            del run_time
+            # can result in what appears to be a memory leak, but it is not, it
+            # is just the way that Python handles floats
+            # @modified 20170809 - Bug #2136: Analyzer stalling on no metrics
+            #                      Task #1544: Add additional except handling to Analyzer
+            #                      Task #1372: algorithm performance tuning
+            # Added except to all del methods to prevent Analyzer stalling if
+            # any of the float variables are not set, like projected if no
+            # metrics were being set to Redis
+            try:
+                del timeseries[:]
+            except:
+                logger.error('error :: failed to del timeseries')
+            try:
+                del time_human
+            except:
+                logger.error('error :: failed to del time_human')
+            try:
+                del projected
+            except:
+                logger.error('error :: failed to del projected - Redis probably has no metrics')
+            try:
+                del run_time
+            except:
+                logger.error('error :: failed to del run_time')
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage after reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -1753,8 +1784,8 @@ class Analyzer(Thread):
             # @modified 20160504 - @earthgecko - development internal ref #1338, #1340)
             # Etsy's original for this was a value of 5 seconds which does
             # not make skyline Analyzer very efficient in terms of installations
-            # where 100s of 1000s of metrics are being analyzed.  This lead to
-            # Analyzer running over several metrics multiple time in a minute
+            # where 100s of 1000s of metrics are not being analyzed.  This lead to
+            # Analyzer running over several metrics multiple times in a minute
             # and always working.  Therefore this was changed from if you took
             # less than 5 seconds to run only then sleep.  This behaviour
             # resulted in Analyzer analysing a few 1000 metrics in 9 seconds and
@@ -1762,7 +1793,7 @@ class Analyzer(Thread):
             # ANALYZER_OPTIMUM_RUN_DURATION setting was added to allow this to
             # self optimise in cases where skyline is NOT deployed to analyze
             # 100s of 1000s of metrics.  This relates to optimising performance
-            # for any deployments in the few 1000s and 60 second resolution
+            # for any deployments with a few 1000 metrics and 60 second resolution
             # area, e.g. smaller and local deployments.
             process_runtime = time() - now
             analyzer_optimum_run_duration = settings.ANALYZER_OPTIMUM_RUN_DURATION
@@ -1770,5 +1801,11 @@ class Analyzer(Thread):
                 sleep_for = (analyzer_optimum_run_duration - process_runtime)
                 logger.info('sleeping for %.2f seconds due to low run time...' % sleep_for)
                 sleep(sleep_for)
-                del sleep_for
-            del process_runtime
+                try:
+                    del sleep_for
+                except:
+                    logger.error('error :: failed to del sleep_for')
+            try:
+                del process_runtime
+            except:
+                logger.error('error :: failed to del process_runtime')

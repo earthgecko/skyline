@@ -1463,8 +1463,18 @@ def ionosphere_search(default_query, search_query):
     if count_request and search_query:
         if engine:
             engine_disposal(engine)
-        del all_fps
-        del metrics
+
+        # @modified 20170809 - Bug #2136: Analyzer stalling on no metrics
+        # Added except to all del methods to prevent stalling if any object does
+        # not exist
+        try:
+            del all_fps
+        except:
+            logger.error('error :: failed to del all_fps')
+        try:
+            del metrics
+        except:
+            logger.error('error :: failed to del metrics')
         return (features_profiles, features_profiles_count, matched_count,
                 checked_count, generation_count, full_duration_list,
                 enabled_list, tsfresh_version_list, generation_list, fail_msg,
@@ -1642,8 +1652,14 @@ def ionosphere_search(default_query, search_query):
         generation_list = None
         if engine:
             engine_disposal(engine)
-        del all_fps
-        del metrics
+        try:
+            del all_fps
+        except:
+            logger.error('error :: failed to del all_fps')
+        try:
+            del metrics
+        except:
+            logger.error('error :: failed to del metrics')
         return (features_profiles, features_profiles_count, matched_count,
                 checked_count, generation_count, full_duration_list,
                 enabled_list, tsfresh_version_list, generation_list, fail_msg,
@@ -1683,8 +1699,15 @@ def ionosphere_search(default_query, search_query):
 
     if engine:
         engine_disposal(engine)
-    del all_fps
-    del metrics
+    try:
+        del all_fps
+    except:
+        logger.error('error :: failed to del all_fps')
+    try:
+        del metrics
+    except:
+        logger.error('error :: failed to del metrics')
+
     return (features_profiles, features_profiles_count, matched_count,
             checked_count, generation_count, full_duration_list,
             enabled_list, tsfresh_version_list, generation_list, fail_msg,
