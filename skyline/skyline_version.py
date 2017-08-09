@@ -6,7 +6,7 @@ version info
 # __version_info__ = ('1', '1', '0')
 __version_info__ = ('1', '1', '5')
 __branch__ = 'ionosphere'
-__version_tag__ = ''
+__version_tag__ = 'beta'
 
 __version__ = '.'.join(__version_info__)
 __absolute_version__ = 'Skyline (%s v%s-%s)' % (__branch__, __version__, __version_tag__)

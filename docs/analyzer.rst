@@ -193,7 +193,7 @@ Should you wish to disable the Redis data graph and simply have the Graphite
 graph, simply set :mod:`settings.PLOT_REDIS_DATA` to ``False``.
 
 Example alert
-^^^^^^^^^^^^^
+-------------
 
 .. figure:: images/skyline.analyzer.redis.data.graph.png
    :alt: Redis data graph in Analyzer alert
