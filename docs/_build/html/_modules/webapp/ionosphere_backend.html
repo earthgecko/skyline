@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.ionosphere_backend &mdash; Skyline 1.1.5 documentation</title>
+  <title>webapp.ionosphere_backend &mdash; Skyline 1.1.5-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.5 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -854,28 +854,15 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get a MySQL engine&#39;</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
-            <span class="k">raise</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to get fp_ids&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
             <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: engine not obtained&#39;</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
             <span class="k">raise</span>
-
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting MySQL engine&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to get fp_ids&#39;</span><span class="p">)</span>
-            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to get fp_ids&#39;</span><span class="p">)</span>
-            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">ionosphere_matched_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_matched_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
@@ -884,6 +871,10 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere_checked_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
 
         <span class="n">matched_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
@@ -908,6 +899,11 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine timestamps from ionosphere_matched for fp_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal and raise</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
 
         <span class="n">len_matched_timestamps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matched_timestamps</span><span class="p">)</span>
         <span class="n">matched_count</span> <span class="o">=</span> <span class="n">len_matched_timestamps</span>
@@ -1453,6 +1449,11 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metrics_table meta&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
 
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1468,6 +1469,11 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics from metrics table&#39;</span><span class="p">)</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal and raise</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
 
         <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
             <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1622,8 +1628,18 @@
     <span class="k">if</span> <span class="n">count_request</span> <span class="ow">and</span> <span class="n">search_query</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-        <span class="k">del</span> <span class="n">all_fps</span>
-        <span class="k">del</span> <span class="n">metrics</span>
+
+        <span class="c1"># @modified 20170809 - Bug #2136: Analyzer stalling on no metrics</span>
+        <span class="c1"># Added except to all del methods to prevent stalling if any object does</span>
+        <span class="c1"># not exist</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">all_fps</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del all_fps&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del metrics&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">features_profiles</span><span class="p">,</span> <span class="n">features_profiles_count</span><span class="p">,</span> <span class="n">matched_count</span><span class="p">,</span>
                 <span class="n">checked_count</span><span class="p">,</span> <span class="n">generation_count</span><span class="p">,</span> <span class="n">full_duration_list</span><span class="p">,</span>
                 <span class="n">enabled_list</span><span class="p">,</span> <span class="n">tsfresh_version_list</span><span class="p">,</span> <span class="n">generation_list</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span>
@@ -1724,6 +1740,10 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere_layers meta&#39;</span><span class="p">)</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -1797,8 +1817,14 @@
         <span class="n">generation_list</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-        <span class="k">del</span> <span class="n">all_fps</span>
-        <span class="k">del</span> <span class="n">metrics</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">all_fps</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del all_fps&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del metrics&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">features_profiles</span><span class="p">,</span> <span class="n">features_profiles_count</span><span class="p">,</span> <span class="n">matched_count</span><span class="p">,</span>
                 <span class="n">checked_count</span><span class="p">,</span> <span class="n">generation_count</span><span class="p">,</span> <span class="n">full_duration_list</span><span class="p">,</span>
                 <span class="n">enabled_list</span><span class="p">,</span> <span class="n">tsfresh_version_list</span><span class="p">,</span> <span class="n">generation_list</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span>
@@ -1838,8 +1864,15 @@
 
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-    <span class="k">del</span> <span class="n">all_fps</span>
-    <span class="k">del</span> <span class="n">metrics</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">all_fps</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del all_fps&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">metrics</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del metrics&#39;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="p">(</span><span class="n">features_profiles</span><span class="p">,</span> <span class="n">features_profiles_count</span><span class="p">,</span> <span class="n">matched_count</span><span class="p">,</span>
             <span class="n">checked_count</span><span class="p">,</span> <span class="n">generation_count</span><span class="p">,</span> <span class="n">full_duration_list</span><span class="p">,</span>
             <span class="n">enabled_list</span><span class="p">,</span> <span class="n">tsfresh_version_list</span><span class="p">,</span> <span class="n">generation_list</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span>
@@ -2358,6 +2391,10 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not update layers_id for </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+        <span class="c1"># Added missing disposal</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">raise</span>
 
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
@@ -3152,6 +3189,11 @@
             <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">raise</span>
 
+    <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+    <span class="c1"># Added missing disposal</span>
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 
 
@@ -3313,7 +3355,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.5',
+            VERSION:'1.1.5-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.1.5 - the ionosphere branch &mdash; Skyline 1.1.5 documentation</title>
+  <title>1.1.5 - the ionosphere branch &mdash; Skyline 1.1.5-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.5 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
         <link rel="next" title="1.1.4 - the ionosphere branch" href="1_1_4.html"/>
         <link rel="prev" title="Release Notes" href="../releases.html"/> 
@@ -210,6 +210,14 @@ the x and y as nonNegativeDerivative has to discard the first value as it
 has no delta and resulted a matplotlib/axes/_base.py error in _xy_from_xy
 <cite>raise ValueError(&#8220;x and y must have same first dimension&#8221;)</cite>
 (Bug #2068: Analyzer smtp alert error on Redis plot with derivative metrics)</li>
+<li>Bug fix to handle MySQL Aborted_clients where duplicate engines were being
+accquired and engines were not being disposed of
+(Bug #2136: Analyzer stalling on no metrics)</li>
+<li>Bug fix - All del methods have been wrapped with an except logger.error method
+to prevent any stalling on the variable/object not existing
+(Bug #2136: Analyzer stalling on no metrics)</li>
+<li>Show a human date in alerts.  Added alerted_at, long overdue.</li>
+<li>Also wrapped the mirage_alerters.alert_smtp body creation in try except</li>
 </ul>
 </div>
 </div>
@@ -255,7 +263,7 @@ has no delta and resulted a matplotlib/axes/_base.py error in _xy_from_xy
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.5',
+            VERSION:'1.1.5-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

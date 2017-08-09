@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.webapp &mdash; Skyline 1.1.5 documentation</title>
+  <title>webapp.webapp &mdash; Skyline 1.1.5-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.5 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -2370,7 +2370,13 @@
     <span class="c1"># if t is None:</span>
     <span class="c1">#    abort(404)</span>
     <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dump</span><span class="p">)</span>
-    <span class="k">del</span> <span class="n">dump</span>
+    <span class="c1"># @modified 20170809 - Bug #2136: Analyzer stalling on no metrics</span>
+    <span class="c1"># Added except to all del methods to prevent stalling if any object does</span>
+    <span class="c1"># not exist</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">dump</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del dump&#39;</span><span class="p">)</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="n">ttl</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">pttl</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
@@ -2606,7 +2612,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.5',
+            VERSION:'1.1.5-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.1.5 documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.1.5-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.5 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -1219,13 +1219,19 @@
             <span class="c1"># @added 20170101 - Feature #1836: ionosphere - local features profiles disk cache</span>
             <span class="c1"># Cache fp ids for 300 seconds?</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting MySQL engine&#39;</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to get fp_ids&#39;</span><span class="p">)</span>
+            <span class="c1"># @added 20170804 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Set a conditional here to only get_an_engine if no engine, this</span>
+            <span class="c1"># is probably responsible for the Aborted_clients, as it would have</span>
+            <span class="c1"># left the accquired engine orphaned</span>
+            <span class="c1"># Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting MySQL engine&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to get fp_ids&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to get fp_ids&#39;</span><span class="p">)</span>
@@ -1500,11 +1506,18 @@
                 <span class="c1"># Get features for fp_id from z_fp_&lt;metric_id&gt; table where the</span>
                 <span class="c1"># features profile is the same full_duration</span>
                 <span class="n">metric_fp_table</span> <span class="o">=</span> <span class="s1">&#39;z_fp_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine for feature_id and values from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_table</span><span class="p">)</span>
+
+                <span class="c1"># @added 20170804 - Bug #2130: MySQL - Aborted_clients</span>
+                <span class="c1"># Set a conditional here to only get_an_engine if no engine, this</span>
+                <span class="c1"># is probably responsible for the Aborted_clients, as it would have</span>
+                <span class="c1"># left the accquired engine orphaned</span>
+                <span class="c1"># Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine for feature_id and values from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_table</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained for feature_id and values from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_table</span><span class="p">)</span>
@@ -1616,11 +1629,17 @@
                 <span class="c1"># update matched_count in ionosphere_table</span>
                 <span class="n">checked_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
 
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to update checked details in db for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+                <span class="c1"># @added 20170804 - Bug #2130: MySQL - Aborted_clients</span>
+                <span class="c1"># Set a conditional here to only get_an_engine if no engine, this</span>
+                <span class="c1"># is probably responsible for the Aborted_clients, as it would have</span>
+                <span class="c1"># left the accquired engine orphaned</span>
+                <span class="c1"># Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to update checked details in db for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to update checked details in db for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
 
@@ -1655,11 +1674,17 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
                     <span class="c1"># update matched_count in ionosphere_table</span>
                     <span class="n">matched_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to update matched details in db for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+                    <span class="c1"># @added 20170804 - Bug #2130: MySQL - Aborted_clients</span>
+                    <span class="c1"># Set a conditional here to only get_an_engine if no engine, this</span>
+                    <span class="c1"># is probably responsible for the Aborted_clients, as it would have</span>
+                    <span class="c1"># left the accquired engine orphaned</span>
+                    <span class="c1"># Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to update matched details in db for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to update matched details in db for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
 
@@ -1678,11 +1703,17 @@
 
                     <span class="c1"># @added 20170107 - Feature #1844: ionosphere_matched DB table</span>
                     <span class="c1"># Added ionosphere_matched update</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to update ionosphere_matched for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+                    <span class="c1"># @modified 20170804 - Bug #2130: MySQL - Aborted_clients</span>
+                    <span class="c1"># Set a conditional here to only get_an_engine if no engine, this</span>
+                    <span class="c1"># is probably responsible for the Aborted_clients, as it would have</span>
+                    <span class="c1"># left the accquired engine orphaned</span>
+                    <span class="c1"># Testing on skyline-dev-3-40g-gra1 Fri Aug  4 16:08:14 UTC 2017</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to update ionosphere_matched for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to update ionosphere_matched for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
 
@@ -2534,7 +2565,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.5',
+            VERSION:'1.1.5-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
