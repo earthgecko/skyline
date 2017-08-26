@@ -1143,3 +1143,70 @@ def in_list(metric_name, check_list):
         return True
 
     return False
+
+# @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+# Get the metric db object data to memcache
+
+
+def get_memcache_metric_object(current_skyline_app, base_name):
+    """
+    Return the metrics_db_object from memcache if it exists.
+
+    """
+    try:
+        pymemcache_Client
+    except:
+        from pymemcache.client.base import Client as pymemcache_Client
+
+    try:
+        literal_eval
+    except:
+        from ast import literal_eval
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    if settings.MEMCACHE_ENABLED:
+        memcache_client = pymemcache_Client(('127.0.0.1', 11211), connect_timeout=0.1, timeout=0.2)
+    else:
+        memcache_client = None
+
+    memcache_metrics_db_object = None
+    metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
+    memcache_result = None
+    if settings.MEMCACHE_ENABLED:
+        try:
+            memcache_result = memcache_client.get(metrics_db_object_key)
+        except:
+            current_logger.error('error :: failed to get %s from memcache' % metrics_db_object_key)
+        try:
+            memcache_client.close()
+        except:
+            pass
+
+    memcache_metric_dict = None
+    if memcache_result:
+        try:
+            memcache_metrics_db_object = literal_eval(memcache_result)
+            memcache_metric_dict = {}
+            # for k, v in memcache_result_list:
+            for k, v in memcache_metrics_db_object.iteritems():
+                key_name = str(k)
+                key_value = str(v)
+                memcache_metric_dict[key_name] = key_value
+        except:
+            current_logger.error('error :: failed to process data from memcache key %s' % metrics_db_object_key)
+            memcache_metric_dict = False
+        try:
+            memcache_client.close()
+        except:
+            pass
+
+    if memcache_metric_dict:
+        metrics_id = int(memcache_metric_dict['id'])
+        metric_ionosphere_enabled = int(memcache_metric_dict['ionosphere_enabled'])
+        metrics_db_object = memcache_metric_dict
+        current_logger.info('get_memcache_metric_object :: returned memcache data for key - %s' % metrics_db_object_key)
+        return metrics_db_object
+
+    return False

@@ -226,10 +226,9 @@ PAGERDUTY_ENABLED = False
 
 SLACK_ENABLED = False
 """
-:var SLACK_ENABLED: Enables the Slack alerter`
+:var SLACK_ENABLED: Enables the Slack alerter
 :vartype SLACK_ENABLED: boolean
 """
-
 
 """
 Analyzer settings
@@ -1631,4 +1630,23 @@ IONOSPHERE_AUTOBUILD = True
     matched by age, etc or all and still be able to surface the available features
     profile page data on-demand.
 
+"""
+
+MEMCACHE_ENABLED = False
+"""
+:var MEMCACHE_ENABLED: Enables the use of memcache in Ionosphere to optimise
+    DB usage
+:vartype MEMCACHE_ENABLED: boolean
+"""
+
+MEMCACHED_SERVER_IP = '127.0.0.1'
+"""
+:var MEMCACHE_SERVER_IP: The IP address of the memcached server
+:vartype MEMCACHE_SERVER_IP: str
+"""
+
+MEMCACHED_SERVER_PORT = 11211
+"""
+:var MEMCACHE_SERVER_PORT: The port of the memcached server
+:vartype MEMCACHE_SERVER_IP: int
 """

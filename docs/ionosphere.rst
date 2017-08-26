@@ -599,6 +599,32 @@ people in open source, on par with @astanway :)
 
 Thanks to |blue-yonder| for supporting the open sourcing of |tsfresh|.
 
+memcached
+---------
+
+Ionosphere uses memcached and pymemcache (see https://github.com/pinterest/pymemcache)
+to cache some DB data.  This optimises DB usage and ensures that any large
+anomalous event does not result in Ionosphere making all the DB metrics become
+anomalous :)
+
+The architectural decision to introduce memcached when Redis is already
+available, was done to ensure that Redis is for timeseries data (and alert keys)
+and memcached isolates DB data caching.  The memcache data is truly transient,
+where as the Redis data is more persistent data and memcached is a mature, easy
+and well documented.
+
+Cached data
+^^^^^^^^^^^
+
+Ionosphere caches the following data:
+
+- features profile features values from the `z_fp_<metric_id>` table - no expiry
+- metrics table metric record - `expire=3600`
+- metric feature profile ids - `expire=3600`
+
+.. note:: due to caching a metric and a features profile can take up to 1 hour
+  to become live.
+
 Operational considerations
 --------------------------
 
@@ -625,6 +651,7 @@ MySQL configuration
 
 There could be a lot of tables. **DEFINITELY** implement ``innodb_file_per_table``
 in MySQL.
+
 
 Ionosphere - autobuild features_profiles dir
 --------------------------------------------

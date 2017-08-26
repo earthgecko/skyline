@@ -17,10 +17,23 @@ and considerations relating to the following components:
 - Redis
 - MySQL
 - Apache
+- memcached
 
 This installation document is specifically related to the required installs and
 configurations of things that are directly related Skyline.  For notes regarding
 automation and configuration management see the section at the end of this page.
+
+What the components do
+----------------------
+
+- Graphite - sends metric data to Skyline Horizon via a pickle
+- Redis - Stores mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
+  of timeseries data
+- MySQL - Stores data about anomalies and timeseries features fingerprints and
+  for learning things that are not anomalous.
+- Apache
+- memcached
+
 
 ``sudo``
 ~~~~~~~~
@@ -35,9 +48,9 @@ Steps
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
 
--  Create a python-2.7.12 virtualenv for Skyline to run in see `Running in
-   Python virtualenv <running-in-python-virtualenv.html>`__
--  Setup firewall rules to restrict access to the following:
+- Create a python-2.7.12 virtualenv for Skyline to run in see `Running in
+  Python virtualenv <running-in-python-virtualenv.html>`__
+- Setup firewall rules to restrict access to the following:
 
   - :mod:`settings.WEBAPP_IP` - default is 127.0.0.1
   - :mod:`settings.WEBAPP_PORT` - default 1500
@@ -59,8 +72,9 @@ Steps
   ``/var/run/redis/redis.sock`` if you use this path ensure you change
   :mod:`settings.REDIS_SOCKET_PATH` to this path
 
--  Start Redis
--  Make the required directories
+- Start Redis
+- Install memcached
+- Make the required directories
 
 .. code-block:: bash
 
