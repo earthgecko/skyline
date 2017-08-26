@@ -861,42 +861,12 @@ class Ionosphere(Thread):
         metrics_db_object = None
 
         # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
-        memcache_metrics_db_object = None
-        memcache_metric_dict = None
-
         # Try memcache first
+        memcache_metrics_db_object = None
         metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
-        memcache_result = None
+        memcache_metric_dict = None
         if settings.MEMCACHE_ENABLED:
-            try:
-                memcache_result = self.memcache_client.get(metrics_db_object_key)
-            except:
-                logger.error('error :: failed to get %s from memcache' % metrics_db_object_key)
-            try:
-                self.memcache_client.close()
-            except:
-                pass
-
-        memcache_metric_dict = None
-        if memcache_result:
-            try:
-                memcache_metrics_db_object = literal_eval(memcache_result)
-                memcache_metric_dict = {}
-                # for k, v in memcache_result_list:
-                for k, v in memcache_metrics_db_object.iteritems():
-                    key_name = str(k)
-                    key_value = str(v)
-                    memcache_metric_dict[key_name] = key_value
-            except:
-                logger.error('error :: failed to process data from memcache key %s' % metrics_db_object_key)
-                memcache_metric_dict = False
-            try:
-                self.memcache_client.close()
-            except:
-                pass
-
-        memcache_metric_dict = None
-        memcache_metric_dict = get_memcache_metric_object(skyline_app, base_name)
+            memcache_metric_dict = get_memcache_metric_object(skyline_app, base_name)
 
         query_metric_table = True
         if memcache_metric_dict:

@@ -73,7 +73,7 @@ Steps
   :mod:`settings.REDIS_SOCKET_PATH` to this path
 
 - Start Redis
-- Install memcached
+- Install memcached and start memcached see `memcached.org <https://memcached.org/>`
 - Make the required directories
 
 .. code-block:: bash
