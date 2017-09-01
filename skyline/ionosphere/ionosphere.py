@@ -862,6 +862,10 @@ class Ionosphere(Thread):
 
         # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
         # Try memcache first
+        try:
+            engine
+        except:
+            engine = None
         memcache_metrics_db_object = None
         metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
         memcache_metric_dict = None
@@ -920,6 +924,11 @@ class Ionosphere(Thread):
                 # stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))
                 stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
                 result = connection.execute(stmt)
+                try:
+                    result
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: got no result from MySQL from metrics table for - %s' % base_name)
                 row = result.fetchone()
                 # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
                 memcache_metrics_db_object = dict(row)
@@ -1096,7 +1105,6 @@ class Ionosphere(Thread):
         # This is now the Ionosphere meat.
         # Get a MySQL engine only if not training_metric
         if not training_metric:
-
             if not metrics_id:
                 logger.error('error :: metric id not known')
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
