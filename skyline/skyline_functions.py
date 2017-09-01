@@ -1005,12 +1005,12 @@ def mysql_select(current_skyline_app, select):
             try:
                 pattern_match = re.search(' LIKE ', str(select))
             except:
-                current_logger.error('error :: pattern_match - %s' % traceback_format_exc())
+                current_logger.error('error :: pattern_match - %s' % traceback.format_exc())
             if not pattern_match:
                 try:
                     pattern_match = re.search(' like ', str(select))
                 except:
-                    current_logger.error('error :: pattern_match - %s' % traceback_format_exc())
+                    current_logger.error('error :: pattern_match - %s' % traceback.format_exc())
 
             # TBD - not sure how to get it escaping safely
             pattern_match = True
@@ -1167,9 +1167,9 @@ def get_memcache_metric_object(current_skyline_app, base_name):
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     if settings.MEMCACHE_ENABLED:
-        memcache_client = pymemcache_Client(('127.0.0.1', 11211), connect_timeout=0.1, timeout=0.2)
+        memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
     else:
-        memcache_client = None
+        return False
 
     memcache_metrics_db_object = None
     metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
@@ -1210,3 +1210,61 @@ def get_memcache_metric_object(current_skyline_app, base_name):
         return metrics_db_object
 
     return False
+
+# @added 20170826 - Task #2132: Optimise Ionosphere DB usage
+# Get the fp_ids list object data to memcache
+
+
+def get_memcache_fp_ids_object(current_skyline_app, base_name):
+    """
+    Return the fp_ids list from memcache if it exists.
+
+    .. warning: this returns a list and to mimic the MySQL results rows, when
+        this is used the list item must to turned into a dict to match the
+        MySQL/SQLAlchemy format.
+
+    """
+    try:
+        pymemcache_Client
+    except:
+        from pymemcache.client.base import Client as pymemcache_Client
+
+    try:
+        literal_eval
+    except:
+        from ast import literal_eval
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    if settings.MEMCACHE_ENABLED:
+        memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
+    else:
+        return False
+
+    fp_ids_list_object_key = 'fp_ids_list_object.%s' % (str(base_name))
+
+    memcache_result = None
+    if settings.MEMCACHE_ENABLED:
+        try:
+            memcache_result = memcache_client.get(fp_ids_list_object_key)
+        except:
+            current_logger.error('error :: failed to get %s from memcache' % fp_ids_list_object_key)
+        try:
+            memcache_client.close()
+        except:
+            pass
+
+    result = None
+    if memcache_result:
+        try:
+            result = literal_eval(memcache_result)
+        except:
+            current_logger.error('error :: failed to process data from memcache key %s' % fp_ids_list_object_key)
+            result = False
+        try:
+            memcache_client.close()
+        except:
+            pass
+
+    return result
