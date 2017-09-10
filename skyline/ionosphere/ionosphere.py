@@ -140,7 +140,7 @@ class Ionosphere(Thread):
         self.layers_checked = Manager().list()
         # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
         if settings.MEMCACHE_ENABLED:
-            self.memcache_client = pymemcache_Client(('127.0.0.1', 11211), connect_timeout=0.1, timeout=0.2)
+            self.memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
         else:
             self.memcache_client = None
 

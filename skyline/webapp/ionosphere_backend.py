@@ -3157,3 +3157,153 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
         logger.error('%s' % fail_msg)
 
     return True, False, fail_msg, trace
+
+
+# added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+def features_profile_family_tree(fp_id):
+    """
+    Returns the all features profile ids of the related progeny features
+    profiles, the whole family tree.
+
+    :param fp_id: the features profile id
+    :return: array
+    :rtype: array
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: features_profile_progeny'
+
+    logger.info('%s getting the features profile ids of the progeny of fp_id %s' % (function_str, str(fp_id)))
+
+    trace = 'none'
+    fail_msg = 'none'
+    current_fp_id = int(fp_id)
+    family_tree_fp_ids = [current_fp_id]
+
+    logger.info('%s :: getting MySQL engine' % function_str)
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        logger.error('%s' % fail_msg)
+        raise
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    try:
+        ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    row = current_fp_id
+    while row:
+        try:
+            connection = engine.connect()
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.parent_id == current_fp_id)
+            result = connection.execute(stmt)
+            connection.close()
+            row = None
+            for row in result:
+                progeny_id = row['id']
+                family_tree_fp_ids.append(int(progeny_id))
+                current_fp_id = progeny_id
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: could not get id for %s' % str(current_fp_id)
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+
+    if engine:
+        engine_disposal(engine)
+
+    return family_tree_fp_ids, fail_msg, trace
+
+
+# added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+def disable_features_profile_family_tree(fp_ids):
+    """
+    Disable a features profile and all related progeny features profiles
+
+    :param fp_ids: a list of the the features profile ids to disable
+    :return: array
+    :rtype: array
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: disable_features_profile_and_progeny'
+
+    logger.info('%s disabling fp ids - %s' % (function_str, str(fp_ids)))
+
+    trace = 'none'
+    fail_msg = 'none'
+
+    logger.info('%s :: getting MySQL engine' % function_str)
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        logger.error('%s' % fail_msg)
+        raise
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    try:
+        ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for disable_features_profile_family_tree'
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    for fp_id in fp_ids:
+        try:
+            connection = engine.connect()
+            connection.execute(
+                ionosphere_table.update(
+                    ionosphere_table.c.id == int(fp_id)).
+                values(enabled=0))
+            connection.close()
+            logger.info('updated enabled for %s to 0' % (str(fp_id)))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not update enabled for fp_id %s ' % str(fp_id))
+            fail_msg = 'error :: could not update enabled for fp_id %s ' % str(fp_id)
+            if engine:
+                engine_disposal(engine)
+            raise
+
+    if engine:
+        engine_disposal(engine)
+
+    return True, fail_msg, trace
