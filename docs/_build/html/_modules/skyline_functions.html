@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -1170,12 +1170,12 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39; LIKE &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">select</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: pattern_match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback_format_exc</span><span class="p">())</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: pattern_match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_match</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39; like &#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">select</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: pattern_match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback_format_exc</span><span class="p">())</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: pattern_match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
             <span class="c1"># TBD - not sure how to get it escaping safely</span>
             <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1308,6 +1308,131 @@
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="kc">False</span></div>
+
+<span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+<span class="c1"># Get the metric db object data to memcache</span>
+
+
+<div class="viewcode-block" id="get_memcache_metric_object"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_metric_object">[docs]</a><span class="k">def</span> <span class="nf">get_memcache_metric_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the metrics_db_object from memcache if it exists.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pymemcache_Client</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pymemcache.client.base</span> <span class="k">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">pymemcache_Client</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">literal_eval</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+        <span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">metrics_db_object_key</span> <span class="o">=</span> <span class="s1">&#39;metrics_db_object.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="n">memcache_result</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metrics_db_object_key</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">memcache_result</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">memcache_result</span><span class="p">)</span>
+            <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># for k, v in memcache_result_list:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">memcache_metrics_db_object</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">key_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="n">key_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="n">memcache_metric_dict</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_value</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to process data from memcache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+            <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">memcache_metric_dict</span><span class="p">:</span>
+        <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
+        <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">memcache_metric_dict</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_memcache_metric_object :: returned memcache data for key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metrics_db_object</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+<span class="c1"># @added 20170826 - Task #2132: Optimise Ionosphere DB usage</span>
+<span class="c1"># Get the fp_ids list object data to memcache</span>
+
+
+<div class="viewcode-block" id="get_memcache_fp_ids_object"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_fp_ids_object">[docs]</a><span class="k">def</span> <span class="nf">get_memcache_fp_ids_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the fp_ids list from memcache if it exists.</span>
+
+<span class="sd">    .. warning: this returns a list and to mimic the MySQL results rows, when</span>
+<span class="sd">        this is used the list item must to turned into a dict to match the</span>
+<span class="sd">        MySQL/SQLAlchemy format.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pymemcache_Client</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pymemcache.client.base</span> <span class="k">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">pymemcache_Client</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">literal_eval</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+        <span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">fp_ids_list_object_key</span> <span class="o">=</span> <span class="s1">&#39;fp_ids_list_object.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
+    <span class="n">memcache_result</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_ids_list_object_key</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">fp_ids_list_object_key</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">memcache_result</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">memcache_result</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to process data from memcache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fp_ids_list_object_key</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
 </pre></div>
 
            </div>
@@ -1341,7 +1466,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

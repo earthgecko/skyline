@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.alerters &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>analyzer.alerters &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -163,7 +163,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for analyzer.alerters</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">smtplib</span> <span class="k">import</span> <span class="n">SMTP</span>
 <span class="kn">import</span> <span class="nn">alerters</span>
@@ -206,6 +206,7 @@
     <span class="kn">from</span> <span class="nn">email.MIMEMultipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
     <span class="kn">from</span> <span class="nn">email.MIMEText</span> <span class="k">import</span> <span class="n">MIMEText</span>
     <span class="kn">from</span> <span class="nn">email.MIMEImage</span> <span class="k">import</span> <span class="n">MIMEImage</span>
+    <span class="kn">from</span> <span class="nn">email</span> <span class="k">import</span> <span class="n">charset</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">email.mime.multipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
     <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="k">import</span> <span class="n">MIMEText</span>
@@ -751,41 +752,65 @@
         <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
             <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Derivative graph: True&lt;/font&gt;&lt;br&gt;&#39;</span>
 
+        <span class="n">more_body</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Ionosphere :: &lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span>
+            <span class="c1"># @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls</span>
+            <span class="c1"># Broke body into body and more_body to workaround the 990 character</span>
+            <span class="c1"># limit per line for SMTP</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Ionosphere :: &lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span>
             <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To use this timeseries to train Skyline that this is not anomalous manage this training data at:&lt;br&gt;&#39;</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_link</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To use this timeseries to train Skyline that this is not anomalous manage this training data at:&lt;br&gt;&#39;</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_link</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;min: </span><span class="si">%s</span><span class="s1">  | max: </span><span class="si">%s</span><span class="s1">   | mean: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;min: </span><span class="si">%s</span><span class="s1">  | max: </span><span class="si">%s</span><span class="s1">   | mean: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">array_amin</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">array_amax</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean</span><span class="p">))</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">)</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma upper bound: </span><span class="si">%s</span><span class="s1">   | 3-sigma lower bound: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3</span><span class="p">)</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;3-sigma upper bound: </span><span class="si">%s</span><span class="s1">   | 3-sigma lower bound: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_upper_bound</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sigma3_lower_bound</span><span class="p">))</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Redis data at FULL_DURATION&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;:</span><span class="si">%s</span><span class="s1">&lt;br&gt;&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Redis data at FULL_DURATION&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;:</span><span class="si">%s</span><span class="s1">&lt;br&gt;&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="n">redis_img_tag</span>
         <span class="k">if</span> <span class="n">image_data</span><span class="p">:</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Graphite data at FULL_DURATION (may be aggregated)&lt;/font&gt;&lt;/h3&gt;&#39;</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Clicking on the above graph will open to the Graphite graph with current data&lt;/font&gt;&lt;br&gt;&#39;</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;black&quot;&gt;Graphite data at FULL_DURATION (may be aggregated)&lt;/font&gt;&lt;/h3&gt;&#39;</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Clicking on the above graph will open to the Graphite graph with current data&lt;/font&gt;&lt;br&gt;&#39;</span>
         <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
-            <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;br&gt;&#39;</span>
-        <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot; align=&quot;right&quot;&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; version :: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_version</span><span class="p">)</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
+        <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;br&gt;&#39;</span>
+        <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot; align=&quot;right&quot;&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; version :: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_version</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not build body&#39;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
     <span class="k">for</span> <span class="n">recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;alternative&#39;</span><span class="p">)</span>
+            <span class="c1"># @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls</span>
+            <span class="c1"># Broke body into body and more_body to workaround the 990 character</span>
+            <span class="c1"># limit per line for SMTP, using mixed as alternative indicates that</span>
+            <span class="c1"># the client should select one of the parts for display and ignore</span>
+            <span class="c1"># the rest (tripleee - https://stackoverflow.com/a/35115938)</span>
+            <span class="c1"># msg = MIMEMultipart(&#39;alternative&#39;)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;mixed&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170812 - Bug #2142: 7bit SMTP encoding breaking long urls</span>
+            <span class="c1"># set email charset and email encodings</span>
+            <span class="n">cs_</span> <span class="o">=</span> <span class="n">charset</span><span class="o">.</span><span class="n">Charset</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="n">cs_</span><span class="o">.</span><span class="n">header_encoding</span> <span class="o">=</span> <span class="n">charset</span><span class="o">.</span><span class="n">QP</span>
+            <span class="n">cs_</span><span class="o">.</span><span class="n">body_encoding</span> <span class="o">=</span> <span class="n">charset</span><span class="o">.</span><span class="n">QP</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">set_charset</span><span class="p">(</span><span class="n">cs_</span><span class="p">)</span>
+
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] - </span><span class="si">%s</span><span class="s1"> ALERT - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
 
             <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
+            <span class="c1"># @added 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls</span>
+            <span class="c1"># Broke body into body and more_body to workaround the 990 character</span>
+            <span class="c1"># limit per line for SMTP</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">replace_header</span><span class="p">(</span><span class="s1">&#39;content-transfer-encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;quoted-printable&#39;</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">more_body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
+
             <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># @modified 20160814 - Bug #1558: Memory leak in Analyzer</span>
@@ -1031,7 +1056,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,0 +1,34 @@
+=============================
+1.1.6 - the ionosphere branch
+=============================
+
+v1.1.6-ionosphere - Sep 13, 2017
+
+Changes
+-------
+
+- Bumped to v1.1.6
+- disabled_features_profiles (Feature #2056)
+
+  - Populated the enabled_list
+  - Added enabled_list to display DISABLED in search_features_profiles
+    page results.
+  - Added enabled query modifier to display enabled or disabled profiles in
+    the search_features_profiles page results.
+  - Updated docs with memcached stuff and DISABLED features profiles
+  - Added the functionality in Webapp to disable features profiles and their
+    progeny features profiles
+  - Tidy up and use settings memcache variables in ionosphere.py
+
+- Optimise Ionosphere DB usage with memcached - (Task #2132)
+- Infrequent missing new_ Redis keys (Bug #2154)
+
+  - Update derivative_metrics if the analyzer.derivative_metrics_expiry key is
+    going to expire within 60s
+  - Increased analyzer.derivative_metrics_expiry ttl from 120 to 300
+
+- Updated deps (Task #2138)
+- 7bit SMTP encoding breaking long urls (Bug #2142)
+
+  - Broke body into body and more_body to workaround the 990 character limit per
+    line for SMTP, using mixed MIMEMultipart

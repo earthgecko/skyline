@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -198,9 +198,14 @@
 <span class="c1">#                   Feature #1844: ionosphere_matched DB table</span>
 <span class="kn">from</span> <span class="nn">tsfresh</span> <span class="k">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">tsfresh_version</span>
 
+<span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
+<span class="kn">from</span> <span class="nn">pymemcache.client.base</span> <span class="k">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">pymemcache_Client</span>
+
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">fail_check</span><span class="p">,</span> <span class="n">mysql_select</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">)</span>
+    <span class="n">fail_check</span><span class="p">,</span> <span class="n">mysql_select</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
+    <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+    <span class="n">get_memcache_metric_object</span><span class="p">)</span>
 
 <span class="c1"># @added 20161221 - calculate features for every anomaly, instead of making the</span>
 <span class="c1"># user do it in the frontend or calling the webapp constantly in a cron like</span>
@@ -298,6 +303,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Ionosphere.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1006,6 +1016,39 @@
         <span class="c1"># match to the next.</span>
         <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
+        <span class="c1"># Create the metrics_db_object so it is available to determine all</span>
+        <span class="c1"># the details of all features profiles for the metric, this has all</span>
+        <span class="c1"># the generations values avaialble in it.  Here we go! Learn!</span>
+        <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+        <span class="c1"># Try memcache first</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">metrics_db_object_key</span> <span class="o">=</span> <span class="s1">&#39;metrics_db_object.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+            <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="n">get_memcache_metric_object</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+
+        <span class="n">query_metric_table</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">memcache_metric_dict</span><span class="p">:</span>
+            <span class="n">query_metric_table</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
+            <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">memcache_metric_dict</span>
+            <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using </span><span class="si">%s</span><span class="s1"> key data from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+
         <span class="c1"># Check if the metric has ionosphere_enabled, if not remove the check</span>
         <span class="c1"># file but not the data directory</span>
         <span class="c1"># @modified 20161230 - Feature #1830: Ionosphere alerts</span>
@@ -1019,64 +1062,83 @@
         <span class="c1">#     # self.remove_metric_check_file(str(metric_check_file))</span>
         <span class="c1">#     # return</span>
         <span class="c1">#     training_metric = True</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to determine ionosphere_enabled&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+        <span class="c1"># If no memcache data then MySQL query_metric_table</span>
+        <span class="k">if</span> <span class="n">query_metric_table</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to determine ionosphere_enabled&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to determine ionosphere_enabled&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to determine ionosphere_enabled&#39;</span><span class="p">)</span>
 
-        <span class="c1"># Get the metrics_table metadata</span>
-        <span class="n">metrics_table</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_table OK for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="c1"># Get the metrics_table metadata</span>
+            <span class="n">metrics_table</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_table OK for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
 
-        <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="c1"># stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">result</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: got no result from MySQL from metrics table for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+                <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+                <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">metrics_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">]</span>
+                <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
+                <span class="c1"># Create the metrics_db_object so it is available throughout</span>
+                <span class="c1"># Here we go! Learn!</span>
+                <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">row</span>
 
-        <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
-        <span class="c1"># Create the metrics_db_object so it is available to determine all</span>
-        <span class="c1"># the details of all features profiles for the metric, this has all</span>
-        <span class="c1"># the generations values avaialble in it.  Here we go! Learn!</span>
-        <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-            <span class="c1"># stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))</span>
-            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">)</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
-            <span class="n">row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
-            <span class="n">metrics_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
-            <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">]</span>
-            <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
-            <span class="c1"># Create the metrics_db_object so it is available throughout</span>
-            <span class="c1"># Here we go! Learn!</span>
-            <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">row</span>
-
-            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># @modified 20161222 - do not remove metric file until features</span>
-                <span class="c1"># calculated</span>
-                <span class="c1"># self.remove_metric_check_file(str(metric_check_file))</span>
-                <span class="c1"># return</span>
+                <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># @modified 20161222 - do not remove metric file until features</span>
+                    <span class="c1"># calculated</span>
+                    <span class="c1"># self.remove_metric_check_file(str(metric_check_file))</span>
+                    <span class="c1"># return</span>
+                    <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># self.training_metrics.append(base_name)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine ionosphere_enabled from metrics table for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="c1"># self.training_metrics.append(base_name)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine ionosphere_enabled from metrics table for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-            <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="c1"># self.training_metrics.append(base_name)</span>
+
+        <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+        <span class="c1"># Add the metric db object data to memcache</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span> <span class="ow">and</span> <span class="n">query_metric_table</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">memcache_metrics_db_object</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="n">key_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="n">key_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="n">memcache_metric_dict</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">metrics_db_object_key</span><span class="p">,</span> <span class="n">memcache_metric_dict</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set the memcache key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
 
         <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn - generations</span>
         <span class="c1"># If this is added_by ionosphere_learn the id is only</span>
@@ -1208,7 +1270,6 @@
         <span class="c1"># This is now the Ionosphere meat.</span>
         <span class="c1"># Get a MySQL engine only if not training_metric</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">training_metric</span><span class="p">:</span>
-
             <span class="k">if</span> <span class="ow">not</span> <span class="n">metrics_id</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: metric id not known&#39;</span><span class="p">)</span>
                 <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
@@ -1522,19 +1583,54 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained for feature_id and values from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_table</span><span class="p">)</span>
 
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT feature_id, value FROM </span><span class="si">%s</span><span class="s1"> WHERE fp_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_fp_table</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
-                    <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
-                        <span class="n">fp_feature_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;feature_id&#39;</span><span class="p">])</span>
-                        <span class="n">fp_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
-                        <span class="n">fp_features</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_feature_id</span><span class="p">,</span> <span class="n">fp_value</span><span class="p">])</span>
-                    <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-                    <span class="n">features_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_features</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determined </span><span class="si">%s</span><span class="s1"> features for fp_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">features_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine feature_id, value from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_table</span><span class="p">)</span>
+                <span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
+                <span class="c1"># First check to determine if the fp_id has data in memcache</span>
+                <span class="c1"># before querying the database</span>
+                <span class="n">fp_id_feature_values</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                    <span class="n">fp_id_feature_values_key</span> <span class="o">=</span> <span class="s1">&#39;fp.id.</span><span class="si">%s</span><span class="s1">.feature.values&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">fp_id_feature_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+                        <span class="c1"># if memcache does not have the key the response to the</span>
+                        <span class="c1"># client is None, it does not except</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">if</span> <span class="n">fp_id_feature_values</span><span class="p">:</span>
+                        <span class="n">fp_features</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_id_feature_values</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using memcache </span><span class="si">%s</span><span class="s1"> key data&#39;</span> <span class="o">%</span> <span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_features</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT feature_id, value FROM </span><span class="si">%s</span><span class="s1"> WHERE fp_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_fp_table</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
+                            <span class="n">fp_feature_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;feature_id&#39;</span><span class="p">])</span>
+                            <span class="n">fp_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+                            <span class="n">fp_features</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_feature_id</span><span class="p">,</span> <span class="n">fp_value</span><span class="p">])</span>
+                        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">features_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_features</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determined </span><span class="si">%s</span><span class="s1"> features for fp_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">features_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine feature_id, value from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_table</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">fp_features</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                        <span class="n">fp_id_feature_values_key</span> <span class="o">=</span> <span class="s1">&#39;fp.id.</span><span class="si">%s</span><span class="s1">.feature.values&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">fp_id_feature_values_key</span><span class="p">,</span> <span class="n">fp_features</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populated memcache </span><span class="si">%s</span><span class="s1"> key&#39;</span> <span class="o">%</span> <span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set </span><span class="si">%s</span><span class="s1"> in memcache&#39;</span> <span class="o">%</span> <span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+
+                <span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
 
                 <span class="c1"># @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs</span>
                 <span class="c1">#                   Feature #1844: ionosphere_matched DB table</span>
@@ -2163,13 +2259,43 @@
             <span class="c1"># self.populate the database metatdata tables</span>
             <span class="c1"># What is my host id in the Skyline panorama DB?</span>
             <span class="n">host_id</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id FROM hosts WHERE host=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span>
-            <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
-                <span class="n">host_id</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;host_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">host_id</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to determine host id of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+            <span class="c1"># Check memcached before MySQL</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                <span class="n">hosts_id_key</span> <span class="o">=</span> <span class="s1">&#39;hosts.id.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">host_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hosts_id_key</span><span class="p">)</span>
+                    <span class="c1"># if memcache does not have the key the response to the</span>
+                    <span class="c1"># client is None, it does not except</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">hosts_id_key</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">if</span> <span class="n">host_id</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using memcache </span><span class="si">%s</span><span class="s1"> key data&#39;</span> <span class="o">%</span> <span class="n">hosts_id_key</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;host_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">host_id</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">host_id</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id FROM hosts WHERE host=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+                    <span class="n">host_id</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;host_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">host_id</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to determine host id of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">host_id</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">hosts_id_key</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">host_id</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populated memcache </span><span class="si">%s</span><span class="s1"> key&#39;</span> <span class="o">%</span> <span class="n">hosts_id_key</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set </span><span class="si">%s</span><span class="s1"> in memcache&#39;</span> <span class="o">%</span> <span class="n">hosts_id_key</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
 
             <span class="c1"># if not known - INSERT hostname INTO host</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">host_id</span><span class="p">:</span>
@@ -2565,7 +2691,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
