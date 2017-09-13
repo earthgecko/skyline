@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.webapp &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>webapp.webapp &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -235,7 +235,9 @@
     <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
     <span class="n">validate_fp</span><span class="p">,</span>
     <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
-    <span class="n">save_training_data_dir</span><span class="p">)</span>
+    <span class="n">save_training_data_dir</span><span class="p">,</span>
+    <span class="c1"># added 20170908 - Feature #2056: ionosphere - disabled_features_profiles</span>
+    <span class="n">features_profile_family_tree</span><span class="p">,</span> <span class="n">disable_features_profile_family_tree</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">features_profile</span> <span class="k">import</span> <span class="n">feature_name_id</span><span class="p">,</span> <span class="n">calculate_features_profile</span>
 <span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_VERSION</span>
@@ -1107,11 +1109,15 @@
 
         <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
             <span class="n">fps</span><span class="p">,</span> <span class="n">fps_count</span><span class="p">,</span> <span class="n">mc</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">gc</span><span class="p">,</span> <span class="n">full_duration_list</span><span class="p">,</span> <span class="n">enabled_list</span><span class="p">,</span> <span class="n">tsfresh_version_list</span><span class="p">,</span> <span class="n">generation_list</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_search</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles</span>
+            <span class="c1"># Added enabled_list to display DISABLED in search_features_profiles</span>
+            <span class="c1"># page results.</span>
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
                 <span class="s1">&#39;ionosphere.html&#39;</span><span class="p">,</span> <span class="n">fp_search</span><span class="o">=</span><span class="n">fp_search_req</span><span class="p">,</span>
                 <span class="n">fp_search_results</span><span class="o">=</span><span class="n">fp_search_req</span><span class="p">,</span> <span class="n">features_profiles</span><span class="o">=</span><span class="n">fps</span><span class="p">,</span>
                 <span class="n">for_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">ordered_by</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limited_by</span><span class="p">,</span>
                 <span class="n">matched_count</span><span class="o">=</span><span class="n">mc</span><span class="p">,</span> <span class="n">checked_count</span><span class="o">=</span><span class="n">cc</span><span class="p">,</span> <span class="n">generation_count</span><span class="o">=</span><span class="n">gc</span><span class="p">,</span>
+                <span class="n">enabled_list</span><span class="o">=</span><span class="n">enabled_list</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span>
                 <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="mi">200</span>
 
@@ -1139,6 +1145,8 @@
         <span class="s1">&#39;d1_condition&#39;</span><span class="p">,</span> <span class="s1">&#39;d1_boundary_limit&#39;</span><span class="p">,</span> <span class="s1">&#39;d1_boundary_times&#39;</span><span class="p">,</span>
         <span class="c1"># @added 20170617 - Feature #2054: ionosphere.save.training_data</span>
         <span class="s1">&#39;save_training_data&#39;</span><span class="p">,</span> <span class="s1">&#39;saved_td_label&#39;</span><span class="p">,</span> <span class="s1">&#39;saved_training_data&#39;</span><span class="p">,</span>
+        <span class="c1"># added 20170908 - Feature #2056: ionosphere - disabled_features_profiles</span>
+        <span class="s1">&#39;disable_fp&#39;</span><span class="p">,</span>
     <span class="p">]</span>
 
     <span class="n">determine_metric</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1166,6 +1174,9 @@
     <span class="n">save_training_data</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">saved_training_data</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">saved_td_label</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># added 20170908 - Feature #2056: ionosphere - disabled_features_profiles</span>
+    <span class="n">disable_fp</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">request_args_present</span><span class="p">:</span>
@@ -1729,8 +1740,11 @@
         <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
         <span class="n">validated_fp_success</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="k">if</span> <span class="n">fp_view</span><span class="p">:</span>
+        <span class="c1"># added 20170908 - Feature #2056: ionosphere - disabled_features_profiles</span>
+        <span class="n">family_tree_fp_ids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">disabled_fp_success</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="k">if</span> <span class="n">fp_view</span><span class="p">:</span>
             <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
             <span class="n">validate</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="s1">&#39;validate_fp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -1747,6 +1761,17 @@
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;failed to validate features profile&#39;</span>
                     <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
+            <span class="c1"># added 20170908 - Feature #2056: ionosphere - disabled_features_profiles</span>
+            <span class="n">family_tree_fp_ids</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">features_profile_family_tree</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;disable_fp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;disable_fp&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">disable_fp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_fp is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">disable_fp</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">disable_fp</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disabling fp ids - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">family_tree_fp_ids</span><span class="p">))</span>
+                <span class="n">disabled_fp_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">disable_features_profile_family_tree</span><span class="p">(</span><span class="n">family_tree_fp_ids</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># @modified 20170114 -  Feature #1854: Ionosphere learn - generations</span>
@@ -1888,6 +1913,9 @@
             <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
             <span class="n">fp_validated</span> <span class="o">=</span> <span class="mi">0</span>
 
+            <span class="c1"># added 20170908 - Feature #2056: ionosphere - disabled_features_profiles</span>
+            <span class="n">fp_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="c1"># Determine the parent_id and generation as they were added to the</span>
             <span class="c1"># fp_details_object</span>
             <span class="k">if</span> <span class="n">fp_details</span><span class="p">:</span>
@@ -1896,6 +1924,9 @@
                     <span class="n">gen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">])</span>
                     <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
                     <span class="n">fp_validated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">])</span>
+                    <span class="c1"># added 20170908 - Feature #2056: ionosphere - disabled_features_profiles</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">fp_enabled</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object&#39;</span>
@@ -2076,6 +2107,9 @@
                 <span class="n">metric_training_data_saved</span><span class="o">=</span><span class="n">training_data_saved</span><span class="p">,</span>
                 <span class="n">saved_metric_td_requested</span><span class="o">=</span><span class="n">saved_td_requested</span><span class="p">,</span>
                 <span class="n">saved_metric_td_details</span><span class="o">=</span><span class="n">saved_td_details</span><span class="p">,</span>
+                <span class="n">profile_enabled</span><span class="o">=</span><span class="n">fp_enabled</span><span class="p">,</span> <span class="n">disable_feature_profile</span><span class="o">=</span><span class="n">disable_fp</span><span class="p">,</span>
+                <span class="n">disabled_fp_successful</span><span class="o">=</span><span class="n">disabled_fp_success</span><span class="p">,</span>
+                <span class="n">family_tree_ids</span><span class="o">=</span><span class="n">family_tree_fp_ids</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span>
                 <span class="n">print_debug</span><span class="o">=</span><span class="n">debug_on</span><span class="p">),</span> <span class="mi">200</span>
         <span class="k">except</span><span class="p">:</span>
@@ -2612,7 +2646,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

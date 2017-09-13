@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.learn &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>ionosphere.learn &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -186,7 +186,9 @@
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">get_graphite_metric</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span>
     <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
-    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">,</span>
+    <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+    <span class="n">get_memcache_metric_object</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">features_profile</span> <span class="k">import</span> <span class="n">calculate_features_profile</span>
 
@@ -654,38 +656,47 @@
         <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">metric_db_object</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="c1"># Get a MySQL engine</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">learn_get_an_engine</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">log_msg</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: could not get a MySQL engine to get metric_db_object&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: engine not obtained to get metric_db_object&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
-            <span class="k">continue</span>
+        <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+        <span class="c1"># Get the metric db object data to memcache it is exists</span>
+        <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">get_memcache_metric_object</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">learn_base_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric_db_object</span><span class="p">:</span>
+            <span class="n">metrics_id</span> <span class="o">=</span> <span class="n">metric_db_object</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># @modified 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+            <span class="c1"># Only if no memcache data</span>
+            <span class="c1"># Get a MySQL engine</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">learn_get_an_engine</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">log_msg</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: could not get a MySQL engine to get metric_db_object&#39;</span><span class="p">)</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">metrics_id</span><span class="p">,</span> <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">get_metric_from_metrics</span><span class="p">(</span><span class="n">learn_base_name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-            <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed get the metric details from the database&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: engine not obtained to get metric_db_object&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">metrics_id</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed get the metrics_id from the database&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
-            <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-            <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metrics_id</span><span class="p">,</span> <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">get_metric_from_metrics</span><span class="p">(</span><span class="n">learn_base_name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+                <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed get the metric details from the database&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_db_object</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed get the metric_db_object from the database&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
-            <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-            <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metrics_id</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed get the metrics_id from the database&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+                <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_db_object</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed get the metric_db_object from the database&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+                <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                <span class="k">continue</span>
 
         <span class="n">learn_valid_ts_older_than</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
@@ -697,7 +708,8 @@
             <span class="n">use_full_duration</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">learn_valid_ts_older_than</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
-            <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">learn_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
             <span class="k">continue</span>
 
         <span class="n">time_check</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
@@ -1613,7 +1625,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

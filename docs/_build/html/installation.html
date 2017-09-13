@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>Installation &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -92,7 +92,8 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#intended-audience">Intended audience</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#intended-audience">Intended audience</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-the-components-do">What the components do</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sudo"><code class="docutils literal"><span class="pre">sudo</span></code></a></li>
 </ul>
 </li>
@@ -186,10 +187,23 @@ and considerations relating to the following components:</p>
 <li>Redis</li>
 <li>MySQL</li>
 <li>Apache</li>
+<li>memcached</li>
 </ul>
 <p>This installation document is specifically related to the required installs and
 configurations of things that are directly related Skyline.  For notes regarding
 automation and configuration management see the section at the end of this page.</p>
+</div>
+<div class="section" id="what-the-components-do">
+<h2>What the components do<a class="headerlink" href="#what-the-components-do" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Graphite - sends metric data to Skyline Horizon via a pickle</li>
+<li>Redis - Stores mod:<cite>settings.FULL_DURATION</cite> seconds (usefully 24 hours worth)
+of timeseries data</li>
+<li>MySQL - Stores data about anomalies and timeseries features fingerprints and
+for learning things that are not anomalous.</li>
+<li>Apache</li>
+<li>memcached</li>
+</ul>
 <div class="section" id="sudo">
 <h3><code class="docutils literal"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h3>
 <p>Use <code class="docutils literal"><span class="pre">sudo</span></code> appropriately for your environment wherever necessary.</p>
@@ -207,10 +221,7 @@ environment, it does not lend itself to repeatability or a common known state.</
 <ul class="simple">
 <li>Create a python-2.7.12 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
 Python virtualenv</a></li>
-<li>Setup firewall rules to restrict access to the following:</li>
-</ul>
-<blockquote>
-<div><ul class="simple">
+<li>Setup firewall rules to restrict access to the following:<ul>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_IP</span></code></a> - default is 127.0.0.1</li>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_PORT</span></code></a> - default 1500</li>
 <li>The IP address and port being used to reverse proxy the Webapp (if implementing) e.g. &lt;YOUR_SERVER_IP_ADDRESS&gt;:8080</li>
@@ -218,8 +229,7 @@ Python virtualenv</a></li>
 <li>The IP address and ports 2024 and 2025</li>
 <li>The IP address and port being used by Redis</li>
 </ul>
-</div></blockquote>
-<ul class="simple">
+</li>
 <li>Install Redis - see <a class="reference external" href="http://redis.io/">Redis.io</a></li>
 <li>Ensure Redis has socket enabled <strong>with the following permissions</strong> in your
 redis.conf</li>
@@ -236,6 +246,7 @@ redis.conf</li>
 </div>
 <ul class="simple">
 <li>Start Redis</li>
+<li>Install memcached and start memcached see <cite>memcached.org &lt;https://memcached.org/&gt;</cite></li>
 <li>Make the required directories</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir /var/log/skyline
@@ -411,8 +422,13 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 </pre></div>
 </div>
 <ul class="simple">
-<li>Seed Redis with some test data</li>
+<li>Seed Redis with some test data.</li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">if you are UPGRADING and you are using an already populated Redis
+store, you can skip seeding data.</p>
+</div>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
 bin/python2.7 /opt/skyline/github/skyline/utils/seed_data.py
@@ -510,7 +526,7 @@ the dependency is fulfilled.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

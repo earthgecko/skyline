@@ -10,6 +10,10 @@ Upgrading
 
 .. todo: Document the possible paths
 
+Backup your Redis!
+##################
+
+Do it.
 
 Upgrading from the Etsy version of Skyline
 ##########################################
@@ -24,7 +28,7 @@ Do a new install
 ================
 
 If you are upgrading from an Etsy version consider doing a new install, all you
-need is your Redis data.
+need is your Redis data (but BACK IT UP FIRST)
 
 However you may have some other monitoring or custom inits, etc set up on your
 Skyline then the below is a best effort guide.
@@ -89,6 +93,11 @@ Logging
 
 There have been changes made in the logging methodology, see
 `Logging <../logging.html>`__.
+
+New required components
+~~~~~~~~~~~~~~~~~~~~~~~
+
+MySQL and memcached.
 
 Clone and have a look
 ~~~~~~~~~~~~~~~~~~~~~

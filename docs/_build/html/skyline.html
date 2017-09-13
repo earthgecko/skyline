@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>skyline package &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -918,7 +918,7 @@ details to syslog.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Slack alerter`</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Slack alerter</td>
 </tr>
 </tbody>
 </table>
@@ -2879,6 +2879,46 @@ profile page data on-demand.</p>
 </div>
 </dd></dl>
 
+<dl class="data">
+<dt id="settings.MEMCACHE_ENABLED">
+<code class="descname">MEMCACHE_ENABLED</code><em class="property"> = False</em><a class="headerlink" href="#settings.MEMCACHE_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MEMCACHE_ENABLED" title="settings.MEMCACHE_ENABLED"><strong>MEMCACHE_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the use of memcache in Ionosphere to optimise
+DB usage</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.MEMCACHED_SERVER_IP">
+<code class="descname">MEMCACHED_SERVER_IP</code><em class="property"> = '127.0.0.1'</em><a class="headerlink" href="#settings.MEMCACHED_SERVER_IP" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>MEMCACHE_SERVER_IP</strong> (<em>str</em>) &#8211; The IP address of the memcached server</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.MEMCACHED_SERVER_PORT">
+<code class="descname">MEMCACHED_SERVER_PORT</code><em class="property"> = 11211</em><a class="headerlink" href="#settings.MEMCACHED_SERVER_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>MEMCACHE_SERVER_PORT</strong> &#8211; The port of the memcached server</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_functions">
 <span id="skyline-skyline-functions-module"></span><h2>skyline.skyline_functions module<a class="headerlink" href="#module-skyline_functions" title="Permalink to this headline">¶</a></h2>
@@ -3170,6 +3210,18 @@ This is a part copy of the SKIP_LIST allows for a string match or a match on
 dotted elements within the metric namespace used in Horizon/worker</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="skyline_functions.get_memcache_metric_object">
+<code class="descname">get_memcache_metric_object</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_memcache_metric_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_memcache_metric_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the metrics_db_object from memcache if it exists.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.get_memcache_fp_ids_object">
+<code class="descname">get_memcache_fp_ids_object</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_memcache_fp_ids_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_memcache_fp_ids_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fp_ids list from memcache if it exists.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_version">
 <span id="skyline-skyline-version-module"></span><h2>skyline.skyline_version module<a class="headerlink" href="#module-skyline_version" title="Permalink to this headline">¶</a></h2>
@@ -3303,7 +3355,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

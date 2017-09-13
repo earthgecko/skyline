@@ -112,6 +112,8 @@ Skyline uses to following technologies and libraries at its core:
 7. :red:`re`:brow:`brow` - Skyline uses a modified port of Marian
    Steinbach's excellent `rebrow`_
 8. **tsfresh** - `tsfresh`_ - Automatic extraction of relevant features from time series
+9. **memcached** - `memcached`_ - memory object caching system
+10. **pymemcache** - `pymemcache`_ - A comprehensive, fast, pure-Python memcached client
 
 .. _Etsy: https://www.etsy.com/
 .. _github/etsy: https://github.com/etsy/skyline
@@ -125,3 +127,5 @@ Skyline uses to following technologies and libraries at its core:
 .. _rebrow: https://github.com/marians/rebrow
 .. _MariaDB: https://mariadb.org/
 .. _tsfresh: https://github.com/blue-yonder/tsfresh
+.. _memcached: https://memcached.org/
+.. _pymemcache: https://github.com/pinterest/pymemcache

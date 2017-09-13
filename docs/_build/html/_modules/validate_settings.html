@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>validate_settings &mdash; Skyline 1.1.5-beta documentation</title>
+  <title>validate_settings &mdash; Skyline 1.1.6-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.5-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -493,6 +493,32 @@
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_NAMESPACE_CONFIG is not set in settings.py&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
+    <span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_MEMCACHE_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MEMCACHE_ENABLED is not set as a boolean in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MEMCACHE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_MEMCACHED_SERVER_IP</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_IP is not set as a str in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_IP is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_MEMCACHED_SERVER_PORT</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_PORT is not set as an int in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_PORT is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="k">if</span> <span class="n">invalid_variables</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 
@@ -530,7 +556,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.5-beta',
+            VERSION:'1.1.6-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
