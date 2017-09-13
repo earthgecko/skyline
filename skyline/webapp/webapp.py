@@ -944,11 +944,15 @@ def ionosphere():
 
         if get_metric_profiles:
             fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+            # Added enabled_list to display DISABLED in search_features_profiles
+            # page results.
             return render_template(
                 'ionosphere.html', fp_search=fp_search_req,
                 fp_search_results=fp_search_req, features_profiles=fps,
                 for_metric=metric, order=ordered_by, limit=limited_by,
                 matched_count=mc, checked_count=cc, generation_count=gc,
+                enabled_list=enabled_list,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=False), 200
 

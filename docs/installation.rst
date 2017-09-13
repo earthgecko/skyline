@@ -242,7 +242,10 @@ Steps
       echo ""
     done
 
--  Seed Redis with some test data
+-  Seed Redis with some test data.
+
+.. note:: if you are UPGRADING and you are using an already populated Redis
+  store, you can skip seeding data.
 
 .. code-block:: bash
 

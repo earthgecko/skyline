@@ -421,14 +421,14 @@ the entire range they "think" the metric can go to, a layer is meant to match wi
 a features profile, not a metric.  If this methodology is followed, layers and
 features profiles "retire" around the same time as metrics change over time,
 an old features profile that no longer describes the current active motion state
-well no longer ever be matched anymore, neither should its layers.  One of the
+will no longer ever be matched, neither should its layers.  One of the
 things some way down the road on the Ionosphere roadmap is
 Feature #1888: Ionosphere learn - evolutionary maturity forget
 
 Layers were added to reduce the number of features profiles one has to train
 Skyline on.  They were introduced for humans and to make it easier and more
 useful.  However they come at a cost.  Every layer created reduces Ionosphere's
-opportunities to be trained and learn.  It is a compromise to save on the about
+opportunities to be trained and learn.  It is a compromise to save on the amount
 of monkeys you have to have or need to be to train Skyline properly.  Unfortunately
 someone has to be the monkey, but for every features profile/layer you create,
 you create a Skyline monkey to watch that.  A monkey with fairly simple
@@ -523,6 +523,25 @@ dropped to 0, the above example is not a good example of the as we want and
 expect 0 on the 404 found generally, but if it was status code 200, we would not
 want any layers silencing a drop to 0, please try and use layer D1 wisely were
 required.
+
+DISABLED features profiles
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ionosphere learning is not perfect, sometimes it will get it wrong as far as a
+human is concerned.  Luckily that does not happen often, but it will happen.
+
+Ionosphere lets the operator disable any features profile that they deem as
+anomalous.  This can be due to a features profile having been LEARNT and the
+operator thinks it to be anomalous or an operator could create a features
+profile that they decide was in error, this can especially be true when on
+re-evaluating after creating with the "and LEARN" option enabled, but looking at
+the 30 day data and thinking... "hmmm actually I do not really want it to learn
+that spike from 2 weeks ago".
+
+If a features profile is DISABLED, all its progeny features profiles are
+disabled as well.  This ensures that every features profile was LEARNT from the
+profile and any that were LEARNT from any of them are disabled too so that the
+pattern is removed from evaluation during analysis of the metric in the future.
 
 No machine learning
 ^^^^^^^^^^^^^^^^^^^

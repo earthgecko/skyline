@@ -1218,7 +1218,6 @@ def ionosphere_search(default_query, search_query):
                 needs_and = True
 
     # @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than
-    'matched_greater_than',
     if 'matched_greater_than' in request.args:
         matched_greater_than = request.args.get('matched_greater_than', None)
         if matched_greater_than and matched_greater_than != '0':
@@ -1230,6 +1229,30 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s WHERE matched_count > %s' % (query_string, matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
+
+    # @added 20170913 - Feature #2056: ionosphere - disabled_features_profiles
+    # Added enabled query modifier to search and display enabled or disabled
+    # profiles in the search_features_profiles page results.
+    if 'enabled' in request.args:
+        enabled = request.args.get('enabled', None)
+        enabled_query = False
+        enabled_query_value = 1
+        if enabled:
+            if str(enabled) == 'all':
+                enabled_query = False
+            if str(enabled) == 'true':
+                enabled_query = True
+            if str(enabled) == 'false':
+                enabled_query = True
+                enabled_query_value = 0
+        if enabled_query:
+            if needs_and:
+                new_query_string = '%s AND enabled = %s' % (query_string, str(enabled_query_value))
+                query_string = new_query_string
+            else:
+                new_query_string = '%s WHERE enabled = %s' % (query_string, str(enabled_query_value))
+                query_string = new_query_string
+            needs_and = True
 
     ordered_by = None
     if 'order' in request.args:
@@ -1548,6 +1571,10 @@ def ionosphere_search(default_query, search_query):
                     if fp_layers_id > 0:
                         layers_present = True
                     features_profiles.append([fp_id, metric_id, str(metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id])
+                    # @added 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+                    features_profile_enabled = int(row['enabled'])
+                    if features_profile_enabled == 1:
+                        enabled_list.append(fp_id)
                 except:
                     trace = traceback.format_exc()
                     logger.error('%s' % trace)
@@ -1647,7 +1674,10 @@ def ionosphere_search(default_query, search_query):
         features_profiles = features_profiles_and_layers
 
         full_duration_list = None
-        enabled_list = None
+        # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+        # enabled_list = None
+        if not enabled_list:
+            enabled_list = None
         tsfresh_version_list = None
         generation_list = None
         if engine:
