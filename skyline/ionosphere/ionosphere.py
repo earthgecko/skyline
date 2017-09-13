@@ -33,9 +33,14 @@ import numpy as np
 #                   Feature #1844: ionosphere_matched DB table
 from tsfresh import __version__ as tsfresh_version
 
+# @added 20170809 - Task #2132: Optimise Ionosphere DB usage
+from pymemcache.client.base import Client as pymemcache_Client
+
 import settings
 from skyline_functions import (
-    fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p)
+    fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p,
+    # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+    get_memcache_metric_object)
 
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
@@ -133,6 +138,11 @@ class Ionosphere(Thread):
         self.ionosphere_non_smtp_alerter_metrics = Manager().list()
         # @added 20170306 - Feature #1960: ionosphere_layers
         self.layers_checked = Manager().list()
+        # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
+        if settings.MEMCACHE_ENABLED:
+            self.memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
+        else:
+            self.memcache_client = None
 
     def check_if_parent_is_alive(self):
         """
@@ -841,6 +851,39 @@ class Ionosphere(Thread):
         # match to the next.
         training_metric = False
 
+        metrics_id = None
+        metric_ionosphere_enabled = None
+
+        # @added 20170115 - Feature #1854: Ionosphere learn - generations
+        # Create the metrics_db_object so it is available to determine all
+        # the details of all features profiles for the metric, this has all
+        # the generations values avaialble in it.  Here we go! Learn!
+        metrics_db_object = None
+
+        # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+        # Try memcache first
+        try:
+            engine
+        except:
+            engine = None
+        memcache_metrics_db_object = None
+        metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
+        memcache_metric_dict = None
+        if settings.MEMCACHE_ENABLED:
+            memcache_metric_dict = get_memcache_metric_object(skyline_app, base_name)
+
+        query_metric_table = True
+        if memcache_metric_dict:
+            query_metric_table = False
+            metrics_id = int(memcache_metric_dict['id'])
+            metric_ionosphere_enabled = int(memcache_metric_dict['ionosphere_enabled'])
+            metrics_db_object = memcache_metric_dict
+            if metric_ionosphere_enabled is not None:
+                training_metric = False
+            else:
+                training_metric = True
+            logger.info('using %s key data from memcache' % metrics_db_object_key)
+
         # Check if the metric has ionosphere_enabled, if not remove the check
         # file but not the data directory
         # @modified 20161230 - Feature #1830: Ionosphere alerts
@@ -854,64 +897,83 @@ class Ionosphere(Thread):
         #     # self.remove_metric_check_file(str(metric_check_file))
         #     # return
         #     training_metric = True
-        try:
-            engine, log_msg, trace = get_an_engine()
-            logger.info(log_msg)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: could not get a MySQL engine to determine ionosphere_enabled')
+        # @modified 20170825 - Task #2132: Optimise Ionosphere DB usage
+        # If no memcache data then MySQL query_metric_table
+        if query_metric_table:
+            try:
+                engine, log_msg, trace = get_an_engine()
+                logger.info(log_msg)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not get a MySQL engine to determine ionosphere_enabled')
 
-        if not engine:
-            logger.error('error :: engine not obtained to determine ionosphere_enabled')
+            if not engine:
+                logger.error('error :: engine not obtained to determine ionosphere_enabled')
 
-        # Get the metrics_table metadata
-        metrics_table = None
-        try:
-            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-            logger.info('metrics_table OK for %s' % base_name)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: failed to get metrics_table meta for %s' % base_name)
+            # Get the metrics_table metadata
+            metrics_table = None
+            try:
+                metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+                logger.info('metrics_table OK for %s' % base_name)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get metrics_table meta for %s' % base_name)
 
-        metrics_id = None
-        metric_ionosphere_enabled = None
+            try:
+                connection = engine.connect()
+                # stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))
+                stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                result = connection.execute(stmt)
+                try:
+                    result
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: got no result from MySQL from metrics table for - %s' % base_name)
+                row = result.fetchone()
+                # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+                memcache_metrics_db_object = dict(row)
+                metrics_id = row['id']
+                metric_ionosphere_enabled = row['ionosphere_enabled']
+                # @added 20170115 - Feature #1854: Ionosphere learn - generations
+                # Create the metrics_db_object so it is available throughout
+                # Here we go! Learn!
+                metrics_db_object = row
 
-        # @added 20170115 - Feature #1854: Ionosphere learn - generations
-        # Create the metrics_db_object so it is available to determine all
-        # the details of all features profiles for the metric, this has all
-        # the generations values avaialble in it.  Here we go! Learn!
-        metrics_db_object = None
+                connection.close()
 
-        try:
-            connection = engine.connect()
-            # stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))
-            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-            result = connection.execute(stmt)
-            row = result.fetchone()
-            metrics_id = row['id']
-            metric_ionosphere_enabled = row['ionosphere_enabled']
-            # @added 20170115 - Feature #1854: Ionosphere learn - generations
-            # Create the metrics_db_object so it is available throughout
-            # Here we go! Learn!
-            metrics_db_object = row
-
-            connection.close()
-
-            if metric_ionosphere_enabled is not None:
-                training_metric = False
-            else:
-                # @modified 20161222 - do not remove metric file until features
-                # calculated
-                # self.remove_metric_check_file(str(metric_check_file))
-                # return
+                if metric_ionosphere_enabled is not None:
+                    training_metric = False
+                else:
+                    # @modified 20161222 - do not remove metric file until features
+                    # calculated
+                    # self.remove_metric_check_file(str(metric_check_file))
+                    # return
+                    training_metric = True
+                    # self.training_metrics.append(base_name)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not determine ionosphere_enabled from metrics table for - %s' % base_name)
+                metric_ionosphere_enabled = None
                 training_metric = True
                 # self.training_metrics.append(base_name)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: could not determine ionosphere_enabled from metrics table for - %s' % base_name)
-            metric_ionosphere_enabled = None
-            training_metric = True
-            # self.training_metrics.append(base_name)
+
+        # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+        # Add the metric db object data to memcache
+        if settings.MEMCACHE_ENABLED and query_metric_table:
+            try:
+                memcache_metric_dict = {}
+                for k, v in memcache_metrics_db_object.iteritems():
+                    key_name = str(k)
+                    key_value = str(v)
+                    memcache_metric_dict[key_name] = key_value
+                self.memcache_client.set(metrics_db_object_key, memcache_metric_dict, expire=3600)
+                logger.info('set the memcache key - %s' % metrics_db_object_key)
+            except:
+                logger.error('error :: failed to set %s from memcache' % metrics_db_object_key)
+            try:
+                self.memcache_client.close()
+            except:
+                pass
 
         # @added 20170116 - Feature #1854: Ionosphere learn - generations
         # If this is added_by ionosphere_learn the id is only
@@ -1043,7 +1105,6 @@ class Ionosphere(Thread):
         # This is now the Ionosphere meat.
         # Get a MySQL engine only if not training_metric
         if not training_metric:
-
             if not metrics_id:
                 logger.error('error :: metric id not known')
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
@@ -1357,19 +1418,54 @@ class Ionosphere(Thread):
                 if not engine:
                     logger.error('error :: engine not obtained for feature_id and values from %s' % metric_fp_table)
 
-                try:
-                    stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s' % (metric_fp_table, str(fp_id))
-                    connection = engine.connect()
-                    for row in engine.execute(stmt):
-                        fp_feature_id = int(row['feature_id'])
-                        fp_value = float(row['value'])
-                        fp_features.append([fp_feature_id, fp_value])
-                    connection.close()
-                    features_count = len(fp_features)
-                    logger.info('determined %s features for fp_id %s' % (str(features_count), str(fp_id)))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: could not determine feature_id, value from %s' % metric_fp_table)
+                # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
+                # First check to determine if the fp_id has data in memcache
+                # before querying the database
+                fp_id_feature_values = None
+                if settings.MEMCACHE_ENABLED:
+                    fp_id_feature_values_key = 'fp.id.%s.feature.values' % str(fp_id)
+                    try:
+                        fp_id_feature_values = self.memcache_client.get(fp_id_feature_values_key)
+                        # if memcache does not have the key the response to the
+                        # client is None, it does not except
+                    except:
+                        logger.error('error :: failed to get %s from memcache' % fp_id_feature_values_key)
+                    try:
+                        self.memcache_client.close()
+                    except:
+                        pass
+                    if fp_id_feature_values:
+                        fp_features = literal_eval(fp_id_feature_values)
+                        logger.info('using memcache %s key data' % fp_id_feature_values_key)
+
+                if not fp_features:
+                    try:
+                        stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s' % (metric_fp_table, str(fp_id))
+                        connection = engine.connect()
+                        for row in engine.execute(stmt):
+                            fp_feature_id = int(row['feature_id'])
+                            fp_value = float(row['value'])
+                            fp_features.append([fp_feature_id, fp_value])
+                        connection.close()
+                        features_count = len(fp_features)
+                        logger.info('determined %s features for fp_id %s' % (str(features_count), str(fp_id)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not determine feature_id, value from %s' % metric_fp_table)
+                    if fp_features and settings.MEMCACHE_ENABLED:
+                        fp_id_feature_values_key = 'fp.id.%s.feature.values' % str(fp_id)
+                        try:
+                            self.memcache_client.set(fp_id_feature_values_key, fp_features)
+                            logger.info('populated memcache %s key' % fp_id_feature_values_key)
+                        except:
+                            logger.error('error :: failed to set %s in memcache' % fp_id_feature_values_key)
+
+                # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
+                if settings.MEMCACHE_ENABLED:
+                    try:
+                        self.memcache_client.close()
+                    except:
+                        pass
 
                 # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
                 #                   Feature #1844: ionosphere_matched DB table
@@ -1998,13 +2094,43 @@ class Ionosphere(Thread):
             # self.populate the database metatdata tables
             # What is my host id in the Skyline panorama DB?
             host_id = False
-            query = 'select id FROM hosts WHERE host=\'%s\'' % this_host
-            results = mysql_select(skyline_app, query)
-            if results:
-                host_id = results[0][0]
-                logger.info('host_id: %s' % str(host_id))
-            else:
-                logger.info('failed to determine host id of %s' % this_host)
+
+            # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+            # Check memcached before MySQL
+            if settings.MEMCACHE_ENABLED:
+                hosts_id_key = 'hosts.id.%s' % this_host
+                try:
+                    host_id = self.memcache_client.get(hosts_id_key)
+                    # if memcache does not have the key the response to the
+                    # client is None, it does not except
+                except:
+                    logger.error('error :: failed to get %s from memcache' % hosts_id_key)
+                try:
+                    self.memcache_client.close()
+                except:
+                    pass
+                if host_id:
+                    logger.info('using memcache %s key data' % hosts_id_key)
+                    logger.info('host_id: %s' % str(host_id))
+
+            if not host_id:
+                query = 'select id FROM hosts WHERE host=\'%s\'' % this_host
+                results = mysql_select(skyline_app, query)
+                if results:
+                    host_id = results[0][0]
+                    logger.info('host_id: %s' % str(host_id))
+                else:
+                    logger.info('failed to determine host id of %s' % this_host)
+                if host_id and settings.MEMCACHE_ENABLED:
+                    try:
+                        self.memcache_client.set(hosts_id_key, int(host_id))
+                        logger.info('populated memcache %s key' % hosts_id_key)
+                    except:
+                        logger.error('error :: failed to set %s in memcache' % hosts_id_key)
+                    try:
+                        self.memcache_client.close()
+                    except:
+                        pass
 
             # if not known - INSERT hostname INTO host
             if not host_id:

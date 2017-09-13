@@ -1218,7 +1218,6 @@ def ionosphere_search(default_query, search_query):
                 needs_and = True
 
     # @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than
-    'matched_greater_than',
     if 'matched_greater_than' in request.args:
         matched_greater_than = request.args.get('matched_greater_than', None)
         if matched_greater_than and matched_greater_than != '0':
@@ -1230,6 +1229,30 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s WHERE matched_count > %s' % (query_string, matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
+
+    # @added 20170913 - Feature #2056: ionosphere - disabled_features_profiles
+    # Added enabled query modifier to search and display enabled or disabled
+    # profiles in the search_features_profiles page results.
+    if 'enabled' in request.args:
+        enabled = request.args.get('enabled', None)
+        enabled_query = False
+        enabled_query_value = 1
+        if enabled:
+            if str(enabled) == 'all':
+                enabled_query = False
+            if str(enabled) == 'true':
+                enabled_query = True
+            if str(enabled) == 'false':
+                enabled_query = True
+                enabled_query_value = 0
+        if enabled_query:
+            if needs_and:
+                new_query_string = '%s AND enabled = %s' % (query_string, str(enabled_query_value))
+                query_string = new_query_string
+            else:
+                new_query_string = '%s WHERE enabled = %s' % (query_string, str(enabled_query_value))
+                query_string = new_query_string
+            needs_and = True
 
     ordered_by = None
     if 'order' in request.args:
@@ -1548,6 +1571,10 @@ def ionosphere_search(default_query, search_query):
                     if fp_layers_id > 0:
                         layers_present = True
                     features_profiles.append([fp_id, metric_id, str(metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id])
+                    # @added 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+                    features_profile_enabled = int(row['enabled'])
+                    if features_profile_enabled == 1:
+                        enabled_list.append(fp_id)
                 except:
                     trace = traceback.format_exc()
                     logger.error('%s' % trace)
@@ -1647,7 +1674,10 @@ def ionosphere_search(default_query, search_query):
         features_profiles = features_profiles_and_layers
 
         full_duration_list = None
-        enabled_list = None
+        # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+        # enabled_list = None
+        if not enabled_list:
+            enabled_list = None
         tsfresh_version_list = None
         generation_list = None
         if engine:
@@ -3157,3 +3187,153 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
         logger.error('%s' % fail_msg)
 
     return True, False, fail_msg, trace
+
+
+# added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+def features_profile_family_tree(fp_id):
+    """
+    Returns the all features profile ids of the related progeny features
+    profiles, the whole family tree.
+
+    :param fp_id: the features profile id
+    :return: array
+    :rtype: array
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: features_profile_progeny'
+
+    logger.info('%s getting the features profile ids of the progeny of fp_id %s' % (function_str, str(fp_id)))
+
+    trace = 'none'
+    fail_msg = 'none'
+    current_fp_id = int(fp_id)
+    family_tree_fp_ids = [current_fp_id]
+
+    logger.info('%s :: getting MySQL engine' % function_str)
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        logger.error('%s' % fail_msg)
+        raise
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    try:
+        ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    row = current_fp_id
+    while row:
+        try:
+            connection = engine.connect()
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.parent_id == current_fp_id)
+            result = connection.execute(stmt)
+            connection.close()
+            row = None
+            for row in result:
+                progeny_id = row['id']
+                family_tree_fp_ids.append(int(progeny_id))
+                current_fp_id = progeny_id
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: could not get id for %s' % str(current_fp_id)
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+
+    if engine:
+        engine_disposal(engine)
+
+    return family_tree_fp_ids, fail_msg, trace
+
+
+# added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+def disable_features_profile_family_tree(fp_ids):
+    """
+    Disable a features profile and all related progeny features profiles
+
+    :param fp_ids: a list of the the features profile ids to disable
+    :return: array
+    :rtype: array
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: disable_features_profile_and_progeny'
+
+    logger.info('%s disabling fp ids - %s' % (function_str, str(fp_ids)))
+
+    trace = 'none'
+    fail_msg = 'none'
+
+    logger.info('%s :: getting MySQL engine' % function_str)
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        logger.error('%s' % fail_msg)
+        raise
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    try:
+        ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for disable_features_profile_family_tree'
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    for fp_id in fp_ids:
+        try:
+            connection = engine.connect()
+            connection.execute(
+                ionosphere_table.update(
+                    ionosphere_table.c.id == int(fp_id)).
+                values(enabled=0))
+            connection.close()
+            logger.info('updated enabled for %s to 0' % (str(fp_id)))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not update enabled for fp_id %s ' % str(fp_id))
+            fail_msg = 'error :: could not update enabled for fp_id %s ' % str(fp_id)
+            if engine:
+                engine_disposal(engine)
+            raise
+
+    if engine:
+        engine_disposal(engine)
+
+    return True, fail_msg, trace

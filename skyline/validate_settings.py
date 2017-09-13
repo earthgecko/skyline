@@ -328,6 +328,32 @@ def validate_settings_variables(current_skyline_app):
             print ('error :: IONOSPHERE_LEARN_NAMESPACE_CONFIG is not set in settings.py')
             invalid_variables = True
 
+    # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
+    try:
+        TEST_MEMCACHE_ENABLED = settings.MEMCACHE_ENABLED
+    except:
+        current_logger.error('error :: MEMCACHE_ENABLED is not set as a boolean in settings.py')
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: exiting, please fix setting.py')
+        print ('error :: MEMCACHE_ENABLED is not set in settings.py')
+        invalid_variables = True
+    try:
+        TEST_MEMCACHED_SERVER_IP = settings.MEMCACHED_SERVER_IP
+    except:
+        current_logger.error('error :: MEMCACHED_SERVER_IP is not set as a str in settings.py')
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: exiting, please fix setting.py')
+        print ('error :: MEMCACHED_SERVER_IP is not set in settings.py')
+        invalid_variables = True
+    try:
+        TEST_MEMCACHED_SERVER_PORT = settings.MEMCACHED_SERVER_PORT
+    except:
+        current_logger.error('error :: MEMCACHED_SERVER_PORT is not set as an int in settings.py')
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: exiting, please fix setting.py')
+        print ('error :: MEMCACHED_SERVER_PORT is not set in settings.py')
+        invalid_variables = True
+
     if invalid_variables:
         return False
 

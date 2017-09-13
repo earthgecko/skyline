@@ -70,7 +70,9 @@ from ionosphere_backend import (
     # @added 20170402 - Feature #2000: Ionosphere - validated
     validate_fp,
     # @added 20170617 - Feature #2054: ionosphere.save.training_data
-    save_training_data_dir)
+    save_training_data_dir,
+    # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+    features_profile_family_tree, disable_features_profile_family_tree)
 
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
@@ -942,11 +944,15 @@ def ionosphere():
 
         if get_metric_profiles:
             fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+            # Added enabled_list to display DISABLED in search_features_profiles
+            # page results.
             return render_template(
                 'ionosphere.html', fp_search=fp_search_req,
                 fp_search_results=fp_search_req, features_profiles=fps,
                 for_metric=metric, order=ordered_by, limit=limited_by,
                 matched_count=mc, checked_count=cc, generation_count=gc,
+                enabled_list=enabled_list,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=False), 200
 
@@ -974,6 +980,8 @@ def ionosphere():
         'd1_condition', 'd1_boundary_limit', 'd1_boundary_times',
         # @added 20170617 - Feature #2054: ionosphere.save.training_data
         'save_training_data', 'saved_td_label', 'saved_training_data',
+        # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+        'disable_fp',
     ]
 
     determine_metric = False
@@ -1001,6 +1009,9 @@ def ionosphere():
     save_training_data = False
     saved_training_data = False
     saved_td_label = False
+
+    # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+    disable_fp = False
 
     try:
         if request_args_present:
@@ -1564,8 +1575,11 @@ def ionosphere():
         # @added 20170402 - Feature #2000: Ionosphere - validated
         validated_fp_success = False
 
-        if fp_view:
+        # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+        family_tree_fp_ids = None
+        disabled_fp_success = None
 
+        if fp_view:
             # @added 20170402 - Feature #2000: Ionosphere - validated
             validate = False
             if 'validate_fp' in request.args:
@@ -1582,6 +1596,17 @@ def ionosphere():
                     trace = traceback.format_exc()
                     message = 'failed to validate features profile'
                     return internal_error(message, trace)
+
+            # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+            family_tree_fp_ids, fail_msg, traceback_format_exc = features_profile_family_tree(fp_id)
+            if 'disable_fp' in request.args:
+                value = request.args.get(str('disable_fp'), None)
+                if int(value) > 1:
+                    disable_fp = int(value)
+                    logger.info('disable_fp is set to %s' % str(disable_fp))
+            if disable_fp:
+                logger.info('disabling fp ids - %s' % str(family_tree_fp_ids))
+                disabled_fp_success, fail_msg, traceback_format_exc = disable_features_profile_family_tree(family_tree_fp_ids)
 
             try:
                 # @modified 20170114 -  Feature #1854: Ionosphere learn - generations
@@ -1723,6 +1748,9 @@ def ionosphere():
             # @added 20170402 - Feature #2000: Ionosphere - validated
             fp_validated = 0
 
+            # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+            fp_enabled = False
+
             # Determine the parent_id and generation as they were added to the
             # fp_details_object
             if fp_details:
@@ -1731,6 +1759,9 @@ def ionosphere():
                     gen = int(fp_details_object['generation'])
                     # @added 20170402 - Feature #2000: Ionosphere - validated
                     fp_validated = int(fp_details_object['validated'])
+                    # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+                    if int(fp_details_object['enabled']) == 1:
+                        fp_enabled = True
                 except:
                     trace = traceback.format_exc()
                     message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
@@ -1911,6 +1942,9 @@ def ionosphere():
                 metric_training_data_saved=training_data_saved,
                 saved_metric_td_requested=saved_td_requested,
                 saved_metric_td_details=saved_td_details,
+                profile_enabled=fp_enabled, disable_feature_profile=disable_fp,
+                disabled_fp_successful=disabled_fp_success,
+                family_tree_ids=family_tree_fp_ids,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

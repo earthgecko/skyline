@@ -256,6 +256,30 @@ class Analyzer(Thread):
         except Exception as e:
             if LOCAL_DEBUG:
                 logger.error('error :: could not query Redis for analyzer.derivative_metrics_expiry key: %s' % str(e))
+            manage_derivative_metrics = False
+
+        # @added 20170901 - Bug #2154: Infrequent missing new_ Redis keys
+        # If the analyzer.derivative_metrics_expiry is going to expire in the
+        # next 60 seconds, just manage the derivative_metrics in the run as
+        # there is an overlap some times where the key existed at the start of
+        # the run but has expired by the end of the run.
+        derivative_metrics_expiry_ttl = False
+        if manage_derivative_metrics:
+            try:
+                derivative_metrics_expiry_ttl = self.redis_conn.ttl('analyzer.derivative_metrics_expiry')
+                logger.info('the analyzer.derivative_metrics_expiry key ttl is %s' % str(derivative_metrics_expiry_ttl))
+            except:
+                logger.error('error :: could not query Redis for analyzer.derivative_metrics_expiry key: %s' % str(e))
+            if derivative_metrics_expiry_ttl:
+                if int(derivative_metrics_expiry_ttl) < 60:
+                    logger.info('managing derivative_metrics as the analyzer.derivative_metrics_expiry key ttl is less than 60 with %s' % str(derivative_metrics_expiry_ttl))
+                    manage_derivative_metrics = False
+                    try:
+                        self.redis_conn.delete('analyzer.derivative_metrics_expiry')
+                        logger.info('deleted the Redis key analyzer.derivative_metrics_expiry')
+                    except:
+                        logger.error('error :: failed to delete Redis key :: analyzer.derivative_metrics_expiry')
+
         try:
             non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
         except:
@@ -1748,10 +1772,12 @@ class Analyzer(Thread):
                     logger.error('error :: could not query Redis for analyzer.derivative_metrics_expiry key: %s' % str(e))
             if not manage_derivative_metrics:
                 try:
-                    self.redis_conn.setex('analyzer.derivative_metrics_expiry', 120, key_timestamp)
+                    # @modified 20170901 - Bug #2154: Infrequent missing new_ Redis keys
+                    # self.redis_conn.setex('analyzer.derivative_metrics_expiry', 120, key_timestamp)
+                    self.redis_conn.setex('analyzer.derivative_metrics_expiry', 300, key_timestamp)
+                    logger.info('set analyzer.derivative_metrics_expiry Redis key')
                 except:
                     logger.error('error :: failed to set key :: analyzer.analyzer.derivative_metrics_expiry')
-
                 try:
                     self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
                 except Exception as e:

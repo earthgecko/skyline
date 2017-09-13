@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 import logging
 from smtplib import SMTP
 import mirage_alerters
@@ -41,6 +41,7 @@ if python_version == 2:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
     from email.MIMEImage import MIMEImage
+    from email import charset
 if python_version == 3:
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -353,6 +354,23 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                         'error :: %s failed to read timeseries data from %s' % (skyline_app, anomaly_json))
                     timeseries = None
 
+        # @added 20170823 - Feature #2034: analyse_derivatives
+        # Originally patterned and added to analyzer/alerters.py on 20170603
+        if known_derivative_metric:
+            try:
+                derivative_timeseries = nonNegativeDerivative(timeseries)
+                timeseries = derivative_timeseries
+            except:
+                logger.error('error :: alert_smtp - nonNegativeDerivative failed')
+
+        # @added 21070823 - Bug #2068: Analyzer smtp alert error on Redis plot with derivative metrics
+        # Originally patterned and added to analyzer/alerters.py on 20170726
+        # If the nonNegativeDerivative has been calculated we need to reset the
+        # x and y as nonNegativeDerivative has to discard the first value as it
+        # has no delta for it so the timeseries is 1 item less.
+        timeseries_x = [float(item[0]) for item in timeseries]
+        timeseries_y = [item[1] for item in timeseries]
+
         pd_series_values = None
         original_anomalous_datapoint = metric[0]
         if timeseries:
@@ -569,41 +587,63 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         if known_derivative_metric:
             body += '<font color="black">Derivative graph: True</font><br>'
 
+        more_body = ''
         if settings.IONOSPHERE_ENABLED:
-            body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
+            # @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls
+            # Broke body into body and more_body to workaround the 990 character
+            # limit per line for SMTP
+            more_body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
             ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
                 settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
-            body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
-            body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
+            more_body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+            more_body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
         if image_data:
-            body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
-            body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
-            body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
+            more_body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
+            more_body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
+            more_body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
         if redis_image_data:
-            body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
+            more_body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
                 str(array_amin), str(array_amax), str(mean))
-            body += '3-sigma: %s <br>' % str(sigma3)
-            body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
+            more_body += '3-sigma: %s <br>' % str(sigma3)
+            more_body += '3-sigma upper bound: %s   | 3-sigma lower bound: %s <br></font>' % (
                 str(sigma3_upper_bound), str(sigma3_lower_bound))
-            body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
-
-            body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
-            body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
-            body += 'however do note that will remove the 3-sigma and mean value too.</font>'
-        body += '<br>'
-        body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
+            more_body += '<h3><font color="black">Redis data at FULL_DURATION</font></h3><br>'
+            more_body += '<div dir="ltr">:%s<br></div>' % redis_img_tag
+            more_body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
+            more_body += 'however do note that will remove the 3-sigma and mean value too.</font>'
+        more_body += '<br>'
+        more_body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
     except:
         logger.error('error :: alert_smtp - could not build body')
         logger.info(traceback.format_exc())
 
     for recipient in recipients:
         try:
-            msg = MIMEMultipart('alternative')
+            # @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls
+            # Broke body into body and more_body to workaround the 990 character
+            # limit per line for SMTP, using mixed as alternative indicates that
+            # the client should select one of the parts for display and ignore
+            # the rest (tripleee - https://stackoverflow.com/a/35115938)
+            # msg = MIMEMultipart('alternative')
+            msg = MIMEMultipart('mixed')
+
+            # @added 20170812 - Bug #2142: 7bit SMTP encoding breaking long urls
+            # set email charset and email encodings
+            cs_ = charset.Charset('utf-8')
+            cs_.header_encoding = charset.QP
+            cs_.body_encoding = charset.QP
+            msg.set_charset(cs_)
+
             msg['Subject'] = '[Skyline alert] - %s ALERT - %s' % (context, metric[1])
             msg['From'] = sender
             msg['To'] = recipient
 
             msg.attach(MIMEText(body, 'html'))
+            # @added 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls
+            # Broke body into body and more_body to workaround the 990 character
+            # limit per line for SMTP
+            msg.attach(MIMEText(more_body, 'html'))
+            msg.replace_header('content-transfer-encoding', 'quoted-printable')
 
             if image_data is not None:
                 try:

@@ -21,7 +21,9 @@ import settings
 from skyline_functions import (
     mkdir_p, get_graphite_metric, send_anomalous_metric_to,
     # @added 20170603 - Feature #2034: analyse_derivatives
-    nonNegativeDerivative, in_list)
+    nonNegativeDerivative, in_list,
+    # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+    get_memcache_metric_object)
 
 from features_profile import calculate_features_profile
 
@@ -489,38 +491,47 @@ def ionosphere_learn(timestamp):
         metrics_id = None
         metric_db_object = None
         engine = None
-        # Get a MySQL engine
-        try:
-            engine, log_msg, trace = learn_get_an_engine()
-            logger.info('learn :: %s' % log_msg)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: learn :: could not get a MySQL engine to get metric_db_object')
 
-        if not engine:
-            logger.error('error :: learn :: engine not obtained to get metric_db_object')
-            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-            continue
+        # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+        # Get the metric db object data to memcache it is exists
+        metric_db_object = get_memcache_metric_object(skyline_app, learn_base_name)
+        if metric_db_object:
+            metrics_id = metric_db_object['id']
+        else:
+            # @modified 20170825 - Task #2132: Optimise Ionosphere DB usage
+            # Only if no memcache data
+            # Get a MySQL engine
+            try:
+                engine, log_msg, trace = learn_get_an_engine()
+                logger.info('learn :: %s' % log_msg)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: could not get a MySQL engine to get metric_db_object')
 
-        try:
-            metrics_id, metric_db_object = get_metric_from_metrics(learn_base_name, engine)
-            learn_engine_disposal(engine)
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: learn :: failed get the metric details from the database')
-            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+            if not engine:
+                logger.error('error :: learn :: engine not obtained to get metric_db_object')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                continue
 
-        if not metrics_id:
-            logger.error('error :: learn :: failed get the metrics_id from the database')
-            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-            learn_engine_disposal(engine)
-            continue
+            try:
+                metrics_id, metric_db_object = get_metric_from_metrics(learn_base_name, engine)
+                learn_engine_disposal(engine)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: failed get the metric details from the database')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
 
-        if not metric_db_object:
-            logger.error('error :: learn :: failed get the metric_db_object from the database')
-            logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-            learn_engine_disposal(engine)
-            continue
+            if not metrics_id:
+                logger.error('error :: learn :: failed get the metrics_id from the database')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                learn_engine_disposal(engine)
+                continue
+
+            if not metric_db_object:
+                logger.error('error :: learn :: failed get the metric_db_object from the database')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                learn_engine_disposal(engine)
+                continue
 
         learn_valid_ts_older_than = None
         try:
@@ -532,7 +543,8 @@ def ionosphere_learn(timestamp):
             use_full_duration = None
         if not learn_valid_ts_older_than:
             logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-            learn_engine_disposal(engine)
+            if engine:
+                learn_engine_disposal(engine)
             continue
 
         time_check = int(time())

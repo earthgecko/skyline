@@ -129,9 +129,10 @@ Added matched_greater_than query to the search features profile page -->
                 <td>enabled</td>
                 <td><select name="enabled">
                   <option value="all">all</option>
-            {% for item in enabled_list %}
-                  <option value="{{ item }}">{{ item }}</option>
-            {% endfor %}
+<!-- # @added 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+# modified from for item in enabled_list to true or false -->
+                  <option value="true">true</option>
+                  <option value="false">false</option>
                 </select></td>
   		      </tr>
   {% endif %}
@@ -372,9 +373,18 @@ count
               <a href="?generation_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[16] }}</a> <span class="logo">
             </td>
     {% if item[16] == 0 or item[16] == 1 %}
+<!-- # @added 20170912 - Feature #2056: ionosphere - disabled_features_profiles -->
+      {% if item[0] in enabled_list %}
             <td><span class="logo"><span class="sky">trained</span></span></td>
+      {% else %}
+            <td><span class="logo"><span class="sky">trained DISABLED</span></span></td>
+      {% endif %}
     {% else %}
+      {% if item[0] in enabled_list %}
             <td><span class="logo"><span class="re">learnt</span></span></td>
+      {% else %}
+            <td><span class="logo"><span class="re">learnt DISABLED</span></span></td>
+      {% endif %}
     {% endif %}
             <td>{{ item[3] }}</td>
             <td>{{ item[10] }}</td>
