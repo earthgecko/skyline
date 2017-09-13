@@ -324,7 +324,9 @@ class Boundary(Thread):
                             autoaggregate_value, algorithm)
                     )
                     # Dump the the timeseries data to a file
-                    timeseries_dump_dir = "/tmp/skyline/boundary/" + algorithm
+                    # @modified 20170913 - Task #2160: Test skyline with bandit
+                    # Added nosec to exclude from bandit tests
+                    timeseries_dump_dir = "/tmp/skyline/boundary/" + algorithm  # nosec
                     self.mkdir_p(timeseries_dump_dir)
                     timeseries_dump_file = timeseries_dump_dir + "/" + metric_name + ".json"
                     with open(timeseries_dump_file, 'w+') as f:

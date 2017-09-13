@@ -193,7 +193,9 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         try:
             new_datapoint = [float(datapoint[0]), float(datapoint[1])]
             converted.append(new_datapoint)
-        except:
+        # @modified 20170913 - Task #2160: Test skyline with bandit
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
             continue
 
     if os.path.isfile(ts_csv):

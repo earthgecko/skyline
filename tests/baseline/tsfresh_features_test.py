@@ -185,7 +185,9 @@ class TestTsfreshBaseline(unittest.TestCase):
         try:
             shutil.rmtree(self.test_path)
             ran = True
-        except:
+        # @modified 20170913 - Task #2160: Test skyline with bandit
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
             pass
         self.assertTrue(ran, msg=fail_msg)
 

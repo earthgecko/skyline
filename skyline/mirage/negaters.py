@@ -68,14 +68,16 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
         link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         analyzer_link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
     else:
-        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], graphite_settings)
-        analyzer_link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], analyzer_graphite_settings)
+        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        analyzer_link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
 
     content_id = metric[1]
     image_data = None
     if settings.SMTP_OPTS.get('embed-images'):
         try:
-            image_data = urllib2.urlopen(link).read()
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            image_data = urllib2.urlopen(link).read()  # nosec
         except urllib2.URLError:
             image_data = None
 
@@ -90,7 +92,9 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
     analyzer_image_data = None
     if settings.SMTP_OPTS.get('embed-images'):
         try:
-            analyzer_image_data = urllib2.urlopen(analyzer_link).read()
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            analyzer_image_data = urllib2.urlopen(analyzer_link).read()  # nosec
         except urllib2.URLError:
             analyzer_image_data = None
 

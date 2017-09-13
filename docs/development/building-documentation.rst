@@ -125,6 +125,10 @@ Build
       done
     fi
 
+    # @added 20170913 - Task #2160: Test skyline with bandit
+    # For static analysis - https://github.com/openstack/bandit
+    bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py"
+
     cd "$APPDIR/docs"
     echo "Building Skyline documentation - in $APPDIR/docs"
     sphinx-apidoc --force -o "${APPDIR}/docs" "${APPDIR}/skyline" skyline

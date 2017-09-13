@@ -47,10 +47,12 @@ if python_version == 3:
     import io
 
 try:
-    import cPickle as pickle
+    # @modified 20170913 - Task #2160: Test skyline with bandit
+    # Added nosec to exclude from bandit tests
+    import cPickle as pickle  # nosec
     USING_CPICKLE = True
 except:
-    import pickle
+    import pickle  # nosec
     USING_CPICKLE = False
 
 # This whole song & dance is due to pickle being insecure
@@ -77,7 +79,9 @@ if USING_CPICKLE:
 
         @classmethod
         def loads(cls, pickle_string):
-            pickle_obj = pickle.Unpickler(StringIO(pickle_string))
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            pickle_obj = pickle.Unpickler(StringIO(pickle_string))  # nosec
             pickle_obj.find_global = cls.find_class
             return pickle_obj.load()
 

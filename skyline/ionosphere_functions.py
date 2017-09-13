@@ -758,7 +758,9 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         try:
             new_datapoint = [str(int(datapoint[0])), float(datapoint[1])]
             validated_timeseries.append(new_datapoint)
-        except:
+        # @modified 20170913 - Task #2160: Test skyline with bandit
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
             continue
 
     insert_statement = []

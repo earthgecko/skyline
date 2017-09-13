@@ -68,7 +68,9 @@ def alert_smtp(alert, metric):
     image_data = None
     if settings.SMTP_OPTS.get('embed-images'):
         try:
-            image_data = urllib2.urlopen(link).read()
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            image_data = urllib2.urlopen(link).read()  # nosec
         except urllib2.URLError:
             image_data = None
 
