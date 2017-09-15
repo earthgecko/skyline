@@ -1062,6 +1062,24 @@ def ionosphere():
                     else:
                         logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
 
+                    # @added 20170915 - Bug #2162: ionosphere - mismatching timestamp metadata
+                    #                   Feature #1872: Ionosphere - features profile page by id only
+                    # Iterate back a few seconds as the features profile dir and
+                    # file resources may have a slight offset timestamp from the
+                    # created_timestamp which is based on MySQL CURRENT_TIMESTAMP
+                    if use_timestamp == 0:
+                        check_back_to_timestamp = int(unix_created_timestamp) - 10
+                        check_timestamp = int(unix_created_timestamp) - 1
+                        while check_timestamp > check_back_to_timestamp:
+                            features_profiles_data_dir = '%s/%s/%s' % (
+                                settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                                str(check_timestamp))
+                            if os.path.exists(features_profiles_data_dir):
+                                use_timestamp = int(check_timestamp)
+                                check_timestamp = check_back_to_timestamp - 1
+                            else:
+                                check_timestamp -= 1
+
                     features_profiles_data_dir = '%s/%s/%s' % (
                         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
                         str(anomaly_timestamp))
