@@ -189,7 +189,7 @@ def panorama_request():
             if from_timestamp and from_timestamp != 'all':
 
                 if ":" in from_timestamp:
-                    # import time
+                    import time
                     import datetime
                     new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
                     from_timestamp = str(int(new_from_timestamp))

@@ -2102,6 +2102,15 @@ class Ionosphere(Thread):
                             settings.IONOSPHERE_LEARN_FOLDER,
                             settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
 
+            # @added 20170916 - Feature #1996: Ionosphere - matches page
+            # Create the ionosphere_summary_memcache_object
+            if settings.MEMCACHE_ENABLED:
+                try:
+                    logger.info('updating the ionosphere_summary_memcache_object')
+                    self.update_ionosphere_summary_memcache_object
+                except:
+                    logger.error('error :: update_ionosphere_summary_memcache_object - %s' % traceback.print_exc())
+
             # self.populate the database metatdata tables
             # What is my host id in the Skyline panorama DB?
             host_id = False

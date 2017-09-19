@@ -1,15 +1,15 @@
 import logging
 import os
-import sys
-import datetime
-import csv
+# import sys
+# import datetime
+# import csv
 import time
 from ast import literal_eval
 
 import traceback
-import json
+# import json
 from timeit import default_timer as timer
-import numpy as np
+# import numpy as np
 import pandas as pd
 
 from tsfresh.feature_extraction import (
@@ -19,6 +19,8 @@ from tsfresh import __version__ as tsfresh_version
 import settings
 import skyline_version
 from skyline_functions import write_data_to_file
+# TSFRESH_VERSION below was only added to a single log output as it was unused
+# however it may be used in one of the tests in some way, I shall have to search
 from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 
 skyline_version = skyline_version.__absolute_version__
@@ -251,7 +253,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     df.columns = ['metric', 'timestamp', 'value']
 
     start_feature_extraction = timer()
-    current_logger.info('starting extract_features')
+    current_logger.info('starting extract_features with %s' % str(TSFRESH_VERSION))
     try:
         # @modified 20161226 - Bug #1822: tsfresh extract_features process stalling
         # Changed to use the new ReasonableFeatureExtractionSettings that was

@@ -1148,10 +1148,9 @@ def in_list(metric_name, check_list):
 
     return False
 
+
 # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
 # Get the metric db object data to memcache
-
-
 def get_memcache_metric_object(current_skyline_app, base_name):
     """
     Return the metrics_db_object from memcache if it exists.
@@ -1219,10 +1218,9 @@ def get_memcache_metric_object(current_skyline_app, base_name):
 
     return False
 
+
 # @added 20170826 - Task #2132: Optimise Ionosphere DB usage
 # Get the fp_ids list object data to memcache
-
-
 def get_memcache_fp_ids_object(current_skyline_app, base_name):
     """
     Return the fp_ids list from memcache if it exists.
