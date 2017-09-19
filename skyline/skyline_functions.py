@@ -634,7 +634,9 @@ def get_graphite_metric(
         image_data = None
 
         try:
-            image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
             current_logger.info('url OK - %s' % (image_url))
         except urllib2.URLError:
             image_data = None
@@ -703,7 +705,9 @@ def get_graphite_metric(
             try:
                 new_datapoint = [float(datapoint[1]), float(datapoint[0])]
                 converted.append(new_datapoint)
-            except:
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            except:  # nosec
                 continue
 
         if output_object != 'object':
@@ -1144,10 +1148,9 @@ def in_list(metric_name, check_list):
 
     return False
 
+
 # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
 # Get the metric db object data to memcache
-
-
 def get_memcache_metric_object(current_skyline_app, base_name):
     """
     Return the metrics_db_object from memcache if it exists.
@@ -1181,7 +1184,9 @@ def get_memcache_metric_object(current_skyline_app, base_name):
             current_logger.error('error :: failed to get %s from memcache' % metrics_db_object_key)
         try:
             memcache_client.close()
-        except:
+        # @modified 20170913 - Task #2160: Test skyline with bandit
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
             pass
 
     memcache_metric_dict = None
@@ -1199,7 +1204,9 @@ def get_memcache_metric_object(current_skyline_app, base_name):
             memcache_metric_dict = False
         try:
             memcache_client.close()
-        except:
+        # @modified 20170913 - Task #2160: Test skyline with bandit
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
             pass
 
     if memcache_metric_dict:
@@ -1211,10 +1218,9 @@ def get_memcache_metric_object(current_skyline_app, base_name):
 
     return False
 
+
 # @added 20170826 - Task #2132: Optimise Ionosphere DB usage
 # Get the fp_ids list object data to memcache
-
-
 def get_memcache_fp_ids_object(current_skyline_app, base_name):
     """
     Return the fp_ids list from memcache if it exists.
@@ -1252,7 +1258,9 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
             current_logger.error('error :: failed to get %s from memcache' % fp_ids_list_object_key)
         try:
             memcache_client.close()
-        except:
+        # @modified 20170913 - Task #2160: Test skyline with bandit
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
             pass
 
     result = None
@@ -1264,7 +1272,9 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
             result = False
         try:
             memcache_client.close()
-        except:
+        # @modified 20170913 - Task #2160: Test skyline with bandit
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
             pass
 
     return result

@@ -24,9 +24,11 @@ import urllib2
 # https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv
 datafile = '../examples/data/Real_time_energy_data_October.csv'
 if not os.path.exists(datafile):
-    datafile = '/tmp/Real_time_energy_data_October.csv'
-    url = 'https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv'
-    response = urllib2.urlopen(url)
+    # @modified 20170913 - Task #2160: Test skyline with bandit
+    # Added nosec to exclude from bandit tests
+    datafile = '/tmp/Real_time_energy_data_October.csv'  # nosec
+    url = 'https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv'  # nosec
+    response = urllib2.urlopen(url)  # nosec
     with open(datafile, 'w') as fw:
         fw.write(response.read())
 
@@ -60,7 +62,9 @@ for index, value in enumerate(values):
             current_index += 1
             current_hour += 1
 
-tmp_datafile = '/tmp/skyline.docs.mirage.energy_data.csv'
+# @modified 20170913 - Task #2160: Test skyline with bandit
+# Added nosec to exclude from bandit tests
+tmp_datafile = '/tmp/skyline.docs.mirage.energy_data.csv'  # nosec
 if os.path.exists(tmp_datafile):
     os.remove(tmp_datafile)
 

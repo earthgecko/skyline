@@ -72,7 +72,11 @@ from ionosphere_backend import (
     # @added 20170617 - Feature #2054: ionosphere.save.training_data
     save_training_data_dir,
     # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
-    features_profile_family_tree, disable_features_profile_family_tree)
+    features_profile_family_tree, disable_features_profile_family_tree,
+    # @added 20170916 - Feature #1996: Ionosphere - matches page
+    get_fp_matches,
+    # @added 20170917 - Feature #1996: Ionosphere - matches page
+    get_matched_id_resources,)
 
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
@@ -824,13 +828,33 @@ def ionosphere():
     # @added 20170220 - Feature #1862: Ionosphere features profiles search page
     # Ionosphere features profiles by generations
     fp_search_req = None
+    # @added 20170916 - Feature #1996: Ionosphere - matches page
+    # Handle both fp_search and fp_matches
+    fp_search_or_matches_req = False
+
     if 'fp_search' in request.args:
         fp_search_req = request.args.get(str('fp_search'), None)
         if fp_search_req == 'true':
             fp_search_req = True
+            fp_search_or_matches_req = True
         else:
             fp_search_req = False
-    if fp_search_req and request_args_len > 1:
+
+    # @added 20170916 - Feature #1996: Ionosphere - matches page
+    fp_matches_req = None
+    if 'fp_matches' in request.args:
+        fp_matches_req = request.args.get(str('fp_matches'), None)
+        if fp_matches_req == 'true':
+            fp_matches_req = True
+            fp_search_or_matches_req = True
+            from_timestamp = None
+            until_timestamp = None
+        else:
+            fp_matches_req = False
+    # @modified 20170916 - Feature #1996: Ionosphere - matches page
+    # Handle both fp_search and fp_matches
+    # if fp_search_req and request_args_len > 1:
+    if fp_search_or_matches_req and request_args_len > 1:
         REQUEST_ARGS = ['fp_search',
                         'metric',
                         'metric_like',
@@ -853,6 +877,10 @@ def ionosphere():
                         'count_by_checked',
                         'limit',
                         'order',
+                        # @added 20170916 - Feature #1996: Ionosphere - matches page
+                        'fp_matches',
+                        # @added 20170917 - Feature #1996: Ionosphere - matches page
+                        'fp_id', 'layer_id',
                         ]
 
         count_by_metric = None
@@ -932,6 +960,35 @@ def ionosphere():
                     get_metric_profiles = True
                     metric = str(value)
 
+            # @added 20170917 - Feature #1996: Ionosphere - matches page
+            matching = False
+            metric_like = False
+            if key == 'metric_like':
+                if value == 'all':
+                    metric_namespace_pattern = value.replace('all', '')
+
+                metric_namespace_pattern = value.replace('%', '')
+                if metric_namespace_pattern != '' and value != 'all':
+                    try:
+                        unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                    except:
+                        trace = traceback.format_exc()
+                        fail_msg = 'error :: Webapp could not get the unique_metrics list from Redis'
+                        logger.error(fail_msg)
+                        logger.info(traceback.format_exc())
+                        return internal_error(fail_msg, trace)
+
+                    matching = [s for s in unique_metrics if metric_namespace_pattern in s]
+                    if len(matching) == 0:
+                        error_string = 'error :: no metric like - %s - exists in Redis' % metric_namespace_pattern
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return resp, 404
+                if matching:
+                    metric_like = str(value)
+
+    if fp_search_req and request_args_len > 1:
         if count_by_metric:
             features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
             return render_template(
@@ -955,6 +1012,60 @@ def ionosphere():
                 enabled_list=enabled_list,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=False), 200
+
+    # @added 20170916 - Feature #1996: Ionosphere - matches page
+    if fp_matches_req:
+        # @added 20170917 - Feature #1996: Ionosphere - matches page
+        # Added by fp_id or layer_id as well
+        fp_id = None
+        layer_id = None
+        for i in request.args:
+            key = str(i)
+            value = request.args.get(key, None)
+            if key == 'fp_id':
+                logger.info('request key %s set to %s' % (key, str(value)))
+                try:
+                    test_fp_id = int(value) + 0
+                    if test_fp_id > 0:
+                        fp_id = str(test_fp_id)
+                    else:
+                        fp_id = None
+                    logger.info('fp_id now set to %s' % (str(fp_id)))
+                except:
+                    error_string = 'error :: the fp_id argument was was passed but not as an int - %s' % str(value)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 404
+            if key == 'layer_id':
+                logger.info('request key %s set to %s' % (key, str(value)))
+                try:
+                    test_layer_id = int(value) + 0
+                    if test_layer_id > 0:
+                        layer_id = str(test_layer_id)
+                    else:
+                        layer_id = None
+                    logger.info('layer_id now set to %s' % (str(layer_id)))
+                except:
+                    error_string = 'error :: the layer_id argument was was passed but not as an int - %s' % str(value)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'results': error_string})
+                    return resp, 404
+
+        logger.info('get_fp_matches with arguments :: %s, %s, %s, %s, %s, %s, %s, %s' % (
+            str(metric), str(metric_like), str(fp_id), str(layer_id),
+            str(from_timestamp), str(until_timestamp), str(limited_by),
+            str(ordered_by)))
+
+        matches, fail_msg, trace = get_fp_matches(metric, metric_like, fp_id, layer_id, from_timestamp, until_timestamp, limited_by, ordered_by)
+        if not matches:
+            return internal_error(fail_msg, trace)
+        return render_template(
+            'ionosphere.html', fp_matches=fp_matches_req, for_metric=metric,
+            fp_matches_results=matches, order=ordered_by, limit=limited_by,
+            version=skyline_version, duration=(time.time() - start),
+            print_debug=False), 200
 
     # @modified 20170118 - Feature #1862: Ionosphere features profiles search page
     # Added fp_search parameter
@@ -982,6 +1093,8 @@ def ionosphere():
         'save_training_data', 'saved_td_label', 'saved_training_data',
         # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
         'disable_fp',
+        # @added 20170917 - Feature #1996: Ionosphere - matches page
+        'matched_fp_id', 'matched_layer_id',
     ]
 
     determine_metric = False
@@ -1013,6 +1126,10 @@ def ionosphere():
     # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
     disable_fp = False
 
+    # @added 20170917 - Feature #1996: Ionosphere - matches page
+    matched_fp_id = False
+    matched_layer_id = False
+
     try:
         if request_args_present:
             timestamp_arg = False
@@ -1023,6 +1140,12 @@ def ionosphere():
             if 'fp_view' in request.args:
                 fp_view = request.args.get(str('fp_view'), None)
                 base_name = request.args.get(str('metric'), None)
+
+                # @added 20170917 - Feature #1996: Ionosphere - matches page
+                if 'matched_fp_id' in request.args:
+                    matched_fp_id = request.args.get(str('matched_fp_id'), None)
+                if 'matched_layer_id' in request.args:
+                    matched_layer_id = request.args.get(str('matched_layer_id'), None)
 
                 # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
                 # Determine the features profile dir path for a fp_id
@@ -1062,6 +1185,24 @@ def ionosphere():
                     else:
                         logger.error('no timestamp feature profiles data dir found for feature profile id %s at %s' % (str(fp_id), str(features_profiles_data_dir)))
 
+                    # @added 20170915 - Bug #2162: ionosphere - mismatching timestamp metadata
+                    #                   Feature #1872: Ionosphere - features profile page by id only
+                    # Iterate back a few seconds as the features profile dir and
+                    # file resources may have a slight offset timestamp from the
+                    # created_timestamp which is based on MySQL CURRENT_TIMESTAMP
+                    if use_timestamp == 0:
+                        check_back_to_timestamp = int(unix_created_timestamp) - 10
+                        check_timestamp = int(unix_created_timestamp) - 1
+                        while check_timestamp > check_back_to_timestamp:
+                            features_profiles_data_dir = '%s/%s/%s' % (
+                                settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                                str(check_timestamp))
+                            if os.path.exists(features_profiles_data_dir):
+                                use_timestamp = int(check_timestamp)
+                                check_timestamp = check_back_to_timestamp - 1
+                            else:
+                                check_timestamp -= 1
+
                     features_profiles_data_dir = '%s/%s/%s' % (
                         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
                         str(anomaly_timestamp))
@@ -1081,6 +1222,19 @@ def ionosphere():
                         return resp, 400
 
                     redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
+
+                    # @added 20170917 - Feature #1996: Ionosphere - matches page
+                    if matched_fp_id:
+                        if matched_fp_id != 'False':
+                            redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_fp_id=%s' % (
+                                settings.SKYLINE_URL, str(use_timestamp), base_name,
+                                str(matched_fp_id))
+                    if matched_layer_id:
+                        if matched_layer_id != 'False':
+                            redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_layer_id=%s' % (
+                                settings.SKYLINE_URL, str(use_timestamp), base_name,
+                                str(matched_layer_id))
+
                     # @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers
                     #                      Task #2002: Review and correct incorrectly defined layers
                     # Build the query string from the previous parameters
@@ -1273,12 +1427,20 @@ def ionosphere():
                         logger.info(traceback.format_exc())
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + str(value)
+
                     if metric_name not in unique_metrics:
-                        error_string = 'error :: no metric - %s - exists in Redis' % metric_name
-                        logger.error(error_string)
-                        resp = json.dumps(
-                            {'results': error_string})
-                        return resp, 404
+                        # @added 20170917 - Bug #2158: webapp - redis metric check - existing but sparsely represented metrics
+                        # If this is an fp_view=true, it means that either the
+                        # metric is sparsely represented or no longer exists,
+                        # but an fp exists so continue and do not 404
+                        if fp_view:
+                            logger.info('%s not in Redis, but fp passed so continuing' % metric_name)
+                        else:
+                            error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                            logger.error(error_string)
+                            resp = json.dumps(
+                                {'results': error_string})
+                            return resp, 404
 
                 if key == 'metric':
                     metric_arg = True
@@ -1324,7 +1486,7 @@ def ionosphere():
                                 {'results': 'Error: no features profile dir exists - ' + ionosphere_profiles_dir + ' - go on... nothing here.'})
                             return resp, 404
 
-        logger.debug('arguments validated - OK')
+        logger.info('arguments validated - OK')
 
     except:
         message = 'Uh oh ... a Skyline 500 :('
@@ -1897,6 +2059,16 @@ def ionosphere():
                     logger.error('error :: Webapp could not get saved training_data details')
                     return internal_error(fail_msg, trace)
 
+            # @added 20170917 - Feature #1996: Ionosphere - matches page
+            matched_id_resources = None
+            matched_graph_image_file = None
+            if matched_fp_id:
+                if matched_fp_id != 'False':
+                    matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_fp_id), 'features_profile', base_name, requested_timestamp)
+            if matched_layer_id:
+                if matched_layer_id != 'False':
+                    matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_layer_id), 'layers', base_name, requested_timestamp)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -1945,6 +2117,9 @@ def ionosphere():
                 profile_enabled=fp_enabled, disable_feature_profile=disable_fp,
                 disabled_fp_successful=disabled_fp_success,
                 family_tree_ids=family_tree_fp_ids,
+                matched_fp_id=matched_fp_id, matched_layer_id=matched_layer_id,
+                matched_id_resources=matched_id_resources,
+                matched_graph_image_file=matched_graph_image_file,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

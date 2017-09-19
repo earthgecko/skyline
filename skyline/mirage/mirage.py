@@ -169,7 +169,9 @@ class Mirage(Thread):
             try:
                 new_datapoint = [float(datapoint[1]), float(datapoint[0])]
                 converted.append(new_datapoint)
-            except:
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            except:  # nosec
                 continue
 
         parsed = urlparse.urlparse(url)

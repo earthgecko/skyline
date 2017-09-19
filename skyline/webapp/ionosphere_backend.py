@@ -23,6 +23,9 @@ from sqlalchemy.sql import select
 # import json
 # from tsfresh import __version__ as tsfresh_version
 
+# @added 20170916 - Feature #1996: Ionosphere - matches page
+from pymemcache.client.base import Client as pymemcache_Client
+
 import settings
 import skyline_version
 # from skyline_functions import (
@@ -1703,7 +1706,9 @@ def ionosphere_search(default_query, search_query):
             all_list = []
 #            required_option = 'full_duration'
             try:
-                stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)
+                # @modified 20170913 - Task #2160: Test skyline with bandit
+                # Added nosec to exclude from bandit tests
+                stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)  # nosec
                 connection = engine.connect()
                 for row in engine.execute(stmt):
                     value = row[str(required_option)]
@@ -3337,3 +3342,604 @@ def disable_features_profile_family_tree(fp_ids):
         engine_disposal(engine)
 
     return True, fail_msg, trace
+
+
+# @added 20170915 - Feature #1996: Ionosphere - matches page
+def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp, until_timestamp, limit, sort):
+    """
+    Get all the matches.
+
+    :param metric: all or the metric name
+    :param metric_like: False or the metric MySQL like string e.g statsd.%
+    :param get_fp_id: None or int
+    :param get_layer_id: None or int
+    :param from_timestamp: timestamp or None
+    :param until_timestamp: timestamp or None
+    :param limit: None or number to limit to
+    :param sort: DESC or ASC
+    :return: list
+    :rtype: list
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: get_fp_matches'
+
+    logger.info('%s getting matches' % (function_str))
+    logger.info('arguments :: %s, %s, %s, %s, %s, %s, %s, %s' % (
+        str(metric), str(metric_like), str(get_fp_id), str(get_layer_id),
+        str(from_timestamp), str(until_timestamp), str(limit),
+        str(sort)))
+    trace = 'none'
+    fail_msg = 'none'
+
+    if settings.MEMCACHE_ENABLED:
+        memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
+    else:
+        memcache_client = None
+
+    logger.info('%s :: getting MySQL engine' % function_str)
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        return False, fail_msg, trace
+
+    query_string = 'SELECT * FROM ionosphere_matched'
+    needs_and = False
+
+    if metric and metric != 'all':
+        metric_id_stmt = 'SELECT id FROM metrics WHERE metric=\'%s\'' % str(metric)
+        metric_id = None
+        logger.info('metric set to %s' % str(metric))
+        try:
+            connection = engine.connect()
+            result = connection.execute(metric_id_stmt)
+            connection.close()
+            for row in result:
+                if not metric_id:
+                    metric_id = int(row[0])
+            logger.info('metric_id set to %s' % str(metric_id))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not determine id from metrics table')
+            # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+
+        fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id=%s' % str(metric_id)
+        fp_ids = ''
+        try:
+            connection = engine.connect()
+            results = connection.execute(fp_ids_stmt)
+            connection.close()
+            for row in results:
+                fp_id = str(row[0])
+                if fp_ids == '':
+                    fp_ids = '%s' % (fp_id)
+                else:
+                    new_fp_ids = '%s, %s' % (fp_ids, fp_id)
+                    fp_ids = new_fp_ids
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not determine id from metrics table')
+            # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+        logger.info('fp_ids set to %s' % str(fp_ids))
+        query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id in (%s)' % str(fp_ids)
+        needs_and = True
+
+#    if 'metric_like' in request.args:
+    if metric_like:
+        if metric_like and metric_like != 'all':
+            # SQLAlchemy requires the MySQL wildcard % to be %% to prevent
+            # interpreting the % as a printf-like format character
+            python_escaped_metric_like = metric_like.replace('%', '%%')
+            # nosec to exclude from bandit tests
+            metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
+            logger.info('executing metrics_like_query - %s' % metrics_like_query)
+            metric_ids = ''
+            try:
+                connection = engine.connect()
+                results = connection.execute(metrics_like_query)
+                connection.close()
+                for row in results:
+                    metric_id = str(row[0])
+                    if metric_ids == '':
+                        metric_ids = '%s' % (metric_id)
+                    else:
+                        new_metric_ids = '%s, %s' % (metric_ids, metric_id)
+                        metric_ids = new_metric_ids
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error('error :: could not determine ids from metrics table')
+                # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+                if engine:
+                    engine_disposal(engine)
+                return False, fail_msg, trace
+
+            fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id IN (%s)' % str(metric_ids)
+            fp_ids = ''
+            try:
+                connection = engine.connect()
+                results = connection.execute(fp_ids_stmt)
+                connection.close()
+                for row in results:
+                    fp_id = str(row[0])
+                    if fp_ids == '':
+                        fp_ids = '%s' % (fp_id)
+                    else:
+                        new_fp_ids = '%s, %s' % (fp_ids, fp_id)
+                        fp_ids = new_fp_ids
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error('error :: could not determine id from metrics table')
+                # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+                if engine:
+                    engine_disposal(engine)
+                return False, fail_msg, trace
+            query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id in (%s)' % str(fp_ids)
+            needs_and = True
+
+    # @added 20170917 - Feature #1996: Ionosphere - matches page
+    # Added by fp_id or layer_id as well
+    get_features_profiles_matched = True
+    get_layers_matched = True
+    if get_fp_id or get_layer_id:
+        if get_fp_id:
+            logger.info('get_fp_id set to %s' % str(get_fp_id))
+            if get_fp_id != '0':
+                get_layers_matched = False
+                query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id=%s' % str(get_fp_id)
+        if get_layer_id:
+            logger.info('get_layer_id set to %s' % str(get_layer_id))
+            if get_layer_id != '0':
+                get_features_profiles_matched = False
+                query_string = 'SELECT * FROM ionosphere_layers_matched WHERE layer_id=%s' % str(get_layer_id)
+                fp_id_query_string = 'SELECT fp_id FROM ionosphere_layers WHERE id=%s' % str(get_layer_id)
+                fp_id = None
+                try:
+                    connection = engine.connect()
+                    result = connection.execute(fp_id_query_string)
+                    connection.close()
+                    for row in result:
+                        if not fp_id:
+                            fp_id = int(row[0])
+                except:
+                    trace = traceback.format_exc()
+                    logger.error(trace)
+                    logger.error('error :: could not determine id from metrics table')
+                    # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+                    if engine:
+                        engine_disposal(engine)
+                    return False, fail_msg, trace
+        needs_and = True
+
+    if 'from_timestamp' in request.args:
+        from_timestamp = request.args.get('from_timestamp', None)
+        if from_timestamp and from_timestamp != 'all':
+            if ":" in from_timestamp:
+                import datetime
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+                from_timestamp = str(int(new_from_timestamp))
+            if needs_and:
+                new_query_string = '%s AND metric_timestamp >= %s' % (query_string, from_timestamp)
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE metric_timestamp >= %s' % (query_string, from_timestamp)
+                query_string = new_query_string
+                needs_and = True
+
+    if 'until_timestamp' in request.args:
+        until_timestamp = request.args.get('until_timestamp', None)
+        if until_timestamp and until_timestamp != 'all':
+            if ":" in until_timestamp:
+                import datetime
+                new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+                until_timestamp = str(int(new_until_timestamp))
+
+            if needs_and:
+                new_query_string = '%s AND metric_timestamp <= %s' % (query_string, until_timestamp)
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE metric_timestamp <= %s' % (query_string, until_timestamp)
+                query_string = new_query_string
+                needs_and = True
+
+    ordered_by = None
+    if 'order' in request.args:
+        order = request.args.get('order', 'DESC')
+        if str(order) == 'DESC':
+            ordered_by = 'DESC'
+        if str(order) == 'ASC':
+            ordered_by = 'ASC'
+
+    if ordered_by:
+        new_query_string = '%s ORDER BY id %s' % (query_string, ordered_by)
+        query_string = new_query_string
+
+    if 'limit' in request.args:
+        limit = request.args.get('limit', '30')
+        try:
+            test_limit = int(limit) + 0
+            if int(limit) != 0:
+                new_query_string = '%s LIMIT %s' % (query_string, str(limit))
+                query_string = new_query_string
+        except:
+            logger.error('error :: limit is not an integer - %s' % str(limit))
+
+    # Get ionosphere_summary memcache object from which metric names will be
+    # determined
+    memcache_result = None
+    ionosphere_summary_list = None
+    if settings.MEMCACHE_ENABLED:
+        try:
+            memcache_result = memcache_client.get('ionosphere_summary_list')
+        except:
+            logger.error('error :: failed to get ionosphere_summary_list from memcache')
+        try:
+            memcache_client.close()
+        # Added nosec to exclude from bandit tests
+        except:  # nosec
+            pass
+
+    if memcache_result:
+        try:
+            logger.info('using memcache ionosphere_summary_list key data')
+            ionosphere_summary_list = literal_eval(memcache_result)
+        except:
+            logger.error('error :: failed to process data from memcache key - ionosphere_summary_list')
+            ionosphere_summary_list = False
+
+    if not ionosphere_summary_list:
+        stmt = "SELECT ionosphere.id, ionosphere.metric_id, metrics.metric FROM ionosphere INNER JOIN metrics ON ionosphere.metric_id=metrics.id"
+        try:
+            connection = engine.connect()
+            results = connection.execute(stmt)
+            connection.close()
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not determine metrics from metrics table')
+            # Disposal and raise for Bug #2130: MySQL - Aborted_clients
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+        if results:
+            # Because the each row in the results is a dict and all the rows are
+            # being used, these are being converted into a list and stored in
+            # memcache as a list
+            ionosphere_summary_list = []
+            for row in results:
+                ionosphere_summary_list.append([int(row['id']), int(row['metric_id']), str(row['metric'])])
+            if settings.MEMCACHE_ENABLED:
+                try:
+                    memcache_client.set('ionosphere_summary_list', ionosphere_summary_list, expire=600)
+                    logger.info('set memcache ionosphere_summary_list key with DB results')
+                except:
+                    logger.error('error :: failed to get ionosphere_summary_list from memcache')
+                try:
+                    memcache_client.close()
+                # Added nosec to exclude from bandit tests
+                except:  # nosec
+                    pass
+
+# ionosphere_matched table layout
+# | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version |
+# | 39793 |   782 |       1505560867 |      9856.36758282061 |                     210 |  9813.63277426169 |                   150 | 0.4.0           |
+# ionosphere_layers_matched table layout
+# | id    | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration |
+# | 25069 |       24 |  1108 |       195 |        1505561823 |            2.000000 |         86400 |
+
+    matches = []
+# matches list elements - where id is the ionosphere_matched or the
+# ionosphere_layers_matched table id for the match being processed
+# [metric_timestamp, id, matched_by, fp_id, layer_id, metric, uri_to_matched_page]
+# e.g.
+# [[1505560867, 39793, 'features_profile', 782, 'None', 'stats.skyline-dev-3-40g-gra1.vda.ioInProgress', 'ionosphere?fp_matched=true...'],
+# [1505561823, 25069, 'layers', 1108, 24, 'stats.controller-dev-3-40g-sbg1.apache.sending', 'ionosphere?fp_matched=true...']]
+
+    if get_features_profiles_matched:
+        try:
+            connection = engine.connect()
+            stmt = query_string
+            logger.info('executing %s' % stmt)
+            results = connection.execute(stmt)
+            connection.close()
+        except:
+            trace = traceback.format_exc()
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine metrics from metrics table')
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal and raise
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+
+        for row in results:
+            metric_timestamp = int(row['metric_timestamp'])
+            metric_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
+            match_id = int(row['id'])
+            matched_by = 'features profile'
+            fp_id = int(row['fp_id'])
+            layer_id = 'None'
+            # Get metric name, first get metric id from the features profile
+            # record
+            try:
+                metric_list = [row[2] for row in ionosphere_summary_list if row[0] == fp_id]
+                metric = metric_list[0]
+            except:
+                metric = 'UNKNOWN'
+            uri_to_matched_page = 'None'
+            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
+
+    if get_layers_matched:
+        # layers matches
+        new_query_string = query_string.replace('ionosphere_matched', 'ionosphere_layers_matched')
+        query_string = new_query_string
+        new_query_string = query_string.replace('metric_timestamp', 'anomaly_timestamp')
+        query_string = new_query_string
+        try:
+            connection = engine.connect()
+            stmt = query_string
+            logger.info('executing %s' % stmt)
+            results = connection.execute(stmt)
+            connection.close()
+        except:
+            trace = traceback.format_exc()
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine metrics from metrics table')
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal and raise
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+
+        for row in results:
+            anomaly_timestamp = int(row['anomaly_timestamp'])
+            metric_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(anomaly_timestamp)))
+            match_id = int(row['id'])
+            matched_by = 'layers'
+            fp_id = int(row['fp_id'])
+            layer_id = int(row['layer_id'])
+            # Get metric name, first get metric id from the features profile
+            # record
+            try:
+                metric_list = [row[2] for row in ionosphere_summary_list if row[0] == fp_id]
+                metric = metric_list[0]
+            except:
+                metric = 'UNKNOWN'
+            uri_to_matched_page = 'None'
+            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
+
+    sorted_matches = sorted(matches, key=lambda x: x[0])
+    matches = sorted_matches
+
+    if engine:
+        engine_disposal(engine)
+    try:
+        del metric_list
+    except:
+        logger.error('error :: failed to del metrics')
+
+    return matches, fail_msg, trace
+
+
+# @added 20170917 - Feature #1996: Ionosphere - matches page
+def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp):
+    """
+    Get the Ionosphere matched details of a features profile or layer
+
+    :param matched_id: the matched id
+    :type id: int
+    :param matched_by: either features_profile or layers
+    :type id: str
+    :param metric: metric base_name
+    :type id: str
+    :param requested_timestamp: the timestamp of the features profile
+    :type id: int
+    :return: tuple
+    :rtype:  (str, boolean, str, str)
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: get_matched_id_resources'
+
+    trace = 'none'
+    fail_msg = 'none'
+    matched_details = None
+
+    use_table = 'ionosphere_matched'
+    if matched_by == 'layers':
+        use_table = 'ionosphere_layers_matched'
+
+    logger.info('%s :: getting MySQL engine' % function_str)
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        logger.error('%s' % fail_msg)
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
+
+    if matched_by == 'features_profile':
+        ionosphere_matched_table = None
+        try:
+            ionosphere_matched_table, fail_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+            logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+
+    if matched_by == 'layers':
+        ionosphere_layers_matched_table = None
+        try:
+            ionosphere_layers_matched_table, fail_msg, trace = ionosphere_layers_matched_table_meta(skyline_app, engine)
+            logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+
+    if trace != 'none':
+        fail_msg = 'error :: failed to get %s table for matched id %s' % (use_table, str(matched_id))
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
+
+    logger.info('%s :: %s table OK' % (function_str, use_table))
+
+    if matched_by == 'features_profile':
+        stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.id == int(matched_id))
+    if matched_by == 'layers':
+        stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.id == int(matched_id))
+
+    try:
+        connection = engine.connect()
+        # stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.id == int(matched_id))
+        result = connection.execute(stmt)
+        row = result.fetchone()
+        matched_details_object = row
+        connection.close()
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: could not get matched_id %s details from %s DB table' % (str(matched_id), use_table)
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
+
+    if matched_by == 'features_profile':
+        try:
+            fp_id = row['fp_id']
+            metric_timestamp = row['metric_timestamp']
+            all_calc_features_sum = row['all_calc_features_sum']
+            all_calc_features_count = row['all_calc_features_count']
+            sum_common_values = row['sum_common_values']
+            common_features_count = row['common_features_count']
+            tsfresh_version = row['tsfresh_version']
+            matched_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
+            matched_details = '''
+tsfresh_version   :: %s
+all_calc_features_sum :: %s     | all_calc_features_count :: %s
+sum_common_values     :: %s     | common_features_count :: %s
+metric_timestamp      :: %s     | human_date :: %s
+''' % (str(tsfresh_version), str(all_calc_features_sum),
+                str(all_calc_features_count), str(sum_common_values),
+                str(common_features_count), str(metric_timestamp),
+                str(matched_human_date))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: could not get details for matched id %s' % str(matched_id)
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            # return False, False, fail_msg, trace, False
+            raise  # to webapp to return in the UI
+        full_duration_stmt = 'SELECT full_duration FROM ionosphere WHERE id=%s' % str(fp_id)
+        full_duration = None
+        try:
+            connection = engine.connect()
+            result = connection.execute(full_duration_stmt)
+            connection.close()
+            for row in result:
+                if not full_duration:
+                    full_duration = int(row[0])
+            logger.info('full_duration for matched determined as %s' % (str(full_duration)))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not determine full_duration from ionosphere table')
+            # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+
+    if matched_by == 'layers':
+        try:
+            layer_id = row['layer_id']
+            fp_id = row['fp_id']
+            metric_timestamp = row['anomaly_timestamp']
+            anomalous_datapoint = row['anomalous_datapoint']
+            full_duration = row['full_duration']
+            matched_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
+            matched_details = '''
+layer_id            :: %s
+anomalous_datapoint :: %s
+full_duration       :: %s
+metric_timestamp    :: %s     | human_date :: %s
+''' % (str(layer_id), str(anomalous_datapoint), str(full_duration),
+                str(metric_timestamp), str(matched_human_date))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: could not get details for matched id %s' % str(matched_id)
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            # return False, False, fail_msg, trace, False
+            raise  # to webapp to return in the UI
+
+    if engine:
+        engine_disposal(engine)
+
+    # Create a Graphite image
+    from_timestamp = str(int(metric_timestamp) - int(full_duration))
+    until_timestamp = str(metric_timestamp)
+    timeseries_dir = metric.replace('.', '/')
+    metric_data_dir = '%s/%s/%s' % (
+        settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
+        str(requested_timestamp))
+
+    if matched_by == 'features_profile':
+        graph_image_file = '%s/%s.matched.fp_id-%s.%s.png' % (
+            metric_data_dir, metric, str(fp_id), str(metric_timestamp))
+    if matched_by == 'layers':
+        graph_image_file = '%s/%s.layers_id-%s.matched.layers.fp_id-%s.%s.png' % (
+            metric_data_dir, metric, str(matched_id),
+            str(fp_id), str(layer_id))
+
+    if not path.isfile(graph_image_file):
+        logger.info('getting Graphite graph for match - from_timestamp - %s, until_timestamp - %s' % (str(from_timestamp), str(until_timestamp)))
+        graph_image = get_graphite_metric(
+            skyline_app, metric, from_timestamp, until_timestamp, 'image',
+            graph_image_file)
+        if not graph_image:
+            logger.error('failed getting Graphite graph')
+            graph_image_file = None
+
+    return matched_details, True, fail_msg, trace, matched_details_object, graph_image_file

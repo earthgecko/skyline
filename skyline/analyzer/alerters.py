@@ -223,7 +223,9 @@ def alert_smtp(alert, metric, context):
 
         if image_data is None:
             try:
-                image_data = urllib2.urlopen(link).read()
+                # @modified 20170913 - Task #2160: Test skyline with bandit
+                # Added nosec to exclude from bandit tests
+                image_data = urllib2.urlopen(link).read()  # nosec
                 if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                     logger.info('debug :: alert_smtp - image data OK')
             except urllib2.URLError:
