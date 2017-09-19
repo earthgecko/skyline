@@ -664,11 +664,24 @@ class Panorama(Thread):
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
             query = 'select id FROM %s WHERE %s=\'%s\'' % (table, key, value)  # nosec
-            results = self.mysql_select(query)
+
+            # @modified 20170916 - Bug #2166: panorama incorrect mysql_id cache keys
+            # Wrap in except
+            # results = self.mysql_select(query)
+            results = None
+            try:
+                results = self.mysql_select(query)
+            except:
+                logger.error('error :: failed to determine results from - %s' % (query))
 
             determined_id = 0
             if results:
-                determined_id = int(results[0][0])
+                try:
+                    determined_id = int(results[0][0])
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: determined_id is not an int')
+                    determined_id = 0
 
             if determined_id > 0:
                 # Set the key for a week
