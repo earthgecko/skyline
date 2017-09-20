@@ -2432,6 +2432,12 @@ def rebrow_key(host, port, db, key):
         except:
             abort(404)
         test_string = all(c in string.printable for c in val)
+        # @added 20170920 - Bug #2166: panorama incorrect mysql_id cache keys
+        # There are SOME cache key msgpack values that DO == string.printable
+        # for example [73] msgpacks to I
+        # panorama.mysql_ids will always be msgpack
+        if 'panorama.mysql_ids' in str(key):
+            test_string = False
         if not test_string:
             raw_result = r.get(key)
             unpacker = Unpacker(use_list=False)
