@@ -329,6 +329,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             # @modified 20161229 - Feature #1830: Ionosphere alerts
             # Only write the data to the file if it does not exist and replace
             # the timeseries object if a json file exists
+
+            # @added 20170920 - Bug #2168: Strange Redis derivative graph
+            using_original_redis_json = False
+
             if not os.path.isfile(json_file):
                 timeseries_json = str(timeseries).replace('[', '(').replace(']', ')')
                 try:
@@ -350,6 +354,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                     logger.info('%s Redis timeseries replaced with timeseries from :: %s' % (skyline_app, anomaly_json))
                     timeseries_x = [float(item[0]) for item in timeseries]
                     timeseries_y = [item[1] for item in timeseries]
+                    # @added 20170920 - Bug #2168: Strange Redis derivative graph
+                    # This already has nonNegativeDerivative applied to it
+                    using_original_redis_json = True
                 except:
                     logger.error(traceback.format_exc())
                     logger.error(
@@ -359,11 +366,22 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         # @added 20170823 - Feature #2034: analyse_derivatives
         # Originally patterned and added to analyzer/alerters.py on 20170603
         if known_derivative_metric:
-            try:
-                derivative_timeseries = nonNegativeDerivative(timeseries)
-                timeseries = derivative_timeseries
-            except:
-                logger.error('error :: alert_smtp - nonNegativeDerivative failed')
+
+            # @added 20170920 - Bug #2168: Strange Redis derivative graph
+            # If this is the Mirage Redis json it already has
+            # nonNegativeDerivative applied to it
+            if not using_original_redis_json:
+                logger.info('alert_smtp - nonNegativeDerivative being applied')
+
+                try:
+                    derivative_timeseries = nonNegativeDerivative(timeseries)
+                    timeseries = derivative_timeseries
+                    # @added 20170920 - Bug #2168: Strange Redis derivative graph
+                    logger.info('alert_smtp - nonNegativeDerivative applied')
+                except:
+                    logger.error('error :: alert_smtp - nonNegativeDerivative failed')
+            else:
+                logger.info('alert_smtp - nonNegativeDerivative not being applied, as it will have been applied in the original json')
 
         # @added 21070823 - Bug #2068: Analyzer smtp alert error on Redis plot with derivative metrics
         # Originally patterned and added to analyzer/alerters.py on 20170726
