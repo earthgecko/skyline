@@ -14,7 +14,7 @@ calculate the features for.
 Run the script with:
 
 ```
-python tsfresh/scripts/tsfresh_graphite_csv path_to_your_graphite_csv [pytz_timezone]
+python tsfresh/scripts/tsfresh_graphite_csv.py path_to_your_graphite_csv [pytz_timezone]
 ```
 
 Where path_to_your_graphite_csv.csv is a single metric timeseries that has been
@@ -63,6 +63,7 @@ def set_date(self, d):
         self.date = d.astimezone(pytz.utc)
     except:
         self.date = pytz.utc.localize(d)
+
 
 if __name__ == '__main__':
 
