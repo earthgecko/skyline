@@ -363,7 +363,9 @@ def run_layer_algorithms(base_name, layers_id, timeseries):
                 if count >= 4:
                     understandable_message_str = 'the %sth last value in the timeseries' % str(count)
                 value = float(timeseries[-count][1])
-                op_func_result = op_func(value, e_boundary_limit)
+                # @modified 20171106 - Bug #2208: D1 layer issue
+                # op_func_result = op_func(value, e_boundary_limit)
+                op_func_result = op_func(value, d1_boundary_limit)
                 if op_func_result:
                     if engine:
                         layers_engine_disposal(engine)

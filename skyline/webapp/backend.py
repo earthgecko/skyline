@@ -402,8 +402,8 @@ def get_list(thing):
 
     :param thing: the thing, e.g. 'algorithm'
     :type thing: str
-    :return: array
-    :rtype: array, boolean
+    :return: list
+    :rtype: list
 
     """
     table = '%ss' % thing
