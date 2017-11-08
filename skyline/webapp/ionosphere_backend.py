@@ -1631,7 +1631,11 @@ def ionosphere_search(default_query, search_query):
                     else:
                         layer_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(layer_last_matched)))
                     layer_last_checked = int(row['last_checked'])
-                    if str(last_checked) == '0':
+                    # @modified 20170924 - Feature #2170: Ionosphere - validated matches
+                    # Fixed variable typo which resulted in layer last checked
+                    # field showing 1970-01-01 00:00:00 UTC (Thursday)
+                    # if str(last_checked) == '0':
+                    if str(layer_last_checked) == '0':
                         layer_checked_human_date = 'never checked'
                     else:
                         layer_checked_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(layer_last_checked)))
@@ -3853,7 +3857,7 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
             tsfresh_version = row['tsfresh_version']
             matched_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
             matched_details = '''
-tsfresh_version   :: %s
+tsfresh_version       :: %s
 all_calc_features_sum :: %s     | all_calc_features_count :: %s
 sum_common_values     :: %s     | common_features_count :: %s
 metric_timestamp      :: %s     | human_date :: %s
