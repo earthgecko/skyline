@@ -344,6 +344,8 @@ count
             <th>generation</th>
             <th>origin</th>
             <th>full duration</th>
+<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
+            <th>fp efficiency</th>
             <th>match count</th>
             <th>last matched</th>
             <th>checked count</th>
@@ -352,6 +354,8 @@ count
 <!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
             <th>validated</th>
             <th>layer id</th>
+<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
+            <th>layer efficiency</th>
 <!-- @added 20170322 - Feature #1960: ionosphere_layers
 # Added layers information to the features profiles search results -->
             <th>layer matched count</th>
@@ -389,6 +393,12 @@ count
       {% endif %}
     {% endif %}
             <td>{{ item[3] }}</td>
+<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
+    {% if item[10] == 0 %}
+            <td>0 %</td>
+    {% else %}
+            <td>{{ (item[10] / item[13] * 100)|round(1, 'common')}} %</td>
+    {% endif %}
             <td>{{ item[10] }}</td>
             <td>{{ item[11] }}</td>
             <td>{{ item[13] }}</td>
@@ -396,7 +406,23 @@ count
             <td>{{ item[12] }}</td>
             <td>{{ item[17] }}</td>
             <td>{{ item[18] }}</td>
+<!-- # @added 20171106 - Feature #2184: features profiles by performance
+Handle if no layers in results, not ideal but works.  If item[19] do not exist
+for any of the returned features profiles the layers column values will be blank -->
+    {% if item[19] %}
+<!-- # @added 20171020 - Feature #2184: features profiles by performance -->
+      {% if item[19] == 0 %}
+            <td>0 %</td>
             <td>{{ item[19] }}</td>
+      {% else %}
+            <td>{{ (item[19] / item[21] * 100)|round(1, 'common')}} %</td>
+            <td>{{ item[19] }}</td>
+      {% endif %}
+    {% else %}
+            <td>0 %</td>
+            <td>{{ item[19] }}</td>
+    {% endif %}
+<!--            <td>{{ item[19] }}</td> -->
             <td>{{ item[20] }}</td>
             <td>{{ item[21] }}</td>
             <td>{{ item[22] }}</td>
