@@ -381,6 +381,16 @@ already matched a training data set -->
       {% endif %}
     {% endif %}
 
+<!-- # @added 20171106 - Feature #2210: existing features profiles link
+Add a link to features profiles for a metric so that the operator can open up
+the features profile search page with all the features profiles for the metric
+to evaluate efficiency and count of features profiles to determine how effectively
+Ionosphere is working on a metric.  This could be a table insert like Existing
+layers, but big tables may hinder easy navigation in the training page, so a
+link and new tab is ok.
+-->
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
+
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the existing layers and algorithms for the metric
 # @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers

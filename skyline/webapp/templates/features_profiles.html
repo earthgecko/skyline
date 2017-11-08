@@ -285,7 +285,7 @@ you need to try and be quicker next time.
       <h3><span class="logo"><span class="sky">Learnt ::</span> <span class="re">NOT anomalous ::</span></span></span> features profile id {{ features_profile_id }}</h3>
       <br>
       <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile based on </span></span></span>
-      <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}"><b>parent features profile id {{ parent_id }}</b></a></h4></center>
+      <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}" target="_blank"><b>parent features profile id {{ parent_id }}</b></a></h4></center>
   {% endif %}
       <br>
 
@@ -325,12 +325,22 @@ you need to try and be quicker next time.
   	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span></span> False</h4>
 	  <div class="alert alert-warning">
     <strong>Warning!</strong> This features profile has not been validated, please review it against
-<a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}"><b>parent features profile id {{ parent_id }}</b></a>
+<a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}" target="_blank"><b>parent features profile id {{ parent_id }}</b></a>
 and validate that it is valid.
       <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric }}&validate_fp=true">
       <button type="button">Validate features profile</button></a>
 	  </div>
   {% endif %}
+
+<!-- # @added 20171106 - Feature #2210: existing features profiles link
+Add a link to features profiles for a metric so that the operator can open up
+the features profile search page with all the features profiles for the metric
+to evaluate efficiency and count of features profiles to determine how effectively
+Ionosphere is working on a metric.  This could be a table insert like Existing
+layers, but big tables may hinder easy navigation in the training page, so a
+link and new tab is ok.
+-->
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
 
   	  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">details ::</span></span></span> features profile ionosphere_layers id {{ layer_id }}</h4>
   {% if layer_details %}
@@ -500,7 +510,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>{{ family_tree_ids|length - 1 }} learnt profiles</h4>
       {% for item in family_tree_ids %}
         {% if item != features_profile_id %}
-      <a href="?fp_view=true&fp_id={{ item }}&metric={{ for_metric }}"><b>{{ item }}</b></a>
+      <a href="?fp_view=true&fp_id={{ item }}&metric={{ for_metric }}" target="_blank"><b>{{ item }}</b></a>
         {% endif %}
       {% endfor %}
     {% else %}
