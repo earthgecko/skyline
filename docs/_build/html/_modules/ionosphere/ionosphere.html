@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.1.6-beta documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.1.7-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.7-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -1138,7 +1138,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="k">pass</span>
+                <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                <span class="c1"># pass</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
 
         <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn - generations</span>
         <span class="c1"># If this is added_by ionosphere_learn the id is only</span>
@@ -1598,14 +1600,18 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="k">except</span><span class="p">:</span>
-                        <span class="k">pass</span>
+                        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                        <span class="c1"># pass</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">fp_id_feature_values</span><span class="p">:</span>
                         <span class="n">fp_features</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_id_feature_values</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using memcache </span><span class="si">%s</span><span class="s1"> key data&#39;</span> <span class="o">%</span> <span class="n">fp_id_feature_values_key</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_features</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT feature_id, value FROM </span><span class="si">%s</span><span class="s1"> WHERE fp_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_fp_table</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                        <span class="c1"># Added nosec to exclude from bandit tests</span>
+                        <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT feature_id, value FROM </span><span class="si">%s</span><span class="s1"> WHERE fp_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_fp_table</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>  <span class="c1"># nosec</span>
                         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
                             <span class="n">fp_feature_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;feature_id&#39;</span><span class="p">])</span>
@@ -1630,7 +1636,9 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="k">except</span><span class="p">:</span>
-                        <span class="k">pass</span>
+                        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                        <span class="c1"># pass</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
 
                 <span class="c1"># @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs</span>
                 <span class="c1">#                   Feature #1844: ionosphere_matched DB table</span>
@@ -1892,9 +1900,10 @@
                     <span class="n">after_datetime</span> <span class="o">=</span> <span class="n">rate_limit_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                        <span class="c1"># Added nosec to exclude from bandit tests</span>
                         <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-                            <span class="s1">&#39;SELECT * FROM ionosphere WHERE metric_id=</span><span class="si">%s</span><span class="s1"> AND created_timestamp &gt; </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1"> AND generation &gt; 1&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">after_datetime</span><span class="p">)))</span>
+                            <span class="s1">&#39;SELECT * FROM ionosphere WHERE metric_id=</span><span class="si">%s</span><span class="s1"> AND created_timestamp &gt; </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1"> AND generation &gt; 1&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">after_datetime</span><span class="p">)))</span>  <span class="c1"># nosec</span>
                         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                             <span class="n">last_full_duration</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
                             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_full_duration</span><span class="p">):</span>
@@ -1917,7 +1926,9 @@
                     <span class="c1"># Determine generation of the matched fp not the last in the</span>
                     <span class="c1"># list</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT generation FROM ionosphere WHERE id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                        <span class="c1"># Added nosec to exclude from bandit tests</span>
+                        <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT generation FROM ionosphere WHERE id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>  <span class="c1"># nosec</span>
                         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
                             <span class="n">matched_fp_generation</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">])</span>
@@ -2256,6 +2267,15 @@
                             <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_FOLDER</span><span class="p">,</span>
                             <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span>
 
+            <span class="c1"># @added 20170916 - Feature #1996: Ionosphere - matches page</span>
+            <span class="c1"># Create the ionosphere_summary_memcache_object</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updating the ionosphere_summary_memcache_object&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">update_ionosphere_summary_memcache_object</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_ionosphere_summary_memcache_object - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+
             <span class="c1"># self.populate the database metatdata tables</span>
             <span class="c1"># What is my host id in the Skyline panorama DB?</span>
             <span class="n">host_id</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2273,13 +2293,17 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="k">pass</span>
+                    <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                    <span class="c1"># pass</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">host_id</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using memcache </span><span class="si">%s</span><span class="s1"> key data&#39;</span> <span class="o">%</span> <span class="n">hosts_id_key</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;host_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">host_id</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">host_id</span><span class="p">:</span>
-                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id FROM hosts WHERE host=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span>
+                <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                <span class="c1"># Added nosec to exclude from bandit tests</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id FROM hosts WHERE host=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span>  <span class="c1"># nosec</span>
                 <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
                     <span class="n">host_id</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -2295,12 +2319,16 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="k">except</span><span class="p">:</span>
-                        <span class="k">pass</span>
+                        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                        <span class="c1"># pass</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
 
             <span class="c1"># if not known - INSERT hostname INTO host</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">host_id</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inserting </span><span class="si">%s</span><span class="s1"> into hosts table&#39;</span> <span class="o">%</span> <span class="n">this_host</span><span class="p">)</span>
-                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;insert into hosts (host) VALUES (</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">this_host</span>
+                <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                <span class="c1"># Added nosec to exclude from bandit tests</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;insert into hosts (host) VALUES (</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">this_host</span>  <span class="c1"># nosec</span>
                 <span class="n">host_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mysql_insert</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">host_id</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;new host_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">host_id</span><span class="p">))</span>
@@ -2691,7 +2719,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.6-beta',
+            VERSION:'1.1.7-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

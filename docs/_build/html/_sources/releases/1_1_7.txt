@@ -1,0 +1,46 @@
+=============================
+1.1.7 - the ionosphere branch
+=============================
+
+v1.1.7-ionosphere - Nov 8, 2017
+
+Changes
+-------
+
+- Bumped to v1.1.7
+- features profiles by performance (Feature #2184).  Added fp efficiency and
+  layer efficiency calculations to the search features results table.  This is
+  a simple percentage calculation of matched over number of time checked.
+- existing features profiles link (Feature #2210). Add a link to features
+  profiles for a metric so that the operator can open up the features profile
+  search page with all the features profiles for the metric to evaluate
+  efficiency and count of features profiles to determine how effectively
+  Ionosphere is working on a metric.  This could be a table insert like Existing
+  layers, but big tables may hinder easy navigation in the training page, so a
+  link and new tab is ok.
+- Fixed variable typo which resulted in layer last checked - ionosphere_backend.py
+- D1 layer issue (Bug #2208). Corrected copy paste typo in layers
+- fix alert Redis derivative graphs. (Bug #2168). Stop nonNegativeDerivative
+  being applied twice
+- panorama incorrect mysql_id cache keys (Bug #2166). There are SOME cache key
+  msgpack values that DO == string.printable for example [73] msgpacks to I
+  panorama.mysql_ids will always be msgpack so if 'panorama.mysql_ids' in key
+  name set test_string = False
+- Ionosphere - matches page (Feature #1996). Included the features_profiles_matches.html
+  Create the ionosphere_summary_memcache_object. Added get_fp_matches and
+  get_matched_id_resources, get_fp_matches, get_matched_id_resources,
+  fp_search_or_matches_req and fp_matches.  Handle both fp_search and fp_matches.
+  Added 'matched_fp_id', 'matched_layer_id' request arguments. Added
+  matched_graph_image_file to show the graph for the matched event in the
+  features_profile MATCHED Evaluation page. Added the Matches Ionosphere page
+  and menu tabs
+- panorama incorrect mysql_id cache keys (Bug #2166). Wrap in except around
+  mysql_select
+- webapp Redis metric check, existing but sparsely represented metrics.  If this
+  is an fp_view=true, it means that either the metric is sparsely represented or
+  no longer exists, but an fp exists so continue and do not 404 (Bug #2158).
+  Note about unused TSFRESH_VERSION in skyline/features_profile.py
+- ionosphere - mismatching timestamp metadata (Bug #2162 and Feature #1872)
+  Iterate back a few seconds as the features profile dir and file resources may
+  have a slight offset timestamp from the created_timestamp which is based on
+  MySQL CURRENT_TIMESTAMP

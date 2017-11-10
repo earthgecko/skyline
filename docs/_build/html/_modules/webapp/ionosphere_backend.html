@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.ionosphere_backend &mdash; Skyline 1.1.6-beta documentation</title>
+  <title>webapp.ionosphere_backend &mdash; Skyline 1.1.7-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.7-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -187,6 +187,9 @@
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">select</span>
 <span class="c1"># import json</span>
 <span class="c1"># from tsfresh import __version__ as tsfresh_version</span>
+
+<span class="c1"># @added 20170916 - Feature #1996: Ionosphere - matches page</span>
+<span class="kn">from</span> <span class="nn">pymemcache.client.base</span> <span class="k">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">pymemcache_Client</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">import</span> <span class="nn">skyline_version</span>
@@ -1793,7 +1796,11 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">layer_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">layer_last_matched</span><span class="p">)))</span>
                     <span class="n">layer_last_checked</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;last_checked&#39;</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_checked</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                    <span class="c1"># @modified 20170924 - Feature #2170: Ionosphere - validated matches</span>
+                    <span class="c1"># Fixed variable typo which resulted in layer last checked</span>
+                    <span class="c1"># field showing 1970-01-01 00:00:00 UTC (Thursday)</span>
+                    <span class="c1"># if str(last_checked) == &#39;0&#39;:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_last_checked</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
                         <span class="n">layer_checked_human_date</span> <span class="o">=</span> <span class="s1">&#39;never checked&#39;</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">layer_checked_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">layer_last_checked</span><span class="p">)))</span>
@@ -1868,7 +1875,9 @@
             <span class="n">all_list</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="c1">#            required_option = &#39;full_duration&#39;</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT </span><span class="si">%s</span><span class="s1"> FROM ionosphere WHERE enabled=1&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">required_option</span><span class="p">)</span>
+                <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                <span class="c1"># Added nosec to exclude from bandit tests</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT </span><span class="si">%s</span><span class="s1"> FROM ionosphere WHERE enabled=1&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">required_option</span><span class="p">)</span>  <span class="c1"># nosec</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">required_option</span><span class="p">)]</span>
@@ -3502,6 +3511,607 @@
         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20170915 - Feature #1996: Ionosphere - matches page</span>
+<div class="viewcode-block" id="get_fp_matches"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.get_fp_matches">[docs]</a><span class="k">def</span> <span class="nf">get_fp_matches</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">metric_like</span><span class="p">,</span> <span class="n">get_fp_id</span><span class="p">,</span> <span class="n">get_layer_id</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">sort</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get all the matches.</span>
+
+<span class="sd">    :param metric: all or the metric name</span>
+<span class="sd">    :param metric_like: False or the metric MySQL like string e.g statsd.%</span>
+<span class="sd">    :param get_fp_id: None or int</span>
+<span class="sd">    :param get_layer_id: None or int</span>
+<span class="sd">    :param from_timestamp: timestamp or None</span>
+<span class="sd">    :param until_timestamp: timestamp or None</span>
+<span class="sd">    :param limit: None or number to limit to</span>
+<span class="sd">    :param sort: DESC or ASC</span>
+<span class="sd">    :return: list</span>
+<span class="sd">    :rtype: list</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;ionoshere_backend.py :: get_fp_matches&#39;</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> getting matches&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;arguments :: </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_like</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_layer_id</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">sort</span><span class="p">)))</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+        <span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">memcache_client</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: getting MySQL engine&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get a MySQL engine&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: engine not obtained&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+    <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere_matched&#39;</span>
+    <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">metric</span> <span class="ow">and</span> <span class="n">metric</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">metric_id_stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT id FROM metrics WHERE metric=</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">metric_id_stmt</span><span class="p">)</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_id</span><span class="p">:</span>
+                    <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_id set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine id from metrics table&#39;</span><span class="p">)</span>
+            <span class="c1"># Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+        <span class="n">fp_ids_stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT id FROM ionosphere WHERE metric_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+        <span class="n">fp_ids</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">fp_ids_stmt</span><span class="p">)</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">fp_ids</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">fp_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_fp_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fp_ids</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+                    <span class="n">fp_ids</span> <span class="o">=</span> <span class="n">new_fp_ids</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine id from metrics table&#39;</span><span class="p">)</span>
+            <span class="c1"># Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fp_ids set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">))</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere_matched WHERE fp_id in (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)</span>
+        <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1">#    if &#39;metric_like&#39; in request.args:</span>
+    <span class="k">if</span> <span class="n">metric_like</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">metric_like</span> <span class="ow">and</span> <span class="n">metric_like</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="c1"># SQLAlchemy requires the MySQL wildcard % to be %% to prevent</span>
+            <span class="c1"># interpreting the % as a printf-like format character</span>
+            <span class="n">python_escaped_metric_like</span> <span class="o">=</span> <span class="n">metric_like</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="c1"># nosec to exclude from bandit tests</span>
+            <span class="n">metrics_like_query</span> <span class="o">=</span> <span class="s1">&#39;SELECT id FROM metrics WHERE metric LIKE </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">python_escaped_metric_like</span><span class="p">))</span>  <span class="c1"># nosec</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;executing metrics_like_query - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_like_query</span><span class="p">)</span>
+            <span class="n">metric_ids</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">metrics_like_query</span><span class="p">)</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                    <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">metric_ids</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="n">metric_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_metric_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_ids</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">)</span>
+                        <span class="n">metric_ids</span> <span class="o">=</span> <span class="n">new_metric_ids</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine ids from metrics table&#39;</span><span class="p">)</span>
+                <span class="c1"># Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients</span>
+                <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+            <span class="n">fp_ids_stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT id FROM ionosphere WHERE metric_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">)</span>
+            <span class="n">fp_ids</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">fp_ids_stmt</span><span class="p">)</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                    <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">fp_ids</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="n">fp_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_fp_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fp_ids</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+                        <span class="n">fp_ids</span> <span class="o">=</span> <span class="n">new_fp_ids</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine id from metrics table&#39;</span><span class="p">)</span>
+                <span class="c1"># Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients</span>
+                <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere_matched WHERE fp_id in (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)</span>
+            <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># @added 20170917 - Feature #1996: Ionosphere - matches page</span>
+    <span class="c1"># Added by fp_id or layer_id as well</span>
+    <span class="n">get_features_profiles_matched</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">get_layers_matched</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">get_fp_id</span> <span class="ow">or</span> <span class="n">get_layer_id</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">get_fp_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_fp_id set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_fp_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">get_fp_id</span> <span class="o">!=</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                <span class="n">get_layers_matched</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere_matched WHERE fp_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_fp_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">get_layer_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_layer_id set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_layer_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">get_layer_id</span> <span class="o">!=</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+                <span class="n">get_features_profiles_matched</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere_layers_matched WHERE layer_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_layer_id</span><span class="p">)</span>
+                <span class="n">fp_id_query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT fp_id FROM ionosphere_layers WHERE id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_layer_id</span><span class="p">)</span>
+                <span class="n">fp_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">fp_id_query_string</span><span class="p">)</span>
+                    <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_id</span><span class="p">:</span>
+                            <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine id from metrics table&#39;</span><span class="p">)</span>
+                    <span class="c1"># Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients</span>
+                    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                        <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+        <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="s1">&#39;from_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">from_timestamp</span> <span class="ow">and</span> <span class="n">from_timestamp</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">from_timestamp</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">datetime</span>
+                <span class="n">new_from_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
+                <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">new_from_timestamp</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND metric_timestamp &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_timestamp &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="s1">&#39;until_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">until_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;until_timestamp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">until_timestamp</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">until_timestamp</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">datetime</span>
+                <span class="n">new_until_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
+                <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">new_until_timestamp</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND metric_timestamp &lt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">)</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_timestamp &lt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">)</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">ordered_by</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;order&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;DESC&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;DESC&#39;</span><span class="p">:</span>
+            <span class="n">ordered_by</span> <span class="o">=</span> <span class="s1">&#39;DESC&#39;</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;ASC&#39;</span><span class="p">:</span>
+            <span class="n">ordered_by</span> <span class="o">=</span> <span class="s1">&#39;ASC&#39;</span>
+
+    <span class="k">if</span> <span class="n">ordered_by</span><span class="p">:</span>
+        <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ORDER BY id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">ordered_by</span><span class="p">)</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+
+    <span class="k">if</span> <span class="s1">&#39;limit&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">test_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> LIMIT </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: limit is not an integer - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
+
+    <span class="c1"># Get ionosphere_summary memcache object from which metric names will be</span>
+    <span class="c1"># determined</span>
+    <span class="n">memcache_result</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ionosphere_summary_list</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere_summary_list&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere_summary_list from memcache&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># Added nosec to exclude from bandit tests</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
+            <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">memcache_result</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using memcache ionosphere_summary_list key data&#39;</span><span class="p">)</span>
+            <span class="n">ionosphere_summary_list</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">memcache_result</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to process data from memcache key - ionosphere_summary_list&#39;</span><span class="p">)</span>
+            <span class="n">ionosphere_summary_list</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_summary_list</span><span class="p">:</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="s2">&quot;SELECT ionosphere.id, ionosphere.metric_id, metrics.metric FROM ionosphere INNER JOIN metrics ON ionosphere.metric_id=metrics.id&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics from metrics table&#39;</span><span class="p">)</span>
+            <span class="c1"># Disposal and raise for Bug #2130: MySQL - Aborted_clients</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+            <span class="c1"># Because the each row in the results is a dict and all the rows are</span>
+            <span class="c1"># being used, these are being converted into a list and stored in</span>
+            <span class="c1"># memcache as a list</span>
+            <span class="n">ionosphere_summary_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                <span class="n">ionosphere_summary_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">])])</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">memcache_client</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;ionosphere_summary_list&#39;</span><span class="p">,</span> <span class="n">ionosphere_summary_list</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set memcache ionosphere_summary_list key with DB results&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere_summary_list from memcache&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="c1"># Added nosec to exclude from bandit tests</span>
+                <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
+                    <span class="k">pass</span>
+
+<span class="c1"># ionosphere_matched table layout</span>
+<span class="c1"># | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version |</span>
+<span class="c1"># | 39793 |   782 |       1505560867 |      9856.36758282061 |                     210 |  9813.63277426169 |                   150 | 0.4.0           |</span>
+<span class="c1"># ionosphere_layers_matched table layout</span>
+<span class="c1"># | id    | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration |</span>
+<span class="c1"># | 25069 |       24 |  1108 |       195 |        1505561823 |            2.000000 |         86400 |</span>
+
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="c1"># matches list elements - where id is the ionosphere_matched or the</span>
+<span class="c1"># ionosphere_layers_matched table id for the match being processed</span>
+<span class="c1"># [metric_timestamp, id, matched_by, fp_id, layer_id, metric, uri_to_matched_page]</span>
+<span class="c1"># e.g.</span>
+<span class="c1"># [[1505560867, 39793, &#39;features_profile&#39;, 782, &#39;None&#39;, &#39;stats.skyline-dev-3-40g-gra1.vda.ioInProgress&#39;, &#39;ionosphere?fp_matched=true...&#39;],</span>
+<span class="c1"># [1505561823, 25069, &#39;layers&#39;, 1108, 24, &#39;stats.controller-dev-3-40g-sbg1.apache.sending&#39;, &#39;ionosphere?fp_matched=true...&#39;]]</span>
+
+    <span class="k">if</span> <span class="n">get_features_profiles_matched</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">query_string</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;executing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">stmt</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics from metrics table&#39;</span><span class="p">)</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal and raise</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">])</span>
+            <span class="n">metric_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
+            <span class="n">match_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;features profile&#39;</span>
+            <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">])</span>
+            <span class="n">layer_id</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+            <span class="c1"># Get metric name, first get metric id from the features profile</span>
+            <span class="c1"># record</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">ionosphere_summary_list</span> <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">fp_id</span><span class="p">]</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN&#39;</span>
+            <span class="n">uri_to_matched_page</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_human_date</span><span class="p">,</span> <span class="n">match_id</span><span class="p">,</span> <span class="n">matched_by</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">layer_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">uri_to_matched_page</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">get_layers_matched</span><span class="p">:</span>
+        <span class="c1"># layers matches</span>
+        <span class="n">new_query_string</span> <span class="o">=</span> <span class="n">query_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ionosphere_matched&#39;</span><span class="p">,</span> <span class="s1">&#39;ionosphere_layers_matched&#39;</span><span class="p">)</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+        <span class="n">new_query_string</span> <span class="o">=</span> <span class="n">query_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">)</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">query_string</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;executing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">stmt</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics from metrics table&#39;</span><span class="p">)</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal and raise</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">])</span>
+            <span class="n">metric_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">)))</span>
+            <span class="n">match_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;layers&#39;</span>
+            <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">])</span>
+            <span class="n">layer_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;layer_id&#39;</span><span class="p">])</span>
+            <span class="c1"># Get metric name, first get metric id from the features profile</span>
+            <span class="c1"># record</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">ionosphere_summary_list</span> <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">fp_id</span><span class="p">]</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN&#39;</span>
+            <span class="n">uri_to_matched_page</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_human_date</span><span class="p">,</span> <span class="n">match_id</span><span class="p">,</span> <span class="n">matched_by</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">layer_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">uri_to_matched_page</span><span class="p">])</span>
+
+    <span class="n">sorted_matches</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">sorted_matches</span>
+
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">metric_list</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del metrics&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">matches</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20170917 - Feature #1996: Ionosphere - matches page</span>
+<div class="viewcode-block" id="get_matched_id_resources"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.get_matched_id_resources">[docs]</a><span class="k">def</span> <span class="nf">get_matched_id_resources</span><span class="p">(</span><span class="n">matched_id</span><span class="p">,</span> <span class="n">matched_by</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the Ionosphere matched details of a features profile or layer</span>
+
+<span class="sd">    :param matched_id: the matched id</span>
+<span class="sd">    :type id: int</span>
+<span class="sd">    :param matched_by: either features_profile or layers</span>
+<span class="sd">    :type id: str</span>
+<span class="sd">    :param metric: metric base_name</span>
+<span class="sd">    :type id: str</span>
+<span class="sd">    :param requested_timestamp: the timestamp of the features profile</span>
+<span class="sd">    :type id: int</span>
+<span class="sd">    :return: tuple</span>
+<span class="sd">    :rtype:  (str, boolean, str, str)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;ionoshere_backend.py :: get_matched_id_resources&#39;</span>
+
+    <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+    <span class="n">matched_details</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">use_table</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_matched&#39;</span>
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;layers&#39;</span><span class="p">:</span>
+        <span class="n">use_table</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_layers_matched&#39;</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: getting MySQL engine&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get a MySQL engine&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># return False, False, fail_msg, trace, False</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: engine not obtained&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># return False, False, fail_msg, trace, False</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+        <span class="n">ionosphere_matched_table</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_matched_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_matched_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;layers&#39;</span><span class="p">:</span>
+        <span class="n">ionosphere_layers_matched_table</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_layers_matched_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_layers_matched_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">trace</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> table for matched id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">use_table</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_id</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="c1"># return False, False, fail_msg, trace, False</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> table OK&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">use_table</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_matched_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched_id</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;layers&#39;</span><span class="p">:</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_layers_matched_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched_id</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="c1"># stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.id == int(matched_id))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="n">matched_details_object</span> <span class="o">=</span> <span class="n">row</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get matched_id </span><span class="si">%s</span><span class="s1"> details from </span><span class="si">%s</span><span class="s1"> DB table&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">matched_id</span><span class="p">),</span> <span class="n">use_table</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="c1"># return False, False, fail_msg, trace, False</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fp_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">]</span>
+            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">]</span>
+            <span class="n">all_calc_features_sum</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;all_calc_features_sum&#39;</span><span class="p">]</span>
+            <span class="n">all_calc_features_count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;all_calc_features_count&#39;</span><span class="p">]</span>
+            <span class="n">sum_common_values</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;sum_common_values&#39;</span><span class="p">]</span>
+            <span class="n">common_features_count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;common_features_count&#39;</span><span class="p">]</span>
+            <span class="n">tsfresh_version</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tsfresh_version&#39;</span><span class="p">]</span>
+            <span class="n">matched_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
+            <span class="n">matched_details</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">tsfresh_version       :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">all_calc_features_sum :: </span><span class="si">%s</span><span class="s1">     | all_calc_features_count :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">sum_common_values     :: </span><span class="si">%s</span><span class="s1">     | common_features_count :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">metric_timestamp      :: </span><span class="si">%s</span><span class="s1">     | human_date :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tsfresh_version</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_calc_features_sum</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">all_calc_features_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sum_common_values</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">common_features_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">matched_human_date</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get details for matched id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="c1"># return False, False, fail_msg, trace, False</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+        <span class="n">full_duration_stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT full_duration FROM ionosphere WHERE id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+        <span class="n">full_duration</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">full_duration_stmt</span><span class="p">)</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">full_duration</span><span class="p">:</span>
+                    <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;full_duration for matched determined as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine full_duration from ionosphere table&#39;</span><span class="p">)</span>
+            <span class="c1"># Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;layers&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">layer_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;layer_id&#39;</span><span class="p">]</span>
+            <span class="n">fp_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">]</span>
+            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]</span>
+            <span class="n">anomalous_datapoint</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomalous_datapoint&#39;</span><span class="p">]</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
+            <span class="n">matched_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
+            <span class="n">matched_details</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">layer_id            :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">anomalous_datapoint :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">full_duration       :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">metric_timestamp    :: </span><span class="si">%s</span><span class="s1">     | human_date :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">layer_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_datapoint</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_human_date</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get details for matched id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="c1"># return False, False, fail_msg, trace, False</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+    <span class="c1"># Create a Graphite image</span>
+    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
+    <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+    <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+        <span class="n">graph_image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.matched.fp_id-</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">matched_by</span> <span class="o">==</span> <span class="s1">&#39;layers&#39;</span><span class="p">:</span>
+        <span class="n">graph_image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.layers_id-</span><span class="si">%s</span><span class="s1">.matched.layers.fp_id-</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_id</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_id</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graph_image_file</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting Graphite graph for match - from_timestamp - </span><span class="si">%s</span><span class="s1">, until_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)))</span>
+        <span class="n">graph_image</span> <span class="o">=</span> <span class="n">get_graphite_metric</span><span class="p">(</span>
+            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">,</span>
+            <span class="n">graph_image_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">graph_image</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed getting Graphite graph&#39;</span><span class="p">)</span>
+            <span class="n">graph_image_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">matched_details</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">matched_details_object</span><span class="p">,</span> <span class="n">graph_image_file</span></div>
 </pre></div>
 
            </div>
@@ -3535,7 +4145,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.6-beta',
+            VERSION:'1.1.7-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

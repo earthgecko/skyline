@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.layers &mdash; Skyline 1.1.6-beta documentation</title>
+  <title>ionosphere.layers &mdash; Skyline 1.1.7-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.7-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -528,7 +528,9 @@
                 <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
                     <span class="n">understandable_message_str</span> <span class="o">=</span> <span class="s1">&#39;the </span><span class="si">%s</span><span class="s1">th last value in the timeseries&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">count</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">op_func_result</span> <span class="o">=</span> <span class="n">op_func</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">e_boundary_limit</span><span class="p">)</span>
+                <span class="c1"># @modified 20171106 - Bug #2208: D1 layer issue</span>
+                <span class="c1"># op_func_result = op_func(value, e_boundary_limit)</span>
+                <span class="n">op_func_result</span> <span class="o">=</span> <span class="n">op_func</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">d1_boundary_limit</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">op_func_result</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                         <span class="n">layers_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
@@ -691,7 +693,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.6-beta',
+            VERSION:'1.1.7-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
