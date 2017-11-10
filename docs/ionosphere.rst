@@ -56,6 +56,31 @@ Overview
   operator to define ad-hoc boundaries and conditions that can be considered as
   not anomalous for each features profile that is created.
 
+How well does it work?
+----------------------
+
+This is a graph of the impact that Ionosphere has had on the anomaly count of
+`ionosphere_enabled` metrics before and after the deployment of Ionosphere.
+
+.. image:: images/ionosphere/ionosphere_impact_on_anomaly_count.png
+
+It is clear that when the features profiles and layers are introduced and
+Skyline starts to learn, the anomaly counts for metrics that have been trained
+drop significantly, but it is not perfect.
+
+Significant events which happen infrequently and change machine metrics
+significantly are still difficult to handle.  Things like the occasional
+importing of a DB, reboots, zipping up a bunch of things, however layers do
+allow one to "describe" these events on metrics as normal should they so wish.
+
+And Ionosphere does **not* make handling downtime and missing data points in
+metrics any easier, in fact it can make it harder.
+
+"Do I want to train Skyline to think that the hole in this metric for 10 hours
+yesterday while OVH had 2 x 20 Kv lines down and generator problems in France,
+is normal?  Maybe I should wait a week before training Skyline on any metrics
+that have been OVH'd..."
+
 Deploying and setting Ionosphere up
 -----------------------------------
 
