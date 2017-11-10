@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.1.6-beta documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.1.7-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.7-beta documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -799,7 +799,9 @@
         <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">image_url_timeout</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+            <span class="c1"># Added nosec to exclude from bandit tests</span>
+            <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">image_url_timeout</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;url OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
         <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
             <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -868,7 +870,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">new_datapoint</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
                 <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+            <span class="c1"># Added nosec to exclude from bandit tests</span>
+            <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
                 <span class="k">continue</span>
 
         <span class="k">if</span> <span class="n">output_object</span> <span class="o">!=</span> <span class="s1">&#39;object&#39;</span><span class="p">:</span>
@@ -1309,10 +1313,9 @@
 
     <span class="k">return</span> <span class="kc">False</span></div>
 
+
 <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
 <span class="c1"># Get the metric db object data to memcache</span>
-
-
 <div class="viewcode-block" id="get_memcache_metric_object"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_metric_object">[docs]</a><span class="k">def</span> <span class="nf">get_memcache_metric_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the metrics_db_object from memcache if it exists.</span>
@@ -1346,7 +1349,9 @@
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+        <span class="c1"># Added nosec to exclude from bandit tests</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
             <span class="k">pass</span>
 
     <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1364,7 +1369,9 @@
             <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+        <span class="c1"># Added nosec to exclude from bandit tests</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
             <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">memcache_metric_dict</span><span class="p">:</span>
@@ -1376,10 +1383,9 @@
 
     <span class="k">return</span> <span class="kc">False</span></div>
 
+
 <span class="c1"># @added 20170826 - Task #2132: Optimise Ionosphere DB usage</span>
 <span class="c1"># Get the fp_ids list object data to memcache</span>
-
-
 <div class="viewcode-block" id="get_memcache_fp_ids_object"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_memcache_fp_ids_object">[docs]</a><span class="k">def</span> <span class="nf">get_memcache_fp_ids_object</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the fp_ids list from memcache if it exists.</span>
@@ -1417,7 +1423,9 @@
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">fp_ids_list_object_key</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+        <span class="c1"># Added nosec to exclude from bandit tests</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
             <span class="k">pass</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1429,7 +1437,9 @@
             <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+        <span class="c1"># Added nosec to exclude from bandit tests</span>
+        <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
             <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
@@ -1466,7 +1476,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.6-beta',
+            VERSION:'1.1.7-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

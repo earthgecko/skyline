@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>horizon.listen &mdash; Skyline 1.1.6-beta documentation</title>
+  <title>horizon.listen &mdash; Skyline 1.1.7-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.7-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -212,10 +212,12 @@
     <span class="kn">import</span> <span class="nn">io</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="k">as</span> <span class="nn">pickle</span>
+    <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+    <span class="c1"># Added nosec to exclude from bandit tests</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="k">as</span> <span class="nn">pickle</span>  <span class="c1"># nosec</span>
     <span class="n">USING_CPICKLE</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">pickle</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>  <span class="c1"># nosec</span>
     <span class="n">USING_CPICKLE</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="c1"># This whole song &amp; dance is due to pickle being insecure</span>
@@ -242,7 +244,9 @@
 
         <span class="nd">@classmethod</span>
         <span class="k">def</span> <span class="nf">loads</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">pickle_string</span><span class="p">):</span>
-            <span class="n">pickle_obj</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">Unpickler</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">pickle_string</span><span class="p">))</span>
+            <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+            <span class="c1"># Added nosec to exclude from bandit tests</span>
+            <span class="n">pickle_obj</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">Unpickler</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">pickle_string</span><span class="p">))</span>  <span class="c1"># nosec</span>
             <span class="n">pickle_obj</span><span class="o">.</span><span class="n">find_global</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">find_class</span>
             <span class="k">return</span> <span class="n">pickle_obj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
 
@@ -500,7 +504,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.6-beta',
+            VERSION:'1.1.7-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

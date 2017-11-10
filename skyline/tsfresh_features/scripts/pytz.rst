@@ -9,7 +9,7 @@ Development - pytz
 pytz.all_timezones
 ==================
 
-**pytz version: 2017.2**
+**pytz version: 2016.6.1**
 
 This is an automatically generated list of all pytz timezones for the specified
 pytz version generated using pytz.all_timezones.  It is generated so there is an
@@ -33,7 +33,7 @@ It is hoped that the methods used handle daylight savings timezones (DST), the
 methods implemented has been taken from some best practices, however they are
 not tested on DST changes, so the outcome is somewhat unknown.
 
-**pytz version: 2017.2**
+**pytz version: 2016.6.1**
 
 Timezones list for pytz version
 -------------------------------
@@ -408,8 +408,6 @@ America/Porto_Velho
 
 America/Puerto_Rico
 
-America/Punta_Arenas
-
 America/Rainy_River
 
 America/Rankin_Inlet
@@ -520,8 +518,6 @@ Asia/Ashgabat
 
 Asia/Ashkhabad
 
-Asia/Atyrau
-
 Asia/Baghdad
 
 Asia/Bahrain
@@ -561,8 +557,6 @@ Asia/Dili
 Asia/Dubai
 
 Asia/Dushanbe
-
-Asia/Famagusta
 
 Asia/Gaza
 
@@ -693,8 +687,6 @@ Asia/Vientiane
 Asia/Vladivostok
 
 Asia/Yakutsk
-
-Asia/Yangon
 
 Asia/Yekaterinburg
 
@@ -973,8 +965,6 @@ Europe/Samara
 Europe/San_Marino
 
 Europe/Sarajevo
-
-Europe/Saratov
 
 Europe/Simferopol
 

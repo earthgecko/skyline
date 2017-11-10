@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.1.6-beta documentation</title>
+  <title>Installation &mdash; Skyline 1.1.7-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.6-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.7-beta documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -197,12 +197,12 @@ automation and configuration management see the section at the end of this page.
 <h2>What the components do<a class="headerlink" href="#what-the-components-do" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Graphite - sends metric data to Skyline Horizon via a pickle</li>
-<li>Redis - Stores mod:<cite>settings.FULL_DURATION</cite> seconds (usefully 24 hours worth)
+<li>Redis - stores mod:<cite>settings.FULL_DURATION</cite> seconds (usefully 24 hours worth)
 of timeseries data</li>
-<li>MySQL - Stores data about anomalies and timeseries features fingerprints and
+<li>MySQL - stores data about anomalies and timeseries features fingerprints and
 for learning things that are not anomalous.</li>
-<li>Apache</li>
-<li>memcached</li>
+<li>Apache - serves the Skyline webapp via gunicorn and handles basic http auth</li>
+<li>memcached - caches Ionosphere MySQL data</li>
 </ul>
 <div class="section" id="sudo">
 <h3><code class="docutils literal"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h3>
@@ -246,12 +246,12 @@ redis.conf</li>
 </div>
 <ul class="simple">
 <li>Start Redis</li>
-<li>Install memcached and start memcached see <cite>memcached.org &lt;https://memcached.org/&gt;</cite></li>
+<li>Install memcached and start memcached see <a class="reference external" href="https://memcached.org/">memcached.org</a></li>
 <li>Make the required directories</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir /var/log/skyline
 mkdir /var/run/skyline
-mkdir /var/dump/
+mkdir /var/dump
 
 mkdir -p /opt/skyline/panorama/check
 mkdir -p /opt/skyline/mirage/check
@@ -300,7 +300,7 @@ that it is harder for you to err.</p>
 bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5<span class="o">=</span>6d42998cfec6e85b902d4ffa5a35ce86
 
 <span class="c1"># The MySQL download source can now be commented it out of requirements.txt</span>
-cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep -v <span class="s2">&quot;cdn.mysql.com/Downloads&quot;</span> &gt; /tmp/requirements.txt
+cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep -v <span class="s2">&quot;cdn.mysql.com/Downloads\|mysql-connector&quot;</span> &gt; /tmp/requirements.txt
 
 <span class="c1"># This can take lots and lots of minutes...</span>
 bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /tmp/requirements.txt
@@ -343,10 +343,7 @@ password that you provide in <cite>settings.py</cite> for
 <ul class="simple">
 <li>Deploy your Skyline Apache configuration file and restart httpd.</li>
 <li>Create the Skyline MySQL database for Panorama (see
-<a class="reference external" href="panorama.html">Panorama</a>).  Although this is optional, it is
-<strong>recommended</strong> as Panorama does give you a full historical view of all the
-triggered anomalies, which is very useful for providing insight into what, how
-and when metrics are triggering as anomalous.</li>
+<a class="reference external" href="panorama.html">Panorama</a>) and Ionosphere.</li>
 <li>Edit the <code class="docutils literal"><span class="pre">settings.py</span></code> file and enter your appropriate settings,
 specifically ensure you set the following variables to the correct
 setting for your environment, see the documentation links and docstrings in
@@ -526,7 +523,7 @@ the dependency is fulfilled.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.6-beta',
+            VERSION:'1.1.7-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

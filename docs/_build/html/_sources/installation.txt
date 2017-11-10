@@ -27,12 +27,12 @@ What the components do
 ----------------------
 
 - Graphite - sends metric data to Skyline Horizon via a pickle
-- Redis - Stores mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
+- Redis - stores mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
   of timeseries data
-- MySQL - Stores data about anomalies and timeseries features fingerprints and
+- MySQL - stores data about anomalies and timeseries features fingerprints and
   for learning things that are not anomalous.
-- Apache
-- memcached
+- Apache - serves the Skyline webapp via gunicorn and handles basic http auth
+- memcached - caches Ionosphere MySQL data
 
 
 ``sudo``
@@ -73,14 +73,14 @@ Steps
   :mod:`settings.REDIS_SOCKET_PATH` to this path
 
 - Start Redis
-- Install memcached and start memcached see `memcached.org <https://memcached.org/>`
+- Install memcached and start memcached see `memcached.org <https://memcached.org/>`__
 - Make the required directories
 
 .. code-block:: bash
 
     mkdir /var/log/skyline
     mkdir /var/run/skyline
-    mkdir /var/dump/
+    mkdir /var/dump
 
     mkdir -p /opt/skyline/panorama/check
     mkdir -p /opt/skyline/mirage/check
@@ -127,7 +127,7 @@ Steps
     bin/"pip${PYTHON_MAJOR_VERSION}" install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86
 
     # The MySQL download source can now be commented it out of requirements.txt
-    cat /opt/skyline/github/skyline/requirements.txt | grep -v "cdn.mysql.com/Downloads" > /tmp/requirements.txt
+    cat /opt/skyline/github/skyline/requirements.txt | grep -v "cdn.mysql.com/Downloads\|mysql-connector" > /tmp/requirements.txt
 
     # This can take lots and lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.txt
@@ -165,10 +165,7 @@ Steps
 
 - Deploy your Skyline Apache configuration file and restart httpd.
 - Create the Skyline MySQL database for Panorama (see
-  `Panorama <panorama.html>`__).  Although this is optional, it is
-  **recommended** as Panorama does give you a full historical view of all the
-  triggered anomalies, which is very useful for providing insight into what, how
-  and when metrics are triggering as anomalous.
+  `Panorama <panorama.html>`__) and Ionosphere.
 - Edit the ``settings.py`` file and enter your appropriate settings,
   specifically ensure you set the following variables to the correct
   setting for your environment, see the documentation links and docstrings in

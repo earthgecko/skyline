@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.learn &mdash; Skyline 1.1.6-beta documentation</title>
+  <title>ionosphere.learn &mdash; Skyline 1.1.7-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.6-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.7-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -1113,7 +1113,9 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">new_datapoint</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
                         <span class="n">validated_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
-                    <span class="k">except</span><span class="p">:</span>
+                    <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                    <span class="c1"># Added nosec to exclude from bandit tests</span>
+                    <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
                         <span class="k">continue</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="n">validated_timeseries</span>
 
@@ -1311,9 +1313,10 @@
             <span class="n">child_use_full_duration_count_of_origin_fp_id</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                <span class="c1"># Added nosec to exclude from bandit tests</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-                    <span class="s1">&#39;SELECT COUNT(id) FROM ionosphere WHERE parent_id=</span><span class="si">%s</span><span class="s1"> AND full_duration=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">origin_fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_full_duration</span><span class="p">)))</span>
+                    <span class="s1">&#39;SELECT COUNT(id) FROM ionosphere WHERE parent_id=</span><span class="si">%s</span><span class="s1"> AND full_duration=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">origin_fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_full_duration</span><span class="p">)))</span>  <span class="c1"># nosec</span>
                 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                     <span class="n">child_fp_count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;COUNT(id)&#39;</span><span class="p">]</span>
                 <span class="n">child_use_full_duration_count_of_origin_fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">child_fp_count</span><span class="p">)</span>
@@ -1625,7 +1628,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.6-beta',
+            VERSION:'1.1.7-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
