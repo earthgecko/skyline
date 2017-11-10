@@ -73,7 +73,7 @@ significantly are still difficult to handle.  Things like the occasional
 importing of a DB, reboots, zipping up a bunch of things, however layers do
 allow one to "describe" these events on metrics as normal should they so wish.
 
-And Ionosphere does **not* make handling downtime and missing data points in
+And Ionosphere does **not** make handling downtime and missing data points in
 metrics any easier, in fact it can make it harder.
 
 "Do I want to train Skyline to think that the hole in this metric for 10 hours
