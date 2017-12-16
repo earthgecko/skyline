@@ -21,7 +21,10 @@ import errno
 import sys
 import os.path
 import settings
-from skyline_functions import send_graphite_metric, write_data_to_file
+# @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+# Added move_file
+from skyline_functions import (
+    send_graphite_metric, write_data_to_file, move_file)
 
 from boundary_alerters import trigger_alert
 from boundary_algorithms import run_selected_algorithm
@@ -76,6 +79,8 @@ class Boundary(Thread):
         self.anomalous_metrics = Manager().list()
         self.exceptions_q = Queue()
         self.anomaly_breakdown_q = Queue()
+        # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
+        self.not_anomalous_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -104,7 +109,11 @@ class Boundary(Thread):
             else:
                 raise
 
-    def spin_process(self, i, boundary_metrics):
+    # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+    # Pass added_at as an argument to spin_process so that the panaroma_anomaly_file
+    # can be moved from SKYLINE_TMP_DIR to the PANORAMA_CHECK_PATH
+    # def spin_process(self, i, boundary_metrics):
+    def spin_process(self, i, boundary_metrics, added_at):
         """
         Assign a bunch of metrics for a process to analyze.
         """
@@ -388,6 +397,11 @@ class Boundary(Thread):
                     )
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.info('debug :: analysed - %s' % (metric_name))
+                    # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
+                    # If it's not anomalous, add it to list
+                    if not anomalous:
+                        not_anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
+                        self.not_anomalous_metrics.append(not_anomalous_metric)
                 else:
                     anomalous = False
                     if ENABLE_BOUNDARY_DEBUG:
@@ -426,7 +440,10 @@ class Boundary(Thread):
                         # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
                         # single quoting results in the desired,
                         # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
-                        added_at = str(int(time()))
+                        # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+                        # added_at now passedas an argument to spin_process so that the panaroma_anomaly_file
+                        # can be moved from SKYLINE_TMP_DIR to the PANORAMA_CHECK_PATH
+                        # added_at = str(int(time()))
                         source = 'graphite'
                         panaroma_anomaly_data = 'metric = \'%s\'\n' \
                                                 'value = \'%s\'\n' \
@@ -443,16 +460,23 @@ class Boundary(Thread):
                                skyline_app, source, this_host, added_at)
 
                         # Create an anomaly file with details about the anomaly
-                        panaroma_anomaly_file = '%s/%s.%s.txt' % (
-                            settings.PANORAMA_CHECK_PATH, added_at,
+                        # @modified 20171214 - Task #2236: Change Boundary to only send to Panorama on alert
+                        # Only send to Panorama IF Boundary is going to alert,
+                        # so here the file is written to SKYLINE_TMP_DIR
+                        # instead and moved in def run() if an alert is sent
+                        # panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                        #     settings.PANORAMA_CHECK_PATH, added_at,
+                        #     base_name)
+                        tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
+                            settings.SKYLINE_TMP_DIR, added_at,
                             base_name)
                         try:
                             write_data_to_file(
-                                skyline_app, panaroma_anomaly_file, 'w',
+                                skyline_app, tmp_panaroma_anomaly_file, 'w',
                                 panaroma_anomaly_data)
-                            logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                            logger.info('added tmp panorama anomaly file :: %s' % (tmp_panaroma_anomaly_file))
                         except:
-                            logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                            logger.error('error :: failed to add tmp panorama anomaly file :: %s' % (tmp_panaroma_anomaly_file))
                             logger.info(traceback.format_exc())
 
                     # If crucible is enabled - save timeseries and create a
@@ -630,6 +654,11 @@ class Boundary(Thread):
                 sleep(10)
                 continue
 
+            # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+            # Pass added_at as an argument t spin_process so that the panaroma_anomaly_file
+            # can be moved from SKYLINE_TMP_DIR to the PANORAMA_CHECK_PATH
+            added_at = str(int(time()))
+
             # Spawn processes
             pids = []
             for i in range(1, settings.BOUNDARY_PROCESSES + 1):
@@ -637,7 +666,11 @@ class Boundary(Thread):
                     logger.info('WARNING: Skyline Boundary is set for more cores than needed.')
                     break
 
-                p = Process(target=self.spin_process, args=(i, boundary_metrics))
+                # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+                # Pass added_at as an argument to spin_process so that the panaroma_anomaly_file
+                # can be moved from SKYLINE_TMP_DIR to the PANORAMA_CHECK_PATH
+                # p = Process(target=self.spin_process, args=(i, boundary_metrics))
+                p = Process(target=self.spin_process, args=(i, boundary_metrics, added_at))
                 pids.append(p)
                 p.start()
 
@@ -667,6 +700,33 @@ class Boundary(Thread):
                         exceptions[key] += value
                 except Empty:
                     break
+
+            # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
+            # Expire keys
+            if settings.BOUNDARY_ENABLE_ALERTS:
+                for not_anomalous_metric in self.not_anomalous_metrics:
+                    metric_name = not_anomalous_metric[1]
+                    base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+                    algorithm = not_anomalous_metric[8]
+                    if ENABLE_BOUNDARY_DEBUG:
+                        logger.info("debug :: not_anomalous_metric - " + str(not_anomalous_metric))
+                    anomaly_cache_key_expiration_time = 1
+                    anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
+                    times_seen = 0
+                    try:
+                        self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                    except:
+                        if ENABLE_BOUNDARY_DEBUG:
+                            logger.info('debug :: redis failed - anomaly_cache_key set failed - ' + str(anomaly_cache_key))
+                    # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+                    # Remove tmp_panaroma_anomaly_file
+                    tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
+                        settings.SKYLINE_TMP_DIR, added_at, base_name)
+                    if os.path.isfile(tmp_panaroma_anomaly_file):
+                        try:
+                            os.remove(str(tmp_panaroma_anomaly_file))
+                        except OSError:
+                            pass
 
             # Send alerts
             if settings.BOUNDARY_ENABLE_ALERTS:
@@ -740,6 +800,15 @@ class Boundary(Thread):
                     if times_seen >= alert_threshold:
                         if ENABLE_BOUNDARY_DEBUG:
                             logger.info('debug :: times_seen %s is greater than or equal to alert_threshold %s' % (str(times_seen), str(alert_threshold)))
+
+                        # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+                        tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
+                            settings.SKYLINE_TMP_DIR, added_at, base_name)
+                        if os.path.isfile(tmp_panaroma_anomaly_file):
+                            panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                                settings.PANORAMA_CHECK_PATH, added_at, base_name)
+                            move_file(tmp_panaroma_anomaly_file, panaroma_anomaly_file)
+
                         for alerter in metric_alerters.split("|"):
                             # Determine alerter limits
                             send_alert = False
@@ -859,6 +928,17 @@ class Boundary(Thread):
                         trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm)
                         logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
 
+                    # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+                    # Remove tmp_panaroma_anomaly_file
+                    tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
+                        settings.SKYLINE_TMP_DIR, added_at, base_name)
+                    if os.path.isfile(tmp_panaroma_anomaly_file):
+                        try:
+                            os.remove(str(tmp_panaroma_anomaly_file))
+                            logger.info('removed - %s' % str(tmp_panaroma_anomaly_file))
+                        except OSError:
+                            pass
+
             # Write anomalous_metrics to static webapp directory
             if len(self.anomalous_metrics) > 0:
                 filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
@@ -919,6 +999,8 @@ class Boundary(Thread):
 
             # Reset counters
             self.anomalous_metrics[:] = []
+            # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
+            self.not_anomalous_metrics[:] = []
 
             # Only run once per
             process_runtime = time() - now

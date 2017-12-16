@@ -502,11 +502,10 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     ts_json = ['error: no timeseries json file', ts_json_file]
     if path.isfile(ts_json_file):
         try:
-            ts_json = []
+            # ts_json = []
             with open(ts_json_file) as f:
                 for line in f:
                     ts_json.append(line)
-
             ts_json_ok = True
         except:
             ts_json_ok = False
@@ -538,6 +537,15 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             anomalous_timeseries = literal_eval(timeseries_array_str)
         except:
             ionosphere_json_ok = False
+    # @added 20171130 - Task #1988: Review - Ionosphere layers - always show layers
+    #                   Feature #1960: ionosphere_layers
+    # Return the anomalous_timeseries as an array to sample and just use the
+    # ts_json file if there is no ionosphere_json_file
+    if not anomalous_timeseries:
+        with open((ts_json_file), 'r') as f:
+            raw_timeseries = f.read()
+        timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+        anomalous_timeseries = literal_eval(timeseries_array_str)
 
     # @added 20170308 - Feature #1960: ionosphere_layers
     if layers_id_matched_file:

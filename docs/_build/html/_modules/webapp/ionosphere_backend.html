@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.ionosphere_backend &mdash; Skyline 1.1.7-beta documentation</title>
+  <title>webapp.ionosphere_backend &mdash; Skyline 1.1.8-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.7-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.8-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -667,11 +667,10 @@
     <span class="n">ts_json</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;error: no timeseries json file&#39;</span><span class="p">,</span> <span class="n">ts_json_file</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_json_file</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">ts_json</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># ts_json = []</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ts_json_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">ts_json</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-
             <span class="n">ts_json_ok</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">ts_json_ok</span> <span class="o">=</span> <span class="kc">False</span>
@@ -703,6 +702,15 @@
             <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">ionosphere_json_ok</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># @added 20171130 - Task #1988: Review - Ionosphere layers - always show layers</span>
+    <span class="c1">#                   Feature #1960: ionosphere_layers</span>
+    <span class="c1"># Return the anomalous_timeseries as an array to sample and just use the</span>
+    <span class="c1"># ts_json file if there is no ionosphere_json_file</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous_timeseries</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">ts_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+        <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
 
     <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
     <span class="k">if</span> <span class="n">layers_id_matched_file</span><span class="p">:</span>
@@ -4145,7 +4153,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.7-beta',
+            VERSION:'1.1.8-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
