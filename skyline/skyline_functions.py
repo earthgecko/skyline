@@ -1278,3 +1278,70 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
             pass
 
     return result
+
+
+# @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+def move_file(current_skyline_app, dest_dir, file_to_move):
+    """
+    Move a file.
+
+    :param current_skyline_app: the skyline app using this function
+    :param dest_dir: the directory the file is to be moved to
+    :param file_to_move: path and filename of the file to move
+    :type current_skyline_app: str
+    :type dest_dir: str
+    :type file_to_move: str
+    :return: ``True``, ``False``
+    :rtype: boolean
+
+    """
+    try:
+        os.getpid()
+    except:
+        import os
+
+    try:
+        shutil
+    except:
+        import shutil
+
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    if not os.path.exists(dest_dir):
+        try:
+            mkdir_p(dest_dir)
+            current_logger.info(
+                'created dest_dir - %s' % str(dest_dir))
+        except:
+            current_logger.info(traceback.format_exc())
+            current_logger.error(
+                'error :: failed to create dest_dir - %s' %
+                str(dest_dir))
+            return False
+
+    move_file_name = os.path.basename(str(file_to_move))
+    moved_file = '%s/%s' % (dest_dir, move_file_name)
+
+    try:
+        shutil.move(file_to_move, moved_file)
+        if python_version == 2:
+            os.chmod(moved_file, 0644)
+        if python_version == 3:
+            os.chmod(moved_file, mode=0o644)
+
+        current_logger.info('moved file to - %s' % moved_file)
+        return True
+    except OSError:
+        current_logger.info(traceback.format_exc())
+        msg = 'failed to move file to - %s' % moved_file
+        current_logger.error('error :: %s' % msg)
+        pass
+
+    return False

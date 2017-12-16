@@ -408,6 +408,8 @@ class Panorama(Thread):
             return
 
         value = None
+        # @added 20171214 - Bug #2234: panorama metric_vars value check
+        value_valid = None
         try:
             # metric_vars.value
             # value = str(metric_vars.value)
@@ -416,12 +418,21 @@ class Panorama(Thread):
             value = float(value_list[0])
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: metric variable - value - %s' % (value))
+            # @added 20171214 - Bug #2234: panorama metric_vars value check
+            value_valid = True
         except:
             logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
-        if not value:
+        # @added 20171214 - Bug #2234: panorama metric_vars value check
+        # If value was float of 0.0 then this was interpolated as not set
+        # if not value:
+        if not value_valid:
+            # @added 20171214 - Bug #2234: panorama metric_vars value check
+            # Added exception handling here
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
