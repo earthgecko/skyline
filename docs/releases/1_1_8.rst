@@ -1,0 +1,13 @@
+=============================
+1.1.8 - the ionosphere branch
+=============================
+
+v1.1.8-ionosphere - Dec 16, 2017
+
+Changes
+-------
+
+- Bumped to v1.1.8
+- Expiry boundary last_seen keys appropriately (Bug #2232)
+- Fix panorama metric_vars value check (Bug #2234)
+- Change Boundary to only send to Panorama on alert (Task #2236)
