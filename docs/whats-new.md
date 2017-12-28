@@ -1,5 +1,9 @@
 # What's new
 
+## See Release Notes
+
+For v.1.1.1 and later see [Release Notes](releases.html)
+
 ## Skyline v1.1.0-beta the ionosphere branch
 
 See `Ionosphere <ionosphere.html>`__ and `Development - Ionosphere
