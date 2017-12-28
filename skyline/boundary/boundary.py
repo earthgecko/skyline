@@ -467,8 +467,11 @@ class Boundary(Thread):
                         # panaroma_anomaly_file = '%s/%s.%s.txt' % (
                         #     settings.PANORAMA_CHECK_PATH, added_at,
                         #     base_name)
-                        tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
-                            settings.SKYLINE_TMP_DIR, added_at,
+                        # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                        # Added algorithm as it is required if the metric has
+                        # multiple rules covering a number of algorithms
+                        tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                            settings.SKYLINE_TMP_DIR, added_at, str(algorithm),
                             base_name)
                         try:
                             write_data_to_file(
@@ -711,21 +714,42 @@ class Boundary(Thread):
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.info("debug :: not_anomalous_metric - " + str(not_anomalous_metric))
                     anomaly_cache_key_expiration_time = 1
-                    anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
+                    # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                    # Wrapped in try - Added algorithm as it is required if the metric has
+                    # multiple rules covering a number of algorithms
+                    try:
+                        anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
+                        if ENABLE_BOUNDARY_DEBUG:
+                            logger.info('debug :: anomaly_cache_key - anomaly_seen.%s.%s' % (algorithm, base_name))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to determine string for anomaly_cache_key')
+                        anomaly_cache_key = 'anomaly_seen.%s' % (base_name)
                     times_seen = 0
                     try:
                         self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                        if ENABLE_BOUNDARY_DEBUG:
+                            logger.info('debug :: redis - anomaly_cache_key set OK - %s' % str(anomaly_cache_key))
                     except:
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: redis failed - anomaly_cache_key set failed - ' + str(anomaly_cache_key))
+                            logger.info('debug :: redis failed - anomaly_cache_key set failed - %s' % str(anomaly_cache_key))
                     # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
                     # Remove tmp_panaroma_anomaly_file
-                    tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
-                        settings.SKYLINE_TMP_DIR, added_at, base_name)
+                    # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                    # Added algorithm as it is required if the metric has
+                    # multiple rules covering a number of algorithms
+                    tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                        settings.SKYLINE_TMP_DIR, added_at, algorithm, base_name)
+                    if ENABLE_BOUNDARY_DEBUG:
+                        logger.info('debug :: set tmp_panaroma_anomaly_file to - %s' % (str(tmp_panaroma_anomaly_file)))
                     if os.path.isfile(tmp_panaroma_anomaly_file):
                         try:
+                            if ENABLE_BOUNDARY_DEBUG:
+                                logger.info('debug :: removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                             os.remove(str(tmp_panaroma_anomaly_file))
                         except OSError:
+                            if ENABLE_BOUNDARY_DEBUG:
+                                logger.info('debug :: error removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                             pass
 
             # Send alerts
@@ -802,12 +826,40 @@ class Boundary(Thread):
                             logger.info('debug :: times_seen %s is greater than or equal to alert_threshold %s' % (str(times_seen), str(alert_threshold)))
 
                         # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
-                        tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
-                            settings.SKYLINE_TMP_DIR, added_at, base_name)
+                        tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                            settings.SKYLINE_TMP_DIR, added_at,
+                            # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                            # Added algorithm as it is required if the metric has
+                            # multiple rules covering a number of algorithms
+                            algorithm, base_name)
+                        if ENABLE_BOUNDARY_DEBUG:
+                            logger.info('debug :: tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                         if os.path.isfile(tmp_panaroma_anomaly_file):
                             panaroma_anomaly_file = '%s/%s.%s.txt' % (
                                 settings.PANORAMA_CHECK_PATH, added_at, base_name)
-                            move_file(tmp_panaroma_anomaly_file, panaroma_anomaly_file)
+                            logger.info('moving tmp_panaroma_anomaly_file - %s to panaroma_anomaly_file %s' % (str(tmp_panaroma_anomaly_file), str(panaroma_anomaly_file)))
+                            # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                            # Added skyline_app
+                            try:
+                                # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                                # Correct move
+                                # move_file(skyline_app, tmp_panaroma_anomaly_file, panaroma_anomaly_file)
+                                move_file(skyline_app, settings.PANORAMA_CHECK_PATH, tmp_panaroma_anomaly_file)
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to move tmp_panaroma_anomaly_file to panaroma_anomaly_file')
+                            # @added 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                            # Rename moved file as the filename is used in Panorama
+                            try:
+                                tmp_panaroma_anomaly_file_to_rename = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                                    settings.PANORAMA_CHECK_PATH, added_at,
+                                    algorithm, base_name)
+                                os.rename(tmp_panaroma_anomaly_file_to_rename, panaroma_anomaly_file)
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to rename tmp_panaroma_anomaly_filename to panaroma_anomaly_filename')
+                        else:
+                            logger.error('error :: tmp_panaroma_anomaly_file does not exist')
 
                         for alerter in metric_alerters.split("|"):
                             # Determine alerter limits
@@ -930,8 +982,10 @@ class Boundary(Thread):
 
                     # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
                     # Remove tmp_panaroma_anomaly_file
-                    tmp_panaroma_anomaly_file = '%s/%s.%s.panorama_anomaly.txt' % (
-                        settings.SKYLINE_TMP_DIR, added_at, base_name)
+                    tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                        # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                        # Added algorithm
+                        settings.SKYLINE_TMP_DIR, added_at, algorithm, base_name)
                     if os.path.isfile(tmp_panaroma_anomaly_file):
                         try:
                             os.remove(str(tmp_panaroma_anomaly_file))
