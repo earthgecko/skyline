@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>boundary.boundary &mdash; Skyline 1.1.8-beta documentation</title>
+  <title>boundary.boundary &mdash; Skyline 1.1.9-beta documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.8-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -632,8 +632,11 @@
                         <span class="c1"># panaroma_anomaly_file = &#39;%s/%s.%s.txt&#39; % (</span>
                         <span class="c1">#     settings.PANORAMA_CHECK_PATH, added_at,</span>
                         <span class="c1">#     base_name)</span>
-                        <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span>
+                        <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                        <span class="c1"># Added algorithm as it is required if the metric has</span>
+                        <span class="c1"># multiple rules covering a number of algorithms</span>
+                        <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">),</span>
                             <span class="n">base_name</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">write_data_to_file</span><span class="p">(</span>
@@ -876,21 +879,42 @@
                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;debug :: not_anomalous_metric - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_anomalous_metric</span><span class="p">))</span>
                     <span class="n">anomaly_cache_key_expiration_time</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="n">anomaly_cache_key</span> <span class="o">=</span> <span class="s1">&#39;anomaly_seen.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                    <span class="c1"># Wrapped in try - Added algorithm as it is required if the metric has</span>
+                    <span class="c1"># multiple rules covering a number of algorithms</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">anomaly_cache_key</span> <span class="o">=</span> <span class="s1">&#39;anomaly_seen.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: anomaly_cache_key - anomaly_seen.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine string for anomaly_cache_key&#39;</span><span class="p">)</span>
+                        <span class="n">anomaly_cache_key</span> <span class="o">=</span> <span class="s1">&#39;anomaly_seen.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
                     <span class="n">times_seen</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">,</span> <span class="n">anomaly_cache_key_expiration_time</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">times_seen</span><span class="p">)))</span>
+                        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis - anomaly_cache_key set OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis failed - anomaly_cache_key set failed - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis failed - anomaly_cache_key set failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                     <span class="c1"># @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
                     <span class="c1"># Remove tmp_panaroma_anomaly_file</span>
-                    <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                    <span class="c1"># Added algorithm as it is required if the metric has</span>
+                    <span class="c1"># multiple rules covering a number of algorithms</span>
+                    <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: set tmp_panaroma_anomaly_file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">):</span>
                         <span class="k">try</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: removing tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">))</span>
                         <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: error removing tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                             <span class="k">pass</span>
 
             <span class="c1"># Send alerts</span>
@@ -967,12 +991,40 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: times_seen </span><span class="si">%s</span><span class="s1"> is greater than or equal to alert_threshold </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">times_seen</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">)))</span>
 
                         <span class="c1"># @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
-                        <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span>
+                            <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                            <span class="c1"># Added algorithm as it is required if the metric has</span>
+                            <span class="c1"># multiple rules covering a number of algorithms</span>
+                            <span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">):</span>
                             <span class="n">panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-                            <span class="n">move_file</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moving tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1"> to panaroma_anomaly_file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">)))</span>
+                            <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                            <span class="c1"># Added skyline_app</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                                <span class="c1"># Correct move</span>
+                                <span class="c1"># move_file(skyline_app, tmp_panaroma_anomaly_file, panaroma_anomaly_file)</span>
+                                <span class="n">move_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">tmp_panaroma_anomaly_file</span><span class="p">)</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move tmp_panaroma_anomaly_file to panaroma_anomaly_file&#39;</span><span class="p">)</span>
+                            <span class="c1"># @added 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                            <span class="c1"># Rename moved file as the filename is used in Panorama</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">tmp_panaroma_anomaly_file_to_rename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span>
+                                    <span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file_to_rename</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">)</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rename tmp_panaroma_anomaly_filename to panaroma_anomaly_filename&#39;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: tmp_panaroma_anomaly_file does not exist&#39;</span><span class="p">)</span>
 
                         <span class="k">for</span> <span class="n">alerter</span> <span class="ow">in</span> <span class="n">metric_alerters</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">):</span>
                             <span class="c1"># Determine alerter limits</span>
@@ -1095,8 +1147,10 @@
 
                     <span class="c1"># @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
                     <span class="c1"># Remove tmp_panaroma_anomaly_file</span>
-                    <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
+                        <span class="c1"># Added algorithm</span>
+                        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">):</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">))</span>
@@ -1211,7 +1265,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.8-beta',
+            VERSION:'1.1.9-beta',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
