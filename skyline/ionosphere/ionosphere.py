@@ -2104,12 +2104,14 @@ class Ionosphere(Thread):
 
             # @added 20170916 - Feature #1996: Ionosphere - matches page
             # Create the ionosphere_summary_memcache_object
-            if settings.MEMCACHE_ENABLED:
-                try:
-                    logger.info('updating the ionosphere_summary_memcache_object')
-                    self.update_ionosphere_summary_memcache_object
-                except:
-                    logger.error('error :: update_ionosphere_summary_memcache_object - %s' % traceback.print_exc())
+            # @modified 20180103 - Feature #1996: Ionosphere - matches page
+            # This is not managed here and was an artefact of some dev work
+            # if settings.MEMCACHE_ENABLED:
+            #     try:
+            #         logger.info('updating the ionosphere_summary_memcache_object')
+            #         self.update_ionosphere_summary_memcache_object
+            #     except:
+            #         logger.error('error :: update_ionosphere_summary_memcache_object - %s' % traceback.print_exc())
 
             # self.populate the database metatdata tables
             # What is my host id in the Skyline panorama DB?

@@ -21,7 +21,7 @@ Changes
   - Tidy up and use settings memcache variables in ionosphere.py
 
 - Optimise Ionosphere DB usage with memcached - (Task #2132)
-- Infrequent missing new_ Redis keys (Bug #2154)
+- Infrequent missing `new_` Redis keys (Bug #2154)
 
   - Update derivative_metrics if the analyzer.derivative_metrics_expiry key is
     going to expire within 60s
