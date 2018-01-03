@@ -2105,7 +2105,9 @@ class Ionosphere(Thread):
             # @added 20170916 - Feature #1996: Ionosphere - matches page
             # Create the ionosphere_summary_memcache_object
             # @modified 20180103 - Feature #1996: Ionosphere - matches page
-            # This is not managed here and was an artefact of some dev work
+            # The ionosphere_summary_list memcache object is not managed in
+            # ionosphere.py and was an artefact of some dev work that may
+            # resume at some point
             # if settings.MEMCACHE_ENABLED:
             #     try:
             #         logger.info('updating the ionosphere_summary_memcache_object')
