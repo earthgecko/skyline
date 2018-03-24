@@ -605,7 +605,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             Column('feature_id', Integer, nullable=False),
             Column('value', DOUBLE(), nullable=True),
             mysql_charset='utf8',
-            mysql_key_block_size='255',
+            # @modified 20180324 - Bug #2340: MySQL key_block_size
+            #                      MySQL key_block_size #45
+            # Removed as under MySQL 5.7 breaks
+            # mysql_key_block_size='255',
             mysql_engine='InnoDB')
         fp_metric_table.create(engine, checkfirst=True)
         fp_table_created = True
@@ -699,7 +702,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             Column('timestamp', Integer, nullable=False),
             Column('value', DOUBLE(), nullable=True),
             mysql_charset='utf8',
-            mysql_key_block_size='255',
+            # @modified 20180324 - Bug #2340: MySQL key_block_size
+            #                      MySQL key_block_size #45
+            # Removed as under MySQL 5.7 breaks
+            # mysql_key_block_size='255',
             mysql_engine='InnoDB')
         ts_metric_table.create(engine, checkfirst=True)
         # ts_table_created = True
