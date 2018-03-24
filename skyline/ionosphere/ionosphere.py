@@ -79,7 +79,7 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
 except:
-    logger.error('error :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
+    logger.error('error :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings')
     ENABLE_IONOSPHERE_DEBUG = False
 
 try:
