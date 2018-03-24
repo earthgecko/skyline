@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Webapp &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Webapp &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Ionosphere" href="ionosphere.html"/>
         <link rel="prev" title="Panorama" href="panorama.html"/> 
 
@@ -147,7 +147,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -185,7 +185,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/webapp.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/webapp.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -213,7 +213,7 @@ json that takes the following parameters:<ul>
 </ul>
 </li>
 <li>Publish the Skyline docs.</li>
-<li>Browse the Redis DB with a port of Marian Steinbach&#8217;s excellent <span class="red">re</span><span class="brow">brow</span>
+<li>Browse the Redis DB with a port of Marian Steinbach’s excellent <span class="red">re</span><span class="brow">brow</span>
 <a class="reference external" href="https://github.com/marians/rebrow">https://github.com/marians/rebrow</a></li>
 </ul>
 <div class="section" id="a-basic-overview-of-the-webapp">
@@ -307,10 +307,10 @@ some way, either through error or accident.</p>
 or a production grade HTTP application.</p>
 <div class="section" id="logging">
 <h4>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h4>
-<p>Flask&#8217;s development server is based on werkzeug, whose WSGIRequestHandler is,
+<p>Flask’s development server is based on werkzeug, whose WSGIRequestHandler is,
 in turn, based in the BaseHTTPServer from the standard lib.  This means that
 WSGIRequestHandler overrides the logging methods, log_request, log_error and
-log_message, to use it&#8217;s own logging.Logger.  So there is no access logging in
+log_message, to use it’s own logging.Logger.  So there is no access logging in
 Skyline Webapp log.  It is possible to hack this around a bit, but this means
 application error logging would get shifted from the Webapp log to the access
 log, which is not ideal.</p>
@@ -363,7 +363,7 @@ UI, you can use <a class="reference internal" href="skyline.html#settings.WEBAPP
 </div>
 <div class="section" id="rebrow">
 <h2><span class="red">re</span><span class="brow">brow</span><a class="headerlink" href="#rebrow" title="Permalink to this headline">¶</a></h2>
-<p>Skyline uses a modified port of Marian Steinbach&#8217;s excellent
+<p>Skyline uses a modified port of Marian Steinbach’s excellent
 <span class="red">re</span><span class="brow">brow</span> Flask Redis browser - <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a>.  A modified port was used
 for a number of reasons:</p>
 <ul class="simple">
@@ -413,7 +413,7 @@ browser to graph the timeseries.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -435,7 +435,7 @@ browser to graph the timeseries.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

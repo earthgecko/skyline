@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Development &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="../index.html"/>
         <link rel="next" title="Building documentation" href="building-documentation.html"/>
-        <link rel="prev" title="What’s new" href="../whats-new.html"/> 
+        <link rel="prev" title="What&#39;s new" href="../whats-new.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -115,7 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What's new</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
@@ -163,7 +163,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/development/index.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/development/index.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -258,45 +258,40 @@ different implementations.</p>
 <h2>On going refactoring<a class="headerlink" href="#on-going-refactoring" title="Permalink to this headline">¶</a></h2>
 <p>The code style in the Skyline codebase is somewhat organic, over time more and
 changes have been made mostly in the following contexts.</p>
-<ul>
+<ul class="simple">
 <li><dl class="first docutils">
 <dt>Logging trying to achieve consistency in logging string formats such as</dt>
-<dd><p class="first last"><code class="docutils literal"><span class="pre">error</span> <span class="pre">::</span> <span class="pre">message</span></code>, etc.  Maybe there should be independent standard and
-error logs :)</p>
-</dd>
+<dd><code class="docutils literal"><span class="pre">error</span> <span class="pre">::</span> <span class="pre">message</span></code>, etc.  Maybe there should be independent standard and
+error logs :)</dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt>Quotation style, although there are not any hard and fast rules in this there</dt>
-<dd><p class="first last">has been an attempt to try and refactor any strings that were quoted with
+<dd>has been an attempt to try and refactor any strings that were quoted with
 double quotes to single quoted strings.  This was more to do with try align
 the code so that double quotes can be reserved for strings that interpolate
-the variable in the string not via &#8220;%&#8221;.  Although this is specifically
+the variable in the string not via “%”.  Although this is specifically
 Pythonic in a way, it can be and although not covered in any PEP seen, here
 have been some references to this being an acceptable and preferred style by
 some.  Seeing as this is common in other languages too, such a ruby and shell.
 It is not a rule :) and there are still instances of double quoted string in
-places, maybe.</p>
-</dd>
+places, maybe.</dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt><code class="docutils literal"><span class="pre">except:</span></code> - Attempts are always being made to try and <code class="docutils literal"><span class="pre">try:</span></code> and</dt>
-<dd><p class="first last"><code class="docutils literal"><span class="pre">except:</span></code> wherever possible with the goal being that all Skyline apps handle
+<dd><code class="docutils literal"><span class="pre">except:</span></code> wherever possible with the goal being that all Skyline apps handle
 failure gracefully, log informatively, without logging vommiting through an
 entire <code class="docutils literal"><span class="pre">assigned_metrics</span></code> loop and exiting whenever a critical error is
-encountered at start up.</p>
-</dd>
+encountered at start up.</dd>
 </dl>
 </li>
-<li><p class="first">Trying to achieve PEP8, wherever possible and not inconvenient.</p>
-</li>
+<li>Trying to achieve PEP8, wherever possible and not inconvenient.</li>
 <li><dl class="first docutils">
 <dt>Adding any found Python-3 patterns discovered while doing something as long as</dt>
-<dd><p class="first last">it is wrapped in the appropriate conditional, it should have no effect on the
+<dd>it is wrapped in the appropriate conditional, it should have no effect on the
 functioning of the apps with Python2.7 and is there to test when Python3
-becomes desired.</p>
-</dd>
+becomes desired.</dd>
 </dl>
 </li>
 </ul>
@@ -313,7 +308,7 @@ becomes desired.</p>
         <a href="building-documentation.html" class="btn btn-neutral float-right" title="Building documentation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../whats-new.html" class="btn btn-neutral" title="What’s new" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../whats-new.html" class="btn btn-neutral" title="What&#39;s new" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -322,7 +317,7 @@ becomes desired.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -344,7 +339,7 @@ becomes desired.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

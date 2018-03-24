@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline package &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -115,7 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">skyline package</a><ul>
@@ -142,7 +142,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_version">skyline.skyline_version module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-validate_settings">skyline.validate_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-skyline">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -179,7 +179,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/skyline.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/skyline.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -366,7 +366,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature_name</strong> (<em>str</em>) &#8211; the tsfresh feature name</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>feature_name</strong> (<em>str</em>) – the tsfresh feature name</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">id</td>
 </tr>
@@ -385,8 +385,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>timestamp</strong> (<em>str</em>) &#8211; the timestamp of metric anomaly with training data</li>
-<li><strong>metric</strong> (<em>str</em>) &#8211; the base_name of the metric</li>
+<li><strong>timestamp</strong> (<em>str</em>) – the timestamp of metric anomaly with training data</li>
+<li><strong>metric</strong> (<em>str</em>) – the base_name of the metric</li>
 </ul>
 </td>
 </tr>
@@ -428,8 +428,8 @@ webapp/ionosphere_backend</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the Skyline app name calling the function</li>
-<li><strong>base_name</strong> (<em>str</em>) &#8211; thee base_name of the metric</li>
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the Skyline app name calling the function</li>
+<li><strong>base_name</strong> (<em>str</em>) – thee base_name of the metric</li>
 </ul>
 </td>
 </tr>
@@ -455,20 +455,20 @@ webapp/ionosphere_backend</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; Skyline app name</li>
-<li><strong>requested_timestamp</strong> (<em>int</em>) &#8211; The timestamp of the dir that the features
+<li><strong>current_skyline_app</strong> (<em>str</em>) – Skyline app name</li>
+<li><strong>requested_timestamp</strong> (<em>int</em>) – The timestamp of the dir that the features
 profile data is in</li>
-<li><strong>data_for_metric</strong> (<em>str</em>) &#8211; The base_name of the metric</li>
-<li><strong>context</strong> (<em>str</em>) &#8211; The context of the caller</li>
-<li><strong>ionosphere_job</strong> (<em>str</em>) &#8211; The ionosphere_job name related to creation request
+<li><strong>data_for_metric</strong> (<em>str</em>) – The base_name of the metric</li>
+<li><strong>context</strong> (<em>str</em>) – The context of the caller</li>
+<li><strong>ionosphere_job</strong> (<em>str</em>) – The ionosphere_job name related to creation request
 valid jobs are <code class="docutils literal"><span class="pre">learn_fp_human</span></code>, <code class="docutils literal"><span class="pre">learn_fp_generation</span></code>,
 <code class="docutils literal"><span class="pre">learn_fp_learnt</span></code> and <code class="docutils literal"><span class="pre">learn_fp_automatic</span></code>.</li>
-<li><strong>fp_parent_id</strong> (<em>int</em>) &#8211; The id of the parent features profile that this was
+<li><strong>fp_parent_id</strong> (<em>int</em>) – The id of the parent features profile that this was
 learnt from, 0 being an original human generated features profile</li>
-<li><strong>fp_generation</strong> (<em>int</em>) &#8211; The number of generations away for the original
+<li><strong>fp_generation</strong> (<em>int</em>) – The number of generations away for the original
 human generated features profile, 0 being an original human generated
 features profile.</li>
-<li><strong>fp_learn</strong> (<em>boolean</em>) &#8211; Whether Ionosphere should learn at use_full_duration_days</li>
+<li><strong>fp_learn</strong> (<em>boolean</em>) – Whether Ionosphere should learn at use_full_duration_days</li>
 </ul>
 </td>
 </tr>
@@ -496,7 +496,7 @@ features profile.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><strong>REDIS_SOCKET_PATH</strong></a> (<em>str</em>) &#8211; The path for the Redis unix socket</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><strong>REDIS_SOCKET_PATH</strong></a> (<em>str</em>) – The path for the Redis unix socket</td>
 </tr>
 </tbody>
 </table>
@@ -509,7 +509,7 @@ features profile.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.LOG_PATH" title="settings.LOG_PATH"><strong>LOG_PATH</strong></a> (<em>str</em>) &#8211; The Skyline logs directory. Do not include a trailing slash.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.LOG_PATH" title="settings.LOG_PATH"><strong>LOG_PATH</strong></a> (<em>str</em>) – The Skyline logs directory. Do not include a trailing slash.</td>
 </tr>
 </tbody>
 </table>
@@ -522,7 +522,7 @@ features profile.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PID_PATH" title="settings.PID_PATH"><strong>PID_PATH</strong></a> (<em>str</em>) &#8211; The Skyline pids directory. Do not include a trailing slash.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PID_PATH" title="settings.PID_PATH"><strong>PID_PATH</strong></a> (<em>str</em>) – The Skyline pids directory. Do not include a trailing slash.</td>
 </tr>
 </tbody>
 </table>
@@ -535,7 +535,7 @@ features profile.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_TMP_DIR" title="settings.SKYLINE_TMP_DIR"><strong>SKYLINE_TMP_DIR</strong></a> (<em>str</em>) &#8211; The Skyline tmp dir. Do not include a trailing slash.
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_TMP_DIR" title="settings.SKYLINE_TMP_DIR"><strong>SKYLINE_TMP_DIR</strong></a> (<em>str</em>) – The Skyline tmp dir. Do not include a trailing slash.
 It is recommended you keep this in the /tmp directory which normally uses
 tmpfs.</td>
 </tr>
@@ -550,7 +550,7 @@ tmpfs.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FULL_NAMESPACE" title="settings.FULL_NAMESPACE"><strong>FULL_NAMESPACE</strong></a> (<em>str</em>) &#8211; Metrics will be prefixed with this value in Redis.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FULL_NAMESPACE" title="settings.FULL_NAMESPACE"><strong>FULL_NAMESPACE</strong></a> (<em>str</em>) – Metrics will be prefixed with this value in Redis.</td>
 </tr>
 </tbody>
 </table>
@@ -563,7 +563,7 @@ tmpfs.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_SOURCE" title="settings.GRAPHITE_SOURCE"><strong>GRAPHITE_SOURCE</strong></a> (<em>str</em>) &#8211; The data source</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_SOURCE" title="settings.GRAPHITE_SOURCE"><strong>GRAPHITE_SOURCE</strong></a> (<em>str</em>) – The data source</td>
 </tr>
 </tbody>
 </table>
@@ -576,7 +576,7 @@ tmpfs.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_DEBUG" title="settings.ENABLE_DEBUG"><strong>ENABLE_DEBUG</strong></a> (<em>str</em>) &#8211; Enable additional debug logging - useful for development
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_DEBUG" title="settings.ENABLE_DEBUG"><strong>ENABLE_DEBUG</strong></a> (<em>str</em>) – Enable additional debug logging - useful for development
 only, this should definitely be set to False on production systems.</td>
 </tr>
 </tbody>
@@ -590,7 +590,7 @@ only, this should definitely be set to False on production systems.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MINI_NAMESPACE" title="settings.MINI_NAMESPACE"><strong>MINI_NAMESPACE</strong></a> (<em>str</em>) &#8211; The Horizon agent will make T&#8217;d writes to both the full
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MINI_NAMESPACE" title="settings.MINI_NAMESPACE"><strong>MINI_NAMESPACE</strong></a> (<em>str</em>) – The Horizon agent will make T’d writes to both the full
 namespace and the mini namespace. Oculus gets its data from everything in
 the mini namespace.</td>
 </tr>
@@ -605,7 +605,7 @@ the mini namespace.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FULL_DURATION" title="settings.FULL_DURATION"><strong>FULL_DURATION</strong></a> (<em>str</em>) &#8211; This is the rolling duration that will be stored in Redis.
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FULL_DURATION" title="settings.FULL_DURATION"><strong>FULL_DURATION</strong></a> (<em>str</em>) – This is the rolling duration that will be stored in Redis.
 Be sure to pick a value that suits your memory capacity, your CPU capacity
 and your overall metrics count. Longer durations take a longer to analyze,
 but they can help the algorithms reduce the noise and provide more accurate
@@ -622,9 +622,9 @@ anomaly detection.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MINI_DURATION" title="settings.MINI_DURATION"><strong>MINI_DURATION</strong></a> (<em>str</em>) &#8211; This is the duration of the &#8216;mini&#8217; namespace, if you are
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MINI_DURATION" title="settings.MINI_DURATION"><strong>MINI_DURATION</strong></a> (<em>str</em>) – This is the duration of the ‘mini’ namespace, if you are
 also using the Oculus service. It is also the duration of data that is
-displayed in the Webapp &#8216;mini&#8217; view.</td>
+displayed in the Webapp ‘mini’ view.</td>
 </tr>
 </tbody>
 </table>
@@ -637,8 +637,8 @@ displayed in the Webapp &#8216;mini&#8217; view.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><strong>GRAPHITE_HOST</strong></a> (<em>str</em>) &#8211; If you have a Graphite host set up, set this metric to get
-graphs on Skyline and Horizon. Don&#8217;t include <a class="reference external" href="http://">http://</a> since this is used for
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><strong>GRAPHITE_HOST</strong></a> (<em>str</em>) – If you have a Graphite host set up, set this metric to get
+graphs on Skyline and Horizon. Don’t include <a class="reference external" href="http://">http://</a> since this is used for
 carbon host as well.</td>
 </tr>
 </tbody>
@@ -652,7 +652,7 @@ carbon host as well.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_PROTOCOL" title="settings.GRAPHITE_PROTOCOL"><strong>GRAPHITE_PROTOCOL</strong></a> (<em>str</em>) &#8211; Graphite host protocol - http or https</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_PROTOCOL" title="settings.GRAPHITE_PROTOCOL"><strong>GRAPHITE_PROTOCOL</strong></a> (<em>str</em>) – Graphite host protocol - http or https</td>
 </tr>
 </tbody>
 </table>
@@ -665,8 +665,8 @@ carbon host as well.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_PORT" title="settings.GRAPHITE_PORT"><strong>GRAPHITE_PORT</strong></a> (<em>str</em>) &#8211; Graphite host port - for a specific port if graphite runs on
-a port other than 80, e.g. &#8216;8888&#8217;</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_PORT" title="settings.GRAPHITE_PORT"><strong>GRAPHITE_PORT</strong></a> (<em>str</em>) – Graphite host port - for a specific port if graphite runs on
+a port other than 80, e.g. ‘8888’</td>
 </tr>
 </tbody>
 </table>
@@ -679,7 +679,7 @@ a port other than 80, e.g. &#8216;8888&#8217;</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_CONNECT_TIMEOUT" title="settings.GRAPHITE_CONNECT_TIMEOUT"><strong>GRAPHITE_CONNECT_TIMEOUT</strong></a> (<em>int</em>) &#8211; Graphite connect timeout - this allows for the
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_CONNECT_TIMEOUT" title="settings.GRAPHITE_CONNECT_TIMEOUT"><strong>GRAPHITE_CONNECT_TIMEOUT</strong></a> (<em>int</em>) – Graphite connect timeout - this allows for the
 gracefully failure of any graphite requests so that no graphite related
 functions ever block for too long.</td>
 </tr>
@@ -694,7 +694,7 @@ functions ever block for too long.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_READ_TIMEOUT" title="settings.GRAPHITE_READ_TIMEOUT"><strong>GRAPHITE_READ_TIMEOUT</strong></a> (<em>int</em>) &#8211; Graphite read timeout</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_READ_TIMEOUT" title="settings.GRAPHITE_READ_TIMEOUT"><strong>GRAPHITE_READ_TIMEOUT</strong></a> (<em>int</em>) – Graphite read timeout</td>
 </tr>
 </tbody>
 </table>
@@ -707,7 +707,7 @@ functions ever block for too long.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_GRAPH_SETTINGS" title="settings.GRAPHITE_GRAPH_SETTINGS"><strong>GRAPHITE_GRAPH_SETTINGS</strong></a> (<em>str</em>) &#8211; These are graphite settings in terms of alert
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_GRAPH_SETTINGS" title="settings.GRAPHITE_GRAPH_SETTINGS"><strong>GRAPHITE_GRAPH_SETTINGS</strong></a> (<em>str</em>) – These are graphite settings in terms of alert
 graphs - this is defaulted to a format that is more colourblind friendly
 than the default graphite graphs.</td>
 </tr>
@@ -722,7 +722,7 @@ than the default graphite graphs.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.TARGET_HOURS" title="settings.TARGET_HOURS"><strong>TARGET_HOURS</strong></a> (<em>str</em>) &#8211; The number of hours data to graph in alerts.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.TARGET_HOURS" title="settings.TARGET_HOURS"><strong>TARGET_HOURS</strong></a> (<em>str</em>) – The number of hours data to graph in alerts.</td>
 </tr>
 </tbody>
 </table>
@@ -735,7 +735,7 @@ than the default graphite graphs.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPH_URL" title="settings.GRAPH_URL"><strong>GRAPH_URL</strong></a> (<em>str</em>) &#8211; The graphite URL for alert graphs will be appended with the
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPH_URL" title="settings.GRAPH_URL"><strong>GRAPH_URL</strong></a> (<em>str</em>) – The graphite URL for alert graphs will be appended with the
 relevant metric name in each alert.</td>
 </tr>
 </tbody>
@@ -754,7 +754,7 @@ size graph sent with alerts.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CARBON_PORT" title="settings.CARBON_PORT"><strong>CARBON_PORT</strong></a> (<em>int</em>) &#8211; If you have a Graphite host set up, set its Carbon port.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CARBON_PORT" title="settings.CARBON_PORT"><strong>CARBON_PORT</strong></a> (<em>int</em>) – If you have a Graphite host set up, set its Carbon port.</td>
 </tr>
 </tbody>
 </table>
@@ -767,7 +767,7 @@ size graph sent with alerts.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.OCULUS_HOST" title="settings.OCULUS_HOST"><strong>OCULUS_HOST</strong></a> (<em>str</em>) &#8211; If you have Oculus set up, set this to <code class="docutils literal"><span class="pre">http://&lt;OCULUS_HOST&gt;</span></code></td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.OCULUS_HOST" title="settings.OCULUS_HOST"><strong>OCULUS_HOST</strong></a> (<em>str</em>) – If you have Oculus set up, set this to <code class="docutils literal"><span class="pre">http://&lt;OCULUS_HOST&gt;</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -785,7 +785,7 @@ support is disabled.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SERVER_METRICS_NAME" title="settings.SERVER_METRICS_NAME"><strong>SERVER_METRICS_NAME</strong></a> (<em>str</em>) &#8211; The hostname of the Skyline.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SERVER_METRICS_NAME" title="settings.SERVER_METRICS_NAME"><strong>SERVER_METRICS_NAME</strong></a> (<em>str</em>) – The hostname of the Skyline.</td>
 </tr>
 </tbody>
 </table>
@@ -804,7 +804,7 @@ metrics will be as e.g. <code class="docutils literal"><span class="pre">skyline
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_CHECK_PATH" title="settings.MIRAGE_CHECK_PATH"><strong>MIRAGE_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline analyzer will write
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_CHECK_PATH" title="settings.MIRAGE_CHECK_PATH"><strong>MIRAGE_CHECK_PATH</strong></a> (<em>str</em>) – This is the location the Skyline analyzer will write
 the second order resolution anomalies to check to a file on disk - absolute
 path</td>
 </tr>
@@ -819,7 +819,7 @@ path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_CHECK_PATH" title="settings.CRUCIBLE_CHECK_PATH"><strong>CRUCIBLE_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_CHECK_PATH" title="settings.CRUCIBLE_CHECK_PATH"><strong>CRUCIBLE_CHECK_PATH</strong></a> (<em>str</em>) – This is the location the Skyline apps will write the
 anomalies to for crucible to check to a file on disk - absolute path</td>
 </tr>
 </tbody>
@@ -833,7 +833,7 @@ anomalies to for crucible to check to a file on disk - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_PATH" title="settings.PANORAMA_CHECK_PATH"><strong>PANORAMA_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_PATH" title="settings.PANORAMA_CHECK_PATH"><strong>PANORAMA_CHECK_PATH</strong></a> (<em>str</em>) – This is the location the Skyline apps will write the
 anomalies to for Panorama to check to a file on disk - absolute path</td>
 </tr>
 </tbody>
@@ -847,7 +847,7 @@ anomalies to for Panorama to check to a file on disk - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANDAS_VERSION" title="settings.PANDAS_VERSION"><strong>PANDAS_VERSION</strong></a> (<em>str</em>) &#8211; Pandas version in use</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANDAS_VERSION" title="settings.PANDAS_VERSION"><strong>PANDAS_VERSION</strong></a> (<em>str</em>) – Pandas version in use</td>
 </tr>
 </tbody>
 </table>
@@ -878,7 +878,7 @@ imported and means that not all alerter related modules in
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><strong>SYSLOG_ENABLED</strong></a> (<em>boolean</em>) &#8211; Alerter - enables Skyline apps to submit anomalous metric
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><strong>SYSLOG_ENABLED</strong></a> (<em>boolean</em>) – Alerter - enables Skyline apps to submit anomalous metric
 details to syslog.</td>
 </tr>
 </tbody>
@@ -892,7 +892,7 @@ details to syslog.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HIPCHAT_ENABLED" title="settings.HIPCHAT_ENABLED"><strong>HIPCHAT_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Hipchat alerter</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HIPCHAT_ENABLED" title="settings.HIPCHAT_ENABLED"><strong>HIPCHAT_ENABLED</strong></a> (<em>boolean</em>) – Enables the Hipchat alerter</td>
 </tr>
 </tbody>
 </table>
@@ -905,7 +905,7 @@ details to syslog.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><strong>PAGERDUTY_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Pagerduty alerter</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><strong>PAGERDUTY_ENABLED</strong></a> (<em>boolean</em>) – Enables the Pagerduty alerter</td>
 </tr>
 </tbody>
 </table>
@@ -918,7 +918,7 @@ details to syslog.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Slack alerter</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) – Enables the Slack alerter</td>
 </tr>
 </tbody>
 </table>
@@ -931,7 +931,7 @@ details to syslog.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANOMALY_DUMP" title="settings.ANOMALY_DUMP"><strong>ANOMALY_DUMP</strong></a> (<em>str</em>) &#8211; This is the location the Skyline agent will write the
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANOMALY_DUMP" title="settings.ANOMALY_DUMP"><strong>ANOMALY_DUMP</strong></a> (<em>str</em>) – This is the location the Skyline agent will write the
 anomalies file to disk.  It needs to be in a location accessible to the webapp.</td>
 </tr>
 </tbody>
@@ -945,7 +945,7 @@ anomalies file to disk.  It needs to be in a location accessible to the webapp.<
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><strong>ANALYZER_PROCESSES</strong></a> (<em>int</em>) &#8211; This is the number of processes that the Skyline
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><strong>ANALYZER_PROCESSES</strong></a> (<em>int</em>) – This is the number of processes that the Skyline
 Analyzer will spawn.</td>
 </tr>
 </tbody>
@@ -962,7 +962,7 @@ seconds), you are aiming to try and analyze all of those within 60 seconds.
 If you do not the anomaly detection begins to lag and it is no longer really
 near realtime.  That stated, bear in mind if you are not processing 10s of
 1000s of metrics, you may only need one Analyzer process.  To determine your
-optimal settings take note of &#8216;seconds to run&#8217; values in the Analyzer log.</li>
+optimal settings take note of ‘seconds to run’ values in the Analyzer log.</li>
 </ul>
 </dd></dl>
 
@@ -973,7 +973,7 @@ optimal settings take note of &#8216;seconds to run&#8217; values in the Analyze
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANALYZER_OPTIMUM_RUN_DURATION" title="settings.ANALYZER_OPTIMUM_RUN_DURATION"><strong>ANALYZER_OPTIMUM_RUN_DURATION</strong></a> (<em>int</em>) &#8211; This is how many seconds it would be
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANALYZER_OPTIMUM_RUN_DURATION" title="settings.ANALYZER_OPTIMUM_RUN_DURATION"><strong>ANALYZER_OPTIMUM_RUN_DURATION</strong></a> (<em>int</em>) – This is how many seconds it would be
 optimum for Analyzer to be able to analyze all your metrics in.</td>
 </tr>
 </tbody>
@@ -991,7 +991,7 @@ optimum for Analyzer to be able to analyze all your metrics in.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_ANALYZER_PROCESS_RUNTIME" title="settings.MAX_ANALYZER_PROCESS_RUNTIME"><strong>MAX_ANALYZER_PROCESS_RUNTIME</strong></a> (<em>int</em>) &#8211; What is the maximum number of seconds an
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_ANALYZER_PROCESS_RUNTIME" title="settings.MAX_ANALYZER_PROCESS_RUNTIME"><strong>MAX_ANALYZER_PROCESS_RUNTIME</strong></a> (<em>int</em>) – What is the maximum number of seconds an
 Analyzer process should run analysing a set of <code class="docutils literal"><span class="pre">assigned_metrics</span></code></td>
 </tr>
 </tbody>
@@ -1011,9 +1011,9 @@ operations which can very infrequently cause a process to hang.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.STALE_PERIOD" title="settings.STALE_PERIOD"><strong>STALE_PERIOD</strong></a> (<em>int</em>) &#8211; This is the duration, in seconds, for a metric to become
-&#8216;stale&#8217; and for the analyzer to ignore it until new datapoints are added.
-&#8216;Staleness&#8217; means that a datapoint has not been added for STALE_PERIOD
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.STALE_PERIOD" title="settings.STALE_PERIOD"><strong>STALE_PERIOD</strong></a> (<em>int</em>) – This is the duration, in seconds, for a metric to become
+‘stale’ and for the analyzer to ignore it until new datapoints are added.
+‘Staleness’ means that a datapoint has not been added for STALE_PERIOD
 seconds.</td>
 </tr>
 </tbody>
@@ -1027,7 +1027,7 @@ seconds.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><strong>MIN_TOLERABLE_LENGTH</strong></a> (<em>int</em>) &#8211; This is the minimum length of a timeseries, in
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><strong>MIN_TOLERABLE_LENGTH</strong></a> (<em>int</em>) – This is the minimum length of a timeseries, in
 datapoints, for the analyzer to recognize it as a complete series.</td>
 </tr>
 </tbody>
@@ -1041,8 +1041,8 @@ datapoints, for the analyzer to recognize it as a complete series.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_TOLERABLE_BOREDOM" title="settings.MAX_TOLERABLE_BOREDOM"><strong>MAX_TOLERABLE_BOREDOM</strong></a> (<em>int</em>) &#8211; Sometimes a metric will continually transmit the
-same number. There&#8217;s no need to analyze metrics that remain boring like
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_TOLERABLE_BOREDOM" title="settings.MAX_TOLERABLE_BOREDOM"><strong>MAX_TOLERABLE_BOREDOM</strong></a> (<em>int</em>) – Sometimes a metric will continually transmit the
+same number. There’s no need to analyze metrics that remain boring like
 this, so this setting determines the amount of boring datapoints that will
 be allowed to accumulate before the analyzer skips over the metric. If the
 metric becomes noisy again, the analyzer will stop ignoring it.</td>
@@ -1058,7 +1058,7 @@ metric becomes noisy again, the analyzer will stop ignoring it.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOREDOM_SET_SIZE" title="settings.BOREDOM_SET_SIZE"><strong>BOREDOM_SET_SIZE</strong></a> (<em>int</em>) &#8211; By default, the analyzer skips a metric if it it has
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOREDOM_SET_SIZE" title="settings.BOREDOM_SET_SIZE"><strong>BOREDOM_SET_SIZE</strong></a> (<em>int</em>) – By default, the analyzer skips a metric if it it has
 transmitted a single number <a class="reference internal" href="#settings.MAX_TOLERABLE_BOREDOM" title="settings.MAX_TOLERABLE_BOREDOM"><code class="xref py py-mod docutils literal"><span class="pre">settings.MAX_TOLERABLE_BOREDOM</span></code></a> times.</td>
 </tr>
 </tbody>
@@ -1078,7 +1078,7 @@ timeseries that often oscillate between two values.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><strong>CANARY_METRIC</strong></a> (<em>str</em>) &#8211; The metric name to use as the CANARY_METRIC</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><strong>CANARY_METRIC</strong></a> (<em>str</em>) – The metric name to use as the CANARY_METRIC</td>
 </tr>
 </tbody>
 </table>
@@ -1096,9 +1096,9 @@ that you can use to gauge the status of the system as a whole.  Like the
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ALGORITHMS" title="settings.ALGORITHMS"><strong>ALGORITHMS</strong></a> (<em>array</em>) &#8211; These are the algorithms that the Analyzer will run. To add a
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ALGORITHMS" title="settings.ALGORITHMS"><strong>ALGORITHMS</strong></a> (<em>array</em>) – These are the algorithms that the Analyzer will run. To add a
 new algorithm, you must both define the algorithm in algorithms.py and add
-it&#8217;s name here.</td>
+it’s name here.</td>
 </tr>
 </tbody>
 </table>
@@ -1111,7 +1111,7 @@ it&#8217;s name here.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CONSENSUS" title="settings.CONSENSUS"><strong>CONSENSUS</strong></a> (<em>int</em>) &#8211; This is the number of algorithms that must return True before a
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CONSENSUS" title="settings.CONSENSUS"><strong>CONSENSUS</strong></a> (<em>int</em>) – This is the number of algorithms that must return True before a
 metric is classified as anomalous by Analyzer.</td>
 </tr>
 </tbody>
@@ -1125,7 +1125,7 @@ metric is classified as anomalous by Analyzer.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><strong>RUN_OPTIMIZED_WORKFLOW</strong></a> (<em>boolean</em>) &#8211; This sets Analyzer to run in an optimized manner.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><strong>RUN_OPTIMIZED_WORKFLOW</strong></a> (<em>boolean</em>) – This sets Analyzer to run in an optimized manner.</td>
 </tr>
 </tbody>
 </table>
@@ -1147,7 +1147,7 @@ you may want this to be False</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_ALGORITHM_RUN_METRICS" title="settings.ENABLE_ALGORITHM_RUN_METRICS"><strong>ENABLE_ALGORITHM_RUN_METRICS</strong></a> (<em>boolean</em>) &#8211; This enables algorithm timing metrics to
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_ALGORITHM_RUN_METRICS" title="settings.ENABLE_ALGORITHM_RUN_METRICS"><strong>ENABLE_ALGORITHM_RUN_METRICS</strong></a> (<em>boolean</em>) – This enables algorithm timing metrics to
 Graphite</td>
 </tr>
 </tbody>
@@ -1168,13 +1168,13 @@ These are related to the RUN_OPTIMIZED_WORKFLOW performance tuning.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_ALL_ALGORITHMS_RUN_METRICS" title="settings.ENABLE_ALL_ALGORITHMS_RUN_METRICS"><strong>ENABLE_ALL_ALGORITHMS_RUN_METRICS</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - run and time all</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_ALL_ALGORITHMS_RUN_METRICS" title="settings.ENABLE_ALL_ALGORITHMS_RUN_METRICS"><strong>ENABLE_ALL_ALGORITHMS_RUN_METRICS</strong></a> (<em>boolean</em>) – DEVELOPMENT only - run and time all</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">If set to <code class="docutils literal"><span class="pre">True</span></code>, Analyzer will revert to it&#8217;s original unoptimized
+<p class="last">If set to <code class="docutils literal"><span class="pre">True</span></code>, Analyzer will revert to it’s original unoptimized
 workflow and will run and time all algorithms against all timeseries.</p>
 </div>
 </dd></dl>
@@ -1186,13 +1186,13 @@ workflow and will run and time all algorithms against all timeseries.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_SECOND_ORDER" title="settings.ENABLE_SECOND_ORDER"><strong>ENABLE_SECOND_ORDER</strong></a> (<em>boolean</em>) &#8211; This is to enable second order anomalies.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_SECOND_ORDER" title="settings.ENABLE_SECOND_ORDER"><strong>ENABLE_SECOND_ORDER</strong></a> (<em>boolean</em>) – This is to enable second order anomalies.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">EXPERIMENTAL - This is an experimental feature, so it&#8217;s turned off
+<p class="last">EXPERIMENTAL - This is an experimental feature, so it’s turned off
 by default.</p>
 </div>
 </dd></dl>
@@ -1204,7 +1204,7 @@ by default.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_ALERTS" title="settings.ENABLE_ALERTS"><strong>ENABLE_ALERTS</strong></a> (<em>boolean</em>) &#8211; This enables Analyzer alerting.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_ALERTS" title="settings.ENABLE_ALERTS"><strong>ENABLE_ALERTS</strong></a> (<em>boolean</em>) – This enables Analyzer alerting.</td>
 </tr>
 </tbody>
 </table>
@@ -1217,7 +1217,7 @@ by default.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_MIRAGE" title="settings.ENABLE_MIRAGE"><strong>ENABLE_MIRAGE</strong></a> (<em>boolean</em>) &#8211; This enables Analyzer to output to Mirage</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_MIRAGE" title="settings.ENABLE_MIRAGE"><strong>ENABLE_MIRAGE</strong></a> (<em>boolean</em>) – This enables Analyzer to output to Mirage</td>
 </tr>
 </tbody>
 </table>
@@ -1230,7 +1230,7 @@ by default.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_FULL_DURATION_ALERTS" title="settings.ENABLE_FULL_DURATION_ALERTS"><strong>ENABLE_FULL_DURATION_ALERTS</strong></a> (<em>boolean</em>) &#8211; This enables Analyzer to alert on all
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_FULL_DURATION_ALERTS" title="settings.ENABLE_FULL_DURATION_ALERTS"><strong>ENABLE_FULL_DURATION_ALERTS</strong></a> (<em>boolean</em>) – This enables Analyzer to alert on all
 FULL_DURATION anomalies.</td>
 </tr>
 </tbody>
@@ -1255,7 +1255,7 @@ values in the desired metric alert tuples, you want this set to <code class="doc
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANALYZER_CRUCIBLE_ENABLED" title="settings.ANALYZER_CRUCIBLE_ENABLED"><strong>ANALYZER_CRUCIBLE_ENABLED</strong></a> (<em>boolean</em>) &#8211; This enables Analyzer to output to Crucible</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANALYZER_CRUCIBLE_ENABLED" title="settings.ANALYZER_CRUCIBLE_ENABLED"><strong>ANALYZER_CRUCIBLE_ENABLED</strong></a> (<em>boolean</em>) – This enables Analyzer to output to Crucible</td>
 </tr>
 </tbody>
 </table>
@@ -1278,7 +1278,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ALERTS" title="settings.ALERTS"><strong>ALERTS</strong></a> (<em>tuples</em>) &#8211; This enables analyzer alerting.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ALERTS" title="settings.ALERTS"><strong>ALERTS</strong></a> (<em>tuples</em>) – This enables analyzer alerting.</td>
 </tr>
 </tbody>
 </table>
@@ -1314,11 +1314,11 @@ trigger again.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>metric</strong> (<em>str</em>) &#8211; metric name.</li>
-<li><strong>alerter</strong> (<em>str</em>) &#8211; the alerter name e.g. smtp, syslog, hipchat, pagerduty</li>
-<li><strong>EXPIRATION_TIME</strong> (<em>int</em>) &#8211; Alerts will not fire twice within this amount of
+<li><strong>metric</strong> (<em>str</em>) – metric name.</li>
+<li><strong>alerter</strong> (<em>str</em>) – the alerter name e.g. smtp, syslog, hipchat, pagerduty</li>
+<li><strong>EXPIRATION_TIME</strong> (<em>int</em>) – Alerts will not fire twice within this amount of
 seconds, even if they trigger again.</li>
-<li><strong>SECOND_ORDER_RESOLUTION_HOURS</strong> (<em>int</em>) &#8211; (optional) The number of hours that Mirage
+<li><strong>SECOND_ORDER_RESOLUTION_HOURS</strong> (<em>int</em>) – (optional) The number of hours that Mirage
 should surface the metric timeseries for</li>
 </ul>
 </td>
@@ -1339,7 +1339,7 @@ alerts with.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><strong>PLOT_REDIS_DATA</strong></a> (<em>boolean</em>) &#8211; Plot graph using Redis timeseries data on with
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><strong>PLOT_REDIS_DATA</strong></a> (<em>boolean</em>) – Plot graph using Redis timeseries data on with
 Analyzer alerts.</td>
 </tr>
 </tbody>
@@ -1366,7 +1366,7 @@ visualisation of the 3sigma boundaries is informative.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.NON_DERIVATIVE_MONOTONIC_METRICS" title="settings.NON_DERIVATIVE_MONOTONIC_METRICS"><strong>NON_DERIVATIVE_MONOTONIC_METRICS</strong></a> (<em>list</em>) &#8211; Strictly increasing monotonically metrics
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.NON_DERIVATIVE_MONOTONIC_METRICS" title="settings.NON_DERIVATIVE_MONOTONIC_METRICS"><strong>NON_DERIVATIVE_MONOTONIC_METRICS</strong></a> (<em>list</em>) – Strictly increasing monotonically metrics
 to <strong>not</strong> calculate the derivative values for</td>
 </tr>
 </tbody>
@@ -1388,7 +1388,7 @@ elements.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><strong>SMTP_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your SMTP settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><strong>SMTP_OPTS</strong></a> (<em>dictionary</em>) – Your SMTP settings.</td>
 </tr>
 </tbody>
 </table>
@@ -1408,7 +1408,7 @@ defined.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HIPCHAT_OPTS" title="settings.HIPCHAT_OPTS"><strong>HIPCHAT_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your Hipchat settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HIPCHAT_OPTS" title="settings.HIPCHAT_OPTS"><strong>HIPCHAT_OPTS</strong></a> (<em>dictionary</em>) – Your Hipchat settings.</td>
 </tr>
 </tbody>
 </table>
@@ -1422,7 +1422,7 @@ defined.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><strong>PAGERDUTY_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your SMTP settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><strong>PAGERDUTY_OPTS</strong></a> (<em>dictionary</em>) – Your SMTP settings.</td>
 </tr>
 </tbody>
 </table>
@@ -1436,7 +1436,7 @@ defined.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_OPTS" title="settings.SYSLOG_OPTS"><strong>SYSLOG_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your SMTP settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_OPTS" title="settings.SYSLOG_OPTS"><strong>SYSLOG_OPTS</strong></a> (<em>dictionary</em>) – Your SMTP settings.</td>
 </tr>
 </tbody>
 </table>
@@ -1453,7 +1453,7 @@ every anomaly into the syslog.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WORKER_PROCESSES" title="settings.WORKER_PROCESSES"><strong>WORKER_PROCESSES</strong></a> (<em>int</em>) &#8211; This is the number of worker processes that will consume
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WORKER_PROCESSES" title="settings.WORKER_PROCESSES"><strong>WORKER_PROCESSES</strong></a> (<em>int</em>) – This is the number of worker processes that will consume
 from the Horizon queue.</td>
 </tr>
 </tbody>
@@ -1467,7 +1467,7 @@ from the Horizon queue.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HORIZON_IP" title="settings.HORIZON_IP"><strong>HORIZON_IP</strong></a> (<em>str</em>) &#8211; The IP address for Horizon to bind to.  Defaults to
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HORIZON_IP" title="settings.HORIZON_IP"><strong>HORIZON_IP</strong></a> (<em>str</em>) – The IP address for Horizon to bind to.  Defaults to
 <code class="docutils literal"><span class="pre">gethostname()</span></code></td>
 </tr>
 </tbody>
@@ -1481,8 +1481,8 @@ from the Horizon queue.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PICKLE_PORT" title="settings.PICKLE_PORT"><strong>PICKLE_PORT</strong></a> (<em>str</em>) &#8211; This is the port that listens for Graphite pickles over TCP,
-sent by Graphite&#8217;s carbon-relay agent.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PICKLE_PORT" title="settings.PICKLE_PORT"><strong>PICKLE_PORT</strong></a> (<em>str</em>) – This is the port that listens for Graphite pickles over TCP,
+sent by Graphite’s carbon-relay agent.</td>
 </tr>
 </tbody>
 </table>
@@ -1495,7 +1495,7 @@ sent by Graphite&#8217;s carbon-relay agent.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.UDP_PORT" title="settings.UDP_PORT"><strong>UDP_PORT</strong></a> (<em>str</em>) &#8211; This is the port that listens for Messagepack-encoded UDP packets.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.UDP_PORT" title="settings.UDP_PORT"><strong>UDP_PORT</strong></a> (<em>str</em>) – This is the port that listens for Messagepack-encoded UDP packets.</td>
 </tr>
 </tbody>
 </table>
@@ -1508,7 +1508,7 @@ sent by Graphite&#8217;s carbon-relay agent.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CHUNK_SIZE" title="settings.CHUNK_SIZE"><strong>CHUNK_SIZE</strong></a> (<em>int</em>) &#8211; This is how big a &#8216;chunk&#8217; of metrics will be before they are
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CHUNK_SIZE" title="settings.CHUNK_SIZE"><strong>CHUNK_SIZE</strong></a> (<em>int</em>) – This is how big a ‘chunk’ of metrics will be before they are
 added onto the shared queue for processing into Redis.</td>
 </tr>
 </tbody>
@@ -1526,7 +1526,7 @@ setting this value a bit higher.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_QUEUE_SIZE" title="settings.MAX_QUEUE_SIZE"><strong>MAX_QUEUE_SIZE</strong></a> (<em>int</em>) &#8211; Maximum allowable length of the processing queue</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_QUEUE_SIZE" title="settings.MAX_QUEUE_SIZE"><strong>MAX_QUEUE_SIZE</strong></a> (<em>int</em>) – Maximum allowable length of the processing queue</td>
 </tr>
 </tbody>
 </table>
@@ -1545,7 +1545,7 @@ Try increasing <a class="reference internal" href="#settings.CHUNK_SIZE" title="
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ROOMBA_PROCESSES" title="settings.ROOMBA_PROCESSES"><strong>ROOMBA_PROCESSES</strong></a> (<em>int</em>) &#8211; This is the number of Roomba processes that will be
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ROOMBA_PROCESSES" title="settings.ROOMBA_PROCESSES"><strong>ROOMBA_PROCESSES</strong></a> (<em>int</em>) – This is the number of Roomba processes that will be
 spawned to trim timeseries in order to keep them at
 <a class="reference internal" href="#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>. Keep this number small, as it is not
 important that metrics be exactly <a class="reference internal" href="#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> all the time.</td>
@@ -1561,13 +1561,13 @@ important that metrics be exactly <a class="reference internal" href="#settings.
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ROOMBA_GRACE_TIME" title="settings.ROOMBA_GRACE_TIME"><strong>ROOMBA_GRACE_TIME</strong></a> &#8211; Seconds grace</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ROOMBA_GRACE_TIME" title="settings.ROOMBA_GRACE_TIME"><strong>ROOMBA_GRACE_TIME</strong></a> – Seconds grace</td>
 </tr>
 </tbody>
 </table>
 <p>Normally Roomba will clean up everything that is older than
 <a class="reference internal" href="#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> if you have metrics that are not coming in every
-second, it can happen that you&#8217;ll end up with INCOMPLETE metrics. With this
+second, it can happen that you’ll end up with INCOMPLETE metrics. With this
 setting Roomba will clean up evertyhing that is older than
 <a class="reference internal" href="#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> + <a class="reference internal" href="#settings.ROOMBA_GRACE_TIME" title="settings.ROOMBA_GRACE_TIME"><code class="xref py py-mod docutils literal"><span class="pre">settings.ROOMBA_GRACE_TIME</span></code></a></p>
 </dd></dl>
@@ -1579,7 +1579,7 @@ setting Roomba will clean up evertyhing that is older than
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ROOMBA_TIMEOUT" title="settings.ROOMBA_TIMEOUT"><strong>ROOMBA_TIMEOUT</strong></a> (<em>int</em>) &#8211; Timeout in seconds</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ROOMBA_TIMEOUT" title="settings.ROOMBA_TIMEOUT"><strong>ROOMBA_TIMEOUT</strong></a> (<em>int</em>) – Timeout in seconds</td>
 </tr>
 </tbody>
 </table>
@@ -1598,7 +1598,7 @@ is fine, this ensures that no Roombas hang around longer than expected.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_RESOLUTION" title="settings.MAX_RESOLUTION"><strong>MAX_RESOLUTION</strong></a> (<em>int</em>) &#8211; The Horizon agent will ignore incoming datapoints if their
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_RESOLUTION" title="settings.MAX_RESOLUTION"><strong>MAX_RESOLUTION</strong></a> (<em>int</em>) – The Horizon agent will ignore incoming datapoints if their
 timestamp is older than MAX_RESOLUTION seconds ago.</td>
 </tr>
 </tbody>
@@ -1612,20 +1612,20 @@ timestamp is older than MAX_RESOLUTION seconds ago.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKIP_LIST" title="settings.SKIP_LIST"><strong>SKIP_LIST</strong></a> (<em>list</em>) &#8211; Metrics to skip</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKIP_LIST" title="settings.SKIP_LIST"><strong>SKIP_LIST</strong></a> (<em>list</em>) – Metrics to skip</td>
 </tr>
 </tbody>
 </table>
 <p>These are metrics that, for whatever reason, you do not want to analyze in
 Skyline. The Worker will check to see if each incoming metrics contains
 anything in the skip list. It is generally wise to skip entire namespaces by
-adding a &#8216;.&#8217; at the end of the skipped item - otherwise you might skip things
+adding a ‘.’ at the end of the skipped item - otherwise you might skip things
 you do not intend to.  For example the default
 <code class="docutils literal"><span class="pre">skyline.analyzer.anomaly_breakdown.</span></code> which MUST be skipped to prevent crazy
 feedback.</p>
 <p>These SKIP_LIST are also matched just dotted namespace elements too, if a match
 is not found in the string, then the dotted elements are compared.  For example
-if an item such as &#8216;skyline.analyzer.algorithm_breakdown&#8217; was added it would
+if an item such as ‘skyline.analyzer.algorithm_breakdown’ was added it would
 macth any metric that matched all 3 dotted namespace elements, so it would
 match:</p>
 <p>skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
@@ -1640,7 +1640,7 @@ skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DO_NOT_SKIP_LIST" title="settings.DO_NOT_SKIP_LIST"><strong>DO_NOT_SKIP_LIST</strong></a> (<em>list</em>) &#8211; Metrics to skip</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DO_NOT_SKIP_LIST" title="settings.DO_NOT_SKIP_LIST"><strong>DO_NOT_SKIP_LIST</strong></a> (<em>list</em>) – Metrics to skip</td>
 </tr>
 </tbody>
 </table>
@@ -1656,7 +1656,7 @@ matches in the string or dotted namespace elements.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_ENABLED" title="settings.PANORAMA_ENABLED"><strong>PANORAMA_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enable Panorama</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_ENABLED" title="settings.PANORAMA_ENABLED"><strong>PANORAMA_ENABLED</strong></a> (<em>boolean</em>) – Enable Panorama</td>
 </tr>
 </tbody>
 </table>
@@ -1669,7 +1669,7 @@ matches in the string or dotted namespace elements.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_PROCESSES" title="settings.PANORAMA_PROCESSES"><strong>PANORAMA_PROCESSES</strong></a> &#8211; Number of processes to assign to Panorama, should never
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_PROCESSES" title="settings.PANORAMA_PROCESSES"><strong>PANORAMA_PROCESSES</strong></a> – Number of processes to assign to Panorama, should never
 need more than 1</td>
 </tr>
 </tbody>
@@ -1683,7 +1683,7 @@ need more than 1</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_PANORAMA_DEBUG" title="settings.ENABLE_PANORAMA_DEBUG"><strong>ENABLE_PANORAMA_DEBUG</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - enables additional debug logging
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_PANORAMA_DEBUG" title="settings.ENABLE_PANORAMA_DEBUG"><strong>ENABLE_PANORAMA_DEBUG</strong></a> (<em>boolean</em>) – DEVELOPMENT only - enables additional debug logging
 useful for development only, this should definitely be set to <code class="docutils literal"><span class="pre">False</span></code> on
 production system as LOTS of output</td>
 </tr>
@@ -1698,7 +1698,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DATABASE" title="settings.PANORAMA_DATABASE"><strong>PANORAMA_DATABASE</strong></a> (<em>str</em>) &#8211; The database schema name</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DATABASE" title="settings.PANORAMA_DATABASE"><strong>PANORAMA_DATABASE</strong></a> (<em>str</em>) – The database schema name</td>
 </tr>
 </tbody>
 </table>
@@ -1711,7 +1711,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBHOST" title="settings.PANORAMA_DBHOST"><strong>PANORAMA_DBHOST</strong></a> (<em>str</em>) &#8211; The IP address or FQDN of the database server</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBHOST" title="settings.PANORAMA_DBHOST"><strong>PANORAMA_DBHOST</strong></a> (<em>str</em>) – The IP address or FQDN of the database server</td>
 </tr>
 </tbody>
 </table>
@@ -1724,7 +1724,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBPORT" title="settings.PANORAMA_DBPORT"><strong>PANORAMA_DBPORT</strong></a> (<em>str</em>) &#8211; The port to connet to the database server on</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBPORT" title="settings.PANORAMA_DBPORT"><strong>PANORAMA_DBPORT</strong></a> (<em>str</em>) – The port to connet to the database server on</td>
 </tr>
 </tbody>
 </table>
@@ -1737,7 +1737,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBUSER" title="settings.PANORAMA_DBUSER"><strong>PANORAMA_DBUSER</strong></a> (<em>str</em>) &#8211; The database user</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBUSER" title="settings.PANORAMA_DBUSER"><strong>PANORAMA_DBUSER</strong></a> (<em>str</em>) – The database user</td>
 </tr>
 </tbody>
 </table>
@@ -1750,7 +1750,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><strong>PANORAMA_DBUSERPASS</strong></a> (<em>str</em>) &#8211; The database user password</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><strong>PANORAMA_DBUSERPASS</strong></a> (<em>str</em>) – The database user password</td>
 </tr>
 </tbody>
 </table>
@@ -1763,7 +1763,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.NUMBER_OF_ANOMALIES_TO_STORE_IN_PANORAMA" title="settings.NUMBER_OF_ANOMALIES_TO_STORE_IN_PANORAMA"><strong>NUMBER_OF_ANOMALIES_TO_STORE_IN_PANORAMA</strong></a> (<em>int</em>) &#8211; The number of anomalies to store
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.NUMBER_OF_ANOMALIES_TO_STORE_IN_PANORAMA" title="settings.NUMBER_OF_ANOMALIES_TO_STORE_IN_PANORAMA"><strong>NUMBER_OF_ANOMALIES_TO_STORE_IN_PANORAMA</strong></a> (<em>int</em>) – The number of anomalies to store
 in the Panaroma database, the default is 0 which means UNLIMITED.  This does
 nothing currently.</td>
 </tr>
@@ -1778,7 +1778,7 @@ nothing currently.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><strong>PANORAMA_EXPIRY_TIME</strong></a> (<em>int</em>) &#8211; Panorama will only store one anomaly for a metric every PANORAMA_EXPIRY_TIME seconds.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><strong>PANORAMA_EXPIRY_TIME</strong></a> (<em>int</em>) – Panorama will only store one anomaly for a metric every PANORAMA_EXPIRY_TIME seconds.</td>
 </tr>
 </tbody>
 </table>
@@ -1797,7 +1797,7 @@ often fire as anomalous every minute, until it no longer is.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><strong>PANORAMA_CHECK_MAX_AGE</strong></a> (<em>int</em>) &#8211; Panorama will only process a check file if it is
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><strong>PANORAMA_CHECK_MAX_AGE</strong></a> (<em>int</em>) – Panorama will only process a check file if it is
 not older than PANORAMA_CHECK_MAX_AGE seconds.  If it is set to 0 it does
 all.  This setting just ensures if Panorama stalls for some hours and is
 restarted, the user can choose to discard older checks and miss anomalies
@@ -1816,7 +1816,7 @@ checks.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_DATA_FOLDER" title="settings.MIRAGE_DATA_FOLDER"><strong>MIRAGE_DATA_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Mirage data folder where
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_DATA_FOLDER" title="settings.MIRAGE_DATA_FOLDER"><strong>MIRAGE_DATA_FOLDER</strong></a> (<em>str</em>) – This is the path for the Mirage data folder where
 timeseries data that has been surfaced will be written - absolute path</td>
 </tr>
 </tbody>
@@ -1830,12 +1830,12 @@ timeseries data that has been surfaced will be written - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_ALGORITHMS" title="settings.MIRAGE_ALGORITHMS"><strong>MIRAGE_ALGORITHMS</strong></a> (<em>array</em>) &#8211; These are the algorithms that the Mirage will run.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_ALGORITHMS" title="settings.MIRAGE_ALGORITHMS"><strong>MIRAGE_ALGORITHMS</strong></a> (<em>array</em>) – These are the algorithms that the Mirage will run.</td>
 </tr>
 </tbody>
 </table>
 <p>To add a new algorithm, you must both define the algorithm in
-<code class="docutils literal"><span class="pre">mirage/mirage_algorithms.py</span></code> and add it&#8217;s name here.</p>
+<code class="docutils literal"><span class="pre">mirage/mirage_algorithms.py</span></code> and add it’s name here.</p>
 </dd></dl>
 
 <dl class="data">
@@ -1845,7 +1845,7 @@ timeseries data that has been surfaced will be written - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_STALE_SECONDS" title="settings.MIRAGE_STALE_SECONDS"><strong>MIRAGE_STALE_SECONDS</strong></a> (<em>int</em>) &#8211; The number of seconds after which a check is
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_STALE_SECONDS" title="settings.MIRAGE_STALE_SECONDS"><strong>MIRAGE_STALE_SECONDS</strong></a> (<em>int</em>) – The number of seconds after which a check is
 considered stale and discarded.</td>
 </tr>
 </tbody>
@@ -1859,7 +1859,7 @@ considered stale and discarded.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_CONSENSUS" title="settings.MIRAGE_CONSENSUS"><strong>MIRAGE_CONSENSUS</strong></a> (<em>int</em>) &#8211; This is the number of algorithms that must return <code class="docutils literal"><span class="pre">True</span></code>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_CONSENSUS" title="settings.MIRAGE_CONSENSUS"><strong>MIRAGE_CONSENSUS</strong></a> (<em>int</em>) – This is the number of algorithms that must return <code class="docutils literal"><span class="pre">True</span></code>
 before a metric is classified as anomalous.</td>
 </tr>
 </tbody>
@@ -1873,13 +1873,13 @@ before a metric is classified as anomalous.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_ENABLE_SECOND_ORDER" title="settings.MIRAGE_ENABLE_SECOND_ORDER"><strong>MIRAGE_ENABLE_SECOND_ORDER</strong></a> (<em>boolean</em>) &#8211; This is to enable second order anomalies.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_ENABLE_SECOND_ORDER" title="settings.MIRAGE_ENABLE_SECOND_ORDER"><strong>MIRAGE_ENABLE_SECOND_ORDER</strong></a> (<em>boolean</em>) – This is to enable second order anomalies.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">EXPERIMENTAL - This is an experimental feature, so it&#8217;s turned off
+<p class="last">EXPERIMENTAL - This is an experimental feature, so it’s turned off
 by default.</p>
 </div>
 </dd></dl>
@@ -1891,7 +1891,7 @@ by default.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_ENABLE_ALERTS" title="settings.MIRAGE_ENABLE_ALERTS"><strong>MIRAGE_ENABLE_ALERTS</strong></a> (<em>boolean</em>) &#8211; This enables Mirage alerting.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_ENABLE_ALERTS" title="settings.MIRAGE_ENABLE_ALERTS"><strong>MIRAGE_ENABLE_ALERTS</strong></a> (<em>boolean</em>) – This enables Mirage alerting.</td>
 </tr>
 </tbody>
 </table>
@@ -1904,7 +1904,7 @@ by default.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.NEGATE_ANALYZER_ALERTS" title="settings.NEGATE_ANALYZER_ALERTS"><strong>NEGATE_ANALYZER_ALERTS</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - negates Analyzer alerts</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.NEGATE_ANALYZER_ALERTS" title="settings.NEGATE_ANALYZER_ALERTS"><strong>NEGATE_ANALYZER_ALERTS</strong></a> (<em>boolean</em>) – DEVELOPMENT only - negates Analyzer alerts</td>
 </tr>
 </tbody>
 </table>
@@ -1922,7 +1922,7 @@ testing and comparison of analysis at different time ranges and/or algorithms.</
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_CRUCIBLE_ENABLED" title="settings.MIRAGE_CRUCIBLE_ENABLED"><strong>MIRAGE_CRUCIBLE_ENABLED</strong></a> (<em>boolean</em>) &#8211; This enables Mirage to output to Crucible</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_CRUCIBLE_ENABLED" title="settings.MIRAGE_CRUCIBLE_ENABLED"><strong>MIRAGE_CRUCIBLE_ENABLED</strong></a> (<em>boolean</em>) – This enables Mirage to output to Crucible</td>
 </tr>
 </tbody>
 </table>
@@ -1943,7 +1943,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_PROCESSES" title="settings.BOUNDARY_PROCESSES"><strong>BOUNDARY_PROCESSES</strong></a> (<em>int</em>) &#8211; The number of processes that Boundary should spawn.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_PROCESSES" title="settings.BOUNDARY_PROCESSES"><strong>BOUNDARY_PROCESSES</strong></a> (<em>int</em>) – The number of processes that Boundary should spawn.</td>
 </tr>
 </tbody>
 </table>
@@ -1958,7 +1958,7 @@ than the number of <a class="reference internal" href="#settings.ANALYZER_PROCES
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_OPTIMUM_RUN_DURATION" title="settings.BOUNDARY_OPTIMUM_RUN_DURATION"><strong>BOUNDARY_OPTIMUM_RUN_DURATION</strong></a> &#8211; This is how many seconds it would be optimum
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_OPTIMUM_RUN_DURATION" title="settings.BOUNDARY_OPTIMUM_RUN_DURATION"><strong>BOUNDARY_OPTIMUM_RUN_DURATION</strong></a> – This is how many seconds it would be optimum
 for Boundary to be able to analyze your Boundary defined metrics in.</td>
 </tr>
 </tbody>
@@ -1974,7 +1974,7 @@ and how many metrics you are running through Boundary.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_BOUNDARY_DEBUG" title="settings.ENABLE_BOUNDARY_DEBUG"><strong>ENABLE_BOUNDARY_DEBUG</strong></a> (<em>boolean</em>) &#8211; Enables Boundary debug logging</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_BOUNDARY_DEBUG" title="settings.ENABLE_BOUNDARY_DEBUG"><strong>ENABLE_BOUNDARY_DEBUG</strong></a> (<em>boolean</em>) – Enables Boundary debug logging</td>
 </tr>
 </tbody>
 </table>
@@ -1991,7 +1991,7 @@ definitely be set to <cite>False</cite> on as production system - LOTS of output
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_ALGORITHMS" title="settings.BOUNDARY_ALGORITHMS"><strong>BOUNDARY_ALGORITHMS</strong></a> (<em>array</em>) &#8211; Algorithms that Boundary can run</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_ALGORITHMS" title="settings.BOUNDARY_ALGORITHMS"><strong>BOUNDARY_ALGORITHMS</strong></a> (<em>array</em>) – Algorithms that Boundary can run</td>
 </tr>
 </tbody>
 </table>
@@ -2008,7 +2008,7 @@ must both define the algorithm in boundary_algorithms.py and add its name here.<
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_ENABLE_ALERTS" title="settings.BOUNDARY_ENABLE_ALERTS"><strong>BOUNDARY_ENABLE_ALERTS</strong></a> (<em>boolean</em>) &#8211; Enables Boundary alerting</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_ENABLE_ALERTS" title="settings.BOUNDARY_ENABLE_ALERTS"><strong>BOUNDARY_ENABLE_ALERTS</strong></a> (<em>boolean</em>) – Enables Boundary alerting</td>
 </tr>
 </tbody>
 </table>
@@ -2021,7 +2021,7 @@ must both define the algorithm in boundary_algorithms.py and add its name here.<
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_CRUCIBLE_ENABLED" title="settings.BOUNDARY_CRUCIBLE_ENABLED"><strong>BOUNDARY_CRUCIBLE_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables and disables Boundary pushing data to
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_CRUCIBLE_ENABLED" title="settings.BOUNDARY_CRUCIBLE_ENABLED"><strong>BOUNDARY_CRUCIBLE_ENABLED</strong></a> (<em>boolean</em>) – Enables and disables Boundary pushing data to
 Crucible</td>
 </tr>
 </tbody>
@@ -2043,7 +2043,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><strong>BOUNDARY_METRICS</strong></a> (<em>tuple</em>) &#8211; definitions of metrics for Boundary to analyze</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><strong>BOUNDARY_METRICS</strong></a> (<em>tuple</em>) – definitions of metrics for Boundary to analyze</td>
 </tr>
 </tbody>
 </table>
@@ -2072,25 +2072,25 @@ different ranges to pre-filter some noise.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>metric</strong> (<em>str</em>) &#8211; metric name.</li>
-<li><strong>algorithm</strong> (<em>str</em>) &#8211; algorithm name.</li>
-<li><strong>EXPIRATION_TIME</strong> (<em>int</em>) &#8211; Alerts will not fire twice within this amount of
+<li><strong>metric</strong> (<em>str</em>) – metric name.</li>
+<li><strong>algorithm</strong> (<em>str</em>) – algorithm name.</li>
+<li><strong>EXPIRATION_TIME</strong> (<em>int</em>) – Alerts will not fire twice within this amount of
 seconds, even if they trigger again.</li>
-<li><strong>MIN_AVERAGE</strong> (<em>int</em>) &#8211; the minimum average value to evaluate for
+<li><strong>MIN_AVERAGE</strong> (<em>int</em>) – the minimum average value to evaluate for
 <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.detect_drop_off_cliff" title="boundary.boundary_algorithms.detect_drop_off_cliff"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.detect_drop_off_cliff()</span></code></a>, in the
 <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.less_than" title="boundary.boundary_algorithms.less_than"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.less_than()</span></code></a> and
 <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.greater_than" title="boundary.boundary_algorithms.greater_than"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.greater_than()</span></code></a> algorithm contexts set
 this to 0.</li>
-<li><strong>MIN_AVERAGE_SECONDS</strong> (<em>int</em>) &#8211; the seconds to calculate the minimum average value
+<li><strong>MIN_AVERAGE_SECONDS</strong> (<em>int</em>) – the seconds to calculate the minimum average value
 over in <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.detect_drop_off_cliff" title="boundary.boundary_algorithms.detect_drop_off_cliff"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.detect_drop_off_cliff()</span></code></a>.  So if
 <code class="docutils literal"><span class="pre">MIN_AVERAGE</span></code> set to 100 and <code class="docutils literal"><span class="pre">MIN_AVERAGE_SECONDS</span></code> to 3600 a metric will
 only be analysed if the average value of the metric over 3600 seconds is
 greater than 100.  For the <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.less_than" title="boundary.boundary_algorithms.less_than"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.less_than()</span></code></a>
 and <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.greater_than" title="boundary.boundary_algorithms.greater_than"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.greater_than()</span></code></a> algorithms set this
 to 0.</li>
-<li><strong>TRIGGER_VALUE</strong> (<em>int</em>) &#8211; then less_than or greater_than trigger value set to 0 for
+<li><strong>TRIGGER_VALUE</strong> (<em>int</em>) – then less_than or greater_than trigger value set to 0 for
 <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.detect_drop_off_cliff" title="boundary.boundary_algorithms.detect_drop_off_cliff"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.detect_drop_off_cliff()</span></code></a></li>
-<li><strong>ALERT_THRESHOLD</strong> (<em>int</em>) &#8211; alert after detected x times.  This allows you to set
+<li><strong>ALERT_THRESHOLD</strong> (<em>int</em>) – alert after detected x times.  This allows you to set
 how many times a timeseries has to be detected by the algorithm as anomalous
 before alerting on it.  The nature of distributed metric collection, storage
 and analysis can have a lag every now and then due to latency, I/O pause,
@@ -2099,7 +2099,7 @@ setting should be 1, maybe 2 maximum to ensure that signals are not being
 surpressed.  Try 1 if you are getting the occassional false positive, try 2.
 Note - Any <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.greater_than" title="boundary.boundary_algorithms.greater_than"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.greater_than()</span></code></a> metrics should have
 this as 1.</li>
-<li><strong>ALERT_VIAS</strong> (<em>str</em>) &#8211; pipe separated alerters to send to.</li>
+<li><strong>ALERT_VIAS</strong> (<em>str</em>) – pipe separated alerters to send to.</li>
 </ul>
 </td>
 </tr>
@@ -2131,7 +2131,7 @@ and pagerduty added.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_AUTOAGGRERATION" title="settings.BOUNDARY_AUTOAGGRERATION"><strong>BOUNDARY_AUTOAGGRERATION</strong></a> (<em>boolean</em>) &#8211; Enables autoaggregate a timeseries</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_AUTOAGGRERATION" title="settings.BOUNDARY_AUTOAGGRERATION"><strong>BOUNDARY_AUTOAGGRERATION</strong></a> (<em>boolean</em>) – Enables autoaggregate a timeseries</td>
 </tr>
 </tbody>
 </table>
@@ -2147,7 +2147,7 @@ minute then autoaggregate can be used to aggregate the required sample.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_AUTOAGGRERATION_METRICS" title="settings.BOUNDARY_AUTOAGGRERATION_METRICS"><strong>BOUNDARY_AUTOAGGRERATION_METRICS</strong></a> (<em>tuples</em>) &#8211; The namespaces to autoaggregate</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_AUTOAGGRERATION_METRICS" title="settings.BOUNDARY_AUTOAGGRERATION_METRICS"><strong>BOUNDARY_AUTOAGGRERATION_METRICS</strong></a> (<em>tuples</em>) – The namespaces to autoaggregate</td>
 </tr>
 </tbody>
 </table>
@@ -2167,8 +2167,8 @@ minute then autoaggregate can be used to aggregate the required sample.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>metric</strong> (<em>str</em>) &#8211; metric name.</li>
-<li><strong>AGGREGATION_VALUE</strong> (<em>int</em>) &#8211; alerter name.</li>
+<li><strong>metric</strong> (<em>str</em>) – metric name.</li>
+<li><strong>AGGREGATION_VALUE</strong> (<em>int</em>) – alerter name.</li>
 </ul>
 </td>
 </tr>
@@ -2186,7 +2186,7 @@ the <code class="docutils literal"><span class="pre">AGGREGATION_VALUE</span></c
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_ALERTER_OPTS" title="settings.BOUNDARY_ALERTER_OPTS"><strong>BOUNDARY_ALERTER_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your Boundary alerter settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_ALERTER_OPTS" title="settings.BOUNDARY_ALERTER_OPTS"><strong>BOUNDARY_ALERTER_OPTS</strong></a> (<em>dictionary</em>) – Your Boundary alerter settings.</td>
 </tr>
 </tbody>
 </table>
@@ -2209,7 +2209,7 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_SMTP_OPTS" title="settings.BOUNDARY_SMTP_OPTS"><strong>BOUNDARY_SMTP_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your SMTP settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_SMTP_OPTS" title="settings.BOUNDARY_SMTP_OPTS"><strong>BOUNDARY_SMTP_OPTS</strong></a> (<em>dictionary</em>) – Your SMTP settings.</td>
 </tr>
 </tbody>
 </table>
@@ -2222,7 +2222,7 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_HIPCHAT_OPTS" title="settings.BOUNDARY_HIPCHAT_OPTS"><strong>BOUNDARY_HIPCHAT_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your Hipchat settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_HIPCHAT_OPTS" title="settings.BOUNDARY_HIPCHAT_OPTS"><strong>BOUNDARY_HIPCHAT_OPTS</strong></a> (<em>dictionary</em>) – Your Hipchat settings.</td>
 </tr>
 </tbody>
 </table>
@@ -2236,7 +2236,7 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_PAGERDUTY_OPTS" title="settings.BOUNDARY_PAGERDUTY_OPTS"><strong>BOUNDARY_PAGERDUTY_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your SMTP settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_PAGERDUTY_OPTS" title="settings.BOUNDARY_PAGERDUTY_OPTS"><strong>BOUNDARY_PAGERDUTY_OPTS</strong></a> (<em>dictionary</em>) – Your SMTP settings.</td>
 </tr>
 </tbody>
 </table>
@@ -2250,7 +2250,7 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_CRUCIBLE" title="settings.ENABLE_CRUCIBLE"><strong>ENABLE_CRUCIBLE</strong></a> (<em>boolean</em>) &#8211; Enable Crucible.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_CRUCIBLE" title="settings.ENABLE_CRUCIBLE"><strong>ENABLE_CRUCIBLE</strong></a> (<em>boolean</em>) – Enable Crucible.</td>
 </tr>
 </tbody>
 </table>
@@ -2263,7 +2263,7 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_PROCESSES" title="settings.CRUCIBLE_PROCESSES"><strong>CRUCIBLE_PROCESSES</strong></a> (<em>int</em>) &#8211; The number of processes that Crucible should spawn.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_PROCESSES" title="settings.CRUCIBLE_PROCESSES"><strong>CRUCIBLE_PROCESSES</strong></a> (<em>int</em>) – The number of processes that Crucible should spawn.</td>
 </tr>
 </tbody>
 </table>
@@ -2276,7 +2276,7 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_TESTS_TIMEOUT" title="settings.CRUCIBLE_TESTS_TIMEOUT"><strong>CRUCIBLE_TESTS_TIMEOUT</strong></a> (<em>int</em>) &#8211; # This is the number of seconds that Crucible tests
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_TESTS_TIMEOUT" title="settings.CRUCIBLE_TESTS_TIMEOUT"><strong>CRUCIBLE_TESTS_TIMEOUT</strong></a> (<em>int</em>) – # This is the number of seconds that Crucible tests
 can take. 60 is a reasonable default for a run with a
 <a class="reference internal" href="#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> of 86400</td>
 </tr>
@@ -2291,7 +2291,7 @@ can take. 60 is a reasonable default for a run with a
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_CRUCIBLE_DEBUG" title="settings.ENABLE_CRUCIBLE_DEBUG"><strong>ENABLE_CRUCIBLE_DEBUG</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - enables additional debug logging
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_CRUCIBLE_DEBUG" title="settings.ENABLE_CRUCIBLE_DEBUG"><strong>ENABLE_CRUCIBLE_DEBUG</strong></a> (<em>boolean</em>) – DEVELOPMENT only - enables additional debug logging
 useful for development only, this should definitely be set to <code class="docutils literal"><span class="pre">False</span></code> on
 production system as LOTS of output</td>
 </tr>
@@ -2306,7 +2306,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="settings.CRUCIBLE_DATA_FOLDER"><strong>CRUCIBLE_DATA_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Crucible data folder where
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="settings.CRUCIBLE_DATA_FOLDER"><strong>CRUCIBLE_DATA_FOLDER</strong></a> (<em>str</em>) – This is the path for the Crucible data folder where
 anomaly data for timeseries will be stored - absolute path</td>
 </tr>
 </tbody>
@@ -2320,7 +2320,7 @@ anomaly data for timeseries will be stored - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_SERVER" title="settings.WEBAPP_SERVER"><strong>WEBAPP_SERVER</strong></a> (<em>str</em>) &#8211; Run the Webapp via gunicorn (recommended) or the Flask
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_SERVER" title="settings.WEBAPP_SERVER"><strong>WEBAPP_SERVER</strong></a> (<em>str</em>) – Run the Webapp via gunicorn (recommended) or the Flask
 development server, set this to either <code class="docutils literal"><span class="pre">'gunicorn'</span></code> or <code class="docutils literal"><span class="pre">'flask'</span></code></td>
 </tr>
 </tbody>
@@ -2334,7 +2334,7 @@ development server, set this to either <code class="docutils literal"><span clas
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><strong>WEBAPP_IP</strong></a> (<em>str</em>) &#8211; The IP address for the Webapp to bind to</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><strong>WEBAPP_IP</strong></a> (<em>str</em>) – The IP address for the Webapp to bind to</td>
 </tr>
 </tbody>
 </table>
@@ -2347,7 +2347,7 @@ development server, set this to either <code class="docutils literal"><span clas
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><strong>WEBAPP_PORT</strong></a> (<em>int</em>) &#8211; The port for the Webapp to listen on</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><strong>WEBAPP_PORT</strong></a> (<em>int</em>) – The port for the Webapp to listen on</td>
 </tr>
 </tbody>
 </table>
@@ -2360,7 +2360,7 @@ development server, set this to either <code class="docutils literal"><span clas
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_AUTH_ENABLED" title="settings.WEBAPP_AUTH_ENABLED"><strong>WEBAPP_AUTH_ENABLED</strong></a> (<em>boolean</em>) &#8211; To enable pseudo basic HTTP auth</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_AUTH_ENABLED" title="settings.WEBAPP_AUTH_ENABLED"><strong>WEBAPP_AUTH_ENABLED</strong></a> (<em>boolean</em>) – To enable pseudo basic HTTP auth</td>
 </tr>
 </tbody>
 </table>
@@ -2373,7 +2373,7 @@ development server, set this to either <code class="docutils literal"><span clas
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><strong>WEBAPP_AUTH_USER</strong></a> (<em>str</em>) &#8211; The username for pseudo basic HTTP auth</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><strong>WEBAPP_AUTH_USER</strong></a> (<em>str</em>) – The username for pseudo basic HTTP auth</td>
 </tr>
 </tbody>
 </table>
@@ -2386,7 +2386,7 @@ development server, set this to either <code class="docutils literal"><span clas
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><strong>WEBAPP_AUTH_USER_PASSWORD</strong></a> (<em>str</em>) &#8211; The user password for pseudo basic HTTP auth</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><strong>WEBAPP_AUTH_USER_PASSWORD</strong></a> (<em>str</em>) – The user password for pseudo basic HTTP auth</td>
 </tr>
 </tbody>
 </table>
@@ -2399,7 +2399,7 @@ development server, set this to either <code class="docutils literal"><span clas
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_IP_RESTRICTED" title="settings.WEBAPP_IP_RESTRICTED"><strong>WEBAPP_IP_RESTRICTED</strong></a> (<em>boolean</em>) &#8211; To enable restricted access from IP address declared
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_IP_RESTRICTED" title="settings.WEBAPP_IP_RESTRICTED"><strong>WEBAPP_IP_RESTRICTED</strong></a> (<em>boolean</em>) – To enable restricted access from IP address declared
 in <a class="reference internal" href="#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a></td>
 </tr>
 </tbody>
@@ -2413,7 +2413,7 @@ in <a class="reference internal" href="#settings.WEBAPP_ALLOWED_IPS" title="sett
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><strong>WEBAPP_ALLOWED_IPS</strong></a> (<em>array</em>) &#8211; The allowed IP addresses</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><strong>WEBAPP_ALLOWED_IPS</strong></a> (<em>array</em>) – The allowed IP addresses</td>
 </tr>
 </tbody>
 </table>
@@ -2426,8 +2426,8 @@ in <a class="reference internal" href="#settings.WEBAPP_ALLOWED_IPS" title="sett
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><strong>WEBAPP_USER_TIMEZONE</strong></a> (<em>boolean</em>) &#8211; This determines the user&#8217;s timezone and
-renders graphs with the user&#8217;s date values.  If this is set to <code class="docutils literal"><span class="pre">False</span></code> the
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><strong>WEBAPP_USER_TIMEZONE</strong></a> (<em>boolean</em>) – This determines the user’s timezone and
+renders graphs with the user’s date values.  If this is set to <code class="docutils literal"><span class="pre">False</span></code> the
 timezone in <a class="reference internal" href="#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_FIXED_TIMEZONE</span></code></a> is used.</td>
 </tr>
 </tbody>
@@ -2441,7 +2441,7 @@ timezone in <a class="reference internal" href="#settings.WEBAPP_FIXED_TIMEZONE"
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><strong>WEBAPP_FIXED_TIMEZONE</strong></a> (<em>str</em>) &#8211; You can specific a timezone you want the client
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><strong>WEBAPP_FIXED_TIMEZONE</strong></a> (<em>str</em>) – You can specific a timezone you want the client
 browser to render graph date and times in.  This setting is only used if the
 <a class="reference internal" href="#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_USER_TIMEZONE</span></code></a> is set to <code class="docutils literal"><span class="pre">False</span></code>.
 This must be a valid momentjs timezone name, see:
@@ -2453,7 +2453,7 @@ This must be a valid momentjs timezone name, see:
 <p class="first admonition-title">Note</p>
 <p class="last">Timezones, UTC and javascript Date
 You only need to use the first element of the momentjs timezone string, some
-examples, &#8216;Europe/London&#8217;, &#8216;Etc/UTC&#8217;, &#8216;America/Los_Angeles&#8217;.
+examples, ‘Europe/London’, ‘Etc/UTC’, ‘America/Los_Angeles’.
 Because the Webapp is graphing using data UTC timestamps, you may may want
 to display the graphs to users with a fixed timezone and not use the browser
 timezone so that the Webapp graphs are the same in any location.</p>
@@ -2467,7 +2467,7 @@ timezone so that the Webapp graphs are the same in any location.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_JAVASCRIPT_DEBUG" title="settings.WEBAPP_JAVASCRIPT_DEBUG"><strong>WEBAPP_JAVASCRIPT_DEBUG</strong></a> (<em>boolean</em>) &#8211; Enables some javascript console.log when enabled.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_JAVASCRIPT_DEBUG" title="settings.WEBAPP_JAVASCRIPT_DEBUG"><strong>WEBAPP_JAVASCRIPT_DEBUG</strong></a> (<em>boolean</em>) – Enables some javascript console.log when enabled.</td>
 </tr>
 </tbody>
 </table>
@@ -2480,7 +2480,7 @@ timezone so that the Webapp graphs are the same in any location.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_WEBAPP_DEBUG" title="settings.ENABLE_WEBAPP_DEBUG"><strong>ENABLE_WEBAPP_DEBUG</strong></a> (<em>boolean</em>) &#8211; Enables some app specific debugging to log.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_WEBAPP_DEBUG" title="settings.ENABLE_WEBAPP_DEBUG"><strong>ENABLE_WEBAPP_DEBUG</strong></a> (<em>boolean</em>) – Enables some app specific debugging to log.</td>
 </tr>
 </tbody>
 </table>
@@ -2493,7 +2493,7 @@ timezone so that the Webapp graphs are the same in any location.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><strong>IONOSPHERE_CHECK_PATH</strong></a> (<em>str</em>) &#8211; This is the location the Skyline apps will write the
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><strong>IONOSPHERE_CHECK_PATH</strong></a> (<em>str</em>) – This is the location the Skyline apps will write the
 anomalies to for Ionosphere to check to a file on disk - absolute path</td>
 </tr>
 </tbody>
@@ -2507,7 +2507,7 @@ anomalies to for Ionosphere to check to a file on disk - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ENABLED" title="settings.IONOSPHERE_ENABLED"><strong>IONOSPHERE_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enable Ionosphere</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ENABLED" title="settings.IONOSPHERE_ENABLED"><strong>IONOSPHERE_ENABLED</strong></a> (<em>boolean</em>) – Enable Ionosphere</td>
 </tr>
 </tbody>
 </table>
@@ -2520,7 +2520,7 @@ anomalies to for Ionosphere to check to a file on disk - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROCESSES" title="settings.IONOSPHERE_PROCESSES"><strong>IONOSPHERE_PROCESSES</strong></a> &#8211; Number of processes to assign to Panorama, should never
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROCESSES" title="settings.IONOSPHERE_PROCESSES"><strong>IONOSPHERE_PROCESSES</strong></a> – Number of processes to assign to Panorama, should never
 need more than 1</td>
 </tr>
 </tbody>
@@ -2534,7 +2534,7 @@ need more than 1</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="settings.ENABLE_IONOSPHERE_DEBUG"><strong>ENABLE_IONOSPHERE_DEBUG</strong></a> (<em>boolean</em>) &#8211; DEVELOPMENT only - enables additional debug logging
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ENABLE_IONOSPHERE_DEBUG" title="settings.ENABLE_IONOSPHERE_DEBUG"><strong>ENABLE_IONOSPHERE_DEBUG</strong></a> (<em>boolean</em>) – DEVELOPMENT only - enables additional debug logging
 useful for development only, this should definitely be set to <code class="docutils literal"><span class="pre">False</span></code> on
 production system as LOTS of output</td>
 </tr>
@@ -2549,7 +2549,7 @@ production system as LOTS of output</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_DATA_FOLDER" title="settings.IONOSPHERE_DATA_FOLDER"><strong>IONOSPHERE_DATA_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Ionosphere data folder
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_DATA_FOLDER" title="settings.IONOSPHERE_DATA_FOLDER"><strong>IONOSPHERE_DATA_FOLDER</strong></a> (<em>str</em>) – This is the path for the Ionosphere data folder
 where anomaly data for timeseries will be stored - absolute path</td>
 </tr>
 </tbody>
@@ -2563,7 +2563,7 @@ where anomaly data for timeseries will be stored - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROFILES_FOLDER" title="settings.IONOSPHERE_PROFILES_FOLDER"><strong>IONOSPHERE_PROFILES_FOLDER</strong></a> &#8211; This is the path for the Ionosphere data folder
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROFILES_FOLDER" title="settings.IONOSPHERE_PROFILES_FOLDER"><strong>IONOSPHERE_PROFILES_FOLDER</strong></a> – This is the path for the Ionosphere data folder
 where anomaly data for timeseries will be stored - absolute path</td>
 </tr>
 </tbody>
@@ -2577,7 +2577,7 @@ where anomaly data for timeseries will be stored - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_FOLDER" title="settings.IONOSPHERE_LEARN_FOLDER"><strong>IONOSPHERE_LEARN_FOLDER</strong></a> (<em>str</em>) &#8211; This is the path for the Ionosphere learning data
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_FOLDER" title="settings.IONOSPHERE_LEARN_FOLDER"><strong>IONOSPHERE_LEARN_FOLDER</strong></a> (<em>str</em>) – This is the path for the Ionosphere learning data
 folder where learning data for timeseries will be processed - absolute path</td>
 </tr>
 </tbody>
@@ -2591,7 +2591,7 @@ folder where learning data for timeseries will be processed - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="settings.IONOSPHERE_CHECK_MAX_AGE"><strong>IONOSPHERE_CHECK_MAX_AGE</strong></a> (<em>int</em>) &#8211; Ionosphere will only process a check file if it is
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_CHECK_MAX_AGE" title="settings.IONOSPHERE_CHECK_MAX_AGE"><strong>IONOSPHERE_CHECK_MAX_AGE</strong></a> (<em>int</em>) – Ionosphere will only process a check file if it is
 not older than IONOSPHERE_CHECK_MAX_AGE seconds.  If it is set to 0 it does
 all.  This setting just ensures if Ionosphere stalls for some hours and is
 restarted, the user can choose to discard older checks and miss anomalies
@@ -2608,7 +2608,7 @@ being recorded if they so choose to, to prevent Ionosphere stampeding.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><strong>IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</strong></a> (<em>int</em>) &#8211; Ionosphere will keep timeseries
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><strong>IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</strong></a> (<em>int</em>) – Ionosphere will keep timeseries
 data files for this long, for the operator to review.</td>
 </tr>
 </tbody>
@@ -2622,7 +2622,7 @@ data files for this long, for the operator to review.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_URL" title="settings.SKYLINE_URL"><strong>SKYLINE_URL</strong></a> (<em>str</em>) &#8211; The http or https URL (and port if required) to access your
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_URL" title="settings.SKYLINE_URL"><strong>SKYLINE_URL</strong></a> (<em>str</em>) – The http or https URL (and port if required) to access your
 Skyline on (no trailing slash).</td>
 </tr>
 </tbody>
@@ -2636,7 +2636,7 @@ Skyline on (no trailing slash).</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SERVER_PYTZ_TIMEZONE" title="settings.SERVER_PYTZ_TIMEZONE"><strong>SERVER_PYTZ_TIMEZONE</strong></a> (<em>str</em>) &#8211; You must specify a pytz timezone you want Ionosphere
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SERVER_PYTZ_TIMEZONE" title="settings.SERVER_PYTZ_TIMEZONE"><strong>SERVER_PYTZ_TIMEZONE</strong></a> (<em>str</em>) – You must specify a pytz timezone you want Ionosphere
 to use for the creation of features profiles and converting datetimes to
 UTC.  This must be a valid pytz timezone name, see:
 <a class="reference external" href="https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst">https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst</a>
@@ -2653,7 +2653,7 @@ UTC.  This must be a valid pytz timezone name, see:
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><strong>IONOSPHERE_FEATURES_PERCENT_SIMILAR</strong></a> (<em>float</em>) &#8211; The percentage difference between a
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><strong>IONOSPHERE_FEATURES_PERCENT_SIMILAR</strong></a> (<em>float</em>) – The percentage difference between a
 features profile sum and a calculated profile sum to result in a match.</td>
 </tr>
 </tbody>
@@ -2667,7 +2667,7 @@ features profile sum and a calculated profile sum to result in a match.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN" title="settings.IONOSPHERE_LEARN"><strong>IONOSPHERE_LEARN</strong></a> (<em>boolean</em>) &#8211; Whether Ionosphere is set to learn</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN" title="settings.IONOSPHERE_LEARN"><strong>IONOSPHERE_LEARN</strong></a> (<em>boolean</em>) – Whether Ionosphere is set to learn</td>
 </tr>
 </tbody>
 </table>
@@ -2704,7 +2704,7 @@ source of truth.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS"><strong>IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</strong></a> (<em>int</em>) &#8211; The maximum number of generations
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS"><strong>IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</strong></a> (<em>int</em>) – The maximum number of generations
 that Ionosphere can automatically learn up to from the original human created
 features profile within the IONOSPHERE_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN
 Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
@@ -2721,7 +2721,7 @@ and via webapp UI to update DB</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><strong>IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</strong></a> (<em>float</em>) &#8211; The maximum percent
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><strong>IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</strong></a> (<em>float</em>) – The maximum percent
 that an automatically generated features profile can be from the original
 human created features profile, any automatically generated features profile
 with the a greater percent difference above this value when summed common
@@ -2748,7 +2748,7 @@ to really disable learning, also set all max_generations settings to 1.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS" title="settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS"><strong>IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</strong></a> (<em>int</em>) &#8211; The default full duration in
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS" title="settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS"><strong>IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</strong></a> (<em>int</em>) – The default full duration in
 in days at which Ionosphere should learn, the default is 30 days.
 Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
 </tr>
@@ -2763,7 +2763,7 @@ Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</strong> &#8211; The number of seconds that
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</strong> – The number of seconds that
 Ionosphere should wait before surfacing the metric timeseries for to learn
 from.  What Graphite aggregration do you want the retention at before
 querying it to learn from?
@@ -2780,13 +2780,13 @@ Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG" title="settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG"><strong>IONOSPHERE_LEARN_NAMESPACE_CONFIG</strong></a> &#8211; Configures specific namespaces at
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG" title="settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG"><strong>IONOSPHERE_LEARN_NAMESPACE_CONFIG</strong></a> – Configures specific namespaces at
 specific learning full duration in days.
 Overrides settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS,
 settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS,
 settings.IONOSPHERE_MAX_GENERATIONS and settings.IONOSPHERE_MAX_PERCENT_DIFF_FROM_ORIGIN
 per defined namespace, first matched, used.  Order highest to lowest
-namespace resoultion. Like settings.ALERTS, you know how this works now...</td>
+namespace resoultion. Like settings.ALERTS, you know how this works now…</td>
 </tr>
 </tbody>
 </table>
@@ -2823,20 +2823,20 @@ to 0</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>metric_namespace</strong> (<em>str</em>) &#8211; metric_namespace pattern</li>
-<li><strong>LEARN_FULL_DURATION_DAYS</strong> (<em>int</em>) &#8211; The number of days that Ionosphere should
+<li><strong>metric_namespace</strong> (<em>str</em>) – metric_namespace pattern</li>
+<li><strong>LEARN_FULL_DURATION_DAYS</strong> (<em>int</em>) – The number of days that Ionosphere should
 should surface the metric timeseries for</li>
-<li><strong>LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</strong> (<em>int</em>) &#8211; The number of seconds that
+<li><strong>LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</strong> (<em>int</em>) – The number of seconds that
 Ionosphere should wait before surfacing the metric timeseries for to learn
 from.  What Graphite aggregration do you want the retention at before
 querying it to learn from?  REQUIRED, NOT optional, we could use the
 settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS but
 that be some more conditionals, that we do not need, be precise, by now if
 you are training Skyline well you will understand, be precise helps :)</li>
-<li><strong>MAX_GENERATIONS</strong> (<em>int</em>) &#8211; The maximum number of generations that Ionosphere can
+<li><strong>MAX_GENERATIONS</strong> (<em>int</em>) – The maximum number of generations that Ionosphere can
 automatically learn up to from the original human created features profile
 on this metric namespace.</li>
-<li><strong>MAX_PERCENT_DIFF_FROM_ORIGIN</strong> &#8211; The maximum percent that an automatically
+<li><strong>MAX_PERCENT_DIFF_FROM_ORIGIN</strong> – The maximum percent that an automatically
 generated features profile can be from the original human created features
 profile for a metric in the namespace.</li>
 </ul>
@@ -2853,7 +2853,7 @@ profile for a metric in the namespace.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_AUTOBUILD" title="settings.IONOSPHERE_AUTOBUILD"><strong>IONOSPHERE_AUTOBUILD</strong></a> (<em>boolean</em>) &#8211; Make best effort attempt to auto provision any
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_AUTOBUILD" title="settings.IONOSPHERE_AUTOBUILD"><strong>IONOSPHERE_AUTOBUILD</strong></a> (<em>boolean</em>) – Make best effort attempt to auto provision any
 features_profiles directory and resources that have been deleted or are
 missing.</td>
 </tr>
@@ -2886,7 +2886,7 @@ profile page data on-demand.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MEMCACHE_ENABLED" title="settings.MEMCACHE_ENABLED"><strong>MEMCACHE_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the use of memcache in Ionosphere to optimise
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MEMCACHE_ENABLED" title="settings.MEMCACHE_ENABLED"><strong>MEMCACHE_ENABLED</strong></a> (<em>boolean</em>) – Enables the use of memcache in Ionosphere to optimise
 DB usage</td>
 </tr>
 </tbody>
@@ -2900,7 +2900,7 @@ DB usage</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>MEMCACHE_SERVER_IP</strong> (<em>str</em>) &#8211; The IP address of the memcached server</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>MEMCACHE_SERVER_IP</strong> (<em>str</em>) – The IP address of the memcached server</td>
 </tr>
 </tbody>
 </table>
@@ -2913,7 +2913,7 @@ DB usage</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>MEMCACHE_SERVER_PORT</strong> &#8211; The port of the memcached server</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>MEMCACHE_SERVER_PORT</strong> – The port of the memcached server</td>
 </tr>
 </tbody>
 </table>
@@ -2934,9 +2934,9 @@ host is defined.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>metric</strong> (<em>str</em>) &#8211; the metric namespace</li>
-<li><strong>value</strong> (<em>str</em>) &#8211; the metric value (as a str not an int)</li>
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the skyline app using this function</li>
+<li><strong>metric</strong> (<em>str</em>) – the metric namespace</li>
+<li><strong>value</strong> (<em>str</em>) – the metric value (as a str not an int)</li>
 </ul>
 </td>
 </tr>
@@ -2958,7 +2958,7 @@ host is defined.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) &#8211; directory path to create</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) – directory path to create</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">returns True</td>
 </tr>
@@ -2975,8 +2975,8 @@ host is defined.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</li>
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the skyline app using this function</li>
+<li><strong>metric_vars_file</strong> (<em>str</em>) – the path and filename to the metric variables files</li>
 </ul>
 </td>
 </tr>
@@ -2999,10 +2999,10 @@ host is defined.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>file</strong> (<em>str</em>) &#8211; the path and filename to write the data into</li>
-<li><strong>mode</strong> (<em>str</em>) &#8211; <code class="docutils literal"><span class="pre">w</span></code> to overwrite, <code class="docutils literal"><span class="pre">a</span></code> to append</li>
-<li><strong>data</strong> (<em>str</em>) &#8211; the data to write to the file</li>
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the skyline app using this function</li>
+<li><strong>file</strong> (<em>str</em>) – the path and filename to write the data into</li>
+<li><strong>mode</strong> (<em>str</em>) – <code class="docutils literal"><span class="pre">w</span></code> to overwrite, <code class="docutils literal"><span class="pre">a</span></code> to append</li>
+<li><strong>data</strong> (<em>str</em>) – the data to write to the file</li>
 </ul>
 </td>
 </tr>
@@ -3025,9 +3025,9 @@ host is defined.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>failed_check_dir</strong> (<em>str</em>) &#8211; the directory where failed checks are moved to</li>
-<li><strong>check_file_to_fail</strong> (<em>str</em>) &#8211; failed check file to move</li>
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the skyline app using this function</li>
+<li><strong>failed_check_dir</strong> (<em>str</em>) – the directory where failed checks are moved to</li>
+<li><strong>check_file_to_fail</strong> (<em>str</em>) – failed check file to move</li>
 </ul>
 </td>
 </tr>
@@ -3056,9 +3056,9 @@ EXPIRATION_TIME as alerts.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>metric</strong> (<em>str</em>) &#8211; metric name</li>
-<li><strong>added_by</strong> (<em>str</em>) &#8211; which app requested the alert_expiry_check</li>
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the skyline app using this function</li>
+<li><strong>metric</strong> (<em>str</em>) – metric name</li>
+<li><strong>added_by</strong> (<em>str</em>) – which app requested the alert_expiry_check</li>
 </ul>
 </td>
 </tr>
@@ -3085,12 +3085,12 @@ EXPIRATION_TIME as alerts.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>metric</strong> (<em>str</em>) &#8211; metric name</li>
-<li><strong>from_timestamp</strong> (<em>str</em>) &#8211; unix timestamp</li>
-<li><strong>until_timestamp</strong> (<em>str</em>) &#8211; unix timestamp</li>
-<li><strong>data_type</strong> (<em>str</em>) &#8211; image or json</li>
-<li><strong>output_object</strong> (<em>str</em>) &#8211; object or path and filename to save data as, if set to
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the skyline app using this function</li>
+<li><strong>metric</strong> (<em>str</em>) – metric name</li>
+<li><strong>from_timestamp</strong> (<em>str</em>) – unix timestamp</li>
+<li><strong>until_timestamp</strong> (<em>str</em>) – unix timestamp</li>
+<li><strong>data_type</strong> (<em>str</em>) – image or json</li>
+<li><strong>output_object</strong> (<em>str</em>) – object or path and filename to save data as, if set to
 object, the object is returned</li>
 </ul>
 </td>
@@ -3122,7 +3122,7 @@ check files, etc</p>
 <dt id="skyline_functions.RepresentsInt">
 <code class="descname">RepresentsInt</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#RepresentsInt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.RepresentsInt" title="Permalink to this definition">¶</a></dt>
 <dd><p>As per <a class="reference external" href="http://stackoverflow.com/a/1267145">http://stackoverflow.com/a/1267145</a> and &#64;Aivar I must agree with
-&#64;Triptycha &gt; &#8220;This 5 line function is not a complex mechanism.&#8221;</p>
+&#64;Triptycha &gt; “This 5 line function is not a complex mechanism.”</p>
 </dd></dl>
 
 <dl class="function">
@@ -3134,8 +3134,8 @@ check files, etc</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> &#8211; the Skyline app that is calling the function</li>
-<li><strong>select</strong> (<em>str</em>) &#8211; the select string</li>
+<li><strong>current_skyline_app</strong> – the Skyline app that is calling the function</li>
+<li><strong>select</strong> (<em>str</em>) – the select string</li>
 </ul>
 </td>
 </tr>
@@ -3167,10 +3167,10 @@ check files, etc</p>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -3231,9 +3231,9 @@ dotted elements within the metric namespace used in Horizon/worker</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>dest_dir</strong> (<em>str</em>) &#8211; the directory the file is to be moved to</li>
-<li><strong>file_to_move</strong> (<em>str</em>) &#8211; path and filename of the file to move</li>
+<li><strong>current_skyline_app</strong> (<em>str</em>) – the skyline app using this function</li>
+<li><strong>dest_dir</strong> (<em>str</em>) – the directory the file is to be moved to</li>
+<li><strong>file_to_move</strong> (<em>str</em>) – path and filename of the file to move</li>
 </ul>
 </td>
 </tr>
@@ -3261,7 +3261,7 @@ dotted elements within the metric namespace used in Horizon/worker</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_VERSION" title="tsfresh_feature_names.TSFRESH_VERSION"><strong>TSFRESH_VERSION</strong></a> (<em>str</em>) &#8211; The version of tsfresh installed by pip, this is important
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_VERSION" title="tsfresh_feature_names.TSFRESH_VERSION"><strong>TSFRESH_VERSION</strong></a> (<em>str</em>) – The version of tsfresh installed by pip, this is important
 in terms of feature extraction baselines</td>
 </tr>
 </tbody>
@@ -3275,7 +3275,7 @@ in terms of feature extraction baselines</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_BASELINE_VERSION" title="tsfresh_feature_names.TSFRESH_BASELINE_VERSION"><strong>TSFRESH_BASELINE_VERSION</strong></a> (<em>str</em>) &#8211; The version of tsfresh that was used to generate
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_BASELINE_VERSION" title="tsfresh_feature_names.TSFRESH_BASELINE_VERSION"><strong>TSFRESH_BASELINE_VERSION</strong></a> (<em>str</em>) – The version of tsfresh that was used to generate
 feature extraction baselines on.</td>
 </tr>
 </tbody>
@@ -3289,7 +3289,7 @@ feature extraction baselines on.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_FEATURES" title="tsfresh_feature_names.TSFRESH_FEATURES"><strong>TSFRESH_FEATURES</strong></a> (<em>array</em>) &#8211; This array defines the Skyline id for each known tsfresh
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#tsfresh_feature_names.TSFRESH_FEATURES" title="tsfresh_feature_names.TSFRESH_FEATURES"><strong>TSFRESH_FEATURES</strong></a> (<em>array</em>) – This array defines the Skyline id for each known tsfresh
 feature.</td>
 </tr>
 </tbody>
@@ -3322,7 +3322,7 @@ settings.py are valid</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>current_skyline_app</strong> &#8211; the skyline app using this function</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>current_skyline_app</strong> – the skyline app using this function</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">True</span></code> or <code class="docutils literal"><span class="pre">False</span></code></td>
 </tr>
@@ -3333,9 +3333,9 @@ settings.py are valid</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-skyline"></span><p>Used by autodoc_mock_imports.</p>
+<div class="section" id="module-skyline">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-skyline" title="Permalink to this headline">¶</a></h2>
+<p>Used by autodoc_mock_imports.</p>
 </div>
 </div>
 
@@ -3358,7 +3358,7 @@ settings.py are valid</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -3380,7 +3380,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

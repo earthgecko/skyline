@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.1.7 - the ionosphere branch &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>1.1.7 - the ionosphere branch &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
         <link rel="next" title="1.1.6 - the ionosphere branch" href="1_1_6.html"/>
         <link rel="prev" title="1.1.8 - the ionosphere branch" href="1_1_8.html"/> 
@@ -116,6 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_1_10.html">1.1.10 - the ionosphere branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_1_9.html">1.1.9 - the ionosphere branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_1_8.html">1.1.8 - the ionosphere branch</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">1.1.7 - the ionosphere branch</a><ul>
@@ -140,7 +141,7 @@
 <li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
@@ -180,7 +181,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_1_7.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_1_7.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -213,13 +214,13 @@ link and new tab is ok.</li>
 being applied twice</li>
 <li>panorama incorrect mysql_id cache keys (Bug #2166). There are SOME cache key
 msgpack values that DO == string.printable for example [73] msgpacks to I
-panorama.mysql_ids will always be msgpack so if &#8216;panorama.mysql_ids&#8217; in key
+panorama.mysql_ids will always be msgpack so if ‘panorama.mysql_ids’ in key
 name set test_string = False</li>
 <li>Ionosphere - matches page (Feature #1996). Included the features_profiles_matches.html
 Create the ionosphere_summary_memcache_object. Added get_fp_matches and
 get_matched_id_resources, get_fp_matches, get_matched_id_resources,
 fp_search_or_matches_req and fp_matches.  Handle both fp_search and fp_matches.
-Added &#8216;matched_fp_id&#8217;, &#8216;matched_layer_id&#8217; request arguments. Added
+Added ‘matched_fp_id’, ‘matched_layer_id’ request arguments. Added
 matched_graph_image_file to show the graph for the matched event in the
 features_profile MATCHED Evaluation page. Added the Matches Ionosphere page
 and menu tabs</li>
@@ -256,7 +257,7 @@ MySQL CURRENT_TIMESTAMP</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -278,7 +279,7 @@ MySQL CURRENT_TIMESTAMP</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

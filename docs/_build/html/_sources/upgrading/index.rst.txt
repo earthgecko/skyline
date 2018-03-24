@@ -1,0 +1,109 @@
+#########
+Upgrading
+#########
+
+.. toctree::
+
+	crucible-to-ionosphere.rst
+	etsy-to-ionosphere.rst
+	etsy-to-crucible.rst
+
+.. todo: Document the possible paths
+
+Backup your Redis!
+##################
+
+Do it.
+
+Upgrading from the Etsy version of Skyline
+##########################################
+
+This section covers the steps involved in upgrading an existing Skyline
+implementation. For the sake of fullness this describes the changes from
+the last
+`github/etsy/skyline <https://github.com/etsy/skyline/commit/22ae09da716267a65835472da89ac31cc5cc5192>`__
+commit to date.
+
+Do a new install
+================
+
+If you are upgrading from an Etsy version consider doing a new install, all you
+need is your Redis data (but BACK IT UP FIRST)
+
+However you may have some other monitoring or custom inits, etc set up on your
+Skyline then the below is a best effort guide.
+
+Things to note
+==============
+
+This new version of Skyline sees a lot of changes, however although
+certain things have changed and much has been added, whether these
+changes are backwards incompatible in terms of functionality is
+debatable. That said, there is a lot of change.  Please review the following
+key changes relating to upgrading.
+
+Directory structure changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In order to bring Skyline in line with a more standard Python package
+structure the directory structure has had to changed to accommodate
+sphinx autodoc and the setuptools framework.
+
+settings.py
+~~~~~~~~~~~
+
+The ``settings.py`` has had a face lift too. This will probably be the
+largest initial change that any users upgrading from Skyline < 1.0.0
+will find.
+
+The format is much less friendly to the eye as it now has all the
+comments in Python docstrings rather than just plain "#"ed lines.
+Apologies for this, but for complete autodoc coverage and referencing it
+is a necessary change.
+
+Analyzer optimizations
+~~~~~~~~~~~~~~~~~~~~~~
+
+There has been some fairly substantial performance improvements that may affect
+your Analyzer settings.  The optimizations should benefit any deployment,
+however they will benefit smaller Skyline deployments more than very large
+Skyline deployments.  Finding the optimum settings for your Analyzer deployment
+will require some evaluation of your Analyzer run_time, total_metrics and
+:mod:`settings.ANALYZER_PROCESSES`.
+
+See `Analyzer Optimizations <../analyzer-optimizations.html>`__ and regardless of
+whether your deployment is small or large the new
+:mod:`settings.RUN_OPTIMIZED_WORKFLOW` timeseries analysis will improve
+performance and benefit all deployments.
+
+Skyline graphite namespace for metrics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The original metrics namespace for skyline was ``skyline.analyzer``,
+``skyline.horizon``, etc. Skyline now shards metrics by the Skyline
+server host name. So before you start the new Skyline apps when
+referenced below in the Upgrade steps, ensure you move/copy your whisper
+files related to Skyline to their new namespaces, which are
+``skyline.<hostname>.analyzer``, ``skyline.<hostname>.horizon``, etc. Or
+use Graphite's whisper-fill.py to populate the new metric namespaces
+from the old ones.
+
+Logging
+~~~~~~~
+
+There have been changes made in the logging methodology, see
+`Logging <../logging.html>`__.
+
+New required components
+~~~~~~~~~~~~~~~~~~~~~~~
+
+MySQL and memcached.
+
+Clone and have a look
+~~~~~~~~~~~~~~~~~~~~~
+
+If you are quite familiar with your Skyline setup it would be useful to
+clone the new Skyline and first have a look at the new structure and
+assess how this impacts any of your deployment patterns, init,
+supervisord, etc and et al.  Diff the new settings.py and your existing
+settings.py to see the additions and all the changes you need to make.

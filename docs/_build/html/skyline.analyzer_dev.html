@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.analyzer_dev package &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline.analyzer_dev package &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.boundary package" href="skyline.boundary.html"/>
         <link rel="prev" title="skyline.analyzer package" href="skyline.analyzer.html"/> 
@@ -116,7 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -151,7 +151,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -190,7 +190,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/skyline.analyzer_dev.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/skyline.analyzer_dev.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -265,12 +265,12 @@ the approriate alert def is then called and passed the tuples.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>alert</strong> &#8211; <p>The alert tuple specified in settings.py.</p>
+<li><strong>alert</strong> – <p>The alert tuple specified in settings.py.</p>
 <p>alert[0]: The matched substring of the anomalous metric</p>
 <p>alert[1]: the name of the strategy being used to alert</p>
 <p>alert[2]: The timeout of the alert that was triggered</p>
 </li>
-<li><strong>meric</strong> &#8211; <p>The metric tuple.</p>
+<li><strong>meric</strong> – <p>The metric tuple.</p>
 <p>metric[0]: the anomalous value
 metric[1]: The full name of the anomalous metric</p>
 </li>
@@ -308,7 +308,7 @@ respect to the median is X times larger than the median of deviations.</p>
 <dl class="function">
 <dt id="analyzer_dev.algorithms_dev.grubbs">
 <code class="descname">grubbs</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#grubbs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.grubbs" title="Permalink to this definition">¶</a></dt>
-<dd><p>A timeseries is anomalous if the Z score is greater than the Grubb&#8217;s score.</p>
+<dd><p>A timeseries is anomalous if the Z score is greater than the Grubb’s score.</p>
 </dd></dl>
 
 <dl class="function">
@@ -356,7 +356,7 @@ on a projected least squares model is greater than three sigma.</p>
 <dt id="analyzer_dev.algorithms_dev.histogram_bins">
 <code class="descname">histogram_bins</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/algorithms_dev.html#histogram_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.algorithms_dev.histogram_bins" title="Permalink to this definition">¶</a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints falls
-into a histogram bin with less than 20 other datapoints (you&#8217;ll need to tweak
+into a histogram bin with less than 20 other datapoints (you’ll need to tweak
 that number depending on your data)</p>
 <p>Returns: the size of the bin which contains the tail_avg. Smaller bin size
 means more anomalous.</p>
@@ -480,7 +480,7 @@ and assign each process a set of metrics to analyse for anomalies.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -502,7 +502,7 @@ and assign each process a set of metrics to analyse for anomalies.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

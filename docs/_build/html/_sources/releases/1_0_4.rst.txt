@@ -1,0 +1,30 @@
+===========================
+1.0.4 - the crucible branch
+===========================
+
+Some documentation updates and setup.py things
+
+Changes include:
+
+- Corrected boundary anomaly_seen log info context
+- In the skyline_functions get_graphite_metric slip the fetching Graphite json
+  into 2 try: blocks the actual Graphite request and the reading datapoints from
+  json and added the graphite_json_fetched variable to test the condition
+- Padded out skyline_functions docstrings with type definitions for each param
+- Escape : ( and ) in metric name to Graphite URI for Unescaped Graphite target
+  https://github.com/earthgecko/skyline/issues/20 in mirage and skyline_functions
+- Rmoved old sys.path requirements for the old import settings method.
+- Added some notes to the development doc regarding ongoing refactoring work
+- Added validation on all Panorama GET parameters to mitigate as much XSS and
+  SQL injection as I can at the moment, arachni is happier now.
+- Sanitize request.args
+- Added missing settings. to CRUCIBLE_PROCESSES thanks @blake3r2, this stops it
+  doing nothing.  This branch reallt should have been called panorama, but it
+  started last year as crucible, so crucible was not fully tested in the new
+  structure, apologies.
+- Misc docs changes
+- Adding additional exception handling to Analyzer - Issue #19 - task1544
+  https://github.com/earthgecko/skyline/issues/19
+- This is a start but not complete, other issues took precedence and these are
+  the changes to date.
+- Bumped version to 1.0.4

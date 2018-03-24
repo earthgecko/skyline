@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tuning tips &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Tuning tips &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Monitoring Skyline" href="monitoring-skyline.html"/>
         <link rel="prev" title="Logging" href="logging.html"/> 
 
@@ -115,7 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -153,7 +153,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/tuning-tips.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tuning-tips.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -165,8 +165,8 @@
             
   <div class="section" id="tuning-tips">
 <span id="tuning-tips"></span><h1>Tuning tips<a class="headerlink" href="#tuning-tips" title="Permalink to this headline">¶</a></h1>
-<p>Okay, so you&#8217;ve got everything all set up, data is flowing through, and...what?
-You can&#8217;t consume everything on time? Allow me to help:</p>
+<p>Okay, so you've got everything all set up, data is flowing through, and...what?
+You can't consume everything on time? Allow me to help:</p>
 <ol class="simple">
 <li>Try increasing <code class="docutils literal"><span class="pre">settings.CHUNK_SIZE</span></code> - this increases the size of a chunk of
 metrics that gets added onto the queue. Bigger chunks == smaller network traffic.</li>
@@ -174,14 +174,14 @@ metrics that gets added onto the queue. Bigger chunks == smaller network traffic
 consume metrics off the queue and insert them into Redis.</li>
 <li>Try decreasing <code class="docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code> - this all runs on one box (for
 now), so share the resources!</li>
-<li>Still can&#8217;t fix the performance? Try reducing your <code class="docutils literal"><span class="pre">settings.FULL_DURATION</span></code>.
+<li>Still can't fix the performance? Try reducing your <code class="docutils literal"><span class="pre">settings.FULL_DURATION</span></code>.
 If this is set to be too long, Redis will buckle under the pressure.</li>
 <li>Is your analyzer taking too long? Maybe you need to make your algorithms
 faster, or use fewer algorithms in your ensemble.</li>
-<li>Reduce your metrics! If you&#8217;re using StatsD, it will spit out lots of
+<li>Reduce your metrics! If you're using StatsD, it will spit out lots of
 variations for each metric (sum, median, lower, upper, etc). These are largely
 identical, so it might be worth it to put them in <code class="docutils literal"><span class="pre">settings.SKIP_LIST</span></code>.</li>
-<li>Disable Oculus - if you set settings.OCULUS_HOST to &#8216;&#8217;, Skyline will not
+<li>Disable Oculus - if you set settings.OCULUS_HOST to '', Skyline will not
 write metrics into the <code class="docutils literal"><span class="pre">mini.</span></code> namespace - this should result in dramatic speed
 improvements.  At Etsy, they had a flow of about 5k metrics coming in every
 second on average (with 250k distinct metrics). They used a 32 core Sandy Bridge
@@ -242,7 +242,7 @@ therefore some another external to Python monitoring can help.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -264,7 +264,7 @@ therefore some another external to Python monitoring can help.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

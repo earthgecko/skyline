@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Crucible &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Crucible &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Panorama" href="panorama.html"/>
         <link rel="prev" title="Boundary" href="boundary.html"/> 
 
@@ -122,7 +122,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -160,7 +160,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/crucible.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/crucible.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -172,7 +172,7 @@
             
   <div class="section" id="crucible">
 <h1>Crucible<a class="headerlink" href="#crucible" title="Permalink to this headline">¶</a></h1>
-<p>Crucible is an extension of Skyline based on Abe Stanway&#8217;s
+<p>Crucible is an extension of Skyline based on Abe Stanway’s
 <a class="reference external" href="https://github.com/astanway/crucible">Crucible</a> testing suite.  Crucible has
 been integrated into Skyline as a module and daemon to allow for the following:</p>
 <ul class="simple">
@@ -208,7 +208,7 @@ it disabled default in each of the apps own settings.</p>
 timeseries files.</p>
 <p>For example Analyzer creates txt check files for Mirage, Crucible and Panorama.
 These txt files are created in logical directory structures that mirror
-Graphite&#8217;s whisper storage directories for stats, etc.  Often other timeseries
+Graphite’s whisper storage directories for stats, etc.  Often other timeseries
 data sets that are not Graphite, machine or app related metrics, are also
 structured in a directory or tree structure and follow similar naming
 convention, which allows for this tree and txt files design to work with a large
@@ -218,10 +218,10 @@ be queued through Redis or another queue application, using the local filesystem
 is the simplest method to pass data between the Skyline modules, without
 introducing additional dependencies.</p>
 <p>While ensuring that Redis is being queried as minimally as required to do
-analysis.  The shuffling of data and querying of &#8220;queues&#8221; is offloaded to the
+analysis.  The shuffling of data and querying of “queues” is offloaded to the
 filesystem.  Resulting in each module being somewhat autonomous in terms of
 managing its own work, decoupled from the other modules.</p>
-<p>Today&#8217;s filesystems are more than capable of handling this load.  The use of txt
+<p>Today’s filesystems are more than capable of handling this load.  The use of txt
 files also provides an event history, which transient Redis data does not.</p>
 <p>Importantly in terms of Crucible ad-hoc testing, txt and json timeseries files
 provide a simple and standardised method to push ad-hoc checks into Crucible.</p>
@@ -265,7 +265,7 @@ space.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -287,7 +287,7 @@ space.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

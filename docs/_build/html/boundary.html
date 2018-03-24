@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Boundary &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Boundary &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Crucible" href="crucible.html"/>
         <link rel="prev" title="Mirage" href="mirage.html"/> 
 
@@ -122,7 +122,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -160,7 +160,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/boundary.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/boundary.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -182,7 +182,7 @@ analysis of 1000s of metrics, its algorithms are not perfect. Boundary
 allows for the use of the Skyline data and model as a scapel, not just a
 sword. Just like Analyzer, Boundary has its own algorithms and
 importantly, Boundary is <em>not</em> <code class="docutils literal"><span class="pre">CONSENSUS</span></code> based. This means that you
-can match key metrics on &#8220;thresholds/limits&#8221; and somewhat dynamically
+can match key metrics on “thresholds/limits” and somewhat dynamically
 too.</p>
 <p>The Boundary concept is quite like Skyline backwards, enilyks. This is
 because where Analyzer is almost all to one configuration, Boundary is
@@ -237,7 +237,7 @@ Boundary:</p>
 <div class="section" id="detect-drop-off-cliff-algorithm">
 <h2>detect_drop_off_cliff algorithm<a class="headerlink" href="#detect-drop-off-cliff-algorithm" title="Permalink to this headline">¶</a></h2>
 <p>The detect_drop_off_cliff algorithm provides a method for analysing a
-timeseries to determine is the timeseries &#8220;dropped off a cliff&#8221;. The
+timeseries to determine is the timeseries “dropped off a cliff”. The
 standard Skyline Analyzer algorithms do not detect the drop off cliff
 pattern very well at all, testing with Crucible has proven. Further to
 this, the <code class="docutils literal"><span class="pre">CONSENSUS</span></code> methodology used to determine whether a
@@ -262,7 +262,7 @@ but has been tested and does filter peaky noise in low range timeseries, which
 filters most/lots of noise.</li>
 <li>The alogrithm is more suited to data sets which come from multiple sources,
 e.g. an aggregation of a count from all servers, rather than from individual
-sources, e.g. a single server&#8217;s metric. The many are less likely to experience
+sources, e.g. a single server’s metric. The many are less likely to experience
 false positive cliff drops, whereas the individual is more likely to
 experience true cliff drops.</li>
 <li><strong>ONLY WORKS WITH</strong>:<ul>
@@ -284,9 +284,9 @@ surfaces and analyzes metrics.</p>
 <code class="docutils literal"><span class="pre">BOUNDARY_METRICS</span></code> tuple in <code class="docutils literal"><span class="pre">settings.py</span></code>, matching the defined
 namespaces to all the unique_metrics list from Redis.</li>
 <li>These are divided between the <code class="docutils literal"><span class="pre">BOUNDARY_PROCESSES</span></code> to be analyzed.</li>
-<li>Boundary&#8217;s spawned processes pull the all timeseries for the metrics
+<li>Boundary’s spawned processes pull the all timeseries for the metrics
 they are assigned from Redis and iterate through each metric and
-analyses it&#8217;s timeseries against the algorithm declared for the
+analyses it’s timeseries against the algorithm declared for the
 metric in the matching <code class="docutils literal"><span class="pre">BOUNDARY_METRICS</span></code> tuple/s in
 <code class="docutils literal"><span class="pre">settings.py</span></code></li>
 <li>The Boundary process will add any metric that it finds anomalous to a
@@ -294,10 +294,10 @@ list of anomalous_metrics.</li>
 <li>The parent Boundary process will then check every metric in the
 anomalous_metrics list to see if:<ul>
 <li>An alert has been triggered for the metric within the last
-<code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds by querying the metric&#8217;s Boundary alert
+<code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds by querying the metric’s Boundary alert
 key in Redis</li>
 <li>If no alert key is set, send alert/s to configured alerters and sets
-the metric&#8217;s Boundary alert key in for <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds in
+the metric’s Boundary alert key in for <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds in
 Redis.</li>
 <li>If no alert key is set and <a class="reference internal" href="skyline.html#settings.PANORAMA_ENABLED" title="settings.PANORAMA_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_ENABLED</span></code></a> is <cite>True</cite>, the
 anomalous metrics details will be inserted into the database.</li>
@@ -327,7 +327,7 @@ anomalous metrics details will be inserted into the database.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -349,7 +349,7 @@ anomalous metrics details will be inserted into the database.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

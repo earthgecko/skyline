@@ -1,0 +1,14 @@
+==============================
+1.1.10 - the ionosphere branch
+==============================
+
+v1.1.10-ionosphere - Mar 24, 2018
+
+Changes
+-------
+
+- Bumped to v1.1.10
+- Release to fixed #45 MySQL key_block_size (Bug #2340)
+- Minor corrections to a log line in ionosphere and panorama
+
+

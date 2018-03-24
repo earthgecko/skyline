@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.webapp &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>webapp.webapp &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -114,7 +114,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
@@ -306,7 +306,7 @@
     <span class="n">WEBAPP_JAVASCRIPT_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">before_request</span>
+<div class="viewcode-block" id="limit_remote_addr"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.limit_remote_addr">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">before_request</span>
 <span class="c1"># def setup_logging():</span>
 <span class="c1">#    if not app.debug:</span>
 <span class="c1">#        stream_handler = logging.StreamHandler()</span>
@@ -332,7 +332,7 @@
 <span class="c1">#        handler.setFormatter(formatter)</span>
 <span class="c1">#        app.logger.addHandler(memory_handler)</span>
 <span class="c1">#        app.logger.addHandler(handler)</span>
-<div class="viewcode-block" id="limit_remote_addr"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.limit_remote_addr">[docs]</a><span class="k">def</span> <span class="nf">limit_remote_addr</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">limit_remote_addr</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is called to check if the requesting IP address is in the</span>
 <span class="sd">    settings.WEBAPP_ALLOWED_IPS array, if not 403.</span>
@@ -379,8 +379,8 @@
     <span class="k">return</span> <span class="n">decorated</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
-<div class="viewcode-block" id="internal_error"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.internal_error">[docs]</a><span class="k">def</span> <span class="nf">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">):</span>
+<div class="viewcode-block" id="internal_error"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.internal_error">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Show traceback in the browser when running a flask app on a production</span>
 <span class="sd">    server.</span>
@@ -415,9 +415,9 @@
         <span class="n">message</span><span class="o">=</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">bad_machine</span><span class="o">=</span><span class="n">server_name</span><span class="p">),</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.index">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.index">[docs]</a><span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
 
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">if</span> <span class="s1">&#39;uh_oh&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -440,9 +440,9 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/a_500&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="a_500"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.a_500">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/a_500&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="a_500"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.a_500">[docs]</a><span class="k">def</span> <span class="nf">a_500</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">a_500</span><span class="p">():</span>
 
     <span class="k">if</span> <span class="s1">&#39;message&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
@@ -466,9 +466,9 @@
     <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">501</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/now&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="now"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.now">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/now&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="now"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.now">[docs]</a><span class="k">def</span> <span class="nf">now</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">now</span><span class="p">():</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -479,9 +479,9 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/then&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="then"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.then">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/then&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="then"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.then">[docs]</a><span class="k">def</span> <span class="nf">then</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">then</span><span class="p">():</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;then.html&#39;</span><span class="p">),</span> <span class="mi">200</span>
@@ -491,8 +491,8 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/anomalies.json&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.anomalies">[docs]</a><span class="k">def</span> <span class="nf">anomalies</span><span class="p">():</span>
+<div class="viewcode-block" id="anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.anomalies">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/anomalies.json&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">anomalies</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">anomalies_json</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalies_json</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -503,8 +503,8 @@
     <span class="k">return</span> <span class="n">json_data</span><span class="p">,</span> <span class="mi">200</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama.json&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="panorama_anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama_anomalies">[docs]</a><span class="k">def</span> <span class="nf">panorama_anomalies</span><span class="p">():</span>
+<div class="viewcode-block" id="panorama_anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama_anomalies">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama.json&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">panorama_anomalies</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">anomalies_json</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
         <span class="n">panorama_json</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomalies_json</span><span class="p">),</span> <span class="s1">&#39;anomalies.json&#39;</span><span class="p">,</span> <span class="s1">&#39;panorama.json&#39;</span><span class="p">)</span>
@@ -517,8 +517,8 @@
     <span class="k">return</span> <span class="n">json_data</span><span class="p">,</span> <span class="mi">200</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/app_settings&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="app_settings"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.app_settings">[docs]</a><span class="k">def</span> <span class="nf">app_settings</span><span class="p">():</span>
+<div class="viewcode-block" id="app_settings"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.app_settings">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/app_settings&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">app_settings</span><span class="p">():</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">app_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;GRAPH_URL&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">,</span>
@@ -545,8 +545,8 @@
     <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">200</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/version&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="version"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.version">[docs]</a><span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
+<div class="viewcode-block" id="version"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.version">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/version&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">version_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SKYLINE_VERSION&#39;</span><span class="p">:</span> <span class="n">skyline_version</span><span class="p">}</span>
@@ -556,8 +556,8 @@
         <span class="k">return</span> <span class="s2">&quot;Not Found&quot;</span><span class="p">,</span> <span class="mi">404</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
-<div class="viewcode-block" id="data"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.data">[docs]</a><span class="k">def</span> <span class="nf">data</span><span class="p">():</span>
+<div class="viewcode-block" id="data"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.data">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">data</span><span class="p">():</span>
     <span class="k">if</span> <span class="s1">&#39;metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -648,9 +648,9 @@
     <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/docs&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="docs"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.docs">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/docs&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="docs"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.docs">[docs]</a><span class="k">def</span> <span class="nf">docs</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">docs</span><span class="p">():</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -659,9 +659,9 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="panorama"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="panorama"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama">[docs]</a><span class="k">def</span> <span class="nf">panorama</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">panorama</span><span class="p">():</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -946,9 +946,9 @@
 <span class="c1"># Branch #868: crucible - @earthgecko</span>
 <span class="c1"># This may actually need Django, perhaps this is starting to move outside the</span>
 <span class="c1"># realms of Flask..</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/crucible&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="crucible"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.crucible">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/crucible&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="crucible"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.crucible">[docs]</a><span class="k">def</span> <span class="nf">crucible</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">crucible</span><span class="p">():</span>
 
     <span class="n">crucible_web_ui_implemented</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">crucible_web_ui_implemented</span><span class="p">:</span>
@@ -964,9 +964,9 @@
 <span class="c1"># @added 20161123 - Branch #922: ionosphere</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/ionosphere&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="ionosphere"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/ionosphere&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="ionosphere"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere">[docs]</a><span class="k">def</span> <span class="nf">ionosphere</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">ionosphere</span><span class="p">():</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -2304,8 +2304,8 @@
         <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/ionosphere_images&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="ionosphere_images"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere_images">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_images</span><span class="p">():</span>
+<div class="viewcode-block" id="ionosphere_images"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere_images">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/ionosphere_images&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">ionosphere_images</span><span class="p">():</span>
 
     <span class="n">request_args_present</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
@@ -2353,9 +2353,9 @@
 <span class="c1"># Added utilities TODO</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/utilities&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="utilities"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.utilities">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/utilities&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="utilities"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.utilities">[docs]</a><span class="k">def</span> <span class="nf">utilities</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">utilities</span><span class="p">():</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;utilities.html&#39;</span><span class="p">),</span> <span class="mi">200</span>
@@ -2472,9 +2472,9 @@
 <span class="p">}</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/rebrow&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="rebrow"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/rebrow&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="c1"># def login():</span>
-<div class="viewcode-block" id="rebrow"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow">[docs]</a><span class="k">def</span> <span class="nf">rebrow</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">rebrow</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Start page</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2493,8 +2493,8 @@
             <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_server_db/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="rebrow_server_db"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_server_db">[docs]</a><span class="k">def</span> <span class="nf">rebrow_server_db</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+<div class="viewcode-block" id="rebrow_server_db"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_server_db">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_server_db/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">rebrow_server_db</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List all databases and show info on server</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2514,8 +2514,8 @@
         <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_keys/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
-<div class="viewcode-block" id="rebrow_keys"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_keys">[docs]</a><span class="k">def</span> <span class="nf">rebrow_keys</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+<div class="viewcode-block" id="rebrow_keys"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_keys">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_keys/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">rebrow_keys</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List keys for one database</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2558,8 +2558,8 @@
             <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_key/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&lt;key&gt;/&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="rebrow_key"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_key">[docs]</a><span class="k">def</span> <span class="nf">rebrow_key</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<div class="viewcode-block" id="rebrow_key"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_key">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_key/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&lt;key&gt;/&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">rebrow_key</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Show a specific key.</span>
 <span class="sd">    key is expected to be URL-safe base64 encoded</span>
@@ -2634,8 +2634,8 @@
         <span class="n">msg_packed_key</span><span class="o">=</span><span class="n">msg_pack_key</span><span class="p">)</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">template_filter</span><span class="p">(</span><span class="s1">&#39;urlsafe_base64&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="urlsafe_base64_encode"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.urlsafe_base64_encode">[docs]</a><span class="k">def</span> <span class="nf">urlsafe_base64_encode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<div class="viewcode-block" id="urlsafe_base64_encode"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.urlsafe_base64_encode">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">template_filter</span><span class="p">(</span><span class="s1">&#39;urlsafe_base64&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">urlsafe_base64_encode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Markup&#39;</span><span class="p">:</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">unescape</span><span class="p">()</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
@@ -2805,7 +2805,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -2827,7 +2827,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.panorama package &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline.panorama package &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/>
         <link rel="prev" title="skyline.mirage package" href="skyline.mirage.html"/> 
@@ -116,7 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -149,7 +149,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -188,7 +188,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/skyline.panorama.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/skyline.panorama.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -237,7 +237,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>select</strong> (<em>str</em>) &#8211; the select string</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>select</strong> (<em>str</em>) – the select string</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
@@ -264,10 +264,10 @@
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -286,7 +286,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>select</strong> (<em>str</em>) &#8211; the insert string</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>select</strong> (<em>str</em>) – the insert string</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int</td>
 </tr>
@@ -304,10 +304,10 @@
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -326,7 +326,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) – the path and filename to the metric variables files</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars module object or <code class="docutils literal"><span class="pre">False</span></code></td>
 </tr>
@@ -345,8 +345,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> &#8211; python process id</li>
-<li><strong>metric_check_file</strong> &#8211; full path to the metric check file</li>
+<li><strong>i</strong> – python process id</li>
+<li><strong>metric_check_file</strong> – full path to the metric check file</li>
 </ul>
 </td>
 </tr>
@@ -392,7 +392,7 @@ blah</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -414,7 +414,7 @@ blah</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

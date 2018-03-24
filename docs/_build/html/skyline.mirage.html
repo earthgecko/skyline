@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.mirage package &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline.mirage package &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.panorama package" href="skyline.panorama.html"/>
         <link rel="prev" title="skyline.ionosphere package" href="skyline.ionosphere.html"/> 
@@ -116,7 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -152,7 +152,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -191,7 +191,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/skyline.mirage.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/skyline.mirage.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -264,7 +264,7 @@ and handling prevents any memory leaks in the parent.
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) – the path and filename to the metric variables files</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars list or <code class="docutils literal"><span class="pre">False</span></code></td>
 </tr>
@@ -280,7 +280,7 @@ and handling prevents any memory leaks in the parent.
 <dd><p>DEVELOPMENT ONLY</p>
 <p># &#64;added 20160806 - Bug #1558: Memory leak in Analyzer
 # Debug with garbage collection - <a class="reference external" href="http://code.activestate.com/recipes/65333/">http://code.activestate.com/recipes/65333/</a></p>
-<p>show us what&#8217;s the garbage about</p>
+<p>show us what’s the garbage about</p>
 </dd></dl>
 
 <dl class="method">
@@ -302,7 +302,7 @@ and handling prevents any memory leaks in the parent.
 <span id="skyline-mirage-mirage-alerters-module"></span><h2>skyline.mirage.mirage_alerters module<a class="headerlink" href="#module-mirage.mirage_alerters" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
 <dt id="mirage.mirage_alerters.skyline_version">
-<code class="descname">skyline_version</code><em class="property"> = 'Skyline (ionosphere v1.1.9-beta)'</em><a class="headerlink" href="#mirage.mirage_alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
+<code class="descname">skyline_version</code><em class="property"> = 'Skyline (ionosphere v1.1.10-stable)'</em><a class="headerlink" href="#mirage.mirage_alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create any alerter you want here. The function will be invoked from trigger_alert.
 Four arguments will be passed, two of them tuples: alert and metric.</p>
 <p>alert: the tuple specified in your settings:</p>
@@ -359,18 +359,18 @@ tuples.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>alert</strong> &#8211; <p>The alert tuple specified in settings.py.</p>
+<li><strong>alert</strong> – <p>The alert tuple specified in settings.py.</p>
 <p>alert[0]: The matched substring of the anomalous metric</p>
 <p>alert[1]: the name of the strategy being used to alert</p>
 <p>alert[2]: The timeout of the alert that was triggered</p>
 <p>alert[3]: The SECOND_ORDER_RESOLUTION_HOURS</p>
 </li>
-<li><strong>meric</strong> &#8211; <p>The metric tuple.</p>
+<li><strong>meric</strong> – <p>The metric tuple.</p>
 <p>metric[0]: the anomalous value</p>
 <p>metric[1]: The full name of the anomalous metric</p>
 <p>metric[2]: anomaly timestamp</p>
 </li>
-<li><strong>context</strong> (<em>str</em>) &#8211; app name</li>
+<li><strong>context</strong> (<em>str</em>) – app name</li>
 </ul>
 </td>
 </tr>
@@ -384,7 +384,7 @@ tuples.</p>
 <dl class="data">
 <dt id="mirage.mirage_algorithms.logger">
 <code class="descname">logger</code><em class="property"> = &lt;logging.Logger object&gt;</em><a class="headerlink" href="#mirage.mirage_algorithms.logger" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is no man&#8217;s land. Do anything you want in here,
+<dd><p>This is no man’s land. Do anything you want in here,
 as long as you return a boolean that determines whether the input timeseries is
 anomalous or not.</p>
 <p>The key here is to return a True or False boolean.</p>
@@ -413,7 +413,7 @@ respect to the median is X times larger than the median of deviations.</p>
 <dl class="function">
 <dt id="mirage.mirage_algorithms.grubbs">
 <code class="descname">grubbs</code><span class="sig-paren">(</span><em>timeseries</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#grubbs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_algorithms.grubbs" title="Permalink to this definition">¶</a></dt>
-<dd><p>A timeseries is anomalous if the Z score is greater than the Grubb&#8217;s score.</p>
+<dd><p>A timeseries is anomalous if the Z score is greater than the Grubb’s score.</p>
 </dd></dl>
 
 <dl class="function">
@@ -461,7 +461,7 @@ on a projected least squares model is greater than three sigma.</p>
 <dt id="mirage.mirage_algorithms.histogram_bins">
 <code class="descname">histogram_bins</code><span class="sig-paren">(</span><em>timeseries</em>, <em>second_order_resolution_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#histogram_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage_algorithms.histogram_bins" title="Permalink to this definition">¶</a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints falls
-into a histogram bin with less than 20 other datapoints (you&#8217;ll need to
+into a histogram bin with less than 20 other datapoints (you’ll need to
 tweak that number depending on your data)</p>
 <p>Returns: the size of the bin which contains the tail_avg. Smaller bin size
 means more anomalous.</p>
@@ -489,7 +489,7 @@ an algorithm error when the record_algorithm_error is used.</p>
 <dd><p>This utility function is used to facilitate the traceback from any algorithm
 errors.  The algorithm functions themselves we want to run super fast and
 without fail in terms of stopping the function returning and not reporting
-anything to the log, so the pythonic except is used to &#8220;sample&#8221; any
+anything to the log, so the pythonic except is used to “sample” any
 algorithm errors to a tmp file and report once per run rather than spewing
 tons of errors into the log.</p>
 <div class="admonition note">
@@ -505,8 +505,8 @@ tons of errors into the log.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>algorithm_name</strong> (<em>str</em>) &#8211; the algoritm function name</li>
-<li><strong>traceback_format_exc_string</strong> (<em>str</em>) &#8211; the traceback_format_exc string</li>
+<li><strong>algorithm_name</strong> (<em>str</em>) – the algoritm function name</li>
+<li><strong>traceback_format_exc_string</strong> (<em>str</em>) – the traceback_format_exc string</li>
 </ul>
 </td>
 </tr>
@@ -594,7 +594,7 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -616,7 +616,7 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
