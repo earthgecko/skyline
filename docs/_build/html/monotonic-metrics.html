@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Strictly increasing monotonicity &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Strictly increasing monotonicity &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Horizon" href="horizon.html"/>
         <link rel="prev" title="Alert testing" href="alert-testing.html"/> 
 
@@ -118,7 +118,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -156,7 +156,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/monotonic-metrics.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/monotonic-metrics.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -174,7 +174,7 @@ Graphite and converts the values to their derivative products.</p>
 <p>In terms of visualisation Graphite has the nonNegativeDerivative function,
 which converts an integral or incrementing count to a derivative by
 calculating the delta between subsequent datapoints.  The function ignores
-datapoints that trend down.  With Skyline&#8217;s new functionality this is a
+datapoints that trend down.  With Skyline’s new functionality this is a
 requirement for metrics that only increase over time and then at some point
 reset to 0 (e.g. interface packets counts, varnish or haproxy backend
 connections, etc).</p>
@@ -207,7 +207,7 @@ than a bug as if any metrics of this extreme nature can be handled via SKIP or
 using <a class="reference internal" href="skyline.html#settings.NON_DERIVATIVE_MONOTONIC_METRICS" title="settings.NON_DERIVATIVE_MONOTONIC_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.NON_DERIVATIVE_MONOTONIC_METRICS</span></code></a></p>
 <div class="section" id="really-why-is-this-important">
 <h2>Really why is this important?<a class="headerlink" href="#really-why-is-this-important" title="Permalink to this headline">¶</a></h2>
-<p>If you are still reading...</p>
+<p>If you are still reading…</p>
 <p>With the original Analyzer/Mirage, single time resolution and 3-sigma based
 algorithms, these types of metrics with strictly increasing monotonicity
 that reset always triggered 3-sigma and alerts (false positives).  That is
@@ -225,7 +225,7 @@ comparison, and learning patterns due to the step nature of the data and
 the variability of the steps, in terms of profiling features these type of
 data are almost like snowflakes.  The derivatives of these strictly
 increasing metrics are the kind of patterns that lend themselves to
-Skyline&#8217;s timeseries comparison and analysis methods.</p>
+Skyline’s timeseries comparison and analysis methods.</p>
 <p>The Skyline nonNegativeDerivative is based on part of the Graphite render
 function nonNegativeDerivative at:
 <a class="reference external" href="https://github.com/graphite-project/graphite-web/blob/1e5cf9f659f5d4cc0fa53127f756a1916e62eb47/webapp/graphite/render/functions.py#L1627">https://github.com/graphite-project/graphite-web/blob/1e5cf9f659f5d4cc0fa53127f756a1916e62eb47/webapp/graphite/render/functions.py#L1627</a></p>
@@ -251,7 +251,7 @@ function nonNegativeDerivative at:
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -273,7 +273,7 @@ function nonNegativeDerivative at:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

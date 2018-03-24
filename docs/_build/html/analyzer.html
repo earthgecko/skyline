@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Analyzer &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Analyzer &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Analyzer Optimizations" href="analyzer-optimizations.html"/>
         <link rel="prev" title="Horizon" href="horizon.html"/> 
 
@@ -131,7 +131,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -169,7 +169,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/analyzer.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/analyzer.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -239,7 +239,7 @@ sure to update the <a class="reference internal" href="skyline.html#settings.CON
 </div>
 <div class="section" id="algorithm-philosophy">
 <h2>Algorithm philosophy<a class="headerlink" href="#algorithm-philosophy" title="Permalink to this headline">¶</a></h2>
-<p>The basic algorithm is based on 3-sigma, derived from Shewhart&#8217;s
+<p>The basic algorithm is based on 3-sigma, derived from Shewhart’s
 <a class="reference external" href="http://en.wikipedia.org/wiki/Statistical_process_control">statistical process
 control</a>.
 However, you are not limited to 3-sigma based algorithms if you do not
@@ -256,7 +256,7 @@ seconds long</p>
 <a class="reference internal" href="skyline.html#settings.STALE_PERIOD" title="settings.STALE_PERIOD"><code class="xref py py-mod docutils literal"><span class="pre">settings.STALE_PERIOD</span></code></a> seconds</p>
 <p><strong>Boring</strong>: The timeseries has been the same value for the past
 <a class="reference internal" href="skyline.html#settings.MAX_TOLERABLE_BOREDOM" title="settings.MAX_TOLERABLE_BOREDOM"><code class="xref py py-mod docutils literal"><span class="pre">settings.MAX_TOLERABLE_BOREDOM</span></code></a> seconds</p>
-<p><strong>Other</strong>: There&#8217;s probably an error in the code, if you&#8217;ve been making
+<p><strong>Other</strong>: There’s probably an error in the code, if you’ve been making
 changes or we have.</p>
 </div>
 <div class="section" id="metrics-monotonicity">
@@ -331,8 +331,8 @@ that Analyzer is alerting on.  Often your metrics are aggregated in Graphite and
 a Graphite graph is not the exact representation of the timeseries data that
 triggered the alert, so having both is clearer.</p>
 <p>The Redis data graph also adds the mean and the 3-sigma boundaries to the plot,
-which is useful for brain training.  This goes against the &#8220;less is more
-(effective)&#8221; data visualization philosophy, however if the human neocortex is
+which is useful for brain training.  This goes against the “less is more
+(effective)” data visualization philosophy, however if the human neocortex is
 presented with 3-sigma boundaries enough times, it will probably eventually be
 able to calculate 3-sigma boundaries in any timeseries, reasonably well.</p>
 <p>Bearing in mind that when we view anomalous timeseries in the UI we are
@@ -379,9 +379,9 @@ file.</li>
 file and a Crucible check file.</li>
 <li>If no Mirage parameter, but the metric matches an <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple
 namespace, Analyzer then checks if an Analyzer alert key exists for
-the metric by querying the metric&#8217;s Analyzer alert key in Redis.</li>
+the metric by querying the metric’s Analyzer alert key in Redis.</li>
 <li>If no alert key, Analyzer sends alert/s to the configured alerters
-and sets the metric&#8217;s Analyzer alert key for <code class="xref py py-mod docutils literal"><span class="pre">settings.EXPIRATION_TIME</span></code>
+and sets the metric’s Analyzer alert key for <code class="xref py py-mod docutils literal"><span class="pre">settings.EXPIRATION_TIME</span></code>
 seconds.</li>
 <li>Analyzer will alert for an Analyzer metric that has been returned from
 Ionosphere as anomalous having not matched any known features profile or
@@ -411,7 +411,7 @@ layers.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -433,7 +433,7 @@ layers.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

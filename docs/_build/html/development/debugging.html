@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - Debugging &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Development - Debugging &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development - Ionosphere" href="ionosphere.html"/>
         <link rel="prev" title="Development - Webapp" href="webapp.html"/> 
@@ -116,7 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What's new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
@@ -183,7 +183,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/development/debugging.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/development/debugging.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -196,10 +196,10 @@
   <div class="section" id="development-debugging">
 <h1>Development - Debugging<a class="headerlink" href="#development-debugging" title="Permalink to this headline">¶</a></h1>
 <p>A large number of tools and techniques have been used to get to grips
-with the Skyline code base, it&#8217;s debugging, profiling, performance tuning, memory
-leaking and so forth.  These tools and techniques give &#8220;some&#8221; insight
+with the Skyline code base, it’s debugging, profiling, performance tuning, memory
+leaking and so forth.  These tools and techniques give “some” insight
 into the number of objects, calls, reference counts, etc, etc.  A myriad maze of
-Python&#8217;s intestinal details, where it is possible to get lost and tangled up
+Python’s intestinal details, where it is possible to get lost and tangled up
 fairly quickly.  Python being such a vast and mature ecosystem, the choices are
 vast.  The following is for future reference on what works, where and how and
 how well.  Due to the number of objects and calls that Skyline makes in a run
@@ -220,11 +220,11 @@ useful for future reference.</p>
 <a class="reference external" href="http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks">http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks</a></p>
 <p>There are only a few reasons for memory leaks in Python.</p>
 <ul class="simple">
-<li>There&#8217;s some object you are opening (repeatedly) but not closing - <code class="docutils literal"><span class="pre">plt.savefig</span></code></li>
+<li>There’s some object you are opening (repeatedly) but not closing - <code class="docutils literal"><span class="pre">plt.savefig</span></code></li>
 <li>You are repeatedly adding data to a list/dict and not removing the old data.
-(for instance, if you&#8217;re appending data to an array instead of replacing the
+(for instance, if you’re appending data to an array instead of replacing the
 array) - <code class="docutils literal"><span class="pre">self.mirage_metrics.append(metric)</span></code></li>
-<li>There&#8217;s a memory leak in one of the libraries you&#8217;re calling. (unlikely)</li>
+<li>There’s a memory leak in one of the libraries you’re calling. (unlikely)</li>
 </ul>
 <p>This is <code class="docutils literal"><span class="pre">True</span></code>, the hard part is finding 1 and 2 if you do not know what you
 are looking for or how to find it.</p>
@@ -270,7 +270,7 @@ memory usage where in terms of when functions where executed and after the
 process the memory usage incremented up and the increment remained.</p>
 <p>Days were spent trying to glean this exact information with all the below
 mentioned tools and techniques, but in terms of debugging and understanding
-Analyzer&#8217;s memory usage and allocation none provided exact enough actionable
+Analyzer’s memory usage and allocation none provided exact enough actionable
 information, in all likelihood this was probably a result of a PEBKAB type of
 problem and possibly not wielding the tools to their full potential.  That said
 they definitely do provide some insight in other ways.</p>
@@ -413,7 +413,7 @@ in agent.py could not get any Trackable outputs in analyzer.py all None?</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -435,7 +435,7 @@ in agent.py could not get any Trackable outputs in analyzer.py all None?</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

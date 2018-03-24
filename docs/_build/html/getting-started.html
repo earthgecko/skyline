@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Getting started &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/>
         <link rel="prev" title="Requirements" href="requirements.html"/> 
 
@@ -126,7 +126,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -164,7 +164,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/getting-started.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/getting-started.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -194,10 +194,10 @@ equally.</p>
 <p>It helps to think of anomaly detection as an ongoing journey.  Although ideally
 it would be great to be able to computationally detect anomalies with a high
 degree of certainty, there is no getting away from the fact that the more
-<strong>you</strong> learn, &#8220;help&#8221; and tune your anomaly detection, the better it will become.</p>
+<strong>you</strong> learn, “help” and tune your anomaly detection, the better it will become.</p>
 <p>The fact that Skyline <strong>does</strong> computationally detect anomalies with a
 high degree of certainty, can be a problem in itself.  <strong>But</strong> it is not
-Skyline&#8217;s fault that:</p>
+Skyline’s fault that:</p>
 <ul class="simple">
 <li>a lot of your metrics <strong>are</strong> anomalous</li>
 <li>that feeding all your metrics to Skyline and setting alerting on all your
@@ -207,7 +207,7 @@ metric namespaces is too noisy to be generally considered useful</li>
 <div class="section" id="enabling-metrics-incrementally">
 <h2>Enabling metrics incrementally<a class="headerlink" href="#enabling-metrics-incrementally" title="Permalink to this headline">¶</a></h2>
 <p>Skyline was originally pitched to automatically monitor #allthethings, all your
-metrics, it can but...</p>
+metrics, it can but…</p>
 <p>Skyline should have been pitched to monitor your KEY metrics.</p>
 <p>To begin with decide what your 10 most important Graphite metrics are and
 <strong>only</strong> configure <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a> on those
@@ -217,7 +217,7 @@ groups as you get the hang of it.</p>
 </div>
 <div class="section" id="enabling-skyline-modules-incrementally">
 <h2>Enabling Skyline modules incrementally<a class="headerlink" href="#enabling-skyline-modules-incrementally" title="Permalink to this headline">¶</a></h2>
-<p>Skyline&#8217;s modules do different things differently and understanding the process
+<p>Skyline’s modules do different things differently and understanding the process
 and pipeline helps to tune each Skyline module appropriately for your data.</p>
 <p>Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere (and
 Crucible), have their own specific configurations.  These configurations are not
@@ -230,14 +230,14 @@ easier.  Easier than trying to get the whole stack up and running straight off.<
 <h2>Start with Horizon, Analyzer, Webapp and Panorama<a class="headerlink" href="#start-with-horizon-analyzer-webapp-and-panorama" title="Permalink to this headline">¶</a></h2>
 <p>It is advisable to only start the original Horizon, Analyzer and Webapp daemons
 and Panorama initially and take time to understand what Skyline is doing.  Take
-some time to tune Analyzer&#8217;s <code class="docutils literal"><span class="pre">ALERTS</span></code> and learn the patterns in your IMPORTANT
+some time to tune Analyzer’s <code class="docutils literal"><span class="pre">ALERTS</span></code> and learn the patterns in your IMPORTANT
 metrics:</p>
 <ul class="simple">
 <li>which metrics trigger anomalies?</li>
 <li>when the metrics trigger anomalies?</li>
 <li>why/what known events are triggering anomalies?</li>
 <li>are there seasonalities/periodicity in anomalies some metrics?</li>
-<li>what metrics are critical and what metrics are just &#8220;normal&#8221;/expected noise</li>
+<li>what metrics are critical and what metrics are just “normal”/expected noise</li>
 </ul>
 <p>Panorama will help you view what things are triggering as anomalous.</p>
 <p>Once you have got an idea of what you want to anomaly detect on and more
@@ -276,7 +276,7 @@ this can consume a lot of disk space if enabled.</li>
 run algorithms.</li>
 </ol>
 <p>It is not advisable to enable Crucible on any of the other modules unless you
-really want to &#8220;see&#8221; anomalies in great depth.  Crucible is enabled as there is
+really want to “see” anomalies in great depth.  Crucible is enabled as there is
 a Crucible frontend view on the roadmap that will allow the user to test any
 timeseries of any metric directly through the UI.</p>
 </div>
@@ -301,7 +301,7 @@ timeseries of any metric directly through the UI.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -323,7 +323,7 @@ timeseries of any metric directly through the UI.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

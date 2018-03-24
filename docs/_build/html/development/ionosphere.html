@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - Ionosphere &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Development - Ionosphere &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development - tsfresh" href="tsfresh.html"/>
         <link rel="prev" title="Development - Debugging" href="debugging.html"/> 
@@ -116,7 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What's new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
@@ -178,7 +178,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/development/ionosphere.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/development/ionosphere.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -198,7 +198,7 @@ There are 7 apache.sending a day, not 7000 a minute.</p>
 <p>Or there are peaks of 3 on the metric stats_counts.statsd.bad_lines_seen</p>
 <img alt="../_images/21060819.stats_counts.statsd.bad_lines_seen.png" src="../_images/21060819.stats_counts.statsd.bad_lines_seen.png" />
 <p>This is not anomalous.</p>
-<p>Ionosphere&#8217;s goal is to allow us to train Skyline on what is not anomalous.</p>
+<p>Ionosphere’s goal is to allow us to train Skyline on what is not anomalous.</p>
 </div>
 <div class="section" id="almost-a-year-in-review">
 <h2>Almost a year in review<a class="headerlink" href="#almost-a-year-in-review" title="Permalink to this headline">¶</a></h2>
@@ -206,15 +206,15 @@ There are 7 apache.sending a day, not 7000 a minute.</p>
 been sort after.</p>
 <div class="section" id="ramblings-the-development-of-ionosphere">
 <h3>Ramblings - the development of Ionosphere<a class="headerlink" href="#ramblings-the-development-of-ionosphere" title="Permalink to this headline">¶</a></h3>
-<p>The original idea behind Ionosphere was...</p>
+<p>The original idea behind Ionosphere was…</p>
 <p>Ionosphere is a user feedback/input to Skyline that allows for the creation of
-timeseries specific &#8220;algorithms&#8221;.</p>
+timeseries specific “algorithms”.</p>
 <p>Skyline Mirage (and Analyzer) work well on fairly constant rate, high range
 metrics, however on low rate, low range metrics like machine stats metrics it
 tends to be less effective and these types of timeseries make Mirage chatty
 even when set too very high resolution e.g. 730 hours.</p>
 <p>Ionosphere enables the user to create custom algorithms for specific timeseries.
-While defining all the custom &#8220;rules&#8221; to match different types of timeseries and
+While defining all the custom “rules” to match different types of timeseries and
 metrics, much of the recent efforts in anomaly detection have been dedicated to
 creation of automated, algorithmic and machine learning processes doing
 everything with minimal user input, other than some configurations.</p>
@@ -259,11 +259,11 @@ recently updated and provides (among PDC) a number of approaches to time
 series dissimilarities.
 (<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)</li>
 </ul>
-<p>And python maybe RMS - Erol Kalkan · United States Geological Survey, &#8220;Another
+<p>And python maybe RMS - Erol Kalkan · United States Geological Survey, “Another
 approach to compute the differences between two time series is moving window
 root-mean-square. RMS can be run for both series separately. This way, you can
 compare the similarities in energy (gain) level of time series. You may vary the
-window length for best resolution.&#8221; (<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)
+window length for best resolution.” (<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)
 <a class="reference external" href="http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of">http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of</a>-numpy#</p>
 <p>However finding a good similarity measure between time series is a very
 non-trivial task.</p>
@@ -277,7 +277,7 @@ be useful long term. rpy2</p>
 <a class="reference external" href="http://dbgroup.eecs.umich.edu/files/sigmod07timeseries.pdf">http://dbgroup.eecs.umich.edu/files/sigmod07timeseries.pdf</a></li>
 <li><a class="reference external" href="https://www.semanticscholar.org/paper/Benchmarking-dynamic-time-warping-on-nearest-Tselas-Papapetrou/69683d13b7dfac64bd6d8cd6654b617361574baf">https://www.semanticscholar.org/paper/Benchmarking-dynamic-time-warping-on-nearest-Tselas-Papapetrou/69683d13b7dfac64bd6d8cd6654b617361574baf</a></li>
 </ul>
-<p>Aggregation. Further complicates... a lot I think.</p>
+<p>Aggregation. Further complicates… a lot I think.</p>
 <p>Clustering not the way?</p>
 <ul class="simple">
 <li>Clustering of Time Series Subsequences is Meaningless: Implications for
@@ -305,9 +305,9 @@ Skyline and lots of paths and methods, etc have been reviewed and unfortunately
 no simple way can be seen of achieving this in any meaningful way in terms of
 Skyline and it original purpose, anomaly detecting in machine metrics timeseries.
 Although it would be nice to update to the current Skyline stack and pipeline to
-use something not from the 1920&#8217;s, it is alas a fork to far at this point.</p>
-<p>And a bit of 1920&#8217;s with a bit of modern key value and some Python, with a dash
-of &#8220;lets try CONSENSUS&#8221;, does not do bad a job.  Considering off the production
+use something not from the 1920’s, it is alas a fork to far at this point.</p>
+<p>And a bit of 1920’s with a bit of modern key value and some Python, with a dash
+of “lets try CONSENSUS”, does not do bad a job.  Considering off the production
 line and into the digital pipeline, with a sprinkling of new ideas.</p>
 <p>However, not all metrics do well with 3sigma either :)
 Machine learning, scikit-learn, tensorflow, NuPIC, TPOT, k-means, et al are not
@@ -400,7 +400,7 @@ on trained values. If less than x similar, alert, else proceed as normal.</li>
 <h4>Task #1718: review.tsfresh - still in progress<a class="headerlink" href="#task-1718-review-tsfresh-still-in-progress" title="Permalink to this headline">¶</a></h4>
 <p>tsfresh possibly does have the potential to fulfill some of the functionality of
 Ionosphere as described above.</p>
-<p>It is not super fast, quite processor intensive, but... lots of features!!!</p>
+<p>It is not super fast, quite processor intensive, but… lots of features!!!</p>
 </div>
 </div>
 </div>
@@ -411,7 +411,7 @@ Ionosphere as described above.</p>
 a year in the waiting and making.</p>
 <p>A special thanks to &#64;MaxBenChrist, &#64;nils-braun and &#64;jneuff over at
 <a class="reference external" href="https://github.com/blue-yonder/tsfresh">https://github.com/blue-yonder/tsfresh</a></p>
-<p>Well it took a year :)  But... it works :)</p>
+<p>Well it took a year :)  But… it works :)</p>
 <ul class="simple">
 <li>Branch #922: ionosphere - created 2015-12-26 11:21 AM</li>
 <li>Task #1658: Patterning Skyline Ionosphere</li>
@@ -439,15 +439,15 @@ merely attempts to make 3sigma based anomaly detection methods better.  That
 said there may be some within the data science arena that may wish to argue
 that a number of things in the Ionosphere learning method would not necessarily
 hold up to some UCR review or Kaggle competition.  Luckily Ionosphere makes no
-bones in this regard as this is not Ionosphere&#8217;s domain space. Ionosphere&#8217;s
+bones in this regard as this is not Ionosphere’s domain space. Ionosphere’s
 domain space is machine and application metrics, with ambitions for bigger
 things.  Skyline and Ionosphere will find a timeseries Rebra (I reckon) :)</p>
 <p>Ionosphere is the culmination of over 24 months of deconstruction and refitting
-of Etsy&#8217;s now much aged Skyline simple Python anomaly detection (complicated
+of Etsy’s now much aged Skyline simple Python anomaly detection (complicated
 stack) application.</p>
 <p>Ionosphere began with a very, very small goal.  To teach Skyline what things
 were not anomalous.  The journey of trying to build something that would do that
-went from confused, impossible, no idea .... to a multi-generation one-step
+went from confused, impossible, no idea …. to a multi-generation one-step
 learning system, like a timeseries Rebra finder.</p>
 </div>
 </div>
@@ -471,7 +471,7 @@ learning system, like a timeseries Rebra finder.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -493,7 +493,7 @@ learning system, like a timeseries Rebra finder.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

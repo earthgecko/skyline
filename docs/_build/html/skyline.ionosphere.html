@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.ionosphere package &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline.ionosphere package &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.mirage package" href="skyline.mirage.html"/>
         <link rel="prev" title="skyline.horizon package" href="skyline.horizon.html"/> 
@@ -116,7 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -151,7 +151,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -190,7 +190,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/skyline.ionosphere.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/skyline.ionosphere.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -245,7 +245,7 @@ processes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>insert</strong> (<em>str</em>) &#8211; the insert string</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>insert</strong> (<em>str</em>) – the insert string</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int</td>
 </tr>
@@ -263,10 +263,10 @@ processes.</p>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -295,7 +295,7 @@ processes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>i</strong> &#8211; python process id</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>i</strong> – python process id</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">returns True</td>
 </tr>
@@ -311,7 +311,7 @@ processes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) – the path and filename to the metric variables files</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars list or <code class="docutils literal"><span class="pre">False</span></code></td>
 </tr>
@@ -342,8 +342,8 @@ is terminated this prevents any memory leaks in the parent.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> (<em>object</em>) &#8211; python process id</li>
-<li><strong>metric_check_file</strong> (<em>str</em>) &#8211; full path to the metric check file</li>
+<li><strong>i</strong> (<em>object</em>) – python process id</li>
+<li><strong>metric_check_file</strong> (<em>str</em>) – full path to the metric check file</li>
 </ul>
 </td>
 </tr>
@@ -377,7 +377,7 @@ evaluate anomalies against a custom layers boundary algorithm.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric</strong> (<em>str</em>) &#8211; the metric base_name</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric</strong> (<em>str</em>) – the metric base_name</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True or False</td>
 </tr>
@@ -398,7 +398,7 @@ evaluate anomalies against a custom layers boundary algorithm.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) – the path and filename to the metric variables files</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars list or <code class="docutils literal"><span class="pre">False</span></code></td>
 </tr>
@@ -423,7 +423,7 @@ metric from Graphite and save as json.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) &#8211; timestamp at which learn was called</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) – timestamp at which learn was called</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
@@ -462,7 +462,7 @@ features profiles and learn features profiles.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) &#8211; timestamp at which learn was called</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) – timestamp at which learn was called</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True or False</td>
 </tr>
@@ -479,10 +479,10 @@ Redis work set list item has the following elements:</p>
 <ul class="simple">
 <li>Hard - missing a deadline is a total system failure.</li>
 <li>Firm - infrequent deadline misses are tolerable, but may degrade the
-system&#8217;s quality of service. The usefulness of a result is zero after
+system’s quality of service. The usefulness of a result is zero after
 its deadline.</li>
 <li>Soft - the usefulness of a result degrades after its deadline, thereby
-degrading the system&#8217;s quality of service.</li>
+degrading the system’s quality of service.</li>
 </ul>
 <p>references:</p>
 <ul class="simple">
@@ -509,18 +509,18 @@ profile was created later.  This prevents the pollution of metric_timestamp
 training data features profile.  This is a new features profile.  Is it
 generation 0 or generation 1?  The more I think I am edging to generation
 1, however as long as the first automated full_duration profiles that they
-create are generation 1 as well... hmm the generation game... TDB
-- deadline: &#8216;Soft&#8217;</li>
+create are generation 1 as well… hmm the generation game… TDB
+- deadline: ‘Soft’</li>
 <li><strong>learn_fp_automatic</strong> - Create a features profile for the automatic
 created features profile as per the learn_fp_human above.
-- deadline: &#8216;Soft&#8217;</li>
+- deadline: ‘Soft’</li>
 <li><strong>learn_fp_generation</strong> - Create a features profile for the Ionosphere
 training_data metric after <code class="docutils literal"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at
 <code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> have passed and compare to other known
 <code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> features profiles.  If it matches any, then the
 metric training_data is added as features profile incremented by 1
 generation if <code class="docutils literal"><span class="pre">MAX_GENERATIONS</span></code> is not breached.
-- deadline: &#8216;Soft&#8217;</li>
+- deadline: ‘Soft’</li>
 <li><strong>learn_fp_learnt</strong> - Create a features profile for the Ionosphere learnt
 features profile after <code class="docutils literal"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at <code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code>
 whatever those maybe it, will find out.  Copies the training_data dir to
@@ -529,7 +529,7 @@ relaces the metric_timestamp context and the metric_check_file has the
 full_duration replace by the relevant use_full_duration.  Then this
 features profile is created as an incremented generation features profile
 at use_full_duration via learn.
-- deadline: &#8216;Soft&#8217;</li>
+- deadline: ‘Soft’</li>
 </ul>
 </dd></dl>
 
@@ -558,7 +558,7 @@ at use_full_duration via learn.
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -580,7 +580,7 @@ at use_full_duration via learn.
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

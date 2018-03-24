@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.webapp package &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline.webapp package &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="prev" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/> 
 
@@ -115,7 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -151,7 +151,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -190,7 +190,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/skyline.webapp.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/skyline.webapp.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -221,7 +221,7 @@ array and the JSONP file to serve to the browser for the client side
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> – determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
@@ -243,7 +243,7 @@ array and the JSONP file to serve to the browser for the client side
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>thing</strong> (<em>str</em>) &#8211; the thing, e.g. &#8216;algorithm&#8217;</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>thing</strong> (<em>str</em>) – the thing, e.g. ‘algorithm’</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list</td>
 </tr>
@@ -269,8 +269,8 @@ folder</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>requested_timestamp</strong> (<em>str</em>) &#8211; the training data timestamp</li>
-<li><strong>context</strong> (<em>str</em>) &#8211; the request context, training_data or features_profiles</li>
+<li><strong>requested_timestamp</strong> (<em>str</em>) – the training data timestamp</li>
+<li><strong>context</strong> (<em>str</em>) – the request context, training_data or features_profiles</li>
 </ul>
 </td>
 </tr>
@@ -293,9 +293,9 @@ folder</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>requested_timestamp</strong> (<em>str</em>) &#8211; the training data or profile timestamp</li>
-<li><strong>data_for_metric</strong> (<em>str</em>) &#8211; the metric base_name</li>
-<li><strong>context</strong> (<em>str</em>) &#8211; the request context, training_data or features_profiles</li>
+<li><strong>requested_timestamp</strong> (<em>str</em>) – the training data or profile timestamp</li>
+<li><strong>data_for_metric</strong> (<em>str</em>) – the metric base_name</li>
+<li><strong>context</strong> (<em>str</em>) – the request context, training_data or features_profiles</li>
 </ul>
 </td>
 </tr>
@@ -333,7 +333,7 @@ folder</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> (<em>str</em>) &#8211; the features profile id</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> (<em>str</em>) – the features profile id</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
@@ -354,7 +354,7 @@ array of the features profiles that matched the query.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> – determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
@@ -372,7 +372,7 @@ array of the features profiles that matched the query.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> – determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
@@ -390,7 +390,7 @@ array of the features profiles that matched the query.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> &#8211; the features profile layers_id</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> – the features profile layers_id</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
@@ -408,7 +408,7 @@ array of the features profiles that matched the query.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> &#8211; the features profile layers_id</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> – the features profile layers_id</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
@@ -426,7 +426,7 @@ array of the features profiles that matched the query.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) &#8211; the metric base_name</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) – the metric base_name</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
@@ -444,7 +444,7 @@ array of the features profiles that matched the query.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layers_id</strong> &#8211; the layer id to edit</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layers_id</strong> – the layer id to edit</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
@@ -462,7 +462,7 @@ array of the features profiles that matched the query.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> &#8211; the features profile id to validate</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> – the features profile id to validate</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
@@ -481,10 +481,10 @@ array of the features profiles that matched the query.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>timestamp</strong> (<em>str</em>) &#8211; the Ionosphere training_data metric timestamp</li>
-<li><strong>base_name</strong> (<em>str</em>) &#8211; metric base_name</li>
-<li><strong>label</strong> (<em>str</em>) &#8211; the saved training_data label</li>
-<li><strong>hdate</strong> (<em>str</em>) &#8211; human date for the saved training_data</li>
+<li><strong>timestamp</strong> (<em>str</em>) – the Ionosphere training_data metric timestamp</li>
+<li><strong>base_name</strong> (<em>str</em>) – metric base_name</li>
+<li><strong>label</strong> (<em>str</em>) – the saved training_data label</li>
+<li><strong>hdate</strong> (<em>str</em>) – human date for the saved training_data</li>
 </ul>
 </td>
 </tr>
@@ -507,7 +507,7 @@ profiles, the whole family tree.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> &#8211; the features profile id</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> – the features profile id</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
@@ -525,7 +525,7 @@ profiles, the whole family tree.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_ids</strong> &#8211; a list of the the features profile ids to disable</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_ids</strong> – a list of the the features profile ids to disable</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
 </tr>
@@ -544,14 +544,14 @@ profiles, the whole family tree.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>metric</strong> &#8211; all or the metric name</li>
-<li><strong>metric_like</strong> &#8211; False or the metric MySQL like string e.g statsd.%</li>
-<li><strong>get_fp_id</strong> &#8211; None or int</li>
-<li><strong>get_layer_id</strong> &#8211; None or int</li>
-<li><strong>from_timestamp</strong> &#8211; timestamp or None</li>
-<li><strong>until_timestamp</strong> &#8211; timestamp or None</li>
-<li><strong>limit</strong> &#8211; None or number to limit to</li>
-<li><strong>sort</strong> &#8211; DESC or ASC</li>
+<li><strong>metric</strong> – all or the metric name</li>
+<li><strong>metric_like</strong> – False or the metric MySQL like string e.g statsd.%</li>
+<li><strong>get_fp_id</strong> – None or int</li>
+<li><strong>get_layer_id</strong> – None or int</li>
+<li><strong>from_timestamp</strong> – timestamp or None</li>
+<li><strong>until_timestamp</strong> – timestamp or None</li>
+<li><strong>limit</strong> – None or number to limit to</li>
+<li><strong>sort</strong> – DESC or ASC</li>
 </ul>
 </td>
 </tr>
@@ -574,10 +574,10 @@ profiles, the whole family tree.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>matched_id</strong> &#8211; the matched id</li>
-<li><strong>matched_by</strong> &#8211; either features_profile or layers</li>
-<li><strong>metric</strong> &#8211; metric base_name</li>
-<li><strong>requested_timestamp</strong> &#8211; the timestamp of the features profile</li>
+<li><strong>matched_id</strong> – the matched id</li>
+<li><strong>matched_by</strong> – either features_profile or layers</li>
+<li><strong>metric</strong> – metric base_name</li>
+<li><strong>requested_timestamp</strong> – the timestamp of the features profile</li>
 </ul>
 </td>
 </tr>
@@ -603,10 +603,10 @@ profiles, the whole family tree.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_name</strong> (<em>str</em>) &#8211; The metric name</li>
-<li><strong>pattern</strong> (<em>str</em>) &#8211; the ALERT pattern</li>
-<li><strong>alerter</strong> (<em>str</em>) &#8211; the alerter name e.g. smtp, syslog, hipchat, pagerdaty</li>
-<li><strong>second_order_resolution_hours</strong> (<em>int</em>) &#8211; (optional) The number of hours that
+<li><strong>base_name</strong> (<em>str</em>) – The metric name</li>
+<li><strong>pattern</strong> (<em>str</em>) – the ALERT pattern</li>
+<li><strong>alerter</strong> (<em>str</em>) – the alerter name e.g. smtp, syslog, hipchat, pagerdaty</li>
+<li><strong>second_order_resolution_hours</strong> (<em>int</em>) – (optional) The number of hours that
 Mirage should surface the metric timeseries for</li>
 </ul>
 </td>
@@ -615,13 +615,13 @@ Mirage should surface the metric timeseries for</li>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><p>str</p>
-<p>(&#8216;metric3&#8217;, &#8216;hipchat&#8217;, 600),
+<p>(‘metric3’, ‘hipchat’, 600),
 # Log all anomalies to syslog
-(&#8216;stats.&#8217;, &#8216;syslog&#8217;, 1),
+(‘stats.’, ‘syslog’, 1),
 # Wildcard namespaces can be used as well
-(&#8216;metric4.thing.*.requests&#8217;, &#8216;stmp&#8217;, 900),
+(‘metric4.thing.*.requests’, ‘stmp’, 900),
 # However beware of wildcards as the above wildcard should really be
-(&#8216;metric4.thing..*..requests&#8217;, &#8216;stmp&#8217;, 900),</p>
+(‘metric4.thing..*..requests’, ‘stmp’, 900),</p>
 </p>
 </td>
 </tr>
@@ -817,7 +817,7 @@ key is expected to be URL-safe base64 encoded</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -839,7 +839,7 @@ key is expected to be URL-safe base64 encoded</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mirage &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Mirage &mdash; Skyline 1.1.10-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
         <link rel="next" title="Boundary" href="boundary.html"/>
         <link rel="prev" title="Analyzer Optimizations" href="analyzer-optimizations.html"/> 
 
@@ -107,7 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#what-mirage-can-and-cannot-do">What Mirage can and cannot do</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-difference-between-the-analyzer-and-mirage-views-of-a-timeseries">The difference between the Analyzer and Mirage views of a timeseries</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#a-real-world-example-with-tenfold-com">A real world example with tenfold.com</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mirage-normalizes">Mirage &#8220;normalizes&#8221;</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mirage-normalizes">Mirage “normalizes”</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-and-enabling-mirage">Setting up and enabling Mirage</a><ul>
@@ -134,7 +134,7 @@
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What's new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -172,7 +172,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/mirage.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/mirage.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -187,7 +187,7 @@
 <p>The Mirage service is responsible for analyzing selected timeseries at custom
 time ranges when a timeseries seasonality does not fit within
 <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>.  Mirage allows for testing of real time data
-and algorithms in parallel to Analyzer.  Mirage was inspired by Abe Stanway&#8217;s
+and algorithms in parallel to Analyzer.  Mirage was inspired by Abe Stanway’s
 Crucible and the desire to extend the temporal data pools available to Skyline
 in an attempt to handle seasonality better, reduce noise and increase signal,
 specifically on seasonal metrics.</p>
@@ -206,10 +206,10 @@ just like Analyzer does.</li>
 <p><a class="reference external" href="_images/skyline.mirage.overview.png">Fullsize overview image</a> for a clearer picture.</p>
 <div class="section" id="why-mirage">
 <h3>Why Mirage?<a class="headerlink" href="#why-mirage" title="Permalink to this headline">¶</a></h3>
-<p>Analyzer&#8217;s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> somewhat limits Analyzer&#8217;s usefulness
+<p>Analyzer’s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> somewhat limits Analyzer’s usefulness
 for metrics that have a seasonality / periodicity that is greater than
 <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>.  This means Analyzer is not great in terms of
-&#8220;seeing the bigger picture&#8221; when it comes to metrics that have a weekly pattern
+“seeing the bigger picture” when it comes to metrics that have a weekly pattern
 as well as a daily patterns for example.</p>
 <p>Increasing <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> to anything above 24 hours (86400) is
 not necessarily realistic or useful, because the greater the
@@ -248,9 +248,9 @@ consumption in an office building is a good example of a multi-seasonal data set
 increase as it normally does during the week days. Analyzer would probably find
 the metric to be anomalous if <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> was set to 86400 (24
 hours), Saturday morning would seem anomalous.</p>
-<p>However, if the metric&#8217;s alert tuple was set up with a
+<p>However, if the metric’s alert tuple was set up with a
 <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> of 168, Mirage would analyze the data point
-against a week&#8217;s worth of data points and the Saturday and Sunday daytime data
+against a week’s worth of data points and the Saturday and Sunday daytime data
 points would have less probability of triggering as anomalous.  <em>The above
 image is plotted as if the Mirage</em> <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> <em>was set to
 172 hours just so that the trailing edges can be seen.</em></p>
@@ -263,8 +263,8 @@ image is plotted as if the Mirage</em> <code class="docutils literal"><span clas
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">blak3r2:</th><td class="field-body">Our app logs phone calls for businesses and I want to be able to
 detect when VIP phone systems go down or act funny and begin flooding us with
-events.  Our work load is very noisy from 9-5pm... where 9-5 is different for
-each customer depending on their workload so thresholding and modeling isn&#8217;t
+events.  Our work load is very noisy from 9-5pm… where 9-5 is different for
+each customer depending on their workload so thresholding and modeling isn’t
 good.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">earthgecko:</th><td class="field-body">Yes, Mirage is great at user defined seasonality, in your case
@@ -279,14 +279,14 @@ resolution, even at the weekends.</td>
 </table>
 </div>
 <div class="section" id="mirage-normalizes">
-<h3>Mirage &#8220;normalizes&#8221;<a class="headerlink" href="#mirage-normalizes" title="Permalink to this headline">¶</a></h3>
-<p>Mirage is a &#8220;tuning&#8221; tool for seasonal metrics and it is important to understand
+<h3>Mirage “normalizes”<a class="headerlink" href="#mirage-normalizes" title="Permalink to this headline">¶</a></h3>
+<p>Mirage is a “tuning” tool for seasonal metrics and it is important to understand
 that Mirage is probably using aggregated data (unless your Graphite is not using
 retentions and aggregating) and due to this Mirage will lose some resolution
 resulting in it being less sensitive to anomalies than Analyzer is.</p>
-<p>So Mirage does some &#8220;normalizing&#8221; if your have aggregations in Graphite (e.g
+<p>So Mirage does some “normalizing” if your have aggregations in Graphite (e.g
 retentions), however it is analyzing the timeseries at the aggregated resolution
-so it is &#8220;normalised&#8221; as the data point that Analyzer triggered on is ALSO
+so it is “normalised” as the data point that Analyzer triggered on is ALSO
 aggregated in the timeseries resolution that Mirage is analyzing.
 Intuitively one may think it may miss it in the aggregation then.  This is true
 to an extent, but Analyzer will likely trigger multiple times if the metric
@@ -319,7 +319,7 @@ it has no <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTI
 <p>To enable Analyzer to send the metric to Mirage we append the metric alert tuple
 in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> with the <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> value.
 Below we have used 168 hours to get Mirage to analyze <strong>any</strong> anomalous metric
-in the &#8216;stats_counts.http.rpm.publishers.*&#8217; namespace using using 7 days worth
+in the ‘stats_counts.http.rpm.publishers.*’ namespace using using 7 days worth
 of timeseries data from Graphite:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
 <span class="c1">#          (&#39;stats_counts.http.rpm.publishers.*&#39;, &#39;smtp&#39;, 300),  # --&gt; Analyzer sends to alerter</span>
@@ -435,7 +435,7 @@ as anomalous having not matched any known features profile or layers.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -457,7 +457,7 @@ as anomalous having not matched any known features profile or layers.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.1.10-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

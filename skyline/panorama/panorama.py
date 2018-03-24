@@ -45,7 +45,7 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_PANORAMA_DEBUG = settings.ENABLE_PANORAMA_DEBUG
 except:
-    logger.error('error :: cannot determine ENABLE_PANORAMA_DEBUG from settings' % skyline_app)
+    logger.error('error :: cannot determine ENABLE_PANORAMA_DEBUG from settings')
     ENABLE_PANORAMA_DEBUG = False
 
 try:
@@ -635,8 +635,8 @@ class Panorama(Thread):
         # Determine id of something thing
         def determine_id(table, key, value):
             """
-            Get the id of something from Redis or the database and insert a new
-            record if one does not exist for the value.
+            Get the id of something from Redis or the database and create a new
+            Redis key with the value if one does not exist.
 
             :param table: table name
             :param key: key name
