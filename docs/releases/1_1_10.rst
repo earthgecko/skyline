@@ -1,14 +1,12 @@
-=============================
-1.1.9 - the ionosphere branch
-=============================
+==============================
+1.1.10 - the ionosphere branch
+==============================
 
-v1.1.9-ionosphere - Dec 28, 2017
+v1.1.10-ionosphere - Mar 24, 2018
 
 Changes
 -------
 
-- Bumped to v1.1.9
-- Change Boundary to only send to Panorama on alert (Task #2236) - fixed some
-  minor bugs related to the tmp_panaroma_anomaly_file and add missing move_file
-  argument in boundary.py.  Added algorithm as it is required if the metric has
-  multiple rules covering a number of algorithms.
+- Bumped to v1.1.10
+- Release to fixed #45 MySQL key_block_size (Bug #2340) https://github.com/earthgecko/skyline/issues/45
+- Minor corrections to a log line in ionosphere and panorama

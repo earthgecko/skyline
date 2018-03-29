@@ -408,6 +408,8 @@ America/Porto_Velho
 
 America/Puerto_Rico
 
+America/Punta_Arenas
+
 America/Rainy_River
 
 America/Rankin_Inlet
@@ -518,6 +520,8 @@ Asia/Ashgabat
 
 Asia/Ashkhabad
 
+Asia/Atyrau
+
 Asia/Baghdad
 
 Asia/Bahrain
@@ -557,6 +561,8 @@ Asia/Dili
 Asia/Dubai
 
 Asia/Dushanbe
+
+Asia/Famagusta
 
 Asia/Gaza
 
@@ -687,6 +693,8 @@ Asia/Vientiane
 Asia/Vladivostok
 
 Asia/Yakutsk
+
+Asia/Yangon
 
 Asia/Yekaterinburg
 
@@ -965,6 +973,8 @@ Europe/Samara
 Europe/San_Marino
 
 Europe/Sarajevo
+
+Europe/Saratov
 
 Europe/Simferopol
 
