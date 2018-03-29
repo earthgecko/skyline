@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.0.1 - the crucible branch &mdash; Skyline 1.1.11-stable documentation</title>
+  <title>1.1.11 - the ionosphere branch &mdash; Skyline 1.1.11-stable documentation</title>
   
 
   
@@ -37,8 +37,8 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Skyline 1.1.11-stable documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.0.0 - the crucible branch" href="1_0_0.html"/>
-        <link rel="prev" title="1.0.2 - the crucible branch" href="1_0_2.html"/> 
+        <link rel="next" title="1.1.10 - the ionosphere branch" href="1_1_10.html"/>
+        <link rel="prev" title="Release Notes" href="../releases.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -116,7 +116,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="1_1_11.html">1.1.11 - the ionosphere branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.1.11 - the ionosphere branch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#changes">Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#script-usage">Script usage</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="1_1_10.html">1.1.10 - the ionosphere branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_1_9.html">1.1.9 - the ionosphere branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_1_8.html">1.1.8 - the ionosphere branch</a></li>
@@ -135,7 +139,7 @@
 <li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
 </ul>
 </li>
@@ -175,11 +179,11 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.0.1 - the crucible branch</li>
+    <li>1.1.11 - the ionosphere branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_0_1.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_1_11.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -189,32 +193,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="the-crucible-branch">
-<h1>1.0.1 - the crucible branch<a class="headerlink" href="#the-crucible-branch" title="Permalink to this headline">¶</a></h1>
-<p>This is a minor update to the the crucible branch which fixes a few bugs and
-some documentation corrections and additions.  It also adds a Redis data graph
-to the Analyzer alerter see
-<a class="reference external" href="../analyzer.html#analyzer-smtp-alert-graphs">Analyzer SMTP alert graphs</a></p>
-<p>Changes include:</p>
+  <div class="section" id="the-ionosphere-branch">
+<h1>1.1.11 - the ionosphere branch<a class="headerlink" href="#the-ionosphere-branch" title="Permalink to this headline">¶</a></h1>
+<p>v1.1.11-ionosphere - Mar 29, 2018</p>
+<div class="section" id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>blak3r2 patch-5 <a class="reference external" href="https://github.com/earthgecko/skyline/pull/12">https://github.com/earthgecko/skyline/pull/12</a> related to
-<code class="docutils literal"><span class="pre">use</span> <span class="pre">skyline;</span></code></li>
-<li>Fixed a determine_median error, related to an error that crept in testing
-although it is not currently used, it was included incorrectly as in
-patterning the value range of the timeseries had has already been panda.Series
-into an array.</li>
-<li>Corrected path as per blak3r2 blak3r2:patch-3 as per
-https://github.com/earthgecko/skyline/pull/11/files</li>
-<li>Added matplotlib Redis data graph to alerters - this adds a matplotlib plot
-image to the smtp alert with additional details showing the 3sigma upper (and
-if applicable lower) bounds and the mean.</li>
-<li>Added <a class="reference internal" href="../skyline.html#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><code class="xref py py-mod docutils literal"><span class="pre">settings.PLOT_REDIS_DATA</span></code></a> to the settings.py</li>
-<li>Added a note about expected installation pip times</li>
-<li>Updated Python version references in docs from 2.7.11 to 2.7.12</li>
-<li>Added docs/skyline.simplified.workflow.uml and docs/skyline.uml for a workflow
-diagram with some annotations - things clustered by role</li>
-<li>Bumped up to version 1.0.1</li>
+<li>Bumped to v1.1.11</li>
+<li>Adds a helper script to create any missing <cite>z_fp_</cite> and <cite>z_ts_</cite> tables that are
+missing if MySQL was updated to 5.7, related to #45 MySQL key_block_size (<a class="reference external" href="https://github.com/earthgecko/skyline/issues/45">https://github.com/earthgecko/skyline/issues/45</a>)
+(Bug #2340) - skyline/tsfresh_features/autobuild_features_profile_tables.py</li>
 </ul>
+</div>
+<div class="section" id="script-usage">
+<h2>Script usage<a class="headerlink" href="#script-usage" title="Permalink to this headline">¶</a></h2>
+<p>Change the Python version and directories as appropriate to your set up.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># BACKUP the skyline MySQL database FIRST</span>
+
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
+
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+<span class="nb">cd</span> /opt/skyline/github/skyline
+python<span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span> skyline/tsfresh_features/autobuild_features_profile_tables.py
+deactivate
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -224,10 +231,10 @@ diagram with some annotations - things clustered by role</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_0_0.html" class="btn btn-neutral float-right" title="1.0.0 - the crucible branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="1_1_10.html" class="btn btn-neutral float-right" title="1.1.10 - the ionosphere branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_0_2.html" class="btn btn-neutral" title="1.0.2 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../releases.html" class="btn btn-neutral" title="Release Notes" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

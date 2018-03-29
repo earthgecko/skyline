@@ -8,7 +8,5 @@ Changes
 -------
 
 - Bumped to v1.1.10
-- Release to fixed #45 MySQL key_block_size (Bug #2340)
+- Release to fixed #45 MySQL key_block_size (Bug #2340) https://github.com/earthgecko/skyline/issues/45
 - Minor corrections to a log line in ionosphere and panorama
-
-
