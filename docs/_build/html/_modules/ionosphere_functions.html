@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.1.10-stable documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.1.11-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.10-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.1.11-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -770,7 +770,10 @@
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;feature_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">DOUBLE</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">mysql_charset</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span>
-            <span class="n">mysql_key_block_size</span><span class="o">=</span><span class="s1">&#39;255&#39;</span><span class="p">,</span>
+            <span class="c1"># @modified 20180324 - Bug #2340: MySQL key_block_size</span>
+            <span class="c1">#                      MySQL key_block_size #45</span>
+            <span class="c1"># Removed as under MySQL 5.7 breaks</span>
+            <span class="c1"># mysql_key_block_size=&#39;255&#39;,</span>
             <span class="n">mysql_engine</span><span class="o">=</span><span class="s1">&#39;InnoDB&#39;</span><span class="p">)</span>
         <span class="n">fp_metric_table</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">checkfirst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">fp_table_created</span> <span class="o">=</span> <span class="kc">True</span>
@@ -864,7 +867,10 @@
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">DOUBLE</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">mysql_charset</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span>
-            <span class="n">mysql_key_block_size</span><span class="o">=</span><span class="s1">&#39;255&#39;</span><span class="p">,</span>
+            <span class="c1"># @modified 20180324 - Bug #2340: MySQL key_block_size</span>
+            <span class="c1">#                      MySQL key_block_size #45</span>
+            <span class="c1"># Removed as under MySQL 5.7 breaks</span>
+            <span class="c1"># mysql_key_block_size=&#39;255&#39;,</span>
             <span class="n">mysql_engine</span><span class="o">=</span><span class="s1">&#39;InnoDB&#39;</span><span class="p">)</span>
         <span class="n">ts_metric_table</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">checkfirst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># ts_table_created = True</span>
@@ -1122,7 +1128,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.10-stable',
+            VERSION:'1.1.11-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

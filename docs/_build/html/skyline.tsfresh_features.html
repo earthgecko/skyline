@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.tsfresh_features package &mdash; Skyline 1.1.10-stable documentation</title>
+  <title>skyline.tsfresh_features package &mdash; Skyline 1.1.11-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.10-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.1.11-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.webapp package" href="skyline.webapp.html"/>
         <link rel="prev" title="skyline.panorama package" href="skyline.panorama.html"/> 
@@ -131,6 +131,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.tsfresh_features package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-tsfresh_features.autobuild_features_profile_tables">skyline.tsfresh_features.autobuild_features_profile_tables module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-tsfresh_features.generate_tsfresh_features">skyline.tsfresh_features.generate_tsfresh_features module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-tsfresh_features">Module contents</a></li>
 </ul>
@@ -201,6 +202,26 @@
 <h1>skyline.tsfresh_features package<a class="headerlink" href="#skyline-tsfresh-features-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-tsfresh_features.autobuild_features_profile_tables">
+<span id="skyline-tsfresh-features-autobuild-features-profile-tables-module"></span><h2>skyline.tsfresh_features.autobuild_features_profile_tables module<a class="headerlink" href="#module-tsfresh_features.autobuild_features_profile_tables" title="Permalink to this headline">¶</a></h2>
+<p>This script creates any missing Ionosphere <cite>z_fp_</cite> and <cite>z_ts_</cite> tables that may be
+missing from the database using the raw data in the IONOSPHERE_DATA_FOLDER if
+there is any.</p>
+<p>Run the script with your relevant paths and Python version for example:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># BACKUP the skyline MySQL database FIRST</span>
+
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
+
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+<span class="nb">cd</span> /opt/skyline/github/skyline
+python<span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span> skyline/tsfresh_features/autobuild_features_profile_tables.py
+deactivate
+</pre></div>
+</div>
 </div>
 <div class="section" id="module-tsfresh_features.generate_tsfresh_features">
 <span id="skyline-tsfresh-features-generate-tsfresh-features-module"></span><h2>skyline.tsfresh_features.generate_tsfresh_features module<a class="headerlink" href="#module-tsfresh_features.generate_tsfresh_features" title="Permalink to this headline">¶</a></h2>
@@ -275,7 +296,7 @@ deactivate
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.10-stable',
+            VERSION:'1.1.11-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
