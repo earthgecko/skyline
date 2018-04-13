@@ -1,27 +1,27 @@
-skyline.crucible package
-========================
+skyline\.crucible package
+=========================
 
 Submodules
 ----------
 
-skyline.crucible.agent module
------------------------------
+skyline\.crucible\.agent module
+-------------------------------
 
 .. automodule:: crucible.agent
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline.crucible.crucible module
---------------------------------
+skyline\.crucible\.crucible module
+----------------------------------
 
 .. automodule:: crucible.crucible
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline.crucible.crucible_algorithms module
--------------------------------------------
+skyline\.crucible\.crucible\_algorithms module
+----------------------------------------------
 
 .. automodule:: crucible.crucible_algorithms
     :members:

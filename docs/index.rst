@@ -31,6 +31,7 @@ Contents:
   webapp
   ionosphere
   tsfresh
+  luminosity
   redis-integration
   skyline-and-friends
   logging

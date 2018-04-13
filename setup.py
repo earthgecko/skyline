@@ -18,7 +18,7 @@ import os
 # import skyline
 # import skyline_version
 # VERSION = skyline_version.__version__
-VERSION = '1.1.0'
+VERSION = '1.2.0'
 
 # @added 20161127 - Branch #922: ionosphere
 # Added setup_package
@@ -65,6 +65,7 @@ def setup_package():
         #     'gunicorn==19.6.0'
         # ],
     )
+
 
 if __name__ == '__main__':
     print('Starting')

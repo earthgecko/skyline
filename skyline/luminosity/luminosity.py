@@ -57,8 +57,6 @@ except:
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
-max_age_seconds = settings.IONOSPHERE_CHECK_MAX_AGE
-
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -113,6 +111,55 @@ class Luminosity(Thread):
         except:
             exit(0)
 
+    def mysql_insert(self, insert):
+        """
+        Insert data into mysql table
+
+        :param insert: the insert string
+        :type insert: str
+        :return: int
+        :rtype: int or boolean
+
+        - **Example usage**::
+
+            query = 'insert into host (host) VALUES (\'this_host\')'
+            result = self.mysql_insert(query)
+
+        .. note::
+            - If the MySQL query fails a boolean will be returned not a tuple
+                * ``False``
+                * ``None``
+
+        """
+
+        try:
+            cnx = mysql.connector.connect(**config)
+        except mysql.connector.Error as err:
+            logger.error('error :: mysql error - %s' % str(err))
+            logger.error('error :: failed to connect to mysql')
+            raise
+
+        if cnx:
+            try:
+                cursor = cnx.cursor()
+                cursor.execute(insert)
+                inserted_id = cursor.lastrowid
+                # Make sure data is committed to the database
+                cnx.commit()
+                cursor.close()
+                cnx.close()
+                return inserted_id
+            except mysql.connector.Error as err:
+                logger.error('error :: mysql error - %s' % str(err))
+                logger.error('Failed to insert record')
+                cnx.close()
+                raise
+        else:
+            cnx.close()
+            return False
+
+        return False
+
     def spin_process(self, i, anomaly_id):
         """
         Assign an anomalous metric and determine correlated metrics
@@ -157,7 +204,7 @@ class Luminosity(Thread):
         if settings.MEMCACHE_ENABLED:
             try:
                 memcache_key = '%s.last.processed.anomaly.id' % skyline_app
-                self.memcache_client.set(memcache_key, str(anomaly_id))
+                self.memcache_client.set(memcache_key, int(anomaly_id))
                 logger.info('processed - set the memcache key - %s - %s' % (memcache_key, str(anomaly_id)))
             except:
                 logger.error('error :: failed to set  the memcache key - %s - %s' % (memcache_key, str(anomaly_id)))
@@ -171,6 +218,7 @@ class Luminosity(Thread):
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: processing correlations')
+            return False
 
         metrics_str = ''
         for metric_name in correlated_metrics:
@@ -187,6 +235,7 @@ class Luminosity(Thread):
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: querying MySQL - SELECT id,metric FROM metrics WHERE metric in (%s)' % str(metrics_str))
+            return False
 
         correlated_metrics_list = []
         for metric_id, metric in results:
@@ -199,29 +248,33 @@ class Luminosity(Thread):
                         if shifted < 2:
                             luminosity_correlations.append([anomaly_id, int(metric_id), coefficient, shifted, shifted_coefficient])
             first_value_not_added = True
-            values_string = 'INSERT INTO luminosity (anomaly_id, metric_id, coefficient, shifted, shifted_coefficient) VALUES '
+            values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES '
             for anomaly_id, metric_id, coefficient, shifted, shifted_coefficient in luminosity_correlations:
                 ins_values = '(%s,%s,%s,%s,%s)' % (str(anomaly_id),
                                                    str(metric_id),
-                                                   str(round(coefficient, 6)),
+                                                   str(round(coefficient, 5)),
                                                    str(shifted),
-                                                   str(round(shifted_coefficient, 6)))
+                                                   str(round(shifted_coefficient, 5)))
                 if first_value_not_added:
                     first_value_not_added = False
-                    values_string = 'INSERT INTO luminosity (anomaly_id, metric_id, coefficient, shifted, shifted_coefficient) VALUES %s' % ins_values
+                    values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES %s' % ins_values
                 else:
                     new_values_string = '%s,%s' % (values_string, ins_values)
                     values_string = new_values_string
             new_values_string = '%s;' % values_string
             values_string = new_values_string
-            logger.info('debug insert string :: %s' % str(values_string))
+            # logger.info('debug insert string :: %s' % str(values_string))
             # 'INSERT INTO luminosity (anomaly_id, metric_id, coefficient, shifted, shifted_coefficient) VALUES (68882,619,1.0,0,1.0),...,(68882,489,1.0,0,1.0);'
             # Needs a mysql_insert not SQLAlchemy
+            luminosity_populated = False
+            try:
+                self.mysql_insert(values_string)
+                luminosity_populated = True
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: MySQL insert - %s' % str(values_string))
 
-        if sorted_correlations:
-            return True
-        else:
-            return False
+        return luminosity_populated
 
     def run(self):
         """
@@ -287,23 +340,54 @@ class Luminosity(Thread):
             while True:
                 process_anomaly_id = None
                 last_processed_anomaly_id = None
+                memcache_last_processed_anomaly_id_data = False
                 # Check memcached before MySQL
+                memcache_key = '%s.last.processed.anomaly.id' % skyline_app
                 if settings.MEMCACHE_ENABLED:
                     try:
-                        last_processed_anomaly_id_key = '%s.last_processed.anomaly_id' % (skyline_app)
-                        last_processed_anomaly_id = self.memcache_client.get(last_processed_anomaly_id_key)
+                        last_processed_anomaly_id = self.memcache_client.get(memcache_key)
                         # if memcache does not have the key the response to the
                         # client is None, it does not except
-                        if last_processed_anomaly_id is not None:
-                            logger.info('last_processed_anomaly_id found in memcache - %s' % str(last_processed_anomaly_id))
                     except:
-                        logger.error('error :: failed to get %s from memcache' % last_processed_anomaly_id_key)
+                        logger.error('error :: failed to get %s from memcache' % memcache_key)
                     try:
                         self.memcache_client.close()
                     except:
                         logger.error('error :: failed to close memcache_client')
-                    if last_processed_anomaly_id:
-                        logger.info('using memcache %s key data - %s' % (last_processed_anomaly_id_key, str(last_processed_anomaly_id)))
+
+                if last_processed_anomaly_id:
+                    logger.info('last_processed_anomaly_id found in memcache - %s' % str(last_processed_anomaly_id))
+                    memcache_last_processed_anomaly_id_data = True
+                else:
+                    logger.info('last_processed_anomaly_id key was NOT found in memcache - %s' % str(last_processed_anomaly_id))
+
+                if not last_processed_anomaly_id:
+                    query = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
+                    results = None
+                    try:
+                        results = mysql_select(skyline_app, query)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: MySQL quey failed - %s' % query)
+                    if results:
+                        try:
+                            last_processed_anomaly_id = int(results[0][0])
+                            logger.info('last_processed_anomaly_id found from DB - %s' % str(last_processed_anomaly_id))
+                        except:
+                            logger.error(traceback.format_exc())
+
+                        if last_processed_anomaly_id and settings.MEMCACHE_ENABLED:
+                            if not memcache_last_processed_anomaly_id_data:
+                                logger.info('Populating memcache with DB result - %s' % str(last_processed_anomaly_id))
+                                try:
+                                    self.memcache_client.set(memcache_key, int(last_processed_anomaly_id))
+                                    logger.info('populated memcache key %s with %s' % (memcache_key, str(last_processed_anomaly_id)))
+                                except:
+                                    logger.error('error :: failed to set  the memcache key - %s - %s' % (memcache_key, str(last_processed_anomaly_id)))
+                                try:
+                                    self.memcache_client.close()
+                                except:
+                                    logger.error('error :: failed to close memcache_client')
 
                 if not last_processed_anomaly_id:
                     # Check MySQL
@@ -320,32 +404,32 @@ class Luminosity(Thread):
                         logger.info('found new anomaly id to process from the DB - %s' % str(process_anomaly_id))
                     else:
                         logger.info('no new anomalies in the anomalies table')
-                else:
-                    query = 'SELECT * FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
-                    results = None
-                    try:
-                        results = mysql_select(skyline_app, query)
-                    except:
-                        logger.error('error :: MySQL quey failed - %s' % query)
-                    if results:
-                        try:
-                            process_anomaly_id = int(results[0][0])
-                            logger.info('found the next new anomaly id to process from the DB- %s' % str(process_anomaly_id))
-                            last_processed_anomaly_id = process_anomaly_id - 1
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: from query - %s' % query)
-                    else:
-                        logger.info('no new anomalies in the anomalies table')
 
-                if isinstance(last_processed_anomaly_id, int):
-                    if isinstance(process_anomaly_id, int):
-                        if last_processed_anomaly_id == process_anomaly_id:
-                            logger.info('anomaly id already processed - %s' % str(process_anomaly_id))
-                            process_anomaly_id = None
+                query = 'SELECT * FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
+                results = None
+                try:
+                    results = mysql_select(skyline_app, query)
+                except:
+                    logger.error('error :: MySQL quey failed - %s' % query)
+                if results:
+                    try:
+                        process_anomaly_id = int(results[0][0])
+                        logger.info('found the next new anomaly id to process from the DB - %s' % str(process_anomaly_id))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: from query - %s' % query)
+                else:
+                    logger.info('no new anomalies in the anomalies table')
+
+                if process_anomaly_id and last_processed_anomaly_id:
+                    if isinstance(last_processed_anomaly_id, int):
+                        if isinstance(process_anomaly_id, int):
+                            if last_processed_anomaly_id == process_anomaly_id:
+                                logger.info('anomaly id already processed - %s' % str(process_anomaly_id))
+                                process_anomaly_id = None
 
                 if not process_anomaly_id:
-                    logger.info('sleeping 20 no anomalies to correlate')
+                    logger.info('sleeping 20 no anomalies to correlate - last processed anomaly id - %s' % str(last_processed_anomaly_id))
                     sleep(20)
                     up_now = time()
                     # Report app up
@@ -447,3 +531,17 @@ class Luminosity(Thread):
                 if p.is_alive():
                     logger.info('stopping spin_process - %s' % (str(p.is_alive())))
                     p.join()
+
+            process_runtime = time() - now
+            if process_runtime < 10:
+                sleep_for = (10 - process_runtime)
+                logger.info('sleeping for %.2f seconds due to low run time...' % sleep_for)
+                sleep(sleep_for)
+                try:
+                    del sleep_for
+                except:
+                    logger.error('error :: failed to del sleep_for')
+            try:
+                del process_runtime
+            except:
+                logger.error('error :: failed to del process_runtime')

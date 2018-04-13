@@ -1650,3 +1650,11 @@ MEMCACHED_SERVER_PORT = 11211
 :var MEMCACHE_SERVER_PORT: The port of the memcached server
 :vartype MEMCACHE_SERVER_IP: int
 """
+
+LUMINOSITY_PROCESSES = 1
+"""
+:var LUMINOSITY_PROCESSES: This is the number of Luminosity processes to run.
+:vartype LUMINOSITY_PROCESSES: int
+"""
+
+ENABLE_LUMINOSITY_DEBUG = False

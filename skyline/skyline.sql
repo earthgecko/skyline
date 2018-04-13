@@ -25,28 +25,33 @@ CREATE TABLE IF NOT EXISTS `hosts` (
   `host` VARCHAR(255) NOT NULL COMMENT 'host name, e.g. skyline-prod-1',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
-  INDEX `host_id` (`id`, `host`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+# @modified 20180413 - Bug #2340: MySQL key_block_size
+#                      MySQL key_block_size #45
+# Removed KEY_BLOCK_SIZE=255 from all CREATE TABLE statements as under
+# MySQL 5.7 breaks
+#  INDEX `host_id` (`id`, `host`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+  INDEX `host_id` (`id`, `host`)) ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS `apps` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'app unique id',
   `app` VARCHAR(255) NOT NULL COMMENT 'app name, e.g. analyzer',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
-  INDEX `app` (`id`,`app`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+  INDEX `app` (`id`,`app`)) ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS `algorithms` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'algorithm unique id',
   `algorithm` VARCHAR(255) NOT NULL COMMENT 'algorithm name, e.g. least_squares`',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (id),
-  INDEX `algorithm_id` (`id`,`algorithm`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+  INDEX `algorithm_id` (`id`,`algorithm`)) ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS `sources` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'source unique id',
   `source` VARCHAR(255) NOT NULL COMMENT 'name of the data source, e.g. graphite, Kepler, webcam',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
   PRIMARY KEY (`id`),
-  INDEX `app` (`id`,`source` ASC)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+  INDEX `app` (`id`,`source` ASC)) ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS `metrics` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'metric unique id',
@@ -63,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `metrics` (
   `max_generations` INT DEFAULT 5 COMMENT 'Ionosphere learn - the maximum number of generations that can be learnt for this metric',
   `max_percent_diff_from_origin` DOUBLE DEFAULT 7.0 COMMENT 'Ionosphere learn - the maximum percentage difference that a learn features profile sum can be from the original human generated features profile',
   PRIMARY KEY (id),
-  INDEX `metric` (`id`,`metric`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
+  INDEX `metric` (`id`,`metric`)) ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS `anomalies` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'anomaly unique id',
@@ -98,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
 # been created.
 */
   INDEX `anomaly` (`id`,`metric_id`,`host_id`,`app_id`,`source_id`,`anomaly_timestamp`,
-                   `full_duration`,`triggered_algorithms`,`created_timestamp`)  KEY_BLOCK_SIZE=255)
+                   `full_duration`,`triggered_algorithms`,`created_timestamp`))
     ENGINE=InnoDB;
 
 /*
@@ -242,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 /* # @added 20170305 - Feature #1960: ionosphere_layers */
   `layers_id` INT(11) DEFAULT 0 COMMENT 'the id of the ionosphere_layers profile, 0 being none',
   PRIMARY KEY (id),
-  INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layer_id`)  KEY_BLOCK_SIZE=255)
+  INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layer_id`))
   ENGINE=InnoDB;
 
 /*
@@ -263,7 +268,7 @@ CREATE TABLE IF NOT EXISTS `z_fp_metricid` (
 # in the table cache as required.
 #  INDEX `fp` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 */
-  INDEX `fp` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=InnoDB;
+  INDEX `fp` (`id`,`fp_id`)) ENGINE=InnoDB;
 
 /*
 This is an example metric timeseries table the Ionosphere generated
@@ -283,7 +288,7 @@ CREATE TABLE IF NOT EXISTS `z_ts_metricid` (
 # in the table cache as required.
 #  INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=MyISAM;
 */
-  INDEX `metric` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255) ENGINE=InnoDB;
+  INDEX `metric` (`id`,`fp_id`)) ENGINE=InnoDB;
 
 /*
 # @added 20170107 - Feature #1844: ionosphere_matched DB table
@@ -307,7 +312,7 @@ CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
   `common_features_count` INT(10) DEFAULT 0 COMMENT 'the number of the common calculated features of the not_anomalous timeseries',
   `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
   PRIMARY KEY (id),
-  INDEX `features_profile_matched` (`id`,`fp_id`)  KEY_BLOCK_SIZE=255)
+  INDEX `features_profile_matched` (`id`,`fp_id`))
   ENGINE=InnoDB;
 
 /*
@@ -332,7 +337,7 @@ CREATE TABLE IF NOT EXISTS `ionosphere_layers` (
 */
   `validated` INT(10) DEFAULT 0 COMMENT 'unix timestamp when validated, 0 being none',
   PRIMARY KEY (id),
-  INDEX `ionosphere_layers` (`id`,`fp_id`,`metric_id`)  KEY_BLOCK_SIZE=255)
+  INDEX `ionosphere_layers` (`id`,`fp_id`,`metric_id`))
   ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `layers_algorithms` (
@@ -346,7 +351,7 @@ CREATE TABLE IF NOT EXISTS `layers_algorithms` (
   `layer_boundary` VARCHAR(255) DEFAULT NULL COMMENT 'the value of the layer boundary, int or str',
   `times_in_row` INT DEFAULT NULL COMMENT 'number of times in a row',
   PRIMARY KEY (id),
-  INDEX `layer_id` (`id`,`layer_id`,`fp_id`,`metric_id`)  KEY_BLOCK_SIZE=255)
+  INDEX `layer_id` (`id`,`layer_id`,`fp_id`,`metric_id`))
   ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS `ionosphere_layers_matched` (
@@ -358,7 +363,17 @@ CREATE TABLE IF NOT EXISTS `ionosphere_layers_matched` (
   `anomalous_datapoint` DECIMAL(18,6) NOT NULL COMMENT 'anomalous datapoint',
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries which matched',
   PRIMARY KEY (id),
-  INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`)  KEY_BLOCK_SIZE=255)
+  INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`))
+  ENGINE=InnoDB;
+
+# @added 20180413 - Branch #2270: luminosity
+CREATE TABLE IF NOT EXISTS `luminosity` (
+  `id` INT(11) NOT NULL COMMENT 'anomaly id',
+  `metric_id` INT(11) NOT NULL COMMENT 'metric id',
+  `coefficient` DECIMAL(6,5) NOT NULL COMMENT 'correlation coefficient',
+  `shifted` TINYINT NOT NULL COMMENT 'shifted',
+  `shifted_coefficient` DECIMAL(6,5) NOT NULL COMMENT 'shifted correlation coefficient',
+  INDEX `luminosity` (`id`,`metric_id`))
   ENGINE=InnoDB;
 
 /*

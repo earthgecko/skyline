@@ -2,7 +2,9 @@ setuptools
 wheel
 # @modified 20160820 - Issue #23 Test dependency updates
 # All current versions verified as of 20160820 - https://github.com/earthgecko/skyline/issues/21
-redis==2.10.5
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#redis==2.10.5
+redis==2.10.6
 hiredis==0.2.0
 
 ## python-daemon and deps
@@ -22,7 +24,9 @@ itsdangerous==0.24
 # @modified 20170809 - Task #2138: Update deps
 #Jinja2==2.8
 #MarkupSafe==0.23
-Jinja2==2.9.6
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#Jinja2==2.9.6
+Jinja2==2.10
 MarkupSafe==1.0
 
 # @modified 20161119 - Branch #922: ionosphere
@@ -30,9 +34,14 @@ MarkupSafe==1.0
 #Werkzeug==0.11.10
 # @modified 20170809 - Task #2138: Update deps
 #Werkzeug==0.11.11
-Werkzeug==0.12.2
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#Werkzeug==0.12.2
+Werkzeug==0.14.1
 
-click==6.6
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#click==6.6
+click==6.7
+
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
 #Flask==0.11.1
 # @modified 20170809 - Task #2138: Update deps
@@ -44,9 +53,13 @@ Flask==0.12.2
 #simplejson==3.8.2
 # @modified 20170809 - Task #2138: Update deps
 #simplejson==3.10.0
-simplejson==3.11.1
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#simplejson==3.11.1
+simplejson==3.13.2
 
-six==1.10.0
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#six==1.10.0
+six==1.11.0
 
 ## unittest2 and deps
 argparse==1.4.0
@@ -72,7 +85,9 @@ mock==2.0.0
 #numpy==1.11.2
 # @modified 20170809 - Task #2138: Update deps
 #numpy==1.11.3
-numpy==1.13.1
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#numpy==1.13.1
+numpy==1.13.3
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -82,7 +97,9 @@ numpy==1.13.1
 #scipy==0.18.0
 # @modified 20170809 - Task #2138: Update deps
 #scipy==0.18.1
-scipy==0.19.1
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#scipy==0.19.1
+scipy==1.0.0
 
 ## matplotlib and co
 # @modified 20161119 - Branch #922: ionosphere
@@ -101,7 +118,9 @@ python-dateutil==2.6.1
 #pytz==2016.7
 # @modified 20170809 - Task #2138: Update deps
 #pytz==2016.10
-pytz==2017.2
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#pytz==2017.2
+pytz==2017.3
 
 cycler==0.10.0
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -120,7 +139,9 @@ pyparsing==2.2.0
 #matplotlib==1.5.2
 # @modified 20170809 - Task #2138: Update deps
 #matplotlib==1.5.3
-matplotlib==2.0.2
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#matplotlib==2.0.2
+matplotlib==2.1.1
 
 ## pandas and deps
 # @modified 20161119 - Branch #922: ionosphere
@@ -128,7 +149,12 @@ matplotlib==2.0.2
 #pandas==0.18.1
 # @modified 20170809 - Task #2138: Update deps
 #pandas==0.19.1
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#                      Bug #2274: pandas-0.22.0 and numpy
+# Rolled back to 0.20.3 so as to not have to try and use the automation
+# unfriendly workaround - https://github.com/pandas-dev/pandas/issues/18281
 pandas==0.20.3
+#pandas==0.22.0
 
 patsy==0.4.1
 
@@ -151,7 +177,9 @@ msgpack-python==0.4.8
 #requests==2.12.3
 # @modified 20170809 - Task #2138: Update deps
 #requests==2.12.4
-requests==2.18.3
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#requests==2.18.3
+requests==2.18.4
 
 # ALERTERS - uncomment any alerters you want to enable
 python-simple-hipchat==0.4.0
@@ -163,7 +191,9 @@ python-simple-hipchat==0.4.0
 #pygerduty==0.35.1
 # @modified 20170809 - Task #2138: Update deps
 #pygerduty==0.35.2
-pygerduty==0.36.2
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#pygerduty==0.36.2
+pygerduty==0.37.0
 
 # for panorama - direct from MySQL as the package has broken in the context of
 # pip and virtualenv - NOTE: once you have installed this once, if it is run in
@@ -196,7 +226,9 @@ pipdeptree==0.10.1
 ## tsfresh and deps
 # @modified 20170809 - Task #2138: Update deps
 #scikit_learn==0.18.1
-scikit_learn==0.18.2
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#scikit_learn==0.18.2
+scikit_learn==0.19.1
 future==0.16.0
 # @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
 #tsfresh==0.1.2
@@ -221,14 +253,27 @@ termcolor==1.1.0
 # @modified 20170809 - Task #2138: Update deps
 #py==1.4.32
 #pytest==3.0.5
-py==1.4.34
-pytest==3.2.0
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#py==1.4.34
+#pytest==3.2.0
+py==1.5.2
+pytest==3.3.2
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
 # @modified 20170809 - Task #2138: Update deps
 #sqlalchemy==1.1.4
-sqlalchemy==1.1.13
+# @modified 20180105 - Task #2272: update deps for luminosity branch
+#sqlalchemy==1.1.13
+sqlalchemy==1.2.0
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 pymemcache==1.4.3
+
+# @added 20180105 - Branch #2270: luminosity
+#luminol==0.4
+# @modified 20180413 - Branch #2270: luminosity
+# Using fork with fixes corrections as per
+# https://github.com/linkedin/luminol/pull/39 - Passed max_shift_seconds to milliseconds
+# https://github.com/linkedin/luminol/pull/41 - fix normalize
+git+git://github.com/earthgecko/luminol@d429044#egg=luminol

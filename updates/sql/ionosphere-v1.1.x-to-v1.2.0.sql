@@ -6,11 +6,10 @@ USE skyline;
 
 # @added 20180413 - Branch #2270: luminosity
 CREATE TABLE IF NOT EXISTS `luminosity` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'anomaly id',
+  `id` INT(11) NOT NULL COMMENT 'anomaly id',
   `metric_id` INT(11) NOT NULL COMMENT 'metric id',
   `coefficient` DECIMAL(6,5) NOT NULL COMMENT 'correlation coefficient',
   `shifted` TINYINT NOT NULL COMMENT 'shifted',
   `shifted_coefficient` DECIMAL(6,5) NOT NULL COMMENT 'shifted correlation coefficient',
-  PRIMARY KEY (id),
   INDEX `luminosity` (`id`,`metric_id`))
   ENGINE=InnoDB;

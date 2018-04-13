@@ -147,7 +147,7 @@ if __name__ == "__main__":
     ionosphere = IonosphereAgent()
 
     if len(sys.argv) > 1 and sys.argv[1] == 'run':
-        panorama.run()
+        ionosphere.run()
     else:
         daemon_runner = runner.DaemonRunner(ionosphere)
         daemon_runner.daemon_context.files_preserve = [handler.stream]

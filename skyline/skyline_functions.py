@@ -514,11 +514,16 @@ def get_graphite_metric(
     # increasing monotonically to their deriative products in Graphite now
     # graphs
     known_derivative_metric = False
-    from redis import StrictRedis
+    REDIS_CONN = None
     try:
         REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     except:
-        current_logger.error('error :: alert_smtp - redis connection failed')
+        from redis import StrictRedis
+    if not REDIS_CONN:
+        try:
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        except:
+            current_logger.error('error :: alert_smtp - redis connection failed')
     try:
         derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
     except:
@@ -924,6 +929,7 @@ def mysql_select(current_skyline_app, select):
 
     :param current_skyline_app: the Skyline app that is calling the function
     :param select: the select string
+    :type current_skyline_app: str
     :type select: str
     :return: tuple
     :rtype: tuple, boolean
@@ -1343,5 +1349,80 @@ def move_file(current_skyline_app, dest_dir, file_to_move):
         msg = 'failed to move file to - %s' % moved_file
         current_logger.error('error :: %s' % msg)
         pass
+
+    return False
+
+
+# @added 20180107 - Branch #2270: luminosity
+def is_derivative_metric(current_skyline_app, base_name):
+    """
+    Determine if a metric is a known derivative metric.
+
+    :param current_skyline_app: the Skyline app that is calling the function
+    :type current_skyline_app: str
+    :param base_name: The metric base_name
+    :type base_name: str
+    :return: boolean
+    :rtype: boolean
+
+    """
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Feature #2034: analyse_derivatives
+    known_derivative_metric = False
+    REDIS_CONN = None
+    try:
+        REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        from redis import StrictRedis
+    if not REDIS_CONN:
+        try:
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        except:
+            current_logger.error('error :: known_derivative_metric - Redis connection failed')
+    try:
+        derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+    except:
+        derivative_metrics = []
+    try:
+        non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
+    except:
+        non_derivative_metrics = []
+    try:
+        non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+    except:
+        non_derivative_monotonic_metrics = []
+
+    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+    if redis_metric_name in derivative_metrics:
+        known_derivative_metric = True
+
+    # First check if it has its own Redis z.derivative_metric key
+    # that has not expired
+    derivative_metric_key = 'z.derivative_metric.%s' % str(base_name)
+    if not known_derivative_metric:
+        last_derivative_metric_key = False
+        try:
+            last_derivative_metric_key = REDIS_CONN.get(derivative_metric_key)
+        except Exception as e:
+            current_logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+
+        if last_derivative_metric_key:
+            # Until the z.derivative_metric key expires, it is classed
+            # as such
+            known_derivative_metric = True
+
+    skip_derivative = in_list(base_name, non_derivative_monotonic_metrics)
+    if skip_derivative:
+        known_derivative_metric = False
+
+    if known_derivative_metric:
+        if redis_metric_name in non_derivative_metrics:
+            known_derivative_metric = False
+
+    if known_derivative_metric:
+        return True
 
     return False

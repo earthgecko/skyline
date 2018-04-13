@@ -79,7 +79,7 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
 except:
-    logger.error('error :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
+    logger.error('error :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings')
     ENABLE_IONOSPHERE_DEBUG = False
 
 try:
@@ -2104,12 +2104,16 @@ class Ionosphere(Thread):
 
             # @added 20170916 - Feature #1996: Ionosphere - matches page
             # Create the ionosphere_summary_memcache_object
-            if settings.MEMCACHE_ENABLED:
-                try:
-                    logger.info('updating the ionosphere_summary_memcache_object')
-                    self.update_ionosphere_summary_memcache_object
-                except:
-                    logger.error('error :: update_ionosphere_summary_memcache_object - %s' % traceback.print_exc())
+            # @modified 20180103 - Feature #1996: Ionosphere - matches page
+            # The ionosphere_summary_list memcache object is not managed in
+            # ionosphere.py and was an artefact of some dev work that may
+            # resume at some point
+            # if settings.MEMCACHE_ENABLED:
+            #     try:
+            #         logger.info('updating the ionosphere_summary_memcache_object')
+            #         self.update_ionosphere_summary_memcache_object
+            #     except:
+            #         logger.error('error :: update_ionosphere_summary_memcache_object - %s' % traceback.print_exc())
 
             # self.populate the database metatdata tables
             # What is my host id in the Skyline panorama DB?
