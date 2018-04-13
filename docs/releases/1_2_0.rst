@@ -1,0 +1,31 @@
+==============================
+1.2.0 - the luminosity branch
+==============================
+
+v1.2.0-luminosity - Apr 13, 2018
+
+Changes
+-------
+
+- Bumped to v1.2.0
+- Adds basic Luminosity correlation functionality based on Linkedin luminol
+
+SQL update
+----------
+
+Change the below variables as appropriate to your set up.
+
+.. code-block:: bash
+
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="<YOUR_MYSQL_USER>"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+    SKYLINE_PATH="/opt/skyline/github/skyline"  # Your Skyline path
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.v1.2.0.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < $SKYLINE_PATH/updates/sql/ionosphere-v1.1.x-to-v1.2.0.sql
