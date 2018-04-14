@@ -3,7 +3,7 @@ import logging
 import traceback
 from sqlalchemy import (
     create_engine, Column, Table, Integer, String, MetaData, DateTime)
-from sqlalchemy.dialects.mysql import DOUBLE, FLOAT, TINYINT, VARCHAR
+from sqlalchemy.dialects.mysql import DOUBLE, FLOAT, TINYINT, VARCHAR, SMALLINT
 
 import settings
 
@@ -196,5 +196,24 @@ def ionosphere_layers_matched_table_meta(current_skyline_app, engine):
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
         fail_msg = 'error :: failed to reflect the ionosphere_layers_matched table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+# @added 20180414 - Branch #2270: luminosity
+def luminosity_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the luminosity table MetaData
+    try:
+        luminosity_meta = MetaData()
+        luminosity_table = Table('luminosity', luminosity_meta, autoload=True, autoload_with=engine)
+        return luminosity_table, 'luminosity_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the luminosity table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace

@@ -85,7 +85,9 @@ from tsfresh_feature_names import TSFRESH_VERSION
 # Decoupled the create_features_profile from ionosphere_backend and moved to
 # ionosphere_functions so it can be used by ionosphere/learn
 from ionosphere_functions import (
-    create_features_profile, get_ionosphere_learn_details)
+    create_features_profile, get_ionosphere_learn_details,
+    # @added 20180414 - Branch #2270: luminosity
+    get_correlations)
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -1000,7 +1002,17 @@ def ionosphere():
                 duration=(time.time() - start), print_debug=False), 200
 
         if get_metric_profiles:
-            fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            search_success = False
+            try:
+                fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, search_success, fail_msg, trace = ionosphere_search(False, True)
+            except:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with search_ionosphere'
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+            if not search_success:
+                return internal_error(fail_msg, trace)
+
             # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
             # Added enabled_list to display DISABLED in search_features_profiles
             # page results.
@@ -2069,6 +2081,19 @@ def ionosphere():
                 if matched_layer_id != 'False':
                     matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_layer_id), 'layers', base_name, requested_timestamp)
 
+            # @added 20180414 - Branch #2270: luminosity
+            # Add correlations to features_profile and training_data pages if a
+            # panorama_anomaly_id is present
+            correlations = False
+            if p_id:
+                try:
+                    correlations, fail_msg, trace = get_correlations(skyline_app, p_id)
+                except:
+                    trace = traceback.format_exc()
+                    fail_msg = 'error :: Webapp error with search_ionosphere'
+                    logger.error(fail_msg)
+                    return internal_error(fail_msg, trace)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -2120,6 +2145,7 @@ def ionosphere():
                 matched_fp_id=matched_fp_id, matched_layer_id=matched_layer_id,
                 matched_id_resources=matched_id_resources,
                 matched_graph_image_file=matched_graph_image_file,
+                correlations=correlations,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

@@ -29,7 +29,9 @@ from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
     get_engine, ionosphere_table_meta, metrics_table_meta,
-    ionosphere_matched_table_meta)
+    ionosphere_matched_table_meta,
+    # @added 20180414 - Branch #2270: luminosity
+    luminosity_table_meta)
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -930,3 +932,99 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             fp_create_engine_disposal(current_skyline_app, engine)
 
     return str(new_fp_id), True, False, fail_msg, trace
+
+
+# @added 20180414 - Branch #2270: luminosity
+def get_correlations(current_skyline_app, anomaly_id):
+    """
+    Get all the correlations for an anomaly from the database
+
+    :param current_skyline_app: the Skyline app name calling the function
+    :param anomaly_id: thee base_name of the metric
+    :type current_skyline_app: str
+    :type anomaly_id: int
+    :return: list
+    :return: [[metric_name, coefficient, shifted, shifted_coefficient],[metric_name, coefficient, ...]]
+    :rtype: [[str, float, float, float]]
+    """
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+    func_name = 'get_correlations'
+
+    correlations = []
+
+    current_logger.info('get_correlations :: getting MySQL engine')
+    try:
+        engine, fail_msg, trace = fp_create_get_an_engine(current_skyline_app)
+        current_logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        current_logger.error('%s' % fail_msg)
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
+
+    metrics_table = None
+    try:
+        metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
+        current_logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
+        current_logger.error('%s' % fail_msg)
+
+    luminosity_table = None
+    try:
+        luminosity_table, fail_msg, trace = luminosity_table_meta(current_skyline_app, engine)
+        current_logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: %s :: failed to get luminosity_table_meta' % func_name
+        current_logger.error('%s' % fail_msg)
+
+    metrics_list = []
+    try:
+        connection = engine.connect()
+        stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+        results = connection.execute(stmt)
+        for row in results:
+            metric_id = row['id']
+            metric_name = row['metric']
+            metrics_list.append([int(metric_id), str(metric_name)])
+        connection.close()
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: could not determine metrics from MySQL')
+        if engine:
+            fp_create_engine_disposal(current_skyline_app, engine)
+        raise
+
+    try:
+        connection = engine.connect()
+        stmt = select([luminosity_table]).where(luminosity_table.c.id == int(anomaly_id))
+        result = connection.execute(stmt)
+        for row in result:
+            metric_id = row['metric_id']
+            metric_name = None
+            if metric_id:
+                metric_name = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+            coefficient = row['coefficient']
+            shifted = row['shifted']
+            shifted_coefficient = row['shifted_coefficient']
+            correlations.append([metric_name, coefficient, shifted, shifted_coefficient])
+        connection.close()
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: could not determine correlations for anomaly id -  %s' % str(anomaly_id))
+        if engine:
+            fp_create_engine_disposal(current_skyline_app, engine)
+        raise
+
+    if engine:
+        fp_create_engine_disposal(current_skyline_app, engine)
+
+    return correlations, fail_msg, trace

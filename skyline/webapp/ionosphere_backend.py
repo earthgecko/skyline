@@ -1265,33 +1265,11 @@ def ionosphere_search(default_query, search_query):
                 query_string = new_query_string
             needs_and = True
 
-    ordered_by = None
-    if 'order' in request.args:
-        order = request.args.get('order', 'DESC')
-        if str(order) == 'DESC':
-            ordered_by = 'DESC'
-        if str(order) == 'ASC':
-            ordered_by = 'ASC'
-
-    if ordered_by:
-        if count_request and search_query:
-            new_query_string = '%s %s' % (query_string, ordered_by)
-        else:
-            new_query_string = '%s ORDER BY id %s' % (query_string, ordered_by)
-        query_string = new_query_string
-
-    if 'limit' in request.args:
-        limit = request.args.get('limit', '30')
-        try:
-            test_limit = int(limit) + 0
-            if int(limit) != 0:
-                new_query_string = '%s LIMIT %s' % (query_string, str(limit))
-                query_string = new_query_string
-        except:
-            logger.error('error :: limit is not an integer - %s' % str(limit))
-
+    # @modified 20180414 - Feature #1862: Ionosphere features profiles search page
+    #                      Branch #2270: luminosity
+    # Moved from being just above metrics = [] below as required to determine
+    # metric_like queries
     engine_needed = True
-
     engine = None
     if engine_needed:
         logger.info('%s :: getting MySQL engine' % function_str)
@@ -1325,6 +1303,70 @@ def ionosphere_search(default_query, search_query):
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
 
+    # @added 20180414 - Feature #1862: Ionosphere features profiles search page
+    #                   Branch #2270: luminosity
+    if 'metric_like' in request.args:
+        metric_like_str = request.args.get('metric_like', 'all')
+        if metric_like_str != 'all':
+            # SQLAlchemy requires the MySQL wildcard % to be %% to prevent
+            # interpreting the % as a printf-like format character
+            python_escaped_metric_like = metric_like_str.replace('%', '%%')
+            # nosec to exclude from bandit tests
+            metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
+            logger.info('executing metrics_like_query - %s' % metrics_like_query)
+            metric_ids = ''
+            try:
+                connection = engine.connect()
+                results = connection.execute(metrics_like_query)
+                connection.close()
+                for row in results:
+                    metric_id = str(row[0])
+                    if metric_ids == '':
+                        metric_ids = '%s' % (metric_id)
+                    else:
+                        new_metric_ids = '%s, %s' % (metric_ids, metric_id)
+                        metric_ids = new_metric_ids
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error('error :: could not determine ids from metrics table')
+                # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+                if engine:
+                    engine_disposal(engine)
+                return False, fail_msg, trace
+            if needs_and:
+                new_query_string = '%s AND metric_id IN (%s)' % (query_string, str(metric_ids))
+                query_string = new_query_string
+            else:
+                new_query_string = '%s WHERE metric_id IN (%s)' % (query_string, str(metric_ids))
+                query_string = new_query_string
+            needs_and = True
+
+    ordered_by = None
+    if 'order' in request.args:
+        order = request.args.get('order', 'DESC')
+        if str(order) == 'DESC':
+            ordered_by = 'DESC'
+        if str(order) == 'ASC':
+            ordered_by = 'ASC'
+
+    if ordered_by:
+        if count_request and search_query:
+            new_query_string = '%s %s' % (query_string, ordered_by)
+        else:
+            new_query_string = '%s ORDER BY id %s' % (query_string, ordered_by)
+        query_string = new_query_string
+
+    if 'limit' in request.args:
+        limit = request.args.get('limit', '30')
+        try:
+            test_limit = int(limit) + 0
+            if int(limit) != 0:
+                new_query_string = '%s LIMIT %s' % (query_string, str(limit))
+                query_string = new_query_string
+        except:
+            logger.error('error :: limit is not an integer - %s' % str(limit))
+
         metrics = []
         try:
             connection = engine.connect()
@@ -1336,8 +1378,10 @@ def ionosphere_search(default_query, search_query):
                 metrics.append([metric_id, metric_name])
             connection.close()
         except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: could not determine metrics from metrics table')
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: could not determine metrics from metrics table'
+            logger.error('%s' % fail_msg)
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal and raise
             if engine:
@@ -1430,6 +1474,7 @@ def ionosphere_search(default_query, search_query):
         trace = traceback.format_exc()
         logger.error('%s' % trace)
         logger.error('error :: bad row data')
+        raise
 
     if count_request and search_query:
         features_profiles = None
@@ -1509,10 +1554,11 @@ def ionosphere_search(default_query, search_query):
             del metrics
         except:
             logger.error('error :: failed to del metrics')
+        search_success = True
         return (features_profiles, features_profiles_count, matched_count,
                 checked_count, generation_count, full_duration_list,
-                enabled_list, tsfresh_version_list, generation_list, fail_msg,
-                trace)
+                enabled_list, tsfresh_version_list, generation_list,
+                search_success, fail_msg, trace)
 
     features_profiles = []
     # @added 20170322 - Feature #1960: ionosphere_layers
@@ -1529,7 +1575,17 @@ def ionosphere_search(default_query, search_query):
             else:
                 stmt = query_string
                 logger.debug('debug :: stmt - %s' % stmt)
-            result = connection.execute(stmt)
+            try:
+                result = connection.execute(stmt)
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: MySQL query failed'
+                logger.error('%s' % fail_msg)
+                if engine:
+                    engine_disposal(engine)
+                raise
+
             for row in result:
                 try:
                     fp_id = int(row['id'])
@@ -1611,8 +1667,10 @@ def ionosphere_search(default_query, search_query):
             logger.info(log_msg)
             logger.info('ionosphere_layers OK')
         except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: failed to get ionosphere_layers meta')
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: failed to get ionosphere_layers meta'
+            logger.error('%s' % fail_msg)
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal
             if engine:
@@ -1705,10 +1763,11 @@ def ionosphere_search(default_query, search_query):
             del metrics
         except:
             logger.error('error :: failed to del metrics')
+        search_success = True
         return (features_profiles, features_profiles_count, matched_count,
                 checked_count, generation_count, full_duration_list,
-                enabled_list, tsfresh_version_list, generation_list, fail_msg,
-                trace)
+                enabled_list, tsfresh_version_list, generation_list,
+                search_success, fail_msg, trace)
 
     get_options = [
         'full_duration', 'enabled', 'tsfresh_version', 'generation']
@@ -1755,10 +1814,11 @@ def ionosphere_search(default_query, search_query):
     except:
         logger.error('error :: failed to del metrics')
 
+    search_success = True
     return (features_profiles, features_profiles_count, matched_count,
             checked_count, generation_count, full_duration_list,
-            enabled_list, tsfresh_version_list, generation_list, fail_msg,
-            trace)
+            enabled_list, tsfresh_version_list, generation_list, search_success,
+            fail_msg, trace)
 
 
 # @added 20170305 - Feature #1960: ionosphere_layers

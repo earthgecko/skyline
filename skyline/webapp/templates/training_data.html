@@ -756,6 +756,11 @@ Image file: {{ image }}<br><br>
 	  </div>
   {% endif %}
 
+<!-- # @added 20180414 - Branch #2270: luminosity -->
+  {% if panorama_anomaly_id %}
+    {% include "correlations.html" %}
+  {% endif %}
+
       <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span></span> files</h4>
       <table>
         <tr>

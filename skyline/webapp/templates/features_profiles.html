@@ -654,6 +654,11 @@ Image file: {{ image }}<br><br>
     {% endif %}
   {% endfor %}
 
+<!-- # @added 20180414 - Branch #2270: luminosity -->
+  {% if panorama_anomaly_id %}
+    {% include "correlations.html" %}
+  {% endif %}
+
       <h4><span class="logo"><span class="sky">Features ::</span> <span class="re"> profile ::</span></span></span> files</h4>
       <table>
         <tr>
@@ -668,6 +673,7 @@ Image file: {{ image }}<br><br>
         </tr>
   {% endfor %}
       </table>
+
   {% if data_ok == True %}
       <br><p>
 <!-- # @modified 20170309 - Feature #1960: ionosphere_layers
