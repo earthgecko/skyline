@@ -220,6 +220,12 @@ class Luminosity(Thread):
             logger.error('error :: processing correlations')
             return False
 
+        # @added 20180414 - Bug #2352: Luminosity no metrics MySQL error
+        # Do not query with an empty string
+        if not correlated_metrics:
+            logger.info('no correlations found for %s anomaly id %s' % (base_name, str(anomaly_id)))
+            return False
+
         metrics_str = ''
         for metric_name in correlated_metrics:
             if metrics_str == '':

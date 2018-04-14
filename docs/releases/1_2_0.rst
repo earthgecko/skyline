@@ -8,7 +8,27 @@ Changes
 -------
 
 - Bumped to v1.2.0
-- Adds basic Luminosity correlation functionality based on Linkedin luminol
+- Adds the basic Luminosity correlation functionality based on Linkedin luminol
+-
+
+How to update from v1.x
+-----------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version settings.py with skyline/settings.py and
+  create a new settings.py in the temp location appropriate for Skyline v1.2.0
+  and your set up, ready to be deployed.
+- Stop Skyline Ionosphere and Panorama services.
+- Backup your Skyline database.
+- Apply the SQL update to your Skyline database (as per described below).
+- Stop all other Skyline services
+- Move your current Skyline directory to a backup directory.
+- Move the new Skyline v1.2.0 with your new settings.py from the temp location
+  to your working Skyline directory.
+- Start the Skyline services, remembering to start bin/luminosity.d too :)
+- Add the luminosity service/process to any local process monitoring/management
+  you may have.
 
 SQL update
 ----------
