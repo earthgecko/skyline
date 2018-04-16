@@ -71,7 +71,9 @@ unittest2==1.1.0
 funcsigs==1.0.2
 # @modified 20170809 - Task #2138: Update deps
 #pbr==1.10.0
-pbr==3.1.1
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#pbr==3.1.1
+pbr==4.0.2
 mock==2.0.0
 
 # If python-2.6 is being used, distribute is probably still required
@@ -87,7 +89,12 @@ mock==2.0.0
 #numpy==1.11.3
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #numpy==1.13.1
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#                      Bug #2274: pandas-0.22.0 and numpy
+# Downgrade back to pandas=0.20.3
 numpy==1.13.3
+#numpy==1.14.2
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -99,7 +106,9 @@ numpy==1.13.3
 #scipy==0.18.1
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #scipy==0.19.1
-scipy==1.0.0
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#scipy==1.0.0
+scipy==1.0.1
 
 ## matplotlib and co
 # @modified 20161119 - Branch #922: ionosphere
@@ -107,7 +116,9 @@ scipy==1.0.0
 #python-dateutil==2.5.3
 # @modified 20170809 - Task #2138: Update deps
 #python-dateutil==2.6.0
-python-dateutil==2.6.1
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#python-dateutil==2.6.1
+python-dateutil==2.7.2
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #pytz==2016.4
@@ -120,7 +131,9 @@ python-dateutil==2.6.1
 #pytz==2016.10
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #pytz==2017.2
-pytz==2017.3
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#pytz==2017.3
+pytz==2018.4
 
 cycler==0.10.0
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -141,7 +154,9 @@ pyparsing==2.2.0
 #matplotlib==1.5.3
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #matplotlib==2.0.2
-matplotlib==2.1.1
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#matplotlib==2.1.1
+matplotlib==2.2.2
 
 ## pandas and deps
 # @modified 20161119 - Branch #922: ionosphere
@@ -150,13 +165,15 @@ matplotlib==2.1.1
 # @modified 20170809 - Task #2138: Update deps
 #pandas==0.19.1
 # @modified 20180105 - Task #2272: update deps for luminosity branch
-#                      Bug #2274: pandas-0.22.0 and numpy
-# Rolled back to 0.20.3 so as to not have to try and use the automation
-# unfriendly workaround - https://github.com/pandas-dev/pandas/issues/18281
 pandas==0.20.3
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#                      Bug #2274: pandas-0.22.0 and numpy
+# Downgrade back to pandas=0.20.3
 #pandas==0.22.0
 
-patsy==0.4.1
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#patsy==0.4.1
+patsy==0.5.0
 
 # @modified 20170809 - Task #2138: Update deps
 #statsmodels==0.6.1
@@ -164,7 +181,8 @@ statsmodels==0.8.0
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #msgpack-python==0.4.7
-msgpack-python==0.4.8
+#msgpack-python==0.4.8
+msgpack-python==0.5.6
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #requests==2.10.0
@@ -201,13 +219,15 @@ pygerduty==0.37.0
 # download from MySQL as it is only required once, but will run every time.
 # It provides the mysql-connector-python reference below, that can be left
 # uncommented.
-http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86
+#http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
 # Seems the name is not matching in pip now when a version is used
 #mysql-connector-python==1.2.3
-mysql-connector-python
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#mysql-connector-python
+mysql-connector-python==8.0.6
 
 # For a production WSGI HTTP Server for the Webapp
 # @modified 20170809 - Task #2138: Update deps
@@ -220,7 +240,9 @@ gunicorn==19.7.1
 #pipdeptree==0.6.0
 # @modified 20170809 - Task #2138: Update deps
 #pipdeptree==0.8.0
-pipdeptree==0.10.1
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#pipdeptree==0.10.1
+pipdeptree==0.12.1
 
 # @added 20161119 - Branch #922: ionosphere
 ## tsfresh and deps
@@ -256,8 +278,11 @@ termcolor==1.1.0
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #py==1.4.34
 #pytest==3.2.0
-py==1.5.2
-pytest==3.3.2
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#py==1.5.2
+#pytest==3.3.2
+py==1.5.3
+pytest==3.5.0
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
@@ -265,15 +290,20 @@ pytest==3.3.2
 #sqlalchemy==1.1.4
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #sqlalchemy==1.1.13
-sqlalchemy==1.2.0
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#sqlalchemy==1.2.0
+SQLAlchemy==1.2.6
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
-pymemcache==1.4.3
+# @modified 20180416 - Task #2272: update deps for luminosity branch
+#pymemcache==1.4.3
+pymemcache==1.4.4
 
 # @added 20180105 - Branch #2270: luminosity
-#luminol==0.4
+# @added 20180105 - Branch #2270: luminosity
 # @modified 20180413 - Branch #2270: luminosity
-# Using fork with fixes corrections as per
+#luminol==0.4
+# Using fork with fixes as per
 # https://github.com/linkedin/luminol/pull/39 - Passed max_shift_seconds to milliseconds
 # https://github.com/linkedin/luminol/pull/41 - fix normalize
 git+git://github.com/earthgecko/luminol@d429044#egg=luminol

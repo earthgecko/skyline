@@ -203,7 +203,7 @@ def get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metric
             correlated_metrics.append(metric_base_name)
 
     end = timer()
-    logger.info('correlated %s metrics calculated in %.6f seconds' % (str(len(correlated_metrics)), (end - start)))
+    logger.info('correlated %s metrics to %s anomaly, processed in %.6f seconds' % (str(len(correlated_metrics)), base_name, (end - start)))
     return (correlated_metrics, correlations)
 
 

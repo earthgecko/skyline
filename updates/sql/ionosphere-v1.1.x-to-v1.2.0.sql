@@ -1,5 +1,5 @@
 /*
-This the the SQL script to update Skyline from ionosphere (v1.1.2 - v1.1.3)
+This the the SQL script to update Skyline from ionosphere (v1.1.3 - v1.2.0)
 */
 
 USE skyline;
