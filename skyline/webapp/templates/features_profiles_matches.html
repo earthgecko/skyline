@@ -35,7 +35,10 @@
 	<div class="col-md-12">
 		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
 		  <li><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
-		  <li class="active"><a href="?fp_matches=true&metric=all&limit=10&order=DESC">Matches</a></li>
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
+# Return matches for the last 24 hours as the default -->
+		  <li class="active"><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
 		</ul>
@@ -80,7 +83,9 @@
   		      </tr>
   		      <tr>
   		        <td>from_timestamp</td>
-  		        <td><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+# Change the default from_timestamp from all to the past 24 hours -->
+  		        <td><input type="text" name="from_timestamp" value="{{ matched_from_datetime }}"> (unix timestamp or %Y%m%d %H:%M)</td>
   		      </tr>
   		      <tr>
   		        <td>until_timestamp</td>
@@ -88,7 +93,7 @@
   		      </tr>
   		      <tr>
                 <td>limit</td>
-                <td><input type="number" name="limit" min="0" max="100" value="30" /> use 0 for unlimited</td>
+                <td><input type="number" name="limit" min="0" max="100" value="100" /> use 0 for unlimited</td>
   		      </tr>
   		      <tr>
   		        <td>order by:</td>

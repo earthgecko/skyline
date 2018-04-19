@@ -842,6 +842,14 @@ def ionosphere():
         else:
             fp_search_req = False
 
+    # @added 20180419 - Feature #1996: Ionosphere - matches page
+    #                   Branch #2270: luminosity
+    # Change the default search parameters to return all matches for the
+    # past 24 hours
+    matched_request_timestamp = int(time.time())
+    default_matched_from_timestamp = matched_request_timestamp - 86400
+    matched_from_datetime = time.strftime('%Y%m%d %H:%M', time.localtime(default_matched_from_timestamp))
+
     # @added 20170916 - Feature #1996: Ionosphere - matches page
     fp_matches_req = None
     if 'fp_matches' in request.args:
@@ -998,7 +1006,8 @@ def ionosphere():
                 fp_search_results=fp_search_req,
                 features_profiles_count=fps_count, order=ordered_by,
                 limit=limited_by, matched_count=mc, checked_count=cc,
-                generation_count=gc, version=skyline_version,
+                generation_count=gc, matched_from_datetime=matched_from_datetime,
+                version=skyline_version,
                 duration=(time.time() - start), print_debug=False), 200
 
         if get_metric_profiles:
@@ -1022,6 +1031,7 @@ def ionosphere():
                 for_metric=metric, order=ordered_by, limit=limited_by,
                 matched_count=mc, checked_count=cc, generation_count=gc,
                 enabled_list=enabled_list,
+                matched_from_datetime=matched_from_datetime,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=False), 200
 
@@ -1076,6 +1086,7 @@ def ionosphere():
         return render_template(
             'ionosphere.html', fp_matches=fp_matches_req, for_metric=metric,
             fp_matches_results=matches, order=ordered_by, limit=limited_by,
+            matched_from_datetime=matched_from_datetime,
             version=skyline_version, duration=(time.time() - start),
             print_debug=False), 200
 
@@ -1542,6 +1553,7 @@ def ionosphere():
                 unique_timestamps=unique_ts, human_dates=hdates,
                 metric_td_dirs=zip(unique_ts, hdates), td_files=mpaths,
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
+                matched_from_datetime=matched_from_datetime,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -1575,6 +1587,7 @@ def ionosphere():
                     'ionosphere.html', list_by=listed_by, fp_search=fp_search_param,
                     full_duration_list=fd_list, enabled_list=en_list,
                     tsfresh_version_list=tsfresh_list, generation_list=gen_list,
+                    matched_from_datetime=matched_from_datetime,
                     version=skyline_version, duration=(time.time() - start),
                     print_debug=debug_on), 200
             except:
@@ -1590,6 +1603,7 @@ def ionosphere():
                 'ionosphere.html', metric_td_dirs=zip(unique_ts, hdates),
                 list_by=listed_by, for_metric=base_name, td_files=mpaths,
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
+                matched_from_datetime=matched_from_datetime,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -1608,6 +1622,7 @@ def ionosphere():
                 unique_timestamps=unique_ts, human_dates=hdates, td_files=mpaths,
                 metric_td_dirs=zip(unique_ts, hdates),
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
+                matched_from_datetime=matched_from_datetime,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -2146,6 +2161,7 @@ def ionosphere():
                 matched_id_resources=matched_id_resources,
                 matched_graph_image_file=matched_graph_image_file,
                 correlations=correlations,
+                matched_from_datetime=matched_from_datetime,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

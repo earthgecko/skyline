@@ -36,7 +36,10 @@
 		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
 		  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 <!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
-		  <li><a href="?fp_matches=true&&metric=all&limit=10&order=DESC">Matches</a></li>
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
+# Return matches for the last 24 hours as the default -->
+		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
 		</ul>
