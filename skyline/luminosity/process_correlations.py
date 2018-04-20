@@ -47,7 +47,7 @@ def get_anomaly(request_type):
     except:
         logger.error(traceback.format_exc())
         logger.error('MySQL error')
-        return False
+        return (False, False, False, False)
 
     try:
         anomaly_id = int(results[0][0])
@@ -59,17 +59,49 @@ def get_anomaly(request_type):
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: MySQL error - %s' % query)
-        return False
+        return (False, False, False, False)
 
     return (anomaly_id, metric_id, anomaly_timestamp, base_name)
 
 
 def get_anomalous_ts(base_name, anomaly_timestamp):
 
+    if not base_name or not anomaly_timestamp:
+        return False
+
     # from skyline_functions import nonNegativeDerivative
     anomalous_metric = '%s%s' % (settings.FULL_NAMESPACE, base_name)
     assigned_metrics = [anomalous_metric]
-    raw_assigned = redis_conn.mget(assigned_metrics)
+    # @modified 20180419 -
+    raw_assigned = []
+    try:
+        raw_assigned = redis_conn.mget(assigned_metrics)
+    except:
+        raw_assigned = []
+    if raw_assigned == [None]:
+        logger.info('%s data not retrieved from local Redis' % (str(base_name)))
+        raw_assigned = []
+
+    if not raw_assigned and settings.OTHER_SKYLINE_REDIS_INSTANCES:
+        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+            if not raw_assigned:
+                try:
+                    other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port))
+                    raw_assigned = other_redis_conn.mget(assigned_metrics)
+                    if raw_assigned == [None]:
+                        logger.info('%s data not retrieved from Redis at %s on port %s' % (str(base_name), str(redis_ip), str(redis_port)))
+                        raw_assigned = []
+                    if raw_assigned:
+                        logger.info('%s data retrieved from Redis at %s on port %s' % (str(base_name), str(redis_ip), str(redis_port)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                    raw_assigned = []
+
+    if not raw_assigned or raw_assigned == [None]:
+        logger.info('%s data not retrieved' % (str(base_name)))
+        return False
+
     for i, metric_name in enumerate(assigned_metrics):
         try:
             raw_series = raw_assigned[i]
@@ -100,6 +132,9 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
 
 def get_anoms(anomalous_ts):
 
+    if not anomalous_ts:
+        return []
+
     anomalies = []
     try:
         anomaly_ts_dict = dict(anomalous_ts)
@@ -112,7 +147,10 @@ def get_anoms(anomalous_ts):
 
 
 def get_assigned_metrics(i):
-    unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+    try:
+        unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+    except:
+        return []
     # Discover assigned metrics
     keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.LUMINOSITY_PROCESSES)))
     if i == settings.LUMINOSITY_PROCESSES:
@@ -137,6 +175,18 @@ def get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metric
     from_timestamp = anomaly_timestamp - 600
     correlated_metrics = []
     correlations = []
+    no_data = False
+    if not anomalous_ts:
+        no_data = True
+    if not assigned_metrics:
+        no_data = True
+    if not raw_assigned:
+        no_data = True
+    if not anomalies:
+        no_data = True
+    if no_data:
+        return (correlated_metrics, correlations)
+
     for i, metric_name in enumerate(assigned_metrics):
         count += 1
         # print(metric_name)

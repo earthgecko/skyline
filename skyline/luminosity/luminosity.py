@@ -255,7 +255,14 @@ class Luminosity(Thread):
                             luminosity_correlations.append([anomaly_id, int(metric_id), coefficient, shifted, shifted_coefficient])
             first_value_not_added = True
             values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES '
+
+            # @added 20180420 - Branch #2270: luminosity
+            # Only try and insert if there are values present
+            values_present = False
+
             for anomaly_id, metric_id, coefficient, shifted, shifted_coefficient in luminosity_correlations:
+                if coefficient:
+                    values_present = True
                 ins_values = '(%s,%s,%s,%s,%s)' % (str(anomaly_id),
                                                    str(metric_id),
                                                    str(round(coefficient, 5)),
@@ -273,12 +280,13 @@ class Luminosity(Thread):
             # 'INSERT INTO luminosity (anomaly_id, metric_id, coefficient, shifted, shifted_coefficient) VALUES (68882,619,1.0,0,1.0),...,(68882,489,1.0,0,1.0);'
             # Needs a mysql_insert not SQLAlchemy
             luminosity_populated = False
-            try:
-                self.mysql_insert(values_string)
-                luminosity_populated = True
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: MySQL insert - %s' % str(values_string))
+            if luminosity_correlations and values_present:
+                try:
+                    self.mysql_insert(values_string)
+                    luminosity_populated = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: MySQL insert - %s' % str(values_string))
 
         return luminosity_populated
 
@@ -408,6 +416,8 @@ class Luminosity(Thread):
                     if results:
                         process_anomaly_id = int(results[0][0])
                         logger.info('found new anomaly id to process from the DB - %s' % str(process_anomaly_id))
+                        # Handle the first one
+                        last_processed_anomaly_id = process_anomaly_id - 1
                     else:
                         logger.info('no new anomalies in the anomalies table')
 

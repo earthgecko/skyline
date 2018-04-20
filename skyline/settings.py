@@ -1658,3 +1658,14 @@ LUMINOSITY_PROCESSES = 1
 """
 
 ENABLE_LUMINOSITY_DEBUG = False
+
+OTHER_SKYLINE_REDIS_INSTANCES = []
+"""
+:var OTHER_SKYLINE_REDIS_INSTANCES: This a nested list of any Redis instances
+    that Skyline should query for correlation time series ONLY applicable if
+    there are multiple Skyline instances each with their own Redis.
+:vartype OTHER_SKYLINE_REDIS_INSTANCES: list
+
+For example, the IP or FQDN as a string and the port as an int:
+OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379], ['192.168.1.15', 6379]]
+"""

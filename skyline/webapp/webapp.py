@@ -1240,6 +1240,34 @@ def ionosphere():
 
                     if use_timestamp == 0:
                         logger.error('no timestamp feature profiles data dir found for feature profile id - %s' % str(fp_id))
+
+                        # @added 20180420 - Branch #2270: luminosity
+                        # Use settings.ALTERNATIVE_SKYLINE_URLS if they are
+                        # declared
+                        try:
+                            use_alternative_urls = settings.ALTERNATIVE_SKYLINE_URLS
+                        except:
+                            use_alternative_urls = False
+
+                        if use_alternative_urls:
+                            alternative_urls = []
+                            for alt_url in use_alternative_urls:
+                                alt_redirect_url = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (str(alt_url), str(fp_id), str(base_name))
+                                alternative_urls.append(alt_redirect_url)
+                            message = 'no timestamp feature profiles data dir found on this Skyline instance try at the alternative URLS listed below:'
+                            logger.info('passing alternative_urls - %s' % str(alternative_urls))
+                            try:
+                                return render_template(
+                                    'ionosphere.html', display_message=message,
+                                    alternative_urls=alternative_urls,
+                                    fp_view=True,
+                                    version=skyline_version, duration=(time.time() - start),
+                                    print_debug=True), 200
+                            except:
+                                message = 'Uh oh ... a Skyline 500 :('
+                                trace = traceback.format_exc()
+                                return internal_error(message, trace)
+
                         resp = json.dumps(
                             {'results': 'Error: no timestamp feature profiles data dir found for feature profile id - ' + str(fp_id) + ' - go on... nothing here.'})
                         return resp, 400
@@ -1451,7 +1479,23 @@ def ionosphere():
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + str(value)
 
-                    if metric_name not in unique_metrics:
+                    if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        metric_found = False
+                        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                            other_unique_metrics = []
+                            if not metric_found:
+                                try:
+                                    OTHER_REDIS_CONN = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
+                                    other_unique_metrics = list(OTHER_REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                                    logger.info('metric found in Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                            if metric_name in other_unique_metrics:
+                                metric_found = True
+
+                    # if metric_name not in unique_metrics:
+                    if metric_name not in unique_metrics and not metric_found:
                         # @added 20170917 - Bug #2158: webapp - redis metric check - existing but sparsely represented metrics
                         # If this is an fp_view=true, it means that either the
                         # metric is sparsely represented or no longer exists,

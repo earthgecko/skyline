@@ -49,6 +49,13 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if alternative_urls %}
+<!-- # @added 20180420 - Branch #2270: luminosity -->
+  {% for alt_url in alternative_urls %}
+<a href="{{ alt_url }}">{{ alt_url }}</a><br>
+  {% endfor %}
+{% endif %}
+
 {% if list_by %}
 <div class="row">
 	<div class="col-md-3 col-md-push-9">
@@ -73,6 +80,7 @@
 			  <li><a href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 <!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
 <!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
 		    <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
 			  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
