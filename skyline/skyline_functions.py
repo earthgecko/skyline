@@ -529,8 +529,14 @@ def get_graphite_metric(
     except:
         derivative_metrics = []
     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
+
+    # @added 20180423 - Feature #2034: analyse_derivatives
+    #                   Branch #2270: luminosity
+    metric_found_in_redis = False
+
     if redis_metric_name in derivative_metrics:
         known_derivative_metric = True
+        metric_found_in_redis = True
     if known_derivative_metric:
         try:
             non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
@@ -538,6 +544,24 @@ def get_graphite_metric(
             non_derivative_metrics = []
         if redis_metric_name in non_derivative_metrics:
             known_derivative_metric = False
+            metric_found_in_redis = True
+
+    # @added 20180423 - Feature #2034: analyse_derivatives
+    #                   Branch #2270: luminosity
+    if not metric_found_in_redis and settings.OTHER_SKYLINE_REDIS_INSTANCES:
+        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+            if not metric_found_in_redis:
+                try:
+                    other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port))
+                    other_derivative_metrics = list(other_redis_conn.smembers('derivative_metrics'))
+                except:
+                    current_logger.error(traceback.format_exc())
+                    current_logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                if redis_metric_name in other_derivative_metrics:
+                    known_derivative_metric = True
+                    metric_found_in_redis = True
+                    current_logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (redis_metric_name, str(redis_ip), str(redis_port)))
+
     target_metric = metric
     if known_derivative_metric:
         target_metric = 'nonNegativeDerivative(%s)' % str(metric)

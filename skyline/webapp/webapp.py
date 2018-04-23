@@ -581,7 +581,25 @@ def panorama():
                         logger.info(traceback.format_exc())
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + value
-                    if metric_name not in unique_metrics:
+
+                    # @added 20180423 - Feature #2034: analyse_derivatives
+                    #                   Branch #2270: luminosity
+                    other_unique_metrics = []
+                    if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        metric_found_in_other_redis = False
+                        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                            if not metric_found_in_other_redis:
+                                try:
+                                    other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
+                                    other_unique_metrics = list(other_redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                                if metric_name in other_unique_metrics:
+                                    metric_found_in_other_redis = True
+                                    logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
+
+                    if metric_name not in unique_metrics and not metric_found_in_other_redis:
                         error_string = 'error :: no metric - %s - exists in Redis' % metric_name
                         logger.error(error_string)
                         resp = json.dumps(
@@ -960,7 +978,25 @@ def ionosphere():
                     logger.info(traceback.format_exc())
                     return 'Internal Server Error', 500
                 metric_name = settings.FULL_NAMESPACE + str(value)
-                if metric_name not in unique_metrics:
+
+                # @added 20180423 - Feature #2034: analyse_derivatives
+                #                   Branch #2270: luminosity
+                other_unique_metrics = []
+                if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                    metric_found_in_other_redis = False
+                    for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        if not metric_found_in_other_redis:
+                            try:
+                                other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
+                                other_unique_metrics = list(other_redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                            if metric_name in other_unique_metrics:
+                                metric_found_in_other_redis = True
+                                logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
+
+                if metric_name not in unique_metrics and not metric_found_in_other_redis:
                     error_string = 'error :: no metric - %s - exists in Redis' % metric_name
                     logger.error(error_string)
                     resp = json.dumps(

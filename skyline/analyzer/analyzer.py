@@ -1017,6 +1017,25 @@ class Analyzer(Thread):
             logger.info('smtp_alerter_metrics     :: %s' % str(len(self.smtp_alerter_metrics)))
             logger.info('non_smtp_alerter_metrics :: %s' % str(len(self.non_smtp_alerter_metrics)))
 
+            # @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
+            #                   Branch #2270: luminosity
+            # Add a Redis set of smtp_alerter_metrics for Luminosity to only
+            # cross correlate on metrics with an alert setting
+            for metric in self.smtp_alerter_metrics:
+                self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', metric)
+            try:
+                self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('new_analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics')
+            except:
+                pass
+            try:
+                self.redis_conn.delete('analyzer.smtp_alerter_metrics.old')
+            except:
+                pass
+
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
             for algorithm in algorithms_to_time:

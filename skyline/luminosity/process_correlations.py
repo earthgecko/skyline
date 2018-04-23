@@ -18,6 +18,14 @@ config = {'user': settings.PANORAMA_DBUSER,
           'database': settings.PANORAMA_DATABASE,
           'raise_on_warnings': True}
 
+# @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
+#                   Branch #2270: luminosity
+# Only correlate metrics with an alert setting
+try:
+    correlate_alerts_only = settings.CORRELATE_ALERTS_ONLY
+except:
+    correlate_alerts_only = True
+
 skyline_app = 'luminosity'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -65,6 +73,18 @@ def get_anomaly(request_type):
 
 
 def get_anomalous_ts(base_name, anomaly_timestamp):
+
+    # @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
+    #                   Branch #2270: luminosity
+    # Only correlate metrics with an alert setting
+    if correlate_alerts_only:
+        try:
+            smtp_alerter_metrics = list(redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+        except:
+            smtp_alerter_metrics = []
+        if base_name not in smtp_alerter_metrics:
+            logger.error('%s has no alerter setting, not correlating' % base_name)
+            return False
 
     if not base_name or not anomaly_timestamp:
         return False

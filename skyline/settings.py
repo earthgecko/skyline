@@ -1651,6 +1651,10 @@ MEMCACHED_SERVER_PORT = 11211
 :vartype MEMCACHE_SERVER_IP: int
 """
 
+"""
+Luminosity settings
+"""
+
 LUMINOSITY_PROCESSES = 1
 """
 :var LUMINOSITY_PROCESSES: This is the number of Luminosity processes to run.
@@ -1668,4 +1672,24 @@ OTHER_SKYLINE_REDIS_INSTANCES = []
 
 For example, the IP or FQDN as a string and the port as an int:
 OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379], ['192.168.1.15', 6379]]
+"""
+
+ALTERNATIVE_SKYLINE_URLS = []
+"""
+:var ALTERNATIVE_SKYLINE_URLS: The alternative URLs of any other Skyline
+    instances. This ONLY applicable if there are multiple Skyline instances each
+    with their own Redis.
+:vartype ALTERNATIVE_SKYLINE_URLS: list
+
+For example (note NO trailing slash):
+ALTERNATIVE_SKYLINE_URLS = ['http://skyline-na.example.com:8080','http://skyline-eu.example.com']
+"""
+
+CORRELATE_ALERTS_ONLY = True
+"""
+:var CORRELATE_ALERTS_ONLY: Only cross correlate anomalies the have an alert
+    setting (other that syslog).  This reduces the number of correlations that
+    are recorded in the database.  Non alerter metrics are still however cross
+    correlated against when an anomaly triggers on an alerter metric.
+:vartype CORRELATE_ALERTS_ONLY: boolean
 """
