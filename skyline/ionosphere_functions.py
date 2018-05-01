@@ -1027,4 +1027,8 @@ def get_correlations(current_skyline_app, anomaly_id):
     if engine:
         fp_create_engine_disposal(current_skyline_app, engine)
 
+    if correlations:
+        sorted_correlations = sorted(correlations, key=lambda x: x[1], reverse=True)
+        correlations = sorted_correlations
+
     return correlations, fail_msg, trace

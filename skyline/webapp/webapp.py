@@ -1515,8 +1515,8 @@ def ionosphere():
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + str(value)
 
+                    metric_found = False
                     if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
-                        metric_found = False
                         for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
                             other_unique_metrics = []
                             if not metric_found:
