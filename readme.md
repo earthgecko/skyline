@@ -1,8 +1,6 @@
 ## Skyline
 
-<a href='http://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest'>
-  <img src='https://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest' alt='Documentation Status' />
-</a>
+version - Ionosphere
 
 ![skyline web app](skyline.png)
 
@@ -21,3 +19,7 @@ metric to be anomalous.
 All the Skyline documentation is available in a clone locally in your
 browser at `file://<PATH_TO_YOUR_CLONE>/docs/_build/html/index.html`, via
 the Skyline Webapp frontend and online at http://earthgecko-skyline.readthedocs.io/en/latest/
+
+## Other
+
+https://gitter.im/earthgecko-skyline/Lobby

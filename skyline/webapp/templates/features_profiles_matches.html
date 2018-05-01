@@ -1,0 +1,187 @@
+{% block features_profiles_matches_block %}
+<!-- BEGIN /ionosphere/fp_matches=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere features_profiles_matches block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
+# Return matches for the last 24 hours as the default -->
+		  <li class="active"><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+  		  <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles</span></span></span></h4>
+  {% if fp_matches_results %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#match_options">Show match options</button>
+        <div id="match_options" class="collapse">
+  {% endif %}
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Match criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Features profile matches search</td>
+  		        <td><select name="fp_matches">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Metric like</td>
+  		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>features profile id:</td>
+              <td><input type="number" name="fp_id" value="0" /> use 0 for all</td>
+  		      </tr>
+  		      <tr>
+  		        <td>layer id:</td>
+              <td><input type="number" name="layer_id" value="0" /> use 0 for all</td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp</td>
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+# Change the default from_timestamp from all to the past 24 hours -->
+  		        <td><input type="text" name="from_timestamp" value="{{ matched_from_datetime }}"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+                <td>limit</td>
+                <td><input type="number" name="limit" min="0" max="100" value="100" /> use 0 for unlimited</td>
+  		      </tr>
+  		      <tr>
+  		        <td>order by:</td>
+  		        <td><select name="order">
+                <option value="DESC">DESC</option>
+                <option value="ASC">ASC</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Matches">
+      </form>
+  {% if fp_matches_results %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+      </div>
+{% if fp_matches_results %}
+<!-- TODO results tables
+id
+metric
+count
+-->
+
+  {% if fp_matches_results %}
+	  <div class="tab-pane active" id="matches">
+      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
+          limited by {{ fp_matches_results|length }} features profile matches ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page] -->
+            <th>date</th>
+            <th>metric</th>
+            <th>match id</th>
+            <th>matched by</th>
+            <th>fp_id</th>
+            <th>layer_id</th>
+            <th>uri_to_matched_page</th>
+					</tr>
+				</thead>
+				<tbody>
+    {% for item in fp_matches_results %}
+          <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[5] }}</td>
+      {% if item[2] == 'features profile' %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
+            </td>
+            <td><span class="logo"><span class="sky">{{ item[2] }}</span></span></td>
+      {% else %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>
+            </td>
+            <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
+      {% endif %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[3] }}</a>
+            </td>
+      {% if item[4] == 'None' %}
+            <td>{{ item[4] }}</td>
+      {% else %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[4] }}</a>
+            </td>
+      {% endif %}
+            <td>{{ item[6] }}</td>
+          </tr>
+    {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+{% endif %}
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere/?fp_matches=true block -->
+{% endblock %}

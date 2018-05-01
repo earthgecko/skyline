@@ -1,0 +1,878 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Development - pytz &mdash; Skyline 1.2.0-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
+        <link rel="up" title="Development" href="index.html"/>
+        <link rel="next" title="Roadmap" href="../roadmap.html"/>
+        <link rel="prev" title="Development - tsfresh" href="tsfresh.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tsfresh.html">Development - tsfresh</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Development - pytz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pytz-all-timezones">pytz.all_timezones</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#timezones-list-for-pytz-version">Timezones list for pytz version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Development</a> &raquo;</li>
+      
+    <li>Development - pytz</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/development/pytz.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="development-pytz">
+<h1>Development - pytz<a class="headerlink" href="#development-pytz" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This pytz.rst file is automatically generated DO NOT edit this page
+directly, edit its source skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py
+and see <a class="reference external" href="building-documentation.html">Building documentation</a>)</p>
+</div>
+<div class="section" id="pytz-all-timezones">
+<h2>pytz.all_timezones<a class="headerlink" href="#pytz-all-timezones" title="Permalink to this headline">¶</a></h2>
+<p><strong>pytz version: 2016.7</strong></p>
+<p>This is an automatically generated list of all pytz timezones for the specified
+pytz version generated using pytz.all_timezones.  It is generated so there is an
+easy reference for users to find their relevant pytz timezone string.</p>
+<p>It is specifically related to Skyline Ionosphere, but it is also
+applicable more generally to working with Graphite timeseries data, different
+timezones, pytz and formatting the Graphite timeseries data in UTC for feature
+extraction using tsfresh.</p>
+<p>In terms of Ionosphere or generally working with Graphite timeseries data, this
+is only applicable for anyone want who has Graphite implemented in a timezone
+other than UTC and wishes to pass a timezone to extract the features of a metric
+timeseries with tsfresh.</p>
+<p>The user should not have to fire up pytz locally or on their server to find
+their applicable pytz timezone, they are all listed here below, which is yours?
+Or in more detail - <a class="reference external" href="https://en.wikipedia.org/wiki/Tz_database">https://en.wikipedia.org/wiki/Tz_database</a></p>
+<p>It is hoped that the methods used handle daylight savings timezones (DST), the
+methods implemented has been taken from some best practices, however they are
+not tested on DST changes, so the outcome is somewhat unknown.</p>
+<p><strong>pytz version: 2016.7</strong></p>
+<div class="section" id="timezones-list-for-pytz-version">
+<h3>Timezones list for pytz version<a class="headerlink" href="#timezones-list-for-pytz-version" title="Permalink to this headline">¶</a></h3>
+<p>Africa/Abidjan</p>
+<p>Africa/Accra</p>
+<p>Africa/Addis_Ababa</p>
+<p>Africa/Algiers</p>
+<p>Africa/Asmara</p>
+<p>Africa/Asmera</p>
+<p>Africa/Bamako</p>
+<p>Africa/Bangui</p>
+<p>Africa/Banjul</p>
+<p>Africa/Bissau</p>
+<p>Africa/Blantyre</p>
+<p>Africa/Brazzaville</p>
+<p>Africa/Bujumbura</p>
+<p>Africa/Cairo</p>
+<p>Africa/Casablanca</p>
+<p>Africa/Ceuta</p>
+<p>Africa/Conakry</p>
+<p>Africa/Dakar</p>
+<p>Africa/Dar_es_Salaam</p>
+<p>Africa/Djibouti</p>
+<p>Africa/Douala</p>
+<p>Africa/El_Aaiun</p>
+<p>Africa/Freetown</p>
+<p>Africa/Gaborone</p>
+<p>Africa/Harare</p>
+<p>Africa/Johannesburg</p>
+<p>Africa/Juba</p>
+<p>Africa/Kampala</p>
+<p>Africa/Khartoum</p>
+<p>Africa/Kigali</p>
+<p>Africa/Kinshasa</p>
+<p>Africa/Lagos</p>
+<p>Africa/Libreville</p>
+<p>Africa/Lome</p>
+<p>Africa/Luanda</p>
+<p>Africa/Lubumbashi</p>
+<p>Africa/Lusaka</p>
+<p>Africa/Malabo</p>
+<p>Africa/Maputo</p>
+<p>Africa/Maseru</p>
+<p>Africa/Mbabane</p>
+<p>Africa/Mogadishu</p>
+<p>Africa/Monrovia</p>
+<p>Africa/Nairobi</p>
+<p>Africa/Ndjamena</p>
+<p>Africa/Niamey</p>
+<p>Africa/Nouakchott</p>
+<p>Africa/Ouagadougou</p>
+<p>Africa/Porto-Novo</p>
+<p>Africa/Sao_Tome</p>
+<p>Africa/Timbuktu</p>
+<p>Africa/Tripoli</p>
+<p>Africa/Tunis</p>
+<p>Africa/Windhoek</p>
+<p>America/Adak</p>
+<p>America/Anchorage</p>
+<p>America/Anguilla</p>
+<p>America/Antigua</p>
+<p>America/Araguaina</p>
+<p>America/Argentina/Buenos_Aires</p>
+<p>America/Argentina/Catamarca</p>
+<p>America/Argentina/ComodRivadavia</p>
+<p>America/Argentina/Cordoba</p>
+<p>America/Argentina/Jujuy</p>
+<p>America/Argentina/La_Rioja</p>
+<p>America/Argentina/Mendoza</p>
+<p>America/Argentina/Rio_Gallegos</p>
+<p>America/Argentina/Salta</p>
+<p>America/Argentina/San_Juan</p>
+<p>America/Argentina/San_Luis</p>
+<p>America/Argentina/Tucuman</p>
+<p>America/Argentina/Ushuaia</p>
+<p>America/Aruba</p>
+<p>America/Asuncion</p>
+<p>America/Atikokan</p>
+<p>America/Atka</p>
+<p>America/Bahia</p>
+<p>America/Bahia_Banderas</p>
+<p>America/Barbados</p>
+<p>America/Belem</p>
+<p>America/Belize</p>
+<p>America/Blanc-Sablon</p>
+<p>America/Boa_Vista</p>
+<p>America/Bogota</p>
+<p>America/Boise</p>
+<p>America/Buenos_Aires</p>
+<p>America/Cambridge_Bay</p>
+<p>America/Campo_Grande</p>
+<p>America/Cancun</p>
+<p>America/Caracas</p>
+<p>America/Catamarca</p>
+<p>America/Cayenne</p>
+<p>America/Cayman</p>
+<p>America/Chicago</p>
+<p>America/Chihuahua</p>
+<p>America/Coral_Harbour</p>
+<p>America/Cordoba</p>
+<p>America/Costa_Rica</p>
+<p>America/Creston</p>
+<p>America/Cuiaba</p>
+<p>America/Curacao</p>
+<p>America/Danmarkshavn</p>
+<p>America/Dawson</p>
+<p>America/Dawson_Creek</p>
+<p>America/Denver</p>
+<p>America/Detroit</p>
+<p>America/Dominica</p>
+<p>America/Edmonton</p>
+<p>America/Eirunepe</p>
+<p>America/El_Salvador</p>
+<p>America/Ensenada</p>
+<p>America/Fort_Nelson</p>
+<p>America/Fort_Wayne</p>
+<p>America/Fortaleza</p>
+<p>America/Glace_Bay</p>
+<p>America/Godthab</p>
+<p>America/Goose_Bay</p>
+<p>America/Grand_Turk</p>
+<p>America/Grenada</p>
+<p>America/Guadeloupe</p>
+<p>America/Guatemala</p>
+<p>America/Guayaquil</p>
+<p>America/Guyana</p>
+<p>America/Halifax</p>
+<p>America/Havana</p>
+<p>America/Hermosillo</p>
+<p>America/Indiana/Indianapolis</p>
+<p>America/Indiana/Knox</p>
+<p>America/Indiana/Marengo</p>
+<p>America/Indiana/Petersburg</p>
+<p>America/Indiana/Tell_City</p>
+<p>America/Indiana/Vevay</p>
+<p>America/Indiana/Vincennes</p>
+<p>America/Indiana/Winamac</p>
+<p>America/Indianapolis</p>
+<p>America/Inuvik</p>
+<p>America/Iqaluit</p>
+<p>America/Jamaica</p>
+<p>America/Jujuy</p>
+<p>America/Juneau</p>
+<p>America/Kentucky/Louisville</p>
+<p>America/Kentucky/Monticello</p>
+<p>America/Knox_IN</p>
+<p>America/Kralendijk</p>
+<p>America/La_Paz</p>
+<p>America/Lima</p>
+<p>America/Los_Angeles</p>
+<p>America/Louisville</p>
+<p>America/Lower_Princes</p>
+<p>America/Maceio</p>
+<p>America/Managua</p>
+<p>America/Manaus</p>
+<p>America/Marigot</p>
+<p>America/Martinique</p>
+<p>America/Matamoros</p>
+<p>America/Mazatlan</p>
+<p>America/Mendoza</p>
+<p>America/Menominee</p>
+<p>America/Merida</p>
+<p>America/Metlakatla</p>
+<p>America/Mexico_City</p>
+<p>America/Miquelon</p>
+<p>America/Moncton</p>
+<p>America/Monterrey</p>
+<p>America/Montevideo</p>
+<p>America/Montreal</p>
+<p>America/Montserrat</p>
+<p>America/Nassau</p>
+<p>America/New_York</p>
+<p>America/Nipigon</p>
+<p>America/Nome</p>
+<p>America/Noronha</p>
+<p>America/North_Dakota/Beulah</p>
+<p>America/North_Dakota/Center</p>
+<p>America/North_Dakota/New_Salem</p>
+<p>America/Ojinaga</p>
+<p>America/Panama</p>
+<p>America/Pangnirtung</p>
+<p>America/Paramaribo</p>
+<p>America/Phoenix</p>
+<p>America/Port-au-Prince</p>
+<p>America/Port_of_Spain</p>
+<p>America/Porto_Acre</p>
+<p>America/Porto_Velho</p>
+<p>America/Puerto_Rico</p>
+<p>America/Rainy_River</p>
+<p>America/Rankin_Inlet</p>
+<p>America/Recife</p>
+<p>America/Regina</p>
+<p>America/Resolute</p>
+<p>America/Rio_Branco</p>
+<p>America/Rosario</p>
+<p>America/Santa_Isabel</p>
+<p>America/Santarem</p>
+<p>America/Santiago</p>
+<p>America/Santo_Domingo</p>
+<p>America/Sao_Paulo</p>
+<p>America/Scoresbysund</p>
+<p>America/Shiprock</p>
+<p>America/Sitka</p>
+<p>America/St_Barthelemy</p>
+<p>America/St_Johns</p>
+<p>America/St_Kitts</p>
+<p>America/St_Lucia</p>
+<p>America/St_Thomas</p>
+<p>America/St_Vincent</p>
+<p>America/Swift_Current</p>
+<p>America/Tegucigalpa</p>
+<p>America/Thule</p>
+<p>America/Thunder_Bay</p>
+<p>America/Tijuana</p>
+<p>America/Toronto</p>
+<p>America/Tortola</p>
+<p>America/Vancouver</p>
+<p>America/Virgin</p>
+<p>America/Whitehorse</p>
+<p>America/Winnipeg</p>
+<p>America/Yakutat</p>
+<p>America/Yellowknife</p>
+<p>Antarctica/Casey</p>
+<p>Antarctica/Davis</p>
+<p>Antarctica/DumontDUrville</p>
+<p>Antarctica/Macquarie</p>
+<p>Antarctica/Mawson</p>
+<p>Antarctica/McMurdo</p>
+<p>Antarctica/Palmer</p>
+<p>Antarctica/Rothera</p>
+<p>Antarctica/South_Pole</p>
+<p>Antarctica/Syowa</p>
+<p>Antarctica/Troll</p>
+<p>Antarctica/Vostok</p>
+<p>Arctic/Longyearbyen</p>
+<p>Asia/Aden</p>
+<p>Asia/Almaty</p>
+<p>Asia/Amman</p>
+<p>Asia/Anadyr</p>
+<p>Asia/Aqtau</p>
+<p>Asia/Aqtobe</p>
+<p>Asia/Ashgabat</p>
+<p>Asia/Ashkhabad</p>
+<p>Asia/Baghdad</p>
+<p>Asia/Bahrain</p>
+<p>Asia/Baku</p>
+<p>Asia/Bangkok</p>
+<p>Asia/Barnaul</p>
+<p>Asia/Beirut</p>
+<p>Asia/Bishkek</p>
+<p>Asia/Brunei</p>
+<p>Asia/Calcutta</p>
+<p>Asia/Chita</p>
+<p>Asia/Choibalsan</p>
+<p>Asia/Chongqing</p>
+<p>Asia/Chungking</p>
+<p>Asia/Colombo</p>
+<p>Asia/Dacca</p>
+<p>Asia/Damascus</p>
+<p>Asia/Dhaka</p>
+<p>Asia/Dili</p>
+<p>Asia/Dubai</p>
+<p>Asia/Dushanbe</p>
+<p>Asia/Gaza</p>
+<p>Asia/Harbin</p>
+<p>Asia/Hebron</p>
+<p>Asia/Ho_Chi_Minh</p>
+<p>Asia/Hong_Kong</p>
+<p>Asia/Hovd</p>
+<p>Asia/Irkutsk</p>
+<p>Asia/Istanbul</p>
+<p>Asia/Jakarta</p>
+<p>Asia/Jayapura</p>
+<p>Asia/Jerusalem</p>
+<p>Asia/Kabul</p>
+<p>Asia/Kamchatka</p>
+<p>Asia/Karachi</p>
+<p>Asia/Kashgar</p>
+<p>Asia/Kathmandu</p>
+<p>Asia/Katmandu</p>
+<p>Asia/Khandyga</p>
+<p>Asia/Kolkata</p>
+<p>Asia/Krasnoyarsk</p>
+<p>Asia/Kuala_Lumpur</p>
+<p>Asia/Kuching</p>
+<p>Asia/Kuwait</p>
+<p>Asia/Macao</p>
+<p>Asia/Macau</p>
+<p>Asia/Magadan</p>
+<p>Asia/Makassar</p>
+<p>Asia/Manila</p>
+<p>Asia/Muscat</p>
+<p>Asia/Nicosia</p>
+<p>Asia/Novokuznetsk</p>
+<p>Asia/Novosibirsk</p>
+<p>Asia/Omsk</p>
+<p>Asia/Oral</p>
+<p>Asia/Phnom_Penh</p>
+<p>Asia/Pontianak</p>
+<p>Asia/Pyongyang</p>
+<p>Asia/Qatar</p>
+<p>Asia/Qyzylorda</p>
+<p>Asia/Rangoon</p>
+<p>Asia/Riyadh</p>
+<p>Asia/Saigon</p>
+<p>Asia/Sakhalin</p>
+<p>Asia/Samarkand</p>
+<p>Asia/Seoul</p>
+<p>Asia/Shanghai</p>
+<p>Asia/Singapore</p>
+<p>Asia/Srednekolymsk</p>
+<p>Asia/Taipei</p>
+<p>Asia/Tashkent</p>
+<p>Asia/Tbilisi</p>
+<p>Asia/Tehran</p>
+<p>Asia/Tel_Aviv</p>
+<p>Asia/Thimbu</p>
+<p>Asia/Thimphu</p>
+<p>Asia/Tokyo</p>
+<p>Asia/Tomsk</p>
+<p>Asia/Ujung_Pandang</p>
+<p>Asia/Ulaanbaatar</p>
+<p>Asia/Ulan_Bator</p>
+<p>Asia/Urumqi</p>
+<p>Asia/Ust-Nera</p>
+<p>Asia/Vientiane</p>
+<p>Asia/Vladivostok</p>
+<p>Asia/Yakutsk</p>
+<p>Asia/Yangon</p>
+<p>Asia/Yekaterinburg</p>
+<p>Asia/Yerevan</p>
+<p>Atlantic/Azores</p>
+<p>Atlantic/Bermuda</p>
+<p>Atlantic/Canary</p>
+<p>Atlantic/Cape_Verde</p>
+<p>Atlantic/Faeroe</p>
+<p>Atlantic/Faroe</p>
+<p>Atlantic/Jan_Mayen</p>
+<p>Atlantic/Madeira</p>
+<p>Atlantic/Reykjavik</p>
+<p>Atlantic/South_Georgia</p>
+<p>Atlantic/St_Helena</p>
+<p>Atlantic/Stanley</p>
+<p>Australia/ACT</p>
+<p>Australia/Adelaide</p>
+<p>Australia/Brisbane</p>
+<p>Australia/Broken_Hill</p>
+<p>Australia/Canberra</p>
+<p>Australia/Currie</p>
+<p>Australia/Darwin</p>
+<p>Australia/Eucla</p>
+<p>Australia/Hobart</p>
+<p>Australia/LHI</p>
+<p>Australia/Lindeman</p>
+<p>Australia/Lord_Howe</p>
+<p>Australia/Melbourne</p>
+<p>Australia/NSW</p>
+<p>Australia/North</p>
+<p>Australia/Perth</p>
+<p>Australia/Queensland</p>
+<p>Australia/South</p>
+<p>Australia/Sydney</p>
+<p>Australia/Tasmania</p>
+<p>Australia/Victoria</p>
+<p>Australia/West</p>
+<p>Australia/Yancowinna</p>
+<p>Brazil/Acre</p>
+<p>Brazil/DeNoronha</p>
+<p>Brazil/East</p>
+<p>Brazil/West</p>
+<p>CET</p>
+<p>CST6CDT</p>
+<p>Canada/Atlantic</p>
+<p>Canada/Central</p>
+<p>Canada/East-Saskatchewan</p>
+<p>Canada/Eastern</p>
+<p>Canada/Mountain</p>
+<p>Canada/Newfoundland</p>
+<p>Canada/Pacific</p>
+<p>Canada/Saskatchewan</p>
+<p>Canada/Yukon</p>
+<p>Chile/Continental</p>
+<p>Chile/EasterIsland</p>
+<p>Cuba</p>
+<p>EET</p>
+<p>EST</p>
+<p>EST5EDT</p>
+<p>Egypt</p>
+<p>Eire</p>
+<p>Etc/GMT</p>
+<p>Etc/GMT+0</p>
+<p>Etc/GMT+1</p>
+<p>Etc/GMT+10</p>
+<p>Etc/GMT+11</p>
+<p>Etc/GMT+12</p>
+<p>Etc/GMT+2</p>
+<p>Etc/GMT+3</p>
+<p>Etc/GMT+4</p>
+<p>Etc/GMT+5</p>
+<p>Etc/GMT+6</p>
+<p>Etc/GMT+7</p>
+<p>Etc/GMT+8</p>
+<p>Etc/GMT+9</p>
+<p>Etc/GMT-0</p>
+<p>Etc/GMT-1</p>
+<p>Etc/GMT-10</p>
+<p>Etc/GMT-11</p>
+<p>Etc/GMT-12</p>
+<p>Etc/GMT-13</p>
+<p>Etc/GMT-14</p>
+<p>Etc/GMT-2</p>
+<p>Etc/GMT-3</p>
+<p>Etc/GMT-4</p>
+<p>Etc/GMT-5</p>
+<p>Etc/GMT-6</p>
+<p>Etc/GMT-7</p>
+<p>Etc/GMT-8</p>
+<p>Etc/GMT-9</p>
+<p>Etc/GMT0</p>
+<p>Etc/Greenwich</p>
+<p>Etc/UCT</p>
+<p>Etc/UTC</p>
+<p>Etc/Universal</p>
+<p>Etc/Zulu</p>
+<p>Europe/Amsterdam</p>
+<p>Europe/Andorra</p>
+<p>Europe/Astrakhan</p>
+<p>Europe/Athens</p>
+<p>Europe/Belfast</p>
+<p>Europe/Belgrade</p>
+<p>Europe/Berlin</p>
+<p>Europe/Bratislava</p>
+<p>Europe/Brussels</p>
+<p>Europe/Bucharest</p>
+<p>Europe/Budapest</p>
+<p>Europe/Busingen</p>
+<p>Europe/Chisinau</p>
+<p>Europe/Copenhagen</p>
+<p>Europe/Dublin</p>
+<p>Europe/Gibraltar</p>
+<p>Europe/Guernsey</p>
+<p>Europe/Helsinki</p>
+<p>Europe/Isle_of_Man</p>
+<p>Europe/Istanbul</p>
+<p>Europe/Jersey</p>
+<p>Europe/Kaliningrad</p>
+<p>Europe/Kiev</p>
+<p>Europe/Kirov</p>
+<p>Europe/Lisbon</p>
+<p>Europe/Ljubljana</p>
+<p>Europe/London</p>
+<p>Europe/Luxembourg</p>
+<p>Europe/Madrid</p>
+<p>Europe/Malta</p>
+<p>Europe/Mariehamn</p>
+<p>Europe/Minsk</p>
+<p>Europe/Monaco</p>
+<p>Europe/Moscow</p>
+<p>Europe/Nicosia</p>
+<p>Europe/Oslo</p>
+<p>Europe/Paris</p>
+<p>Europe/Podgorica</p>
+<p>Europe/Prague</p>
+<p>Europe/Riga</p>
+<p>Europe/Rome</p>
+<p>Europe/Samara</p>
+<p>Europe/San_Marino</p>
+<p>Europe/Sarajevo</p>
+<p>Europe/Simferopol</p>
+<p>Europe/Skopje</p>
+<p>Europe/Sofia</p>
+<p>Europe/Stockholm</p>
+<p>Europe/Tallinn</p>
+<p>Europe/Tirane</p>
+<p>Europe/Tiraspol</p>
+<p>Europe/Ulyanovsk</p>
+<p>Europe/Uzhgorod</p>
+<p>Europe/Vaduz</p>
+<p>Europe/Vatican</p>
+<p>Europe/Vienna</p>
+<p>Europe/Vilnius</p>
+<p>Europe/Volgograd</p>
+<p>Europe/Warsaw</p>
+<p>Europe/Zagreb</p>
+<p>Europe/Zaporozhye</p>
+<p>Europe/Zurich</p>
+<p>GB</p>
+<p>GB-Eire</p>
+<p>GMT</p>
+<p>GMT+0</p>
+<p>GMT-0</p>
+<p>GMT0</p>
+<p>Greenwich</p>
+<p>HST</p>
+<p>Hongkong</p>
+<p>Iceland</p>
+<p>Indian/Antananarivo</p>
+<p>Indian/Chagos</p>
+<p>Indian/Christmas</p>
+<p>Indian/Cocos</p>
+<p>Indian/Comoro</p>
+<p>Indian/Kerguelen</p>
+<p>Indian/Mahe</p>
+<p>Indian/Maldives</p>
+<p>Indian/Mauritius</p>
+<p>Indian/Mayotte</p>
+<p>Indian/Reunion</p>
+<p>Iran</p>
+<p>Israel</p>
+<p>Jamaica</p>
+<p>Japan</p>
+<p>Kwajalein</p>
+<p>Libya</p>
+<p>MET</p>
+<p>MST</p>
+<p>MST7MDT</p>
+<p>Mexico/BajaNorte</p>
+<p>Mexico/BajaSur</p>
+<p>Mexico/General</p>
+<p>NZ</p>
+<p>NZ-CHAT</p>
+<p>Navajo</p>
+<p>PRC</p>
+<p>PST8PDT</p>
+<p>Pacific/Apia</p>
+<p>Pacific/Auckland</p>
+<p>Pacific/Bougainville</p>
+<p>Pacific/Chatham</p>
+<p>Pacific/Chuuk</p>
+<p>Pacific/Easter</p>
+<p>Pacific/Efate</p>
+<p>Pacific/Enderbury</p>
+<p>Pacific/Fakaofo</p>
+<p>Pacific/Fiji</p>
+<p>Pacific/Funafuti</p>
+<p>Pacific/Galapagos</p>
+<p>Pacific/Gambier</p>
+<p>Pacific/Guadalcanal</p>
+<p>Pacific/Guam</p>
+<p>Pacific/Honolulu</p>
+<p>Pacific/Johnston</p>
+<p>Pacific/Kiritimati</p>
+<p>Pacific/Kosrae</p>
+<p>Pacific/Kwajalein</p>
+<p>Pacific/Majuro</p>
+<p>Pacific/Marquesas</p>
+<p>Pacific/Midway</p>
+<p>Pacific/Nauru</p>
+<p>Pacific/Niue</p>
+<p>Pacific/Norfolk</p>
+<p>Pacific/Noumea</p>
+<p>Pacific/Pago_Pago</p>
+<p>Pacific/Palau</p>
+<p>Pacific/Pitcairn</p>
+<p>Pacific/Pohnpei</p>
+<p>Pacific/Ponape</p>
+<p>Pacific/Port_Moresby</p>
+<p>Pacific/Rarotonga</p>
+<p>Pacific/Saipan</p>
+<p>Pacific/Samoa</p>
+<p>Pacific/Tahiti</p>
+<p>Pacific/Tarawa</p>
+<p>Pacific/Tongatapu</p>
+<p>Pacific/Truk</p>
+<p>Pacific/Wake</p>
+<p>Pacific/Wallis</p>
+<p>Pacific/Yap</p>
+<p>Poland</p>
+<p>Portugal</p>
+<p>ROC</p>
+<p>ROK</p>
+<p>Singapore</p>
+<p>Turkey</p>
+<p>UCT</p>
+<p>US/Alaska</p>
+<p>US/Aleutian</p>
+<p>US/Arizona</p>
+<p>US/Central</p>
+<p>US/East-Indiana</p>
+<p>US/Eastern</p>
+<p>US/Hawaii</p>
+<p>US/Indiana-Starke</p>
+<p>US/Michigan</p>
+<p>US/Mountain</p>
+<p>US/Pacific</p>
+<p>US/Pacific-New</p>
+<p>US/Samoa</p>
+<p>UTC</p>
+<p>Universal</p>
+<p>W-SU</p>
+<p>WET</p>
+<p>Zulu</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../roadmap.html" class="btn btn-neutral float-right" title="Roadmap" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tsfresh.html" class="btn btn-neutral" title="Development - tsfresh" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2.0-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -2,13 +2,10 @@
 
 import json
 import os
-import pickle
 import socket
 import sys
 import time
 from os.path import dirname, join, realpath
-from multiprocessing import Manager, Process, log_to_stderr
-from struct import Struct, pack
 import traceback
 
 import redis
@@ -64,6 +61,7 @@ def seed():
             print 'warn   :: there is an issue with the Horizon parameters'
             traceback.print_exc()
             print 'warn :: Horizon is not available on UDP via 127.0.0.1'
+            print 'error :: %s' % str(e)
 
     if not horizon_params_ok:
         print 'error  :: please check your HORIZON related settings in settings.py and restart the Horizon service'
@@ -129,6 +127,7 @@ def seed():
         print 'info :: please check your settings.py and ensure that the Horizon and Redis settings are correct.'
         print 'info :: ensure Redis is available via socket in your redis.conf'
         print 'info :: restart these services and try again'
+
 
 if __name__ == '__main__':
     seed()

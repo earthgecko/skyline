@@ -12,10 +12,10 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
-import settings
-from validate_settings import validate_settings_variables
-
-from analyzer import Analyzer
+if True:
+    import settings
+    from validate_settings import validate_settings_variables
+    from analyzer import Analyzer
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -118,6 +118,7 @@ def run():
 
     logger.info('stopping analyzer')
     memory_handler.flush
+
 
 if __name__ == '__main__':
     run()

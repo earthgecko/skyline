@@ -1,0 +1,19 @@
+===========================
+1.0.6 - the crucible branch
+===========================
+
+A very quick release to fix the immediate last release which was missing a
+settings.py variable related to ENABLE_WEBAPP_DEBUG in v1.0.5-crucible-beta
+The variable had been included in config management but not the codebase hence
+it tested fine.
+
+Changes include:
+
+- The addition of a missing settings.py variable in v1.0.5-crucible-beta
+  ENABLE_WEBAPP_DEBUG
+- Added a check to validate_settings.py for ENABLE_WEBAPP_DEBUG
+- Minor modification to webapp.py and backend.py to handle it not being defined
+  gracefully
+- Fixed a minor bug in the webapp/backend.py to not 500 if no metric_like row
+  ids are found in the MySQL result
+- Bumped version to 1.0.6

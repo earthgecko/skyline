@@ -2,12 +2,12 @@
 Requirements
 ============
 
-The ideal requirements are:
+The requirements are:
 
 -  Linux (and probably any environment that supports Python virtualenv
    and bash)
 -  virtualenv
--  Python-2.7.11 or Python-2.7.12 (running in an isolated vitualenv)
+-  Python-2.7.12 (running in an isolated vitualenv)
 -  Redis
 -  MySQL or mariadb [optional - required for Panorama]
 -  A Graphite implementation sending data would help :)
@@ -39,6 +39,8 @@ run/upgrade on Python-2.6
 pandas
 ======
 
+Updated: 20161120 - can no longer be supported as of Ionosphere (probably)
+
 The ``PANDAS_VERSION`` variable was added to settings.py to handle
 backwards compatability with any instances of Skyline that are run older
 versions that perhaps cannot upgrade to a later version due to any
@@ -66,8 +68,8 @@ use.
 Skyline should be able to run on pandas versions 0.12.0 - 0.18.0 (or
 later)
 
-Python-2.6
-==========
+Python-2.6 - may work, but not supported
+========================================
 
 Skyline can still run on Python-2.6. However deploying Skyline on
 Python-2.6 requires jumping through some hoops. This is because of the
@@ -75,6 +77,8 @@ dependencies and pip packages moving a lot. At some point some older pip
 package is not going to be available any longer and it will no longer be
 possible, unless you are packaging the pip packages into your own packages, e.g.
 with fpm or such.
+
+Updated: 20161120 - can no longer be supported as of Ionosphere (probably)
 
 RedHat family 6.x
 =================
@@ -84,6 +88,8 @@ Skyline in an isolated virtualenv, but have to use the system Python and
 pip. The following pip installs and versions are known to working, with
 a caveat on the scipy needs to be installed via yum NOT pip and you need
 to do the following:
+
+Updated: 20161120 - this information is now too old to be applicable really.
 
 .. code-block:: bash
 

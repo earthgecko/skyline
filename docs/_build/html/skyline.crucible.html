@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.crucible package &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>skyline.crucible package &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.horizon package" href="skyline.horizon.html"/>
         <link rel="prev" title="skyline.boundary package" href="skyline.boundary.html"/> 
@@ -63,7 +66,7 @@
             
             
               <div class="version">
-                1.0
+                1.2
               </div>
             
           
@@ -90,9 +93,10 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
@@ -101,6 +105,9 @@
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -109,7 +116,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
@@ -128,16 +134,23 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
 </ul>
@@ -396,7 +409,7 @@ matches drops off cliffs.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -418,7 +431,7 @@ matches drops off cliffs.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

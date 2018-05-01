@@ -1,4 +1,6 @@
+from __future__ import division
 import logging
+import traceback
 from smtplib import SMTP
 import boundary_alerters
 try:
@@ -8,7 +10,8 @@ except ImportError:
     import urllib.error
 import re
 from requests.utils import quote
-
+from time import time
+import datetime
 import os.path
 import sys
 python_version = int(sys.version_info[0])
@@ -104,7 +107,9 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     image_data = None
     if settings.BOUNDARY_SMTP_OPTS.get('embed-images'):
         try:
-            image_data = urllib2.urlopen(link).read()
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            image_data = urllib2.urlopen(link).read()  # nosec
         except urllib2.URLError:
             image_data = None
 
@@ -181,14 +186,27 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
         graph_title_string = quote(unencoded_graph_title, safe='')
         graph_title = '&title=%s' % graph_title_string
 
+        # @modified 20170706 - Support #2072: Make Boundary hipchat alerts show fixed timeframe
+        graphite_now = int(time())
+        target_seconds = int((graphite_previous_hours * 60) * 60)
+        from_timestamp = str(graphite_now - target_seconds)
+        until_timestamp = str(graphite_now)
+        graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+        graphite_until = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+
         if settings.GRAPHITE_PORT != '':
-            link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=%s' % (
+                # settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
+                # graphite_previous_hours, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
+            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
-                graphite_previous_hours, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
+                graphite_from, graphite_until, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
                 graph_title, graphite_graph_line_color)
         else:
-            link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=%s' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_previous_hours,
+            # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=%s' % (
+                # settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_previous_hours,
+            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_from, graphite_until,
                 metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
                 graphite_graph_line_color)
 

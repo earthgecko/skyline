@@ -23,6 +23,32 @@ fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v
         <script src="/static/dygraph-1.1.1/dygraph-combined.js"></script>
         <script src="/static/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
 
+<!-- @added 20170122 - Feature #1876: Ionosphere - training_data learn countdown
+Using https://github.com/rendro/countdown
+
+<             var endDate = "{{ countdown }}";
+---
+>             var oldendDate = "{{ countdown }}";
+>             var newendDate = "{{ countdown }} UTC";
+>             var endDate = date.toString();
+
+-->
+    {% if countdown %}
+        <script type="text/javascript" src="/static/countdown-2.2.0/dest/jquery.countdown.js"></script>
+        <script type="text/javascript">
+          $(function() {
+            var endDate = "{{ countdown }}";
+
+            $('.countdown.styled').countdown({
+              date: endDate,
+              render: function(data) {
+                $(this.el).html("<div>" + this.leadingZeros(data.hours, 2) + " <span>hrs</span></div><div>" + this.leadingZeros(data.min, 2) + " <span>min</span></div><div>" + this.leadingZeros(data.sec, 2) + " <span>sec</span></div>");
+              }
+            });
+          });
+        </script>
+    {% endif %}
+
         <link rel="stylesheet" href="/static/bootstrap-3.3.6-dist/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="/static/bootstrap-3.3.6-dist/css/bootstrap-theme.min.css">
         <link rel="stylesheet" href="/static/fontawesome-4.6.3/css/font-awesome.min.css">
@@ -33,6 +59,7 @@ fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
           <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -62,11 +89,21 @@ fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v
           	class="active"
           	{% endif %}
           	><a href="/panorama">Panorama</a></li>
+          	<li
+          	{% if url_for("ionosphere") in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/ionosphere">Ionosphere</a></li>
             <li
             {% if url_for("rebrow") in request.path %}
             class="active"
             {% endif %}
             ><a href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></a></li>
+            <li
+            {% if url_for("utilities") in request.path %}
+            class="active"
+            {% endif %}
+            ><a href="/utilities">Utilities</a></li>
             <li
             {% if url_for("docs") in request.path %}
             class="active"
@@ -128,6 +165,21 @@ fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v
     	<div class="row">
         <div class="col-md-9">
       		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> uses a modified port of Marian Steinbach's excellent <span class="logo"><span class="re">re</span>brow</span> Redis browser :: <a href="https://github.com/marians/rebrow/" target="_blank">GitHub - https://github.com/marians/rebrow</a>.
+        </div>
+        <div class="col-md-3">
+      		<p class="text-right"></p>
+      	</div>
+    </div>
+{% endif %}
+
+<!--
+# @added 20170119 - Branch #922: ionosphere
+#                   Task #1718: review.tsfresh
+-->
+{% if url_for("ionosphere") in request.path %}
+    	<div class="row">
+        <div class="col-md-9">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> Ionosphere was made possible by the very featureful tsfresh package <a href="https://github.com/blue-yonder/tsfresh" target="_blank">GitHub - https://github.com/blue-yonder/tsfresh</a>.
         </div>
         <div class="col-md-3">
       		<p class="text-right"></p>

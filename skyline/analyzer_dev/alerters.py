@@ -1,3 +1,4 @@
+from __future__ import division
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
@@ -56,18 +57,20 @@ def alert_smtp(alert, metric):
     if type(recipients) is str:
         recipients = [recipients]
 
-    graph_title = '&title=skyline%%20analyzer%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (full_duration_in_hours, metric[1], metric[0])
+    graph_title = '&title=skyline%%20analyzer%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (str(int(full_duration_in_hours)), metric[1], metric[0])
 
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
     image_data = None
     if settings.SMTP_OPTS.get('embed-images'):
         try:
-            image_data = urllib2.urlopen(link).read()
+            # @modified 20170913 - Task #2160: Test skyline with bandit
+            # Added nosec to exclude from bandit tests
+            image_data = urllib2.urlopen(link).read()  # nosec
         except urllib2.URLError:
             image_data = None
 
@@ -116,15 +119,15 @@ def alert_hipchat(alert, metric):
     hipster = hipchat.HipChat(token=settings.HIPCHAT_OPTS['auth_token'])
     rooms = settings.HIPCHAT_OPTS['rooms'][alert[0]]
 
-    graph_title = '&title=skyline%%20analyzer%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (full_duration_in_hours, metric[1], metric[0])
+    graph_title = '&title=skyline%%20analyzer%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (str(int(full_duration_in_hours)), metric[1], metric[0])
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
     for room in rooms:
-        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - analyzer - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, metric[1], metric[0], full_duration_in_hours, embed_graph)})
+        hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - analyzer - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, metric[1], metric[0], str(int(full_duration_in_hours)), embed_graph)})
 
 
 def alert_syslog(alert, metric):

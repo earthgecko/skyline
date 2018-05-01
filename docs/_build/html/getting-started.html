@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>Getting started &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
         <link rel="next" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/>
         <link rel="prev" title="Requirements" href="requirements.html"/> 
 
@@ -62,7 +65,7 @@
             
             
               <div class="version">
-                1.0
+                1.2
               </div>
             
           
@@ -87,20 +90,23 @@
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#not-just-a-program">Not just a program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#realistic-expectations">Realistic expectations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#anomaly-detection-is-a-journey-not-an-app">Anomaly detection is a journey not an app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enabling-metrics-incrementally">Enabling metrics incrementally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enabling-skyline-modules-incrementally">Enabling Skyline modules incrementally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#start-with-horizon-analyzer-webapp-and-panorama">Start with Horizon, Analyzer, Webapp and Panorama</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#add-mirage-parameters-to-the-alerts">Add Mirage parameters to the <cite>ALERTS</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-mirage-parameters-to-the-alerts">Add Mirage parameters to the <code class="docutils literal"><span class="pre">ALERTS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-boundary-settings">Add Boundary settings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#you-might-want-crucible-you-probably-do-not">You might want Crucible, you probably do not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train-ionosphere">Train Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ignore-crucible">Ignore Crucible</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
@@ -109,6 +115,9 @@
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -117,7 +126,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
@@ -169,27 +177,15 @@
             
   <div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<p>At some point <strong>soon</strong> hopefully it will be <cite>pip install skyline</cite> but for now
-see <a class="reference external" href="../html/installation.html">Installation</a> <strong>after</strong> reviewing the below</p>
-<div class="section" id="not-just-a-program">
-<h2>Not just a program<a class="headerlink" href="#not-just-a-program" title="Permalink to this headline">¶</a></h2>
-<p>Anomaly detection is not easy.</p>
-<p>&gt; &#8220;It seems difficult&#8221;</p>
-<p>It helps if you start out with realistic expectations.  Anomaly detection takes
-time and effort, it is not simply a case of...</p>
-<p><strong>install = &#8220;all singing and dancing anomaly detection system&#8221;</strong></p>
-<p>There is no off-the-shelf, panacea, anomaly detection system or framework that
-is going to provide you with &#8220;WOW&#8221; without some effort, learning and tuning
-your system to your needs.</p>
-<p>It is not simple, it is not perfect.  It is difficult.  Skyline configuration is
-probably on par in complexity with other similar &#8220;things&#8221; such as Riemann or an
-Elasticsearch cluster perhaps... probably less complex, but not easy initially
-either.</p>
-<p>That said, there is probably less of a learning curve and, upfront setup and
-configuration and than other machine learning and like projects such as NuPIC,
-scikit-learn, theano, tensorflow, keras, etc and all the similar ilk.</p>
-<p>Hopefully Skyline will interface with some of the above in the not too distant
-future - see <a class="reference external" href="../html/roadmap.html">roadmap</a></p>
+<p>At some point hopefully it will be <cite>pip install skyline</cite> but for now see the
+<a class="reference external" href="../html/installation.html">Installation</a> page <strong>after</strong> reviewing the below</p>
+<div class="section" id="realistic-expectations">
+<h2>Realistic expectations<a class="headerlink" href="#realistic-expectations" title="Permalink to this headline">¶</a></h2>
+<p>Anomaly detection is not easy.  Skyline is not easy to set up, it has a number
+of moving parts that need to be orchestrated.  Further to this, for Skyline to
+be configured, trained and start learning takes a lot of time.</p>
+<p>Take time to read through the documentation and review <code class="docutils literal"><span class="pre">settings.py</span></code> at the
+same time.</p>
 </div>
 <div class="section" id="anomaly-detection-is-a-journey-not-an-app">
 <h2>Anomaly detection is a journey not an app<a class="headerlink" href="#anomaly-detection-is-a-journey-not-an-app" title="Permalink to this headline">¶</a></h2>
@@ -209,22 +205,34 @@ Skyline&#8217;s fault that:</p>
 metric namespaces is too noisy to be generally considered useful</li>
 </ul>
 </div>
+<div class="section" id="enabling-metrics-incrementally">
+<h2>Enabling metrics incrementally<a class="headerlink" href="#enabling-metrics-incrementally" title="Permalink to this headline">¶</a></h2>
+<p>Skyline was originally pitched to automatically monitor #allthethings, all your
+metrics, it can but...</p>
+<p>Skyline should have been pitched to monitor your KEY metrics.</p>
+<p>To begin with decide what your 10 most important Graphite metrics are and
+<strong>only</strong> configure <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a> on those
+to begin with and get to know what Skyline does with those.  Add more key metric
+groups as you get the hang of it.</p>
+<p>You cannot rush timeseries.</p>
+</div>
 <div class="section" id="enabling-skyline-modules-incrementally">
 <h2>Enabling Skyline modules incrementally<a class="headerlink" href="#enabling-skyline-modules-incrementally" title="Permalink to this headline">¶</a></h2>
 <p>Skyline&#8217;s modules do different things differently and understanding the process
 and pipeline helps to tune each Skyline module appropriately for your data.</p>
-<p>Each analysis based module, Analyzer, Mirage, Boundary and Crucible, have their
-own specific configurations.  These configurations are not extremely complex, but
-they are not obvious or trivial either when you are starting out.  Bringing
-Skyline modules online incrementally over time, helps one to understand the
-processes and their different configuration settings easier.  Easier than trying
-to get the whole stack up and running straight off.</p>
+<p>Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere (and
+Crucible), have their own specific configurations.  These configurations are not
+extremely complex, but they are not obvious or trivial either when you are
+starting out.  Bringing Skyline modules online incrementally over time, helps
+you to understand the processes and their different configuration settings
+easier.  Easier than trying to get the whole stack up and running straight off.</p>
 </div>
 <div class="section" id="start-with-horizon-analyzer-webapp-and-panorama">
 <h2>Start with Horizon, Analyzer, Webapp and Panorama<a class="headerlink" href="#start-with-horizon-analyzer-webapp-and-panorama" title="Permalink to this headline">¶</a></h2>
 <p>It is advisable to only start the original Horizon, Analyzer and Webapp daemons
-initially and take time to understand what Skyline is doing.  Take some time to
-tune Analyzer&#8217;s <cite>ALERTS</cite> and learn the patterns in your metrics:</p>
+and Panorama initially and take time to understand what Skyline is doing.  Take
+some time to tune Analyzer&#8217;s <code class="docutils literal"><span class="pre">ALERTS</span></code> and learn the patterns in your IMPORTANT
+metrics:</p>
 <ul class="simple">
 <li>which metrics trigger anomalies?</li>
 <li>when the metrics trigger anomalies?</li>
@@ -233,25 +241,31 @@ tune Analyzer&#8217;s <cite>ALERTS</cite> and learn the patterns in your metrics
 <li>what metrics are critical and what metrics are just &#8220;normal&#8221;/expected noise</li>
 </ul>
 <p>Panorama will help you view what things are triggering as anomalous.</p>
-<p>Once you have got an idea of what you want to anomaly detect and more
+<p>Once you have got an idea of what you want to anomaly detect on and more
 importantly, on what and when you want to alert, you can start to define the
-settings for other Skyline modules such as Mirage and Boundary and bring them
-online too.</p>
+settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
+bring them online too.</p>
 </div>
 <div class="section" id="add-mirage-parameters-to-the-alerts">
-<h2>Add Mirage parameters to the <cite>ALERTS</cite><a class="headerlink" href="#add-mirage-parameters-to-the-alerts" title="Permalink to this headline">¶</a></h2>
+<h2>Add Mirage parameters to the <code class="docutils literal"><span class="pre">ALERTS</span></code><a class="headerlink" href="#add-mirage-parameters-to-the-alerts" title="Permalink to this headline">¶</a></h2>
 <p>Once you have an overview of metrics that have seasonalities that are greater
-than the <cite>FULL_DURATION</cite>, you can add their Mirage parameters to the <cite>ALERTS</cite>
-tuples and start the Mirage daemon.</p>
+than the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>, you can add their Mirage parameters to
+the <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuples and start the Mirage daemon.</p>
 </div>
 <div class="section" id="add-boundary-settings">
 <h2>Add Boundary settings<a class="headerlink" href="#add-boundary-settings" title="Permalink to this headline">¶</a></h2>
 <p>You will know what your <strong>key</strong> metrics are and you can define their acceptable
-boundaries and alerting channels in the <cite>BOUNDARY_METRICS</cite> tuples and start the
-Boundary daemon.</p>
+boundaries and alerting channels in the <a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> tuples
+and start the Boundary daemon.</p>
 </div>
-<div class="section" id="you-might-want-crucible-you-probably-do-not">
-<h2>You might want Crucible, you probably do not<a class="headerlink" href="#you-might-want-crucible-you-probably-do-not" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="train-ionosphere">
+<h2>Train Ionosphere<a class="headerlink" href="#train-ionosphere" title="Permalink to this headline">¶</a></h2>
+<p>Via the alert emails or in the Skyline Ionosphere UI, train Ionosphere on what
+is NOT anomalous.</p>
+</div>
+<div class="section" id="ignore-crucible">
+<h2>Ignore Crucible<a class="headerlink" href="#ignore-crucible" title="Permalink to this headline">¶</a></h2>
+<p>EXPERIMENTAL</p>
 <p>By default Crucible is enabled in the <code class="docutils literal"><span class="pre">settings.py</span></code> however, for other Skyline
 modules to send Crucible data, Crucible has to be enabled via the appropriate
 <code class="docutils literal"><span class="pre">settings.py</span></code> variable for each module.</p>
@@ -288,7 +302,7 @@ timeseries of any metric directly through the UI.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -310,7 +324,7 @@ timeseries of any metric directly through the UI.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

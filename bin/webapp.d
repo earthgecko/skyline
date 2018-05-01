@@ -340,7 +340,7 @@ stop () {
       PROCESS_COUNT=$(ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
       if [ $PROCESS_COUNT -gt 0 ]; then
         # kill -9
-        ps aux | grep "webapp.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | while read i_pid
+        ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | while read i_pid
         do
           SERVICE_RELATED_PID=$(ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
           if [ $SERVICE_RELATED_PID -eq 1 ]; then
@@ -351,7 +351,7 @@ stop () {
       fi
     fi
 
-    PROCESS_COUNT=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
+    PROCESS_COUNT=$(ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
     if [[ ! -f "$PID_PATH/${SERVICE_NAME}.pid" && $PROCESS_COUNT -eq 0 ]]; then
       echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: all ${SERVICE_NAME} processes have been stopped - OK" >> "$LOG_PATH/${SERVICE_NAME}.log"
       echo "$SERVICE_NAME has been stopped"

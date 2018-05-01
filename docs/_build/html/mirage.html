@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mirage &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>Mirage &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="index.html"/>
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
         <link rel="next" title="Boundary" href="boundary.html"/>
         <link rel="prev" title="Analyzer Optimizations" href="analyzer-optimizations.html"/> 
 
@@ -62,7 +65,7 @@
             
             
               <div class="version">
-                1.0
+                1.2
               </div>
             
           
@@ -89,9 +92,10 @@
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
@@ -119,6 +123,9 @@
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -127,7 +134,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
@@ -307,18 +313,18 @@ have the <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTIO
 Analyzer only <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple that does not have Mirage enabled as
 it has no <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> defined:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.*&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>  <span class="c1"># --&gt; Analyzer sends to alerter</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.*&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>  <span class="c1"># --&gt; Analyzer sends to alerter</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 <p>To enable Analyzer to send the metric to Mirage we append the metric alert tuple
 in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> with the <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> value.
 Below we have used 168 hours to get Mirage to analyze <strong>any</strong> anomalous metric
-in the &#8220;stats_counts.http.rpm.publishers.*&#8221; namespace using using 7 days worth
+in the &#8216;stats_counts.http.rpm.publishers.*&#8217; namespace using using 7 days worth
 of timeseries data from Graphite:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
-<span class="c1">#          (&quot;stats_counts.http.rpm.publishers.*&quot;, &quot;smtp&quot;, 300),  # --&gt; Analyzer sends to alerter</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.*&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>  <span class="c1"># --&gt; Analyzer sends to Mirage</span>
+<span class="c1">#          (&#39;stats_counts.http.rpm.publishers.*&#39;, &#39;smtp&#39;, 300),  # --&gt; Analyzer sends to alerter</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.*&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>  <span class="c1"># --&gt; Analyzer sends to Mirage</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -332,10 +338,10 @@ the first alert tuple that matches.</p>
 </div>
 <p>So for example, with some annotation</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
-           <span class="p">(</span><span class="s2">&quot;skyline&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.seasonal_pub1&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; To Mirage</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.seasonal_pub_freddy&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; To Mirage</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.*&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>    <span class="c1"># --&gt; To alerter</span>
+           <span class="p">(</span><span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.seasonal_pub1&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; To Mirage</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.seasonal_pub_freddy&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; To Mirage</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.*&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>    <span class="c1"># --&gt; To alerter</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -346,10 +352,10 @@ sends the metric to Mirage.</p>
 <p>The below would NOT have the desired effect of analysing the metrics
 seasonal_pub1 and seasonal_pub_freddy with Mirage</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
-           <span class="p">(</span><span class="s2">&quot;skyline&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.*&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>    <span class="c1"># --&gt; To alerter</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.seasonal_pub1&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; NEVER gets reached</span>
-           <span class="p">(</span><span class="s2">&quot;stats_counts.http.rpm.publishers.seasonal_pub_freddy&quot;</span><span class="p">,</span> <span class="s2">&quot;smtp&quot;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; NEVER gets reached</span>
+           <span class="p">(</span><span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.*&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>    <span class="c1"># --&gt; To alerter</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.seasonal_pub1&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; NEVER gets reached</span>
+           <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.seasonal_pub_freddy&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; NEVER gets reached</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -399,9 +405,14 @@ variables to the Mirage check file.</li>
 <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>.</li>
 <li>Mirage then analyses the retrieved metric timeseries against the configured
 <a class="reference internal" href="skyline.html#settings.MIRAGE_ALGORITHMS" title="settings.MIRAGE_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_ALGORITHMS</span></code></a>.</li>
+<li>If a metric is an Ionosphere enabled metric, then Mirage does not alert,
+but hands the metric off to Ionosphere by adding an Ionosphere check
+file.</li>
 <li>If the metric is anomalous over <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> then alerts
 via the configured alerters for the matching metric <code class="xref py py-mod docutils literal"><span class="pre">settings.ALERT</span></code>
 tuple and sets the metric alert key for <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds.</li>
+<li>Mirage will alert for a Mirage metric that has been returned from Ionosphere
+as anomalous having not matched any known features profile or layers.</li>
 </ul>
 </div>
 </div>
@@ -425,7 +436,7 @@ tuple and sets the metric alert key for <code class="docutils literal"><span cla
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -447,7 +458,7 @@ tuple and sets the metric alert key for <code class="docutils literal"><span cla
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

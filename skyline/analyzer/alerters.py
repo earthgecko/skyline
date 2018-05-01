@@ -465,7 +465,14 @@ def alert_smtp(alert, metric, context):
                 fig = plt.figure(frameon=False)
                 ax = fig.add_subplot(111)
                 ax.set_title(graph_title, fontsize='small')
-                ax.set_axis_bgcolor('black')
+                # @modified 20180417 - Bug #2358: set_axis_bgcolor method removed from Matplotlib - Luminosity
+                #                      IssueID #49 'AxesSubplot' object has no attribute 'set_axis_bgcolor'
+                # ax.set_axis_bgcolor('black')
+                if hasattr(ax, 'set_facecolor'):
+                    ax.set_facecolor('black')
+                else:
+                    ax.set_axis_bgcolor('black')
+
                 try:
                     datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
@@ -516,7 +523,13 @@ def alert_smtp(alert, metric, context):
 
                 ax.grid(b=True, which='both', axis='both', color='lightgray',
                         linestyle='solid', alpha=0.5, linewidth=0.6)
-                ax.set_axis_bgcolor('black')
+                # @modified 20180417 - Bug #2358: set_axis_bgcolor method removed from Matplotlib - Luminosity
+                #                      IssueID #49 'AxesSubplot' object has no attribute 'set_axis_bgcolor'
+                # ax.set_axis_bgcolor('black')
+                if hasattr(ax, 'set_facecolor'):
+                    ax.set_facecolor('black')
+                else:
+                    ax.set_axis_bgcolor('black')
 
                 rcParams['xtick.direction'] = 'out'
                 rcParams['ytick.direction'] = 'out'
@@ -878,4 +891,3 @@ def trigger_alert(alert, metric, context):
     except:
         logger.error('error :: alerters - %s - getattr error' % strategy)
         logger.info(traceback.format_exc())
-

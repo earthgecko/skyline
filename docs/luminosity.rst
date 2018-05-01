@@ -1,0 +1,57 @@
+.. role:: skyblue
+.. role:: red
+
+Luminosity
+==========
+
+Luminosity is the beginning of an attempt to implement a pure Python replacement
+for the Oculus anomaly correlation component of the Etsy Kale stack.
+
+Luminosity adds correlations back to Skyline.  Cross correlations to be
+correct.
+
+Oculus was not moved forward with Skyline in this version of Skyline for a
+number of reasons, those mainly being Ruby, Java and Elasticsearch.
+Luminosity is not about being better than Oculus, Oculus was very good, it is
+about adding additional information about anomalies and metrics.
+
+Luminosity uses some of the functionality of Linkedin's luminol Anomaly
+Detection and Correlation library to add this near real time correlation back
+into Skyline.
+
+Luminosity is different to Oculus in a number of ways, however it does provide
+similar information.
+
+Differences between Oculus and Luminosity
+-----------------------------------------
+
+Oculus had a very large architectural footprint.
+Luminosity runs in parallel to all the other Skyline apps on the same Skyline
+commodity machine, with very little overhead.
+
+Oculus used a very novel technique to do similarity search in time series using
+a Shape Description Alphabet:
+1. Map line segments to tokens based on gradient. a b c d e
+2. Index tokens with Elasticsearch.
+3. Search for similar subsequences using sloppy phrase queries.
+Then search these candidates exhaustively, using Fast Dynamic Time Warping.
+Oculus had a searchable frontend UI.
+
+Luminosity uses the Linkedin luminol.correlator to determine the cross
+correlation coefficients of each metric pulling the data directly from Redis
+only when an anomaly alert is triggered.  The resulting cross correlated metrics
+and their results are then recorded in the Skyline MySQL database and related to
+the anomaly.  Viewable via the Ionosphere and Luminosity UI pages.
+
+Luminosity adds
+---------------
+
+Luminosity has the advantage over Oculus of storing the history of metrics,
+anomalies and their correlations.  This gives Skyline a near real time root
+cause analysis component and over time enables Skyline to determine and report
+the most strongly correlated metrics.
+
+luminol.correlate is based on http://paulbourke.net/miscellaneous/correlate/
+and for the purposes of understanding the luminol.correlate, a pure
+implementation of the Paul Bourke method was implemented and verified with the
+results of the luminol.correlate.

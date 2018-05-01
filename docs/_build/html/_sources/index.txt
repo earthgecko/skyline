@@ -17,9 +17,10 @@ Contents:
   getting-started
   running-in-python-virtualenv
   installation
-  upgrading
+  upgrading/index.rst
   getting-data-into-skyline
   alert-testing
+  monotonic-metrics
   horizon
   analyzer
   analyzer-optimizations
@@ -28,13 +29,15 @@ Contents:
   crucible
   panorama
   webapp
+  ionosphere
+  tsfresh
+  luminosity
   redis-integration
   skyline-and-friends
   logging
   tuning-tips
   monitoring-skyline
   debian-and-vagrant-installation-tips
-  building-documentation
   releases
   whats-new
   development/index.rst

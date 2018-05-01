@@ -1,0 +1,790 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>luminosity.luminosity &mdash; Skyline 1.2.0-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>luminosity.luminosity</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for luminosity.luminosity</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">mysql.connector</span>
+<span class="kn">from</span> <span class="nn">pymemcache.client.base</span> <span class="k">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">pymemcache_Client</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">mysql_select</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="n">get_engine</span>
+<span class="c1"># from process_correlations import *</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;luminosity&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Converting one settings variable into a local variable, just because it is a</span>
+<span class="c1"># long string otherwise.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_LUMINOSITY_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_LUMINOSITY_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_LUMINOSITY_DEBUG from settings&#39;</span><span class="p">)</span>
+    <span class="n">ENABLE_LUMINOSITY_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">luminosity_processes</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_PROCESSES</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: cannot determine LUMINOSITY_PROCESSES from settings&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+    <span class="c1"># @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch</span>
+    <span class="c1"># It is fast and lightweight</span>
+    <span class="c1"># luminosity_processes = 2</span>
+    <span class="n">luminosity_processes</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+
+<span class="c1"># Database configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
+          <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSERPASS</span><span class="p">,</span>
+          <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span>
+          <span class="s1">&#39;port&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">,</span>
+          <span class="s1">&#39;database&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">,</span>
+          <span class="s1">&#39;raise_on_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="Luminosity"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.luminosity.Luminosity">[docs]</a><span class="k">class</span> <span class="nc">Luminosity</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Luminosity class which controls the luminosity thread and spawned</span>
+<span class="sd">    processes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize Luminosity</span>
+
+<span class="sd">        Create the :obj:`redis_conn` a Redis client object</span>
+<span class="sd">        Create the :obj:`self.anomalous_metrics` list</span>
+<span class="sd">        Create the :obj:`correlations` list</span>
+<span class="sd">        Create the :obj:`mysql_conn` MySQLConnection object</span>
+<span class="sd">        Create the :obj:`memcache_client` a constructor that does not make a</span>
+<span class="sd">        connection to memcached. The first call to a method on the object will</span>
+<span class="sd">        do that.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Luminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correlations</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mysql_conn</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Luminosity.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.luminosity.Luminosity.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Luminosity.mysql_insert"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.luminosity.Luminosity.mysql_insert">[docs]</a>    <span class="k">def</span> <span class="nf">mysql_insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">insert</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert data into mysql table</span>
+
+<span class="sd">        :param insert: the insert string</span>
+<span class="sd">        :type insert: str</span>
+<span class="sd">        :return: int</span>
+<span class="sd">        :rtype: int or boolean</span>
+
+<span class="sd">        - **Example usage**::</span>
+
+<span class="sd">            query = &#39;insert into host (host) VALUES (\&#39;this_host\&#39;)&#39;</span>
+<span class="sd">            result = self.mysql_insert(query)</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            - If the MySQL query fails a boolean will be returned not a tuple</span>
+<span class="sd">                * ``False``</span>
+<span class="sd">                * ``None``</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cnx</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mysql error - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to connect to mysql&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="k">if</span> <span class="n">cnx</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cursor</span> <span class="o">=</span> <span class="n">cnx</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">insert</span><span class="p">)</span>
+                <span class="n">inserted_id</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">lastrowid</span>
+                <span class="c1"># Make sure data is committed to the database</span>
+                <span class="n">cnx</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">inserted_id</span>
+            <span class="k">except</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mysql error - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Failed to insert record&#39;</span><span class="p">)</span>
+                <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Luminosity.spin_process"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.luminosity.Luminosity.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign an anomalous metric and determine correlated metrics</span>
+
+<span class="sd">        :param i: python process id</span>
+<span class="sd">        :param anomaly_id: the anomaly_id</span>
+<span class="sd">        :type i: object</span>
+<span class="sd">        :type anomaly_id: int</span>
+<span class="sd">        :return: boolean</span>
+<span class="sd">        :rtype: boolean</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;child process pid </span><span class="si">%s</span><span class="s1"> - processing anomaly_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">process_correlations</span> <span class="k">import</span> <span class="n">process_correlations</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: importing process_correlations&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_an_engine</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">log_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get MySQL engine in spin_process&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get MySQL engine in spin_process&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+        <span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: calling engine.dispose()&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">memcache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.last.processed.anomaly.id&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">memcache_key</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processed - set the memcache key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">memcache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set  the memcache key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">memcache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">,</span> <span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">sorted_correlations</span> <span class="o">=</span> <span class="n">process_correlations</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: processing correlations&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20180414 - Bug #2352: Luminosity no metrics MySQL error</span>
+        <span class="c1"># Do not query with an empty string</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">correlated_metrics</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no correlations found for </span><span class="si">%s</span><span class="s1"> anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">metrics_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">correlated_metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">metrics_str</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">new_metrics_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">metric_name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_metrics_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">,&#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metrics_str</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+            <span class="n">metrics_str</span> <span class="o">=</span> <span class="n">new_metrics_str</span>
+        <span class="n">metrics_str</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;SELECT id,metric FROM metrics WHERE metric in (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_str</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: querying MySQL - SELECT id,metric FROM metrics WHERE metric in (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_str</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">correlated_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">correlated_metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)])</span>
+        <span class="k">if</span> <span class="n">sorted_correlations</span><span class="p">:</span>
+            <span class="n">luminosity_correlations</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">,</span> <span class="n">shifted</span><span class="p">,</span> <span class="n">shifted_coefficient</span> <span class="ow">in</span> <span class="n">sorted_correlations</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">correlated_metrics_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="n">metric_name</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">shifted</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">luminosity_correlations</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">anomaly_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="n">coefficient</span><span class="p">,</span> <span class="n">shifted</span><span class="p">,</span> <span class="n">shifted_coefficient</span><span class="p">])</span>
+            <span class="n">first_value_not_added</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">values_string</span> <span class="o">=</span> <span class="s1">&#39;INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES &#39;</span>
+
+            <span class="c1"># @added 20180420 - Branch #2270: luminosity</span>
+            <span class="c1"># Only try and insert if there are values present</span>
+            <span class="n">values_present</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">for</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">,</span> <span class="n">shifted</span><span class="p">,</span> <span class="n">shifted_coefficient</span> <span class="ow">in</span> <span class="n">luminosity_correlations</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">coefficient</span><span class="p">:</span>
+                    <span class="n">values_present</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">ins_values</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span>
+                                                   <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span>
+                                                   <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+                                                   <span class="nb">str</span><span class="p">(</span><span class="n">shifted</span><span class="p">),</span>
+                                                   <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">shifted_coefficient</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">first_value_not_added</span><span class="p">:</span>
+                    <span class="n">first_value_not_added</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">values_string</span> <span class="o">=</span> <span class="s1">&#39;INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ins_values</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_values_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">values_string</span><span class="p">,</span> <span class="n">ins_values</span><span class="p">)</span>
+                    <span class="n">values_string</span> <span class="o">=</span> <span class="n">new_values_string</span>
+            <span class="n">new_values_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">;&#39;</span> <span class="o">%</span> <span class="n">values_string</span>
+            <span class="n">values_string</span> <span class="o">=</span> <span class="n">new_values_string</span>
+            <span class="c1"># logger.info(&#39;debug insert string :: %s&#39; % str(values_string))</span>
+            <span class="c1"># &#39;INSERT INTO luminosity (anomaly_id, metric_id, coefficient, shifted, shifted_coefficient) VALUES (68882,619,1.0,0,1.0),...,(68882,489,1.0,0,1.0);&#39;</span>
+            <span class="c1"># Needs a mysql_insert not SQLAlchemy</span>
+            <span class="n">luminosity_populated</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">luminosity_correlations</span> <span class="ow">and</span> <span class="n">values_present</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mysql_insert</span><span class="p">(</span><span class="n">values_string</span><span class="p">)</span>
+                    <span class="n">luminosity_populated</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MySQL insert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">values_string</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">luminosity_populated</span></div>
+
+<div class="viewcode-block" id="Luminosity.run"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.luminosity.Luminosity.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the process intializes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">ENABLE_LUMINOSITY_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: connected to Redis&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Report app up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Determine if any new anomalies have been added</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">process_anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">memcache_last_processed_anomaly_id_data</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># Check memcached before MySQL</span>
+                <span class="n">memcache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.last.processed.anomaly.id&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">memcache_key</span><span class="p">)</span>
+                        <span class="c1"># if memcache does not have the key the response to the</span>
+                        <span class="c1"># client is None, it does not except</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">memcache_key</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">last_processed_anomaly_id</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;last_processed_anomaly_id found in memcache - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+                    <span class="n">memcache_last_processed_anomaly_id_data</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;last_processed_anomaly_id key was NOT found in memcache - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">last_processed_anomaly_id</span><span class="p">:</span>
+                    <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1&#39;</span>
+                    <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MySQL quey failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;last_processed_anomaly_id found from DB - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                        <span class="k">if</span> <span class="n">last_processed_anomaly_id</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">memcache_last_processed_anomaly_id_data</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Populating memcache with DB result - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">memcache_key</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populated memcache key </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">memcache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">)))</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set  the memcache key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">memcache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">)))</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">last_processed_anomaly_id</span><span class="p">:</span>
+                    <span class="c1"># Check MySQL</span>
+                    <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                    <span class="n">after</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="mi">600</span>
+                    <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM anomalies WHERE anomaly_timestamp &gt; </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>  <span class="c1"># nosec</span>
+                    <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MySQL quey failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+                        <span class="n">process_anomaly_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;found new anomaly id to process from the DB - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">process_anomaly_id</span><span class="p">))</span>
+                        <span class="c1"># Handle the first one</span>
+                        <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="n">process_anomaly_id</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no new anomalies in the anomalies table&#39;</span><span class="p">)</span>
+
+                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM anomalies WHERE id &gt; </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">)</span>  <span class="c1"># nosec</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MySQL quey failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">process_anomaly_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;found the next new anomaly id to process from the DB - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">process_anomaly_id</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: from query - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no new anomalies in the anomalies table&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">process_anomaly_id</span> <span class="ow">and</span> <span class="n">last_processed_anomaly_id</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_anomaly_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">last_processed_anomaly_id</span> <span class="o">==</span> <span class="n">process_anomaly_id</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly id already processed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">process_anomaly_id</span><span class="p">))</span>
+                                <span class="n">process_anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">process_anomaly_id</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping 20 no anomalies to correlate - last processed anomaly id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+                    <span class="n">up_now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="c1"># Report app up</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">up_now</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_graphite_metrics&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+                <span class="n">redis_sent_graphite_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">redis_sent_graphite_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for key </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+                <span class="c1"># Flush metrics to Graphite</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_sent_graphite_metrics</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">total_anomalies</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total_anomalies    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_anomalies</span><span class="p">)</span>
+                    <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.total_anomalies&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">total_anomalies</span><span class="p">)</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">correlations</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">correlations</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">correlations</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;correlations       :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">correlations</span><span class="p">)</span>
+                    <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.correlations&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">correlations</span><span class="p">)</span>
+
+                    <span class="n">sent_graphite_metrics_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="n">sent_graphite_metrics_now</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key - </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+
+                    <span class="c1"># Reset lists</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">correlations</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">if</span> <span class="n">process_anomaly_id</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># Spawn process</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spawning processes to correlate anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">process_anomaly_id</span><span class="p">))</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">luminosity_processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">process_anomaly_id</span><span class="p">))</span>
+                    <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                    <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> spin_process/es&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">luminosity_processes</span><span class="p">)))</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                    <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to start spin_process&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># Self monitor processes and terminate if any spin_process has run</span>
+            <span class="c1"># for to long</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> spin_process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">luminosity_processes</span><span class="p">),</span>
+                            <span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timed out, killing all spin_process processes&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="c1"># p.join()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;killed spin_process process&#39;</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: killing all spin_process processes&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stopping spin_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+            <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+            <span class="k">if</span> <span class="n">process_runtime</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span> <span class="o">-</span> <span class="n">process_runtime</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping for </span><span class="si">%.2f</span><span class="s1"> seconds due to low run time...&#39;</span> <span class="o">%</span> <span class="n">sleep_for</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">sleep_for</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del sleep_for&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">process_runtime</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del process_runtime&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.2.0-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

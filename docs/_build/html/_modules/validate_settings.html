@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>validate_settings &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>validate_settings &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="../index.html"/>
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                1.0
+                1.2
               </div>
             
           
@@ -88,9 +91,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
@@ -99,6 +103,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -107,7 +114,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
@@ -160,6 +166,7 @@
   <h1>Source code for validate_settings</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
 <span class="kn">import</span> <span class="nn">settings</span>
 
 
@@ -183,44 +190,44 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_REDIS_SOCKET_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: REDIS_SOCKET_PATH is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: REDIS_SOCKET_PATH is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: REDIS_SOCKET_PATH is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_SKYLINE_TMP_DIR</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: SKYLINE_TMP_DIR is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: SKYLINE_TMP_DIR is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: SKYLINE_TMP_DIR is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_FULL_NAMESPACE_IN_SETTINGS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: FULL_NAMESPACE is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: FULL_NAMESPACE is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: FULL_NAMESPACE is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_CRUCIBLE_CHECK_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: CRUCIBLE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: CRUCIBLE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: CRUCIBLE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">valid_variables</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">PANORAMA_CHECK_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: PANORAMA_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: PANORAMA_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: PANORAMA_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">valid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -228,92 +235,290 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TEST_ALGORITHMS_IN_SETTINGS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ALGORITHMS is not set in settings.py&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ALGORITHMS is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ALGORITHMS is not set in settings.py&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TEST_ANALYZER_PROCESSES</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ANALYZER_PROCESSES is not set to an int in settings.py&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ANALYZER_PROCESSES is not set to an int in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ANALYZER_PROCESSES is not set in settings.py&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TEST_MAX_ANALYZER_PROCESS_RUNTIME</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MAX_ANALYZER_PROCESS_RUNTIME</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MAX_ANALYZER_PROCESS_RUNTIME is not set to an int in settings.py&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MAX_ANALYZER_PROCESS_RUNTIME is not set to an int in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MAX_ANALYZER_PROCESS_RUNTIME is not set in settings.py&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TEST_ANALYZER_OPTIMUM_RUN_DURATION</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_OPTIMUM_RUN_DURATION</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ANALYZER_OPTIMUM_RUN_DURATION is not set to an int in settings.py&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ANALYZER_OPTIMUM_RUN_DURATION is not set to an int in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ANALYZER_OPTIMUM_RUN_DURATION is not set in settings.py&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TEST_ANALYZER_CRUCIBLE_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_CRUCIBLE_ENABLED</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ANALYZER_CRUCIBLE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ANALYZER_CRUCIBLE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ANALYZER_CRUCIBLE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_ENABLE_ALERTS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALERTS</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ENABLE_ALERTS is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ENABLE_ALERTS is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ENABLE_ALERTS is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_MIRAGE_CHECK_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MIRAGE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MIRAGE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MIRAGE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_ENABLE_CRUCIBLE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ENABLE_CRUCIBLE is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ENABLE_CRUCIBLE is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ENABLE_CRUCIBLE is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">TEST_PANORAMA_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: PANORAMA_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: PANORAMA_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: PANORAMA_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_IONOSPHERE_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
         <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TEST_ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ENABLE_WEBAPP_DEBUG is not set in settings.py&#39;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ENABLE_WEBAPP_DEBUG is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ENABLE_WEBAPP_DEBUG is not set in settings.py&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_IONOSPHERE_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_IONOSPHERE_CHECK_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_CHECK_PATH is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_IONOSPHERE_DATA_FOLDER</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_DATA_FOLDER is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_DATA_FOLDER is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_IONOSPHERE_PROFILES_FOLDER</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_PROFILES_FOLDER is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_PROFILES_FOLDER is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_PROCESSES</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_PROCESSES is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_PROCESSES is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ENABLE_IONOSPHERE_DEBUG is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: ENABLE_IONOSPHERE_DEBUG is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_CHECK_MAX_AGE</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_MAX_AGE</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_CHECK_MAX_AGE is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_CHECK_MAX_AGE is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_FEATURES_PERCENT_SIMILAR</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_FEATURES_PERCENT_SIMILAR</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_FEATURES_PERCENT_SIMILAR is not set as a float in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_FEATURES_PERCENT_SIMILAR is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20170122 - Feature #1872: Ionosphere - features profile page by id only</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_SERVER_PYTZ_TIMEZONE</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_PYTZ_TIMEZONE</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: SERVER_PYTZ_TIMEZONE is not set to a pytz timezone in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: SERVER_PYTZ_TIMEZONE is not set to a pytz timezone in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20170109 - Feature #1854: Ionosphere learn</span>
+        <span class="c1"># Added the Ionosphere LEARN related variables</span>
+        <span class="n">ionosphere_learning_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_learn_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN is not set as a boolean in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">ionosphere_learning_enabled</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">TEST_IONOSPHERE_LEARN_FOLDER</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_FOLDER</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_FOLDER is not set in settings.py&#39;</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_FOLDER is not set in settings.py&#39;</span><span class="p">)</span>
+                <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># @added 20160113 - Feature #1858: Ionosphere - autobuild features_profiles dir</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">TEST_IONOSPHERE_AUTOBUILD</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_AUTOBUILD</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_AUTOBUILD is not set in settings.py&#39;</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_AUTOBUILD is not set in settings.py&#39;</span><span class="p">)</span>
+                <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @modified 20170115 - Feature #1854: Ionosphere learn - generations</span>
+        <span class="c1"># These are now used in a shared context in terms of being required</span>
+        <span class="c1"># by Panorama and ionosphere/learn</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS is not set as an int in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS is not set as an int in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN is not set as a float or int in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">TEST_IONOSPHERE_LEARN_NAMESPACE_CONFIG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_NAMESPACE_CONFIG</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_NAMESPACE_CONFIG is not set as a tuple of tuples in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: IONOSPHERE_LEARN_NAMESPACE_CONFIG is not set in settings.py&#39;</span><span class="p">)</span>
+            <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_MEMCACHE_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MEMCACHE_ENABLED is not set as a boolean in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MEMCACHE_ENABLED is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_MEMCACHED_SERVER_IP</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_IP is not set as a str in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_IP is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_MEMCACHED_SERVER_PORT</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_PORT is not set as an int in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: MEMCACHED_SERVER_PORT is not set in settings.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">invalid_variables</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
@@ -330,7 +535,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -352,7 +557,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

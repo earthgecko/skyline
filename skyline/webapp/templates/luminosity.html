@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<!-- BEGIN /luminosity block -->
+
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/luminosity">Luminosity</a></li>
+{% if correlations_view %}
+  {% if metric_files %}
+		<li><a href="/luminosity?correlations_view=true">Correlations</a></li>
+		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ for_metric }}</span></span></li>
+  {% else %}
+		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></li>
+  {% endif %}
+<!-- # @added 20170118 - Feature #1862: Ionosphere features profiles search page -->
+{% elif fp_search %}
+		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+<!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
+{% elif fp_matches %}
+		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+{% else %}
+  {% if metric_files %}
+		<li><a href="/luminosity?metric_td={{ for_metric }}">training data</a></li>
+		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ for_metric }}</span></span></li>
+  {% else %}
+		<li class="active"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></li>
+  {% endif %}
+{% endif %}
+  </div>
+</ol>
+
+{% if correlations_view %}
+    {% include "correlations_view.html" %}
+{% elif correlation %}
+    {% include "correlation.html" %}
+{% else %}
+    {% include "correlations_view.html" %}
+{% endif %}
+
+<!-- END /luminosity block -->
+{% endblock %}

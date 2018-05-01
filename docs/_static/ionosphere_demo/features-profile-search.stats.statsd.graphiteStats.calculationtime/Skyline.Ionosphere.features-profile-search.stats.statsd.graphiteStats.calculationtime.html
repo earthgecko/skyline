@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link href="https://raw.githubusercontent.com/earthgecko/skyline/ionosphere/skyline/webapp/static/images/favicon.ico" rel="icon" type="image/x-icon">
+  </head>
+    <body>
+        <title>Skyline</title>
+
+
+        <script src="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/mousetrap.js"></script>
+<!-- @added 20160703 - Feature #1464: Webapp rebrow
+Updated bootstrap, dygraph and jquery (only to 2.2.4 as bootstrap needs < 3.0)
+bootstrap was update for the rebrow (https://github.com/marians/rebrow) layout
+elements.
+jquery was just updated - live() deprecated, changed to move
+dygraph was just updated.
+The strftime js (https://github.com/samsonjs/strftime/tree/v0.9.2) was added as
+dygraph-1.1.1 no longer includes the strftime library.
+fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v4.6.3
+-->
+        <script src="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/jquery.js"></script>
+        <script src="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/strftime-min.js"></script>
+        <script src="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/dygraph-combined.js"></script>
+        <script src="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/bootstrap.js"></script>
+
+<!-- @added 20170122 - Feature #1876: Ionosphere - training_data learn countdown
+Using https://github.com/rendro/countdown
+-->
+    
+
+        <link rel="stylesheet" href="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/bootstrap-theme.css">
+        <link rel="stylesheet" href="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/font-awesome.css">
+        <link rel="stylesheet" href="Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime_files/skyline.css">
+
+  <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html"><span class="sky">Sky</span><span class="re">line</span></a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+        		<li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/webapp.html">now</a></li>
+          	<li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/webapp.html">then</a></li>
+          	<li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/panorama.html">Panorama</a></li>
+          	<li class="active"><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/ionosphere.html">Ionosphere</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/webapp.html#rebrow"><span class="logo"><span class="re">re</span>brow</span></a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html">Utilities</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html">docs</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/webapp.html">app_settings</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/webapp.html">api</a></li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </div>
+
+  <div class="container">
+    
+
+    
+
+<!-- BEGIN /ionosphere block -->
+
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html">Home</a></li>
+		<li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/ionosphere.html">Ionosphere</a></li>
+
+		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+
+  </div>
+</ol>
+
+
+    
+<!-- BEGIN /ionosphere/fp_veiw=true&fp_search=true block -->
+
+
+
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li class="active"><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li class="active"><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_search=true&amp;metric=all&amp;limit=10&amp;order=DESC">Search</a></li>
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true">List by metrics</a></li>
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;a_dated_list=true">List by date</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles</span></span></h4>
+  
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Features profile search</td>
+  		        <td><select name="fp_search">
+                <option value="true" selected="selected">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input name="metric" value="all" type="text"></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Metric like</td>
+  		        <td><input name="metric_like" value="all" type="text"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp</td>
+  		        <td><input name="from_timestamp" value="all" type="text"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input name="until_timestamp" value="all" type="text"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>generation_greater_than</td>
+  		        <td><input name="generation_greater_than" value="0" type="text"></td>
+  		      </tr>
+  
+  
+  
+  
+  
+  		      <tr>
+              <td>Features profiles count by metric:</td>
+              <td><select name="count_by_metric">
+                <option value="false" selected="selected">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by matched:</td>
+              <td><select name="count_by_matched">
+                <option value="false" selected="selected">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by checked:</td>
+              <td><select name="count_by_checked">
+                <option value="false" selected="selected">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+                <td>Features profiles count by generation:</td>
+                <td><select name="count_by_generation">
+                  <option value="false" selected="selected">false</option>
+                  <option value="true">true</option>
+                </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+
+  		      <tr>
+                <td>limit</td>
+                <td><input name="limit" min="0" max="100" value="30" type="number"> use 0 for unlimited</td>
+  		      </tr>
+  		      <tr>
+  		        <td>order by:</td>
+  		        <td><select name="order">
+                <option value="DESC" selected="selected">DESC</option>
+                <option value="ASC">ASC</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input value="Search" type="submit">
+      </form>
+  
+<!-- collapse button div -->
+      </div>
+  
+      </div>
+
+<!-- TODO results tables
+id
+metric
+count
+-->
+  
+
+  
+
+  
+
+  
+
+  
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span>stats.statsd.graphiteStats.calculationtime -
+          limited by 5 features profiles ordered by DESC</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+<!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
+      tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
+      matched_count10, human_date11, created_timestamp12, checked_count13,
+      checked_human_date14, parent_id15, generation16] -->
+            <th>fp_ip</th>
+            <th>metric</th>
+            <th>parent_id</th>
+            <th>generation</th>
+            <th>origin</th>
+            <th>full_duration</th>
+            <th>match_count</th>
+            <th>last_matched</th>
+            <th>checked_count</th>
+            <th>last_checked</th>
+            <th>created</th>
+					</tr>
+				</thead>
+				<tbody>
+  
+          <tr>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=269&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=269&amp;metric=stats.statsd.graphiteStats.calculationtime">269</a>
+            </td>
+            <td><code>stats.statsd.graphiteStats.calculationtime</code></td>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=0&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=0&amp;metric=stats.statsd.graphiteStats.calculationtime">0</a>
+            </td>
+            <td onclick="window.location='?generation_view=true&amp;fp_id=269&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?generation_view=true&amp;fp_id=269&amp;metric=stats.statsd.graphiteStats.calculationtime">0</a> <span class="logo">
+            </span></td>
+    
+            <td><span class="logo"><span class="sky">trained</span></span></td>
+    
+            <td>86400</td>
+            <td>2</td>
+            <td>2017-02-12 22:35:36 UTC (Sunday)</td>
+            <td>19</td>
+            <td>2017-02-18 22:30:53 UTC (Saturday)</td>
+            <td>2017-01-23 19:11:40</td>
+          </tr>
+  
+          <tr>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=270&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=270&amp;metric=stats.statsd.graphiteStats.calculationtime">270</a>
+            </td>
+            <td><code>stats.statsd.graphiteStats.calculationtime</code></td>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=269&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=269&amp;metric=stats.statsd.graphiteStats.calculationtime">269</a>
+            </td>
+            <td onclick="window.location='?generation_view=true&amp;fp_id=270&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?generation_view=true&amp;fp_id=270&amp;metric=stats.statsd.graphiteStats.calculationtime">1</a> <span class="logo">
+            </span></td>
+    
+            <td><span class="logo"><span class="sky">trained</span></span></td>
+    
+            <td>2592000</td>
+            <td>3</td>
+            <td>2017-01-25 23:54:46 UTC (Wednesday)</td>
+            <td>16</td>
+            <td>2017-02-18 12:40:23 UTC (Saturday)</td>
+            <td>2017-01-23 19:11:49</td>
+          </tr>
+  
+          <tr>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=273&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=273&amp;metric=stats.statsd.graphiteStats.calculationtime">273</a>
+            </td>
+            <td><code>stats.statsd.graphiteStats.calculationtime</code></td>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=270&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=270&amp;metric=stats.statsd.graphiteStats.calculationtime">270</a>
+            </td>
+            <td onclick="window.location='?generation_view=true&amp;fp_id=273&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?generation_view=true&amp;fp_id=273&amp;metric=stats.statsd.graphiteStats.calculationtime">2</a> <span class="logo">
+            </span></td>
+    
+            <td><span class="logo"><span class="re">learnt</span></span></td>
+    
+            <td>86400</td>
+            <td>0</td>
+            <td>never matched</td>
+            <td>16</td>
+            <td>2017-02-18 22:30:53 UTC (Saturday)</td>
+            <td>2017-01-24 05:44:28</td>
+          </tr>
+  
+          <tr>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=274&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=274&amp;metric=stats.statsd.graphiteStats.calculationtime">274</a>
+            </td>
+            <td><code>stats.statsd.graphiteStats.calculationtime</code></td>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=273&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=273&amp;metric=stats.statsd.graphiteStats.calculationtime">273</a>
+            </td>
+            <td onclick="window.location='?generation_view=true&amp;fp_id=274&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?generation_view=true&amp;fp_id=274&amp;metric=stats.statsd.graphiteStats.calculationtime">3</a> <span class="logo">
+            </span></td>
+    
+            <td><span class="logo"><span class="re">learnt</span></span></td>
+    
+            <td>2592000</td>
+            <td>0</td>
+            <td>never matched</td>
+            <td>13</td>
+            <td>2017-02-18 12:40:23 UTC (Saturday)</td>
+            <td>2017-01-24 05:44:52</td>
+          </tr>
+  
+          <tr>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=443&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=443&amp;metric=stats.statsd.graphiteStats.calculationtime">443</a>
+            </td>
+            <td><code>stats.statsd.graphiteStats.calculationtime</code></td>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=0&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?fp_view=true&amp;fp_id=0&amp;metric=stats.statsd.graphiteStats.calculationtime">0</a>
+            </td>
+            <td onclick="window.location='?generation_view=true&amp;fp_id=443&amp;metric=stats.statsd.graphiteStats.calculationtime'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html?generation_view=true&amp;fp_id=443&amp;metric=stats.statsd.graphiteStats.calculationtime">0</a> <span class="logo">
+            </span></td>
+    
+            <td><span class="logo"><span class="sky">trained</span></span></td>
+    
+            <td>86400</td>
+            <td>0</td>
+            <td>never matched</td>
+            <td>6</td>
+            <td>2017-02-18 22:30:53 UTC (Saturday)</td>
+            <td>2017-02-04 17:16:30</td>
+          </tr>
+  
+				</tbody>
+			</table>
+		</div>
+  
+
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+
+
+
+
+
+<!-- END /ionosphere/fp_veiw=true&fp_search=true block -->
+
+
+
+<!-- END /ionosphere block -->
+
+  
+
+  <div class="footer">
+    <div class="container">
+    	<div class="row">
+<!--
+        <div class="col-xs-6 col-md-4">
+-->
+        <div class="col-xs-6 col-md-4">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> is free software under the terms of the MIT license. Contribute :: <a href="https://github.com/earthgecko/skyline/" target="_blank">GitHub</a>.
+        </div>
+        <div class="col-xs-6 col-md-4">
+
+      		<p class="text-right">Page render took :: 492.764 milliseconds</p>
+
+      	</div>
+        <div class="col-xs-6 col-md-4">
+
+      		<a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html"></a><p class="text-right"><a href="http://earthgecko-skyline.readthedocs.io/en/ionosphere/index.html">version :: Skyline (ionosphere v1.1.1-alpha)</a></p>
+
+      	</div>
+    </div>
+
+
+<!--
+# @added 20170119 - Branch #922: ionosphere
+#                   Task #1718: review.tsfresh
+-->
+
+    	<div class="row">
+        <div class="col-md-9">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> Ionosphere was made possible by the very featureful tsfresh package <a href="https://github.com/blue-yonder/tsfresh" target="_blank">GitHub - https://github.com/blue-yonder/tsfresh</a>.
+        </div>
+        <div class="col-md-3">
+      		<p class="text-right"></p>
+      	</div>
+    </div>
+
+
+  </div>
+
+    
+</div></body></html>

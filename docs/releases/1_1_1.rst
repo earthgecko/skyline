@@ -1,0 +1,269 @@
+=============================
+1.1.1 - the ionosphere branch
+=============================
+
+v1.1.1-beta-ionosphere - Feb 25, 2017
+
+Added learning via features extracted using https://github.com/blue-yonder/tsfresh/releases/tag/v0.4.0
+Dedicated to my father, Derek, a man of numbers if there ever was one.
+
+- Corrected sum_common_values column name
+- Remove needs_sphinx for RTD
+- needs_sphinx = '1.3.5' for RTD
+- 0 should be None as this was causing an error if the full_duration is not
+  in the features_profile_details_file, which it was not for some reason.
+- Added metric_check_file and ts_full_duration is needed to be determined
+  and added the to features_profile_details_file as it was not added here on
+  the 20170104 when it was added the webapp and ionosphere - so added to
+  features_profile.py
+- Added all_fp_ids and lists of ionosphere_smtp_alerter_metrics and
+  ionosphere_non_smtp_alerter_metrics to ionosphere.py so to only process
+  ionosphere_smtp_alerter_metrics
+- Added lists of smtp_alerter_metrics and non_smtp_alerter_metrics to analyzer.py
+  so to only process smtp_alerter_metrics
+- Restored the previous redis_img_tag method as some smtp alerts were
+  coming without a Redis graph, not all but some and for some reason,
+  I am pretty certain retrospectively that it was done that way from
+  testing I just wanted to try and be cleaner.
+- Added all_calc_features_sum, all_calc_features_count, sum_calc_values,
+  common_features_count, tsfresh_version to SQL
+- Added details of match anomalies for verification
+- Added all_calc_features_sum, all_calc_features_count, sum_calc_values,
+  common_features_count, tsfresh_version to ionosphere.py and SQL
+- Added graphite_matched_images|length to features_prfile.html
+- More to do in webapp context to pass verfication values
+- Added graphite_matched_images context and matched.fp_id to
+  skyline_functions.get_graphite_metric
+- Added graphite_matched_images context and db operations to
+  ionosphere_backend.py (geez that is a not of not DRY on the DB stuff)
+- Added graphite_matched_images gmimages to webapp and features_profile.html and
+  ported the training_data.html image order method to features_profile.html
+- Done to the The White Stripes Live - Under Nova Scotian Lights Full
+  https://www.youtube.com/watch?v=fpG8-P_BpcQ I was tried of Flowjob
+  https://soundcloud.com/search/sounds?q=flowjob&filter.duration=epic which a
+  lot of Ionosphere has been patterned to.
+- Fixed typo in database.py
+- Added ionosphere_matched update to ionosphere.py
+- Un/fortunately there is no simple method by which to annotate
+  these Graphite NOW graphs at the anomaly timestamp, if these were
+  from Grafana, yes but we cannot add Grafana as a dep :)  It would
+  be possible to add these using the dygraph js method ala now, then
+  and Panorama, but that is BEYOND the scope of js I want to have to
+  deal with.  I think we can leave this up to the operator's
+  neocortex to do the processing.  Which may be a valid point as
+  sticking a single red line vertical line in the graphs ala Etsy
+  deployments https://codeascraft.com/2010/12/08/track-every-release/
+  or how @andymckay does it https://blog.mozilla.org/webdev/2012/04/05/tracking-deployments-in-graphite/
+  would arguably introduce a bias in this context.  The neocortex
+  should be able to handle this timeshifting fairly simply with a
+  little practice.
+- Added human_date to the Graphite graphs NOW block for the above
+- Exclude graph resolution if matches TARGET_HOURS - unique only
+- Added ionosphere_matched_table_meta
+- Standardised all comments in SQL
+- Added the ionosphere_matched DB table
+- After debugging calls on the readthedocs build, adding to
+  readthedocs.requirements.txt should solve this
+- After debugging calls on the readthedocs build, adding to requirements.txt
+  should solve this
+- Try use setup.cfg install_requires
+- use os.path.isfile although I am not sure on the path
+- readthedocs build is failing as they are Running Sphinx v1.3.5 and returns
+  Sphinx version error:
+  This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
+- Added returns to skyline_functions.get_graphite_metric and specific webapp
+  Ionosphere URL parameters for the Graphite NOW graphs
+- Removed unused get_graphite_metric from skyline/webapp/backend.py
+- Added get_graphite_metric, the graphite_now png context and retrieving the
+  graphite_now_images at TARGET_HOURS, 24h, 7d and 30d
+- Removed the reference to #14 from webapp Ionosphere templates
+- Added order and graphite_now_images block to training_data.html
+- Added sorted_images for order and graphite_now_images to webapp
+- Added Grumpy testing to the roadmap
+- bug on graphite in image match - stats.statsd.graphiteStats.flush_time, but
+  graphite could be in the namespace. So match on .redis.plot and removed the
+  unknown image context as it should not really ever happen...?
+- Enabled utilities as the files were added
+- Added the full_duration parameter so that the appropriate graphs can be
+  embedded for the user in the training data page in the webapp context
+- Added utilities TODO
+- Removed the buggy skyline_functions.load_metric_vars and replaced with the
+  new_load_metric_vars(self, metric_vars_file) function
+- Fixes #14
+- Changed ionosphere_backend.py to the new function
+- Removed the buggy skyline_functions.load_metric_vars and replaced with the
+  new_load_metric_vars(self, metric_vars_file) function
+- Fixes #14
+- Clarified Mirage alert matching in docs
+- Removed unused things
+- Added 'app' and 'source' to string_keys
+- Added anomalous_value to correct calc_value overwriting value
+- Added an app alert key ionosphere.%s.alert app alert key
+- Remove check file is an alert key exists
+- Added TODO: ionosphere.analyzer.unique_metrics (at FULL_DURATION)
+              ionosphere.mirage.unique_metrics (NOT at FULL_DURATION)
+- Get ionosphere.features_calculation_time Graphite metric working
+- Correct auth for requests should webapp be called
+- Cache fp ids for 300 seconds?
+- Send Ionosphere metrics to Graphite and Reset lists
+- Minor log bug fix in features_profile.py
+- Correct rate limitining Ionosphere on last_alert cache key
+- Added SQLAlchemy engine dispose
+- Differentiate between Mirage and Ionosphere context in logging not alerting
+- Do not alert on Mirage metrics, surfaced again as Ionosphere was introduced
+- Added new new_load_metric_vars to ionosphere to get rid of the skyline_functions
+  load_metric_vars as imp is deprecated in py3 anyway and this should fix #24 as
+  well.
+- Added THE FIRST to docs
+- Clarifed log message
+- Handle refreshing mirage.unique_metrics and ionosphere.unique_metrics
+- Refactoring some things in ionosphere.py
+- THE FIRST prod match is at this commit
+- Added last_checked and checked_count to features profile details to Ionosphere
+  features profile page, feature profile details page.
+- Added ionosphere last_checked checked_count columns to record the number of
+  times a features profile is checked and when last checked
+- Ionosphere update checked count and timestamp
+- int timestamp in the alerters
+- Set default as 0 on ionosphere matched_count and last_matched
+- Set default as NULL on ionosphere matched_count and last_matched
+- Added context in Analyzer
+- Added in Analyzer added a self.all_anomalous_metrics to join any Ionosphere
+  Redis alert keys with self.anomalous_metrics
+- Refresh mirage.unique_metrics Redis set
+- Refresh ionosphere.unique_metrics Redis set
+- Pushing alerts back to the apps from Ionosphere
+- Added update SQL
+- PoCing pushing alerts back to the apps from Ionosphere
+- Only match features profiles that have the same full_duration
+- Added the full_duration context to the send_anomalous_metric to Ionosphere in
+  Analyzer, Mirage, skyline_functions and the database which needs to be
+  recorded to allow Mirage metrics to be profiled on Redis timeseries data at
+  FULL_DURATION
+- Added IONOSPHERE_FEATURES_PERCENT_SIMILAR to validate_settings
+- Bringing Ionosphere ionosphere_enabled and ionosphere.unique_metrics online
+- Some flake8 linting
+- Enable ionosphere metrics in DB if features profile is created
+- Added more ionosphere functionality, now checking DB features profiles
+- Determine relevant common features
+- Calculate percent difference in sums
+- Added IONOSPHERE_FEATURES_PERCENT_SIMILAR to settings
+- Use str in alerters Graphite URL for full_duration_in_hours
+- Added the baselines from tsfresh, they diff the same as 0.3.1
+- Update to tsfresh-0.4.0 to make use of the new
+  ReasonableFeatureExtractionSettings that was introduced to exclude the
+  computationally high cost of extracting features from very static timeseries
+  that has little to no variation is the values, which results in features
+  taking up to almost 600 seconds to calculate on a timeseries of length 10075
+  exclude high_comp_cost features.
+- Added the baselines from tsfresh, diff the same
+- Use str not int for full_duration_in_hours context in alerts, etc
+- Updated tsfresh to 0.3.1 not to 0.4.0 as tqdm may not be so great in the mix
+  for now.
+- Added new v0.3.1 baselines from tsfresh 0.4.0 that were committed at
+  https://github.com/blue-yonder/tsfresh/commit/46eb72c60f35de225a962a4149e4a4e25dd02aa0
+  They test fine.
+- Update deps
+- Send Graphite metrics from mirage and ionosphere
+- Added stop process after terminate, if any still exist as any terminate called
+  on extract_features calls terminate, but the pid remains, debugging
+- Added `__future__` division to all scopes using division (pep-0238)
+- Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
+  up, there can be LOTS of file_per_table `z_fp_` tables/files without
+  the MyISAM issues.  `z_fp_` and `z_ts_` tables are mostly read and will be shuffled
+  in the table cache as required.
+- Added some additional logging in ionosphere on the slow hunt to determine why
+  tsfresh extract_features is sometimes just hanging and needs to be killed
+- Removed p.join from all p.terminate blocks as it hangs there
+- Added missing app context to features_profile.py
+- mirage send anomaly timestamp not last timestamp from SECOND_ORDER_RESOLUTION
+  timeseries
+- Always pass the f_calc time to webapp
+- Aligned the alerters HTML format
+- Added the ionosphere context to features_profile.py
+- Changed to InnoDB from MyISAM as no files open issues and MyISAM clean
+  up, there can be LOTS of file_per_table `z_fp_` tables/files without
+  the MyISAM issues.  `z_fp_` tables are mostly read and will be shuffled
+  in the table cache as required.
+- Enabled feature calculation on all anomaly checks in ionosphere
+- Moved features_profile.py to the skyline dir some can be used by the webapp
+  and ionosphere
+- Decouple ionosphere from the webapp
+- In ionosphere calculate the features for every anomaly check file, remove to
+  extract features calcuate and wait time from the user.
+- Corrected assert in test.
+- Added some notes
+- Use ast.literal_eval instead of eval
+- Added tsfresh feature names with ids in list as of tsfresh-0.3.0
+- Deleted skyline/tsfresh/scripts as is now moved to skyline/tsfresh_features/scripts
+  to stop tsfresh namespace pollution
+- Moved the tsfresh test resources into tests/baseline to match tsfresh tests
+  methodology.
+- Added note to ionosphere.py about numpy.testing.assert_almost_equal
+- Reordered TSFRESH_FEATURES based on the new method.
+- Adding the meat to Ionosphere bones on the service side, incomplete.
+- Updated the upgading doc
+- Added development tsfresh docs on howto upgrade, etc
+- Added the creation of tsfresh resources to building-documentation.rst
+- Updated development/ionosphere.rst to reflect tsfresh is not slow
+- Draft text for ionosphere.rst
+- Added Ionosphere reference to panorama.rst
+- Updated path change in tsfresh.rst
+- Modifications for testing
+- Added Ionosphere requirements for tsfresh and SQLAlchemy
+- Added a tsfresh tests
+- Added a tsfresh-0.3.0 baseline features upon which tsfresh is tested
+- Added a tsfresh-0.1.2 baseline features upon which tsfresh is tested
+- Added a baseline timeseries upon which tsfresh is tested
+- Added IONOSPHERE_PROFILES_FOLDER test
+- Added tsfresh feature names with ids in list as of tsfresh-0.3.0
+- Some minor refactors in skyline_functions.py
+- Added RepresentsInt
+- Added the ionosphere tables
+- Moved the Ionosphere settings all to the end in settings.py to make it easier
+  to upgrade
+- Added some additional Ionosphere settings
+- Updated to tfresh-0.3.0
+- Added the SQLAlchemy definitions
+- Added app.errorhandler(500) to webapp.py traceback rendered nicely by Jinja2 as per
+  https://gist.github.com/probonopd/8616a8ff05c8a75e4601
+- Added the ionosphere app.route to webapp.py
+- Minor addition to backend.py log and panorama_anomaly_id request arg
+- Added Ionosphere to the html templates
+- Added webapp training_data.html
+- Added webapp traceback.html which provides the user with real traceback
+- Added webapp features_profiles.html
+- Added webapp ionospere_backend.py which works with training data and features
+  profiles data
+- Added webapp functions to create features profiles
+- Moved skyline/tsfresh to skyline/tsfresh_features so that it does not pollute
+  the tsfresh namespace
+- Added generate_tsfresh_features script
+- Added missing string in panorama.py in the logger.error context
+- mirage.py refactored quite a bit of the conditional blocks workflow to cater
+  for Ionosphere
+- Added metric_timestamp to the trigger_alert metric alert tuple and added
+  `sent_to_` metrics (analyzer.py and mirage.py) - metric[2]: anomaly timestamp
+- Added Ionosphere training data timeseries json, redis plot png and Ionosphere
+  training data link to the Analyzer and Mirage alerters.
+- Mirage alerter creates a Redis timeseries json too - tbd allow user to build
+  features profile on either full Mirage timeseries or on the Redis
+  FULL_DURATION timeseries.
+- analyzer.py use skyline_functions.send_anomalous_metric_to (self function
+  removed) and some new Ionosphere refactoring
+- Modified bin scripts to not match the app name in the virtualenv path should
+  the path happen to have the app name string in the path
+- Corrected webapp bin service string match
+- Bifurcate os.chmod mode for Python 2 and 3
+- Fixes https://github.com/earthgecko/skyline/issues/27 - return False if stdDev
+  is 0
+- Also readded IONOSPHERE_CHECK_MAX_AGE from settings.py as it will be required
+- Mirage changes include a changed to panorama style skyline_functions
+  load_metric_vars and fail_check
+- Handle Panorama stampede on restart after not running #26
+  Added to settings and Panorama to allow to discard any checks older than
+  PANORAMA_CHECK_MAX_AGE to prevent a stampede if desired, not ideal but solves
+  the stampede problem for now - https://github.com/earthgecko/skyline/issues/26
+- Added the original Skyline UI back as a then tab, for nostalgic and historical
+  reasons.
+- Bumped to version 1.0.8

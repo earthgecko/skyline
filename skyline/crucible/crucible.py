@@ -36,7 +36,7 @@ import os.path
 # sys.path.insert(0, os.path.dirname(__file__))
 
 import settings
-from skyline_functions import load_metric_vars, fail_check
+from skyline_functions import load_metric_vars, fail_check, mkdir_p
 
 from crucible_algorithms import run_algorithms
 
@@ -378,11 +378,7 @@ class Crucible(Thread):
         if not os.path.exists(str(anomaly_dir)):
             try:
                 # mkdir_p(skyline_app, str(anomaly_dir))
-                if python_version == 2:
-                    mode_arg = int('0755')
-                if python_version == 3:
-                    mode_arg = mode=0o755
-                os.makedirs(anomaly_dir, mode_arg)
+                mkdir_p(anomaly_dir)
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('created anomaly dir - %s' % str(anomaly_dir))
             except:
@@ -512,7 +508,9 @@ class Crucible(Thread):
                 image_data = None
 
                 try:
-                    image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()
+                    # @modified 20170913 - Task #2160: Test skyline with bandit
+                    # Added nosec to exclude from bandit tests
+                    image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
                     logger.info('url OK - %s' % (image_url))
                 except urllib2.URLError:
                     image_data = None
@@ -523,10 +521,9 @@ class Crucible(Thread):
                         f.write(image_data)
                     logger.info('retrieved - %s' % (anomaly_graph))
                     if python_version == 2:
-                        mode_arg = int('0644')
+                        os.chmod(graphite_image_file, 0644)
                     if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(graphite_image_file, mode_arg)
+                        os.chmod(graphite_image_file, mode=0o644)
                 else:
                     logger.error('error :: failed to retrieved - %s' % (anomaly_graph))
             else:
@@ -564,16 +561,18 @@ class Crucible(Thread):
                         try:
                             new_datapoint = [float(datapoint[1]), float(datapoint[0])]
                             converted.append(new_datapoint)
-                        except:
+                        # @modified 20170913 - Task #2160: Test skyline with bandit
+                        # Added nosec to exclude from bandit tests
+                        except:  # nosec
                             continue
 
                     with open(anomaly_json, 'w') as f:
                         f.write(json.dumps(converted))
                     if python_version == 2:
-                        mode_arg = int('0644')
+                        os.chmod(anomaly_json, 0644)
                     if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(anomaly_json, mode_arg)
+                        os.chmod(anomaly_json, mode=0o644)
+
                     if settings.ENABLE_CRUCIBLE_DEBUG:
                         logger.info('json file - %s' % anomaly_json)
 
@@ -622,10 +621,9 @@ class Crucible(Thread):
                     f_in.close()
                     os.remove(anomaly_json)
                     if python_version == 2:
-                        mode_arg = int('0644')
+                        os.chmod(anomaly_json_gz, 0644)
                     if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(anomaly_json_gz, mode_arg)
+                        os.chmod(anomaly_json_gz, mode=0o644)
                     if settings.ENABLE_CRUCIBLE_DEBUG:
                         logger.info('gzipped - %s' % anomaly_json_gz)
                     try:
@@ -678,10 +676,9 @@ class Crucible(Thread):
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('anomaly_json done')
                 if python_version == 2:
-                    mode_arg = int('0644')
+                    os.chmod(anomaly_json, 0644)
                 if python_version == 3:
-                    mode_arg = '0o644'
-                os.chmod(anomaly_json, mode_arg)
+                    os.chmod(anomaly_json, mode=0o644)
         else:
             if settings.ENABLE_CRUCIBLE_DEBUG:
                 logger.info('No gzip - %s' % anomaly_json_gz)
@@ -703,10 +700,9 @@ class Crucible(Thread):
                 logger.error('error :: file not found - %s' % anomaly_json)
                 shutil.move(metric_check_file, failed_check_file)
                 if python_version == 2:
-                    mode_arg = int('0644')
+                    os.chmod(failed_check_file, 0644)
                 if python_version == 3:
-                    mode_arg = '0o644'
-                os.chmod(failed_check_file, mode_arg)
+                    os.chmod(failed_check_file, mode=0o644)
                 logger.info('moved check file to - %s' % failed_check_file)
             except OSError:
                 logger.error('error :: failed to move check file to - %s' % failed_check_file)
@@ -759,10 +755,9 @@ class Crucible(Thread):
         with open(crucible_anomaly_file, 'a') as fh:
             fh.write(crucible_data)
         if python_version == 2:
-            mode_arg = int('0644')
+            os.chmod(crucible_anomaly_file, 0644)
         if python_version == 3:
-            mode_arg = '0o644'
-        os.chmod(crucible_anomaly_file, mode_arg)
+            os.chmod(crucible_anomaly_file, mode=0o644)
         logger.info('updated crucible anomaly file - %s/%s.txt' % (anomaly_dir, metric))
 
         # gzip the json timeseries data after analysis
@@ -776,10 +771,9 @@ class Crucible(Thread):
                     f_in.close()
                     os.remove(anomaly_json)
                     if python_version == 2:
-                        mode_arg = int('0644')
+                        os.chmod(anomaly_json_gz, 0644)
                     if python_version == 3:
-                        mode_arg = '0o644'
-                    os.chmod(anomaly_json_gz, mode_arg)
+                        os.chmod(anomaly_json_gz, mode=0o644)
                     logger.info('gzipped - %s' % (anomaly_json_gz))
                 except:
                     logger.error('error :: Failed to gzip data file - %s' % str(traceback.print_exc()))
@@ -789,7 +783,9 @@ class Crucible(Thread):
         if run_script:
             if os.path.isfile(run_script):
                 logger.info('running - %s' % (run_script))
-                os.system('%s %s' % (str(run_script), str(crucible_anomaly_file)))
+                # @modified 20170913 - Task #2160: Test skyline with bandit
+                # Added nosec to exclude from bandit tests
+                os.system('%s %s' % (str(run_script), str(crucible_anomaly_file)))  # nosec
 
         # Remove metric check file
         nothing_to_do = ''
@@ -849,11 +845,7 @@ class Crucible(Thread):
                 os.path.exists(settings.CRUCIBLE_CHECK_PATH)
             except:
                 logger.error('error :: check dir did not exist - %s' % settings.CRUCIBLE_CHECK_PATH)
-                if python_version == 2:
-                    mode_arg = int('0755')
-                if python_version == 3:
-                    mode_arg = mode=0o755
-                os.makedirs(settings.CRUCIBLE_CHECK_PATH, mode_arg)
+                mkdir_p(settings.CRUCIBLE_CHECK_PATH)
                 logger.info('check dir created - %s' % settings.CRUCIBLE_CHECK_PATH)
                 os.path.exists(settings.CRUCIBLE_CHECK_PATH)
                 # continue
@@ -934,6 +926,11 @@ class Crucible(Thread):
                 logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                 for p in pids:
                     p.terminate()
+                    # p.join()
+
+            for p in pids:
+                if p.is_alive():
+                    logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
                     p.join()
 
             while os.path.isfile(metric_check_file):

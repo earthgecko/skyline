@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>horizon.worker &mdash; Skyline 1.0.8-dev documentation</title>
+  <title>horizon.worker &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -32,7 +32,10 @@
   
 
   
-    <link rel="top" title="Skyline 1.0.8-dev documentation" href="../../index.html"/>
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                1.0
+                1.2
               </div>
             
           
@@ -88,9 +91,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../upgrading.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
@@ -99,6 +103,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -107,7 +114,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../building-documentation.html">Building documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
@@ -158,7 +164,9 @@
            <div itemprop="articleBody">
             
   <h1>Source code for horizon.worker</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">system</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="c1"># from os import kill, system</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span>
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span><span class="p">,</span> <span class="n">WatchError</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
 <span class="k">try</span><span class="p">:</span>
@@ -168,11 +176,11 @@
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">packb</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 
-<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="c1"># import traceback</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">socket</span>
+<span class="c1"># import socket</span>
 
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="c1"># import sys</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
 
@@ -200,6 +208,12 @@
 
 <span class="n">WORKER_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
+<span class="c1"># @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">DO_NOT_SKIP_LIST</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DO_NOT_SKIP_LIST</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">DO_NOT_SKIP_LIST</span> <span class="o">=</span> <span class="p">[]</span>
+
 
 <div class="viewcode-block" id="Worker"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker">[docs]</a><span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -207,7 +221,7 @@
 <span class="sd">    the latest datapoints to their respective timesteps in Redis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">skip_mini</span><span class="p">,</span> <span class="n">canary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Worker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Worker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">queue</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
@@ -227,10 +241,47 @@
 <div class="viewcode-block" id="Worker.in_skip_list"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.in_skip_list">[docs]</a>    <span class="k">def</span> <span class="nf">in_skip_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if the metric is in SKIP_LIST.</span>
+
+<span class="sd">        # @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST</span>
+<span class="sd">        The SKIP_LIST allows for a string match or a match on dotted elements</span>
+<span class="sd">        within the metric namespace.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># @modified 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST</span>
+        <span class="c1"># Allow for dotted element matches and DO_NOT_SKIP_LIST</span>
+        <span class="c1"># for to_skip in settings.SKIP_LIST:</span>
+        <span class="c1">#    if to_skip in metric_name:</span>
+        <span class="c1">#        return True</span>
+        <span class="c1"># return False</span>
+
+        <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="k">for</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKIP_LIST</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>
+                <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="n">to_skip_namespace_elements</span> <span class="o">=</span> <span class="n">to_skip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">):</span>
+                <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">process_metric</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">do_not_skip</span> <span class="ow">in</span> <span class="n">DO_NOT_SKIP_LIST</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">do_not_skip</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
+                    <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+                <span class="n">do_not_skip_namespace_elements</span> <span class="o">=</span> <span class="n">do_not_skip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">do_not_skip_namespace_elements</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">do_not_skip_namespace_elements</span><span class="p">):</span>
+                    <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">process_metric</span><span class="p">:</span>
+            <span class="c1"># skip</span>
+            <span class="k">return</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="kc">False</span></div>
 
@@ -280,7 +331,7 @@
         <span class="n">last_send_to_graphite</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="n">queue_sizes</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># python-2.x and python3.x had while 1 and while True differently</span>
+        <span class="c1"># python-2.x and python3.x handle while 1 and while True differently</span>
         <span class="c1"># while 1:</span>
         <span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">while</span> <span class="n">running</span><span class="p">:</span>
@@ -298,7 +349,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Get a chunk from the queue with a 15 second timeout</span>
                 <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
-                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="c1"># @modified 20170317 - Feature #1978: worker - DO_NOT_SKIP_LIST</span>
+                <span class="c1"># now = time()</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
 
                 <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
 
@@ -368,7 +421,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2016, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -390,7 +443,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.0.8-dev',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

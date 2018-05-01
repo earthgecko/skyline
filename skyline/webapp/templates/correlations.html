@@ -1,0 +1,44 @@
+{% block correlations_block %}
+<!-- BEGIN /ionosphere/fp_veiw=true block -->
+
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere correlations_block</br>
+  {% if requested_timestamp %}
+<code> requested_timestamp </code>: {{ requested_timestamp }}<br>
+  {% else %}
+<code> requested_timestamp </code>: NOT FOUND<br>
+  {% endif %}
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+  {% if correlations != False %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">correlations ::</span></span></span> {{ correlations|length }} (listed strongest 1 to weakest 0)</h4>
+		  <table class="table table-hover">
+		    <thead>
+		      <tr>
+		        <th>metric</th>
+		        <th>coefficient</th>
+		        <th>shifted</th>
+		        <th>shifted_coefficient</th>
+		      </tr>
+		    </thead>
+		    <tbody>
+    {% for correlation_item in correlations %}
+		      <tr>
+		        <td>{{ correlation_item[0] }}</td>
+		        <td>{{ correlation_item[1] }}</td>
+		        <td>{{ correlation_item[2] }}</td>
+		        <td>{{ correlation_item[3] }}</td>
+		      </tr>
+    {% endfor %}
+		    </tbody>
+		  </table>
+  {% else %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">correlations ::</span></span></span> None</h4>
+  {% endif %}
+
+{% endblock %}

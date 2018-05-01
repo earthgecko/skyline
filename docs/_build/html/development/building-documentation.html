@@ -1,0 +1,456 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Building documentation &mdash; Skyline 1.2.0-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
+        <link rel="up" title="Development" href="index.html"/>
+        <link rel="next" title="Development - Webapp" href="webapp.html"/>
+        <link rel="prev" title="Development" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#part-of-the-build">Part of the build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-docs-requirements-txt">Install docs-requirements.txt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#your-python-interpretor">Your Python interpretor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rst-and-md-wtf">.rst and .md wtf?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build">Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#auto-generating-rst-files">Auto generating .rst files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-workflow-diagrams-with-uml">Building workflow diagrams with UML</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tsfresh.html">Development - tsfresh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Development</a> &raquo;</li>
+      
+    <li>Building documentation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/development/building-documentation.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="building-documentation">
+<h1>Building documentation<a class="headerlink" href="#building-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Currently <a class="reference external" href="http://www.sphinx-doc.org">Sphinx</a> and sphinx-apidoc is being used
+to documented the code and project, however to get working docs, a small
+modification is required to the files outputted by sphinx-apidoc.</p>
+<p>This is related to the package restructure undertaken to make the Skyline code
+and layout more in line with a normal python package.  Although this seems to
+have been achieved, the small hack to the sphinx-apidoc output suggests that
+this is not 100% correct.  Further evidence of this is in terms of importing
+from settings.py, the path needs to be appended in the code, which really should
+not be required.  However, it is working and in the future this should be
+figured and fixed.  Perhaps the below edit of the auto generated .rst files
+could be achieved with a sphinx <cite>conf.py</cite> setting, if anyone knows please do
+let us know :)</p>
+<div class="section" id="part-of-the-build">
+<h2>Part of the build<a class="headerlink" href="#part-of-the-build" title="Permalink to this headline">¶</a></h2>
+<p>The below documentation script not only builds the documentation, it also auto
+generates some documentation and it also auto generates some Python code when
+updates are required, such as the compilation of the tsfresh_features.py</p>
+<p>For now...</p>
+</div>
+<div class="section" id="install-docs-requirements-txt">
+<h2>Install docs-requirements.txt<a class="headerlink" href="#install-docs-requirements-txt" title="Permalink to this headline">¶</a></h2>
+<p>In your Python virtualenv first pip install the required modules in
+docs-requirements.txt (as per documented <a class="reference external" href="running-in-python-virtualenv.html">Running in Python virtualenv</a>)</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
+
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/docs-requirements.txt
+
+deactivate
+</pre></div>
+</div>
+</div>
+<div class="section" id="your-python-interpretor">
+<h2>Your Python interpretor<a class="headerlink" href="#your-python-interpretor" title="Permalink to this headline">¶</a></h2>
+<p>The docs/conf.py self interpolates the Python path if you are running in a
+virtualenv in the documented manner.  If you are not you may need to change the
+following to your python interpretor site-packages path by setting
+python_site_packages_path in docs/conf.py, e.g.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1">#    sys.path.insert(0, os.path.abspath(&#39;/opt/python_virtualenv/projects/skyline-py2712/lib/python2.7/site-packages&#39;))</span>
+    sys.path.insert<span class="o">(</span><span class="m">0</span>, os.path.abspath<span class="o">(</span>python_site_packages_path<span class="o">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="rst-and-md-wtf">
+<h2>.rst and .md wtf?<a class="headerlink" href="#rst-and-md-wtf" title="Permalink to this headline">¶</a></h2>
+<p>The documentation is written in both .md and .rst format, because it can be
+thanks to the awesome of Sphinx.  The original Skyline documentation was written
+in .md for github.  The documentation is being ported over to .rst to allow for
+the full functionality of Sphinx documentation.</p>
+</div>
+<div class="section" id="build">
+<h2>Build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
+
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+
+<span class="k">function</span> build_docs<span class="o">()</span> <span class="o">{</span>
+
+  <span class="c1"># Arguments:</span>
+  <span class="c1"># APP_DIR - path to your Skyline dir, e.g.</span>
+  <span class="c1"># build_docs  # e.g. ~/github/earthgecko/skyline/develop/skyline</span>
+  <span class="c1"># pyflakes    # run pyflakes if passed</span>
+
+  <span class="k">if</span> <span class="o">[</span> -n <span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nv">APPDIR</span><span class="o">=</span><span class="nv">$1</span>
+  <span class="k">fi</span>
+
+  <span class="k">if</span> <span class="o">[</span> -z <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">&quot;error: could not determine APPDIR - </span><span class="nv">$APPDIR</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="m">1</span>
+  <span class="k">fi</span>
+
+  <span class="k">if</span> <span class="o">[</span> ! -d <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">&quot;error: directory not found - </span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
+    <span class="k">return</span> <span class="m">1</span>
+  <span class="k">fi</span>
+
+  <span class="c1"># @added 20161119 - Branch #922: ionosphere</span>
+  <span class="c1">#                   Task #1718: review.tsfresh</span>
+  <span class="c1"># Build the pytz.rst page to generate the pytz timezone list for Skyline</span>
+  <span class="c1"># Ionosphere and tsfresh, creates &quot;$APPDIR/docs/development/pytz.rst&quot;</span>
+
+  python<span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/skyline/tsfresh_features/scripts/make-pytz.all_timezones-rst.py&quot;</span>
+
+  <span class="c1"># Run tests</span>
+  <span class="nv">ORIGINAL_DIR</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>
+  <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span>
+  python<span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span> -m pytest tests/
+  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nb">echo</span> <span class="s2">&quot;Tests failed not building documentation&quot;</span>
+    <span class="k">return</span> <span class="m">1</span>
+  <span class="k">fi</span>
+
+  <span class="c1"># @added 20170308 - Task #1966: Add pyflakes tests to build_docs</span>
+  <span class="c1">#                   Feature #1960: ionosphere_layers</span>
+  <span class="k">if</span> <span class="o">[</span> -n <span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    find <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> -type f -name <span class="s2">&quot;*.py&quot;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> i_file
+    <span class="k">do</span>
+      pyflakes <span class="s2">&quot;</span><span class="nv">$i_file</span><span class="s2">&quot;</span>
+    <span class="k">done</span>
+  <span class="k">fi</span>
+
+  <span class="c1"># @added 20170913 - Task #2160: Test skyline with bandit</span>
+  <span class="c1"># For static analysis - https://github.com/openstack/bandit</span>
+  bandit -r <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> -x <span class="s2">&quot;</span><span class="si">${</span><span class="nv">APPDIR</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span>
+
+  <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;Building Skyline documentation - in </span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
+  sphinx-apidoc --force -o <span class="s2">&quot;</span><span class="si">${</span><span class="nv">APPDIR</span><span class="si">}</span><span class="s2">/docs&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">APPDIR</span><span class="si">}</span><span class="s2">/skyline&quot;</span> skyline
+
+  <span class="c1"># Inline edit all apidoc generated .rst files in docs/skyline.*rst</span>
+  <span class="k">for</span> i in <span class="k">$(</span>find <span class="s2">&quot;</span><span class="si">${</span><span class="nv">APPDIR</span><span class="si">}</span><span class="s2">/docs&quot;</span> -type f -name <span class="s2">&quot;skyline.*rst&quot;</span><span class="k">)</span>
+  <span class="k">do</span>
+    cat <span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span> &gt; <span class="s2">&quot;</span><span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="s2">.org&quot;</span>
+    cat <span class="s2">&quot;</span><span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="s2">.org&quot;</span> <span class="p">|</span> sed -e <span class="s1">&#39;/package/!s/automodule:: skyline\./automodule:: /g&#39;</span> &gt; <span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+    rm -f <span class="s2">&quot;</span><span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="s2">.org&quot;</span>
+  <span class="k">done</span>
+
+  <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
+  make clean
+  rm -rf _build/*
+  make html
+  <span class="k">for</span> i in <span class="k">$(</span>find <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> -type f -name <span class="s2">&quot;*.pyc&quot;</span><span class="k">)</span>
+  <span class="k">do</span>
+    rm -f <span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+  <span class="k">done</span>
+  <span class="k">for</span> i in <span class="k">$(</span>find <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> -type d -name <span class="s2">&quot;__pycache__&quot;</span><span class="k">)</span>
+  <span class="k">do</span>
+    rm -rf <span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+  <span class="k">done</span>
+  <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$ORIGINAL_DIR</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># Usage: build_docs &lt;app_dir&gt;</span>
+<span class="c1"># e.g.</span>
+<span class="c1"># cd /opt/python_virtualenv/projects/skyline-ionosphere-py2712/</span>
+<span class="c1"># build_docs /home/gary/sandbox/of/github/earthgecko/skyline/ionosphere/skyline</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="auto-generating-rst-files">
+<h2>Auto generating .rst files<a class="headerlink" href="#auto-generating-rst-files" title="Permalink to this headline">¶</a></h2>
+<p>This may be a little unconventional but it probably beats trying to do it via
+Sphinx support custom extensions, without using generates or includes or Jinga
+templating, which may or may not work with readthedocs.</p>
+<p>The script skyline/tsfresh_features/scripts/make-pytz.all_timezones-rst.py introduces a
+novel way to automatically generate the docs/development/pytz.rst during the
+local build process to provide a list of all pytz timezones at the current
+version.</p>
+<p>This pattern could be reused fairly easier.</p>
+</div>
+<div class="section" id="building-workflow-diagrams-with-uml">
+<h2>Building workflow diagrams with UML<a class="headerlink" href="#building-workflow-diagrams-with-uml" title="Permalink to this headline">¶</a></h2>
+<p>This can be quite handy to make simple diagrams, if not finicky.  A good
+resource is the PlantUML.com server is handy for making workflow diagrams,
+without having to create and edit SVGs.</p>
+<p>The docs/skyline.simplified.workflow.uml rendered by the PlantUML server:
+<a class="reference external" href="http://plantuml.com/plantuml/png/ZLFBJWCn3BpdAwozmmTKLQLo0IIGW0ekY4EwwrAhUQoSNLO5yU-upQEx2A6U4eyzCqwSTDGPXDLkRyWX1BAjeGrX0uFdtSRuGIbTTvvXsLXo53hMXsW-XvlUQWUBXLAryNq3NmhWrMB7L8Stq07INdqhvNo3K5spRhVKOQLKoi750Z8Aiyo0pXSqSv-meL3bw7w_UhmhqTOpVNedST4ItOHEPMyYg79IwexAqweZfDIhDiWTSZnE3hAhTjhiFv4hbNSmlxmiSiiCjhqneaeM0p9XW0rxcomAK_h8-iBLpbj9H2ZxhNtl6itxIkNTnEygW__v5UOPVfPOlsCrwJ5YmcZxi4qqtmS8g8ENkZBpL7XeS3JV-uZ-tM6PUEAUqM8hA6khnqqsVd12pQaHLGRxaD3YSLxrwThEgo_fN7zyhrBCM7jk4kTmSd8nbqyqu5gtRQNYUXhm68Y44N3wA-N2n7FwOMVnvkJr_lh8mazICtWX7E3v5Zv8mvhz8EFv0G00">Simplified Skyline workflow with PlantUML server</a></p>
+<img alt="http://www.plantuml.com/plantuml/png/PL5DRzim3BthLn3fELRI0aKNk3usBT01su9j6B0BRR6sO5ao93g1KUo_Zt7Y8DrEqllW8qMnPKUGlmNFK0KNukFD_VsdXwUdOjUEkJxonGVLcBlLxLtXhAUp33-fnBw79PIOR0LXJt5lwQ0KLXmY_0e3v3ay3nrwA0gbV304Yst4lh5CYvduHiQc2_eyxhw-Nj1XQh60TmNGOzLYBQGFXmLW0ZclwI_eGyGE9sq6ruP8PJoNdguYIWRaMGRJ4B01jXqbYfOI6EHZ-PmqsQRfn2PSXsu4GupMfNzjynl_3uGtsSovMgfEStoOeAKngJzAJUiJ_hG24Nx8Rk7x2-mjmh5AKfMAjcvOGWDJX5qOOaNGCFTfetLjkHdAh0gT9epSr5IrGQTsF7wYvaYaz-jidQsMfJnZQOCFgMyeaZQXIheSh3FMrqj17Nb65aVMSET--orvYiXae1odVjAkT-XvwDpKS0P_0G00" src="http://www.plantuml.com/plantuml/png/PL5DRzim3BthLn3fELRI0aKNk3usBT01su9j6B0BRR6sO5ao93g1KUo_Zt7Y8DrEqllW8qMnPKUGlmNFK0KNukFD_VsdXwUdOjUEkJxonGVLcBlLxLtXhAUp33-fnBw79PIOR0LXJt5lwQ0KLXmY_0e3v3ay3nrwA0gbV304Yst4lh5CYvduHiQc2_eyxhw-Nj1XQh60TmNGOzLYBQGFXmLW0ZclwI_eGyGE9sq6ruP8PJoNdguYIWRaMGRJ4B01jXqbYfOI6EHZ-PmqsQRfn2PSXsu4GupMfNzjynl_3uGtsSovMgfEStoOeAKngJzAJUiJ_hG24Nx8Rk7x2-mjmh5AKfMAjcvOGWDJX5qOOaNGCFTfetLjkHdAh0gT9epSr5IrGQTsF7wYvaYaz-jidQsMfJnZQOCFgMyeaZQXIheSh3FMrqj17Nb65aVMSET--orvYiXae1odVjAkT-XvwDpKS0P_0G00" />
+<p>The UML source to the above image is:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>@startuml
+title &lt;font color=#6698FF&gt;Sky&lt;/font&gt;&lt;font color=#dd3023&gt;line&lt;/font&gt; Webapp - basic overview
+
+actor You &lt;&lt; Human &gt;&gt;
+
+node &quot;Graphite&quot;
+
+node &quot;Redis&quot;
+
+node &quot;MySQL&quot;
+
+node &quot;webapp&quot; {
+  package &quot;now&quot; as now
+  package &quot;Panorama&quot; as Panorama
+  package &quot;rebrow&quot; as rebrow
+  now &lt;.. Redis : timeseries data
+  Panorama &lt;.. MySQL : anomaly details
+  Panorama &lt;.. Graphite : timeseries data for anomaly
+  rebrow &lt;.. Redis : keys
+}
+
+You &lt;.. webapp : View UI via browser
+
+right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ionosphere/docs/building-documentation.html\nGenerated by http://plantuml.com/plantuml
+@enduml
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="webapp.html" class="btn btn-neutral float-right" title="Development - Webapp" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Development" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2.0-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

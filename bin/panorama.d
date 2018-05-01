@@ -279,36 +279,36 @@ stop () {
 #    fi
 
     SERVICE_PID=$RUNNING_PID
-    SERVICE_RELATED_PID=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$SERVICE_PID")
+    SERVICE_RELATED_PID=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$SERVICE_PID")
     if [ $SERVICE_RELATED_PID -eq 1 ]; then
       echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: stopping process $SERVICE_PID" >> "$LOG_PATH/${SERVICE_NAME}.log"
       sudo kill $SERVICE_PID
     fi
 
-    PROCESS_COUNT=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
+    PROCESS_COUNT=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
     if [ $PROCESS_COUNT -gt 0 ]; then
       sleep 1
     fi
 
   # TODO: write a real kill script
-    PROCESS_COUNT=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
+    PROCESS_COUNT=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
     if [ $PROCESS_COUNT -gt 0 ]; then
       # kill -15
-      ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | while read i_pid
+      ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | while read i_pid
       do
-        SERVICE_RELATED_PID=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
+        SERVICE_RELATED_PID=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
         if [ $SERVICE_RELATED_PID -eq 1 ]; then
           echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: cleaning up process $i_pid" >> "$LOG_PATH/${SERVICE_NAME}.log"
           sudo kill $i_pid
         fi
       done
 
-      PROCESS_COUNT=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
+      PROCESS_COUNT=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
       if [ $PROCESS_COUNT -gt 0 ]; then
         # kill -9
-        ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | while read i_pid
+        ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | while read i_pid
         do
-          SERVICE_RELATED_PID=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
+          SERVICE_RELATED_PID=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
           if [ $SERVICE_RELATED_PID -eq 1 ]; then
             echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: kill -9 process $i_pid" >> "$LOG_PATH/${SERVICE_NAME}.log"
             sudo kill -9 $i_pid
@@ -317,7 +317,7 @@ stop () {
       fi
     fi
 
-    PROCESS_COUNT=$(ps aux | grep "agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
+    PROCESS_COUNT=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
     if [[ ! -f "$PID_PATH/${SERVICE_NAME}.pid" && $PROCESS_COUNT -eq 0 ]]; then
       echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: all ${SERVICE_NAME} processes have been stopped - OK" >> "$LOG_PATH/${SERVICE_NAME}.log"
       echo "$SERVICE_NAME has been stopped"

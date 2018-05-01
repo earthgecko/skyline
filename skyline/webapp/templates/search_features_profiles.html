@@ -1,0 +1,454 @@
+{% block search_features_profiles_block %}
+<!-- BEGIN /ionosphere/fp_veiw=true&fp_search=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere search_features_profiles block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
+<!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
+# Return matches for the last 24 hours as the default -->
+		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles</span></span></span></h4>
+  {% if fp_search_results %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  {% endif %}
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Features profile search</td>
+  		        <td><select name="fp_search">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Metric like</td>
+  		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp</td>
+  		        <td><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>generation_greater_than</td>
+  		        <td><input type="text" name="generation_greater_than" value="0"></td>
+  		      </tr>
+<!-- # @added 20170315 - Feature #1960: ionosphere_layers -->
+  		      <tr>
+  		        <td>layers_id_greater_than</td>
+  		        <td><input type="number" name="layers_id_greater_than" value="0"></td>
+  		      </tr>
+<!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
+  		      <tr>
+  		        <td>validated</td>
+  		        <td><select name="validated_equals">
+                <option value="any">any</option>
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+<!-- # @added 20170518 - Feature #1996: Ionosphere - matches page
+Added matched_greater_than query to the search features profile page -->
+  		      <tr>
+  		        <td>matched_greater_than</td>
+  		        <td><input type="number" name="matched_greater_than" value="0"></td>
+  		      </tr>
+  {% if full_duration_list %}
+  		      <tr>
+  		        <td>full_duration</td>
+  		        <td><select name="full_duration">
+                <option value="all">all</option>
+          {% for item in full_duration_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select></td>
+  		      </tr>
+  {% endif %}
+  {% if generation_list %}
+  		      <tr>
+  		        <td>generation</td>
+  		        <td><select name="generation">
+                <option value="all">all</option>
+          {% for item in generation_list %}
+                <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+              </select></td>
+  		      </tr>
+  {% endif %}
+  {% if enabled_list %}
+  		      <tr>
+                <td>enabled</td>
+                <td><select name="enabled">
+                  <option value="all">all</option>
+<!-- # @added 20170912 - Feature #2056: ionosphere - disabled_features_profiles
+# modified from for item in enabled_list to true or false -->
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select></td>
+  		      </tr>
+  {% endif %}
+  {% if tsfresh_version_list %}
+  		      <tr>
+                <td>tsfresh_version</td>
+                <td><select name="tsfresh_version">
+                  <option value="all">all</option>
+            {% for item in tsfresh_version_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+                </select></td>
+  		      </tr>
+  {% endif %}
+  {% if generation_list %}
+  		      <tr>
+                <td>generation:</td>
+                <td><select name="generation">
+                  <option value="all">all</option>
+            {% for item in generation_list %}
+                  <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+                </select></td>
+  		      </tr>
+  {% endif %}
+  		      <tr>
+              <td>Features profiles count by metric:</td>
+              <td><select name="count_by_metric">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by matched:</td>
+              <td><select name="count_by_matched">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by checked:</td>
+              <td><select name="count_by_checked">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+                <td>Features profiles count by generation:</td>
+                <td><select name="count_by_generation">
+                  <option value="false">false</option>
+                  <option value="true">true</option>
+                </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+  		      <tr>
+              <td>Features profiles count by metric:</td>
+              <td><select name="count_by_metric">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> (NOTE: this overrides the above metric value if one is specified)</td>
+  		      </tr>
+
+  		      <tr>
+                <td>limit</td>
+                <td><input type="number" name="limit" min="0" max="100" value="30" /> use 0 for unlimited</td>
+  		      </tr>
+  		      <tr>
+  		        <td>order by:</td>
+  		        <td><select name="order">
+                <option value="DESC">DESC</option>
+                <option value="ASC">ASC</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+  {% if fp_search_results %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+      </div>
+{% if fp_search_results %}
+<!-- TODO results tables
+id
+metric
+count
+-->
+  {% if features_profiles_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>
+          by count - limtied to {{ features_profiles_count|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>Number of features profiles</th>
+            <th>metric_id</th>
+            <th>metric features profiles</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in features_profiles_count %}
+          <tr>
+            <td><code>{{ item[0] }}</code></td>
+            <td>{{ item[1] }}</td>
+            <td onclick="window.location='?fp_search=true&metric={{ item[2] }}'">
+              <a href="?fp_search=true&metric={{ item[2] }}">{{ item[2] }}</a>
+            </td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if matched_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Matched ::</span> <span class="re">features profiles :: </span></span></span>
+          by count - limtied to {{ matched_count|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>fp_id</th>
+            <th>matched_count</th>
+            <th>metric</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in matched_count %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}">{{ item[1] }}</a>
+            </td>
+            <td>{{ item[0] }}</td>
+            <td><code>{{ item[2] }}</code></td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if checked_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Checked ::</span> <span class="re">features profiles :: </span></span></span>
+          by count - limtied to {{ checked_count|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>fp_id</th>
+            <th>checked_count</th>
+            <th>metric</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in checked_count %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[1] }}&metric={{ item[2] }}">{{ item[1] }}</a>
+            </td>
+            <td>{{ item[0] }}</td>
+            <td><code>{{ item[2] }}</code></td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if generation_count %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Generations ::</span> <span class="re">count :: </span></span></span>
+          ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>generation</th>
+            <th>count</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in generation_count %}
+          <tr>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[0] }}</td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if features_profiles %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
+          limited by {{ features_profiles|length }} features profiles ordered by {{ order }}</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+<!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
+      tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
+      matched_count10, human_date11, created_timestamp12, checked_count13,
+      checked_human_date14, parent_id15, generation16, validated17] -->
+            <th>fp_ip</th>
+            <th>metric</th>
+            <th>parent_id</th>
+            <th>generation</th>
+            <th>origin</th>
+            <th>full duration</th>
+<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
+            <th>fp efficiency</th>
+            <th>match count</th>
+            <th>last matched</th>
+            <th>checked count</th>
+            <th>last checked</th>
+            <th>created</th>
+<!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
+            <th>validated</th>
+            <th>layer id</th>
+<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
+            <th>layer efficiency</th>
+<!-- @added 20170322 - Feature #1960: ionosphere_layers
+# Added layers information to the features profiles search results -->
+            <th>layer matched count</th>
+            <th>layer last matched</th>
+            <th>layer checked</th>
+            <th>layer last checked</th>
+            <th>layer label</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in features_profiles %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[0] }}</a>
+            </td>
+            <td><code>{{ item[2] }}</code></td>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}'">
+              <a href="?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}">{{ item[15] }}</a>
+            </td>
+            <td onclick="window.location='?generation_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
+              <a href="?generation_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[16] }}</a> <span class="logo">
+            </td>
+    {% if item[16] == 0 or item[16] == 1 %}
+<!-- # @added 20170912 - Feature #2056: ionosphere - disabled_features_profiles -->
+      {% if item[0] in enabled_list %}
+            <td><span class="logo"><span class="sky">trained</span></span></td>
+      {% else %}
+            <td><span class="logo"><span class="sky">trained DISABLED</span></span></td>
+      {% endif %}
+    {% else %}
+      {% if item[0] in enabled_list %}
+            <td><span class="logo"><span class="re">learnt</span></span></td>
+      {% else %}
+            <td><span class="logo"><span class="re">learnt DISABLED</span></span></td>
+      {% endif %}
+    {% endif %}
+            <td>{{ item[3] }}</td>
+<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
+    {% if item[10] == 0 %}
+            <td>0 %</td>
+    {% else %}
+            <td>{{ (item[10] / item[13] * 100)|round(1, 'common')}} %</td>
+    {% endif %}
+            <td>{{ item[10] }}</td>
+            <td>{{ item[11] }}</td>
+            <td>{{ item[13] }}</td>
+            <td>{{ item[14] }}</td>
+            <td>{{ item[12] }}</td>
+            <td>{{ item[17] }}</td>
+            <td>{{ item[18] }}</td>
+<!-- # @added 20171106 - Feature #2184: features profiles by performance
+Handle if no layers in results, not ideal but works.  If item[19] do not exist
+for any of the returned features profiles the layers column values will be blank -->
+    {% if item[19] %}
+<!-- # @added 20171020 - Feature #2184: features profiles by performance -->
+      {% if item[19] == 0 %}
+            <td>0 %</td>
+            <td>{{ item[19] }}</td>
+      {% else %}
+            <td>{{ (item[19] / item[21] * 100)|round(1, 'common')}} %</td>
+            <td>{{ item[19] }}</td>
+      {% endif %}
+    {% else %}
+            <td>0 %</td>
+            <td>{{ item[19] }}</td>
+    {% endif %}
+<!--            <td>{{ item[19] }}</td> -->
+            <td>{{ item[20] }}</td>
+            <td>{{ item[21] }}</td>
+            <td>{{ item[22] }}</td>
+            <td>{{ item[23] }}</td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+{% endif %}
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere/fp_veiw=true&fp_search=true block -->
+{% endblock %}

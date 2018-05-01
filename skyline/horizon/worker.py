@@ -1,4 +1,6 @@
-from os import kill, system
+from __future__ import division
+# from os import kill, system
+from os import kill
 from redis import StrictRedis, WatchError
 from multiprocessing import Process
 try:
@@ -8,11 +10,11 @@ except ImportError:
 from msgpack import packb
 from time import time, sleep
 
-import traceback
+# import traceback
 import logging
-import socket
+# import socket
 
-import sys
+# import sys
 import os.path
 from os import remove as os_remove
 
@@ -39,6 +41,12 @@ skyline_app_graphite_namespace = 'skyline.%s%s.%s' % (
     parent_skyline_app, SERVER_METRIC_PATH, child_skyline_app)
 
 WORKER_DEBUG = False
+
+# @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
+try:
+    DO_NOT_SKIP_LIST = settings.DO_NOT_SKIP_LIST
+except:
+    DO_NOT_SKIP_LIST = []
 
 
 class Worker(Process):
@@ -67,10 +75,47 @@ class Worker(Process):
     def in_skip_list(self, metric_name):
         """
         Check if the metric is in SKIP_LIST.
+
+        # @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
+        The SKIP_LIST allows for a string match or a match on dotted elements
+        within the metric namespace.
+
         """
+
+        # @modified 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
+        # Allow for dotted element matches and DO_NOT_SKIP_LIST
+        # for to_skip in settings.SKIP_LIST:
+        #    if to_skip in metric_name:
+        #        return True
+        # return False
+
+        metric_namespace_elements = metric_name.split('.')
+        process_metric = True
+
         for to_skip in settings.SKIP_LIST:
             if to_skip in metric_name:
-                return True
+                process_metric = False
+                break
+            to_skip_namespace_elements = to_skip.split('.')
+            elements_matched = set(metric_namespace_elements) & set(to_skip_namespace_elements)
+            if len(elements_matched) == len(to_skip_namespace_elements):
+                process_metric = False
+                break
+
+        if not process_metric:
+            for do_not_skip in DO_NOT_SKIP_LIST:
+                if do_not_skip in metric_name:
+                    process_metric = True
+                    break
+                do_not_skip_namespace_elements = do_not_skip.split('.')
+                elements_matched = set(metric_namespace_elements) & set(do_not_skip_namespace_elements)
+                if len(elements_matched) == len(do_not_skip_namespace_elements):
+                    process_metric = True
+                    break
+
+        if not process_metric:
+            # skip
+            return True
 
         return False
 
@@ -120,7 +165,7 @@ class Worker(Process):
         last_send_to_graphite = time()
         queue_sizes = []
 
-        # python-2.x and python3.x had while 1 and while True differently
+        # python-2.x and python3.x handle while 1 and while True differently
         # while 1:
         running = True
         while running:
@@ -138,7 +183,9 @@ class Worker(Process):
             try:
                 # Get a chunk from the queue with a 15 second timeout
                 chunk = self.q.get(True, 15)
-                now = time()
+                # @modified 20170317 - Feature #1978: worker - DO_NOT_SKIP_LIST
+                # now = time()
+                now = int(time())
 
                 for metric in chunk:
 

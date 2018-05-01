@@ -1,0 +1,446 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>database &mdash; Skyline 1.2.0-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>database</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for database</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">create_engine</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.dialects.mysql</span> <span class="k">import</span> <span class="n">DOUBLE</span><span class="p">,</span> <span class="n">FLOAT</span><span class="p">,</span> <span class="n">TINYINT</span><span class="p">,</span> <span class="n">VARCHAR</span><span class="p">,</span> <span class="n">SMALLINT</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+
+
+<div class="viewcode-block" id="get_engine"><a class="viewcode-back" href="../skyline.html#database.get_engine">[docs]</a><span class="k">def</span> <span class="nf">get_engine</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    # @added 20161209 - Branch #922: ionosphere</span>
+<span class="sd">    #                   Task #1658: Patterning Skyline Ionosphere</span>
+<span class="sd">    # Use SQLAlchemy, mysql.connector is still around but starting the</span>
+<span class="sd">    # move to SQLAlchemy now that all the webapp Ionosphere SQLAlchemy patterns</span>
+<span class="sd">    # work</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span>
+            <span class="s1">&#39;mysql+mysqlconnector://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">@</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSERPASS</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">),</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="s1">&#39;got MySQL engine&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not create MySQL engine&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<div class="viewcode-block" id="ionosphere_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the ionosphere table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+    <span class="c1"># @modified 20161209 - Branch #922: ionosphere</span>
+    <span class="c1">#                      Task #1658: Patterning Skyline Ionosphere</span>
+    <span class="c1"># HOWEVER:</span>
+    <span class="c1"># Create the ionosphere table MetaData, however this the only table not</span>
+    <span class="c1"># currently being reflected from the database.  Due to the possibility of</span>
+    <span class="c1"># SQL update statements with updates, etc it is probably better to stick</span>
+    <span class="c1"># with a single source of truth schema in the skyline.sql rather than having</span>
+    <span class="c1"># to micro manage the schema in Python/SQLAlchemy code too and you cannot</span>
+    <span class="c1"># add COMMENTS with SQLAlchemy table creation.  However z_ts_&lt;metric_id&gt; and</span>
+    <span class="c1"># z_fp_&lt;metric_id&gt; tables ARE and WILL continue to ONLY be described in</span>
+    <span class="c1"># Python/SQLAlchemy in skyline/webapp/ionosphere_backend.py, otherwise</span>
+    <span class="c1"># Skyline would probably be running peewee like pydsn.  However peewee</span>
+    <span class="c1"># cannot create tables per se and I was tired of raw mysql.connector so...</span>
+    <span class="c1"># as of 20161209184400 - thank you SQLAlchemy, reflecting is the better</span>
+    <span class="c1"># option.  However it means if you are in here, see the skyline.sql for the</span>
+    <span class="c1"># source of truth</span>
+    <span class="c1">#    ionosphere_table = Table(</span>
+    <span class="c1">#        &#39;ionosphere&#39;, ionosphere_meta,</span>
+    <span class="c1">#        Column(&#39;id&#39;, Integer, primary_key=True),</span>
+    <span class="c1">#        Column(&#39;metric_id&#39;, Integer, nullable=False, key=&#39;metric_id&#39;),</span>
+    <span class="c1">#        Column(&#39;enabled&#39;, TINYINT(), nullable=True),</span>
+    <span class="c1">#        Column(&#39;tsfresh_version&#39;, VARCHAR(12), nullable=True),</span>
+    <span class="c1">#        Column(&#39;calc_time&#39;, FLOAT, nullable=True),</span>
+    <span class="c1">#        Column(&#39;features_count&#39;, Integer, nullable=True),</span>
+    <span class="c1">#        Column(&#39;features_sum&#39;, DOUBLE, nullable=True),</span>
+    <span class="c1">#        Column(&#39;deleted&#39;, Integer, nullable=True),</span>
+    <span class="c1">#        Column(&#39;matched_count&#39;, Integer, nullable=True),</span>
+    <span class="c1">#        Column(&#39;last_matched&#39;, Integer, nullable=True),</span>
+    <span class="c1">#        Column(&#39;created_timestamp&#39;, DateTime()),</span>
+    <span class="c1">#        mysql_charset=&#39;utf8&#39;,</span>
+    <span class="c1">#        mysql_key_block_size=&#39;255&#39;,</span>
+    <span class="c1">#        mysql_engine=&#39;MyISAM&#39;)</span>
+    <span class="c1">#    ionosphere_table.create(engine, checkfirst=True)</span>
+    <span class="c1">#    return ionosphere_table, &#39;ionosphere_table meta OK&#39;, &#39;none&#39;</span>
+        <span class="n">ionosphere_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;ionosphere&#39;</span><span class="p">,</span> <span class="n">ionosphere_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ionosphere_table</span><span class="p">,</span> <span class="s1">&#39;ionosphere_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to create table - ionosphere&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<div class="viewcode-block" id="metrics_table_meta"><a class="viewcode-back" href="../skyline.html#database.metrics_table_meta">[docs]</a><span class="k">def</span> <span class="nf">metrics_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the metrics table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">metrics_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;metrics&#39;</span><span class="p">,</span> <span class="n">metrics_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metrics_table</span><span class="p">,</span> <span class="s1">&#39;metrics_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the metrics table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<div class="viewcode-block" id="anomalies_table_meta"><a class="viewcode-back" href="../skyline.html#database.anomalies_table_meta">[docs]</a><span class="k">def</span> <span class="nf">anomalies_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the anomalies table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomalies_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">anomalies_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;anomalies&#39;</span><span class="p">,</span> <span class="n">anomalies_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">anomalies_table</span><span class="p">,</span> <span class="s1">&#39;anomalies_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the anomalies table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20170107 - Feature #1844: ionosphere_matched DB table</span>
+<span class="c1">#                   Branch #922: ionosphere</span>
+<span class="c1">#                   Task #1658: Patterning Skyline Ionosphere</span>
+<span class="c1"># This table will allow for each not anomalous match that Ionosphere records to</span>
+<span class="c1"># be reviewed.  It could get big and perhaps should be optional</span>
+
+<div class="viewcode-block" id="ionosphere_matched_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_matched_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_matched_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the ionosphere_matched table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_matched_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">ionosphere_matched_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;ionosphere_matched&#39;</span><span class="p">,</span> <span class="n">ionosphere_matched_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ionosphere_matched_table</span><span class="p">,</span> <span class="s1">&#39;ionosphere_matched_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the ionosphere_matched table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20170305 - Feature #1960: ionosphere_layers</span>
+<div class="viewcode-block" id="ionosphere_layers_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_layers_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_layers_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the ionosphere_layers table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_layers_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">ionosphere_layers_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;ionosphere_layers&#39;</span><span class="p">,</span> <span class="n">ionosphere_layers_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ionosphere_layers_table</span><span class="p">,</span> <span class="s1">&#39;ionosphere_layers_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the ionosphere_layers table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<div class="viewcode-block" id="layers_algorithms_table_meta"><a class="viewcode-back" href="../skyline.html#database.layers_algorithms_table_meta">[docs]</a><span class="k">def</span> <span class="nf">layers_algorithms_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the layers_algorithms table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">layers_algorithms_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">layers_algorithms_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;layers_algorithms&#39;</span><span class="p">,</span> <span class="n">layers_algorithms_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">layers_algorithms_table</span><span class="p">,</span> <span class="s1">&#39;layers_algorithms_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the layers_algorithms table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<div class="viewcode-block" id="ionosphere_layers_matched_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_layers_matched_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_layers_matched_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the ionosphere_layers_matched table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_layers_matched_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">ionosphere_layers_matched_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;ionosphere_layers_matched&#39;</span><span class="p">,</span> <span class="n">ionosphere_layers_matched_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ionosphere_layers_matched_table</span><span class="p">,</span> <span class="s1">&#39;ionosphere_layers_matched_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the ionosphere_layers_matched table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
+<div class="viewcode-block" id="luminosity_table_meta"><a class="viewcode-back" href="../skyline.html#database.luminosity_table_meta">[docs]</a><span class="k">def</span> <span class="nf">luminosity_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the luminosity table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">luminosity_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">luminosity_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;luminosity&#39;</span><span class="p">,</span> <span class="n">luminosity_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">luminosity_table</span><span class="p">,</span> <span class="s1">&#39;luminosity_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the luminosity table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2.0-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,5 +1,10 @@
 """
 Shared settings
+
+IMPORTANT NOTE
+
+You may find reading some of these settings documentation strings
+http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings
 """
 
 REDIS_SOCKET_PATH = '/tmp/redis.sock'
@@ -174,7 +179,7 @@ CRUCIBLE_CHECK_PATH = '/opt/skyline/crucible/check'
 :vartype CRUCIBLE_CHECK_PATH: str
 """
 
-PANORAMA_CHECK_PATH = '/opt/skyline/panaroma/check'
+PANORAMA_CHECK_PATH = '/opt/skyline/panorama/check'
 """
 :var PANORAMA_CHECK_PATH: This is the location the Skyline apps will write the
     anomalies to for Panorama to check to a file on disk - absolute path
@@ -221,10 +226,9 @@ PAGERDUTY_ENABLED = False
 
 SLACK_ENABLED = False
 """
-:var SLACK_ENABLED: Enables the Slack alerter`
+:var SLACK_ENABLED: Enables the Slack alerter
 :vartype SLACK_ENABLED: boolean
 """
-
 
 """
 Analyzer settings
@@ -463,6 +467,8 @@ trigger again.
         ('stats.', 'syslog', 1),
         # Wildcard namespaces can be used as well
         ('metric4.thing.*.requests', 'stmp', 900),
+        # However beware of wildcards as the above wildcard should really be
+        ('metric4.thing\..*.\.requests', 'stmp', 900),
         # mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and Mirage is enabled
         ('metric5.thing.*.rpm', 'smtp', 900, 168),
     )
@@ -470,7 +476,7 @@ trigger again.
 - Alert tuple parameters are:
 
 :param metric: metric name.
-:param alerter: alerter name.
+:param alerter: the alerter name e.g. smtp, syslog, hipchat, pagerduty
 :param EXPIRATION_TIME: Alerts will not fire twice within this amount of
     seconds, even if they trigger again.
 :param SECOND_ORDER_RESOLUTION_HOURS: (optional) The number of hours that Mirage
@@ -500,6 +506,26 @@ PLOT_REDIS_DATA = True
     the 3sigma upper (and if applicable lower) bounds and the mean are plotted
     and reported too.  Although less is more effective, in this case getting a
     visualisation of the 3sigma boundaries is informative.
+
+"""
+
+NON_DERIVATIVE_MONOTONIC_METRICS = [
+    'the_namespace_of_the_monotonic_metric_to_not_calculate_the_derivative_for',
+]
+"""
+:var NON_DERIVATIVE_MONOTONIC_METRICS: Strictly increasing monotonically metrics
+    to **not** calculate the derivative values for
+:vartype NON_DERIVATIVE_MONOTONIC_METRICS: list
+
+Skyline by default automatically converts strictly increasingly monotonically
+metric values to their derivative values by calculating the delta between
+subsequent datapoints.  The function ignores datapoints that trend down.  This
+is useful for metrics that increase over time and then reset.
+
+Any strictly increasing monotonically metrics that you do not want Skyline to
+convert to the derivative values are declared here.  This list works in the same
+way that Horizon SKIP_LIST does, it matches in the string or dotted namespace
+elements.
 
 """
 
@@ -671,11 +697,16 @@ MAX_RESOLUTION = 1000
 """
 
 SKIP_LIST = [
-    # Skip anomaly_breakdown
-    'anomaly_breakdown.',
-    'example.statsd.metric',
-    'another.example.metric',
-    # if you use statsd, these can result in many near-equal series
+    # Skip the skyline namespaces, except horizon.  This prevents Skyline
+    # populating a lot of anomalies related to timings, algorithm_breakdowns,
+    # etc.
+    'skyline.analyzer.',
+    'skyline.boundary.',
+    'skyline.ionosphere.',
+    'skyline.mirage.',
+    # If you use statsd, these can result in many near-equal series, however
+    # be careful that you do not skip any of your own application namespaces
+    # if they include these strings.
     # '_90',
     # '.lower',
     # '.upper',
@@ -685,15 +716,49 @@ SKIP_LIST = [
 ]
 """
 :var SKIP_LIST: Metrics to skip
-:vartype SKIP_LIST: array
+:vartype SKIP_LIST: list
 
-These are metrics that, for whatever reason, you do not want to store in
+These are metrics that, for whatever reason, you do not want to analyze in
 Skyline. The Worker will check to see if each incoming metrics contains
 anything in the skip list. It is generally wise to skip entire namespaces by
 adding a '.' at the end of the skipped item - otherwise you might skip things
 you do not intend to.  For example the default
 ``skyline.analyzer.anomaly_breakdown.`` which MUST be skipped to prevent crazy
 feedback.
+
+These SKIP_LIST are also matched just dotted namespace elements too, if a match
+is not found in the string, then the dotted elements are compared.  For example
+if an item such as 'skyline.analyzer.algorithm_breakdown' was added it would
+macth any metric that matched all 3 dotted namespace elements, so it would
+match:
+
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.times_run
+skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run
+
+"""
+
+DO_NOT_SKIP_LIST = [
+    # DO NOT skip these metrics even if they matched in the SKIP_LIST.
+    # These are the key indicator metrics for Skyline, if you want to monitor
+    # Skyline for anomalies, etc. Due to the other Skyline apps only analysing
+    # when required there metrics are more irratic, however all are sent to
+    # Graphite and available under the 'skyline.' namespace
+    'skyline.analyzer.run_time',
+    'skyline.boundary.run_time',
+    'skyline.analyzer.ionosphere_metrics',
+    'skyline.analyzer.mirage_metrics',
+    'skyline.analyzer.total_analyzed',
+    'skyline.analyzer.total_anomalies',
+]
+"""
+:var DO_NOT_SKIP_LIST: Metrics to skip
+:vartype DO_NOT_SKIP_LIST: list
+
+These are metrics that you want Skyline in analyze even if they match a
+namespace in the SKIP_LIST.  Works in the same way that SKIP_LIST does, it
+matches in the string or dotted namespace elements.
+
 """
 
 """
@@ -1187,6 +1252,7 @@ CRUCIBLE_DATA_FOLDER = '/opt/skyline/crucible/data'
 :vartype CRUCIBLE_DATA_FOLDER: str
 """
 
+
 """
 Webapp settings
 """
@@ -1284,4 +1350,346 @@ ENABLE_WEBAPP_DEBUG = False
 """
 :var ENABLE_WEBAPP_DEBUG: Enables some app specific debugging to log.
 :vartype ENABLE_WEBAPP_DEBUG: boolean
+"""
+
+
+"""
+Ionosphere settings
+"""
+
+IONOSPHERE_CHECK_PATH = '/opt/skyline/ionosphere/check'
+"""
+:var IONOSPHERE_CHECK_PATH: This is the location the Skyline apps will write the
+    anomalies to for Ionosphere to check to a file on disk - absolute path
+:vartype IONOSPHERE_CHECK_PATH: str
+"""
+
+IONOSPHERE_ENABLED = True
+"""
+:var IONOSPHERE_ENABLED: Enable Ionosphere
+:vartype IONOSPHERE_ENABLED: boolean
+"""
+
+IONOSPHERE_PROCESSES = 1
+"""
+:var IONOSPHERE_PROCESSES: Number of processes to assign to Panorama, should never
+    need more than 1
+:vartype IONOSPHERE_ENABLED: int
+"""
+
+ENABLE_IONOSPHERE_DEBUG = False
+"""
+:var ENABLE_IONOSPHERE_DEBUG: DEVELOPMENT only - enables additional debug logging
+    useful for development only, this should definitely be set to ``False`` on
+    production system as LOTS of output
+:vartype ENABLE_IONOSPHERE_DEBUG: boolean
+"""
+
+IONOSPHERE_DATA_FOLDER = '/opt/skyline/ionosphere/data'
+"""
+:var IONOSPHERE_DATA_FOLDER: This is the path for the Ionosphere data folder
+    where anomaly data for timeseries will be stored - absolute path
+:vartype IONOSPHERE_DATA_FOLDER: str
+"""
+
+IONOSPHERE_PROFILES_FOLDER = '/opt/skyline/ionosphere/features_profiles'
+"""
+:var IONOSPHERE_PROFILES_FOLDER: This is the path for the Ionosphere data folder
+    where anomaly data for timeseries will be stored - absolute path
+:vartype IONOSPHERE_DATA_FOLDER: str
+"""
+
+IONOSPHERE_LEARN_FOLDER = '/opt/skyline/ionosphere/learn'
+"""
+:var IONOSPHERE_LEARN_FOLDER: This is the path for the Ionosphere learning data
+    folder where learning data for timeseries will be processed - absolute path
+:vartype IONOSPHERE_LEARN_FOLDER: str
+"""
+
+IONOSPHERE_CHECK_MAX_AGE = 300
+"""
+:var IONOSPHERE_CHECK_MAX_AGE: Ionosphere will only process a check file if it is
+    not older than IONOSPHERE_CHECK_MAX_AGE seconds.  If it is set to 0 it does
+    all.  This setting just ensures if Ionosphere stalls for some hours and is
+    restarted, the user can choose to discard older checks and miss anomalies
+    being recorded if they so choose to, to prevent Ionosphere stampeding.
+:vartype IONOSPHERE_CHECK_MAX_AGE: int
+"""
+
+IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR = 86400
+"""
+:var IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR: Ionosphere will keep timeseries
+    data files for this long, for the operator to review.
+:vartype IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR: int
+"""
+
+SKYLINE_URL = 'http://skyline.example.com:8080'
+"""
+:var SKYLINE_URL: The http or https URL (and port if required) to access your
+    Skyline on (no trailing slash).
+:vartype SKYLINE_URL: str
+"""
+
+# No longer declared in the settings.py handled outside user config in
+# skyline/tsfresh_feature_names.py
+# TSFRESH_VERSION = '0.4.0'
+# """
+# :var TSFRESH_VERSION: The version of tsfresh installed by pip, this is important
+#    in terms of feature extraction baselines
+# :vartype TSFRESH_VERSION: str
+# """
+#
+# TSFRESH_BASELINE_VERSION = '0.4.0'
+# """
+# :var TSFRESH_BASELINE_VERSION: The version of tsfresh installed by pip, this is important
+#     in terms of feature extraction baselines
+# :vartype TSFRESH_BASELINE_VERSION: str
+# """
+
+SERVER_PYTZ_TIMEZONE = 'UTC'
+"""
+:var SERVER_PYTZ_TIMEZONE: You must specify a pytz timezone you want Ionosphere
+    to use for the creation of features profiles and converting datetimes to
+    UTC.  This must be a valid pytz timezone name, see:
+    https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst
+    http://earthgecko-skyline.readthedocs.io/en/ionosphere/development/pytz.html#timezones-list-for-pytz-version
+:vartype SERVER_PYTZ_TIMEZONE: str
+"""
+
+IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1.0
+"""
+:var IONOSPHERE_FEATURES_PERCENT_SIMILAR: The percentage difference between a
+    features profile sum and a calculated profile sum to result in a match.
+:vartype IONOSPHERE_FEATURES_PERCENT_SIMILAR: float
+"""
+
+IONOSPHERE_LEARN = True
+"""
+:var IONOSPHERE_LEARN: Whether Ionosphere is set to learn
+:vartype IONOSPHERE_LEARN: boolean
+
+.. note:: The below ``IONOSPHERE_LEARN_DEFAULT_`` variables are all overrideable in
+    the IONOSPHERE_LEARN_NAMESPACE_CONFIG tuple per defined metric namespace
+    further to this ALL metrics and their settings in terms of the Ionosphere
+    learning context can also be modified via the webapp UI Ionosphere section.
+    These settings are the defaults that are used in the creation of learnt
+    features profiles and new metrics, HOWEVER the database is the preferred
+    source of truth and will always be referred to first and the default or
+    settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG values shall only be used if
+    database values are not determined. These settings are here so that it is
+    easy to paint all metrics and others specifically as a whole, once a metric
+    is added to Ionosphere via the creation of a features profile, it is painted
+    with these defaults or the appropriate namespace settings in
+    settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+
+.. warning:: Changes made to a metric settings in the database directly via the
+    UI or your own SQL will not be overridden ``IONOSPHERE_LEARN_DEFAULT_``
+    variables or the IONOSPHERE_LEARN_NAMESPACE_CONFIG tuple per defined metric
+    namespace even if the metric matches the namespace, the database is the
+    source of truth.
+
+"""
+
+IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS = 16
+"""
+:var IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS: The maximum number of generations
+    that Ionosphere can automatically learn up to from the original human created
+    features profile within the IONOSPHERE_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN
+    Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+    and via webapp UI to update DB
+:vartype IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS: int
+"""
+
+# TODO - testing to 100, tested and set as default, leaving 7 as a very
+# conservative option for anyone initial scared of what it may do :)
+# IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 7.0
+IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN = 100.0
+"""
+:var IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN: The maximum percent
+    that an automatically generated features profile can be from the original
+    human created features profile, any automatically generated features profile
+    with the a greater percent difference above this value when summed common
+    features are calculated will be discarded.  Anything below this value will
+    be considered a valid learned features profile.
+:vartype IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN: float
+
+.. note:: This percent value will match -/+ e.g. works both ways x percent above
+    or below.  In terms of comparisons, a negative percent is simply multiplied
+    by -1.0.  The lower the value, the less Ionosphere can learn, to literally
+    disable Ionosphere learning set this to 0.  The difference can be much
+    greater than 100, but between 7 and 100 is reasonable for learning.  However
+    to really disable learning, also set all max_generations settings to 1.
+
+"""
+
+IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS = 30
+"""
+:var IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS: The default full duration in
+    in days at which Ionosphere should learn, the default is 30 days.
+    Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+:vartype IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS: int
+"""
+
+IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3661
+"""
+:var IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: The number of seconds that
+    Ionosphere should wait before surfacing the metric timeseries for to learn
+    from.  What Graphite aggregration do you want the retention at before
+    querying it to learn from?
+    Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
+:vartype IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
+"""
+
+IONOSPHERE_LEARN_NAMESPACE_CONFIG = (
+    ('skyline_test.alerters.test', 30, 3661, 16, 100.0),
+    # Learn all Ionosphere enabled metrics at 30 days, allow 16 generations and
+    # a learnt features profile can be 100% different for the origin features
+    # profile
+    ('\*', 30, 3661, 16, 100.0),
+)
+"""
+:var IONOSPHERE_LEARN_NAMESPACE_CONFIG: Configures specific namespaces at
+    specific learning full duration in days.
+    Overrides settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS,
+    settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS,
+    settings.IONOSPHERE_MAX_GENERATIONS and settings.IONOSPHERE_MAX_PERCENT_DIFF_FROM_ORIGIN
+    per defined namespace, first matched, used.  Order highest to lowest
+    namespace resoultion. Like settings.ALERTS, you know how this works now...
+:vartype IONOSPHERE_LEARNING: tuples
+
+This is the config by which each declared namespace can be assigned a learning
+full duration in days.  It is here to allow for overrides so that if a metric
+does not suit being learned at say 30 days, it could be learned at say 14 days
+instead if 14 days was a better suited learning full duration.
+
+To specifically disable learning on a namespace, set LEARN_FULL_DURATION_DAYS
+to 0
+
+- **Tuple schema example**::
+
+    IONOSPHERE_LEARN_NAMESPACE_CONFIG = (
+        # ('<metric_namespace>', LEARN_FULL_DURATION_DAYS,
+        #  LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS, MAX_GENERATIONS,
+        #  MAX_PERCENT_DIFF_FROM_ORIGIN),
+        # Wildcard namespaces can be used as well
+        ('metric3.thing\..*', 90, 3661, 16, 100.0),
+        ('metric4.thing\..*.\.requests', 14, 3661, 16, 100.0),
+        # However beware of wildcards as the above wildcard should really be
+        ('metric4.thing\..*.\.requests', 14, 7261, 3, 7.0),
+        # Disable learning on a namespace
+        ('metric5.thing\..*.\.rpm', 0, 3661, 5, 7.0),
+        # Learn all Ionosphere enabled metrics at 30 days
+        ('.*', 30, 3661, 16, 100.0),
+    )
+
+- Namespace tuple parameters are:
+
+:param metric_namespace: metric_namespace pattern
+:param LEARN_FULL_DURATION_DAYS: The number of days that Ionosphere should
+    should surface the metric timeseries for
+:param LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: The number of seconds that
+    Ionosphere should wait before surfacing the metric timeseries for to learn
+    from.  What Graphite aggregration do you want the retention at before
+    querying it to learn from?  REQUIRED, NOT optional, we could use the
+    settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS but
+    that be some more conditionals, that we do not need, be precise, by now if
+    you are training Skyline well you will understand, be precise helps :)
+:param MAX_GENERATIONS: The maximum number of generations that Ionosphere can
+    automatically learn up to from the original human created features profile
+    on this metric namespace.
+:param MAX_PERCENT_DIFF_FROM_ORIGIN: The maximum percent that an automatically
+    generated features profile can be from the original human created features
+    profile for a metric in the namespace.
+:type metric_namespace: str
+:type LEARN_FULL_DURATION_DAYS: int
+:type LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
+:type MAX_GENERATIONS: int
+
+"""
+
+IONOSPHERE_AUTOBUILD = True
+"""
+:var IONOSPHERE_AUTOBUILD: Make best effort attempt to auto provision any
+    features_profiles directory and resources that have been deleted or are
+    missing.
+:vartype IONOSPHERE_AUTOBUILD: boolean
+
+.. note:: This is highlighted as a setting as the number of features_profiles
+    dirs that Ionosphere learn could spawn and the amount of data storage that
+    would result is unknown at this point. It is possible the operator is going
+    to need to prune this data a lot of which will probably never be looked
+    at. Or a Skyline node is going to fail, not have the features_profiles dirs
+    backed up and all the data is going to be lost or deleted. So it is possible for
+    Ionosphere to created all the human interrupted resources for the features
+    profile back under a best effort methodology. Although the original Redis graph
+    image would not be available, nor the Graphite graphs in the resolution at which
+    the features profile was created, however the fp_ts is available so the Redis
+    plot could be remade and all the Graphite graphs could be made as best effort
+    with whatever resoultion is available for that time period.
+    This allows the operator to delete/prune feature profile dirs by possibly least
+    matched by age, etc or all and still be able to surface the available features
+    profile page data on-demand.
+
+"""
+
+MEMCACHE_ENABLED = False
+"""
+:var MEMCACHE_ENABLED: Enables the use of memcache in Ionosphere to optimise
+    DB usage
+:vartype MEMCACHE_ENABLED: boolean
+"""
+
+MEMCACHED_SERVER_IP = '127.0.0.1'
+"""
+:var MEMCACHE_SERVER_IP: The IP address of the memcached server
+:vartype MEMCACHE_SERVER_IP: str
+"""
+
+MEMCACHED_SERVER_PORT = 11211
+"""
+:var MEMCACHE_SERVER_PORT: The port of the memcached server
+:vartype MEMCACHE_SERVER_IP: int
+"""
+
+"""
+Luminosity settings
+"""
+
+LUMINOSITY_PROCESSES = 1
+"""
+:var LUMINOSITY_PROCESSES: This is the number of Luminosity processes to run.
+:vartype LUMINOSITY_PROCESSES: int
+"""
+
+ENABLE_LUMINOSITY_DEBUG = False
+
+OTHER_SKYLINE_REDIS_INSTANCES = []
+"""
+:var OTHER_SKYLINE_REDIS_INSTANCES: This a nested list of any Redis instances
+    that Skyline should query for correlation time series ONLY applicable if
+    there are multiple Skyline instances each with their own Redis.
+:vartype OTHER_SKYLINE_REDIS_INSTANCES: list
+
+For example, the IP or FQDN as a string and the port as an int:
+OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379], ['192.168.1.15', 6379]]
+"""
+
+ALTERNATIVE_SKYLINE_URLS = []
+"""
+:var ALTERNATIVE_SKYLINE_URLS: The alternative URLs of any other Skyline
+    instances. This ONLY applicable if there are multiple Skyline instances each
+    with their own Redis.
+:vartype ALTERNATIVE_SKYLINE_URLS: list
+
+For example (note NO trailing slash):
+ALTERNATIVE_SKYLINE_URLS = ['http://skyline-na.example.com:8080','http://skyline-eu.example.com']
+"""
+
+CORRELATE_ALERTS_ONLY = True
+"""
+:var CORRELATE_ALERTS_ONLY: Only cross correlate anomalies the have an alert
+    setting (other that syslog).  This reduces the number of correlations that
+    are recorded in the database.  Non alerter metrics are still however cross
+    correlated against when an anomaly triggers on an alerter metric.
+:vartype CORRELATE_ALERTS_ONLY: boolean
 """

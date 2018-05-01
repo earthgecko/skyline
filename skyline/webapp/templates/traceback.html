@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<!-- BEGIN /traceback block -->
+<!--   <h3><span class="logo"><span class="sky">Holy ::</span> <span class="re">shit</span></span></span></h3> -->
+   <h3><span class="logo"><span class="sky">Detected ::</span> <span class="re">unacceptable behaviour</span></span></span></h3>
+
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error report</span></span></span></h4>
+Skyline has errored... it would be nice to say it was sorry, but it is just
+code on a machine and has no sentiment towards this event whatsoever.
+
+{% if print_debug == 'True' %}
+  <code> DEBUG </code></br>
+  {% if requested_timestamp %}
+  <code> requested_timestamp </code>: {{ requested_timestamp }}<br>
+  {% else %}
+  <code> requested_timestamp </code>: NOT FOUND<br>
+  {% endif %}
+{% endif %}
+
+{% if message %}
+  <h5><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error message</span></span></span></h5>
+  <code>{{ message }}</code><br>
+{% endif %}
+{% if traceback %}
+  <h5><span class="logo"><span class="sky">Skyline ::</span> <span class="re">traceback</span></span></span></h5>
+  <pre>{{ traceback }}</pre>
+{% endif %}
+
+  <h5><span class="logo"><span class="sky">Skyline ::</span> <span class="re">requested url ::</span></span></span> {{ request.url }}</h5>
+  <h5><span class="logo"><span class="sky">Skyline ::</span> <span class="re">request referrer ::</span></span></span> {{ request.referrer }}</h5>
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">advice ::</span></span></span> please read <strong>very, very carefully</strong></h4>
+
+... there are no breadcrumbs here leading from whence you came<br>
+<br>
+<ol type="1">
+  <li>Record this very, very useful information and <strong>copy and paste into an
+  email</strong> addressed to your relevant Skyline authorities requesting them
+  to please ask your Skyline administrator/s, to check the Skyline webapp log
+  and report an issue <strong>ONLY</strong> if they determine this error
+  <code>is not a system related error</code>, but a genuine anomaly in Skyline,
+  which is <strong>very doubtful.</strong>  Perhaps you should add the administrator/s
+  email addresses too in the cc field, but ensure that their manager or boss'
+  email is the <code>to:</code> address</li>
+  <li>Perhaps also ask them if they have tried turning the machine called
+  <code>{{ bad_machine }}</code> off and on again as that often works.</li>
+  <li>Then please feel free to click the back button in your browser.  However, if you
+  are viewing this page with a <strong>mobile device</strong>, then please consult the device's manual
+  and find it's equivalent to the browser back button.</li>
+  <li>If you have really exhausted <strong>ALL</strong> options and your Skyline
+  administrator/s have spent an acceptable amount of <code>hours</code> trying
+  to fix your Skyline, then see the
+  <span class="logo"><span class="sky">Skyline ::</span> <span class="re">bug reporting and issues</span></span></span>
+  section below.
+  </li>
+</ol>
+<br>
+So just to recap on the <strong>most likely causes</strong> (in order of
+likelihood):<br>
+<br>
+<ol type="a">
+  <li>The machine called <code>{{ bad_machine }}</code> has problems and cannot
+  be expected to do this important task anymore (speak to administrator/s)</li>
+  <li>Your administrator/s need to try and improve their skills (speak to administrator/s and
+  their managers and make then aware of this need for skills improvement)</li>
+  <li>You did something stupid.  Unfortunately it is hard to give specific
+  advice on this, however you could try speaking to family and friends about
+  this personal issue.</li>
+  <li>It is a genuine Skyline error (very unlikely as it may be) see the
+  <span class="logo"><span class="sky">Skyline ::</span> <span class="re">bug reporting and issues</span></span></span>
+  section below.</li>
+</ol>
+
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">apologises ::</span></span></span> a sorry and some compensation</h4>
+
+Although the Skyline code and machine called <code>{{ bad_machine }}</code> may
+have no sentiment to this event, just fact that it has ocurred
+will be <code>troubling</code> for <strong>most</strong> people.  Although do
+<strong>rest assured</strong> that this is probably not a problem with Skyline,
+it is most likely due to the reasons highlighted above (see
+<span class="logo"><span class="sky">Skyline ::</span> <span class="re">advice</span></span></span>
+above).<br>
+<br>
+So by way of apology, please consider the works of David Thorne on
+<a href="http://www.27bslash6.com/" target="_blank">27B/6</a> as a form of
+compensation for this inconvience you must surely be feeling at this moment.<br>
+
+  <a href="http://www.27bslash6.com/" target="_blank"><img src="http://www.27bslash6.com/images/27b6_149.gif" alt="27B/6" class="img-responsive left-block" /></a><br>
+
+If you are unfamiliar with David's works, a recommended starting place would be:<br>
+  <br>
+  <h4>Dear Blockbuster member, we want our DVDs back - <a href="http://www.27bslash6.com/blockbuster.html" target="_blank">http://www.27bslash6.com/blockbuster.html</a></h4>
+
+Please note all links to 27B/6 leave this page and open in a new browser tab.</br>
+
+  <div class="alert alert-warning">
+    <strong>Warning!</strong> The status of this "open in a new browser tab"
+feature on mobile devices is <strong>unknown</strong>.  Please consult your device's manual to
+determine what the equivalent of a new browser tab is on your device.  Perhaps
+you should also consider not trying to be this clever on your phone.  There is a
+reason it is called "a phone".  Given the uncertainty surrounding the state of
+new tabs on your device, instead of partaking in the wistful delights of 27B/6,
+perhaps you should phone a friend instead.  Seeing as you are on a phone right
+now, it may be more appropriate.  Also it will be helpful in solving the
+dilemma with which you are now faced with, how do you carry out the
+extremely ardous task of following the instructions that are laid out above
+in the <span class="logo"><span class="sky">Skyline ::</span> <span class="re">advice</span></span></span>
+section on a phone?
+  </div>
+
+
+Please ensure that you know the URL / address of your Skyline server that gets
+you to this page before you leave, perhaps write it down just to be sure.<br>
+
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">bug reporting and issues ::</span></span></span> <a href="https://github.com/earthgecko/skyline/issues" target="_blank"> on the GitHubs</a></h4>
+
+Should your relevant Skyline authorities not be able to fix Skyline and turning
+<code>{{ bad_machine }}</code> off and on again did not fix the problem and
+there are no related issues to this problem you are experiencing, you could try
+reading the documentation and seeing if that helps any.<br>
+
+Although it probably will not as the documentation does not have any pages or
+sections on fixing errors, but you would possibility get a better understanding
+of Skyline and it would be nice to know that people are reading it.</br>
+
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">docs ::</span></span></span>
+<a href="http://earthgecko-skyline.readthedocs.io/" target="_blank">http://earthgecko-skyline.readthedocs.io/</a></h4>
+
+<!-- END /traceback block -->
+{% endblock %}

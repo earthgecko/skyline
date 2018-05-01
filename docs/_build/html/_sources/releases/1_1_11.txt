@@ -1,0 +1,32 @@
+==============================
+1.1.11 - the ionosphere branch
+==============================
+
+v1.1.11-ionosphere - Mar 29, 2018
+
+Changes
+-------
+
+- Bumped to v1.1.11
+- Adds a helper script to create any missing `z_fp_` and `z_ts_` tables that are
+  missing if MySQL was updated to 5.7, related to #45 MySQL key_block_size (https://github.com/earthgecko/skyline/issues/45)
+  (Bug #2340) - skyline/tsfresh_features/autobuild_features_profile_tables.py
+
+Script usage
+------------
+
+Change the Python version and directories as appropriate to your set up.
+
+.. code-block:: bash
+
+    # BACKUP the skyline MySQL database FIRST
+
+    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    PROJECT="skyline-py2712"
+
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+    cd /opt/skyline/github/skyline
+    python${PYTHON_MAJOR_VERSION} skyline/tsfresh_features/autobuild_features_profile_tables.py
+    deactivate
