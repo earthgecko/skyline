@@ -44,11 +44,11 @@ Steps
 -----
 
 .. note:: All the documentation and testing is based on running Skyline in a
-  Python-2.7.12 virtualenv, if you choose to deploy Skyline another way, you are
+  Python-2.7.14 virtualenv, if you choose to deploy Skyline another way, you are
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
 
-- Create a python-2.7.12 virtualenv for Skyline to run in see `Running in
+- Create a python-2.7.14 virtualenv for Skyline to run in see `Running in
   Python virtualenv <running-in-python-virtualenv.html>`__
 - Setup firewall rules to restrict access to the following:
 
@@ -98,7 +98,7 @@ Steps
     cd /opt/skyline/github
     git clone https://github.com/earthgecko/skyline.git
 
-- Once again using the Python-2.7.12 virtualenv,  install the requirements using
+- Once again using the Python-2.7.14 virtualenv,  install the requirements using
   the virtualenv pip, this can take a long time, the pandas install takes quite
   a while.
 
@@ -116,7 +116,7 @@ Steps
 
     PYTHON_MAJOR_VERSION="2.7"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2712"
+    PROJECT="skyline-py2714"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -139,7 +139,7 @@ Steps
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   setup if it is not using PATH
-  ``/opt/python_virtualenv/projects/skyline-py2712/bin/python2.7``
+  ``/opt/python_virtualenv/projects/skyline-py2714/bin/python2.7``
 
 .. code-block:: bash
 

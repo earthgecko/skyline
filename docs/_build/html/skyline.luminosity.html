@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>skyline.luminosity package &mdash; Skyline 1.2.0-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+        <link rel="up" title="skyline package" href="skyline.html"/>
+        <link rel="next" title="skyline.mirage package" href="skyline.mirage.html"/>
+        <link rel="prev" title="skyline.ionosphere package" href="skyline.ionosphere.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="skyline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer.html">skyline.analyzer package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.luminosity package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-luminosity.agent">skyline.luminosity.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-luminosity.luminosity">skyline.luminosity.luminosity module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-luminosity.process_correlations">skyline.luminosity.process_correlations module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-luminosity">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="skyline.html">skyline package</a> &raquo;</li>
+      
+    <li>skyline.luminosity package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/skyline.luminosity.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="skyline-luminosity-package">
+<h1>skyline.luminosity package<a class="headerlink" href="#skyline-luminosity-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-luminosity.agent">
+<span id="skyline-luminosity-agent-module"></span><h2>skyline.luminosity.agent module<a class="headerlink" href="#module-luminosity.agent" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="luminosity.agent.LuminosityAgent">
+<em class="property">class </em><code class="descname">LuminosityAgent</code><a class="reference internal" href="_modules/luminosity/agent.html#LuminosityAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.agent.LuminosityAgent" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="luminosity.agent.LuminosityAgent.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/agent.html#LuminosityAgent.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.agent.LuminosityAgent.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-luminosity.luminosity">
+<span id="skyline-luminosity-luminosity-module"></span><h2>skyline.luminosity.luminosity module<a class="headerlink" href="#module-luminosity.luminosity" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="luminosity.luminosity.Luminosity">
+<em class="property">class </em><code class="descname">Luminosity</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/luminosity.html#Luminosity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.luminosity.Luminosity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<p>The Luminosity class which controls the luminosity thread and spawned
+processes.</p>
+<dl class="method">
+<dt id="luminosity.luminosity.Luminosity.check_if_parent_is_alive">
+<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/luminosity.html#Luminosity.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.luminosity.Luminosity.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Self explanatory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="luminosity.luminosity.Luminosity.mysql_insert">
+<code class="descname">mysql_insert</code><span class="sig-paren">(</span><em>insert</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/luminosity.html#Luminosity.mysql_insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.luminosity.Luminosity.mysql_insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert data into mysql table</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>insert</strong> (<em>str</em>) &#8211; the insert string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int or boolean</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p class="first"><strong>Example usage</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;insert into host (host) VALUES (&#39;</span><span class="n">this_host</span><span class="s1">&#39;)&#39;</span>
+<span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mysql_insert</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li><dl class="first docutils">
+<dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
+<dd><ul class="first last">
+<li><code class="docutils literal"><span class="pre">False</span></code></li>
+<li><code class="docutils literal"><span class="pre">None</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="luminosity.luminosity.Luminosity.spin_process">
+<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>anomaly_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/luminosity.html#Luminosity.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.luminosity.Luminosity.spin_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign an anomalous metric and determine correlated metrics</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> (<em>object</em>) &#8211; python process id</li>
+<li><strong>anomaly_id</strong> (<em>int</em>) &#8211; the anomaly_id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">boolean</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="luminosity.luminosity.Luminosity.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/luminosity.html#Luminosity.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.luminosity.Luminosity.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the process intializes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-luminosity.process_correlations">
+<span id="skyline-luminosity-process-correlations-module"></span><h2>skyline.luminosity.process_correlations module<a class="headerlink" href="#module-luminosity.process_correlations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="luminosity.process_correlations.get_anomaly">
+<code class="descname">get_anomaly</code><span class="sig-paren">(</span><em>request_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/process_correlations.html#get_anomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.process_correlations.get_anomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the database for the anomaly details</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="luminosity.process_correlations.get_anomalous_ts">
+<code class="descname">get_anomalous_ts</code><span class="sig-paren">(</span><em>base_name</em>, <em>anomaly_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/process_correlations.html#get_anomalous_ts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.process_correlations.get_anomalous_ts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="luminosity.process_correlations.get_anoms">
+<code class="descname">get_anoms</code><span class="sig-paren">(</span><em>anomalous_ts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/process_correlations.html#get_anoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.process_correlations.get_anoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="luminosity.process_correlations.get_assigned_metrics">
+<code class="descname">get_assigned_metrics</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/process_correlations.html#get_assigned_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.process_correlations.get_assigned_metrics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="luminosity.process_correlations.get_correlations">
+<code class="descname">get_correlations</code><span class="sig-paren">(</span><em>base_name</em>, <em>anomaly_timestamp</em>, <em>anomalous_ts</em>, <em>assigned_metrics</em>, <em>raw_assigned</em>, <em>anomalies</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/process_correlations.html#get_correlations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.process_correlations.get_correlations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="luminosity.process_correlations.process_correlations">
+<code class="descname">process_correlations</code><span class="sig-paren">(</span><em>i</em>, <em>anomaly_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/process_correlations.html#process_correlations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.process_correlations.process_correlations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-luminosity">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-luminosity" title="Permalink to this headline">¶</a></h2>
+<p>Luminosity</p>
+<ul class="simple">
+<li>Determine correlations</li>
+<li><dl class="first docutils">
+<dt>Insert in correlations table (slow stream of inserts, not gluts, queue them)</dt>
+<dd><ul class="first last">
+<li>anomaly_id, mertic_id, coefficient, shift, shifted_coefficient</li>
+<li>a table per metric a la z_ts or;</li>
+<li>a table per month and a daily aggregated table?</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>In Ionosphere:</dt>
+<dd><ul class="first last">
+<li>Display Luminosity sorted_correlated_metrics in a block with a link to the
+anomaly page</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>In Panorama:</dt>
+<dd><ul class="first last">
+<li>Display a Luminosity link the anomaly page</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="skyline.mirage.html" class="btn btn-neutral float-right" title="skyline.mirage package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="skyline.ionosphere.html" class="btn btn-neutral" title="skyline.ionosphere package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2.0-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

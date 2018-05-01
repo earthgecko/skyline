@@ -1,10 +1,8 @@
 tsfresh
 =======
 
-EXPERIMENTAL
-
 The Ionosphere branch introduced tsfresh to the Skyline stack to enable the
-creation of feature profiles for timeseries that the user deems to be not
+creation of feature profiles for time series that the user deems to be not
 anomalous.
 
 https://github.com/blue-yonder/tsfresh/
@@ -30,11 +28,11 @@ See:
 skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Assign a Graphite single tiemseries metric csv file to tsfresh to process and
+Assign a Graphite single time series metric csv file to tsfresh to process and
 calculate the features for.
 
 :param path_to_your_graphite_csv: the full path and filename to your Graphite
-    single metric timeseries file saved from a Graphite request with &format=csv
+    single metric time series file saved from a Graphite request with &format=csv
 :type path_to_your_graphite_csv: str
 :param pytz_tz: [OPTIONAL] defaults to UTC or pass as your pytz timezone string.
     For a list of all pytz timezone strings see
@@ -52,13 +50,13 @@ Python-2.7 from wherever you save the script:
     bin/python2.7 tsfresh_features/scripts/tsfresh_graphite_csv path_to_your_graphite_csv [pytz_timezone]
     deactivate
 
-Where path_to_your_graphite_csv.csv is a single metric timeseries that has been
+Where path_to_your_graphite_csv.csv is a single metric time series that has been
 from retrieved from Graphite with the &format=csv request parameter and saved to
 a file.
 
-The single metric timeseries could be the result of a graphite function on
-multiple timeseries, as long as it is a single timeseries.  This does not handle
-multiple timeseries data, meaning a Graphite csv with more than one data set
+The single metric time series could be the result of a graphite function on
+multiple time series, as long as it is a single time series.  This does not handle
+multiple time series data, meaning a Graphite csv with more than one data set
 will not be suitable for this script.
 
 This will output 2 files:
@@ -67,7 +65,7 @@ This will output 2 files:
 - path_to_your_graphite_csv.features.transposed.csv (human friendly row wise
   format) you look at this csv :)
 
-Your timeseries features.
+Your time series features.
 
-.. warning:: Please note that if your timeseries are recorded in a daylight savings
-    timezone, this has not been tested the DST changes.
+.. warning:: Please note that if your time series are recorded in a daylight
+    savings time zone, this has not been tested the DST changes.

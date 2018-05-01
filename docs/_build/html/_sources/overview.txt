@@ -114,6 +114,7 @@ Skyline uses to following technologies and libraries at its core:
 8. **tsfresh** - `tsfresh`_ - Automatic extraction of relevant features from time series
 9. **memcached** - `memcached`_ - memory object caching system
 10. **pymemcache** - `pymemcache`_ - A comprehensive, fast, pure-Python memcached client
+11. **luminol** - `luminol`_ - Anomaly Detection and Correlation library
 
 .. _Etsy: https://www.etsy.com/
 .. _github/etsy: https://github.com/etsy/skyline
@@ -129,3 +130,4 @@ Skyline uses to following technologies and libraries at its core:
 .. _tsfresh: https://github.com/blue-yonder/tsfresh
 .. _memcached: https://memcached.org/
 .. _pymemcache: https://github.com/pinterest/pymemcache
+.. _luminol: https://github.com/linkedin/luminol

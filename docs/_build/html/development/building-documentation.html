@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Building documentation &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Building documentation &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development - Webapp" href="webapp.html"/>
         <link rel="prev" title="Development" href="index.html"/> 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -230,7 +231,7 @@ virtualenv in the documented manner.  If you are not you may need to change the
 following to your python interpretor site-packages path by setting
 python_site_packages_path in docs/conf.py, e.g.</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1">#    sys.path.insert(0, os.path.abspath(&#39;/opt/python_virtualenv/projects/skyline-py2712/lib/python2.7/site-packages&#39;))</span>
-    sys.path.insert<span class="o">(</span>0, os.path.abspath<span class="o">(</span>python_site_packages_path<span class="o">))</span>
+    sys.path.insert<span class="o">(</span><span class="m">0</span>, os.path.abspath<span class="o">(</span>python_site_packages_path<span class="o">))</span>
 </pre></div>
 </div>
 </div>
@@ -263,12 +264,12 @@ the full functionality of Sphinx documentation.</p>
 
   <span class="k">if</span> <span class="o">[</span> -z <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
     <span class="nb">echo</span> <span class="s2">&quot;error: could not determine APPDIR - </span><span class="nv">$APPDIR</span><span class="s2">&quot;</span>
-    <span class="k">return</span> 1
+    <span class="k">return</span> <span class="m">1</span>
   <span class="k">fi</span>
 
   <span class="k">if</span> <span class="o">[</span> ! -d <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
     <span class="nb">echo</span> <span class="s2">&quot;error: directory not found - </span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
-    <span class="k">return</span> 1
+    <span class="k">return</span> <span class="m">1</span>
   <span class="k">fi</span>
 
   <span class="c1"># @added 20161119 - Branch #922: ionosphere</span>
@@ -284,7 +285,7 @@ the full functionality of Sphinx documentation.</p>
   python<span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span> -m pytest tests/
   <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
     <span class="nb">echo</span> <span class="s2">&quot;Tests failed not building documentation&quot;</span>
-    <span class="k">return</span> 1
+    <span class="k">return</span> <span class="m">1</span>
   <span class="k">fi</span>
 
   <span class="c1"># @added 20170308 - Task #1966: Add pyflakes tests to build_docs</span>
@@ -403,7 +404,7 @@ right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ion
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -425,7 +426,7 @@ right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ion
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

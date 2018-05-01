@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.panorama package &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline.panorama package &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/>
         <link rel="prev" title="skyline.mirage package" href="skyline.mirage.html"/> 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -127,6 +128,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.panorama package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
@@ -254,20 +256,20 @@
 </li>
 <li><p class="first"><strong>Example of the 0 indexed results tuple, which can hold multiple results</strong>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
-<span class="n">results</span><span class="p">:</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">u&#39;test1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">u&#39;test2&#39;</span><span class="p">)]</span>
+<span class="n">results</span><span class="p">:</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;test1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;test2&#39;</span><span class="p">)]</span>
 
 <span class="o">&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;results[0]: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-<span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">u&#39;test1&#39;</span><span class="p">)</span>
+<span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="sa">u</span><span class="s1">&#39;test1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -304,10 +306,10 @@
 </ul>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<ul class="last">
+<ul class="last simple">
 <li><dl class="first docutils">
 <dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last simple">
+<dd><ul class="first last">
 <li><code class="docutils literal"><span class="pre">False</span></code></li>
 <li><code class="docutils literal"><span class="pre">None</span></code></li>
 </ul>
@@ -392,7 +394,7 @@ blah</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -414,7 +416,7 @@ blah</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

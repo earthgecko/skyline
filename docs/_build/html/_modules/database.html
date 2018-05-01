@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>database &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>database &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -168,7 +169,7 @@
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">create_engine</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">sqlalchemy.dialects.mysql</span> <span class="k">import</span> <span class="n">DOUBLE</span><span class="p">,</span> <span class="n">FLOAT</span><span class="p">,</span> <span class="n">TINYINT</span><span class="p">,</span> <span class="n">VARCHAR</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.dialects.mysql</span> <span class="k">import</span> <span class="n">DOUBLE</span><span class="p">,</span> <span class="n">FLOAT</span><span class="p">,</span> <span class="n">TINYINT</span><span class="p">,</span> <span class="n">VARCHAR</span><span class="p">,</span> <span class="n">SMALLINT</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 
@@ -363,6 +364,25 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the ionosphere_layers_matched table meta&#39;</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
+<div class="viewcode-block" id="luminosity_table_meta"><a class="viewcode-back" href="../skyline.html#database.luminosity_table_meta">[docs]</a><span class="k">def</span> <span class="nf">luminosity_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the luminosity table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">luminosity_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">luminosity_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;luminosity&#39;</span><span class="p">,</span> <span class="n">luminosity_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">luminosity_table</span><span class="p">,</span> <span class="s1">&#39;luminosity_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the luminosity table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 </pre></div>
 
            </div>
@@ -374,7 +394,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -396,7 +416,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

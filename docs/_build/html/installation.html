@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Installation &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -115,6 +115,7 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -214,12 +215,12 @@ for learning things that are not anomalous.</li>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">All the documentation and testing is based on running Skyline in a
-Python-2.7.12 virtualenv, if you choose to deploy Skyline another way, you are
+Python-2.7.14 virtualenv, if you choose to deploy Skyline another way, you are
 on your own.  Although it is possible to run Skyline in a different type of
 environment, it does not lend itself to repeatability or a common known state.</p>
 </div>
 <ul class="simple">
-<li>Create a python-2.7.12 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
+<li>Create a python-2.7.14 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
 Python virtualenv</a></li>
 <li>Setup firewall rules to restrict access to the following:<ul>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_IP</span></code></a> - default is 127.0.0.1</li>
@@ -271,7 +272,7 @@ git clone https://github.com/earthgecko/skyline.git
 </pre></div>
 </div>
 <ul class="simple">
-<li>Once again using the Python-2.7.12 virtualenv,  install the requirements using
+<li>Once again using the Python-2.7.14 virtualenv,  install the requirements using
 the virtualenv pip, this can take a long time, the pandas install takes quite
 a while.</li>
 </ul>
@@ -289,7 +290,7 @@ that it is harder for you to err.</p>
 </div>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
@@ -314,7 +315,7 @@ deactivate
 <ul class="simple">
 <li>Copy the <code class="docutils literal"><span class="pre">skyline.conf</span></code> and edit the <code class="docutils literal"><span class="pre">USE_PYTHON</span></code> as appropriate to your
 setup if it is not using PATH
-<code class="docutils literal"><span class="pre">/opt/python_virtualenv/projects/skyline-py2712/bin/python2.7</span></code></li>
+<code class="docutils literal"><span class="pre">/opt/python_virtualenv/projects/skyline-py2714/bin/python2.7</span></code></li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>cp /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
 vi /etc/skyline/skyline.conf <span class="c1"># Set USE_PYTHON as appropriate to your setup</span>
@@ -412,7 +413,7 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 <span class="k">do</span>
   <span class="nb">echo</span> <span class="s2">&quot;#####</span>
 <span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
-  cat <span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span> <span class="p">|</span> grep -B2 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n 60
+  cat <span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span> <span class="p">|</span> grep -B2 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n <span class="m">60</span>
   <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
   <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
 <span class="k">done</span>
@@ -501,7 +502,7 @@ the dependency is fulfilled.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -523,7 +524,7 @@ the dependency is fulfilled.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

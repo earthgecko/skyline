@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>Index &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -36,7 +36,7 @@
         <link rel="index" title="Index"
               href="#"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/> 
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -148,7 +149,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li></li>
+    <li>Index</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -288,6 +289,10 @@
 
       
   <dt><a href="skyline.html#settings.ALGORITHMS">ALGORITHMS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.ALTERNATIVE_SKYLINE_URLS">ALTERNATIVE_SKYLINE_URLS (in module settings)</a>
   </dt>
 
   </dl></td>
@@ -532,6 +537,10 @@
   </dt>
 
         
+  <dt><a href="skyline.luminosity.html#luminosity.luminosity.Luminosity.check_if_parent_is_alive">(Luminosity method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.mirage.html#mirage.mirage.Mirage.check_if_parent_is_alive">(Mirage method)</a>
   </dt>
 
@@ -556,6 +565,10 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.CONSENSUS">CONSENSUS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.CORRELATE_ALERTS_ONLY">CORRELATE_ALERTS_ONLY (in module settings)</a>
   </dt>
 
       
@@ -831,6 +844,32 @@
   </dt>
 
       
+  <dt><a href="skyline.luminosity.html#luminosity.process_correlations.get_anomalous_ts">get_anomalous_ts() (in module luminosity.process_correlations)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#luminosity.process_correlations.get_anomaly">get_anomaly() (in module luminosity.process_correlations)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#luminosity.process_correlations.get_anoms">get_anoms() (in module luminosity.process_correlations)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#luminosity.process_correlations.get_assigned_metrics">get_assigned_metrics() (in module luminosity.process_correlations)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#ionosphere_functions.get_correlations">get_correlations() (in module ionosphere_functions)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="skyline.luminosity.html#luminosity.process_correlations.get_correlations">(in module luminosity.process_correlations)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="skyline.html#database.get_engine">get_engine() (in module database)</a>
   </dt>
 
@@ -872,6 +911,8 @@
   <dt><a href="skyline.ionosphere.html#ionosphere.learn.get_learn_json">get_learn_json() (in module ionosphere.learn)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.webapp.html#webapp.backend.get_list">get_list() (in module webapp.backend)</a>
   </dt>
@@ -884,8 +925,6 @@
   <dt><a href="skyline.html#skyline_functions.get_memcache_fp_ids_object">get_memcache_fp_ids_object() (in module skyline_functions)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#skyline_functions.get_memcache_metric_object">get_memcache_metric_object() (in module skyline_functions)</a>
   </dt>
@@ -1188,6 +1227,10 @@
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="skyline.html#skyline_functions.is_derivative_metric">is_derivative_metric() (in module skyline_functions)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -1248,8 +1291,6 @@
   <dt><a href="skyline.boundary.html#boundary.boundary_algorithms.less_than">less_than() (in module boundary.boundary_algorithms)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.webapp.html#webapp.webapp.limit_remote_addr">limit_remote_addr() (in module webapp.webapp)</a>
   </dt>
@@ -1266,6 +1307,8 @@
   <dt><a href="skyline.horizon.html#horizon.listen.Listen.listen_udp">listen_udp() (Listen method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#skyline_functions.load_metric_vars">load_metric_vars() (in module skyline_functions)</a>
   </dt>
@@ -1280,6 +1323,38 @@
 
       
   <dt><a href="skyline.mirage.html#mirage.mirage_algorithms.logger">logger (in module mirage.mirage_algorithms)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#luminosity.luminosity.Luminosity">Luminosity (class in luminosity.luminosity)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#module-luminosity">luminosity (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#module-luminosity.agent">luminosity.agent (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#module-luminosity.luminosity">luminosity.luminosity (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#module-luminosity.process_correlations">luminosity.process_correlations (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.LUMINOSITY_PROCESSES">LUMINOSITY_PROCESSES (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#database.luminosity_table_meta">luminosity_table_meta() (in module database)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#luminosity.agent.LuminosityAgent">LuminosityAgent (class in luminosity.agent)</a>
   </dt>
 
   </dl></td>
@@ -1380,12 +1455,12 @@
   <dt><a href="skyline.mirage.html#mirage.mirage.Mirage">Mirage (class in mirage.mirage)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.mirage.html#module-mirage">mirage (module)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.mirage.html#module-mirage.agent">mirage.agent (module)</a>
   </dt>
@@ -1466,6 +1541,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.luminosity.html#luminosity.luminosity.Luminosity.mysql_insert">(Luminosity method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.panorama.html#panorama.panorama.Panorama.mysql_insert">(Panorama method)</a>
   </dt>
 
@@ -1538,6 +1617,12 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.OCULUS_HOST">OCULUS_HOST (in module settings)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.html#settings.OTHER_SKYLINE_REDIS_INSTANCES">OTHER_SKYLINE_REDIS_INSTANCES (in module settings)</a>
   </dt>
 
   </dl></td>
@@ -1646,6 +1731,10 @@
 
       
   <dt><a href="skyline.html#settings.PLOT_REDIS_DATA">PLOT_REDIS_DATA (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.luminosity.html#luminosity.process_correlations.process_correlations">process_correlations() (in module luminosity.process_correlations)</a>
   </dt>
 
       
@@ -1777,6 +1866,14 @@
 
         
   <dt><a href="skyline.horizon.html#horizon.listen.Listen.run">(Listen method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.luminosity.html#luminosity.luminosity.Luminosity.run">(Luminosity method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.luminosity.html#luminosity.agent.LuminosityAgent.run">(LuminosityAgent method)</a>
   </dt>
 
         
@@ -1984,6 +2081,10 @@
   </dt>
 
         
+  <dt><a href="skyline.luminosity.html#luminosity.luminosity.Luminosity.spin_process">(Luminosity method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.mirage.html#mirage.mirage.Mirage.spin_process">(Mirage method)</a>
   </dt>
 
@@ -2126,6 +2227,10 @@
 
       
   <dt><a href="skyline.tsfresh_features.html#module-tsfresh_features">tsfresh_features (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.tsfresh_features.html#module-tsfresh_features.autobuild_features_profile_tables">tsfresh_features.autobuild_features_profile_tables (module)</a>
   </dt>
 
       
@@ -2290,7 +2395,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -2312,7 +2417,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

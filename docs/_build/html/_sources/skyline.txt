@@ -12,6 +12,7 @@ Subpackages
     skyline.crucible
     skyline.horizon
     skyline.ionosphere
+    skyline.luminosity
     skyline.mirage
     skyline.panorama
     skyline.tsfresh_features

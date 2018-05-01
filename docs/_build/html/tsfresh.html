@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tsfresh &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>tsfresh &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="index.html"/>
-        <link rel="next" title="Redis integration" href="redis-integration.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+        <link rel="next" title="Luminosity" href="luminosity.html"/>
         <link rel="prev" title="Ionosphere" href="ionosphere.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -112,6 +112,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -171,9 +172,8 @@
             
   <div class="section" id="tsfresh">
 <h1>tsfresh<a class="headerlink" href="#tsfresh" title="Permalink to this headline">¶</a></h1>
-<p>EXPERIMENTAL</p>
 <p>The Ionosphere branch introduced tsfresh to the Skyline stack to enable the
-creation of feature profiles for timeseries that the user deems to be not
+creation of feature profiles for time series that the user deems to be not
 anomalous.</p>
 <p><a class="reference external" href="https://github.com/blue-yonder/tsfresh/">https://github.com/blue-yonder/tsfresh/</a></p>
 <p>See <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a> for the long
@@ -193,7 +193,7 @@ tsfresh feature extraction capabilities.</p>
 </ul>
 <div class="section" id="skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py">
 <h3>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py<a class="headerlink" href="#skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py" title="Permalink to this headline">¶</a></h3>
-<p>Assign a Graphite single tiemseries metric csv file to tsfresh to process and
+<p>Assign a Graphite single time series metric csv file to tsfresh to process and
 calculate the features for.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -201,7 +201,7 @@ calculate the features for.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">param path_to_your_graphite_csv:</th></tr>
 <tr class="field-odd field"><td>&nbsp;</td><td class="field-body">the full path and filename to your Graphite
-single metric timeseries file saved from a Graphite request with &amp;format=csv</td>
+single metric time series file saved from a Graphite request with &amp;format=csv</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">type path_to_your_graphite_csv:</th></tr>
 <tr class="field-even field"><td>&nbsp;</td><td class="field-body">str</td>
@@ -223,12 +223,12 @@ bin/python2.7 tsfresh_features/scripts/tsfresh_graphite_csv path_to_your_graphit
 deactivate
 </pre></div>
 </div>
-<p>Where path_to_your_graphite_csv.csv is a single metric timeseries that has been
+<p>Where path_to_your_graphite_csv.csv is a single metric time series that has been
 from retrieved from Graphite with the &amp;format=csv request parameter and saved to
 a file.</p>
-<p>The single metric timeseries could be the result of a graphite function on
-multiple timeseries, as long as it is a single timeseries.  This does not handle
-multiple timeseries data, meaning a Graphite csv with more than one data set
+<p>The single metric time series could be the result of a graphite function on
+multiple time series, as long as it is a single time series.  This does not handle
+multiple time series data, meaning a Graphite csv with more than one data set
 will not be suitable for this script.</p>
 <p>This will output 2 files:</p>
 <ul class="simple">
@@ -236,11 +236,11 @@ will not be suitable for this script.</p>
 <li>path_to_your_graphite_csv.features.transposed.csv (human friendly row wise
 format) you look at this csv :)</li>
 </ul>
-<p>Your timeseries features.</p>
+<p>Your time series features.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Please note that if your timeseries are recorded in a daylight savings
-timezone, this has not been tested the DST changes.</p>
+<p class="last">Please note that if your time series are recorded in a daylight
+savings time zone, this has not been tested the DST changes.</p>
 </div>
 </div>
 </div>
@@ -253,7 +253,7 @@ timezone, this has not been tested the DST changes.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="redis-integration.html" class="btn btn-neutral float-right" title="Redis integration" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="luminosity.html" class="btn btn-neutral float-right" title="Luminosity" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="ionosphere.html" class="btn btn-neutral" title="Ionosphere" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -265,7 +265,7 @@ timezone, this has not been tested the DST changes.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -287,7 +287,7 @@ timezone, this has not been tested the DST changes.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

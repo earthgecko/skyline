@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -679,18 +680,29 @@
     <span class="c1"># increasing monotonically to their deriative products in Graphite now</span>
     <span class="c1"># graphs</span>
     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+    <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+
+    <span class="c1"># @added 20180423 - Feature #2034: analyse_derivatives</span>
+    <span class="c1">#                   Branch #2270: luminosity</span>
+    <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
         <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
@@ -698,6 +710,24 @@
             <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
             <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># @added 20180423 - Feature #2034: analyse_derivatives</span>
+    <span class="c1">#                   Branch #2270: luminosity</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_found_in_redis</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">redis_ip</span><span class="p">,</span> <span class="n">redis_port</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_found_in_redis</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">other_redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">redis_ip</span><span class="p">),</span> <span class="n">port</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">redis_port</span><span class="p">))</span>
+                    <span class="n">other_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">other_redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to connect to Redis at </span><span class="si">%s</span><span class="s1"> on port </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">redis_ip</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_port</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">other_derivative_metrics</span><span class="p">:</span>
+                    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> found in derivative_metrics in Redis at </span><span class="si">%s</span><span class="s1"> on port </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_ip</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_port</span><span class="p">)))</span>
+
     <span class="n">target_metric</span> <span class="o">=</span> <span class="n">metric</span>
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
         <span class="n">target_metric</span> <span class="o">=</span> <span class="s1">&#39;nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
@@ -1089,6 +1119,7 @@
 
 <span class="sd">    :param current_skyline_app: the Skyline app that is calling the function</span>
 <span class="sd">    :param select: the select string</span>
+<span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :type select: str</span>
 <span class="sd">    :return: tuple</span>
 <span class="sd">    :rtype: tuple, boolean</span>
@@ -1510,6 +1541,81 @@
         <span class="k">pass</span>
 
     <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="c1"># @added 20180107 - Branch #2270: luminosity</span>
+<div class="viewcode-block" id="is_derivative_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.is_derivative_metric">[docs]</a><span class="k">def</span> <span class="nf">is_derivative_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if a metric is a known derivative metric.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app that is calling the function</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :param base_name: The metric base_name</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :return: boolean</span>
+<span class="sd">    :rtype: boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Feature #2034: analyse_derivatives</span>
+    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: known_derivative_metric - Redis connection failed&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># First check if it has its own Redis z.derivative_metric key</span>
+    <span class="c1"># that has not expired</span>
+    <span class="n">derivative_metric_key</span> <span class="o">=</span> <span class="s1">&#39;z.derivative_metric.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">derivative_metric_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for last_derivative_metric_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">last_derivative_metric_key</span><span class="p">:</span>
+            <span class="c1"># Until the z.derivative_metric key expires, it is classed</span>
+            <span class="c1"># as such</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
 </pre></div>
 
            </div>
@@ -1521,7 +1627,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -1543,7 +1649,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

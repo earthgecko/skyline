@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -194,7 +195,9 @@
 
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span>
-    <span class="n">ionosphere_matched_table_meta</span><span class="p">)</span>
+    <span class="n">ionosphere_matched_table_meta</span><span class="p">,</span>
+    <span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
+    <span class="n">luminosity_table_meta</span><span class="p">)</span>
 
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 
@@ -770,7 +773,10 @@
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;feature_id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">DOUBLE</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">mysql_charset</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span>
-            <span class="n">mysql_key_block_size</span><span class="o">=</span><span class="s1">&#39;255&#39;</span><span class="p">,</span>
+            <span class="c1"># @modified 20180324 - Bug #2340: MySQL key_block_size</span>
+            <span class="c1">#                      MySQL key_block_size #45</span>
+            <span class="c1"># Removed as under MySQL 5.7 breaks</span>
+            <span class="c1"># mysql_key_block_size=&#39;255&#39;,</span>
             <span class="n">mysql_engine</span><span class="o">=</span><span class="s1">&#39;InnoDB&#39;</span><span class="p">)</span>
         <span class="n">fp_metric_table</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">checkfirst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">fp_table_created</span> <span class="o">=</span> <span class="kc">True</span>
@@ -864,7 +870,10 @@
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
             <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">DOUBLE</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">mysql_charset</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span>
-            <span class="n">mysql_key_block_size</span><span class="o">=</span><span class="s1">&#39;255&#39;</span><span class="p">,</span>
+            <span class="c1"># @modified 20180324 - Bug #2340: MySQL key_block_size</span>
+            <span class="c1">#                      MySQL key_block_size #45</span>
+            <span class="c1"># Removed as under MySQL 5.7 breaks</span>
+            <span class="c1"># mysql_key_block_size=&#39;255&#39;,</span>
             <span class="n">mysql_engine</span><span class="o">=</span><span class="s1">&#39;InnoDB&#39;</span><span class="p">)</span>
         <span class="n">ts_metric_table</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">checkfirst</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># ts_table_created = True</span>
@@ -1089,6 +1098,106 @@
             <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
+<div class="viewcode-block" id="get_correlations"><a class="viewcode-back" href="../skyline.html#ionosphere_functions.get_correlations">[docs]</a><span class="k">def</span> <span class="nf">get_correlations</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get all the correlations for an anomaly from the database</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app name calling the function</span>
+<span class="sd">    :param anomaly_id: thee base_name of the metric</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type anomaly_id: int</span>
+<span class="sd">    :return: list</span>
+<span class="sd">    :return: [[metric_name, coefficient, shifted, shifted_coefficient],[metric_name, coefficient, ...]]</span>
+<span class="sd">    :rtype: [[str, float, float, float]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+    <span class="n">func_name</span> <span class="o">=</span> <span class="s1">&#39;get_correlations&#39;</span>
+
+    <span class="n">correlations</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_correlations :: getting MySQL engine&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">fp_create_get_an_engine</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get a MySQL engine&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># return False, False, fail_msg, trace, False</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">metrics_table</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get metrics_table_meta&#39;</span> <span class="o">%</span> <span class="n">func_name</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+    <span class="n">luminosity_table</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">luminosity_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">luminosity_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get luminosity_table_meta&#39;</span> <span class="o">%</span> <span class="n">func_name</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+    <span class="n">metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+            <span class="n">metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)])</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics from MySQL&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">luminosity_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">luminosity_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
+                <span class="n">metric_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics_list_name</span> <span class="k">for</span> <span class="n">metrics_list_id</span><span class="p">,</span> <span class="n">metrics_list_name</span> <span class="ow">in</span> <span class="n">metrics_list</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_list_id</span><span class="p">)]</span>
+            <span class="n">coefficient</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;coefficient&#39;</span><span class="p">]</span>
+            <span class="n">shifted</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;shifted&#39;</span><span class="p">]</span>
+            <span class="n">shifted_coefficient</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;shifted_coefficient&#39;</span><span class="p">]</span>
+            <span class="n">correlations</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">,</span> <span class="n">shifted</span><span class="p">,</span> <span class="n">shifted_coefficient</span><span class="p">])</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine correlations for anomaly id -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">correlations</span><span class="p">:</span>
+        <span class="n">sorted_correlations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">correlations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">correlations</span> <span class="o">=</span> <span class="n">sorted_correlations</span>
+
+    <span class="k">return</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 </pre></div>
 
            </div>
@@ -1100,7 +1209,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -1122,7 +1231,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

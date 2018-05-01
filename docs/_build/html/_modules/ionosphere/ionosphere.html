@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.1.9-beta documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.2.0-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.1.9-beta documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.1
+                1.2
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -244,7 +245,7 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings&#39;</span><span class="p">)</span>
     <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -285,7 +286,7 @@
 <span class="sd">        Create the :obj:`self.anomalous_metrics` list</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Ionosphere</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Ionosphere</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
@@ -2269,12 +2270,16 @@
 
             <span class="c1"># @added 20170916 - Feature #1996: Ionosphere - matches page</span>
             <span class="c1"># Create the ionosphere_summary_memcache_object</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updating the ionosphere_summary_memcache_object&#39;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">update_ionosphere_summary_memcache_object</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_ionosphere_summary_memcache_object - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+            <span class="c1"># @modified 20180103 - Feature #1996: Ionosphere - matches page</span>
+            <span class="c1"># The ionosphere_summary_list memcache object is not managed in</span>
+            <span class="c1"># ionosphere.py and was an artefact of some dev work that may</span>
+            <span class="c1"># resume at some point</span>
+            <span class="c1"># if settings.MEMCACHE_ENABLED:</span>
+            <span class="c1">#     try:</span>
+            <span class="c1">#         logger.info(&#39;updating the ionosphere_summary_memcache_object&#39;)</span>
+            <span class="c1">#         self.update_ionosphere_summary_memcache_object</span>
+            <span class="c1">#     except:</span>
+            <span class="c1">#         logger.error(&#39;error :: update_ionosphere_summary_memcache_object - %s&#39; % traceback.print_exc())</span>
 
             <span class="c1"># self.populate the database metatdata tables</span>
             <span class="c1"># What is my host id in the Skyline panorama DB?</span>
@@ -2697,7 +2702,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2017, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
 
     </p>
   </div>
@@ -2719,7 +2724,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.1.9-beta',
+            VERSION:'1.2.0-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

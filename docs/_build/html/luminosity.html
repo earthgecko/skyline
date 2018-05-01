@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Luminosity &mdash; Skyline 1.2.0-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+        <link rel="next" title="Redis integration" href="redis-integration.html"/>
+        <link rel="prev" title="tsfresh" href="tsfresh.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Luminosity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#differences-between-oculus-and-luminosity">Differences between Oculus and Luminosity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#luminosity-adds">Luminosity adds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notable-luminosity-related-settings">Notable Luminosity related settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Luminosity</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/luminosity.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="luminosity">
+<h1>Luminosity<a class="headerlink" href="#luminosity" title="Permalink to this headline">¶</a></h1>
+<p>Luminosity is the beginning of an attempt to implement a pure Python replacement
+for the Oculus anomaly correlation component of the Etsy Kale stack.</p>
+<p>Luminosity adds correlations back to Skyline.  Cross correlations to be
+correct.</p>
+<p>Oculus was not moved forward with Skyline in this version of Skyline for a
+number of reasons, those mainly being Ruby, Java and Elasticsearch.
+Luminosity is not about being better than Oculus, Oculus was very good, it is
+about adding additional information about anomalies and metrics.</p>
+<p>Luminosity uses some of the functionality of Linkedin&#8217;s luminol Anomaly
+Detection and Correlation library to add this near real time correlation back
+into Skyline.</p>
+<p>Luminosity is different to Oculus in a number of ways, however it does provide
+similar information.</p>
+<div class="section" id="differences-between-oculus-and-luminosity">
+<h2>Differences between Oculus and Luminosity<a class="headerlink" href="#differences-between-oculus-and-luminosity" title="Permalink to this headline">¶</a></h2>
+<p>Oculus had a very large architectural footprint.
+Luminosity runs in parallel to all the other Skyline apps on the same Skyline
+commodity machine, with very little overhead.</p>
+<p>Oculus used a very novel technique to do similarity search in time series using
+a Shape Description Alphabet:
+1. Map line segments to tokens based on gradient. a b c d e
+2. Index tokens with Elasticsearch.
+3. Search for similar subsequences using sloppy phrase queries.
+Then search these candidates exhaustively, using Fast Dynamic Time Warping.
+Oculus had a searchable frontend UI.</p>
+<p>Luminosity uses the Linkedin luminol.correlator to determine the cross
+correlation coefficients of each metric pulling the data directly from Redis
+only when an anomaly alert is triggered.  The resulting cross correlated metrics
+and their results are then recorded in the Skyline MySQL database and related to
+the anomaly.  Viewable via the Ionosphere and Luminosity UI pages.</p>
+</div>
+<div class="section" id="luminosity-adds">
+<h2>Luminosity adds<a class="headerlink" href="#luminosity-adds" title="Permalink to this headline">¶</a></h2>
+<p>Luminosity has the advantage over Oculus of storing the history of metrics,
+anomalies and their correlations.  This gives Skyline a near real time root
+cause analysis component and over time enables Skyline to determine and report
+the most strongly correlated metrics.</p>
+<p>luminol.correlate is based on <a class="reference external" href="http://paulbourke.net/miscellaneous/correlate/">http://paulbourke.net/miscellaneous/correlate/</a>
+and for the purposes of understanding the luminol.correlate, a pure
+implementation of the Paul Bourke method was implemented and verified with the
+results of the luminol.correlate.</p>
+</div>
+<div class="section" id="notable-luminosity-related-settings">
+<h2>Notable Luminosity related settings<a class="headerlink" href="#notable-luminosity-related-settings" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="skyline.html#settings.CORRELATE_ALERTS_ONLY" title="settings.CORRELATE_ALERTS_ONLY"><code class="xref py py-mod docutils literal"><span class="pre">settings.CORRELATE_ALERTS_ONLY</span></code></a></p>
+<p>By default this is set to <cite>True</cite> in settings.py which only run cross
+correlations on metrics with an alerter setting.  This reduces the number of
+correlations that are recorded in the database.  Non alerter metrics are still
+however cross correlated against when an anomaly triggers on a metric with an
+alert configured.</p>
+<p>If you want to run or are running multiple Skyline instances please see
+<a class="reference external" href="running-multiple-skylines.html">Running multiple Skylines</a></p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="redis-integration.html" class="btn btn-neutral float-right" title="Redis integration" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tsfresh.html" class="btn btn-neutral" title="tsfresh" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2.0-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
