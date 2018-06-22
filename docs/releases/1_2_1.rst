@@ -1,0 +1,132 @@
+==============================
+1.2.1 - the luminosity branch
+==============================
+
+v1.2.1-luminosity - June 2x, 2018
+
+Changes
+-------
+
+- Bumped to v1.2.1
+- Adds Redis AUTH, apologies if this means any additional work on any Redis
+  montioring you have set up.
+- Adds JWT token of Redis password.
+- Adds HTTPS hard requirement.
+- Adds Ionosphere fluid approximation a.k.a Min-Max scaling/standardization, to
+  feature profile calculations and checks.
+
+Update notes
+------------
+
+- NOTE: adding Redis AUTH may affect any Redis monitoring you have set up.
+- NOTE: If you are running v1.x you cannot upgrade from v1.x directly to v1.2.1,
+  first upgrade to v1.2.0 and then upgrade to v1.2.1.
+
+How to update from v1.2.0
+-------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version settings.py with skyline/settings.py and
+  create a new settings.py in the temp location appropriate for Skyline v1.2.1
+  and your set up, ready to be deployed.
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Backup your Skyline database.
+- Apply the SQL update to your Skyline database, change the below variables as
+  appropriate to your set up.
+
+.. code-block:: bash
+
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="<YOUR_MYSQL_USER>"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+    SKYLINE_PATH="/opt/skyline/github/skyline.v1.2.1-luminosity-beta"  # Your Skyline path
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.v1.2.1.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < $SKYLINE_PATH/updates/sql/ionosphere-v1.2.0-to-v1.2.1.sql
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.1 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv /opt/skyline/github/skyline /opt/skyline/github/skyline/skyline.v1.2.0-luminosity-stable
+    mv "$SKYLINE_PATH" /opt/skyline/github/skyline
+
+- Install new requirements e.g.
+
+.. code-block:: bash
+
+    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    PROJECT="skyline-py2714"
+
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+
+    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
+
+    deactivate
+
+.. note:: If you are running v1.2.0 and have already installed the luminol fork
+  the pip install will error similar to the the below, this is expected and can
+  be ignored, it is the last package in requirements.txt so all other deps will
+  install.
+
+.. code-block:: bash
+
+    AssertionError: No source dir for luminol from git+git://github.com/earthgecko/luminol@d429044#egg=luminol in ./lib/python2.7/site-packages (from -r /opt/skyline/github/skyline/requirements.txt (line 317))
+
+- Start the all Skyline services, remembering to start bin/luminosity.d too, (
+  change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done
+
+- Enable any process monitoring you have.
+- Update your Apache (or reverse proxy config) with your SSL certificate and
+  the X-Forwarded-Proto header.
+
+::
+
+    RequestHeader set X-Forwarded-Proto "https"
