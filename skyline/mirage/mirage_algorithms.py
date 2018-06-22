@@ -21,6 +21,8 @@ from settings import (
     PANDAS_VERSION,
     RUN_OPTIMIZED_WORKFLOW,
     SKYLINE_TMP_DIR,
+    REDIS_SOCKET_PATH,
+    REDIS_PASSWORD,
 )
 
 from algorithm_exceptions import *
@@ -28,6 +30,15 @@ from algorithm_exceptions import *
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
+
+# @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+if MIRAGE_ENABLE_SECOND_ORDER:
+    from redis import StrictRedis
+    from msgpack import unpackb, packb
+    if REDIS_PASSWORD:
+        redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
+    else:
+        redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
 
 """
 This is no man's land. Do anything you want in here,

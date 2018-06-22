@@ -14,13 +14,16 @@ of moving parts that need to be orchestrated.  Further to this, for Skyline to
 be configured, trained and start learning takes a lot of time.
 
 Take time to read through the documentation and review ``settings.py`` at the
-same time.
+same time.  There are lots of settings in ``settings.py`` do not feel
+intimidated by this. The default settings should be adequate and reasonable for
+starting out with.  The settings that you must change and take note of are all
+documented on the `Installation`_ page
 
 Anomaly detection is a journey not an app
 -----------------------------------------
 
 Anomaly detection is partly about automated anomaly detection and partly about
-knowing your metrics and timeseries patterns.  Not all timeseries are created
+knowing your metrics and time series patterns.  Not all time series are created
 equally.
 
 It helps to think of anomaly detection as an ongoing journey.  Although ideally
@@ -49,7 +52,11 @@ To begin with decide what your 10 most important Graphite metrics are and
 to begin with and get to know what Skyline does with those.  Add more key metric
 groups as you get the hang of it.
 
-You cannot rush timeseries.
+You cannot rush time series.
+
+.. note:: When checking a log make sure you check the log for the appropriate
+  time, Skyline can log lots fast, so short tails may miss some event you
+  expect between that restart and tail.
 
 Enabling Skyline modules incrementally
 --------------------------------------
@@ -57,25 +64,25 @@ Enabling Skyline modules incrementally
 Skyline's modules do different things differently and understanding the process
 and pipeline helps to tune each Skyline module appropriately for your data.
 
-Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere (and
-Crucible), have their own specific configurations.  These configurations are not
-extremely complex, but they are not obvious or trivial either when you are
+Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere, Luminosity
+(and Crucible), have their own specific configurations.  These configurations are
+not extremely complex, but they are not obvious or trivial either when you are
 starting out.  Bringing Skyline modules online incrementally over time, helps
 you to understand the processes and their different configuration settings
 easier.  Easier than trying to get the whole stack up and running straight off.
 
-Start with Horizon, Analyzer, Webapp and Panorama
--------------------------------------------------
+Start with Horizon, Analyzer, Webapp, Luminosity and Panorama
+-------------------------------------------------------------
 
-It is advisable to only start the original Horizon, Analyzer and Webapp daemons
-and Panorama initially and take time to understand what Skyline is doing.  Take
-some time to tune Analyzer's ``ALERTS`` and learn the patterns in your IMPORTANT
+It is advisable to only start the Horizon, Analyzer, Webapp and Panorama daemons
+initially and take time to understand what Skyline is doing.  Take some time to
+tune Analyzer's mod:`settings.ALERTS` and learn the patterns in your IMPORTANT
 metrics:
 
 - which metrics trigger anomalies?
 - when the metrics trigger anomalies?
 - why/what known events are triggering anomalies?
-- are there seasonalities/periodicity in anomalies some metrics?
+- are there seasonality/periodicity in anomalies some metrics?
 - what metrics are critical and what metrics are just "normal"/expected noise
 
 Panorama will help you view what things are triggering as anomalous.
@@ -88,7 +95,7 @@ bring them online too.
 Add Mirage parameters to the ``ALERTS``
 ---------------------------------------
 
-Once you have an overview of metrics that have seasonalities that are greater
+Once you have an overview of metrics that have seasonality that are greater
 than the :mod:`settings.FULL_DURATION`, you can add their Mirage parameters to
 the :mod:`settings.ALERTS` tuples and start the Mirage daemon.
 
@@ -116,12 +123,12 @@ modules to send Crucible data, Crucible has to be enabled via the appropriate
 
 Crucible has 2 roles:
 
-1. Store resources (timeseries json and graph pngs) for triggered anomalies - note
-   this can consume a lot of disk space if enabled.
-2. Run ad-hoc analysis on any timeseries and create matplotlib plots for the
+1. Store resources (time series json and graph pngs) for triggered anomalies -
+   note this can consume a lot of disk space if enabled.
+2. Run ad hoc analysis on any time series and create matplotlib plots for the
    run algorithms.
 
 It is not advisable to enable Crucible on any of the other modules unless you
 really want to "see" anomalies in great depth.  Crucible is enabled as there is
 a Crucible frontend view on the roadmap that will allow the user to test any
-timeseries of any metric directly through the UI.
+time series of any metric directly through the UI.

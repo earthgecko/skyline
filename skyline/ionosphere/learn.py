@@ -64,7 +64,11 @@ try:
 except:
     learn_full_duration = 86400 * 30  # 2592000
 
-redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+# @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+if settings.REDIS_PASSWORD:
+    redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+else:
+    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 context = 'ionosphere_learn'
 
 
@@ -443,7 +447,12 @@ def ionosphere_learn(timestamp):
     # in Redis terms.
     # @added 20170113 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
     # work_set and work deadlines
-    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+    # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+    if settings.REDIS_PASSWORD:
+        redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+    else:
+        redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     work_set = 'ionosphere.learn.work'
     learn_work = None
     try:

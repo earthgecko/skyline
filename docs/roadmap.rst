@@ -7,6 +7,10 @@ Things on the horizon :)
 This is not really a roadmap per se it is more just a collection of
 ideas at the moment, in no particular order.
 
+UPDATE 20180526 - Skyline itself now seems to write its own roadmap and also
+seems to be plotting it's own course.  Regardless of any whaffle you may read
+here.
+
 Further performance improvements and Python-3.5
 ===============================================
 
@@ -17,6 +21,9 @@ were possible, so cython where applicable is the obvious choice.
 
 Continue updating the code base to ensure that everything can be run on
 >= Python-3.5.x
+
+UPDATE 20180526 - Skyline has not been cooperative here in terms of it's own
+roadmap and plotted course.
 
 Ionosphere
 ==========
@@ -32,14 +39,18 @@ In progress
 See `Ionosphere <ionosphere.html>`__ and `Development - Ionosphere
 <development/ionosphere.html>`__
 
+UPDATE 20180526 - Ionosphere development, still in progress in small increments
+
 Meteor
 ======
 
 Add the ability to inject data into a data set and test a metric, the workflow,
 algorithms, alerters and the apps themselves,etc.
 
-Constellations
-==============
+UPDATE 20180526 - Skyline has not been cooperative here.
+
+Constellations (Updated 20150526 now to be known as Luminosity)
+===============================================================
 
 A pure Python implementation of the Oculus functionality, but not
 necessarily exactly the same, but similar. Calculating in realtime using
@@ -54,6 +65,19 @@ This would allow for the correlations to be determined for any metrics
 at any point within the ``FULL_DURATION`` period.
 
 Help wanted.
+
+UPDATE 20180526 - Skyline HAS been cooperative here and hooked up with
+Linkedin/luminol to provide Skyline Luminosity and adding back the additional
+dimension of correlations, it has managed to provide a fairly good root cause
+analysis dimension to Skyline too.  Ticked. Although I still like the app
+Skyline meme of Constellations, just have to think up or find another cool thing
+(similarly related) to name Constellations.  No doubt in the next roadmap
+edition, this may be updated with something like, "Skyline and other parties
+have not been cooperative here."  Take that as ode to yourselves Linkedin, the
+name was even changed to fit in with paying homeage to your library, however if
+the aim here is to be accurate the app should be called skyline/paulbourke...
+Which gives me an idea :)
+
 
 Skyline and NASA/FITS data
 ==========================
@@ -77,6 +101,8 @@ System) handles:
 It should be possible for Skyline to be able to ingest any FITS data
 file or ingest an image file from a FITS file and feed it to scikit-image,
 etc.
+
+UPDATE 20180526 - Skyline and other parties have not been cooperative here.
 
 NuPIC
 =====
@@ -152,6 +178,8 @@ Quite amazing.  It a not beyond the realms of possibility to have a Horizon
 feeding specific metrics to various NuPIC HTM Cortical Learning
 Algorithms models...
 
+UPDATE 20180526 - Skyline and other parties have not been cooperative here.
+
 Update the NAB Scoreboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -171,11 +199,15 @@ Automated NAB benchmark metrics would be a nice thing to have :)
 **Update 20170225**: Skyline can no longer necessarily be NAB-ed due to it now
 functioning in multiple temporal resolutions as a whole.
 
+UPDATE 20180526 - Skyline and other parties have not been cooperative here.
+
 Machine learning
 ================
 
 Bring additional dimensions of machine learning capabilities into Skyline, too
 many avenues to mention...
+
+UPDATE 20180526 - Skyline and other parties have not been cooperative here.
 
 Grumpy
 ======
@@ -186,3 +218,6 @@ https://opensource.googleblog.com/2017/01/grumpy-go-running-python.html there
 may be some mileage in using go instead of multiprocessing in some cases,
 algorithms, ionosphere, tsfresh chunks to go in extract_features rather than
 multiprocessing, scope for investigation.
+
+UPDATE 20180526 - Skyline and other parties have not been cooperative here.  So
+at least one thing on the roadmap was done.  I guess that is progress :)

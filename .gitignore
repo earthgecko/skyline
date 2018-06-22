@@ -23,3 +23,6 @@ data/*
 
 # sphinx .cache
 .cache/
+
+# pytest_cache
+.pytest_cache/

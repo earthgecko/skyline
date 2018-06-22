@@ -30,7 +30,11 @@ skyline_app = 'luminosity'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
 
-redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+# @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+if settings.REDIS_PASSWORD:
+    redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+else:
+    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
 
 def get_anomaly(request_type):
@@ -103,10 +107,15 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
         raw_assigned = []
 
     if not raw_assigned and settings.OTHER_SKYLINE_REDIS_INSTANCES:
-        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+        for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
             if not raw_assigned:
                 try:
-                    other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port))
+                    if redis_password:
+                        other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port), password=str(redis_password))
+                    else:
+                        other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port))
                     raw_assigned = other_redis_conn.mget(assigned_metrics)
                     if raw_assigned == [None]:
                         logger.info('%s data not retrieved from Redis at %s on port %s' % (str(base_name), str(redis_ip), str(redis_port)))
@@ -263,7 +272,16 @@ def get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metric
                 time_period = (int(anomaly_timestamp - 120), int(anomaly_timestamp + 120))
                 my_correlator = Correlator(anomaly_ts_dict, correlate_ts_dict, time_period)
                 # For better correlation use 0.9 instead of 0.8 for the threshold
-                if my_correlator.is_correlated(threshold=0.9):
+                # @modified 20180524 - Feature #2360: CORRELATE_ALERTS_ONLY
+                #                      Branch #2270: luminosity
+                #                      Feature #2378: Add redis auth to Skyline and rebrow
+                # Added this to setting.py
+                # if my_correlator.is_correlated(threshold=0.9):
+                try:
+                    cross_correlation_threshold = settings.LUMINOL_CROSS_CORRELATION_THRESHOLD
+                except:
+                    cross_correlation_threshold = 0.9
+                if my_correlator.is_correlated(threshold=cross_correlation_threshold):
                     correlation = my_correlator.get_correlation_result()
                     correlated = True
                     correlations.append([metric_base_name, correlation.coefficient, correlation.shift, correlation.shifted_coefficient])

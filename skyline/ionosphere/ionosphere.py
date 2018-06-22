@@ -36,6 +36,11 @@ from tsfresh import __version__ as tsfresh_version
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 from pymemcache.client.base import Client as pymemcache_Client
 
+# @added 20180617 - Feature #2404: Ionosphere - fluid approximation
+import pandas as pd
+from tsfresh.feature_extraction import (
+    extract_features, ReasonableFeatureExtractionSettings)
+
 import settings
 from skyline_functions import (
     fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p,
@@ -105,6 +110,8 @@ failed_checks_dir = '%s_failed' % settings.IONOSPHERE_CHECK_PATH
 last_purge_key = '%s.last_purge_ts' % skyline_app
 
 LOCAL_DEBUG = False
+if this_host == 'zpf-skyline-dev-3-40g-gra1':
+    LOCAL_DEBUG = True
 
 
 class Ionosphere(Thread):
@@ -121,7 +128,11 @@ class Ionosphere(Thread):
 
         """
         super(Ionosphere, self).__init__()
-        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -931,13 +942,23 @@ class Ionosphere(Thread):
                     logger.error('error :: got no result from MySQL from metrics table for - %s' % base_name)
                 row = result.fetchone()
                 # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
-                memcache_metrics_db_object = dict(row)
-                metrics_id = row['id']
-                metric_ionosphere_enabled = row['ionosphere_enabled']
-                # @added 20170115 - Feature #1854: Ionosphere learn - generations
-                # Create the metrics_db_object so it is available throughout
-                # Here we go! Learn!
-                metrics_db_object = row
+                # @modified - 20180524 - Task #2132: Optimise Ionosphere DB usage
+                # Feature #2378: Add redis auth to Skyline and rebrow
+                # Wrapped memcache_metrics_db_object, metrics_id,
+                # metric_ionosphere_enabled and metrics_db_object in if row
+                # as if row is None it can fail with:
+                # TypeError: 'NoneType' object is not iterable
+                # memcache_metrics_db_object = dict(row)
+                if row:
+                    memcache_metrics_db_object = dict(row)
+                    metrics_id = row['id']
+                    metric_ionosphere_enabled = row['ionosphere_enabled']
+                    # @added 20170115 - Feature #1854: Ionosphere learn - generations
+                    # Create the metrics_db_object so it is available throughout
+                    # Here we go! Learn!
+                    metrics_db_object = row
+                else:
+                    logger.info('could not determine metric id for %s' % base_name)
 
                 connection.close()
 
@@ -1609,6 +1630,426 @@ class Ionosphere(Thread):
                         (str(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR),
                             str(fp_id), str(percent_different)))
 
+                # @added 20180617 - Feature #2404: Ionosphere - fluid approximation
+                # Now if not matched use Min-Max scaling as per
+                # http://sebastianraschka.com/Articles/2014_about_feature_scaling.html#numpy
+                # Min-Max scale the fp time series z_ts_<metric_id> SELECT WHERE fp_id
+                #   or from memcache to create minmax_fp_ts
+                # Min-Max scale the current time series to create minmax_anomalous_ts
+                # Create features profiles for minmax_fp_ts
+                # Create features profiles for minmax_anomalous_ts
+                try:
+                    minmax_scaling_enabled = settings.IONOSPHERE_MINMAX_SCALING_ENABLED
+                except:
+                    minmax_scaling_enabled = False
+                minmax_not_anomalous = False
+                minmax_check = False
+                minmax = 0
+                if not not_anomalous:
+                    if minmax_scaling_enabled:
+                        minmax_check = True
+
+                if added_by == 'ionosphere_learn' and minmax_check:
+                    minmax_check = False
+                    logger.info('ionosphere_learn job not minmax scaling')
+
+                if minmax_check:
+                    logger.info('running minmax scaling')
+                    # First check to determine if the z_ts_<mertic_id> for the fp
+                    # has data in memcache before querying the database
+                    metric_fp_ts_table = 'z_ts_%s' % str(metrics_id)
+                    fp_id_metric_ts = []
+                    if settings.MEMCACHE_ENABLED:
+                        fp_id_metric_ts_key = 'fp.%s.%s.ts' % (str(fp_id), str(metrics_id))
+                        try:
+                            fp_id_metric_ts_object = self.memcache_client.get(fp_id_metric_ts_key)
+                            # if memcache does not have the key the response to the
+                            # client is None, it does not except
+                        except:
+                            logger.error('error :: failed to get %s from memcache' % fp_id_metric_ts_key)
+                        try:
+                            self.memcache_client.close()
+                        except:
+                            logger.error('error :: failed to close memcache_client')
+                        if fp_id_metric_ts_object:
+                            fp_id_metric_ts = literal_eval(fp_id_metric_ts_object)
+                            logger.info('used memcache %s key data to populate fp_id_metric_ts with %s data points' % (fp_id_metric_ts_key, str(len(fp_id_metric_ts))))
+                        else:
+                            logger.info('no memcache %s key data, will use database' % fp_id_metric_ts_key)
+                    if not fp_id_metric_ts:
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: getting data from %s database table for fp id %s to populate the fp_id_metric_ts list' % (metric_fp_ts_table, str(fp_id)))
+                        try:
+                            stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))  # nosec
+                            connection = engine.connect()
+                            for row in engine.execute(stmt):
+                                fp_id_ts_timestamp = int(row['timestamp'])
+                                fp_id_ts_value = float(row['value'])
+                                fp_id_metric_ts.append([fp_id_ts_timestamp, fp_id_ts_value])
+                            connection.close()
+                            values_count = len(fp_id_metric_ts)
+                            logger.info('determined %s values for the fp_id time series %s for %s' % (str(values_count), str(fp_id), str(base_name)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not determine timestamps and values from %s' % metric_fp_ts_table)
+
+                        if fp_id_metric_ts and settings.MEMCACHE_ENABLED:
+                            fp_id_metric_ts_key = 'fp.%s.%s.ts' % (str(fp_id), str(metrics_id))
+                            try:
+                                self.memcache_client.set(fp_id_metric_ts_key, fp_id_metric_ts)
+                                logger.info('populated memcache %s key' % fp_id_metric_ts_key)
+                            except:
+                                logger.error('error :: failed to set %s in memcache' % fp_id_metric_ts_key)
+                            try:
+                                self.memcache_client.close()
+                            except:
+                                logger.error('error :: failed to close memcache_client')
+
+                    # Get anomalous time series
+                    anomalous_ts_values_count = 0
+                    if fp_id_metric_ts:
+                        anomalous_timeseries_not_defined = True
+                        try:
+                            test_anomalous_timeseries = anomalous_timeseries
+                            if len(test_anomalous_timeseries) > 0:
+                                anomalous_timeseries_not_defined = False
+                        except:
+                            logger.info('anomalous_timeseries is not defined loading from anomaly json')
+
+                        timeseries_dir = base_name.replace('.', '/')
+                        metric_data_dir = '%s/%s/%s' % (
+                            settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
+                            timeseries_dir)
+                        anomaly_json = '%s/%s.json' % (metric_data_dir, base_name)
+                        if anomalous_timeseries_not_defined:
+                            try:
+                                with open((anomaly_json), 'r') as f:
+                                    raw_timeseries = f.read()
+                                timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                                anomalous_timeseries = literal_eval(timeseries_array_str)
+                                if len(anomalous_timeseries) > 0:
+                                    logger.info('anomalous_timeseries was populated from anomaly json %s with %s data points from for creating the minmax_anomalous_ts' % (anomaly_json, str(len(anomalous_timeseries))))
+                                else:
+                                    logger.error('error :: anomalous_timeseries for minmax_anomalous_ts is not populated from anomaly json - %s' % anomaly_json)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: could not create anomalous_timeseries from anomaly json %s' % anomaly_json)
+                        else:
+                            logger.info('anomalous_timeseries has %s data points from for creating the minmax_anomalous_ts' % (str(len(anomalous_timeseries))))
+
+                        anomalous_ts_values_count = len(anomalous_timeseries)
+
+                    # @added 20180621 - Feature #2404: Ionosphere - fluid approximation
+                    # Check ranges and only Min-Max scale if the 2 time series
+                    # are similar in range
+                    try:
+                        range_tolerance = settings.IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE
+                    except:
+                        range_tolerance = 0.15
+                    range_tolerance_percentage = range_tolerance * 100
+                    check_range = False
+                    range_similar = False
+                    if fp_id_metric_ts:
+                        if anomalous_ts_values_count > 0:
+                            check_range = True
+                    lower_range_similar = False
+                    upper_range_similar = False
+                    if check_range:
+                        try:
+                            minmax_fp_values = [x[1] for x in fp_id_metric_ts]
+                            min_fp_value = min(minmax_fp_values)
+                            max_fp_value = max(minmax_fp_values)
+                        except:
+                            min_fp_value = False
+                            max_fp_value = False
+                        try:
+                            minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
+                            min_anomalous_value = min(minmax_anomalous_values)
+                            max_anomalous_value = max(minmax_anomalous_values)
+                        except:
+                            min_anomalous_value = False
+                            max_anomalous_value = False
+                        lower_range_not_same = True
+                        try:
+                            if int(min_fp_value) == int(min_anomalous_value):
+                                lower_range_not_same = False
+                                lower_range_similar = True
+                                logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
+                                    str(min_fp_value), str(min_anomalous_value)))
+                        except:
+                            lower_range_not_same = True
+                        if min_fp_value and min_anomalous_value and lower_range_not_same:
+                            if int(min_fp_value) == int(min_anomalous_value):
+                                lower_range_similar = True
+                                logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
+                                    str(min_fp_value), str(min_anomalous_value)))
+                            else:
+                                lower_min_fp_value = int(min_fp_value - (min_fp_value * range_tolerance))
+                                upper_min_fp_value = int(min_fp_value + (min_fp_value * range_tolerance))
+                                if int(min_anomalous_value) in range(lower_min_fp_value, upper_min_fp_value):
+                                    lower_range_similar = True
+                                    logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are similar within %s percent of each other' % (
+                                        str(min_fp_value),
+                                        str(min_anomalous_value),
+                                        str(range_tolerance_percentage)))
+                        if not lower_range_similar:
+                            logger.info('lower range of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are not similar' % (
+                                str(min_fp_value), str(min_anomalous_value)))
+                        upper_range_not_same = True
+                        try:
+                            if int(max_fp_value) == int(max_anomalous_value):
+                                upper_range_not_same = False
+                                upper_range_similar = True
+                                logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
+                                    str(max_fp_value), str(max_anomalous_value)))
+                        except:
+                            upper_range_not_same = True
+                        if max_fp_value and max_anomalous_value and lower_range_similar and upper_range_not_same:
+                            lower_max_fp_value = int(max_fp_value - (max_fp_value * range_tolerance))
+                            upper_max_fp_value = int(max_fp_value + (max_fp_value * range_tolerance))
+                            if int(max_anomalous_value) in range(lower_max_fp_value, upper_max_fp_value):
+                                upper_range_similar = True
+                                logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are similar within %s percent of each other' % (
+                                    str(max_fp_value), str(max_anomalous_value),
+                                    str(range_tolerance_percentage)))
+                            else:
+                                logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are not similar' % (
+                                    str(max_fp_value), str(max_anomalous_value)))
+                    if lower_range_similar and upper_range_similar:
+                        range_similar = True
+                    else:
+                        logger.info('the ranges of fp_id_metric_ts and anomalous_timeseries differ significantly Min-Max scaling will be skipped')
+
+                    minmax_fp_ts = []
+                    # if fp_id_metric_ts:
+                    if range_similar:
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: creating minmax_fp_ts from minmax scaled fp_id_metric_ts')
+                        try:
+                            minmax_fp_values = [x[1] for x in fp_id_metric_ts]
+                            x_np = np.asarray(minmax_fp_values)
+                            # Min-Max scaling
+                            np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                            for (ts, v) in zip(fp_id_metric_ts, np_minmax):
+                                minmax_fp_ts.append([ts[0], v])
+                            logger.info('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not minmax scale fp id %s time series for %s' % (str(fp_id), str(base_name)))
+                        if not minmax_fp_ts:
+                            logger.error('error :: minmax_fp_ts list not populated')
+
+                    minmax_anomalous_ts = []
+                    if minmax_fp_ts:
+                        # Only process if they are approximately the same length
+                        minmax_fp_ts_values_count = len(minmax_fp_ts)
+                        if minmax_fp_ts_values_count - anomalous_ts_values_count in range(-14, 14):
+                            try:
+                                minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
+                                x_np = np.asarray(minmax_anomalous_values)
+                                # Min-Max scaling
+                                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                                for (ts, v) in zip(fp_id_metric_ts, np_minmax):
+                                    minmax_anomalous_ts.append([ts[0], v])
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: could not minmax scale current time series anomalous_timeseries for %s' % (str(fp_id), str(base_name)))
+                            if len(minmax_anomalous_ts) > 0:
+                                logger.info('minmax_anomalous_ts is populated with %s data points' % str(len(minmax_anomalous_ts)))
+                            else:
+                                logger.error('error :: minmax_anomalous_ts is not populated')
+                        else:
+                            logger.info('minmax scaled check will be skipped - anomalous_ts_values_count is %s and minmax_fp_ts is %s' % (str(anomalous_ts_values_count), str(minmax_fp_ts_values_count)))
+
+                    minmax_fp_ts_csv = '%s/fpid.%s.%s.minmax_fp_ts.tsfresh.input.std.csv' % (
+                        settings.SKYLINE_TMP_DIR, str(fp_id), base_name)
+                    minmax_fp_fname_out = minmax_fp_ts_csv + '.transposed.csv'
+                    anomalous_ts_csv = '%s/%s.%s.minmax_anomalous_ts.tsfresh.std.csv' % (
+                        settings.SKYLINE_TMP_DIR, metric_timestamp, base_name)
+                    anomalous_fp_fname_out = anomalous_ts_csv + '.transposed.csv'
+
+                    tsf_settings = ReasonableFeatureExtractionSettings()
+                    tsf_settings.disable_progressbar = True
+                    minmax_fp_features_sum = None
+                    minmax_anomalous_features_sum = None
+                    if minmax_anomalous_ts and minmax_fp_ts:
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: analyzing minmax_fp_ts and minmax_anomalous_ts')
+                        if not os.path.isfile(minmax_fp_ts_csv):
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: creating %s from minmax_fp_ts' % minmax_fp_ts_csv)
+                            datapoints = minmax_fp_ts
+                            converted = []
+                            for datapoint in datapoints:
+                                try:
+                                    new_datapoint = [float(datapoint[0]), float(datapoint[1])]
+                                    converted.append(new_datapoint)
+                                except:  # nosec
+                                    continue
+                            if LOCAL_DEBUG:
+                                if len(converted) > 0:
+                                    logger.debug('debug :: converted is populated')
+                                else:
+                                    logger.debug('debug :: error :: converted is not populated')
+                            for ts, value in converted:
+                                try:
+                                    utc_ts_line = '%s,%s,%s\n' % (base_name, str(int(ts)), str(value))
+                                    with open(minmax_fp_ts_csv, 'a') as fh:
+                                        fh.write(utc_ts_line)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: could not write to file %s' % (str(minmax_fp_ts_csv)))
+                        else:
+                            logger.info('file found %s, using for data' % minmax_fp_ts_csv)
+
+                        if not os.path.isfile(minmax_fp_ts_csv):
+                            logger.error('error :: file not found %s' % minmax_fp_ts_csv)
+                        else:
+                            logger.info('file exists to create the minmax_fp_ts data frame from - %s' % minmax_fp_ts_csv)
+
+                        try:
+                            df = pd.read_csv(minmax_fp_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
+                            df.columns = ['metric', 'timestamp', 'value']
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to created data frame from %s' % (str(minmax_fp_ts_csv)))
+                        try:
+                            df_features = extract_features(
+                                df, column_id='metric', column_sort='timestamp', column_kind=None,
+                                column_value=None, feature_extraction_settings=tsf_settings)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to created df_features from %s' % (str(minmax_fp_ts_csv)))
+                        # Create transposed features csv
+                        if not os.path.isfile(minmax_fp_fname_out):
+                            # Transpose
+                            df_t = df_features.transpose()
+                            df_t.to_csv(minmax_fp_fname_out)
+                        else:
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: file exists - %s' % minmax_fp_fname_out)
+                        try:
+                            # Calculate the count and sum of the features values
+                            df_sum = pd.read_csv(
+                                minmax_fp_fname_out, delimiter=',', header=0,
+                                names=['feature_name', 'value'])
+                            df_sum.columns = ['feature_name', 'value']
+                            df_sum['feature_name'] = df_sum['feature_name'].astype(str)
+                            df_sum['value'] = df_sum['value'].astype(float)
+                            minmax_fp_features_count = len(df_sum['value'])
+                            minmax_fp_features_sum = df_sum['value'].sum()
+                            logger.info('minmax_fp_ts - features_count: %s, features_sum: %s' % (str(minmax_fp_features_count), str(minmax_fp_features_sum)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to created df_sum from %s' % (str(minmax_fp_fname_out)))
+
+                        if minmax_fp_features_count > 0:
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: minmax_fp_features_count of the minmax_fp_ts is %s' % str(minmax_fp_features_count))
+                        else:
+                            logger.error('error :: minmax_fp_features_count is %s' % str(minmax_fp_features_count))
+
+                        if not os.path.isfile(anomalous_ts_csv):
+                            datapoints = minmax_anomalous_ts
+                            converted = []
+                            for datapoint in datapoints:
+                                try:
+                                    new_datapoint = [float(datapoint[0]), float(datapoint[1])]
+                                    converted.append(new_datapoint)
+                                except:  # nosec
+                                    continue
+                            for ts, value in converted:
+                                utc_ts_line = '%s,%s,%s\n' % (base_name, str(int(ts)), str(value))
+                                with open(anomalous_ts_csv, 'a') as fh:
+                                    fh.write(utc_ts_line)
+
+                        df = pd.read_csv(anomalous_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
+                        df.columns = ['metric', 'timestamp', 'value']
+                        df_features_current = extract_features(
+                            df, column_id='metric', column_sort='timestamp', column_kind=None,
+                            column_value=None, feature_extraction_settings=tsf_settings)
+
+                        # Create transposed features csv
+                        if not os.path.isfile(anomalous_fp_fname_out):
+                            # Transpose
+                            df_t = df_features_current.transpose()
+                            df_t.to_csv(anomalous_fp_fname_out)
+                        # Calculate the count and sum of the features values
+                        df_sum_2 = pd.read_csv(
+                            anomalous_fp_fname_out, delimiter=',', header=0,
+                            names=['feature_name', 'value'])
+                        df_sum_2.columns = ['feature_name', 'value']
+                        df_sum_2['feature_name'] = df_sum_2['feature_name'].astype(str)
+                        df_sum_2['value'] = df_sum_2['value'].astype(float)
+                        minmax_anomalous_features_count = len(df_sum_2['value'])
+                        minmax_anomalous_features_sum = df_sum_2['value'].sum()
+                        logger.info('minmax_anomalous_ts - minmax_anomalous_features_count: %s, minmax_anomalous_features_sum: %s' % (
+                            str(minmax_anomalous_features_count),
+                            str(minmax_anomalous_features_sum)))
+
+                    if minmax_fp_features_sum and minmax_anomalous_features_sum:
+                        percent_different = None
+                        try:
+                            fp_sum_array = [minmax_fp_features_sum]
+                            calc_sum_array = [minmax_anomalous_features_sum]
+                            percent_different = 100
+                            sums_array = np.array([minmax_fp_features_sum, minmax_anomalous_features_sum], dtype=float)
+                            calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
+                            percent_different = calc_percent_different[0]
+                            logger.info('percent_different between minmax scaled features sums - %s' % str(percent_different))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to calculate percent_different from minmax scaled features sums')
+
+                        if percent_different:
+                            almost_equal = None
+                            try:
+                                np.testing.assert_array_almost_equal(fp_sum_array, calc_sum_array)
+                                almost_equal = True
+                            except:
+                                almost_equal = False
+
+                            if almost_equal:
+                                minmax_not_anomalous = True
+                                logger.info('minmax scaled common features sums are almost equal, not anomalous')
+
+                            # if diff_in_sums <= 1%:
+                            if percent_different < 0:
+                                new_pdiff = percent_different * -1
+                                percent_different = new_pdiff
+
+                            if percent_different < settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:
+                                minmax_not_anomalous = True
+                                # log
+                                logger.info('not anomalous - minmax scaled features profile match - %s - %s' % (base_name, str(minmax_not_anomalous)))
+                                logger.info(
+                                    'minmax scaled calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
+                                    (str(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR),
+                                        str(fp_id), str(percent_different)))
+                            if minmax_not_anomalous:
+                                not_anomalous = True
+                                minmax = 1
+                                # Created time series resources for graphing in
+                                # the matched page
+
+                # Clean up
+                if minmax_check:
+                    try:
+                        clean_file = anomalous_ts_csv
+                        if os.path.isfile(anomalous_ts_csv):
+                            self.remove_metric_check_file(str(anomalous_ts_csv))
+                        logger.info('cleaned up - %s' % clean_file)
+                    except:
+                        logger.info('no anomalous_ts_csv file to clean up')
+                    try:
+                        clean_file = anomalous_fp_fname_out
+                        if os.path.isfile(anomalous_fp_fname_out):
+                            self.remove_metric_check_file(str(anomalous_fp_fname_out))
+                        logger.info('cleaned up - %s' % clean_file)
+                    except:
+                        logger.info('no anomalous_fp_fname_out file to clean up')
+                # END - Feature #2404: Ionosphere - fluid approximation
+
                 if not_anomalous:
                     self.not_anomalous.append(base_name)
                     # update matched_count in ionosphere_table
@@ -1664,6 +2105,19 @@ class Ionosphere(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to get ionosphere_matched_table meta for %s' % base_name)
 
+                    # @added 20180620 - Feature #2404: Ionosphere - fluid approximation
+                    # Added minmax scaling values
+                    if minmax_not_anomalous == 1:
+                        minmax_fp_features_sum = float(minmax_fp_features_sum)
+                        minmax_fp_features_count = int(minmax_fp_features_count)
+                        minmax_anomalous_features_sum = float(minmax_anomalous_features_sum)
+                        minmax_anomalous_features_count = int(minmax_anomalous_features_count)
+                    else:
+                        minmax_fp_features_sum = 0
+                        minmax_fp_features_count = 0
+                        minmax_anomalous_features_sum = 0
+                        minmax_anomalous_features_count = 0
+
                     try:
                         connection = engine.connect()
                         # @modified 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
@@ -1677,11 +2131,23 @@ class Ionosphere(Thread):
                             all_calc_features_count=len(all_calc_features_sum_list),
                             sum_common_values=float(sum_calc_values),
                             common_features_count=int(relevant_calc_feature_values_count),
-                            tsfresh_version=str(tsfresh_version))
+                            tsfresh_version=str(tsfresh_version),
+                            # @added 20180620 - Feature #2404: Ionosphere - fluid approximation
+                            # Added minmax scaling values
+                            minmax=minmax,
+                            minmax_fp_features_sum=minmax_fp_features_sum,
+                            minmax_fp_features_count=minmax_fp_features_count,
+                            minmax_anomalous_features_sum=minmax_anomalous_features_sum,
+                            minmax_anomalous_features_count=minmax_anomalous_features_count)
                         result = connection.execute(ins)
                         connection.close()
                         new_matched_id = result.inserted_primary_key[0]
-                        logger.info('new ionosphere_matched id: %s' % str(new_matched_id))
+                        # @modified 20180620 - Feature #2404: Ionosphere - fluid approximation
+                        # Added minmax
+                        if minmax == 0:
+                            logger.info('new ionosphere_matched id: %s' % str(new_matched_id))
+                        else:
+                            logger.info('new minmax scaled ionosphere_matched id: %s' % str(new_matched_id))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
@@ -2060,7 +2526,11 @@ class Ionosphere(Thread):
                 logger.error('error :: cannot connect to redis at socket path %s' % (
                     settings.REDIS_SOCKET_PATH))
                 sleep(30)
-                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                if settings.REDIS_PASSWORD:
+                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
             # Report app up
@@ -2471,7 +2941,10 @@ class Ionosphere(Thread):
             # Self monitor processes and terminate if any spin_process has run
             # for to long
             p_starts = time()
-            while time() - p_starts <= 20:
+            # @modified 20180621 - Feature #2404: Ionosphere - fluid approximation
+            # Increase run time to 55 seconds to allow for Min-Max scaling
+            # while time() - p_starts <= 20:
+            while time() - p_starts <= 55:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)

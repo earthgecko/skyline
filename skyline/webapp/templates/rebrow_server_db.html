@@ -19,7 +19,11 @@
 
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
-		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+<!-- @modified 20180727 - Feature #2378: Add redis auth to Skyline and rebrow
+# Changed all password password_url parameters to token parameter
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?password={{ url_password }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+-->
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
 		<li class="active"><span class="logo"><span class="sky">{{ host }}:{{ port}}</span> <span class="re">DB {{ db }}</span></li>
 	</ol>
 
@@ -33,16 +37,16 @@
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
         		<li
-        		{% if url_for("rebrow_server_db", host=host, port=port, db=db) == request.path %}
+        		{% if url_for("rebrow_server_db", host=host, port=port, db=db, token=token, salt=salt) == request.path %}
           	class="active"
           	{% endif %}
-          	><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/">Server Status</a></li>
+          	><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}">Server Status</a></li>
 
           	<li
-          	{% if url_for("rebrow_keys", host=host, port=port, db=db) in request.path %}
+          	{% if url_for("rebrow_keys", host=host, port=port, db=db, token=token, salt=salt) in request.path %}
           	class="active"
           	{% endif %}
-          	><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/">Keys</a></li>
+          	><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a></li>
         </ul>
       </div><!-- /.nav-collapse -->
 
@@ -54,8 +58,8 @@
 
 			<p><strong>{{ dbsize }} Keys available.</strong></p>
 
-			<form action="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/" method="get">Find keys matching pattern: <input name="pattern" value="*" /></form>
-			<div>or <a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/">list all keys</a></div>
+			<form action="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}" method="get">Find keys matching pattern: <input name="pattern" value="*" /></form>
+			<div>or <a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">list all keys</a></div>
 
 
 		</div>

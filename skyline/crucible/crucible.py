@@ -77,7 +77,11 @@ class Crucible(Thread):
         self.current_pid = getpid()
         self.process_list = Manager().list()
         self.metric_variables = Manager().list()
-        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
     def check_if_parent_is_alive(self):
         """
@@ -858,7 +862,11 @@ class Crucible(Thread):
                 logger.info('skyline can not connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 sleep(10)
                 logger.info('connecting to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
-                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                if settings.REDIS_PASSWORD:
+                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
             """

@@ -30,6 +30,36 @@ def validate_settings_variables(current_skyline_app):
         print ('error :: REDIS_SOCKET_PATH is not set in settings.py')
         invalid_variables = True
 
+    # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+    try:
+        TEST_REDIS_PASSWORD = settings.REDIS_PASSWORD
+        if not settings.REDIS_PASSWORD:
+            print ('WARNING :: REDIS_PASSWORD is to None, please considering enabling Redis authentication')
+            print ('WARNING :: by setting the Redis variable requirepass in your redis.conf and restarting')
+            print ('WARNING :: Redis, then set the REDIS_PASSWORD in your settings.py and restart your')
+            print ('WARNING :: Skyline services.')
+            print ('WARNING :: See https://redis.io/topics/security and http://antirez.com/news/96 for more info')
+    except:
+        current_logger.error('error :: REDIS_PASSWORD is not set in settings.py')
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: exiting, please fix setting.py')
+        print ('error :: REDIS_PASSWORD is not set in settings.py')
+        invalid_variables = True
+
+    try:
+        TEST_OTHER_SKYLINE_REDIS_INSTANCES = settings.OTHER_SKYLINE_REDIS_INSTANCES
+        if settings.OTHER_SKYLINE_REDIS_INSTANCES:
+            for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                if not redis_password:
+                    print ('WARNING :: the Redis password for %s is to False in the OTHER_SKYLINE_REDIS_INSTANCES') % str(redis_ip)
+                    print ('WARNING :: variable in settings.py, please considering enabling Redis authentication')
+                    print ('WARNING :: on %s by setting the Redis variable requirepass in the redis.conf and restarting') % str(redis_ip)
+                    print ('WARNING :: Redis, then set the Redis password for %s in OTHER_SKYLINE_REDIS_INSTANCES') % str(redis_ip)
+                    print ('WARNING :: in your settings.py and restart your Skyline luminosity service.')
+                    print ('WARNING :: See https://redis.io/topics/security and http://antirez.com/news/96 for more info')
+    except:
+        pass
+
     try:
         TEST_SKYLINE_TMP_DIR = settings.SKYLINE_TMP_DIR
     except:
@@ -353,6 +383,29 @@ def validate_settings_variables(current_skyline_app):
         current_logger.error('error :: exiting, please fix setting.py')
         print ('error :: MEMCACHED_SERVER_PORT is not set in settings.py')
         invalid_variables = True
+
+    # @added 20180524 - Branch #2270: luminosity
+    try:
+        TEST_LUMINOL_CROSS_CORRELATION_THRESHOLD = isinstance(settings.LUMINOL_CROSS_CORRELATION_THRESHOLD, float)
+    except:
+        current_logger.error('error :: LUMINOL_CROSS_CORRELATION_THRESHOLD is not set as a float in settings.py')
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: exiting, please fix setting.py')
+        print ('error :: LUMINOL_CROSS_CORRELATION_THRESHOLD is not set as a float in settings.py')
+        invalid_variables = True
+    if TEST_LUMINOL_CROSS_CORRELATION_THRESHOLD:
+        if settings.LUMINOL_CROSS_CORRELATION_THRESHOLD >= 1.0:
+            current_logger.error('error :: LUMINOL_CROSS_CORRELATION_THRESHOLD is >= 1.0 in settings.py')
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: exiting, please fix setting.py')
+            print ('error :: LUMINOL_CROSS_CORRELATION_THRESHOLD should be a float between 0.0 and 1.0000')
+            invalid_variables = True
+        if settings.LUMINOL_CROSS_CORRELATION_THRESHOLD <= 0.0:
+            current_logger.error('error :: LUMINOL_CROSS_CORRELATION_THRESHOLD is <= 0.0 in settings.py')
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: exiting, please fix setting.py')
+            print ('error :: LUMINOL_CROSS_CORRELATION_THRESHOLD should be a float between 0.0 and 1.0000')
+            invalid_variables = True
 
     if invalid_variables:
         return False

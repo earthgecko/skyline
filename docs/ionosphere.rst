@@ -4,7 +4,7 @@
 Ionosphere
 ==========
 
-Ionosphere is a story about timeseries.
+Ionosphere is a story about time series.
 
 Dedicated to my father, Derek, a man of numbers if there ever was one.
 
@@ -44,16 +44,16 @@ Overview
 - Is Ionosphere the panacea for anomaly detection?  No.
 - Is Ionosphere immediately useful for web scale anomaly detection?  No.  Unless
   you are already doing web scale anomaly detection with Skyline, then still no.
-  However over time yes.  You cannot rush timeseries.
+  However over time yes.  You cannot rush time series.
 - Is Ionosphere a lot of work to train, yes.
-- Ionosphere uses a timeseries similarality comparison method to compare two
-  different timeseries for a metric.
+- Ionosphere uses a time series similarity comparison method to compare two
+  different time series for a metric.
 - This method is based on summing the features that are calculated for the
-  timeseries using |tsfresh| to "fingerprint" the data set.
+  time series using |tsfresh| to "fingerprint" the data set.
 - This allows the operator to fingerprint and profile what is not anomalous, but
   normal and to be expected, even if 3sigma will always detect it as anomalous.
 - Ionosphere also allows for the creation of layers rules which allow the
-  operator to define ad-hoc boundaries and conditions that can be considered as
+  operator to define ad hoc boundaries and conditions that can be considered as
   not anomalous for each features profile that is created.
 
 How well does it work?
@@ -84,6 +84,8 @@ that have been OVH'd..."
 Deploying and setting Ionosphere up
 -----------------------------------
 
+Requires - Panorama to be enabled and running.
+
 Ionosphere has a specific section of variables in ``settings.py`` that are
 documented in the settings specific documentation see all the settings below:
 
@@ -97,7 +99,7 @@ should all be fairly intuitive.
 If you are new to Skyline, then by the time you have all the other Skyline apps
 set up and running you should have a more intuitive feel for these to after
 having spent some time looking over your running Skyline.  You cannot rush
-timeseries :)
+time series :)
 
 Ionosphere static demo pages
 ----------------------------
@@ -141,17 +143,23 @@ that the profile was created, see the :skyblue:`Graphite ::` :red:`graphs WHEN c
 section in the below demo page.
 
 A series of matched graphs, showing the instances where Ionosphere has
-analyzed the Analyzer detected anomalouse timeseries and found it be not
-anomalous because the calculated ``features_sum`` of the Analyzer anomalous
-timeseries were within 1% difference of the ``features_sum :: 73931.7673978000``
-that was calculated for features profile 269 see
+analyzed the Mirage detected anomalous time series and found it be not
+anomalous because the calculated ``features_sum`` of the Mirage anomalous
+time series were within 1% difference of the ``features_sum :: 4764.3152004300``
+that was calculated for features profile 989 see
 :skyblue:`Graphite ::` :red:`graphs MATCHED` section in the below demo page.
 
 See |fp_demo_page| for a clearer picture.
 
 .. |fp_demo_page| raw:: html
 
-   <a href="_static/ionosphere_demo/features-profile.stats.statsd.graphiteStats.calculationtime/Skyline.Ionosphere.features-profile.stats.statsd.graphiteStats.calculationtime.html" target="_blank">Ionosphere static features profile demo page with matched graphs</a>
+   <a href="_static/ionosphere_demo/fp_matched_demo/Skyline.fp.matched.demo.html" target="_blank">Ionosphere static features profile demo page with matched graphs</a>
+
+The |old_fp_demo_page|.
+
+.. |old_fp_demo_page| raw:: html
+
+   <a href="_static/ionosphere_demo/features-profile.stats.statsd.graphiteStats.calculationtime/Skyline.Ionosphere.features-profile.stats.statsd.graphiteStats.calculationtime.html" target="_blank">old demo page with matched graphs</a>
 
 Features profile search demo page with generational information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -176,7 +184,7 @@ Things to consider
 Contextual anomalies - Earthquakes and Earth tremors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A point anomaly is only as contextual as the timeframe in which it is considered
+A point anomaly is only as contextual as the time frame in which it is considered
 to be anomalous in.
 
 The following metaphor can be used to describe this concept.  As this concept is
@@ -202,7 +210,7 @@ quite normal.
 
 Bob then wonders to himself why he did not think about this before leaving
 his stable shire in the UK.  He consoles himself by thinking "Well all the VCs
-and players are here...  so it obviously cannot be a big single point of
+and players are here..." so it obviously cannot be a big single point of
 failure.
 
 .. code-block:: python
@@ -225,7 +233,7 @@ So Ionosphere gives you 2 options:
 
 .. figure:: images/ionosphere/create.and.do.not.learn.png
 
-  Only make a features profile based on the :mod:`settings.FULL_DURATION` data.
+  Only make a features profile based on the :mod:`settings.FULL_DURATION` data or the Mirage ``SECOND_ORDER_RESOLUTION_SECONDS``
 
 .. figure:: images/ionosphere/create.and.learn.png
 
@@ -239,10 +247,11 @@ to see the relevant Analyzer :mod:`settings.FULL_DURATION` or Mirage the
 ``SECOND_ORDER_RESOLUTION_HOURS`` data as not anomalous and **not** learn at
 the fuller duration of the metric's ``learn_full_duration``.
 
-You can teach Ionosphere badly, but to unteach it is just a SQL update.
+You can teach Ionosphere badly, but to unteach it is just a click of the Disable
+features profile button.
 
-How Ionosphere works - as simple overview as possible
------------------------------------------------------
+How Ionosphere works - a simple overview
+----------------------------------------
 
 Firstly one needs to understand there is a chicken and egg aspect to Ionosphere.
 Which if you have read up to this point, hopefully you have already got that
@@ -254,44 +263,77 @@ feature calculations and comparisons and a role centered on learning.
 The features role
 ^^^^^^^^^^^^^^^^^
 
+The features role is based on the sum of the calculated features of a time series.
+What are calculated features?  Between 150 and 210 features are calculated, here
+are a few examples:
+
+.. code-block:: python
+
+  ['value__minimum', '1507.1']
+  ['value__maximum', '3806.75']
+  ['value__median', '1853.95']
+  ['value__count_above_mean', '474.0'],
+  ['value__skewness', '2.1725548997']
+  ['value__number_peaks__n_3', '121.0']
+  ['value__longest_strike_above_mean', '42.0']
+  ['value__first_location_of_minimum', '0.714285714286']
+  ['value__last_location_of_minimum', '0.715277777778']
+  ['value__absolute_sum_of_changes', '71195.65']
+  ['value__augmented_dickey_fuller', '-5.85928430205']
+  ['value__large_number_of_peaks__n_3', '1.0']
+
+For the current full list of all features that are calculated see :mod:`tsfresh_feature_names.TSFRESH_FEATURES`
+Ionosphere calculates the features and then then use the sum of these values.
+
 - Ionosphere **only** analyses SMTP alerter enabled metrics.
 - Once Ionosphere is enabled, if Analyzer or Mirage detect an anomaly on a
   metric they:
 
   - Save the training data set and the anomaly details
-  - If the metric is not an ``ionosphere_enabled`` metric and SMTP alert enabled
+  - If the metric is not an ``ionosphere_enabled`` metric and a SMTP alert enabled
     metric, an alert is triggered and all the created alert images are saved in
     the training data directory as well.
   - If the metric is an ``ionosphere_enabled`` metric, Analyzer and Mirage defer
-    the timeseries to Ionosphere, via a check file, for Ionosphere to make a
+    the time series to Ionosphere, via a check file, for Ionosphere to make a
     decision on.  More on that below.
 
 - Ionosphere serves the training data set for each triggered anomaly, ready for
   a human to come along in the Webapp Ionosphere UI and say, "that is not
   anomalous" (if it is not).
 - At the point the operator makes a features profile, all the features values
-  that are created for the not anomalous timeseries are entered into the
+  that are created for the not anomalous time series are entered into the
   database and the metric becomes an ``ionosphere_enabled`` metric, if it was
   not one already.
 - All the anomaly resources are then copied to the specific features profile
-  directory that is created for the features profile.Over time,
+  directory that is created for the features profile.
 - Once a metric is ``ionosphere_enabled``, both Analyzer and Mirage will refer
   any anomalies found for the metric to Ionosphere instead of just alerting.
-- When a 3sigma anomalous timeseries is sent to Ionosphere, it calculates the
-  features with |tsfresh| for the 3sigma anomalous timeseries and then compares
+- When a 3sigma anomalous time series is sent to Ionosphere, it calculates the
+  features with |tsfresh| for the 3sigma anomalous time series and then compares
   the common features sums with those of previously recorded features profiles.
   If the two values are less than
-  :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN`
-
-    - Ionosphere will deem the timeseries as not anomalous and update the
-      related training data as MATCHED.
-    - If Ionosphere does **not** find a match, it analyses the timeseries
-      against any defined layers, if there are any and if a match is found
-      Ionosphere will deem the timeseries as not anomalous and update the
-      related training data as MATCHED.
-    - If Ionosphere does **not** find a match, it tells the originating app (
-      Analyzer or Mirage) to send out the anomaly alert with a
-      ``[Skyline alert] - Ionosphere ALERT`` subject field.
+  :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN`,
+  Ionosphere will deem the time series as not anomalous and update the related
+  training data as MATCHED and update the features profile matched count in the
+  database.
+- If the values are not matched Ionosphere will apply Min-Max scaling (ONLY if
+  the features profile time series and the anomalous time series are of a
+  similar range) and try the same technique with temporary Min-Max scaled time
+  series from the original features profile time series (which is stored in the
+  database) and the 3sigma anomalous time series.  It creates a features profile
+  for each Min-Max scaled (standardized) time series and then compares the
+  features sums and determines whether the difference is below the
+  :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN` and
+  will deem it as not anomalous and update the related training data as MATCHED
+  and update the features profile matched count in the database.
+- If Ionosphere does **not** find a features profile match, it analyses the time
+  series against any defined layers, if there are any and if a match is found
+  Ionosphere will deem the time series as not anomalous and update the related
+  training data as MATCHED and update the features profile layers matched count
+  in the database.
+- If Ionosphere does **not** find a match, it tells the originating app
+  (Analyzer or Mirage) to send out the anomaly alert with a
+  ``[Skyline alert] - Ionosphere ALERT`` subject field.
 
 The learning role
 ^^^^^^^^^^^^^^^^^
@@ -300,18 +342,22 @@ The learning role
   every unmatched anomaly that training_data is created for, after the
   ``learn_valid_ts_older_than`` seconds have been reached, Ionosphere will
   attempt to "learn" whether the anomalous event after ``learn_valid_ts_older_than``
-  seconds and any subsequent aggregration has had time to occur, if the timeseries
+  seconds and any subsequent aggregation has had time to occur, if the time series
   features at ``learn_full_duration`` seconds match any feature profiles that
   were created for the metric at the ``learn_full_duration``.
 - If Ionosphere finds a match to the features calculated from the metric
-  timeseries that it surfaces the from Graphite at ``learn_full_duration``, it
+  time series that it surfaces from Graphite at ``learn_full_duration``, it
   will use the anomaly training data to create a features profile for the metric
   at the metric's :mod:`settings.FULL_DURATION` or ``SECOND_ORDER_RESOLUTION_HOURS``
   (whichever is applicable) **and** it will also create a features profile with
   the ``learn_full_duration`` data that matched, as long as the :mod:`settings.FULL_DURATION`
-  or ``SECOND_ORDER_RESOLUTION_HOURS`` features sum as long as the difference is
-  within the :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN`
-  or the metric specific ``max_percent_diff_from_origin``
+  or ``SECOND_ORDER_RESOLUTION_HOURS`` features sum difference is within the
+  :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN` or the
+  metric specific ``max_percent_diff_from_origin``
+
+..note:: Ionosphere does not currently use Min-Max scaling in the learning role,
+  the learnt features profiles are only created with the time series at the
+  original scale.
 
 Input
 -----
@@ -319,16 +365,16 @@ Input
 When an anomaly alert is sent out via email, a link to the Ionosphere training
 data is included in the alert.  This link opens the Ionosphere UI with the all
 training data for the specific anomaly where the user can submit the metric
-timeseries as not anomalous and generate have Skyline generate a features
-profile with |tsfresh| (and optionally some additional layers, which are covered
-further down on this page).
+time series as not anomalous and have Skyline generate a features profile with
+|tsfresh| (and optionally some additional layers, which are covered further down
+on this page).
 
 features profiles
 -----------------
 
 When a training data set is submitted as not anomalous for a metric a features
-profile is extracted from the timeseries using |tsfresh|.  This features profile
-contains the about values of 216 features (currently as of tsfresh-0.4.0), such
+profile is extracted from the time series using |tsfresh|.  This features profile
+contains the values of 210 features (currently as of tsfresh-0.4.0), such
 as median, mean, variance, etc, for a full list of known features that are
 calculated see :mod:`tsfresh_feature_names.TSFRESH_FEATURES`.
 
@@ -340,14 +386,14 @@ following manner.  For every metric that has a features profile that is created,
   features profile gets a unique id.
 - z_fp_<metric_id> - features profile metric table which contains the features
   profile id, feature name id and the calculated value of the feature.
-- z_ts_<metric_id> - the timeseries data for the metric on which a features
+- z_ts_<metric_id> - the time series data for the metric on which a features
   profile was calculated.
 
 These tables are prefixed with ``z_`` so that they are all listed after all core
 Skyline database tables.  Once a metric has a z_fp_<metric_id> and a
-z_ts_<metric_id>, these tables are updated any future features profiles and
-timeseries data.  So there is are 2 tables per metric, not tables per features
-profile.
+z_ts_<metric_id> table, these tables are updated with any future features
+profiles and time series data.  So there is are 2 tables per metric, not tables
+per features profile.
 
 How Ionosphere is "learning"?
 -----------------------------
@@ -356,14 +402,14 @@ Ionosphere may have had humble beginnings, but adding this seemingly trivial
 function was anything but humble, simple or easy.  So to solve the seemingly
 simple problem, something completely new had to be pieced together.
 
-Ionosphere "learns" timeseries and makes decisions based on a timeseries
-similarities comparison method, based on a method using the |tsfresh| package.
+Ionosphere "learns" time series and makes decisions based on a time series
+similarities comparison method using the |tsfresh| package.
 
-This "learning" is base upon determining the similarities in timeseries that
-could be best described as attempting to determine how similar 2 timeseries are
+This "learning" is base upon determining the similarities in time series that
+could be best described as attempting to determine how similar 2 time series are
 in terms of the amount of "power/energy", range and "movement" there is within
-the timeseries data set.  A fingerprint or signature if you like, but understand
-that neither are perfect.  This timeseries similarities comparison method is not
+the time series data set.  A fingerprint or signature if you like, but understand
+that neither are perfect.  This time series similarities comparison method is not
 perfect in the dynamic, operational arena, but it achieves the goal of being useful.
 However, it must be stated that it **can** be almost perfect, a |tsfresh| features
 profile sum is (about as) **perfect** as you can get at 0% difference (there may
@@ -371,7 +417,7 @@ be edge cases).  However using it with 100% matching is not useful to learning
 and trying to profile something like the Active Brownian Motion (for want of a
 better way of explaining it).  Lots of dynamic metrics/systems will exhibit a
 tendency to try an achieve Active Brownian Motion, not all but many and
-definitely at differing and some times multiple seasonalities.
+definitely at differing and sometimes multiple seasonality.
 
 For a very good overview of Active Brownian Motion please see the @kempa-liehr
 description at
@@ -384,12 +430,14 @@ description at
 Ionosphere enables us to try and profile something similar to Active Brownian
 Motion as the norm, again for want of a better way of trying to explain it.
 
+.. note:: Ionosphere does not use Min-Max scaling in the learning context
+
 However, contextually, Ionosphere nor the |tsfresh| implemented method, will ever
-be perfect, unless 2 timeseries have identical data, consistently, without
+be perfect, unless 2 time series have identical data, consistently, without
 change.  But how challenging would that be? :)
 
-Also it may be possible that an identical timeseries reversed may give the same
-or negative of a features sum and a mirror image timeseries can have very
+Also it may be possible that an identical time series reversed may give the same
+or negative of a features sum and a mirror image time series can have very
 similar calculated feature sums.
 
 Anyway, it is not perfect, by design.  Evolution tends to not achieve perfection,
@@ -430,7 +478,7 @@ fine tuning and making better or polishing a turd or diamante.
 Layers
 ^^^^^^
 
-Ionosphere allows the operator to train Skyline a not anomalous timeseries
+Ionosphere allows the operator to train Skyline a not anomalous time series
 in terms of generating a features profile to be compared to anomalies in the
 future, however Ionosphere also allows the operator to define "layers" rules at
 the time of feature profile creation.
@@ -439,15 +487,15 @@ Layers rules allow us to train Skyline on boundaries as well, on the fly via the
 UI at the time of features profile creation, which puts all the work for the
 operator in the one place.  Think of them as metric AND feature profile specific
 algorithms.  A layer should only ever be used to describe the features profile
-:mod:`settings.FULL_DURATION` timeseries.  The operator should limit their
-layers values to within acceptable bounds of the range within the features
-profile.  The operator should not try and use a single layer to try and describe
-the entire range they "think" the metric can go to, a layer is meant to match with
-a features profile, not a metric.  If this methodology is followed, layers and
-features profiles "retire" around the same time as metrics change over time,
-an old features profile that no longer describes the current active motion state
-will no longer ever be matched, neither should its layers.  One of the
-things some way down the road on the Ionosphere roadmap is
+and ONLY at :mod:`settings.FULL_DURATION` time series.  The operator should
+limit their layers values to within acceptable bounds of the range within the
+features profile.  The operator should not try and use a single layer to try and
+describe the entire range they "think" the metric can go to, a layer is meant to
+match with a features profile, not a metric.  If this methodology is followed,
+layers and features profiles "retire" around the same time as metrics change
+over time, an old features profile that no longer describes the current active
+motion state will no longer ever be matched, neither should its layers.  One of
+the things some way down the road on the Ionosphere roadmap is
 Feature #1888: Ionosphere learn - evolutionary maturity forget
 
 Layers were added to reduce the number of features profiles one has to train
@@ -460,8 +508,16 @@ you create a Skyline monkey to watch that.  A monkey with fairly simple
 instructions.
 
 A layer consist of a series of simple algorithms that are run against a
-timeseries after Analyzer/Mirage and Ionosphere features comparisons.  The
-layers are defined as:
+time series after Analyzer/Mirage and Ionosphere features comparisons.
+
+.. note:: It is IMPORTANT to understand that layers are only evaluated against
+  the :mod:`settings.FULL_DURATION` time series, regardless if it is a Mirage
+  metric being checked.  The operator should define their layers values in
+  relation to the Redis graph that is presented in the Train :: layers section
+  and to the Last :: 30 datapoints :: at FULL_DURATION section just below that
+  section, to ensure they are using relevant ranges.
+
+The layers are defined as:
 
 ::
 
@@ -478,7 +534,7 @@ any of the other below layers being checked
 
 ::
 
-  D1 layer [optional] if datapoint [<, >, ==, !=, <=, >=] x in the last y values in the timeseries
+  D1 layer [optional] if datapoint [<, >, ==, !=, <=, >=] x in the last y values in the time series
   DISCARD - not_anomalous False
 
 The D1 layer can be used as an upper or lower limit, so the D layer does not
@@ -487,7 +543,7 @@ conditions from being checked.
 
 ::
 
-  E layer [required] if datapoint [<, >, ==, !=, <=, >=] x in the last y values in the timeseries
+  E layer [required] if datapoint [<, >, ==, !=, <=, >=] x in the last y values in the time series
   not anomalous
 
 The Es, F1 and F2 layers shall not be discussed as NOT IMPLEMENTED YET.
@@ -496,7 +552,7 @@ An example layer
 
 For instance, say occasionally we can expect to see a spike of 404s status codes
 on a web app due to bots or your own scanning, with layers we can tell Ionosphere
-that a timeseries was not anomalous if the datapoint is less than 120 and has
+that a time series was not anomalous if the datapoint is less than 120 and has
 values in the last 3 datapoints is less than 50.  This allows for a somewhat
 moving window and an alert that would be delayed by say 3 minutes, but it is a
 signal, rather than noise. Let us describe that layer as gt_120-5_in_3
@@ -531,7 +587,7 @@ however if the data was:
     13:11:11 0
     13:12:11 800
 
-The layer would not ever report the timeseries as not anomalous as the 800
+The layer would not ever report the time series as not anomalous as the 800
 exceeds the gt_120, so the rest of the layer definition would not be evaluated.
 
 .. warning:: Layers may seem simple, but the layers must be thought about
@@ -540,14 +596,17 @@ exceeds the gt_120, so the rest of the layer definition would not be evaluated.
   Specifically D layer, however layer D1 was added to remove this possibility,
   if the layers are properly implemented.  The D1 layer is optional (and is
   reverse capable with with any existing layers that were created prior to
-  1.1.3-beta) as is there to let the operator set upper and lower bounds where
+  1.1.3-beta) and is there to let the operator set upper and lower bounds where
   necessary.
 
 Be careful that you do not create another layer later that silences bad, e.g.
-dropped to 0, the above example is not a good example of the as we want and
-expect 0 on the 404 found generally, but if it was status code 200, we would not
-want any layers silencing a drop to 0, please try and use layer D1 wisely were
-required.
+dropped to 0, the above example is not a good example of that as we want and
+expect 0 on the 404 not found generally, but if it was status code 200, we would
+not want any layers silencing a drop to 0, please try and use layer D1 wisely
+where required.
+
+However, in this example,  if you want to ensure that your 200 status code count
+does not hit 0 or drop off a cliff, you would configure Boundary to watch it.
 
 DISABLED features profiles
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -588,7 +647,7 @@ seminal Belgium 2014 devopsdays presentation, then it has achieved a goal.
 
 Ionosphere first and foremost was created to give this dimension of human
 piloting where necessary.  Giving Skyline that ability to allow human input in
-some form to "teach" Skyline what is not anomalous comes with a number
+some from to "teach" Skyline what is not anomalous comes with a number
 additional benefits, like giving the Skyline the information needed to learn
 how to make decisions based on the input data it is provided within.
 
@@ -605,7 +664,7 @@ Current state
 -------------
 
 It appears that Ionosphere is better at doing what it was intended for than
-doing what it was not intended for.  All timeseries not being created equal.
+doing what it was not intended for.  All time series not being created equal.
 
 Ionosphere does low range, low rate metrics very well.
 
@@ -620,12 +679,15 @@ and high variability metrics, time will tell.
 Over the fullness of time and data, these learning efficiency metrics will be
 available via the database data for analysis.
 
+**UPDATE** - using Min-Max scaling Ionosphere now handles high range, highly
+variable metrics much better.
+
 tsfresh
 -------
 
 The |tsfresh| package and features extraction functions, enabled this ability of
 features calculation on a wholesale scale, without having to design lots of
-algorithms to calculate the timeseries features for.  The |tsfresh| package
+algorithms to calculate the time series features for.  The |tsfresh| package
 enabled Ionosphere to happen much FASTER, it calculates all the features that
 are required to make this method viable and work.  They said:
 
@@ -635,7 +697,7 @@ They were not wrong.  Skyline has added a lot of "checks" to ensure consistency
 in the |tsfresh| calculated features so that a features profile is not affected
 by any changes that may be implemented in the |tsfresh| package.  All of this
 has been pushed back into |tsfresh| and may be one of the reasons why the actual
-development of Ionosphere took so long, but you cannot rush timeseries.
+development of Ionosphere took so long, but you cannot rush time series.
 
 This overview of Ionosphere could not be complete without a special thanks to
 the |tsfresh| people @MaxBenChrist, @nils-braun and @jneuff who are some of nicest
@@ -652,10 +714,10 @@ anomalous event does not result in Ionosphere making all the DB metrics become
 anomalous :)
 
 The architectural decision to introduce memcached when Redis is already
-available, was done to ensure that Redis is for timeseries data (and alert keys)
+available, was done to ensure that Redis is for time series data (and alert keys)
 and memcached isolates DB data caching.  The memcache data is truly transient,
 where as the Redis data is more persistent data and memcached is a mature, easy
-and well documented.
+to use and well documented.
 
 Cached data
 ^^^^^^^^^^^
@@ -665,6 +727,8 @@ Ionosphere caches the following data:
 - features profile features values from the `z_fp_<metric_id>` table - no expiry
 - metrics table metric record - `expire=3600`
 - metric feature profile ids - `expire=3600`
+- features profile features time series from the `z_ts_<metric_id>` table - no
+  expiry
 
 .. note:: due to caching a metric and a features profile can take up to 1 hour
   to become live.
@@ -676,10 +740,10 @@ No UI data update method
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 There is no method to modify the DB data via the UI.  If you want to make any
-changes, they must be made directly against the DB.  Disabling a features
-profile, deleting features profiles, changing any of the metrics values once set
-for metrics e.g. ``learn_full_duration``, ``learn_valid_ts_older_than``,
-``max_generations`` or ``max_percent_diff_from_origin``
+changes, they must be made directly against the DB.  Deleting features profiles,
+changing any of the metrics values once set for metrics e.g.
+``learn_full_duration``, ``learn_valid_ts_older_than``, ``max_generations`` or
+``max_percent_diff_from_origin``
 
 Backup
 ^^^^^^
@@ -689,13 +753,11 @@ Backup
   frequently (for the time being, until autobuild is available, however
   autobuild will not a able to recreate all the resources, but most).
 
-
 MySQL configuration
 ^^^^^^^^^^^^^^^^^^^
 
 There could be a lot of tables. **DEFINITELY** implement ``innodb_file_per_table``
 in MySQL.
-
 
 Ionosphere - autobuild features_profiles dir
 --------------------------------------------

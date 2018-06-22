@@ -96,7 +96,12 @@ def seed():
                 print 'notice :: ' + str(datapoints_sent) + ' datapoints sent'
 
     print 'notice :: connecting to Redis to query data and validate Horizon populated Redis with data'
-    r = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+    # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+    if settings.REDIS_PASSWORD:
+        r = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+    else:
+        r = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     time.sleep(5)
 
     try:
