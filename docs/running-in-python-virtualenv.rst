@@ -114,7 +114,7 @@ Once again using Python-2.7.14:
     PYTHON_VERSION="2.7.14"
     PYTHON_MAJOR_VERSION="2.7"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2712"
+    PROJECT="skyline-py2714"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects"
     virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
