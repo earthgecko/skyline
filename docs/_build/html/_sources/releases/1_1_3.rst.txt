@@ -1,0 +1,12 @@
+=============================
+1.1.3 - the ionosphere branch
+=============================
+
+v1.1.3-beta-ionosphere - Apr 24, 2017
+
+- Added a validated component to the features profiles
+- keying training data.  The addition of each training_dir and data set is now
+  Redis keyed to allow for an increase efficiency in terms of disk I/O for
+  ionosphere.py and making keyed data available for each training_dir data set
+  so that transient matched data can be surfaced for the webapp along with
+  directory paths, etc
