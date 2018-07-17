@@ -1,35 +1,35 @@
-skyline\.horizon package
-========================
+skyline.horizon package
+=======================
 
 Submodules
 ----------
 
-skyline\.horizon\.agent module
-------------------------------
+skyline.horizon.agent module
+----------------------------
 
 .. automodule:: horizon.agent
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.horizon\.listen module
--------------------------------
+skyline.horizon.listen module
+-----------------------------
 
 .. automodule:: horizon.listen
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.horizon\.roomba module
--------------------------------
+skyline.horizon.roomba module
+-----------------------------
 
 .. automodule:: horizon.roomba
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.horizon\.worker module
--------------------------------
+skyline.horizon.worker module
+-----------------------------
 
 .. automodule:: horizon.worker
     :members:

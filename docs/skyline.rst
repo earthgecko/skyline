@@ -21,72 +21,72 @@ Subpackages
 Submodules
 ----------
 
-skyline\.algorithm\_exceptions module
--------------------------------------
+skyline.algorithm_exceptions module
+-----------------------------------
 
 .. automodule:: algorithm_exceptions
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.database module
-------------------------
+skyline.database module
+-----------------------
 
 .. automodule:: database
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.features\_profile module
----------------------------------
+skyline.features_profile module
+-------------------------------
 
 .. automodule:: features_profile
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.ionosphere\_functions module
--------------------------------------
+skyline.ionosphere_functions module
+-----------------------------------
 
 .. automodule:: ionosphere_functions
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.settings module
-------------------------
+skyline.settings module
+-----------------------
 
 .. automodule:: settings
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.skyline\_functions module
-----------------------------------
+skyline.skyline_functions module
+--------------------------------
 
 .. automodule:: skyline_functions
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.skyline\_version module
---------------------------------
+skyline.skyline_version module
+------------------------------
 
 .. automodule:: skyline_version
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.tsfresh\_feature\_names module
----------------------------------------
+skyline.tsfresh_feature_names module
+------------------------------------
 
 .. automodule:: tsfresh_feature_names
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.validate\_settings module
-----------------------------------
+skyline.validate_settings module
+--------------------------------
 
 .. automodule:: validate_settings
     :members:
