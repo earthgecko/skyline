@@ -24,8 +24,8 @@ import mysql.connector
 
 from sqlalchemy.sql import select
 
-# @added 2018075 - Task #2446: Optimize Ionosphere
-#                  Branch #2270: luminosity
+# @added 20180715 - Task #2446: Optimize Ionosphere
+#                   Branch #2270: luminosity
 from sqlalchemy.sql import desc
 
 # @added 20161213 - Branch #1790: test_tsfresh
