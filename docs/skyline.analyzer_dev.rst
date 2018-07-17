@@ -1,35 +1,35 @@
-skyline\.analyzer\_dev package
-==============================
+skyline.analyzer_dev package
+============================
 
 Submodules
 ----------
 
-skyline\.analyzer\_dev\.agent module
-------------------------------------
+skyline.analyzer_dev.agent module
+---------------------------------
 
 .. automodule:: analyzer_dev.agent
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.analyzer\_dev\.alerters module
----------------------------------------
+skyline.analyzer_dev.alerters module
+------------------------------------
 
 .. automodule:: analyzer_dev.alerters
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.analyzer\_dev\.algorithms\_dev module
-----------------------------------------------
+skyline.analyzer_dev.algorithms_dev module
+------------------------------------------
 
 .. automodule:: analyzer_dev.algorithms_dev
     :members:
     :undoc-members:
     :show-inheritance:
 
-skyline\.analyzer\_dev\.analyzer\_dev module
---------------------------------------------
+skyline.analyzer_dev.analyzer_dev module
+----------------------------------------
 
 .. automodule:: analyzer_dev.analyzer_dev
     :members:
