@@ -125,7 +125,8 @@ def seed():
 
         print 'info :: Congratulations! The data made it in. The Horizon pipeline is working.'
         print 'info :: If your analyzer and webapp were started you should be able to see a triggered anomaly for horizon.test.udp'
-        print ('info :: at http://%s:%s' % (str(settings.WEBAPP_IP), str(settings.WEBAPP_PORT)))
+        # print ('info :: at http://%s:%s' % (str(settings.WEBAPP_IP), str(settings.WEBAPP_PORT)))
+        print ('info :: at %s' % str(SKYLINE_URL))
 
     except NoDataException:
         print 'error :: Woops, looks like the data did not make it into Horizon. Try again?'

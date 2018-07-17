@@ -38,8 +38,8 @@ up Skyline takes a while.
 Skyline's default settings and documentation are aimed to run behind a SSL
 terminated and authenticated reverse proxy and use Redis authentication.  This
 makes the installation process more tedious, but it means that all these
-inconvenient factors are not left as an after thought or added some TODO list or
-issue when you decide after trying Skyline, "Yes! I want to Skyline, this is
+inconvenient factors are not left as an after thought or added to some TODO list
+or issue when you decide after trying Skyline, "Yes! I want to Skyline, this is
 cool".
 
 For notes regarding automation and configuration management see the section at
@@ -88,15 +88,16 @@ Steps
   - The IP address and port being used to reverse proxy the Webapp e.g.
     <YOUR_SERVER_IP_ADDRESS>:443, ensure that this is only accessible to
     specified IPs in iptables/ip6tables (further these addresses should also be
-    added to the reverse proxy conf as ``Allow from`` defines when you creat the
-    reverse proxy conf file).
+    added to the reverse proxy conf as ``Allow from`` defines when you create
+    the reverse proxy conf file).
   - The IP address and port being used by MySQL, if you are not binding MySQL to
     127.0.0.1 only, ensure that the MySQL port declared in
     :mod:`settings.PANORAMA_DBPORT` (default 3306) is only accessible to
     specified IPs in iptables/ip6tables
   - Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
     default Graphite pickle ports)
-  - The IP address and port being used by Redis
+  - The IP address and port being used by Redis, which if you are not running
+    multiple distributed Skyline instances should be 127.0.0.1
   - Please ensure you handle all of these with iptables AND ip6tables (or the
     equivalent) before continuing.
 
@@ -117,6 +118,7 @@ Steps
 - Ensure Redis has a long ``requirepass`` set in redis.conf
 - Ensure Redis ``bind`` is set in redis.conf, consider specifically stating
   ``bind 127.0.0.1`` or ``bind 127.0.0.1 <OTHER_IP_YOU_WANT_REDIS_TO_BIND_TO>``
+  if you are going to run multiple distributed  Skyline instances.
 - Start Redis
 - Install memcached and start memcached see `memcached.org <https://memcached.org/>`__
 - Ensure that you start memcached only bound to 127.0.0.1 by passing the daemon
@@ -138,16 +140,18 @@ Steps
     mkdir /tmp/skyline
 
 - git clone Skyline (git should have been installed in the `Running in Python
-  virtualenv <running-in-python-virtualenv.html>`__ section)
+  virtualenv <running-in-python-virtualenv.html>`__ section) and it is
+  recommended to then git checkout the commit reference of the latest stable
+  release.
 
 .. code-block:: bash
 
     mkdir -p /opt/skyline/github
     cd /opt/skyline/github
     git clone https://github.com/earthgecko/skyline.git
-    # If you wish to switch to a specific commit
+    # If you wish to switch to a specific commit or the latest release
     #cd /opt/skyline/github/skyline
-    #git check <COMMITREF>
+    #git checkout <COMMITREF>
 
 - Once again using the Python-2.7.14 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
@@ -201,8 +205,14 @@ Steps
     SSLCertificateKeyFile "<YOUR_PATH_TO_YOUR_KEY_FILE>"
     SSLCertificateChainFile "<YOUR_PATH_TO_YOUR_CHAIN_FILE_IF_YOU_HAVE_ONE_OTHERWISE_COMMENT_THIS_LINE_OUT>"
 
-  - Add a user and password for HTTP authentication, the user does not have to
-    be admin it can be anything, e.g.
+- Update your Apache (or reverse proxy config) with the X-Forwarded-Proto header.
+
+::
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+- Add a user and password for HTTP authentication, the user does not have to
+  be admin it can be anything, e.g.
 
 .. code-block:: bash
 
@@ -217,38 +227,49 @@ Steps
   `Panorama <panorama.html>`__) and Ionosphere.
 - Edit the ``settings.py`` file and enter your appropriate settings,
   specifically ensure you set the following variables to the correct
-  setting for your environment, see the documentation links and docstrings in
-  the `settings.py` file for the full descriptions of each variable:
+  settings for your environment, see the documentation links and docstrings in
+  the `settings.py` file for the full descriptions of each variable.  Below are
+  the variables you must set:
 
+  - :mod:`settings.REDIS_SOCKET_PATH` if different from ```/tmp/redis.sock```
   - :mod:`settings.REDIS_PASSWORD`
-  - :mod:`settings.HORIZON_IP`
   - :mod:`settings.GRAPHITE_HOST`
   - :mod:`settings.GRAPHITE_PROTOCOL`
   - :mod:`settings.GRAPHITE_PORT`
+  - :mod:`settings.CARBON_PORT`
   - :mod:`settings.SERVER_METRICS_NAME`
   - :mod:`settings.CANARY_METRIC`
-  - :mod:`settings.ALERTS`
+  - :mod:`settings.ALERTS` - remember to only add a few key metrics to begin
+    with.  If you want Skyline to start working almost immediately AND you
+    have Graphite populated with more than 7 days of data, you can enable and
+    start Mirage too and declare the SECOND_ORDER_RESOLUTION_HOURS in each
+    ALERTS tuple as 168.
+  - :mod:`settings.MIRAGE_ENABLE_ALERTS` set this to ```True``` if you want to
+    have Mirage running as described above.
   - :mod:`settings.SMTP_OPTS`
   - :mod:`settings.HIPCHAT_OPTS` and :mod:`settings.PAGERDUTY_OPTS` if to be
     used,  if so ensure that :mod:`settings.HIPCHAT_ENABLED` and
     :mod:`settings.PAGERDUTY_ENABLED` are set to ``True``
+  - :mod:`settings.HORIZON_IP`
   - If you are deploying with a Skyline MySQL Panorama DB straight away ensure
     that :mod:`settings.PANORAMA_ENABLED` is set to ``True`` and set all the
-    other Panorama related variables as appropriate.
+    other Panorama related variables as appropriate.  Enabling Panorama from the
+    start is RECOMMENDED as it is integral to Ionosphere and Luminosity.
   - :mod:`settings.WEBAPP_AUTH_USER`
   - :mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
   - :mod:`settings.WEBAPP_ALLOWED_IPS`
+  - :mod:`settings.SKYLINE_URL`
   - :mod:`settings.SERVER_PYTZ_TIMEZONE`
-
-- For later implementing and working with Ionosphere and setting up learning (see
-  `Ionosphere <ionosphere.html>`__) after you have the other Skyline apps up and
-  running.
+  - :mod:`settings.MEMCACHE_ENABLED`
 
 .. code-block:: bash
 
     cd /opt/skyline/github/skyline/skyline
     vi settings.py
 
+- For later implementing and working with Ionosphere and setting up learning (see
+  `Ionosphere <ionosphere.html>`__) after you have the other Skyline apps up and
+  running.
 - If you are **upgrading**, at this point return to the
   `Upgrading <upgrading/index.html>`__ page.
 - Before you test Skyline by seeding Redis with some test data, ensure
@@ -261,7 +282,7 @@ Steps
     /opt/skyline/github/skyline/bin/horizon.d start
     /opt/skyline/github/skyline/bin/analyzer.d start
     /opt/skyline/github/skyline/bin/webapp.d start
-    # And Panorama if you have setup in the DB at this stage
+    # And Panorama if you have set up in the DB at this stage
     /opt/skyline/github/skyline/bin/panorama.d start
     /opt/skyline/github/skyline/bin/ionosphere.d start
     /opt/skyline/github/skyline/bin/luminosity.d start
@@ -317,15 +338,13 @@ Steps
   no errors.
 - Once you have your :mod:`settings.ALERTS` configured to test them see
   `Alert testing <alert-testing.html>`__
-
-- If you have opted to not setup Panorama, later see setup
+- Now you can configure your Graphite to pickle data to Skyline see
+  `Getting data into Skyline <getting-data-into-skyline.html>`__
+- If you have opted to not set up Panorama, later see set up
   `Panorama <panorama.html>`__
-
-- For Mirage setup see `Mirage <mirage.html>`__
-
-- For Boundary setup see `Boundary <boundary.html>`__
-
-- For Ionosphere setup see `Ionosphere <ionosphere.html>`__
+- For Mirage set up see `Mirage <mirage.html>`__
+- For Boundary set up see `Boundary <boundary.html>`__
+- For Ionosphere set up see `Ionosphere <ionosphere.html>`__
 
 Automation and configuration management notes
 ---------------------------------------------

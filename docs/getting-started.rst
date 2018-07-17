@@ -54,10 +54,6 @@ groups as you get the hang of it.
 
 You cannot rush time series.
 
-.. note:: When checking a log make sure you check the log for the appropriate
-  time, Skyline can log lots fast, so short tails may miss some event you
-  expect between that restart and tail.
-
 Enabling Skyline modules incrementally
 --------------------------------------
 
@@ -74,10 +70,10 @@ easier.  Easier than trying to get the whole stack up and running straight off.
 Start with Horizon, Analyzer, Webapp, Luminosity and Panorama
 -------------------------------------------------------------
 
-It is advisable to only start the Horizon, Analyzer, Webapp and Panorama daemons
-initially and take time to understand what Skyline is doing.  Take some time to
-tune Analyzer's mod:`settings.ALERTS` and learn the patterns in your IMPORTANT
-metrics:
+It is advisable to only start the Horizon, Analyzer, Luminosity, Webapp and
+Panorama daemons initially and take time to understand what Skyline is doing.
+Take some time to tune Analyzer's mod:`settings.ALERTS` and learn the patterns
+in your IMPORTANT metrics:
 
 - which metrics trigger anomalies?
 - when the metrics trigger anomalies?
@@ -90,7 +86,8 @@ Panorama will help you view what things are triggering as anomalous.
 Once you have got an idea of what you want to anomaly detect on and more
 importantly, on what and when you want to alert, you can start to define the
 settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
-bring them online too.
+bring them online too.  However do consider enabling Ionosphere from the outset
+as well.
 
 Add Mirage parameters to the ``ALERTS``
 ---------------------------------------

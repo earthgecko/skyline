@@ -35,6 +35,14 @@ something new is unfortunately not possible, but luckily teaching the system is
 possible.  Giving the system better contextual data to work with is the key
 factor.
 
+While a lot of work and research in the anomaly detection and machine learning
+domain is focused at automatically finding anomalies and getting it right,
+Skyline Ionosphere actually does somewhat of the opposite.
+
+With Ionosphere we are training Skyline on what is NOT ANOMALOUS, rather than
+focusing on what is anomalous.  Ionosphere allows us to train Skyline as to what
+is normal, even if normal includes spikes and dips and seasonality.
+
 Overview
 --------
 
@@ -184,8 +192,8 @@ Things to consider
 Contextual anomalies - Earthquakes and Earth tremors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A point anomaly is only as contextual as the time frame in which it is considered
-to be anomalous in.
+A point anomaly is only as contextually as the time frame in which it is
+considered to be anomalous in.
 
 The following metaphor can be used to describe this concept.  As this concept is
 important to understand in terms of Ionosphere and Mirage.

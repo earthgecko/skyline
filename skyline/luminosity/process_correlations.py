@@ -78,6 +78,8 @@ def get_anomaly(request_type):
 
 def get_anomalous_ts(base_name, anomaly_timestamp):
 
+    logger = logging.getLogger(skyline_app_logger)
+
     # @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
     #                   Branch #2270: luminosity
     # Only correlate metrics with an alert setting
@@ -161,7 +163,10 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
 
 def get_anoms(anomalous_ts):
 
+    logger = logging.getLogger(skyline_app_logger)
+
     if not anomalous_ts:
+        logger.error('error :: get_anoms :: no anomalous_ts')
         return []
 
     anomalies = []
@@ -171,7 +176,7 @@ def get_anoms(anomalous_ts):
         anomalies = my_detector.get_anomalies()
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: AnomalyDetector')
+        logger.error('error :: get_anoms :: AnomalyDetector')
     return anomalies
 
 
@@ -179,6 +184,8 @@ def get_assigned_metrics(i):
     try:
         unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
     except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_assigned_metrics :: no unique_metrics')
         return []
     # Discover assigned metrics
     keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.LUMINOSITY_PROCESSES)))
@@ -214,6 +221,7 @@ def get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metric
     if not anomalies:
         no_data = True
     if no_data:
+        logger.error('error :: get_correlations :: no data')
         return (correlated_metrics, correlations)
 
     for i, metric_name in enumerate(assigned_metrics):

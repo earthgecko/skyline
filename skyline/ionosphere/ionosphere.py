@@ -24,6 +24,10 @@ import mysql.connector
 
 from sqlalchemy.sql import select
 
+# @added 2018075 - Task #2446: Optimize Ionosphere
+#                  Branch #2270: luminosity
+from sqlalchemy.sql import desc
+
 # @added 20161213 - Branch #1790: test_tsfresh
 # To match the new order introduced via the test_tsfresh method
 import numpy as np
@@ -1191,7 +1195,12 @@ class Ionosphere(Thread):
 
             try:
                 connection = engine.connect()
-                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
+                # @modified 2018075 - Task #2446: Optimize Ionosphere
+                #                     Branch #2270: luminosity
+                # Order by the latest features profile, this also results in the
+                # layers ids being ordered by latest too.
+                # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
+                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
                 result = connection.execute(stmt)
                 for row in result:
                     # @added 20170116 - Feature #1854: Ionosphere learn
@@ -1408,6 +1417,11 @@ class Ionosphere(Thread):
                 engine_disposal(engine)
             return
 
+        # @added 2018075 - Task #2446: Optimize Ionosphere
+        #                  Branch #2270: luminosity
+        fp_checked = 0
+        layers_checked = 0
+
         # Compare calculated features to feature values for each fp id
         not_anomalous = False
         if calculated_feature_file_found:
@@ -1418,6 +1432,10 @@ class Ionosphere(Thread):
                     if engine:
                         engine_disposal(engine)
                     return False
+
+                # @added 2018075 - Task #2446: Optimize Ionosphere
+                #                  Branch #2270: luminosity
+                fp_checked += 1
 
                 self.features_profiles_checked.append(fp_id)
                 features_count = None
@@ -2138,7 +2156,10 @@ class Ionosphere(Thread):
                             minmax_fp_features_sum=minmax_fp_features_sum,
                             minmax_fp_features_count=minmax_fp_features_count,
                             minmax_anomalous_features_sum=minmax_anomalous_features_sum,
-                            minmax_anomalous_features_count=minmax_anomalous_features_count)
+                            minmax_anomalous_features_count=minmax_anomalous_features_count,
+                            # @added 2018075 - Task #2446: Optimize Ionosphere
+                            #                  Branch #2270: luminosity
+                            fp_count=fp_count, fp_checked=fp_checked)
                         result = connection.execute(ins)
                         connection.close()
                         new_matched_id = result.inserted_primary_key[0]
@@ -2323,21 +2344,31 @@ class Ionosphere(Thread):
                     if not_anomalous:
                         continue
                     if int(layers_id) != 0:
+
+                        # @added 2018075 - Task #2446: Optimize Ionosphere
+                        #                  Branch #2270: luminosity
+                        layers_checked += 1
+
                         # Get the layers algorithms and run then on the timeseries
                         # @modified 20170307 - Feature #1960: ionosphere_layers
                         # Use except on everything, remember how fast Skyline can iterate
                         try:
                             self.layers_checked.append(layers_id)
-                            not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries)
+                            # @added 2018075 - Task #2446: Optimize Ionosphere
+                            #                  Branch #2270: luminosity
+                            # not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries)
+                            not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries, fp_layers_count, layers_checked)
                             if not_anomalous:
                                 matched_layers_id = layers_id
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: run_layer_algorithms failed for layers_id - %s' % (str(layers_id)))
                         if not_anomalous:
-                            logger.info('not_anomalous :: layers_id %s was matched' % (str(layers_id)))
+                            logger.info('not_anomalous :: layers_id %s was matched after checking %s layers profiles of %s possible layers' % (
+                                str(layers_id), str(layers_checked), str(fp_layers_count)))
                         else:
-                            logger.info('still anomalous :: layers_id %s was NOT matched' % (str(layers_id)))
+                            logger.info('still anomalous :: layers_id %s was NOT matched after checking %s layers profiles of %s possible layers' % (
+                                str(layers_id), str(layers_checked), str(fp_layers_count)))
                 if not not_anomalous:
                     logger.info('anomalous - no features profiles layers were matched - %s' % base_name)
 

@@ -4,9 +4,9 @@ version info
 # @modified 20170109 - Feature #1854: Ionosphere learn
 # Added learn
 # __version_info__ = ('1', '1', '0')
-__version_info__ = ('1', '2', '1')
+__version_info__ = ('1', '2', '2')
 __branch__ = 'luminosity'
-__version_tag__ = 'beta'
+__version_tag__ = 'stable'
 
 __version__ = '.'.join(__version_info__)
 __absolute_version__ = 'Skyline (%s v%s-%s)' % (__branch__, __version__, __version_tag__)

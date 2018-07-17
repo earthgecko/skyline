@@ -53,14 +53,21 @@ except:
 context = 'ionosphere_layers'
 
 
-def run_layer_algorithms(base_name, layers_id, timeseries):
-
+def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_checked):
     """
-    Called by :class:`~skyline.skyline.Ionosphere.spawn_layers_process` to
+    Called by :class:`~skyline.skyline.Ionosphere.spin_process` to
     evaluate anomalies against a custom layers boundary algorithm.
 
     :param metric: the metric base_name
+    :param layers_id: the layer id
+    :param timeseries: the time series list
+    :param layers_count: the number of layers for the metric
+    :param layers_checked: the number of layers that have been checked
     :type metric: str
+    :type layer_id: int
+    :type timeseries: list
+    :type layers_count: int
+    :type layers_checked: int
     :return: True or False
     :rtype: boolean
 
@@ -474,7 +481,10 @@ def run_layer_algorithms(base_name, layers_id, timeseries):
                 metric_id=int(current_metric_id),
                 anomaly_timestamp=int(last_timestamp),
                 anomalous_datapoint=float(last_datapoint),
-                full_duration=int(settings.FULL_DURATION))
+                full_duration=int(settings.FULL_DURATION),
+                # @added 2018075 - Task #2446: Optimize Ionosphere
+                #                  Branch #2270: luminosity
+                layers_count=layers_count, layers_checked=layers_checked)
             result = connection.execute(ins)
             connection.close()
             new_matched_id = result.inserted_primary_key[0]

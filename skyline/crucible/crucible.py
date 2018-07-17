@@ -35,6 +35,8 @@ import os.path
 # sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 # sys.path.insert(0, os.path.dirname(__file__))
 
+from ast import literal_eval
+
 import settings
 from skyline_functions import load_metric_vars, fail_check, mkdir_p
 
@@ -695,10 +697,33 @@ class Crucible(Thread):
         if os.path.isfile(anomaly_json):
             if settings.ENABLE_CRUCIBLE_DEBUG:
                 logger.info('loading timeseries from - %s' % anomaly_json)
-            with open(anomaly_json, 'r') as f:
-                timeseries = json.loads(f.read())
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('loaded timeseries from - %s' % anomaly_json)
+            timeseries = None
+            try:
+                with open(anomaly_json, 'r') as f:
+                    timeseries = json.loads(f.read())
+                    raw_timeseries = f.read()
+                    timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                    timeseries = literal_eval(timeseries_array_str)
+                if settings.ENABLE_CRUCIBLE_DEBUG:
+                    logger.info('loaded time series from - %s' % anomaly_json)
+            except:
+                # logger.info(traceback.format_exc())
+                logger.error('error :: failed to load JSON - %s' % anomaly_json)
+            # @added 20180715 - Task #2444: Evaluate CAD
+            #                   Task #2446: Optimize Ionosphere
+            #                   Branch #2270: luminosity
+            # If the json.loads fails use literal_eval
+            if not timeseries:
+                try:
+                    with open(anomaly_json, 'r') as f:
+                        raw_timeseries = f.read()
+                        timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        timeseries = literal_eval(timeseries_array_str)
+                    if settings.ENABLE_CRUCIBLE_DEBUG:
+                        logger.info('loaded time series with literal_eval from - %s' % anomaly_json)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to load JSON - %s' % anomaly_json)
         else:
             try:
                 logger.error('error :: file not found - %s' % anomaly_json)

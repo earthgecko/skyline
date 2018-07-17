@@ -457,7 +457,7 @@ def run_algorithms(
     else:
         check_algorithms = algorithms
 
-    logger.info('checking algoritms - %s' % (str(check_algorithms)))
+    logger.info('checking algorithms - %s' % (str(check_algorithms)))
 
     for algorithm in check_algorithms:
         detected = ''

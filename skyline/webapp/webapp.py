@@ -1524,8 +1524,37 @@ def ionosphere():
                                     {'results': 'Error: timestamp too old no training data exists, training data has been purged'})
                             else:
                                 logger.error('%s=%s no timestamp training data dir found - %s' % (key, str(value), ionosphere_data_dir))
-                                resp = json.dumps(
-                                    {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
+                                # @added 20180713 - Branch #2270: luminosity
+                                # Use settings.ALTERNATIVE_SKYLINE_URLS if they are
+                                # declared
+                                try:
+                                    use_alternative_urls = settings.ALTERNATIVE_SKYLINE_URLS
+                                except:
+                                    use_alternative_urls = False
+                                if use_alternative_urls:
+                                    base_name = request.args.get(str('metric'), None)
+                                    alternative_urls = []
+                                    for alt_url in use_alternative_urls:
+                                        alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(alt_url), str(value), str(base_name))
+                                        if len(use_alternative_urls) == 1:
+                                            return redirect(alt_redirect_url)
+                                        alternative_urls.append(alt_redirect_url)
+                                    message = 'no training data dir exists on this Skyline instance try at the alternative URLS listed below:'
+                                    logger.info('passing alternative_urls - %s' % str(alternative_urls))
+                                    try:
+                                        return render_template(
+                                            'ionosphere.html', display_message=message,
+                                            alternative_urls=alternative_urls,
+                                            fp_view=True,
+                                            version=skyline_version, duration=(time.time() - start),
+                                            print_debug=True), 200
+                                    except:
+                                        message = 'Uh oh ... a Skyline 500 :('
+                                        trace = traceback.format_exc()
+                                        return internal_error(message, trace)
+                                else:
+                                    resp = json.dumps(
+                                        {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
 
                     if not valid_timestamp:
                         return resp, 404
@@ -1626,9 +1655,45 @@ def ionosphere():
                             logger.info(
                                 '%s=%s no timestamp metric features profile dir found - %s' %
                                 (key, str(value), ionosphere_profiles_dir))
-                            resp = json.dumps(
-                                {'results': 'Error: no features profile dir exists - ' + ionosphere_profiles_dir + ' - go on... nothing here.'})
-                            return resp, 404
+
+                            # @added 20180715 - Branch #2270: luminosity
+                            # Use settings.ALTERNATIVE_SKYLINE_URLS if they are
+                            # declared and redirect to alternative URL/s if no
+                            # features profile directory exists on the Skyline
+                            # instance.
+                            try:
+                                use_alternative_urls = settings.ALTERNATIVE_SKYLINE_URLS
+                            except:
+                                use_alternative_urls = False
+                            if use_alternative_urls:
+                                base_name = request.args.get(str('metric'), None)
+                                alternative_urls = []
+                                for alt_url in use_alternative_urls:
+                                    alt_redirect_url_base = '%s/ionosphere' % str(alt_url)
+                                    request_url = str(request.url)
+                                    request_endpoint = '%s/ionosphere' % str(settings.SKYLINE_URL)
+                                    alt_redirect_url = request_url.replace(request_endpoint, alt_redirect_url_base, 1)
+                                    if len(use_alternative_urls) == 1:
+                                        logger.info('redirecting to %s' % str(alt_redirect_url))
+                                        return redirect(alt_redirect_url)
+                                    alternative_urls.append(alt_redirect_url)
+                                message = 'no features profile dir exists on this Skyline instance try at the alternative URLS listed below:'
+                                logger.info('passing alternative_urls - %s' % str(alternative_urls))
+                                try:
+                                    return render_template(
+                                        'ionosphere.html', display_message=message,
+                                        alternative_urls=alternative_urls,
+                                        fp_view=True,
+                                        version=skyline_version, duration=(time.time() - start),
+                                        print_debug=True), 200
+                                except:
+                                    message = 'Uh oh ... a Skyline 500 :('
+                                    trace = traceback.format_exc()
+                                    return internal_error(message, trace)
+                            else:
+                                resp = json.dumps(
+                                    {'results': 'Error: no features profile dir exists - ' + ionosphere_profiles_dir + ' - go on... nothing here.'})
+                                return resp, 404
 
         logger.info('arguments validated - OK')
 

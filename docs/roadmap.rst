@@ -41,6 +41,8 @@ See `Ionosphere <ionosphere.html>`__ and `Development - Ionosphere
 
 UPDATE 20180526 - Ionosphere development, still in progress in small increments
 
+UPDATE 20180715 - Ionosphere stable
+
 Meteor
 ======
 

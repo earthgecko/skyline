@@ -69,7 +69,13 @@ ways:
 - Adding the ability for the operator to teach Skyline and have Skyline learn
   things that are NOT anomalous using a time series similarities comparison
   method based on features extraction and comparison using the `tsfresh`_
-  package.
+  package.  With Ionosphere we are training Skyline on what is NOT anomalous,
+  rather than focusing on what is anomalous.  Ionosphere allows us to train
+  Skyline as to what is normal, even if normal includes spikes and dips and
+  seasonality.  After all we have some expectation that most of our metrics
+  would be NOT anomalous most of the time, rather than anomalous most of the
+  time.  So training Skyline what is NOT ANOMALOUS is more efficient than trying
+  to label anomalies.
 - Adding the ability to Skyline to determine what other metrics are related to
   an anomaly event using cross correlation analysis of all the metrics using
   Linkedin's `luminol`_ library when an anomaly event is triggered and

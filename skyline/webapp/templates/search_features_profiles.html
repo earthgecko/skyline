@@ -347,13 +347,13 @@ count
             <th>generation</th>
             <th>origin</th>
             <th>full duration</th>
+            <th>created</th>
 <!-- # @added 20171020 - Feature #2184: features profiles by performance-->
             <th>fp efficiency</th>
             <th>match count</th>
             <th>last matched</th>
             <th>checked count</th>
             <th>last checked</th>
-            <th>created</th>
 <!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
             <th>validated</th>
             <th>layer id</th>
@@ -396,6 +396,7 @@ count
       {% endif %}
     {% endif %}
             <td>{{ item[3] }}</td>
+            <td>{{ item[12] }}</td>
 <!-- # @added 20171020 - Feature #2184: features profiles by performance-->
     {% if item[10] == 0 %}
             <td>0 %</td>
@@ -406,7 +407,6 @@ count
             <td>{{ item[11] }}</td>
             <td>{{ item[13] }}</td>
             <td>{{ item[14] }}</td>
-            <td>{{ item[12] }}</td>
             <td>{{ item[17] }}</td>
             <td>{{ item[18] }}</td>
 <!-- # @added 20171106 - Feature #2184: features profiles by performance

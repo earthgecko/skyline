@@ -35,16 +35,8 @@ REDIS_PASSWORD = None
 SECRET_KEY = 'your-long_secret-key-to-encrypt_the_redis_password_in_url_parameters'
 """
 :var SECRET_KEY: A secret key that is used to encrypt the Redis password in the
-    rebrow URL parametersThe password for Redis, even though Skyline uses sockct it
-    is still advisable to set a password for Redis.  If this is set to the
-    boolean False Skyline will not use Redis AUTH
+    rebrow URL parameters.
 :vartype SECRET_KEY: str
-
-.. note:: Please ensure that you DO enable Redis authentication by setting the
-    requirepass in your redis.conf with a very long Redis password.  See
-    https://redis.io/topics/security and http://antirez.com/news/96 for more
-    info.
-
 """
 
 LOG_PATH = '/var/log/skyline'
@@ -650,7 +642,7 @@ WORKER_PROCESSES = 2
 :vartype WORKER_PROCESSES: int
 """
 
-HORIZON_IP = '0.0.0.0'
+HORIZON_IP = 'YOUR_SKYLINE_INTSANCE_IP_ADDRESS'
 """
 :var HORIZON_IP: The IP address for Horizon to bind to.  Skyline receives data
     from Graphite on this IP address.  This previously defaulted to
@@ -1733,8 +1725,8 @@ OTHER_SKYLINE_REDIS_INSTANCES = []
 :vartype OTHER_SKYLINE_REDIS_INSTANCES: list
 
 For example, the IP or FQDN as a string and the port as an int and the Redis
-password as a str OR if there is no password the boolean False:
-OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379, 'this_is_the_redis_password'], ['192.168.1.15', 6379, False]]
+password as a str OR if there is no password the boolean None:
+OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379, 'this_is_the_redis_password'], ['192.168.1.15', 6379, None]]
 
 .. note:: If you run multiple Skyline instances and are going to run cross
     correlations and query another Redis please ensure that you have Redis
