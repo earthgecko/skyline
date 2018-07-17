@@ -7,6 +7,91 @@ Overview
 
 Welcome to Skyline.
 
+What is Skyline?
+----------------
+
+Skyline v1.2.2 - For those interested in anomaly detection and deflection in
+streamed time series data.
+
+Anomaly deflection.  The obvious next evolution in the use of all the anomaly
+detection data?
+
+Skyline is a Python based anomaly detection/deflection stack that analyses,
+anomaly detects, deflects, fingerprints and learns vast amounts of streamed
+time series data.
+
+- Skyline ingests streamed metric time series data - skyline/horizon
+- Skyline uses a ```CONSENSUS``` of 3-sigma algorithms to detect anomalies on
+  batch processed, streamed metric time series data - skyline/analyzer - anomaly
+  detector
+- It handles large and small seasonality in the data - skyline/mirage -
+  anomaly deflector and detector
+- You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
+  anomaly deflector
+- It records all your anomalies - skyline/panorama - anomaly memory
+- It shows you all your data - skyline/webapp - anomaly view
+
+Seeing as we desire our metrics to be not anomalous most of the time and we want
+to know when they ARE anomalous and given the fact that we try and build systems
+that try to behave within not anomalous bounds so they perform well, due to
+this we have:
+
+- A lot of metric time series data that are not anomalous most of the time.
+- A lot of data to train a system on what is NOT anomalous given a time series
+  data set, rather than simply focusing on what is anomalous, also focusing on
+  what is not anomalous.
+
+To achieve this Skyline implements a novel time series similarities comparison
+algorithm and a boundary layers methodology that generates fingerprints of time
+series data using the sum of the values of features of the time series which
+have been extracted using the tsfresh features extraction package -
+https://github.com/blue-yonder/tsfresh and evaluation against boundary layer
+algorithms to determine whether a 3-sigma triggered anomaly is actually a normal,
+known pattern in the data.
+
+The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm -
+SITTSSCA first coined here :) compares the generated fingerprints of the two
+time series and can determine if they closely resemble each other in terms of:
+
+- of the amount of "power/energy", range and "movement" there is within the time
+  series data set somewhat like RMS - Erol Kalkan from United States Geological Survey,
+  “Another approach to compute the differences between two time series is moving
+  window root-mean-square. RMS can be run for both series separately. This way,
+  you can compare the similarities in energy (gain) level of time series. You
+  may vary the window length for best resolution.”
+  (https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value)
+  http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy
+
+The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm
+compares how close the fingerprint values are as a percentage and
+varying this percentage variable will either focusing the algorithm with greater
+precision the closer to 0% the parameter gets, the perfect match (or possibly
+a mirror match too - unkonwn/untested) or it will incrementally increase the
+tolerance as the percentage variable increases and the matching will become
+less and less reliable.
+
+However there is a sweet spot and here SITTSSCA works extremely well :)
+
+Added to SITTSSCA is an optional layer of simple boundary algorithms that are
+user defined during the operator training interaction with Skyline, where the
+operator augments the SITTSSCA results with boundaries that describe the
+expected norm within the time series.  Very similar to being able to describe
+the Active Brownian Motion of a time series -
+https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801
+
+This results in an anomaly detection/deflection system which enables the user to
+very simply label time series and train Skyline on the peaks and troughs and the
+expected Active Brownian Motion or best effort thereof.
+
+However it takes a little effort on your part to train Skyline, however with the
+effort, Skyline is very good at doing anomaly detection and deflection.
+
+With your help.  There is no easy anomaly detection or deflection, but there is
+some reward with a bit of effort.
+
+What you need
+-------------
+
 You must be interested in doing real time anomaly detection on vast amounts of
 time series data streams on a reasonable Linux VM (or in a container/s if you
 were really committed).
@@ -88,7 +173,7 @@ and battle tested..
 
 Skyline is **FAST**!!!  Faster enough to handle 10s of 1000s of time series in
 near real time.  In the world of Python, data analysis, R and most machine
-learning, Skyline is FAST.  Processing and analyzing 1000s and 1000s of
+learning, Skyline is FAST.  Processing and analysing 1000s and 1000s of
 constantly changing time series, every minute of every day and it can do it in
 multiple resolutions, on a fairly low end commodity server.
 
@@ -102,8 +187,9 @@ The new look of Skyline apps
 * Crucible - store anomalous time series resources and adhoc analysis of any
   time series
 * Panorama - anomalies database, historical views and root cause analysis
-* Webapp - frontend to view current and historical anomalies and browse Redis
-  with :red:`re`:brow:`brow` and manage Skyline's learning
+* Webapp - frontend to view current and historical anomalies, training data,
+  features profiles, layers, matches and can browse Redis with
+  :red:`re`:brow:`brow` and you manage Skyline's learning with it
 * Ionosphere - time series fingerprinting and learning
 * Luminosity - Cross correlation of metrics for root cause analysis
 
