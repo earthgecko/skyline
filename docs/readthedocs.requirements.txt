@@ -1,3 +1,7 @@
+# @modified 20180717 - Task #2446: Optimize Ionosphere
+#                      Branch #2270: luminosity
+# Use pip 10.0.1 as may be a readthedocs issue - testing
+pip>=10.0.1
 setuptools
 wheel
 redis>=2.10.5
