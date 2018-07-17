@@ -88,6 +88,8 @@
             
                 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-skyline">What is Skyline?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-need">What you need</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#a-brief-history">A brief history</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skyline-as-a-work-in-progress">Skyline - as a work in progress</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-new-look-of-skyline-apps">The new look of Skyline apps</a></li>
@@ -177,6 +179,81 @@
   <div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
 <p>Welcome to Skyline.</p>
+<div class="section" id="what-is-skyline">
+<h2>What is Skyline?<a class="headerlink" href="#what-is-skyline" title="Permalink to this headline">¶</a></h2>
+<p>Skyline v1.2.2 - For those interested in anomaly detection and deflection in
+streamed time series data.</p>
+<p>Anomaly deflection.  The obvious next evolution in the use of all the anomaly
+detection data?</p>
+<p>Skyline is a Python based anomaly detection/deflection stack that analyses,
+anomaly detects, deflects, fingerprints and learns vast amounts of streamed
+time series data.</p>
+<ul class="simple">
+<li>Skyline ingests streamed metric time series data - skyline/horizon</li>
+<li>Skyline uses a <code class="docutils literal"><span class="pre">`CONSENSUS`</span></code> of 3-sigma algorithms to detect anomalies on
+batch processed, streamed metric time series data - skyline/analyzer - anomaly
+detector</li>
+<li>It handles large and small seasonality in the data - skyline/mirage -
+anomaly deflector and detector</li>
+<li>You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
+anomaly deflector</li>
+<li>It records all your anomalies - skyline/panorama - anomaly memory</li>
+<li>It shows you all your data - skyline/webapp - anomaly view</li>
+</ul>
+<p>Seeing as we desire our metrics to be not anomalous most of the time and we want
+to know when they ARE anomalous and given the fact that we try and build systems
+that try to behave within not anomalous bounds so they perform well, due to
+this we have:</p>
+<ul class="simple">
+<li>A lot of metric time series data that are not anomalous most of the time.</li>
+<li>A lot of data to train a system on what is NOT anomalous given a time series
+data set, rather than simply focusing on what is anomalous, also focusing on
+what is not anomalous.</li>
+</ul>
+<p>To achieve this Skyline implements a novel time series similarities comparison
+algorithm and a boundary layers methodology that generates fingerprints of time
+series data using the sum of the values of features of the time series which
+have been extracted using the tsfresh features extraction package -
+<a class="reference external" href="https://github.com/blue-yonder/tsfresh">https://github.com/blue-yonder/tsfresh</a> and evaluation against boundary layer
+algorithms to determine whether a 3-sigma triggered anomaly is actually a normal,
+known pattern in the data.</p>
+<p>The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm -
+SITTSSCA first coined here :) compares the generated fingerprints of the two
+time series and can determine if they closely resemble each other in terms of:</p>
+<ul class="simple">
+<li>of the amount of &#8220;power/energy&#8221;, range and &#8220;movement&#8221; there is within the time
+series data set somewhat like RMS - Erol Kalkan from United States Geological Survey,
+“Another approach to compute the differences between two time series is moving
+window root-mean-square. RMS can be run for both series separately. This way,
+you can compare the similarities in energy (gain) level of time series. You
+may vary the window length for best resolution.”
+(<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)
+<a class="reference external" href="http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy">http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy</a></li>
+</ul>
+<p>The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm
+compares how close the fingerprint values are as a percentage and
+varying this percentage variable will either focusing the algorithm with greater
+precision the closer to 0% the parameter gets, the perfect match (or possibly
+a mirror match too - unkonwn/untested) or it will incrementally increase the
+tolerance as the percentage variable increases and the matching will become
+less and less reliable.</p>
+<p>However there is a sweet spot and here SITTSSCA works extremely well :)</p>
+<p>Added to SITTSSCA is an optional layer of simple boundary algorithms that are
+user defined during the operator training interaction with Skyline, where the
+operator augments the SITTSSCA results with boundaries that describe the
+expected norm within the time series.  Very similar to being able to describe
+the Active Brownian Motion of a time series -
+<a class="reference external" href="https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801">https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801</a></p>
+<p>This results in an anomaly detection/deflection system which enables the user to
+very simply label time series and train Skyline on the peaks and troughs and the
+expected Active Brownian Motion or best effort thereof.</p>
+<p>However it takes a little effort on your part to train Skyline, however with the
+effort, Skyline is very good at doing anomaly detection and deflection.</p>
+<p>With your help.  There is no easy anomaly detection or deflection, but there is
+some reward with a bit of effort.</p>
+</div>
+<div class="section" id="what-you-need">
+<h2>What you need<a class="headerlink" href="#what-you-need" title="Permalink to this headline">¶</a></h2>
 <p>You must be interested in doing real time anomaly detection on vast amounts of
 time series data streams on a reasonable Linux VM (or in a container/s if you
 were really committed).</p>
@@ -190,6 +267,7 @@ this point forward, will require a LOT of hours of your time.</p>
 <p>Skyline is not some Python data science anomaly detection library, it is a full
 blown production grade anomaly detection stack.  Although certain aspects of
 Skyline may have interest to the data science community.</p>
+</div>
 <div class="section" id="a-brief-history">
 <h2>A brief history<a class="headerlink" href="#a-brief-history" title="Permalink to this headline">¶</a></h2>
 <p>Skyline was originally open sourced by <a class="reference external" href="https://www.etsy.com/">Etsy</a> as a real-time anomaly detection
@@ -244,7 +322,7 @@ recording these in the database to assist in root cause analysis.</li>
 and battle tested..</p>
 <p>Skyline is <strong>FAST</strong>!!!  Faster enough to handle 10s of 1000s of time series in
 near real time.  In the world of Python, data analysis, R and most machine
-learning, Skyline is FAST.  Processing and analyzing 1000s and 1000s of
+learning, Skyline is FAST.  Processing and analysing 1000s and 1000s of
 constantly changing time series, every minute of every day and it can do it in
 multiple resolutions, on a fairly low end commodity server.</p>
 </div>
@@ -258,8 +336,9 @@ multiple resolutions, on a fairly low end commodity server.</p>
 <li>Crucible - store anomalous time series resources and adhoc analysis of any
 time series</li>
 <li>Panorama - anomalies database, historical views and root cause analysis</li>
-<li>Webapp - frontend to view current and historical anomalies and browse Redis
-with <span class="red">re</span><span class="brow">brow</span> and manage Skyline&#8217;s learning</li>
+<li>Webapp - frontend to view current and historical anomalies, training data,
+features profiles, layers, matches and can browse Redis with
+<span class="red">re</span><span class="brow">brow</span> and you manage Skyline&#8217;s learning with it</li>
 <li>Ionosphere - time series fingerprinting and learning</li>
 <li>Luminosity - Cross correlation of metrics for root cause analysis</li>
 </ul>
