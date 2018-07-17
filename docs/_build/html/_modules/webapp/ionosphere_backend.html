@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.ionosphere_backend &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>webapp.ionosphere_backend &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
@@ -760,7 +761,18 @@
     <span class="k">if</span> <span class="n">metric_vars_ok</span> <span class="ow">and</span> <span class="n">ts_json_ok</span><span class="p">:</span>
         <span class="n">data_to_process</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">panorama_anomaly_id</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/panorama?metric=</span><span class="si">%s</span><span class="s1">&amp;from_timestamp=</span><span class="si">%s</span><span class="s1">&amp;until_timestamp=</span><span class="si">%s</span><span class="s1">&amp;panorama_anomaly_id=true&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">))</span>
+    <span class="c1"># @modified 20180608 - Bug #2406: Ionosphere - panorama anomaly id lag</span>
+    <span class="c1"># Time shift the requested_timestamp by 120 seconds either way on the</span>
+    <span class="c1"># from_timestamp and until_timestamp parameter to account for any lag in the</span>
+    <span class="c1"># insertion of the anomaly by Panorama in terms Panorama only running every</span>
+    <span class="c1"># 60 second and Analyzer to Mirage to Ionosphere and back introduce</span>
+    <span class="c1"># additional lags.  Panorama will not add multiple anomalies from the same</span>
+    <span class="c1"># metric in the time window so there is no need to consider the possibility</span>
+    <span class="c1"># of there being multiple anomaly ids being returned.</span>
+    <span class="c1"># url = &#39;%s/panorama?metric=%s&amp;from_timestamp=%s&amp;until_timestamp=%s&amp;panorama_anomaly_id=true&#39; % (settings.SKYLINE_URL, str(base_name), str(requested_timestamp), str(requested_timestamp))</span>
+    <span class="n">grace_from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="mi">120</span>
+    <span class="n">grace_until_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">)</span> <span class="o">+</span> <span class="mi">120</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/panorama?metric=</span><span class="si">%s</span><span class="s1">&amp;from_timestamp=</span><span class="si">%s</span><span class="s1">&amp;until_timestamp=</span><span class="si">%s</span><span class="s1">&amp;panorama_anomaly_id=true&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">grace_from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">grace_until_timestamp</span><span class="p">))</span>
     <span class="n">panorama_resp</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting anomaly id from panorama: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
@@ -3884,6 +3896,10 @@
 <span class="c1"># ionosphere_matched table layout</span>
 <span class="c1"># | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version |</span>
 <span class="c1"># | 39793 |   782 |       1505560867 |      9856.36758282061 |                     210 |  9813.63277426169 |                   150 | 0.4.0           |</span>
+<span class="c1"># @modified 20180620 - Feature #2404: Ionosphere - fluid approximation</span>
+<span class="c1"># Added minmax scaling</span>
+<span class="c1"># | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version | minmax | minmax_fp_features_sum | minmax_fp_features_count | minmax_anomalous_features_sum | minmax_anomalous_features_count |</span>
+<span class="c1"># | 68071 |  3352 |       1529490602 |      383311386.647846 |                     210 |  383283135.786868 |                   150 | 0.4.0           |      1 |        4085.7427786846 |                      210 |              4048.14642205812 |                             210 |</span>
 <span class="c1"># ionosphere_layers_matched table layout</span>
 <span class="c1"># | id    | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration |</span>
 <span class="c1"># | 25069 |       24 |  1108 |       195 |        1505561823 |            2.000000 |         86400 |</span>
@@ -3917,7 +3933,14 @@
             <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">])</span>
             <span class="n">metric_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
             <span class="n">match_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-            <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;features profile&#39;</span>
+            <span class="c1"># @modified 20180620 - Feature #2404: Ionosphere - fluid approximation</span>
+            <span class="c1"># Added minmax scaling</span>
+            <span class="c1"># matched_by = &#39;features profile&#39;</span>
+            <span class="n">minmax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;minmax&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">minmax</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;features profile&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;features profile - minmax&#39;</span>
             <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">])</span>
             <span class="n">layer_id</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
             <span class="c1"># Get metric name, first get metric id from the features profile</span>
@@ -4090,15 +4113,28 @@
             <span class="n">common_features_count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;common_features_count&#39;</span><span class="p">]</span>
             <span class="n">tsfresh_version</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tsfresh_version&#39;</span><span class="p">]</span>
             <span class="n">matched_human_date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S %Z (%A)&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
+            <span class="c1"># @added 20180620 - Feature #2404: Ionosphere - fluid approximation</span>
+            <span class="c1"># Added minmax scaling</span>
+            <span class="n">minmax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;minmax&#39;</span><span class="p">])</span>
+            <span class="n">minmax_fp_features_sum</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;minmax_fp_features_sum&#39;</span><span class="p">]</span>
+            <span class="n">minmax_fp_features_count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;minmax_fp_features_count&#39;</span><span class="p">]</span>
+            <span class="n">minmax_anomalous_features_sum</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;minmax_anomalous_features_sum&#39;</span><span class="p">]</span>
+            <span class="n">minmax_anomalous_features_count</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;minmax_anomalous_features_count&#39;</span><span class="p">]</span>
             <span class="n">matched_details</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">tsfresh_version       :: </span><span class="si">%s</span><span class="s1"></span>
 <span class="s1">all_calc_features_sum :: </span><span class="si">%s</span><span class="s1">     | all_calc_features_count :: </span><span class="si">%s</span><span class="s1"></span>
 <span class="s1">sum_common_values     :: </span><span class="si">%s</span><span class="s1">     | common_features_count :: </span><span class="si">%s</span><span class="s1"></span>
-<span class="s1">metric_timestamp      :: </span><span class="si">%s</span><span class="s1">     | human_date :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">metric_timestamp      :: </span><span class="si">%s</span><span class="s1">               | human_date :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">minmax_scaled         :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">minmax_fp_features_sum        :: </span><span class="si">%s</span><span class="s1">  | minmax_fp_features_count :: </span><span class="si">%s</span><span class="s1"></span>
+<span class="s1">minmax_anomalous_features_sum :: </span><span class="si">%s</span><span class="s1">  | minmax_anomalous_features_count :: </span><span class="si">%s</span><span class="s1"></span>
 <span class="s1">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tsfresh_version</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_calc_features_sum</span><span class="p">),</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">all_calc_features_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sum_common_values</span><span class="p">),</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">common_features_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">matched_human_date</span><span class="p">))</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">matched_human_date</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">minmax</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_features_sum</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_features_count</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">minmax_anomalous_features_sum</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">minmax_anomalous_features_count</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
@@ -4214,7 +4250,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

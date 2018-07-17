@@ -299,6 +299,14 @@ SQLAlchemy==1.2.6
 #pymemcache==1.4.3
 pymemcache==1.4.4
 
+# @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+# pycrypto replaced with pycryptodome
+#pycrypto==2.6.1
+# @modified 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
+# Use PyJWT instead of pycryptodome
+#pycryptodome==3.6.1
+PyJWT==1.6.4
+
 # @added 20180105 - Branch #2270: luminosity
 # @added 20180105 - Branch #2270: luminosity
 # @modified 20180413 - Branch #2270: luminosity

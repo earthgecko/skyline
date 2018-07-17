@@ -69,6 +69,42 @@ config = {'user': settings.PANORAMA_DBUSER,
 LOCAL_DEBUG = False
 
 
+class PaulBourke:
+    """
+    # @added 20180526 - Branch #2270: luminosity
+    The PaulBourke class pays homage to Paul Bourke who originally described
+    the cross correlation method on which Linkedin's luminol.correlate library
+    is based upon, he described this in August 1996 and it is upon this which
+    Skyline Luminosity is also based.
+
+    So Skyline has moved from:
+    Shewhart's statistical process control circa 1924 tech
+    To tsfresh - circa 20161029 when it entered Skyline
+    Now to 1996(2015), although 1996 ideas can still be very, very useful and
+    work well.
+
+    Please do visit these following two URLs in order:
+    http://paulbourke.net/miscellaneous/correlate/thanks_mr_bourke_from_skyline_for  # this will 404 but hopefully he has something watching his 404 rate :)
+    http://paulbourke.net/miscellaneous/correlate/  # this will 200
+
+    This is all part of the adventures in Skyline.  If you enjoy this sort of
+    thing, then I posit to you that Sir Walter Munk is one of the least known
+    remarkable scientist of tthe current and previous millienia.
+    Born: October 19, 1917 (age 100 years)
+    His accomplishments abound, he is like Turing, Marconi, Berners-Lee and
+    Einstein rolled into Oceangraphy, but few have ever heard of him.
+
+    If we are giving kudos to Shewhart, tsfresh and Paul Bourke, we can slip
+    some Walther Munk in here too, although currently he nor his work has
+    anything to do with Skyline, however there are some ideas, not necessarily
+    desrcibed in the roadmap, that revolve a byproduct of monitoring surf
+    conditions via a webcams, which could be used for monitoring tide levels
+    too, which would be right up Dr Munk's alley.
+
+    """
+    pass
+
+
 class Luminosity(Thread):
     """
     The Luminosity class which controls the luminosity thread and spawned
@@ -89,7 +125,11 @@ class Luminosity(Thread):
 
         """
         super(Luminosity, self).__init__()
-        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -338,7 +378,11 @@ class Luminosity(Thread):
                 logger.error('error :: cannot connect to redis at socket path %s' % (
                     settings.REDIS_SOCKET_PATH))
                 sleep(30)
-                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                if settings.REDIS_PASSWORD:
+                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
             # Report app up

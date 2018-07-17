@@ -84,6 +84,26 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     if type(recipients) is str:
         recipients = [recipients]
 
+    # @added 20180524 - Task #2384: Change alerters to cc other recipients
+    # The alerters did send an individual email to each recipient. This would be
+    # more useful if one email was sent with the first smtp recipient being the
+    # to recipient and the subsequent recipients were add in cc.
+    if recipients:
+        primary_recipient = False
+        cc_recipients = False
+        for i_recipient in recipients:
+            if not primary_recipient:
+                primary_recipient = str(i_recipient)
+            if primary_recipient != i_recipient:
+                if not cc_recipients:
+                    cc_recipients = str(i_recipient)
+                else:
+                    new_cc_recipients = '%s,%s' % (str(cc_recipients), str(i_recipient))
+                    cc_recipients = str(new_cc_recipients)
+        logger.info(
+            'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
+            (str(primary_recipient), str(cc_recipients)))
+
     alert_algo = str(algorithm)
     alert_context = alert_algo.upper()
 
@@ -123,11 +143,26 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     body = '%s :: %s <br> Next alert in: %s seconds <br> skyline Boundary alert - %s <br><a href="%s">%s</a>' % (
         datapoint, metric_name, expiration_time, alert_context, link, img_tag)
 
-    for recipient in recipients:
+    # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+    # Do not send to each recipient, send to primary_recipient and cc the other
+    # recipients, thereby sending only one email
+    # for recipient in recipients:
+    if primary_recipient:
+        logger.info(
+            'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
+            (str(primary_recipient), str(cc_recipients)))
+
         msg = MIMEMultipart('alternative')
         msg['Subject'] = '[Skyline alert] ' + 'Boundary ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
         msg['From'] = sender
-        msg['To'] = recipient
+        # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+        # msg['To'] = recipient
+        msg['To'] = primary_recipient
+
+        # @added 20180524 - Task #2384: Change alerters to cc other recipients
+        # Added Cc
+        if cc_recipients:
+            msg['Cc'] = cc_recipients
 
         msg.attach(MIMEText(body, 'html'))
         if image_data is not None:
@@ -136,7 +171,19 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
             msg.attach(msg_attachment)
 
         s = SMTP('127.0.0.1')
-        s.sendmail(sender, recipient, msg.as_string())
+        # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+        # Send to primary_recipient and cc_recipients
+        # s.sendmail(sender, recipient, msg.as_string())
+        try:
+            if cc_recipients:
+                s.sendmail(sender, [primary_recipient, cc_recipients], msg.as_string())
+            else:
+                s.sendmail(sender, primary_recipient, msg.as_string())
+        except:
+            logger.info(traceback.format_exc())
+            logger.error(
+                'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
+                (str(primary_recipient), str(cc_recipients)))
         s.quit()
 
 

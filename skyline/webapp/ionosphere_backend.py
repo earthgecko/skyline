@@ -594,7 +594,18 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     if metric_vars_ok and ts_json_ok:
         data_to_process = True
     panorama_anomaly_id = False
-    url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (settings.SKYLINE_URL, str(base_name), str(requested_timestamp), str(requested_timestamp))
+    # @modified 20180608 - Bug #2406: Ionosphere - panorama anomaly id lag
+    # Time shift the requested_timestamp by 120 seconds either way on the
+    # from_timestamp and until_timestamp parameter to account for any lag in the
+    # insertion of the anomaly by Panorama in terms Panorama only running every
+    # 60 second and Analyzer to Mirage to Ionosphere and back introduce
+    # additional lags.  Panorama will not add multiple anomalies from the same
+    # metric in the time window so there is no need to consider the possibility
+    # of there being multiple anomaly ids being returned.
+    # url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (settings.SKYLINE_URL, str(base_name), str(requested_timestamp), str(requested_timestamp))
+    grace_from_timestamp = int(requested_timestamp) - 120
+    grace_until_timestamp = int(requested_timestamp) + 120
+    url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (settings.SKYLINE_URL, str(base_name), str(grace_from_timestamp), str(grace_until_timestamp))
     panorama_resp = None
     logger.info('getting anomaly id from panorama: %s' % str(url))
     if settings.WEBAPP_AUTH_ENABLED:
@@ -3718,6 +3729,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
 # ionosphere_matched table layout
 # | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version |
 # | 39793 |   782 |       1505560867 |      9856.36758282061 |                     210 |  9813.63277426169 |                   150 | 0.4.0           |
+# @modified 20180620 - Feature #2404: Ionosphere - fluid approximation
+# Added minmax scaling
+# | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version | minmax | minmax_fp_features_sum | minmax_fp_features_count | minmax_anomalous_features_sum | minmax_anomalous_features_count |
+# | 68071 |  3352 |       1529490602 |      383311386.647846 |                     210 |  383283135.786868 |                   150 | 0.4.0           |      1 |        4085.7427786846 |                      210 |              4048.14642205812 |                             210 |
 # ionosphere_layers_matched table layout
 # | id    | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration |
 # | 25069 |       24 |  1108 |       195 |        1505561823 |            2.000000 |         86400 |
@@ -3751,7 +3766,14 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             metric_timestamp = int(row['metric_timestamp'])
             metric_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
             match_id = int(row['id'])
-            matched_by = 'features profile'
+            # @modified 20180620 - Feature #2404: Ionosphere - fluid approximation
+            # Added minmax scaling
+            # matched_by = 'features profile'
+            minmax = int(row['minmax'])
+            if minmax == 0:
+                matched_by = 'features profile'
+            else:
+                matched_by = 'features profile - minmax'
             fp_id = int(row['fp_id'])
             layer_id = 'None'
             # Get metric name, first get metric id from the features profile
@@ -3924,15 +3946,28 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
             common_features_count = row['common_features_count']
             tsfresh_version = row['tsfresh_version']
             matched_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
+            # @added 20180620 - Feature #2404: Ionosphere - fluid approximation
+            # Added minmax scaling
+            minmax = int(row['minmax'])
+            minmax_fp_features_sum = row['minmax_fp_features_sum']
+            minmax_fp_features_count = row['minmax_fp_features_count']
+            minmax_anomalous_features_sum = row['minmax_anomalous_features_sum']
+            minmax_anomalous_features_count = row['minmax_anomalous_features_count']
             matched_details = '''
 tsfresh_version       :: %s
 all_calc_features_sum :: %s     | all_calc_features_count :: %s
 sum_common_values     :: %s     | common_features_count :: %s
-metric_timestamp      :: %s     | human_date :: %s
+metric_timestamp      :: %s               | human_date :: %s
+minmax_scaled         :: %s
+minmax_fp_features_sum        :: %s  | minmax_fp_features_count :: %s
+minmax_anomalous_features_sum :: %s  | minmax_anomalous_features_count :: %s
 ''' % (str(tsfresh_version), str(all_calc_features_sum),
                 str(all_calc_features_count), str(sum_common_values),
                 str(common_features_count), str(metric_timestamp),
-                str(matched_human_date))
+                str(matched_human_date), str(minmax),
+                str(minmax_fp_features_sum), str(minmax_fp_features_count),
+                str(minmax_anomalous_features_sum),
+                str(minmax_anomalous_features_count))
         except:
             trace = traceback.format_exc()
             logger.error(trace)

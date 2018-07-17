@@ -311,6 +311,22 @@ CREATE TABLE IF NOT EXISTS `ionosphere_matched` (
   `sum_common_values` DOUBLE DEFAULT 0 COMMENT 'the sum of the common calculated features of the not_anomalous timeseries',
   `common_features_count` INT(10) DEFAULT 0 COMMENT 'the number of the common calculated features of the not_anomalous timeseries',
   `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
+/*
+# @added 20180620 - Feature #2404: Ionosphere - fluid approximation
+#                   Branch #2270: luminosity
+*/
+  `minmax` TINYINT(4) DEFAULT 0 COMMENT 'whether the match was made using minmax scaling, 0 being no',
+  `minmax_fp_features_sum` DOUBLE DEFAULT 0 COMMENT 'the sum of all the minmax scaled calculated features of the fp timeseries',
+  `minmax_fp_features_count` INT(10) DEFAULT 0 COMMENT 'the number of all the minmax scaled calculated features of the fp timeseries',
+  `minmax_anomalous_features_sum` DOUBLE DEFAULT 0 COMMENT 'the sum of all the minmax scaled calculated features of the anomalous timeseries',
+  `minmax_anomalous_features_count` INT(10) DEFAULT 0 COMMENT 'the number of all the minmax scaled calculated features of the anomalous timeseries',
+/*
+# @added 2018075 - Task #2446: Optimize Ionosphere
+#                  Branch #2270: luminosity
+Added fp_count and fp_checked
+*/
+  `fp_count` INT(10) DEFAULT 0 COMMENT 'the total number of features profiles for the metric which were valid to check',
+  `fp_checked` INT(10) DEFAULT 0 COMMENT 'the number of features profiles checked until the match was made',
   PRIMARY KEY (id),
   INDEX `features_profile_matched` (`id`,`fp_id`))
   ENGINE=InnoDB;
@@ -362,6 +378,13 @@ CREATE TABLE IF NOT EXISTS `ionosphere_layers_matched` (
   `anomaly_timestamp` INT(11) NOT NULL COMMENT 'anomaly unix timestamp, see notes on historic dates above',
   `anomalous_datapoint` DECIMAL(18,6) NOT NULL COMMENT 'anomalous datapoint',
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries which matched',
+/*
+# @added 2018075 - Task #2446: Optimize Ionosphere
+#                  Branch #2270: luminosity
+Added layers_count and layers_checked
+*/
+  `layers_count` INT(10) DEFAULT 0 COMMENT 'the total number of layers for the metric which were valid to check',
+  `layers_checked` INT(10) DEFAULT 0 COMMENT 'the number of layers checked until the match was made',
   PRIMARY KEY (id),
   INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`))
   ENGINE=InnoDB;

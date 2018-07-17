@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_algorithms &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>mirage.mirage_algorithms &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
@@ -187,6 +188,8 @@
     <span class="n">PANDAS_VERSION</span><span class="p">,</span>
     <span class="n">RUN_OPTIMIZED_WORKFLOW</span><span class="p">,</span>
     <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span>
+    <span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+    <span class="n">REDIS_PASSWORD</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="o">*</span>
@@ -194,6 +197,15 @@
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
+<span class="c1"># @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+<span class="k">if</span> <span class="n">MIRAGE_ENABLE_SECOND_ORDER</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+    <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">unpackb</span><span class="p">,</span> <span class="n">packb</span>
+    <span class="k">if</span> <span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+        <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
@@ -676,7 +688,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Logging &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Logging &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="next" title="Tuning tips" href="tuning-tips.html"/>
         <link rel="prev" title="Skyline and friends" href="skyline-and-friends.html"/> 
 
@@ -108,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Logging</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#a-modified-logging-methodology">A modified logging methodology</a></li>
@@ -183,10 +184,10 @@ Skyline does is not easy.</li>
 <p>Skyline logging can be viewed as having 2 contexts:</p>
 <ol class="simple">
 <li>Logging the Skyline application operations - Skyline app log</li>
-<li>Logging the details of anomalous timeseries - syslog</li>
+<li>Logging the details of anomalous time series - syslog</li>
 </ol>
 <p>Any long time users of Skyline will have undoubtedly run into a logging pain
-with Skyline at  some point.  Whether that be in terms of logs being overwritten
+with Skyline at some point.  Whether that be in terms of logs being overwritten
 or no errors being logged but a Skyline module broken or hung.
 Although logging is very mature, especially in an ecosystem as mature as Python
 and one may be led to believe it should be easy, however in reality it is
@@ -259,8 +260,8 @@ result in the log being pushed multiple times due to the following scenario:</p>
 <li>Skyline app bin is called to start</li>
 <li>Skyline app bin makes a last log from the Skyline app log</li>
 <li>Skyline Python app is started, creates log with <code class="docutils literal"><span class="pre">mode=w</span></code></li>
-<li>Skyline Python app pauses and the app bin script contenates last log and new
-log file</li>
+<li>Skyline Python app pauses and the app bin script concatenates the last log and
+new log file</li>
 <li>Skyline bin script exits and Skyline Python app continues writing to the log</li>
 </ul>
 <p>In terms of rsyslog pipelining this would result in the log being fully
@@ -269,9 +270,8 @@ submitted again on every restart.</p>
 <div class="section" id="syslog">
 <span id="syslog"></span><h2>syslog<a class="headerlink" href="#syslog" title="Permalink to this headline">¶</a></h2>
 <p>With this in mind a syslog alert trigger was added to Skyline apps to handle the
-logging the details of anomalous timeseries to syslog,  groking the syslog for
-Skyline logs and rates etc is the way to go.  Bearing in mind that only
-anomalies from metrics with set alert tuples are logged.</p>
+logging the details of anomalous time series to syslog,  groking the syslog for
+Skyline logs and rates etc is the way to go.</p>
 </div>
 </div>
 
@@ -316,7 +316,7 @@ anomalies from metrics with set alert tuples are logged.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -4,11 +4,32 @@
 Luminosity
 ==========
 
+Requires - Panorama to be enabled and running.
+
+Luminosity takes the time series of an anomalous metric and then cross
+correlates the time series against all the other metrics time series to find and
+record metrics that are strongly correlated to the anomalous metric, using
+Linkedin's Luminol library.
+
+This information can help in root cause analysis and gives the operator a view
+of other metrics, perhaps on different servers or in different namespaces that
+could be related to anomalous event.
+
+It handles metrics having a time lagged effect on other metrics is handled with
+time shifted cross correlations time shifted too.  So that if metric.a did
+something 120 seconds ago and metric.b become anomalous 120 seconds later, if
+there is correlation between the time shifted time series, these will be found
+as well and recorded with time shifted value e.g. -60 and a shifted_coefficient
+
+Cross correlations are only currently only viewable in Ionosphere on training_data
+and features profile pages, however you can query MySQL directly to report on
+any anomalies ad hoc until a full Luminosity webapp page in created.
+
+Luminosity as a replacement for Kale Oculus
+-------------------------------------------
+
 Luminosity is the beginning of an attempt to implement a pure Python replacement
 for the Oculus anomaly correlation component of the Etsy Kale stack.
-
-Luminosity adds correlations back to Skyline.  Cross correlations to be
-correct.
 
 Oculus was not moved forward with Skyline in this version of Skyline for a
 number of reasons, those mainly being Ruby, Java and Elasticsearch.
@@ -52,6 +73,6 @@ cause analysis component and over time enables Skyline to determine and report
 the most strongly correlated metrics.
 
 luminol.correlate is based on http://paulbourke.net/miscellaneous/correlate/
-and for the purposes of understanding the luminol.correlate, a pure
+and for the purposes of understanding the luminol.correlate, a pure Python
 implementation of the Paul Bourke method was implemented and verified with the
 results of the luminol.correlate.

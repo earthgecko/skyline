@@ -302,6 +302,10 @@ you need to try and be quicker next time.
 <!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
   {% if matched_fp_id %}
       <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">features profile ::</span> ionosphere_matched id - {{ matched_fp_id }}</span></span></span></h4></center>
+<!-- # @added 20180620 - Feature #2404: Ionosphere - fluid approximation -->
+    {% if minmax == 1 %}
+    <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is a Min-Max scaled match</span></span></span></h4></center>
+  {% endif %}
       <br>
   {% endif %}
   {% if matched_layer_id %}
@@ -498,7 +502,13 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 
 <!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
   {% if matched_fp_id %}
-    <h4><span class="logo"><span class="sky">MATCHED evalutating ::</span> <span class="re">ionosphere_matched id ::</span></span></span> {{ matched_fp_id }}</h4>
+<!-- # @modified 20180620 - Feature #2404: Ionosphere - fluid approximation -->
+    {% if minmax == 0 %}
+    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_matched id ::</span></span></span> {{ matched_fp_id }}</h4>
+    {% else %}
+    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_matched id ::</span></span></span> {{ matched_fp_id }}</h4>
+    <center><h4><span class="logo"><span class="sky"></span> <span class="re">This match was made using Min-Max scaling of the features profile time series and the anomalous timeseries</span></span></span></h4></center>
+    {% endif %}
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
     <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
@@ -506,7 +516,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
     <br>
   {% endif %}
   {% if matched_layer_id %}
-    <h4><span class="logo"><span class="sky">MATCHED  evalutating ::</span> <span class="re">ionosphere_layers_matched id ::</span></span></span> {{ matched_layer_id }}</h4>
+    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_layers_matched id ::</span></span></span> {{ matched_layer_id }}</h4>
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
     <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Panorama &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Panorama &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="next" title="Webapp" href="webapp.html"/>
         <link rel="prev" title="Crucible" href="crucible.html"/> 
 
@@ -111,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -169,18 +170,22 @@
             
   <div class="section" id="panorama">
 <h1>Panorama<a class="headerlink" href="#panorama" title="Permalink to this headline">¶</a></h1>
-<p>The Panorama service is responsible for recording the metadata for each anomaly.</p>
+<p>The Panorama service is responsible for recording data for each anomaly.</p>
 <p>It is important to remember that the Skyline analysis apps only alert on metrics
-that have alert tuples set.  Panorama records samples of all metrics that are
-flagged as anomalous.  Sampling at <a class="reference internal" href="skyline.html#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_EXPIRY_TIME</span></code></a>, the
-default is 900 seconds.</p>
+that have alert tuples set.  However if you have <a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.SYSLOG_ENABLED</span></code></a>
+set to <code class="docutils literal"><span class="pre">True</span></code> syslog acts as an alerter, just like a SMTP, hipchat or
+pagerduty alerter.  Therefore having this set to <code class="docutils literal"><span class="pre">True</span></code> means that Panorama
+will record samples of <strong>all</strong> metrics that are flagged as anomalous.  Sampling
+at <a class="reference internal" href="skyline.html#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_EXPIRY_TIME</span></code></a>, the default is 900 seconds.  Although
+this may result in a lot of entries in the anomalies DB table, it is useful for
+helping with root cause analysis.</p>
 <p>The <a class="reference internal" href="skyline.html#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_CHECK_MAX_AGE</span></code></a> ensures that Panorama only processes
 checks that are not older than this value.  This mitigates against Panorama
 stampeding against the MySQL database, if either Panorama or MySQL were stopped
 and there are a lot of Panorama check files queued to process.  If this is set
 to 0, Panorama will process all checks, regardless of age.</p>
 <p>There is a Panorama view in the Skyline Webapp frontend UI to allow you to
-search and view historical anomalies.</p>
+search and view historic anomalies.</p>
 <div class="section" id="create-a-mysql-database">
 <h2>Create a MySQL database<a class="headerlink" href="#create-a-mysql-database" title="Permalink to this headline">¶</a></h2>
 <p>You can install and run MySQL on the Skyline server or use any existing MySQL
@@ -207,7 +212,7 @@ really big data sets may invalidate this in the future, Gaia DR1 MySQL say :)</p
 <ul class="simple">
 <li>See <code class="docutils literal"><span class="pre">skyline.sql</span></code> in your cloned Skyline repo for the schema creation script</li>
 <li>Enable Panorama and set the other Panorama settings in <code class="docutils literal"><span class="pre">settings.py</span></code></li>
-<li>Start Panorama (use you appropriate PATH) - or go back to <a class="reference external" href="../html/installation.html">Installation</a> and
+<li>Start Panorama (use your appropriate PATH) - or go back to <a class="reference external" href="../html/installation.html">Installation</a> and
 continue with the installation steps and Panorama will be started later in the
 installation process.</li>
 </ul>
@@ -258,7 +263,7 @@ installation process.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

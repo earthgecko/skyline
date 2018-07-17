@@ -40,6 +40,46 @@
 					</div>
 
 					<div class="form-group">
+						<label for="password" class="col-sm-3">Password:</label>
+						<div class="col-sm-9">
+							<input type="password" id="password" name="password" value="" class="form-control" />
+						</div>
+					</div>
+
+<!-- # @added 20180529 - Feature #2378: Add redis auth to Skyline and rebrow -->
+					<div class="form-group">
+						<label for="db" class="col-sm-3">Token valid for:</label>
+						<div class="col-sm-9">
+							<input id="token_valid_for" name="token_valid_for" type="number" min="30" max="3600" value="300" class="form-control" size="5" style="width: 100px"/>
+							<p class="help-block">This is how many seconds you want your token for Redis authentication valid for, max allowed 3600.</p>
+						</div>
+					</div>
+
+<!-- # @added 20180727 - Feature #2378: Add redis auth to Skyline and rebrow -->
+  {% if protocol != 'https' %}
+	  		<div class="alert alert-danger">
+<strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">is running misconfigured ::</span></span></b>
+ You are not running Skyline behind a SSL terminated endpoint therefore POST
+data submitted by this form will be sent encrypted, including your Redis
+password or your proxy is not configured correctly and is not setting the
+X-Forwarded-Proto header.
+	  		</div>
+  {% endif %}
+  {% if proxied == False %}
+	  		<div class="alert alert-danger">
+<strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">is running misconfigured ::</span></span></b>
+ Skyline does not appear to be running behind a proxy or your proxy is not
+configured correctly and it is not setting the X-Forwarded-Proto header.
+	  		</div>
+  {% endif %}
+  {% if client_message != False %}
+	  		<div class="alert alert-danger">
+<strong>Warning!</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">message ::</span></span></b>
+ {{ client_message }}
+	  		</div>
+  {% endif %}
+
+					<div class="form-group">
 						<div class="col-sm-9 col-sm-offset-3">
 							<button type="submit" class="btn btn-default btn-primary">Connect</button>
 						</div>

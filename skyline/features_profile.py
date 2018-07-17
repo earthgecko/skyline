@@ -59,6 +59,9 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     :type timestamp: str
     :param metric: the base_name of the metric
     :type metric: str
+    :param context: the context
+    :type metric: str
+
     :return: (features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)
     :rtype: int
     :rtype: (str, boolean, str, str, str)

@@ -73,7 +73,11 @@ class Analyzer(Thread):
 
         """
         super(Analyzer, self).__init__()
-        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -311,7 +315,11 @@ class Analyzer(Thread):
             except:
                 logger.error('skyline can\'t connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 sleep(10)
-                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                if settings.REDIS_PASSWORD:
+                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
             # Report app up

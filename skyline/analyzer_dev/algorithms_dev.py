@@ -28,6 +28,7 @@ try:
         SKYLINE_TMP_DIR,
         ENABLE_ALGORITHM_RUN_METRICS,
         ENABLE_ALL_ALGORITHMS_RUN_METRICS,
+        REDIS_PASSWORD,
     )
 except:
     print('failed to import expected settings' + traceback.format_exc())
@@ -42,7 +43,11 @@ logger = logging.getLogger(skyline_app_logger)
 if ENABLE_SECOND_ORDER:
     from redis import StrictRedis
     from msgpack import unpackb, packb
-    redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+    # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+    if REDIS_PASSWORD:
+        redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
+    else:
+        redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
 
 try:
     send_algorithm_run_metrics = ENABLE_ALGORITHM_RUN_METRICS

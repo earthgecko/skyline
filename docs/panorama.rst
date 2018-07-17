@@ -1,12 +1,16 @@
 Panorama
 ========
 
-The Panorama service is responsible for recording the metadata for each anomaly.
+The Panorama service is responsible for recording data for each anomaly.
 
 It is important to remember that the Skyline analysis apps only alert on metrics
-that have alert tuples set.  Panorama records samples of all metrics that are
-flagged as anomalous.  Sampling at :mod:`settings.PANORAMA_EXPIRY_TIME`, the
-default is 900 seconds.
+that have alert tuples set.  However if you have :mod:`settings.SYSLOG_ENABLED`
+set to ``True`` syslog acts as an alerter, just like a SMTP, hipchat or
+pagerduty alerter.  Therefore having this set to ``True`` means that Panorama
+will record samples of **all** metrics that are flagged as anomalous.  Sampling
+at :mod:`settings.PANORAMA_EXPIRY_TIME`, the default is 900 seconds.  Although
+this may result in a lot of entries in the anomalies DB table, it is useful for
+helping with root cause analysis.
 
 The :mod:`settings.PANORAMA_CHECK_MAX_AGE` ensures that Panorama only processes
 checks that are not older than this value.  This mitigates against Panorama
@@ -15,7 +19,7 @@ and there are a lot of Panorama check files queued to process.  If this is set
 to 0, Panorama will process all checks, regardless of age.
 
 There is a Panorama view in the Skyline Webapp frontend UI to allow you to
-search and view historical anomalies.
+search and view historic anomalies.
 
 Create a MySQL database
 -----------------------
@@ -42,7 +46,7 @@ access the database with the user and password you configure in ``settings.py``
 
 - See ``skyline.sql`` in your cloned Skyline repo for the schema creation script
 - Enable Panorama and set the other Panorama settings in ``settings.py``
-- Start Panorama (use you appropriate PATH) - or go back to `Installation`_ and
+- Start Panorama (use your appropriate PATH) - or go back to `Installation`_ and
   continue with the installation steps and Panorama will be started later in the
   installation process.
 

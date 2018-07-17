@@ -5,7 +5,7 @@ try:
 except:
     from queue import Empty
 from redis import StrictRedis
-from time import time, sleep
+from time import time, sleep, strftime, gmtime
 from threading import Thread
 from collections import defaultdict
 from multiprocessing import Process, Manager, Queue
@@ -82,7 +82,11 @@ class Analyzer(Thread):
 
         """
         super(Analyzer, self).__init__()
-        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -284,6 +288,10 @@ class Analyzer(Thread):
             non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
         except:
             non_derivative_monotonic_metrics = []
+
+        # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Added Redis sets for Boring, TooShort and Stale
+        redis_set_errors = 0
 
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
@@ -690,15 +698,44 @@ class Analyzer(Thread):
             # It could have been deleted by the Roomba
             except TypeError:
                 exceptions['DeletedByRoomba'] += 1
+            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+            # Added Redis sets for Boring, TooShort and Stale
             except TooShort:
                 exceptions['TooShort'] += 1
+                try:
+                    self.redis_conn.sadd('analyzer.too_short', base_name)
+                except:
+                    redis_set_errors += 1
             except Stale:
                 exceptions['Stale'] += 1
+                try:
+                    self.redis_conn.sadd('analyzer.stale', base_name)
+                except:
+                    redis_set_errors += 1
             except Boring:
                 exceptions['Boring'] += 1
+                try:
+                    self.redis_conn.sadd('analyzer.boring', base_name)
+                except:
+                    redis_set_errors += 1
             except:
                 exceptions['Other'] += 1
                 logger.info(traceback.format_exc())
+
+        # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Added Redis sets for Boring, TooShort and Stale
+        if redis_set_errors > 0:
+            logger.error('error :: failed to add some metric/s to a Redis analyzer.{boring,stale,too_short} set')
+        else:
+            # @added 20180523 - Feature #2378: Add redis auth to Skyline and rebrow
+            # Added update time to Redis sets for Boring, TooShort and Stale
+            try:
+                updated_analyzer_sets_at = '_updated_at_%s' % str(strftime('%Y%m%d%H%M%S', gmtime()))
+                self.redis_conn.sadd('analyzer.boring', updated_analyzer_sets_at)
+                self.redis_conn.sadd('analyzer.stale', updated_analyzer_sets_at)
+                self.redis_conn.sadd('analyzer.too_short', updated_analyzer_sets_at)
+            except:
+                redis_set_errors += 1
 
         # Add values to the queue so the parent process can collate
         for key, value in anomaly_breakdown.items():
@@ -834,10 +871,14 @@ class Analyzer(Thread):
                 logger.info(traceback.format_exc())
                 sleep(10)
                 try:
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                    if settings.REDIS_PASSWORD:
+                        self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    else:
+                        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 except:
-                    logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                     logger.info(traceback.format_exc())
+                    logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
 
                 continue
 
@@ -902,6 +943,28 @@ class Analyzer(Thread):
                         mirage_unique_metrics = []
                     except:
                         logger.error('error :: could not query Redis to delete mirage.unique_metric set')
+                    # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                    # Added Redis sets for Boring, TooShort and Stale
+                    try:
+                        self.redis_conn.delete('analyzer.boring')
+                        logger.info('deleted Redis analyzer.boring set to refresh')
+                    except:
+                        logger.info('no Redis set to delete - analyzer.boring')
+                    try:
+                        self.redis_conn.delete('analyzer.too_short')
+                        logger.info('deleted Redis analyzer.too_short set to refresh')
+                    except:
+                        logger.info('no Redis set to delete - analyzer.too_short')
+                    try:
+                        stale_metrics = list(self.redis_conn.smembers('analyzer.stale'))
+                    except:
+                        stale_metrics = []
+                    if stale_metrics:
+                        try:
+                            self.redis_conn.delete('analyzer.stale')
+                            logger.info('deleted Redis analyzer.stale set to refresh')
+                        except:
+                            logger.info('no Redis set to delete - analyzer.stale')
 
                 for alert in settings.ALERTS:
                     for metric in unique_metrics:

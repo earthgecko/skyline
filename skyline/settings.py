@@ -1,16 +1,42 @@
 """
 Shared settings
 
-IMPORTANT NOTE
+IMPORTANT NOTE:
 
-You may find reading some of these settings documentation strings
+These settings are described with docstrings for the purpose of automated
+documentation.  You may find reading some of the docstrings easier to understand
+or read in the documentation itself.
+
 http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings
+
 """
 
 REDIS_SOCKET_PATH = '/tmp/redis.sock'
 """
 :var REDIS_SOCKET_PATH: The path for the Redis unix socket
 :vartype REDIS_SOCKET_PATH: str
+"""
+
+#REDIS_PASSWORD = 'DO.PLEASE.set.A.VERY.VERY.LONG.REDIS.password-time(now-1+before_you_forget)'
+REDIS_PASSWORD = None
+"""
+:var REDIS_PASSWORD: The password for Redis, even though Skyline uses socket it
+    is still advisable to set a password for Redis.  If this is set to the
+    boolean None Skyline will not use Redis AUTH
+:vartype REDIS_PASSWORD: str
+
+.. note:: Please ensure that you do enable Redis authentication by setting the
+    requirepass in your redis.conf with a very long Redis password.  See
+    https://redis.io/topics/security and http://antirez.com/news/96 for more
+    info.
+
+"""
+
+SECRET_KEY = 'your-long_secret-key-to-encrypt_the_redis_password_in_url_parameters'
+"""
+:var SECRET_KEY: A secret key that is used to encrypt the Redis password in the
+    rebrow URL parameters.
+:vartype SECRET_KEY: str
 """
 
 LOG_PATH = '/var/log/skyline'
@@ -207,8 +233,12 @@ ALERTERS_SETTINGS = True
 
 SYSLOG_ENABLED = True
 """
-:var SYSLOG_ENABLED: Alerter - enables Skyline apps to submit anomalous metric
-    details to syslog.
+:var SYSLOG_ENABLED: enables Skyline apps to submit anomalous metric
+    details to syslog.  Being set to True makes syslog a kind of alerter, like a
+    SMTP alert. also results in all anomalies being
+    recorded in the database by Panorama, this is probably desired.  If you
+    find this is making syslog too noise, set to False, but you will lose
+    non alerter
 :vartype SYSLOG_ENABLED: boolean
 """
 
@@ -612,10 +642,12 @@ WORKER_PROCESSES = 2
 :vartype WORKER_PROCESSES: int
 """
 
-HORIZON_IP = '0.0.0.0'
+HORIZON_IP = 'YOUR_SKYLINE_INTSANCE_IP_ADDRESS'
 """
-:var HORIZON_IP: The IP address for Horizon to bind to.  Defaults to
-    ``gethostname()``
+:var HORIZON_IP: The IP address for Horizon to bind to.  Skyline receives data
+    from Graphite on this IP address.  This previously defaulted to
+    ``gethostname()`` but has been change to be specifically specified by the
+    user. USER_DEFINED
 :vartype HORIZON_IP: str
 """
 
@@ -1104,6 +1136,7 @@ BOUNDARY_AUTOAGGRERATION_METRICS = (
 - **Tuple schema example**::
 
     BOUNDARY_AUTOAGGRERATION_METRICS = (
+        ('stats_counts', AGGREGATION_VALUE),
         ('metric1', AGGREGATION_VALUE),
     )
 
@@ -1463,6 +1496,27 @@ IONOSPHERE_FEATURES_PERCENT_SIMILAR = 1.0
 :vartype IONOSPHERE_FEATURES_PERCENT_SIMILAR: float
 """
 
+IONOSPHERE_MINMAX_SCALING_ENABLED = True
+"""
+:var IONOSPHERE_MINMAX_SCALING_ENABLED: Implement Min-Max scaling on features
+    profile time series and an anomalous time series if the features profile
+    sums do not match.  This adds a form of standardization that significantly
+    improves the Ionosphere features sum comparison technique of high range
+    metrics within the IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE boundaries.
+:vartype IONOSPHERE_MINMAX_SCALING_ENABLED: boolean
+"""
+
+IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE = 0.15
+"""
+:var IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE: Min-Max scaling will only be
+    implemented if the lower and upper ranges of both the features profile time
+    series and the anomalous time series are within these margins.  The default
+    being 0.15 (or 15 percent).  This prevents Ionosphere from Min-Max scaling
+    and comparing time series that are in significantly different ranges and
+    only applying Min-Max scaling comparisons when it is sensible to do so.
+:vartype IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE: float
+"""
+
 IONOSPHERE_LEARN = True
 """
 :var IONOSPHERE_LEARN: Whether Ionosphere is set to learn
@@ -1670,8 +1724,15 @@ OTHER_SKYLINE_REDIS_INSTANCES = []
     there are multiple Skyline instances each with their own Redis.
 :vartype OTHER_SKYLINE_REDIS_INSTANCES: list
 
-For example, the IP or FQDN as a string and the port as an int:
-OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379], ['192.168.1.15', 6379]]
+For example, the IP or FQDN as a string and the port as an int and the Redis
+password as a str OR if there is no password the boolean None:
+OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379, 'this_is_the_redis_password'], ['192.168.1.15', 6379, None]]
+
+.. note:: If you run multiple Skyline instances and are going to run cross
+    correlations and query another Redis please ensure that you have Redis
+    authentication enabled.  See https://redis.io/topics/security and
+    http://antirez.com/news/96 for more info.
+
 """
 
 ALTERNATIVE_SKYLINE_URLS = []
@@ -1688,8 +1749,22 @@ ALTERNATIVE_SKYLINE_URLS = ['http://skyline-na.example.com:8080','http://skyline
 CORRELATE_ALERTS_ONLY = True
 """
 :var CORRELATE_ALERTS_ONLY: Only cross correlate anomalies the have an alert
-    setting (other that syslog).  This reduces the number of correlations that
+    setting (other than syslog).  This reduces the number of correlations that
     are recorded in the database.  Non alerter metrics are still however cross
     correlated against when an anomaly triggers on an alerter metric.
 :vartype CORRELATE_ALERTS_ONLY: boolean
+"""
+
+LUMINOL_CROSS_CORRELATION_THRESHOLD = 0.9
+"""
+:var LUMINOL_CROSS_CORRELATION_THRESHOLD: Only record Luminol cross correlated
+    metrics where the correlation coefficient is > this float value.  Linkedin's
+    Luminol library is hardcoded to 0.8, however with lots of testing 0.8 proved
+    to be too low a threshold and resulted in listing many metrics that were
+    not related.  You may find 0.9 too low as well, it can also record a lot,
+    however in root cause analysis and determining relationships between metrics
+    0.9 has proved more useful for in seeing the tress in the forest.
+    This can be a value between 0.0 and 1.00000 - 1.0 being STRONGEST cross
+    correlation
+:vartype LUMINOL_CROSS_CORRELATION_THRESHOLD: float
 """

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.webapp package &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>skyline.webapp package &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="prev" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/> 
 
@@ -108,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -137,7 +138,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.ionosphere_backend">skyline.webapp.ionosphere_backend module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.utilities">skyline.webapp.utilities module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-webapp.webapp">skyline.webapp.webapp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skyline-webapp-webapp-module">skyline.webapp.webapp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp">Module contents</a></li>
 </ul>
 </li>
@@ -632,170 +633,8 @@ Mirage should surface the metric timeseries for</li>
 </dd></dl>
 
 </div>
-<div class="section" id="module-webapp.webapp">
-<span id="skyline-webapp-webapp-module"></span><h2>skyline.webapp.webapp module<a class="headerlink" href="#module-webapp.webapp" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="webapp.webapp.limit_remote_addr">
-<code class="descname">limit_remote_addr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#limit_remote_addr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.limit_remote_addr" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function is called to check if the requesting IP address is in the
-settings.WEBAPP_ALLOWED_IPS array, if not 403.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.check_auth">
-<code class="descname">check_auth</code><span class="sig-paren">(</span><em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#check_auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.check_auth" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function is called to check if a username /
-password combination is valid.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.authenticate">
-<code class="descname">authenticate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#authenticate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.authenticate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a 401 response that enables basic auth</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.requires_auth">
-<code class="descname">requires_auth</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#requires_auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.requires_auth" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.internal_error">
-<code class="descname">internal_error</code><span class="sig-paren">(</span><em>message</em>, <em>traceback_format_exc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#internal_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.internal_error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Show traceback in the browser when running a flask app on a production
-server.
-By default, flask does not show any useful information when running on a
-production server.
-By adding this view, we output the Python traceback to the error 500 page
-and log.</p>
-<p>As per:
-Show flask traceback when running on production server
-<a class="reference external" href="https://gist.github.com/probonopd/8616a8ff05c8a75e4601">https://gist.github.com/probonopd/8616a8ff05c8a75e4601</a> - Python traceback
-rendered nicely by Jinja2</p>
-<p>This can be tested by hitting SKYLINE_URL/a_500</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.index">
-<code class="descname">index</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.index" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.a_500">
-<code class="descname">a_500</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#a_500"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.a_500" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.now">
-<code class="descname">now</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#now"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.now" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.then">
-<code class="descname">then</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#then"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.then" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.anomalies">
-<code class="descname">anomalies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.anomalies" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.panorama_anomalies">
-<code class="descname">panorama_anomalies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#panorama_anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.panorama_anomalies" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.app_settings">
-<code class="descname">app_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#app_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.app_settings" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.version">
-<code class="descname">version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.version" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.data">
-<code class="descname">data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.docs">
-<code class="descname">docs</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#docs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.docs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.panorama">
-<code class="descname">panorama</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#panorama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.panorama" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.crucible">
-<code class="descname">crucible</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#crucible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.crucible" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.ionosphere">
-<code class="descname">ionosphere</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#ionosphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.ionosphere" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.ionosphere_images">
-<code class="descname">ionosphere_images</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#ionosphere_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.ionosphere_images" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.utilities">
-<code class="descname">utilities</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#utilities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.utilities" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.rebrow">
-<code class="descname">rebrow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start page</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.rebrow_server_db">
-<code class="descname">rebrow_server_db</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>db</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_server_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_server_db" title="Permalink to this definition">¶</a></dt>
-<dd><p>List all databases and show info on server</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.rebrow_keys">
-<code class="descname">rebrow_keys</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>db</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_keys" title="Permalink to this definition">¶</a></dt>
-<dd><p>List keys for one database</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.rebrow_key">
-<code class="descname">rebrow_key</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>db</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_key" title="Permalink to this definition">¶</a></dt>
-<dd><p>Show a specific key.
-key is expected to be URL-safe base64 encoded</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.urlsafe_base64_encode">
-<code class="descname">urlsafe_base64_encode</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#urlsafe_base64_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.urlsafe_base64_encode" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="class">
-<dt id="webapp.webapp.App">
-<em class="property">class </em><code class="descname">App</code><a class="reference internal" href="_modules/webapp/webapp.html#App"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.App" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="webapp.webapp.App.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#App.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.App.run" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.webapp.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start the Webapp server</p>
-</dd></dl>
-
+<div class="section" id="skyline-webapp-webapp-module">
+<h2>skyline.webapp.webapp module<a class="headerlink" href="#skyline-webapp-webapp-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-webapp">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-webapp" title="Permalink to this headline">¶</a></h2>
@@ -841,7 +680,7 @@ key is expected to be URL-safe base64 encoded</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

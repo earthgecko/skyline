@@ -23,8 +23,10 @@ import time
 from datetime import datetime, timedelta
 import os
 import base64
+
 # flask things for rebrow
 from flask import session, g, url_for, flash, Markup, json
+
 # For secret_key
 import uuid
 
@@ -33,6 +35,21 @@ import uuid
 import datetime
 # from pytz import timezone
 import pytz
+
+# @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+# Added auth to rebrow as per https://github.com/marians/rebrow/pull/20 by
+# elky84
+from six.moves.urllib.parse import quote
+# @modified 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
+# Use PyJWT instead of pycryptodome
+# from Crypto.Cipher import AES
+# import base64
+# @added 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
+import jwt
+# @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+import hashlib
+from sys import version_info
+from ast import literal_eval
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
@@ -102,7 +119,13 @@ logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 # werkzeug access log
 access_logger = logging.getLogger('werkzeug')
 
-REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+python_version = int(version_info[0])
+
+# @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+if settings.REDIS_PASSWORD:
+    REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+else:
+    REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
 # ENABLE_WEBAPP_DEBUG = True
 
@@ -355,6 +378,7 @@ def panorama_anomalies():
 
 
 @app.route("/app_settings")
+@requires_auth
 def app_settings():
 
     try:
@@ -383,6 +407,7 @@ def app_settings():
 
 
 @app.route("/version")
+@requires_auth
 def version():
 
     try:
@@ -587,10 +612,16 @@ def panorama():
                     other_unique_metrics = []
                     if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
                         metric_found_in_other_redis = False
-                        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+
+                        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                        # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
                             if not metric_found_in_other_redis:
                                 try:
-                                    other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
+                                    if redis_password:
+                                        other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port), password=str(redis_password))
+                                    else:
+                                        other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
                                     other_unique_metrics = list(other_redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                                 except:
                                     logger.error(traceback.format_exc())
@@ -984,10 +1015,15 @@ def ionosphere():
                 other_unique_metrics = []
                 if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
                     metric_found_in_other_redis = False
-                    for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                    # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                    # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                    for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
                         if not metric_found_in_other_redis:
                             try:
-                                other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
+                                if redis_password:
+                                    other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port), password=str(redis_password))
+                                else:
+                                    other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
                                 other_unique_metrics = list(other_redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                             except:
                                 logger.error(traceback.format_exc())
@@ -1488,8 +1524,37 @@ def ionosphere():
                                     {'results': 'Error: timestamp too old no training data exists, training data has been purged'})
                             else:
                                 logger.error('%s=%s no timestamp training data dir found - %s' % (key, str(value), ionosphere_data_dir))
-                                resp = json.dumps(
-                                    {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
+                                # @added 20180713 - Branch #2270: luminosity
+                                # Use settings.ALTERNATIVE_SKYLINE_URLS if they are
+                                # declared
+                                try:
+                                    use_alternative_urls = settings.ALTERNATIVE_SKYLINE_URLS
+                                except:
+                                    use_alternative_urls = False
+                                if use_alternative_urls:
+                                    base_name = request.args.get(str('metric'), None)
+                                    alternative_urls = []
+                                    for alt_url in use_alternative_urls:
+                                        alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(alt_url), str(value), str(base_name))
+                                        if len(use_alternative_urls) == 1:
+                                            return redirect(alt_redirect_url)
+                                        alternative_urls.append(alt_redirect_url)
+                                    message = 'no training data dir exists on this Skyline instance try at the alternative URLS listed below:'
+                                    logger.info('passing alternative_urls - %s' % str(alternative_urls))
+                                    try:
+                                        return render_template(
+                                            'ionosphere.html', display_message=message,
+                                            alternative_urls=alternative_urls,
+                                            fp_view=True,
+                                            version=skyline_version, duration=(time.time() - start),
+                                            print_debug=True), 200
+                                    except:
+                                        message = 'Uh oh ... a Skyline 500 :('
+                                        trace = traceback.format_exc()
+                                        return internal_error(message, trace)
+                                else:
+                                    resp = json.dumps(
+                                        {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
 
                     if not valid_timestamp:
                         return resp, 404
@@ -1517,11 +1582,16 @@ def ionosphere():
 
                     metric_found = False
                     if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
-                        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                        # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
                             other_unique_metrics = []
                             if not metric_found:
                                 try:
-                                    OTHER_REDIS_CONN = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
+                                    if redis_password:
+                                        OTHER_REDIS_CONN = redis.StrictRedis(host=str(redis_ip), port=int(redis_port), password=str(redis_password))
+                                    else:
+                                        OTHER_REDIS_CONN = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
                                     other_unique_metrics = list(OTHER_REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                                     logger.info('metric found in Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
                                 except:
@@ -1585,9 +1655,45 @@ def ionosphere():
                             logger.info(
                                 '%s=%s no timestamp metric features profile dir found - %s' %
                                 (key, str(value), ionosphere_profiles_dir))
-                            resp = json.dumps(
-                                {'results': 'Error: no features profile dir exists - ' + ionosphere_profiles_dir + ' - go on... nothing here.'})
-                            return resp, 404
+
+                            # @added 20180715 - Branch #2270: luminosity
+                            # Use settings.ALTERNATIVE_SKYLINE_URLS if they are
+                            # declared and redirect to alternative URL/s if no
+                            # features profile directory exists on the Skyline
+                            # instance.
+                            try:
+                                use_alternative_urls = settings.ALTERNATIVE_SKYLINE_URLS
+                            except:
+                                use_alternative_urls = False
+                            if use_alternative_urls:
+                                base_name = request.args.get(str('metric'), None)
+                                alternative_urls = []
+                                for alt_url in use_alternative_urls:
+                                    alt_redirect_url_base = '%s/ionosphere' % str(alt_url)
+                                    request_url = str(request.url)
+                                    request_endpoint = '%s/ionosphere' % str(settings.SKYLINE_URL)
+                                    alt_redirect_url = request_url.replace(request_endpoint, alt_redirect_url_base, 1)
+                                    if len(use_alternative_urls) == 1:
+                                        logger.info('redirecting to %s' % str(alt_redirect_url))
+                                        return redirect(alt_redirect_url)
+                                    alternative_urls.append(alt_redirect_url)
+                                message = 'no features profile dir exists on this Skyline instance try at the alternative URLS listed below:'
+                                logger.info('passing alternative_urls - %s' % str(alternative_urls))
+                                try:
+                                    return render_template(
+                                        'ionosphere.html', display_message=message,
+                                        alternative_urls=alternative_urls,
+                                        fp_view=True,
+                                        version=skyline_version, duration=(time.time() - start),
+                                        print_debug=True), 200
+                                except:
+                                    message = 'Uh oh ... a Skyline 500 :('
+                                    trace = traceback.format_exc()
+                                    return internal_error(message, trace)
+                            else:
+                                resp = json.dumps(
+                                    {'results': 'Error: no features profile dir exists - ' + ionosphere_profiles_dir + ' - go on... nothing here.'})
+                                return resp, 404
 
         logger.info('arguments validated - OK')
 
@@ -2176,6 +2282,13 @@ def ionosphere():
                 if matched_layer_id != 'False':
                     matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_layer_id), 'layers', base_name, requested_timestamp)
 
+            # @added 20180620 - Feature #2404: Ionosphere - fluid approximation
+            # Added minmax scaling
+            minmax = 0
+            if matched_fp_id:
+                minmax = int(matched_details_object['minmax'])
+                logger.info('the fp match has minmax set to %s' % str(minmax))
+
             # @added 20180414 - Branch #2270: luminosity
             # Add correlations to features_profile and training_data pages if a
             # panorama_anomaly_id is present
@@ -2240,6 +2353,9 @@ def ionosphere():
                 matched_fp_id=matched_fp_id, matched_layer_id=matched_layer_id,
                 matched_id_resources=matched_id_resources,
                 matched_graph_image_file=matched_graph_image_file,
+                # @added 20180620 - Feature #2404: Ionosphere - fluid approximation
+                # Added minmax scaling
+                minmax=minmax,
                 correlations=correlations,
                 matched_from_datetime=matched_from_datetime,
                 version=skyline_version, duration=(time.time() - start),
@@ -2320,6 +2436,7 @@ def utilities():
         error_string = traceback.format_exc()
         logger.error('error :: failed to render utilities.html: %s' % str(error_string))
         return 'Uh oh ... a Skyline 500 :(', 500
+
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow
@@ -2429,7 +2546,171 @@ serverinfo_meta = {
 }
 
 
+# @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+# Added auth to rebrow as per https://github.com/marians/rebrow/pull/20 by
+# elky84
+def get_redis(host, port, db, password):
+    if password == "":
+        return redis.StrictRedis(host=host, port=port, db=db)
+    else:
+        return redis.StrictRedis(host=host, port=port, db=db, password=password)
+
+
+# @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+# Added token, client_id and salt to replace password parameter and determining
+# client protocol
+def get_client_details():
+    """
+    Gets the first X-Forwarded-For address and sets as the IP address.
+    Gets the client_id by simply using a md5 hash of the client IP address
+    and user agent.
+    Determines whether the request was proxied.
+    Determines the client protocol.
+
+    :return: client_id, protocol, proxied, salt
+    :rtype: str, str, boolean, str
+
+    """
+    proxied = False
+    if request.headers.getlist('X-Forwarded-For'):
+        client_ip = str(request.headers.getlist('X-Forwarded-For')[0])
+        logger.info('rebrow access :: client ip set from X-Forwarded-For[0] to %s' % (str(client_ip)))
+        proxied = True
+    else:
+        client_ip = str(request.remote_addr)
+        logger.info('rebrow access :: client ip set from remote_addr to %s, no X-Forwarded-For header was found' % (str(client_ip)))
+    client_user_agent = request.headers.get('User-Agent')
+    logger.info('rebrow access :: %s client_user_agent set to %s' % (str(client_ip), str(client_user_agent)))
+    client_id = '%s_%s' % (client_ip, client_user_agent)
+    if python_version == 2:
+        client_id = hashlib.md5(client_id).hexdigest()
+    else:
+        client_id = hashlib.md5(client_id.encode('utf-8')).hexdigest()
+    logger.info('rebrow access :: %s has client_id %s' % (str(client_ip), str(client_id)))
+
+    if request.headers.getlist('X-Forwarded-Proto'):
+        protocol_list = request.headers.getlist('X-Forwarded-Proto')
+        protocol = str(protocol_list[0])
+        logger.info('rebrow access :: protocol for %s was set from X-Forwarded-Proto to %s' % (client_ip, str(protocol)))
+    else:
+        protocol = 'unknown'
+        logger.info('rebrow access :: protocol for %s was not set from X-Forwarded-Proto to %s' % (client_ip, str(protocol)))
+
+    if not proxied:
+        logger.info('rebrow access :: Skyline is not set up correctly, the expected X-Forwarded-For header was not found')
+
+    return client_id, protocol, proxied
+
+
+def decode_token(client_id):
+    """
+    Use the app.secret, client_id and salt to decode the token JWT encoded
+    payload and determine the Redis password.
+
+    :param client_id: the client_id string
+    :type client_id: str
+    return token, decoded_redis_password, fail_msg, trace
+    :return: token, decoded_redis_password, fail_msg, trace
+    :rtype: str, str, str, str
+
+    """
+    fail_msg = False
+    trace = False
+    token = False
+    logger.info('decode_token for client_id - %s' % str(client_id))
+
+    if not request.args.getlist('token'):
+        fail_msg = 'No token url parameter was passed, please log into Redis again through rebrow'
+    else:
+        token = request.args.get('token', type=str)
+        logger.info('token found in request.args - %s' % str(token))
+
+    if not token:
+        client_id, protocol, proxied = get_client_details()
+        fail_msg = 'No token url parameter was passed, please log into Redis again through rebrow'
+        trace = 'False'
+
+    client_token_data = False
+    if token:
+        try:
+            if settings.REDIS_PASSWORD:
+                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            key = 'rebrow.token.%s' % token
+            client_token_data = redis_conn.get(key)
+        except:
+            trace = traceback.format_exc()
+            fail_msg = 'Failed to get client_token_data from Redis key - %s' % key
+            client_token_data = False
+            token = False
+
+    client_id_match = False
+    if client_token_data is not None:
+        logger.info('client_token_data retrieved from Redis - %s' % str(client_token_data))
+        try:
+            client_data = literal_eval(client_token_data)
+            logger.info('client_token_data - %s' % str(client_token_data))
+            client_data_client_id = str(client_data[0])
+            logger.info('client_data_client_id - %s' % str(client_data_client_id))
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            err_msg = 'error :: failed to get client data from Redis key'
+            logger.error('%s' % err_msg)
+            fail_msg = 'Invalid token. Please log into Redis through rebrow again.'
+            client_data_client_id = False
+
+        if client_data_client_id != client_id:
+            logger.error(
+                'rebrow access :: error :: the client_id does not match the client_id of the token - %s - %s' %
+                (str(client_data_client_id), str(client_id)))
+            try:
+                if settings.REDIS_PASSWORD:
+                    redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                key = 'rebrow.token.%s' % token
+                redis_conn.delete(key)
+                logger.info('due to possible attempt at unauthorised use of the token, deleted the Redis key - %s' % str(key))
+            except:
+                pass
+            fail_msg = 'The request data did not match the token data, due to possible attempt at unauthorised use of the token it has been deleted.'
+            trace = 'this was a dodgy request'
+            token = False
+        else:
+            client_id_match = True
+    else:
+        fail_msg = 'Invalid token, there was no data found associated with the token, it has probably expired.  Please log into Redis again through rebrow'
+        trace = client_token_data
+        token = False
+
+    client_data_salt = False
+    client_data_jwt_payload = False
+    if client_id_match:
+        client_data_salt = str(client_data[1])
+        client_data_jwt_payload = str(client_data[2])
+
+    decoded_redis_password = False
+    if client_data_salt and client_data_jwt_payload:
+        try:
+            jwt_secret = '%s.%s.%s' % (app.secret_key, client_id, client_data_salt)
+            jwt_decoded_dict = jwt.decode(client_data_jwt_payload, jwt_secret, algorithms=['HS256'])
+            jwt_decoded_redis_password = str(jwt_decoded_dict['auth'])
+            decoded_redis_password = jwt_decoded_redis_password
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            err_msg = 'error :: failed to decode the JWT token with the salt and client_id'
+            logger.error('%s' % err_msg)
+            fail_msg = 'failed to decode the JWT token with the salt and client_id. Please log into rebrow again.'
+            token = False
+
+    return token, decoded_redis_password, fail_msg, trace
+
+
 @app.route('/rebrow', methods=['GET', 'POST'])
+@requires_auth
 # def login():
 def rebrow():
     """
@@ -2437,33 +2718,145 @@ def rebrow():
     """
     if request.method == 'POST':
         # TODO: test connection, handle failures
-        host = request.form['host']
+        host = str(request.form['host'])
         port = int(request.form['port'])
         db = int(request.form['db'])
-        url = url_for('rebrow_server_db', host=host, port=port, db=db)
+        # @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Added auth to rebrow as per https://github.com/marians/rebrow/pull/20 by
+        # elky84
+        # url = url_for('rebrow_server_db', host=host, port=port, db=db)
+        password = str(request.form['password'])
+
+        # @added 20180529 - Feature #2378: Add redis auth to Skyline and rebrow
+        token_valid_for = int(request.form['token_valid_for'])
+        if token_valid_for > 3600:
+            token_valid_for = 3600
+        if token_valid_for < 30:
+            token_valid_for = 30
+
+        # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Added auth to rebrow as per https://github.com/marians/rebrow/pull/20 by
+        # elky84 and add encryption to the password URL parameter trying to use
+        # pycrypto/pycryptodome to encode it, but no, used PyJWT instead
+        # padded_password = password.rjust(32)
+        # secret_key = '1234567890123456' # create new & store somewhere safe
+        # cipher = AES.new(app.secret_key,AES.MODE_ECB) # never use ECB in strong systems obviously
+        # encoded = base64.b64encode(cipher.encrypt(padded_password))
+
+        # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Added client_id, token and salt
+        salt = str(uuid.uuid4())
+        client_id, protocol, proxied = get_client_details()
+
+        # @added 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Use pyjwt - JSON Web Token implementation to encode the password and
+        # pass a token in the URL password parameter, the password in the POST
+        # data should be encrypted via the reverse proxy SSL endpoint
+        # encoded = jwt.encode({'some': 'payload'}, 'secret', algorithm='HS256')
+        # jwt.decode(encoded, 'secret', algorithms=['HS256'])
+        # {'some': 'payload'}
+        try:
+            jwt_secret = '%s.%s.%s' % (app.secret_key, client_id, salt)
+            jwt_encoded_payload = jwt.encode({'auth': str(password)}, jwt_secret, algorithm='HS256')
+        except:
+            message = 'Failed to create set jwt_encoded_payload for %s' % client_id
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+        # HERE WE WANT TO PUT THIS INTO REDIS with a TTL key and give the key
+        # a salt and have the client use that as their token
+        client_token = str(uuid.uuid4())
+        logger.info('rebrow access :: generated client_token %s for client_id %s' % (client_token, client_id))
+        try:
+            if settings.REDIS_PASSWORD:
+                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            key = 'rebrow.token.%s' % client_token
+            value = '[\'%s\',\'%s\',\'%s\']' % (client_id, salt, jwt_encoded_payload)
+            redis_conn.setex(key, token_valid_for, value)
+            logger.info('rebrow access :: set Redis key - %s' % (key))
+        except:
+            message = 'Failed to set Redis key - %s' % key
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
+        # @modified 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Change password parameter to token parameter
+        # url = url_for("rebrow_server_db", host=host, port=port, db=db, password=password)
+        url = url_for(
+            "rebrow_server_db", host=host, port=port, db=db, token=client_token)
         return redirect(url)
     else:
         start = time.time()
+
+        # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Added client_id
+        client_id, protocol, proxied = get_client_details()
+
+        # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+        # Added client message to give relevant messages on the login page
+        client_message = False
+
         return render_template(
             'rebrow_login.html',
+            # @modified 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+            # Change password parameter to token parameter and added protocol,
+            # proxied
+            # redis_password=redis_password,
+            protocol=protocol, proxied=proxied, client_message=client_message,
             version=skyline_version,
             duration=(time.time() - start))
 
 
 @app.route("/rebrow_server_db/<host>:<int:port>/<int:db>/")
+@requires_auth
 def rebrow_server_db(host, port, db):
     """
     List all databases and show info on server
     """
     start = time.time()
-    r = redis.StrictRedis(host=host, port=port, db=0)
-    info = r.info('all')
+    # @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+    # r = redis.StrictRedis(host=host, port=port, db=0)
+    # @modified 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+    # Use client_id and JWT token
+    # password = False
+    # url_password = False
+    # if request.args.getlist('password'):
+    #     password = request.args.get('password', default='', type=str)
+    #     url_password = quote(password, safe='')
+    # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+    # Added client_id and token
+    client_id, protocol, proxied = get_client_details()
+    token, redis_password, fail_msg, trace = decode_token(client_id)
+    if not token:
+        if fail_msg:
+            return internal_error(fail_msg, trace)
+
+    try:
+        r = get_redis(host, port, db, redis_password)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: rebrow access :: failed to login to Redis with token')
+
+    try:
+        info = r.info('all')
+    except:
+        message = 'Failed to get INFO all from Redis, this could be an issue with the Redis password you entered.'
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
     dbsize = r.dbsize()
     return render_template(
         'rebrow_server_db.html',
         host=host,
         port=port,
         db=db,
+        # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+        # password=password,
+        # url_password=url_password,
+        # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+        token=token,
         info=info,
         dbsize=dbsize,
         serverinfo_meta=serverinfo_meta,
@@ -2472,18 +2865,43 @@ def rebrow_server_db(host, port, db):
 
 
 @app.route("/rebrow_keys/<host>:<int:port>/<int:db>/keys/", methods=['GET', 'POST'])
+@requires_auth
 def rebrow_keys(host, port, db):
     """
     List keys for one database
     """
     start = time.time()
-    r = redis.StrictRedis(host=host, port=port, db=db)
+    # @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+    # r = redis.StrictRedis(host=host, port=port, db=db)
+    # @modified 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+    # password = request.args.get('password', default='', type=str)
+    # url_password = quote(password, safe='')
+    # r = get_redis(host, port, db, password)
+    # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+    # Added client_id and token
+    client_id, protocol, proxied = get_client_details()
+    token, redis_password, fail_msg, trace = decode_token(client_id)
+    if not token:
+        if fail_msg:
+            return internal_error(fail_msg, trace)
+
+    try:
+        r = get_redis(host, port, db, redis_password)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: rebrow access :: failed to login to Redis with token')
+
     if request.method == 'POST':
         action = request.form['action']
         app.logger.debug(action)
         if action == 'delkey':
             if request.form['key'] is not None:
-                result = r.delete(request.form['key'])
+                try:
+                    result = r.delete(request.form['key'])
+                except:
+                    message = 'Failed to delete Redis key - %s' % str(request.form['key'])
+                    trace = traceback.format_exc()
+                    return internal_error(message, trace)
                 if result == 1:
                     flash('Key %s has been deleted.' % request.form['key'], category='info')
                 else:
@@ -2491,9 +2909,18 @@ def rebrow_keys(host, port, db):
         return redirect(request.url)
     else:
         offset = int(request.args.get('offset', '0'))
-        perpage = int(request.args.get('perpage', '10'))
+        # @modified 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+        # List more keys per page
+        # perpage = int(request.args.get('perpage', '10'))
+        perpage = int(request.args.get('perpage', '50'))
         pattern = request.args.get('pattern', '*')
-        dbsize = r.dbsize()
+        try:
+            dbsize = r.dbsize()
+        except:
+            message = 'Failed to determine Redis dbsize'
+            trace = traceback.format_exc()
+            return internal_error(message, trace)
+
         keys = sorted(r.keys(pattern))
         limited_keys = keys[offset:(perpage + offset)]
         types = {}
@@ -2504,6 +2931,11 @@ def rebrow_keys(host, port, db):
             host=host,
             port=port,
             db=db,
+            # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+            # password=password,
+            # url_password=url_password,
+            # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+            token=token,
             dbsize=dbsize,
             keys=limited_keys,
             types=types,
@@ -2516,6 +2948,7 @@ def rebrow_keys(host, port, db):
 
 
 @app.route("/rebrow_key/<host>:<int:port>/<int:db>/keys/<key>/")
+@requires_auth
 def rebrow_key(host, port, db, key):
     """
     Show a specific key.
@@ -2529,8 +2962,34 @@ def rebrow_key(host, port, db, key):
     #     msg_packed_key = True
     key = base64.urlsafe_b64decode(key.encode('utf8'))
     start = time.time()
-    r = redis.StrictRedis(host=host, port=port, db=db)
-    dump = r.dump(key)
+    # @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+    # r = redis.StrictRedis(host=host, port=port, db=db)
+    # @modified 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+    # Use client_id and token
+    # password = request.args.get('password', default='', type=str)
+    # url_password = quote(password, safe='')
+    # r = get_redis(host, port, db, password)
+    # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+    # Added client_id and token
+    client_id, protocol, proxied = get_client_details()
+    token, redis_password, fail_msg, trace = decode_token(client_id)
+    if not token:
+        if fail_msg:
+            return internal_error(fail_msg, trace)
+
+    try:
+        r = get_redis(host, port, db, redis_password)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: rebrow access :: failed to login to Redis with token')
+
+    try:
+        dump = r.dump(key)
+    except:
+        message = 'Failed to dump Redis key - %s' % str(key)
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
     if dump is None:
         abort(404)
     # if t is None:
@@ -2579,6 +3038,11 @@ def rebrow_key(host, port, db, key):
         host=host,
         port=port,
         db=db,
+        # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+        # password=password,
+        # url_password=url_password,
+        # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+        token=token,
         key=key,
         value=val,
         type=t,
@@ -2593,8 +3057,13 @@ def rebrow_key(host, port, db, key):
 
 @app.template_filter('urlsafe_base64')
 def urlsafe_base64_encode(s):
-    if type(s) == 'Markup':
+    # @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+    # if type(s) == 'Markup':
+    #     s = s.unescape()
+    if isinstance(s, Markup):
         s = s.unescape()
+    elif isinstance(s, bytes):
+        s = s.decode('utf-8')
     s = s.encode('utf8')
     s = base64.urlsafe_b64encode(s)
     return Markup(s)
@@ -2748,6 +3217,7 @@ def run():
     daemon_runner = runner.DaemonRunner(webapp)
     daemon_runner.daemon_context.files_preserve = [handler.stream]
     daemon_runner.do_action()
+
 
 if __name__ == "__main__":
     run()

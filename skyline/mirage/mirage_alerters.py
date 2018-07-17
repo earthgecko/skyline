@@ -131,12 +131,21 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     if '@' in alert[1]:
         sender = settings.ALERT_SENDER
         recipient = alert[1]
+        logger.info('alert_smtp - recipient for %s are %s' % (str(alert[0]), str(recipient)))
     else:
         sender = settings.SMTP_OPTS['sender']
         # @modified 20160806 - Added default_recipient
         try:
             recipients = settings.SMTP_OPTS['recipients'][alert[0]]
             use_default_recipient = False
+            logger.info('alert_smtp - recipients for %s are %s' % (str(alert[0]), str(recipients)))
+            logger.info('alert_smtp - recipients are:')
+            try:
+                for recip in recipients:
+                    logger.info('alert_smtp :: recipient - %s' % str(recip))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('alert_smtp :: error :: could not iterate recipients list')
         except:
             use_default_recipient = True
         if use_default_recipient:
@@ -153,7 +162,30 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
 
     # Backwards compatibility
     if type(recipients) is str:
+        logger.info('alert_smtp :: recipients is a string')
         recipients = [recipients]
+    else:
+        logger.info('alert_smtp :: recipients is not a string, OK')
+
+    # @added 20180524 - Task #2384: Change alerters to cc other recipients
+    # The alerters did send an individual email to each recipient. This would be
+    # more useful if one email was sent with the first smtp recipient being the
+    # to recipient and the subsequent recipients were add in cc.
+    if recipients:
+        primary_recipient = False
+        cc_recipients = False
+        for i_recipient in recipients:
+            if not primary_recipient:
+                primary_recipient = str(i_recipient)
+            if primary_recipient != i_recipient:
+                if not cc_recipients:
+                    cc_recipients = str(i_recipient)
+                else:
+                    new_cc_recipients = '%s,%s' % (str(cc_recipients), str(i_recipient))
+                    cc_recipients = str(new_cc_recipients)
+        logger.info(
+            'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
+            (str(primary_recipient), str(cc_recipients)))
 
     # @modified 20161228 - Feature #1830: Ionosphere alerts
     # Ionosphere alerts
@@ -165,7 +197,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     # specify it in the graph_title
     known_derivative_metric = False
     try:
-        REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     except:
         logger.error('error :: alert_smtp - redis connection failed')
     try:
@@ -650,7 +686,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         logger.error('error :: alert_smtp - could not build body')
         logger.info(traceback.format_exc())
 
-    for recipient in recipients:
+    # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+    # Do not send to each recipient, send to primary_recipient and cc the other
+    # recipients, thereby sending only one email
+    # for recipient in recipients:
+    #     logger.info('alert_smtp - sending alert to %s' % (str(recipient)))
+    if primary_recipient:
+        logger.info(
+            'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
+            (str(primary_recipient), str(cc_recipients)))
         try:
             # @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls
             # Broke body into body and more_body to workaround the 990 character
@@ -669,7 +713,14 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
 
             msg['Subject'] = '[Skyline alert] - %s ALERT - %s' % (context, metric[1])
             msg['From'] = sender
-            msg['To'] = recipient
+            # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+            # msg['To'] = recipient
+            msg['To'] = primary_recipient
+
+            # @added 20180524 - Task #2384: Change alerters to cc other recipients
+            # Added Cc
+            if cc_recipients:
+                msg['Cc'] = cc_recipients
 
             msg.attach(MIMEText(body, 'html'))
             # @added 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls
@@ -705,18 +756,31 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
 
         s = SMTP('127.0.0.1')
         try:
-            s.sendmail(sender, recipient, msg.as_string())
+            # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+            # Send to primary_recipient and cc_recipients
+            # s.sendmail(sender, recipient, msg.as_string())
+            if cc_recipients:
+                s.sendmail(sender, [primary_recipient, cc_recipients], msg.as_string())
+            else:
+                s.sendmail(sender, primary_recipient, msg.as_string())
             if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                logger.info('debug :: alert_smtp - message sent to %s OK' % str(recipient))
+                # logger.info('debug :: alert_smtp - message sent to %s OK' % str(recipient))
+                logger.info(
+                    'debug :: alert_smtp - message sent OK to primary_recipient :: %s, cc_recipients :: %s' %
+                    (str(primary_recipient), str(cc_recipients)))
         except:
-            logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
             logger.info(traceback.format_exc())
+            # logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
+            logger.error(
+                'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
+                (str(primary_recipient), str(cc_recipients)))
 
         s.quit()
 
         if LOCAL_DEBUG:
             logger.info('debug :: alert_smtp - Memory usage after email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-        return
+
+    return
 
 
 def alert_pagerduty(alert, metric, second_order_resolution_seconds, context):

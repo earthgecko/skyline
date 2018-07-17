@@ -1,0 +1,150 @@
+==============================
+1.2.2 - the luminosity branch
+==============================
+
+v1.2.2-luminosity - July 17, 2018
+
+Changes from v1.2.1
+-------------------
+
+- Bumped to v1.2.2 - luminosity-v1.2.2-stable
+- Added SQL updates for #2446: Optimize Ionosphere
+- Modified ionosphere.py to use order_by to ensure that the latest fps and
+  layers are checked first.  This improves Ionosphere performance probably
+  significantly as new features profiles and layers tend to match more than
+  older ones (it seems/ed).  Although there is no definitive data on this yet,
+  matching newer first is more descriptive of the recent activity.  Without
+  running a Skyline Ionosphere instance collecting fp_count, fp_checked,
+  layers_count and layers_checked in the original Ionosphere configuration of
+  oldest to newest, it will remain a question as to whether this actually an
+  optimization or not, but initial numbers look promising.
+- Added stats to ionosphere.py, layers.py amd ionosphere matched tables on
+  fp/layers counts vs how many were checked until match
+- Added missing logger defines to luminosity/process_correlations.py
+- Corrected settings.py docstrings on SECRET_KEY and OTHER_SKYLINE_REDIS_INSTANCES
+- Changed created column position in skyline/webapp/templates/search_features_profiles.html
+  to be the first date column as this is more intuitive.
+- Typo line in skyline/webapp/templates/training_data.html
+- Use ALTERNATIVE_SKYLINE_URLS with multiple Skyine instances to either redirect
+  to the other Skyline instance if there are only 2 or give a list of
+  ALTERNATIVE_SKYLINE_URLS if many than 2 Skyline instances in
+  skyline/webapp/webapp.py
+- Corrected utils/seed_data.py to report SKYLINE_URL
+- Added to known bugs in the training_data page (Issue #52: Ionosphere learn
+  countdown clock at 0 when client and server timezone differs) refs #2450
+- Updated documentation
+
+Update notes
+------------
+
+- NOTE: If you are running v1.x you cannot upgrade from v1.x directly to v1.2.2.
+
+How to update from v1.2.1
+-------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version settings.py with skyline/settings.py and
+  create a new settings.py in the temp location appropriate for Skyline v1.2.2
+  and your set up, ready to be deployed.
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Backup your Skyline database.
+- Apply the SQL update to your Skyline database, change the below variables as
+  appropriate to your set up.
+
+.. code-block:: bash
+
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="<YOUR_MYSQL_USER>"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+    SKYLINE_PATH="/opt/skyline/github/skyline.v1.2.2-luminosity-stable"  # Your new Skyline path
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.v1.2.2.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < $SKYLINE_PATH/updates/sql/luminosity-v1.2.1-beta-to-v1.2.2-stable.sql
+
+- Backup your Redis database, e.g. replace your Redis dump.rdb path as appropriate.
+
+.. code-block:: bash
+
+    # Backup the Redis dump
+    BACKUP_DIR="/tmp"  # Where you want to backup the Redis dump to
+    cp /var/lib/redis/dump.rdb $BACKUP_DIR/pre.v1.2.2.redis.dump.rdb
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.2 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv /opt/skyline/github/skyline /opt/skyline/github/skyline/skyline.v1.2.1-luminosity-beta
+    mv "$SKYLINE_PATH" /opt/skyline/github/skyline
+
+- Install new requirements e.g.
+
+.. code-block:: bash
+
+    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    PROJECT="skyline-py2714"
+
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+
+    # SEE NOTE BELOW
+    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
+
+    deactivate
+
+.. note:: If you are running v1.2.x and have already installed the luminol fork
+  the pip install will error similar to the the below, this is expected and can
+  be ignored, it is the last package in requirements.txt so all other deps will
+  install.
+
+.. code-block:: bash
+
+    AssertionError: No source dir for luminol from git+git://github.com/earthgecko/luminol@d429044#egg=luminol in ./lib/python2.7/site-packages (from -r /opt/skyline/github/skyline/requirements.txt (line 317))
+
+- Start the all Skyline services, remembering to start bin/luminosity.d too, (
+  change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done

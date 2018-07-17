@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>boundary.boundary_alerters &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>boundary.boundary_alerters &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
@@ -250,6 +251,26 @@
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">recipients</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">recipients</span> <span class="o">=</span> <span class="p">[</span><span class="n">recipients</span><span class="p">]</span>
 
+    <span class="c1"># @added 20180524 - Task #2384: Change alerters to cc other recipients</span>
+    <span class="c1"># The alerters did send an individual email to each recipient. This would be</span>
+    <span class="c1"># more useful if one email was sent with the first smtp recipient being the</span>
+    <span class="c1"># to recipient and the subsequent recipients were add in cc.</span>
+    <span class="k">if</span> <span class="n">recipients</span><span class="p">:</span>
+        <span class="n">primary_recipient</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">cc_recipients</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i_recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">primary_recipient</span><span class="p">:</span>
+                <span class="n">primary_recipient</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_recipient</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">primary_recipient</span> <span class="o">!=</span> <span class="n">i_recipient</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">cc_recipients</span><span class="p">:</span>
+                    <span class="n">cc_recipients</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_recipient</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_cc_recipients</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_recipient</span><span class="p">))</span>
+                    <span class="n">cc_recipients</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_cc_recipients</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;alert_smtp - will send to primary_recipient :: </span><span class="si">%s</span><span class="s1">, cc_recipients :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">)))</span>
+
     <span class="n">alert_algo</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
     <span class="n">alert_context</span> <span class="o">=</span> <span class="n">alert_algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
@@ -289,11 +310,26 @@
     <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> &lt;br&gt; Next alert in: </span><span class="si">%s</span><span class="s1"> seconds &lt;br&gt; skyline Boundary alert - </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
+    <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
+    <span class="c1"># Do not send to each recipient, send to primary_recipient and cc the other</span>
+    <span class="c1"># recipients, thereby sending only one email</span>
+    <span class="c1"># for recipient in recipients:</span>
+    <span class="k">if</span> <span class="n">primary_recipient</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;alert_smtp - will send to primary_recipient :: </span><span class="si">%s</span><span class="s1">, cc_recipients :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">)))</span>
+
         <span class="n">msg</span> <span class="o">=</span> <span class="n">MIMEMultipart</span><span class="p">(</span><span class="s1">&#39;alternative&#39;</span><span class="p">)</span>
         <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] &#39;</span> <span class="o">+</span> <span class="s1">&#39;Boundary ALERT - &#39;</span> <span class="o">+</span> <span class="n">alert_context</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="n">datapoint</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="n">metric_name</span>
         <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
-        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
+        <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
+        <span class="c1"># msg[&#39;To&#39;] = recipient</span>
+        <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">primary_recipient</span>
+
+        <span class="c1"># @added 20180524 - Task #2384: Change alerters to cc other recipients</span>
+        <span class="c1"># Added Cc</span>
+        <span class="k">if</span> <span class="n">cc_recipients</span><span class="p">:</span>
+            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Cc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc_recipients</span>
 
         <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -302,7 +338,19 @@
             <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">msg_attachment</span><span class="p">)</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">)</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">recipient</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
+        <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
+        <span class="c1"># Send to primary_recipient and cc_recipients</span>
+        <span class="c1"># s.sendmail(sender, recipient, msg.as_string())</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cc_recipients</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="p">[</span><span class="n">primary_recipient</span><span class="p">,</span> <span class="n">cc_recipients</span><span class="p">],</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">primary_recipient</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: alert_smtp - could not send email to primary_recipient :: </span><span class="si">%s</span><span class="s1">, cc_recipients :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">)))</span>
         <span class="n">s</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div>
 
 
@@ -449,7 +497,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

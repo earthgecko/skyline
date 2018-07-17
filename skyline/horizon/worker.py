@@ -56,7 +56,11 @@ class Worker(Process):
     """
     def __init__(self, queue, parent_pid, skip_mini, canary=False):
         super(Worker, self).__init__()
-        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         self.q = queue
         self.parent_pid = parent_pid
         self.daemon = True
@@ -176,7 +180,11 @@ class Worker(Process):
             except:
                 logger.error('%s :: can\'t connect to redis at socket path %s' % (skyline_app, settings.REDIS_SOCKET_PATH))
                 sleep(10)
-                self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                if settings.REDIS_PASSWORD:
+                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 pipe = self.redis_conn.pipeline()
                 continue
 

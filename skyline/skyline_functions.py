@@ -300,133 +300,6 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
     return False
 
 
-def alert_expiry_check(current_skyline_app, metric, metric_timestamp, added_by):
-    """
-    Only check if the metric does not a EXPIRATION_TIME key set, panorama
-    uses the alert EXPIRATION_TIME for the relevant alert setting contexts
-    whether that be analyzer, mirage, boundary, etc and sets its own
-    cache_keys in redis.  This prevents large amounts of data being added
-    in terms of duplicate anomaly records in Panorama and timeseries json and
-    image files in crucible samples so that anomalies are recorded at the same
-    EXPIRATION_TIME as alerts.
-
-    :param current_skyline_app: the skyline app using this function
-    :param metric: metric name
-    :param added_by: which app requested the alert_expiry_check
-    :type current_skyline_app: str
-    :type metric: str
-    :type added_by: str
-    :return: ``True``, ``False``
-    :rtype: boolean
-
-    - If inside the alert expiry period returns ``True``
-    - If not in the alert expiry period or unknown returns ``False``
-    """
-
-    try:
-        re
-    except:
-        import re
-
-    current_skyline_app_logger = str(current_skyline_app) + 'Log'
-    current_logger = logging.getLogger(current_skyline_app_logger)
-
-    cache_key = 'last_alert.%s.%s.%s' % (str(current_skyline_app), added_by, metric)
-    try:
-        last_alert = self.redis_conn.get(cache_key)
-    except:
-        current_logger.info(traceback.format_exc())
-        current_logger.error(
-            'error :: failed to query redis cache key - %s' % cache_key)
-        return False
-
-    if added_by == 'analyzer' or added_by == 'mirage':
-        if settings.ENABLE_DEBUG:
-            current_logger.info('Will check %s ALERTS' % added_by)
-        if settings.ENABLE_ALERTS:
-            if settings.ENABLE_DEBUG:
-                current_logger.info('Checking %s ALERTS' % added_by)
-
-            for alert in settings.ALERTS:
-                ALERT_MATCH_PATTERN = alert[0]
-                METRIC_PATTERN = metric
-                alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                if pattern_match:
-                    expiration_timeout = alert[2]
-                    if settings.ENABLE_DEBUG:
-                        msg = 'matched - %s - %s - EXPIRATION_TIME is %s' % (
-                            added_by, metric, str(expiration_timeout))
-                        current_logger.info('%s' % msg)
-                    check_age = int(check_time) - int(metric_timestamp)
-                    if int(check_age) > int(expiration_timeout):
-                        check_expired = True
-                        if settings.ENABLE_DEBUG:
-                            msg = 'the check is older than EXPIRATION_TIME for the metric - not checking - check_expired'
-                            current_logger.info('%s' % msg)
-
-    if added_by == 'boundary':
-        if settings.BOUNDARY_ENABLE_ALERTS:
-            for alert in settings.BOUNDARY_METRICS:
-                ALERT_MATCH_PATTERN = alert[0]
-                METRIC_PATTERN = metric
-                alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                if pattern_match:
-                    source_app = 'boundary'
-                    expiration_timeout = alert[2]
-                    if settings.ENABLE_DEBUG:
-                        msg = 'matched - %s - %s - EXPIRATION_TIME is %s' % (
-                            source_app, metric, str(expiration_timeout))
-                        current_logger.info('%s' % msg)
-                    check_age = int(check_time) - int(metric_timestamp)
-                    if int(check_age) > int(expiration_timeout):
-                        check_expired = True
-                        if settings.ENABLE_DEBUG:
-                            msg = 'the check is older than EXPIRATION_TIME for the metric - not checking - check_expired'
-                            current_logger.info('%s' % msg)
-
-    cache_key = '%s.last_check.%s.%s' % (str(current_skyline_app), added_by, metric)
-    if settings.ENABLE_DEBUG:
-        current_logger.info(
-            'debug :: cache_key - %s.last_check.%s.%s' % (
-                str(current_skyline_app), added_by, metric))
-
-    # Only use the cache_key EXPIRATION_TIME if this is not a request to
-    # run_crucible_tests on a timeseries
-    if settings.ENABLE_DEBUG:
-        current_logger.info('debug :: checking if cache_key exists')
-    try:
-        last_check = self.redis_conn.get(cache_key)
-    except Exception as e:
-        current_logger.error(
-            'error :: could not query cache_key for %s - %s - %s' % (
-                alerter, metric, str(e)))
-
-    if not last_check:
-        try:
-            self.redis_conn.setex(cache_key, expiration_timeout, packb(value))
-            current_logger.info(
-                'set cache_key for %s - %s with timeout of %s' % (
-                    source_app, metric, str(expiration_timeout)))
-        except Exception as e:
-            current_logger.error(
-                'error :: could not query cache_key for %s - %s - %s' % (
-                    alerter, metric, str(e)))
-            current_logger.info('all anomaly files will be removed')
-            remove_all_anomaly_files = True
-    else:
-        if check_expired:
-            current_logger.info(
-                'check_expired - all anomaly files will be removed')
-            remove_all_anomaly_files = True
-        else:
-            current_logger.info(
-                'cache_key is set and not expired for %s - %s - all anomaly files will be removed' % (
-                    source_app, metric))
-            remove_all_anomaly_files = True
-
-
 def get_graphite_metric(
     current_skyline_app, metric, from_timestamp, until_timestamp, data_type,
         output_object):
@@ -516,12 +389,20 @@ def get_graphite_metric(
     known_derivative_metric = False
     REDIS_CONN = None
     try:
-        REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     except:
         from redis import StrictRedis
     if not REDIS_CONN:
         try:
-            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+            if settings.REDIS_PASSWORD:
+                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         except:
             current_logger.error('error :: alert_smtp - redis connection failed')
     try:
@@ -549,10 +430,15 @@ def get_graphite_metric(
     # @added 20180423 - Feature #2034: analyse_derivatives
     #                   Branch #2270: luminosity
     if not metric_found_in_redis and settings.OTHER_SKYLINE_REDIS_INSTANCES:
-        for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+        for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
             if not metric_found_in_redis:
                 try:
-                    other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port))
+                    if redis_password:
+                        other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port), password=str(redis_password))
+                    else:
+                        other_redis_conn = StrictRedis(host=str(redis_ip), port=int(redis_port))
                     other_derivative_metrics = list(other_redis_conn.smembers('derivative_metrics'))
                 except:
                     current_logger.error(traceback.format_exc())
@@ -1398,12 +1284,20 @@ def is_derivative_metric(current_skyline_app, base_name):
     known_derivative_metric = False
     REDIS_CONN = None
     try:
-        REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     except:
         from redis import StrictRedis
     if not REDIS_CONN:
         try:
-            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+            if settings.REDIS_PASSWORD:
+                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         except:
             current_logger.error('error :: known_derivative_metric - Redis connection failed')
     try:

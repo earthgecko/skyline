@@ -18,14 +18,19 @@ from settings import (
     REDIS_SOCKET_PATH,
     BOREDOM_SET_SIZE,
     ENABLE_BOUNDARY_DEBUG,
+    REDIS_PASSWORD,
 )
 
-from algorithm_exceptions import *
+from algorithm_exceptions import (TooShort, Stale, Boring)
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
-redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+# @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+if REDIS_PASSWORD:
+    redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
+else:
+    redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
 
 
 def boundary_no_mans_land():

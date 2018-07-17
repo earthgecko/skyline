@@ -11,10 +11,10 @@ A few considerations to note about logging.
 Skyline logging can be viewed as having 2 contexts:
 
 1. Logging the Skyline application operations - Skyline app log
-2. Logging the details of anomalous timeseries - syslog
+2. Logging the details of anomalous time series - syslog
 
 Any long time users of Skyline will have undoubtedly run into a logging pain
-with Skyline at  some point.  Whether that be in terms of logs being overwritten
+with Skyline at some point.  Whether that be in terms of logs being overwritten
 or no errors being logged but a Skyline module broken or hung.
 Although logging is very mature, especially in an ecosystem as mature as Python
 and one may be led to believe it should be easy, however in reality it is
@@ -97,8 +97,8 @@ result in the log being pushed multiple times due to the following scenario:
 - Skyline app bin is called to start
 - Skyline app bin makes a last log from the Skyline app log
 - Skyline Python app is started, creates log with `mode=w`
-- Skyline Python app pauses and the app bin script contenates last log and new
-  log file
+- Skyline Python app pauses and the app bin script concatenates the last log and
+  new log file
 - Skyline bin script exits and Skyline Python app continues writing to the log
 
 In terms of rsyslog pipelining this would result in the log being fully
@@ -107,6 +107,5 @@ submitted again on every restart.
 ## syslog
 
 With this in mind a syslog alert trigger was added to Skyline apps to handle the
-logging the details of anomalous timeseries to syslog,  groking the syslog for
-Skyline logs and rates etc is the way to go.  Bearing in mind that only
-anomalies from metrics with set alert tuples are logged.
+logging the details of anomalous time series to syslog,  groking the syslog for
+Skyline logs and rates etc is the way to go.

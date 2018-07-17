@@ -3,9 +3,13 @@
 
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
-		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
-		<li><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys"><span class="logo"><span class="re">re</span>brow</span>_keys</a></li>
-		<li><a href="/rebrow_key/{{ host }}:{{ port }}/{{ db }}/keys/{{ key|urlsafe_base64 }}"><span class="logo"><span class="re">re</span>brow</span>_key</a></li>
+<!-- @modified 20180727 - Feature #2378: Add redis auth to Skyline and rebrow
+# Changed all password password_url parameters to token parameter
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?password={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+-->
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+		<li><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_keys</a></li>
+		<li><a href="/rebrow_key/{{ host }}:{{ port }}/{{ db }}/keys/{{ key|urlsafe_base64 }}/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_key</a></li>
 		<li class="active"><span class="logo"><span class="sky">{{ host }}:{{ port}}</span> <span class="re">DB {{ db }} / keys / key / {{ key }}</span></li>
 	</ol>
 

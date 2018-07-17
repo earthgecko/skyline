@@ -33,6 +33,7 @@ Contents:
   tsfresh
   luminosity
   redis-integration
+  running-multiple-skylines
   skyline-and-friends
   logging
   tuning-tips

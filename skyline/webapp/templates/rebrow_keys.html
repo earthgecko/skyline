@@ -3,8 +3,17 @@
 
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
+<!-- @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
+# Added ?password={{ password }} and password=password
 		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
 		<li><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys"><span class="logo"><span class="re">re</span>brow</span>_keys</a></li>
+-->
+<!-- @modified 20180727 - Feature #2378: Add redis auth to Skyline and rebrow
+# Changed all password password_url parameters to token parameter
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?password={{ url_password }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+-->
+		<li><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+		<li><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_keys</a></li>
 		<li class="active"><span class="logo"><span class="sky">{{ host }}:{{ port}}</span> <span class="re">DB {{ db }} / keys</span></li>
 	</ol>
 
@@ -18,16 +27,16 @@
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
         		<li
-        		{% if url_for("rebrow_server_db", host=host, port=port, db=db) == request.path %}
+        		{% if url_for("rebrow_server_db", host=host, port=port, db=db, token=token, salt=salt) == request.path %}
           	class="active"
           	{% endif %}
-          	><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/">Server Status</a></li>
+          	><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}">Server Status</a></li>
 
           	<li
-          	{% if url_for("rebrow_keys", host=host, port=port, db=db) in request.path %}
+          	{% if url_for("rebrow_keys", host=host, port=port, db=db, token=token, salt=salt) in request.path %}
           	class="active"
           	{% endif %}
-          	><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/">Keys</a></li>
+          	><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a></li>
         </ul>
       </div><!-- /.nav-collapse -->
 
@@ -45,6 +54,11 @@
 		  <div class="form-group">
 		    <input name="pattern" type="text" class="form-control" placeholder="{{ pattern }}" value="{{ pattern }}">
 		  </div>
+<!-- @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow -->
+		  <div class="form-group">
+		    <input name="token" type="hidden" class="form-control" placeholder="{{ token }}" value="{{ token }}">
+		  </div>
+
 		  <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>
 		  <a href="./" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Reset</a>
 		</form>
@@ -64,7 +78,7 @@
 	    	<tr>
 	    		<td class="text-right" style="width: 5%">{{ loop.index + offset }}</td>
 	    		<td>{{ types[key] }}</td>
-	    		<td><a href="/rebrow_key/{{ host }}:{{ port }}/{{ db }}/keys/{{ key|urlsafe_base64 }}/">{{ key }}</a></td>
+	    		<td><a href="/rebrow_key/{{ host }}:{{ port }}/{{ db }}/keys/{{ key|urlsafe_base64 }}/?token={{ token }}">{{ key }}</a></td>
 	    		<td><form method="POST"><input type="hidden" name="action" value="delkey" /><input type="hidden" name="key" value="{{ key }}" /><button class="btn btn-default" type="submit" onclick="return confirm('Are you sure you want to delete this key? {{ key }}');"><span class="glyphicon glyphicon-trash"></span></button></form></td>
 	    	</tr>
 			{% endfor %}
@@ -74,15 +88,15 @@
 	{% if num_keys > perpage %}
 	<ul class="pagination">
 	  {% if offset > 0 %}
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, offset=(offset-perpage), perpage=perpage, pattern=pattern) }}">&laquo;</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, offset=(offset-perpage), perpage=perpage, pattern=pattern) }}">&laquo;</a></li>
 	  {% endif %}
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, offset=0, perpage=perpage, pattern=pattern) }}">1</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, offset=perpage, perpage=perpage, pattern=pattern) }}">2</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, offset=(perpage*2), perpage=perpage, pattern=pattern) }}">3</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, offset=(perpage*3), perpage=perpage, pattern=pattern) }}">4</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, offset=(perpage*4), perpage=perpage, pattern=pattern) }}">5</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=0, perpage=perpage, pattern=pattern) }}">1</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=perpage, perpage=perpage, pattern=pattern) }}">2</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*2), perpage=perpage, pattern=pattern) }}">3</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*3), perpage=perpage, pattern=pattern) }}">4</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*4), perpage=perpage, pattern=pattern) }}">5</a></li>
 	  {% if num_keys > (offset + perpage) %}
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, offset=(offset+perpage), perpage=perpage, pattern=pattern) }}">&raquo;</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(offset+perpage), perpage=perpage, pattern=pattern) }}">&raquo;</a></li>
 	  {% endif %}
 	</ul>
 	{% endif %}

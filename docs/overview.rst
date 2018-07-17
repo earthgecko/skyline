@@ -5,6 +5,27 @@
 Overview
 ========
 
+Welcome to Skyline.
+
+You must be interested in doing real time anomaly detection on vast amounts of
+time series data streams on a reasonable Linux VM (or in a container/s if you
+were really committed).
+
+You are still here.
+
+You use Graphite as your time series data source?  No?
+
+Currently Skyline needs Graphite, if you do not already have Graphite please
+consider setting Graphite up and if you like that, come back.
+
+If you are still here and reading this, then maybe you are serious about
+installing and trying Skyline.  In which case a word of warning, continuing from
+this point forward, will require a LOT of hours of your time.
+
+Skyline is not some Python data science anomaly detection library, it is a full
+blown production grade anomaly detection stack.  Although certain aspects of
+Skyline may have interest to the data science community.
+
 A brief history
 ---------------
 
@@ -12,10 +33,10 @@ Skyline was originally open sourced by `Etsy`_ as a real-time anomaly detection
 system. It was originally built to enable passive monitoring of hundreds of
 thousands of metrics, without the need to configure a model/thresholds for each
 one, as you might do with Nagios.  It was designed to be used wherever there are
-a large quantity of high-resolution timeseries which need constant monitoring.
-Once a metric stream was set up (from statsd, graphite or other), additional
+a large quantity of high-resolution time series which need constant monitoring.
+Once a metric stream was set up (from statsd, Graphite or other), additional
 metrics are automatically added to Skyline for analysis, anomaly detection,
-alerting and briefly publishing in the Webapp frontend.  `github/etsy`_ stopped
+alerting and briefly published in the Webapp frontend.  `github/etsy`_ stopped
 actively maintaining Skyline in 2014.
 
 Skyline - as a work in progress
@@ -32,45 +53,76 @@ removes the "without the need to configure a model/thresholds" element somewhat.
 
 So why continue developing Skyline?
 
-The architecture/pipeline works very well at doing what it does.  It is solid
-and battle tested.  To overcome some of the limitations of Skyline.  This
-project extends it.
+The first way to make Skyline MUCH better than the manner it was implemented and
+framed by Etsy, is to **NOT** try and use it to anomaly detect on 1000s of
+metrics in the first place.  Using Skyline as a scapel rather than a sword.
+
+Within in this paradigm, Skyline has been much improved in many ways and is
+very useful at doing anomaly detection on your KEY metrics.  The ongoing
+development of Skyline has been focused on improving Skyline in the following
+ways:
+
+- Improving the anomaly detection methodologies used in the 3-sigma context.
+- Extending Skyline's 3-sigma methodology to enable the operator and Skyline to
+  handle seasonality in metrics.
+- The addition of an anomalies database for learning and root cause analysis.
+- Adding the ability for the operator to teach Skyline and have Skyline learn
+  things that are NOT anomalous using a time series similarities comparison
+  method based on features extraction and comparison using the `tsfresh`_
+  package.  With Ionosphere we are training Skyline on what is NOT anomalous,
+  rather than focusing on what is anomalous.  Ionosphere allows us to train
+  Skyline as to what is normal, even if normal includes spikes and dips and
+  seasonality.  After all we have some expectation that most of our metrics
+  would be NOT anomalous most of the time, rather than anomalous most of the
+  time.  So training Skyline what is NOT ANOMALOUS is more efficient than trying
+  to label anomalies.
+- Adding the ability to Skyline to determine what other metrics are related to
+  an anomaly event using cross correlation analysis of all the metrics using
+  Linkedin's `luminol`_ library when an anomaly event is triggered and
+  recording these in the database to assist in root cause analysis.
 
 And...
 
-Skyline is **FAST**!!!  Faster enough to handle 10s of 1000s of timeseries in
-near real-time.  In the world of Python, data analysis, R and most machine
-learning, Skyline is FAST.  Processing and analyzing 1000s and 1000s of
-constantly changing timeseries, every minute of every day and it can do it in
-multiple resolutions, on a fairly low end commodity server.
+The architecture/pipeline works very well at doing what it does.  It is solid
+and battle tested..
 
-Skyline learns using a timeseries similarities comparison method based on
-features extraction and comparison using the `tsfresh`_ package.
+Skyline is **FAST**!!!  Faster enough to handle 10s of 1000s of time series in
+near real time.  In the world of Python, data analysis, R and most machine
+learning, Skyline is FAST.  Processing and analyzing 1000s and 1000s of
+constantly changing time series, every minute of every day and it can do it in
+multiple resolutions, on a fairly low end commodity server.
 
 The new look of Skyline apps
 ----------------------------
 
-* Horizon - feed metrics to Redis via a pickle input
-* Analyzer - analyze metrics
-* Mirage - analyze specific metrics at a custom time range
-* Boundary - analyze specific timeseries for specific conditions
-* Crucible - store anomalous timeseries resources and ad-hoc analysis of any
-  timeseries
-* Panorama - anomalies database and historical views
-* Webapp - frontend to view current and histroical anomalies and browse Redis
-  with :red:`re`:brow:`brow`
-* Ionosphere - timeseries fingerprinting and learning
+* Horizon - feed metrics to Redis via a pickle input from Graphite/s
+* Analyzer - analyses metrics with 3-sigma algorithms
+* Mirage - analyses specific metrics at a custom time range with 3-sigma algorithms
+* Boundary - analyses specific time series for specific conditions
+* Crucible - store anomalous time series resources and adhoc analysis of any
+  time series
+* Panorama - anomalies database, historical views and root cause analysis
+* Webapp - frontend to view current and historical anomalies and browse Redis
+  with :red:`re`:brow:`brow` and manage Skyline's learning
+* Ionosphere - time series fingerprinting and learning
+* Luminosity - Cross correlation of metrics for root cause analysis
 
-Skyline is still a near real-time anomaly detection system, however it has
+Skyline is still a near real time anomaly detection system, however it has
 various modes of operation that are modular and self contained, so that only the
-desired apps need to be enabled.
+desired apps need to be enabled, although the stack is now much more useful with
+them all running.  This modular nature also isolated the apps from one another
+in terms of operation, meaning an error or failure in one does not necessarily
+the others.
 
-Skyline can now be feed/query and analyze timeseries on an ad-hoc basis, on the
-fly.  This means Skyline can now be used to analyze and process static data too,
-it is no longer just a machine/app metric fed system.
+Skyline can now be feed/query and analyse time series on an adhoc basis, on the
+fly.  This means Skyline can now be used to analyse and process static data too,
+it is no longer just a machine/app metric fed system, if anyone wanted to use
+it to analyse historic data.
 
 A simplified workflow of Skyline
 --------------------------------
+
+This is a bit out of date.
 
 .. figure:: images/skyline.simplified.workflow.annotated.gif
    :alt: A simplified workflow of Skyline
@@ -114,6 +166,7 @@ Skyline uses to following technologies and libraries at its core:
 8. **tsfresh** - `tsfresh`_ - Automatic extraction of relevant features from time series
 9. **memcached** - `memcached`_ - memory object caching system
 10. **pymemcache** - `pymemcache`_ - A comprehensive, fast, pure-Python memcached client
+11. **luminol** - `luminol`_ - Anomaly Detection and Correlation library
 
 .. _Etsy: https://www.etsy.com/
 .. _github/etsy: https://github.com/etsy/skyline
@@ -129,3 +182,4 @@ Skyline uses to following technologies and libraries at its core:
 .. _tsfresh: https://github.com/blue-yonder/tsfresh
 .. _memcached: https://memcached.org/
 .. _pymemcache: https://github.com/pinterest/pymemcache
+.. _luminol: https://github.com/linkedin/luminol

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Running multiple Skylines &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Running multiple Skyline instances &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/> 
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+        <link rel="next" title="Skyline and friends" href="skyline-and-friends.html"/>
+        <link rel="prev" title="Redis integration" href="redis-integration.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -84,7 +86,7 @@
           
             
             
-                <ul>
+                <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
@@ -106,6 +108,10 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running multiple Skyline instances</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-stunnel">Setting up stunnel</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -148,7 +154,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Running multiple Skylines</li>
+    <li>Running multiple Skyline instances</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -162,11 +168,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="running-multiple-skylines">
-<h1>Running multiple Skylines<a class="headerlink" href="#running-multiple-skylines" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="running-multiple-skyline-instances">
+<h1>Running multiple Skyline instances<a class="headerlink" href="#running-multiple-skyline-instances" title="Permalink to this headline">¶</a></h1>
 <p>It is possible to run Skyline in a somewhat distributed manner in terms of
 running multiple Skyline instances and those Skyline instances sharing a MySQL
-but analysing different metrics and querying each other where required.</p>
+database but analysing different metrics and querying the Redis remotely where
+required, e.g. Luminosity.</p>
 <p>Some organisations have multiple Graphite instances for sharding, geographic or
 latency reasons.  In such a case it is possible that each Graphite instance
 would pickle to a Skyline instance and for there to be multiple Skyline
@@ -176,12 +183,36 @@ instances.</p>
 <li><a class="reference internal" href="skyline.html#settings.OTHER_SKYLINE_REDIS_INSTANCES" title="settings.OTHER_SKYLINE_REDIS_INSTANCES"><code class="xref py py-mod docutils literal"><span class="pre">settings.OTHER_SKYLINE_REDIS_INSTANCES</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.ALTERNATIVE_SKYLINE_URLS" title="settings.ALTERNATIVE_SKYLINE_URLS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALTERNATIVE_SKYLINE_URLS</span></code></a></li>
 </ul>
+<p>Up until the introduction of Luminosity, Skyline&#8217;s Redis requirement was
+localhost only, it was bound to 127.0.0.1 and was accessed by the Skyline apps
+via socket only, apart from <span class="red">re</span><span class="brow">brow</span> which connected on localhost.
+If Skyline is run on multiple instances, Luminosity now adds a requirement for
+Redis to be accessed remotely in order for Luminosity to cross correlate all
+metrics.  This requires additional configuration and set up steps to properly
+secure the Redis instances.</p>
+<p>Skyline&#8217;s preferred method of handling remote connections to Redis is via a
+SSL tunnel using stunnel.  Although Redis recommends spiped, stunnel performance
+is much better and stunnel is easier to implement as there are distro packages
+for stunnel.</p>
+<div class="section" id="setting-up-stunnel">
+<h2>Setting up stunnel<a class="headerlink" href="#setting-up-stunnel" title="Permalink to this headline">¶</a></h2>
+<p>docs TDB at some point</p>
+</div>
 </div>
 
 
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="skyline-and-friends.html" class="btn btn-neutral float-right" title="Skyline and friends" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="redis-integration.html" class="btn btn-neutral" title="Redis integration" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -210,7 +241,7 @@ instances.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
