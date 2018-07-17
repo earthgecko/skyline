@@ -1,0 +1,282 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rebrow &mdash; Skyline 1.2.2-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li><span class="red">re</span><span class="brow">brow</span></li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/rebrow.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="rebrow">
+<h1><span class="red">re</span><span class="brow">brow</span><a class="headerlink" href="#rebrow" title="Permalink to this headline">¶</a></h1>
+<p><span class="red">re</span><span class="brow">brow</span> was added to Skyline in the Ionosphere branch, however
+Skyline uses a modified port of Marian Steinbach&#8217;s excellent <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a> Redis
+browser.  <span class="red">re</span><span class="brow">brow</span> was developed and meant as a localhost
+application only and by default is not secure, especially not to be run on any
+publicly accessible server.</p>
+<p><span class="red">re</span><span class="brow">brow</span> makes Skyline development AND having to administer
+multiple Redis instances, very handy to have, it is very nice and easy to have
+a web UI view of Redis.</p>
+<p>Further, being able to easily view Skyline metric sets such as:</p>
+<ul class="simple">
+<li>analyzer.boring</li>
+<li>analyzer.too_short</li>
+<li>analyzer.stale</li>
+</ul>
+<p>Is very useful to understanding your metric pipelines and often can be used to
+inform you on any namespaces that are not spending metrics frequently, etc.
+This is can be very useful at finding metrics that you thought you were sending
+constantly, but apparently not.  Therefore in itself <span class="red">re</span><span class="brow">brow</span> is
+extremely useful in finding possible or occasional misconfiguration in some of
+your metrics.  <span class="red">re</span><span class="brow">brow</span> allows you to browse through and see your
+data which makes it a make tool for discovering things about your metrics and
+Redis.</p>
+<p>For these reasons, Skyline runs a ported version of Marian Steinbach&#8217;s rebrow
+in the webapp itself, this ported version is modified in the following ways:</p>
+<ul class="simple">
+<li>The rebrow&#8217;s pubsub functionality has not been ported as Skyline does not
+need it.</li>
+<li>The Webapp ported version requires authentication in Flask (http basic auth
+over SSL)</li>
+<li>It reads and converts msgpack formatted keys to a rebrowable, veiwable format.</li>
+<li>It adds the ability to authenticate with Redis, inspired by the elky84 PR
+<a class="reference external" href="https://github.com/marians/rebrow/pull/20">https://github.com/marians/rebrow/pull/20</a> which adds very basic Redis auth to
+rebrow (not really fit for production but inspiring)</li>
+<li>To make Rebrow Redis authentication production suitable,  JWT encoding has
+been add to a encoded token instead of the password parameter that the
+elky84 PR describes.</li>
+</ul>
+<p>The Skyline set up is aimed and building Skyline as reasonably hard as possible,
+with the requirement for authentication and SSL encryption on the Skyline Webapp
+frontend proxy (Apache or nginx) and the addition of a JWT encoded json payload
+as the token, in combination with a client_id (simple md5 hash of client ip and
+the client user agent) and a salt which is sent in a POST over a SSL encrypted
+connection (but then does become a URL parameter), Skyline does manage to make
+<span class="red">re</span><span class="brow">brow</span> more suited to deployment in a non localhost environment</p>
+<p>It could still be compromised if an attacker knew your IP, your user agent, the
+token and the salt, and they had access to an authorized IP address and
+authenticated against Skyline, then if they sent spoofed X-Forwarded-For and
+User Agent headers, your token and the salt, then yes they could delete all your
+Skyline Redis keys.</p>
+<p>These further modifications to <span class="red">re</span><span class="brow">brow</span> were required with the
+introduction of Luminosity, which needs the ability to query multiple Redis
+instances to run cross correlations for Skyline is deployed in multiple
+locations.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2.2-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

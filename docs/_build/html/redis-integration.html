@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Redis integration &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Redis integration &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
-        <link rel="next" title="Skyline and friends" href="skyline-and-friends.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+        <link rel="next" title="Running multiple Skyline instances" href="running-multiple-skylines.html"/>
         <link rel="prev" title="Luminosity" href="luminosity.html"/> 
 
   
@@ -108,10 +108,14 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Redis integration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#how-are-timeseries-stored-in-redis">How are timeseries stored in Redis?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#redis-security">Redis Security</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#types-of-skyline-and-redis-implementations">Types of Skyline and Redis implementations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-are-time-series-stored-in-redis">How are time series stored in Redis?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-other-data-are-stored-in-redis">What other data are stored in Redis?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-s-with-the-mini-and-metrics-namespaces">What&#8217;s with the &#8216;mini&#8217; and &#8216;metrics&#8217; namespaces?</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -169,32 +173,90 @@
            <div itemprop="articleBody">
             
   <div class="section" id="redis-integration">
-<span id="redis-integration"></span><h1>Redis integration<a class="headerlink" href="#redis-integration" title="Permalink to this headline">¶</a></h1>
-<p>Part of the Horizon service&#8217;s job is to input data into Redis.</p>
-<div class="section" id="how-are-timeseries-stored-in-redis">
-<span id="how-are-timeseries-stored-in-redis"></span><h2>How are timeseries stored in Redis?<a class="headerlink" href="#how-are-timeseries-stored-in-redis" title="Permalink to this headline">¶</a></h2>
-<p>Skyline uses MessagePack to store data in Redis. When a data point comes in, a
-Horizon worker will pack the datapoint with the schema [timestamp, value] into a
-MessagePack-encoded binary string and make a redis.append() call to append this
-string to the appropriate metric key. This way, we can make very easily make
-many updates to Redis at once, and this is how Skyline is able to support a very
-large firehose of metrics.</p>
-<p>One downside to this scheme is that once timeseries in Redis start to get very
+<h1>Redis integration<a class="headerlink" href="#redis-integration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="redis-security">
+<h2>Redis Security<a class="headerlink" href="#redis-security" title="Permalink to this headline">¶</a></h2>
+<p>First please take the time to read and understand Redis security as described
+at <a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a></p>
+<p>It is important that you understand factors relating to the default Redis
+security model.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">With the introduction of <span class="red">re</span><span class="brow">brow</span> and Luminosity it
+is very important that Redis and your environment are configured correctly in
+terms of securing Redis and access to Redis.  Please ensure that you implement
+the recommendations described on redis.io security page and the Redis related
+Skyline recommendations described on the installations page in this
+documentation and <code class="docutils literal"><span class="pre">settings.py</span></code>.</p>
+</div>
+</div>
+<div class="section" id="types-of-skyline-and-redis-implementations">
+<h2>Types of Skyline and Redis implementations<a class="headerlink" href="#types-of-skyline-and-redis-implementations" title="Permalink to this headline">¶</a></h2>
+<p>There are two different types of Skyline implementations:</p>
+<ul class="simple">
+<li>A single Skyline instance, Redis only needs to bind to 127.0.0.1</li>
+<li>Multiple Skyline instances running in a distributed fashion Redis still
+only needs to bind to 127.0.0.1 but stunnel need to be implmented to allow
+each Skyline server to connect to other Redis instances on Skyline servers via
+a stunnel SSL encrypted connection.  See <a class="reference external" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+</ul>
+</div>
+<div class="section" id="how-are-time-series-stored-in-redis">
+<h2>How are time series stored in Redis?<a class="headerlink" href="#how-are-time-series-stored-in-redis" title="Permalink to this headline">¶</a></h2>
+<p>Part of the Horizon service&#8217;s job is to input data into Redis. Skyline uses
+MessagePack to store data in Redis. When a data point comes in, a
+Horizon worker will pack the data point with the schema <code class="docutils literal"><span class="pre">[timestamp,</span> <span class="pre">value]</span></code>
+into a MessagePack-encoded binary string and make a <code class="docutils literal"><span class="pre">redis.append()</span></code> call to
+append this string to the appropriate metric key. This way, Horizon can very
+easily make many updates to Redis at once, and this is how Skyline is able to
+support a very large firehose of metrics.</p>
+<p>One downside to this scheme is that once time series in Redis start to get very
 long, Redis&#8217; performance suffers. Redis was not designed to contain very large
 strings. We may one day switch to an alternative storage design as proposed by
-Antirez - see https://github.com/antirez/redis-timeseries - but for now, this is
-how it is.</p>
-<p>In addition to all the metrics, there are two specialized Redis sets:
-&#8216;metrics.unique_metrics&#8217; and &#8216;mini.unique_metrics.&#8217; These contain every key that
-exists in Redis, and they are used by the Analyzer to make it easier for the
-Analyzer to know what to mget from Redis (as opposed to doing a very expensive
-keys * query)</p>
+Antirez - see <a class="reference external" href="https://github.com/antirez/redis-timeseries">https://github.com/antirez/redis-timeseries</a> - but for now, this is
+how it is. And given that the last update to that repo was in 10 Oct 2012, it is
+highly probable that normal Redis will be used for the forseenable future.</p>
+<p>Using the default mod:<cite>settings.FULL_DURATION</cite> of 86400 (24 hours) ensures that
+Redis does not hit performance issues in most cases.  Now where Skyline needs
+greater than mod:<cite>settings.FULL_DURATION</cite> data to analyse in Mirage and
+Ionosphere, Skyline fetches that data from Graphite directly when required.
+This overcomes any Redis performance issues and the use of Graphite data removes
+the limitation of Skyline only being able to analyse data and be useful in the
+24 hour time window.</p>
+</div>
+<div class="section" id="what-other-data-are-stored-in-redis">
+<h2>What other data are stored in Redis?<a class="headerlink" href="#what-other-data-are-stored-in-redis" title="Permalink to this headline">¶</a></h2>
+<p>In addition to all the metrics, there are a number of specialized Redis sets and
+keys:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">metrics.unique_metrics</span></code> and <code class="docutils literal"><span class="pre">mini.unique_metrics</span></code> These contain every key
+that exists in Redis, and they are used by the Analyzer to make it easier for
+the Analyzer to know what to mget from Redis (as opposed to doing a very
+expensive keys * query)</li>
+<li>analyzer.boring - a set of all metrics deemed Boring by Analyzer</li>
+<li>analyzer.stale - a set of all metrics deemed Stale by Analyzer</li>
+<li>analyzer.too_short - a set of all metrics deemed TooShort by Analyzer</li>
+<li>derivative_metrics - a set of all metrics that have been defined as
+metrics to analyse as derivatives by Analyzer.</li>
+<li>non_derivative_metrics - a set of all metrics that have been defined as
+to opposite of derivative_metrics by Analyzer.</li>
+<li>ionosphere.learn.work - a set of metric anomalies with details that require
+learning.</li>
+<li>ionosphere.training_data.* keys containing anomalies that need to be learnt e.g.
+<code class="docutils literal"><span class="pre">[['metric_timestamp',</span> <span class="pre">1526755861],</span> <span class="pre">['base_name',</span> <span class="pre">'carbon.relays.graphite-a.metricsReceived'],</span> <span class="pre">['timeseries_dir',</span> <span class="pre">'carbon/relays/graphite-a/metricsReceived'],</span> <span class="pre">['added_by',</span> <span class="pre">'analyzer']]</span></code></li>
+<li>ionosphere.unique_metrics set</li>
+<li>&lt;skyline_app&gt;.last_alert.&lt;alerter&gt;.&lt;metric&gt; keys</li>
+<li>panorama.mysql_ids.* keys</li>
+<li>rebrow.client.key.* keys - expiring rebrow Redis password JWT encoded tokens</li>
+<li>etc, etc, feel free to browser Redis with <span class="red">re</span><span class="brow">brow</span> and take a
+look and please free feel to PR update this doc if you find some that are
+missing here.</li>
+</ul>
 </div>
 <div class="section" id="what-s-with-the-mini-and-metrics-namespaces">
-<span id="what-s-with-the-mini-and-metrics-namespaces"></span><h2>What&#8217;s with the &#8216;mini&#8217; and &#8216;metrics&#8217; namespaces?<a class="headerlink" href="#what-s-with-the-mini-and-metrics-namespaces" title="Permalink to this headline">¶</a></h2>
-<p>The &#8216;mini&#8217; namespace currently has two uses: it helps performance-wise for
-Oculus, if you choose to use it, and it also is used by the webapp to display a
-<code class="docutils literal"><span class="pre">settings.MINI_DURATION</span></code> seconds long view.</p>
+<h2>What&#8217;s with the &#8216;mini&#8217; and &#8216;metrics&#8217; namespaces?<a class="headerlink" href="#what-s-with-the-mini-and-metrics-namespaces" title="Permalink to this headline">¶</a></h2>
+<p>The &#8216;mini&#8217; namespace is used by the Webapp to display a <cite>settings.MINI_DURATION</cite>
+seconds long view.</p>
 </div>
 </div>
 
@@ -205,7 +267,7 @@ Oculus, if you choose to use it, and it also is used by the webapp to display a
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="skyline-and-friends.html" class="btn btn-neutral float-right" title="Skyline and friends" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="running-multiple-skylines.html" class="btn btn-neutral float-right" title="Running multiple Skyline instances" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="luminosity.html" class="btn btn-neutral" title="Luminosity" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
@@ -239,7 +301,7 @@ Oculus, if you choose to use it, and it also is used by the webapp to display a
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

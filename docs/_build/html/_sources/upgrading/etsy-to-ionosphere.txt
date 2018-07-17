@@ -89,4 +89,4 @@ documentation are still appropriate.
 - Look at implementing the other new features at your leisure
 - Panorama is probably the quickest win if you opted to not install it
 - Boundary, Mirage and Ionosphere will take a little assessment over time to see
-  what metrics you want to configure them to monitor.  You cannot rush timeseries.
+  what metrics you want to configure them to monitor.  You cannot rush time series.

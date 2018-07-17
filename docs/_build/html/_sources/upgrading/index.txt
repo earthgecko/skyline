@@ -15,6 +15,35 @@ Backup your Redis!
 
 Do it.
 
+Backup your database!
+#####################
+
+Do it.
+
+Upgrading from version to version
+#################################
+
+All update procedures are documented per release in the relevant Releases page.
+Please ensure you read and carry out as appropriate the steps in each version
+update.  Some releases can skip through a few releases to go from v1.1.8 to
+v.1.1.10 and some releases cannot, you cannot jump from v1.1.x to v.1.2.2 you
+must go from v1.1.x to v1.2.0 and then v.1.2.2
+
+Although it may be painful going through each version upgrade, it informs you
+each time what has changed and been added.
+
+In almost all cases one should be able to craft a single SQL from each version
+that has one and diff your current ```settings.py``` with the new version
+```settings.py``` and with a combination of stopping all Skyline services,
+backing up DB, applying single SQL and switching to the new Skyline version code
+and your new updated ```settings.py``` should be possible if the user does not
+wish to run through the version updates sequentially.  However other than this
+description, the steps and what SQL updates and additions and/or need to be
+applied is left up to the user to determine.  The user should still read each
+release page to ensure they are aware of if any changes are required to any of
+the components related to Skyline, e.g. to the Apache/reverse proxy config,
+Redis, Graphite, etc. or additions outside of Python and pip.
+
 Upgrading from the Etsy version of Skyline
 ##########################################
 
@@ -47,7 +76,10 @@ Directory structure changes
 
 In order to bring Skyline in line with a more standard Python package
 structure the directory structure has had to changed to accommodate
-sphinx autodoc and the setuptools framework.
+sphinx autodoc and the setuptools framework.  This will affect any configuration
+management paths for a templated settings.py and/or to path to the Skyline bin
+directory, etc.
+
 
 settings.py
 ~~~~~~~~~~~

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_alerters &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>mirage.mirage_alerters &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
@@ -297,12 +298,21 @@
     <span class="k">if</span> <span class="s1">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERT_SENDER</span>
         <span class="n">recipient</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - recipient for </span><span class="si">%s</span><span class="s1"> are </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
         <span class="c1"># @modified 20160806 - Added default_recipient</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;recipients&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
             <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - recipients for </span><span class="si">%s</span><span class="s1"> are </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipients</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - recipients are:&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">recip</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp :: recipient - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">recip</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;alert_smtp :: error :: could not iterate recipients list&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">use_default_recipient</span><span class="p">:</span>
@@ -319,7 +329,30 @@
 
     <span class="c1"># Backwards compatibility</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">recipients</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp :: recipients is a string&#39;</span><span class="p">)</span>
         <span class="n">recipients</span> <span class="o">=</span> <span class="p">[</span><span class="n">recipients</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp :: recipients is not a string, OK&#39;</span><span class="p">)</span>
+
+    <span class="c1"># @added 20180524 - Task #2384: Change alerters to cc other recipients</span>
+    <span class="c1"># The alerters did send an individual email to each recipient. This would be</span>
+    <span class="c1"># more useful if one email was sent with the first smtp recipient being the</span>
+    <span class="c1"># to recipient and the subsequent recipients were add in cc.</span>
+    <span class="k">if</span> <span class="n">recipients</span><span class="p">:</span>
+        <span class="n">primary_recipient</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">cc_recipients</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i_recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">primary_recipient</span><span class="p">:</span>
+                <span class="n">primary_recipient</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_recipient</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">primary_recipient</span> <span class="o">!=</span> <span class="n">i_recipient</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">cc_recipients</span><span class="p">:</span>
+                    <span class="n">cc_recipients</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_recipient</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_cc_recipients</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_recipient</span><span class="p">))</span>
+                    <span class="n">cc_recipients</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_cc_recipients</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;alert_smtp - will send to primary_recipient :: </span><span class="si">%s</span><span class="s1">, cc_recipients :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">)))</span>
 
     <span class="c1"># @modified 20161228 - Feature #1830: Ionosphere alerts</span>
     <span class="c1"># Ionosphere alerts</span>
@@ -331,7 +364,11 @@
     <span class="c1"># specify it in the graph_title</span>
     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -816,7 +853,15 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not build body&#39;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
-    <span class="k">for</span> <span class="n">recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
+    <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
+    <span class="c1"># Do not send to each recipient, send to primary_recipient and cc the other</span>
+    <span class="c1"># recipients, thereby sending only one email</span>
+    <span class="c1"># for recipient in recipients:</span>
+    <span class="c1">#     logger.info(&#39;alert_smtp - sending alert to %s&#39; % (str(recipient)))</span>
+    <span class="k">if</span> <span class="n">primary_recipient</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;alert_smtp - will send to primary_recipient :: </span><span class="si">%s</span><span class="s1">, cc_recipients :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">)))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls</span>
             <span class="c1"># Broke body into body and more_body to workaround the 990 character</span>
@@ -835,7 +880,14 @@
 
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] - </span><span class="si">%s</span><span class="s1"> ALERT - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
-            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
+            <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
+            <span class="c1"># msg[&#39;To&#39;] = recipient</span>
+            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">primary_recipient</span>
+
+            <span class="c1"># @added 20180524 - Task #2384: Change alerters to cc other recipients</span>
+            <span class="c1"># Added Cc</span>
+            <span class="k">if</span> <span class="n">cc_recipients</span><span class="p">:</span>
+                <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Cc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc_recipients</span>
 
             <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
             <span class="c1"># @added 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls</span>
@@ -871,18 +923,31 @@
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">SMTP</span><span class="p">(</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">recipient</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
+            <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
+            <span class="c1"># Send to primary_recipient and cc_recipients</span>
+            <span class="c1"># s.sendmail(sender, recipient, msg.as_string())</span>
+            <span class="k">if</span> <span class="n">cc_recipients</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="p">[</span><span class="n">primary_recipient</span><span class="p">,</span> <span class="n">cc_recipients</span><span class="p">],</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">sendmail</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">primary_recipient</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">as_string</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - message sent to </span><span class="si">%s</span><span class="s1"> OK&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="p">))</span>
+                <span class="c1"># logger.info(&#39;debug :: alert_smtp - message sent to %s OK&#39; % str(recipient))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;debug :: alert_smtp - message sent OK to primary_recipient :: </span><span class="si">%s</span><span class="s1">, cc_recipients :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                    <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">)))</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not send email to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="c1"># logger.error(&#39;error :: alert_smtp - could not send email to %s&#39; % str(recipient))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: alert_smtp - could not send email to primary_recipient :: </span><span class="si">%s</span><span class="s1">, cc_recipients :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc_recipients</span><span class="p">)))</span>
 
         <span class="n">s</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after email: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
-        <span class="k">return</span></div>
+
+    <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="alert_pagerduty"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_alerters.alert_pagerduty">[docs]</a><span class="k">def</span> <span class="nf">alert_pagerduty</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
@@ -1012,7 +1077,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

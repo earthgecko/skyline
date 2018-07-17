@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.ionosphere package &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>skyline.ionosphere package &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.luminosity package" href="skyline.luminosity.html"/>
         <link rel="prev" title="skyline.horizon package" href="skyline.horizon.html"/> 
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -372,18 +373,27 @@ is terminated this prevents any memory leaks in the parent.</p>
 <span id="skyline-ionosphere-layers-module"></span><h2>skyline.ionosphere.layers module<a class="headerlink" href="#module-ionosphere.layers" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ionosphere.layers.run_layer_algorithms">
-<code class="descname">run_layer_algorithms</code><span class="sig-paren">(</span><em>base_name</em>, <em>layers_id</em>, <em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/layers.html#run_layer_algorithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.layers.run_layer_algorithms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">spawn_layers_process</span></code> to
+<code class="descname">run_layer_algorithms</code><span class="sig-paren">(</span><em>base_name</em>, <em>layers_id</em>, <em>timeseries</em>, <em>layers_count</em>, <em>layers_checked</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/layers.html#run_layer_algorithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.layers.run_layer_algorithms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">spin_process</span></code> to
 evaluate anomalies against a custom layers boundary algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric</strong> (<em>str</em>) &#8211; the metric base_name</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>metric</strong> (<em>str</em>) &#8211; the metric base_name</li>
+<li><strong>layers_id</strong> &#8211; the layer id</li>
+<li><strong>timeseries</strong> (<em>list</em>) &#8211; the time series list</li>
+<li><strong>layers_count</strong> (<em>int</em>) &#8211; the number of layers for the metric</li>
+<li><strong>layers_checked</strong> (<em>int</em>) &#8211; the number of layers that have been checked</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True or False</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True or False</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -582,7 +592,7 @@ at use_full_duration via learn.
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

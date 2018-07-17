@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Getting started &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="next" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/>
         <link rel="prev" title="Requirements" href="requirements.html"/> 
 
@@ -94,7 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#anomaly-detection-is-a-journey-not-an-app">Anomaly detection is a journey not an app</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enabling-metrics-incrementally">Enabling metrics incrementally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enabling-skyline-modules-incrementally">Enabling Skyline modules incrementally</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#start-with-horizon-analyzer-webapp-and-panorama">Start with Horizon, Analyzer, Webapp and Panorama</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start-with-horizon-analyzer-webapp-luminosity-and-panorama">Start with Horizon, Analyzer, Webapp, Luminosity and Panorama</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-mirage-parameters-to-the-alerts">Add Mirage parameters to the <code class="docutils literal"><span class="pre">ALERTS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-boundary-settings">Add Boundary settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#train-ionosphere">Train Ionosphere</a></li>
@@ -119,6 +119,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -185,12 +186,15 @@
 of moving parts that need to be orchestrated.  Further to this, for Skyline to
 be configured, trained and start learning takes a lot of time.</p>
 <p>Take time to read through the documentation and review <code class="docutils literal"><span class="pre">settings.py</span></code> at the
-same time.</p>
+same time.  There are lots of settings in <code class="docutils literal"><span class="pre">settings.py</span></code> do not feel
+intimidated by this. The default settings should be adequate and reasonable for
+starting out with.  The settings that you must change and take note of are all
+documented on the <a class="reference external" href="../html/installation.html">Installation</a> page</p>
 </div>
 <div class="section" id="anomaly-detection-is-a-journey-not-an-app">
 <h2>Anomaly detection is a journey not an app<a class="headerlink" href="#anomaly-detection-is-a-journey-not-an-app" title="Permalink to this headline">¶</a></h2>
 <p>Anomaly detection is partly about automated anomaly detection and partly about
-knowing your metrics and timeseries patterns.  Not all timeseries are created
+knowing your metrics and time series patterns.  Not all time series are created
 equally.</p>
 <p>It helps to think of anomaly detection as an ongoing journey.  Although ideally
 it would be great to be able to computationally detect anomalies with a high
@@ -214,41 +218,42 @@ metrics, it can but...</p>
 <strong>only</strong> configure <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a> on those
 to begin with and get to know what Skyline does with those.  Add more key metric
 groups as you get the hang of it.</p>
-<p>You cannot rush timeseries.</p>
+<p>You cannot rush time series.</p>
 </div>
 <div class="section" id="enabling-skyline-modules-incrementally">
 <h2>Enabling Skyline modules incrementally<a class="headerlink" href="#enabling-skyline-modules-incrementally" title="Permalink to this headline">¶</a></h2>
 <p>Skyline&#8217;s modules do different things differently and understanding the process
 and pipeline helps to tune each Skyline module appropriately for your data.</p>
-<p>Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere (and
-Crucible), have their own specific configurations.  These configurations are not
-extremely complex, but they are not obvious or trivial either when you are
+<p>Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere, Luminosity
+(and Crucible), have their own specific configurations.  These configurations are
+not extremely complex, but they are not obvious or trivial either when you are
 starting out.  Bringing Skyline modules online incrementally over time, helps
 you to understand the processes and their different configuration settings
 easier.  Easier than trying to get the whole stack up and running straight off.</p>
 </div>
-<div class="section" id="start-with-horizon-analyzer-webapp-and-panorama">
-<h2>Start with Horizon, Analyzer, Webapp and Panorama<a class="headerlink" href="#start-with-horizon-analyzer-webapp-and-panorama" title="Permalink to this headline">¶</a></h2>
-<p>It is advisable to only start the original Horizon, Analyzer and Webapp daemons
-and Panorama initially and take time to understand what Skyline is doing.  Take
-some time to tune Analyzer&#8217;s <code class="docutils literal"><span class="pre">ALERTS</span></code> and learn the patterns in your IMPORTANT
-metrics:</p>
+<div class="section" id="start-with-horizon-analyzer-webapp-luminosity-and-panorama">
+<h2>Start with Horizon, Analyzer, Webapp, Luminosity and Panorama<a class="headerlink" href="#start-with-horizon-analyzer-webapp-luminosity-and-panorama" title="Permalink to this headline">¶</a></h2>
+<p>It is advisable to only start the Horizon, Analyzer, Luminosity, Webapp and
+Panorama daemons initially and take time to understand what Skyline is doing.
+Take some time to tune Analyzer&#8217;s mod:<cite>settings.ALERTS</cite> and learn the patterns
+in your IMPORTANT metrics:</p>
 <ul class="simple">
 <li>which metrics trigger anomalies?</li>
 <li>when the metrics trigger anomalies?</li>
 <li>why/what known events are triggering anomalies?</li>
-<li>are there seasonalities/periodicity in anomalies some metrics?</li>
+<li>are there seasonality/periodicity in anomalies some metrics?</li>
 <li>what metrics are critical and what metrics are just &#8220;normal&#8221;/expected noise</li>
 </ul>
 <p>Panorama will help you view what things are triggering as anomalous.</p>
 <p>Once you have got an idea of what you want to anomaly detect on and more
 importantly, on what and when you want to alert, you can start to define the
 settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
-bring them online too.</p>
+bring them online too.  However do consider enabling Ionosphere from the outset
+as well.</p>
 </div>
 <div class="section" id="add-mirage-parameters-to-the-alerts">
 <h2>Add Mirage parameters to the <code class="docutils literal"><span class="pre">ALERTS</span></code><a class="headerlink" href="#add-mirage-parameters-to-the-alerts" title="Permalink to this headline">¶</a></h2>
-<p>Once you have an overview of metrics that have seasonalities that are greater
+<p>Once you have an overview of metrics that have seasonality that are greater
 than the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>, you can add their Mirage parameters to
 the <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuples and start the Mirage daemon.</p>
 </div>
@@ -271,15 +276,15 @@ modules to send Crucible data, Crucible has to be enabled via the appropriate
 <code class="docutils literal"><span class="pre">settings.py</span></code> variable for each module.</p>
 <p>Crucible has 2 roles:</p>
 <ol class="arabic simple">
-<li>Store resources (timeseries json and graph pngs) for triggered anomalies - note
-this can consume a lot of disk space if enabled.</li>
-<li>Run ad-hoc analysis on any timeseries and create matplotlib plots for the
+<li>Store resources (time series json and graph pngs) for triggered anomalies -
+note this can consume a lot of disk space if enabled.</li>
+<li>Run ad hoc analysis on any time series and create matplotlib plots for the
 run algorithms.</li>
 </ol>
 <p>It is not advisable to enable Crucible on any of the other modules unless you
 really want to &#8220;see&#8221; anomalies in great depth.  Crucible is enabled as there is
 a Crucible frontend view on the roadmap that will allow the user to test any
-timeseries of any metric directly through the UI.</p>
+time series of any metric directly through the UI.</p>
 </div>
 </div>
 
@@ -324,7 +329,7 @@ timeseries of any metric directly through the UI.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

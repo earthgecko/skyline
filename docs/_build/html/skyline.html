@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>skyline package &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -108,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -288,7 +289,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.ionosphere_backend">skyline.webapp.ionosphere_backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.utilities">skyline.webapp.utilities module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.webapp">skyline.webapp.webapp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-webapp-module">skyline.webapp.webapp module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp">Module contents</a></li>
 </ul>
 </li>
@@ -403,6 +404,7 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>timestamp</strong> (<em>str</em>) &#8211; the timestamp of metric anomaly with training data</li>
 <li><strong>metric</strong> (<em>str</em>) &#8211; the base_name of the metric</li>
+<li><strong>context</strong> &#8211; the context</li>
 </ul>
 </td>
 </tr>
@@ -529,9 +531,11 @@ features profile.</li>
 <div class="section" id="module-settings">
 <span id="skyline-settings-module"></span><h2>skyline.settings module<a class="headerlink" href="#module-settings" title="Permalink to this headline">¶</a></h2>
 <p>Shared settings</p>
-<p>IMPORTANT NOTE</p>
-<p>You may find reading some of these settings documentation strings
-<a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings">http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings</a></p>
+<p>IMPORTANT NOTE:</p>
+<p>These settings are described with docstrings for the purpose of automated
+documentation.  You may find reading some of the docstrings easier to understand
+or read in the documentation itself.</p>
+<p><a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings">http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings</a></p>
 <dl class="data">
 <dt id="settings.REDIS_SOCKET_PATH">
 <code class="descname">REDIS_SOCKET_PATH</code><em class="property"> = '/tmp/redis.sock'</em><a class="headerlink" href="#settings.REDIS_SOCKET_PATH" title="Permalink to this definition">¶</a></dt>
@@ -540,6 +544,42 @@ features profile.</li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><strong>REDIS_SOCKET_PATH</strong></a> (<em>str</em>) &#8211; The path for the Redis unix socket</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.REDIS_PASSWORD">
+<code class="descname">REDIS_PASSWORD</code><em class="property"> = None</em><a class="headerlink" href="#settings.REDIS_PASSWORD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.REDIS_PASSWORD" title="settings.REDIS_PASSWORD"><strong>REDIS_PASSWORD</strong></a> (<em>str</em>) &#8211; The password for Redis, even though Skyline uses socket it
+is still advisable to set a password for Redis.  If this is set to the
+boolean None Skyline will not use Redis AUTH</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please ensure that you do enable Redis authentication by setting the
+requirepass in your redis.conf with a very long Redis password.  See
+<a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a> and <a class="reference external" href="http://antirez.com/news/96">http://antirez.com/news/96</a> for more
+info.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SECRET_KEY">
+<code class="descname">SECRET_KEY</code><em class="property"> = 'your-long_secret-key-to-encrypt_the_redis_password_in_url_parameters'</em><a class="headerlink" href="#settings.SECRET_KEY" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SECRET_KEY" title="settings.SECRET_KEY"><strong>SECRET_KEY</strong></a> (<em>str</em>) &#8211; A secret key that is used to encrypt the Redis password in the
+rebrow URL parameters.</td>
 </tr>
 </tbody>
 </table>
@@ -921,8 +961,12 @@ imported and means that not all alerter related modules in
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><strong>SYSLOG_ENABLED</strong></a> (<em>boolean</em>) &#8211; Alerter - enables Skyline apps to submit anomalous metric
-details to syslog.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><strong>SYSLOG_ENABLED</strong></a> (<em>boolean</em>) &#8211; enables Skyline apps to submit anomalous metric
+details to syslog.  Being set to True makes syslog a kind of alerter, like a
+SMTP alert. also results in all anomalies being
+recorded in the database by Panorama, this is probably desired.  If you
+find this is making syslog too noise, set to False, but you will lose
+non alerter</td>
 </tr>
 </tbody>
 </table>
@@ -1505,13 +1549,15 @@ from the Horizon queue.</td>
 
 <dl class="data">
 <dt id="settings.HORIZON_IP">
-<code class="descname">HORIZON_IP</code><em class="property"> = '0.0.0.0'</em><a class="headerlink" href="#settings.HORIZON_IP" title="Permalink to this definition">¶</a></dt>
+<code class="descname">HORIZON_IP</code><em class="property"> = 'YOUR_SKYLINE_INTSANCE_IP_ADDRESS'</em><a class="headerlink" href="#settings.HORIZON_IP" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HORIZON_IP" title="settings.HORIZON_IP"><strong>HORIZON_IP</strong></a> (<em>str</em>) &#8211; The IP address for Horizon to bind to.  Defaults to
-<code class="docutils literal"><span class="pre">gethostname()</span></code></td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HORIZON_IP" title="settings.HORIZON_IP"><strong>HORIZON_IP</strong></a> (<em>str</em>) &#8211; The IP address for Horizon to bind to.  Skyline receives data
+from Graphite on this IP address.  This previously defaulted to
+<code class="docutils literal"><span class="pre">gethostname()</span></code> but has been change to be specifically specified by the
+user. USER_DEFINED</td>
 </tr>
 </tbody>
 </table>
@@ -2197,6 +2243,7 @@ minute then autoaggregate can be used to aggregate the required sample.</p>
 <ul>
 <li><p class="first"><strong>Tuple schema example</strong>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="s1">&#39;stats_counts&#39;</span><span class="p">,</span> <span class="n">AGGREGATION_VALUE</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;metric1&#39;</span><span class="p">,</span> <span class="n">AGGREGATION_VALUE</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
@@ -2704,6 +2751,41 @@ features profile sum and a calculated profile sum to result in a match.</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.IONOSPHERE_MINMAX_SCALING_ENABLED">
+<code class="descname">IONOSPHERE_MINMAX_SCALING_ENABLED</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_MINMAX_SCALING_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_MINMAX_SCALING_ENABLED" title="settings.IONOSPHERE_MINMAX_SCALING_ENABLED"><strong>IONOSPHERE_MINMAX_SCALING_ENABLED</strong></a> (<em>boolean</em>) &#8211; Implement Min-Max scaling on features
+profile time series and an anomalous time series if the features profile
+sums do not match.  This adds a form of standardization that significantly
+improves the Ionosphere features sum comparison technique of high range
+metrics within the IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE boundaries.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE">
+<code class="descname">IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE</code><em class="property"> = 0.15</em><a class="headerlink" href="#settings.IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE" title="settings.IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE"><strong>IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE</strong></a> (<em>float</em>) &#8211; Min-Max scaling will only be
+implemented if the lower and upper ranges of both the features profile time
+series and the anomalous time series are within these margins.  The default
+being 0.15 (or 15 percent).  This prevents Ionosphere from Min-Max scaling
+and comparing time series that are in significantly different ranges and
+only applying Min-Max scaling comparisons when it is sensible to do so.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.IONOSPHERE_LEARN">
 <code class="descname">IONOSPHERE_LEARN</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -2988,8 +3070,16 @@ there are multiple Skyline instances each with their own Redis.</td>
 </tr>
 </tbody>
 </table>
-<p>For example, the IP or FQDN as a string and the port as an int:
-OTHER_SKYLINE_REDIS_INSTANCES = [[&#8216;192.168.1.10&#8217;, 6379], [&#8216;192.168.1.15&#8217;, 6379]]</p>
+<p>For example, the IP or FQDN as a string and the port as an int and the Redis
+password as a str OR if there is no password the boolean None:
+OTHER_SKYLINE_REDIS_INSTANCES = [[&#8216;192.168.1.10&#8217;, 6379, &#8216;this_is_the_redis_password&#8217;], [&#8216;192.168.1.15&#8217;, 6379, None]]</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you run multiple Skyline instances and are going to run cross
+correlations and query another Redis please ensure that you have Redis
+authentication enabled.  See <a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a> and
+<a class="reference external" href="http://antirez.com/news/96">http://antirez.com/news/96</a> for more info.</p>
+</div>
 </dd></dl>
 
 <dl class="data">
@@ -3017,9 +3107,30 @@ ALTERNATIVE_SKYLINE_URLS = [&#8216;<a class="reference external" href="http://sk
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CORRELATE_ALERTS_ONLY" title="settings.CORRELATE_ALERTS_ONLY"><strong>CORRELATE_ALERTS_ONLY</strong></a> (<em>boolean</em>) &#8211; Only cross correlate anomalies the have an alert
-setting (other that syslog).  This reduces the number of correlations that
+setting (other than syslog).  This reduces the number of correlations that
 are recorded in the database.  Non alerter metrics are still however cross
 correlated against when an anomaly triggers on an alerter metric.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.LUMINOL_CROSS_CORRELATION_THRESHOLD">
+<code class="descname">LUMINOL_CROSS_CORRELATION_THRESHOLD</code><em class="property"> = 0.9</em><a class="headerlink" href="#settings.LUMINOL_CROSS_CORRELATION_THRESHOLD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.LUMINOL_CROSS_CORRELATION_THRESHOLD" title="settings.LUMINOL_CROSS_CORRELATION_THRESHOLD"><strong>LUMINOL_CROSS_CORRELATION_THRESHOLD</strong></a> (<em>float</em>) &#8211; Only record Luminol cross correlated
+metrics where the correlation coefficient is &gt; this float value.  Linkedin&#8217;s
+Luminol library is hardcoded to 0.8, however with lots of testing 0.8 proved
+to be too low a threshold and resulted in listing many metrics that were
+not related.  You may find 0.9 too low as well, it can also record a lot,
+however in root cause analysis and determining relationships between metrics
+0.9 has proved more useful for in seeing the tress in the forest.
+This can be a value between 0.0 and 1.00000 - 1.0 being STRONGEST cross
+correlation</td>
 </tr>
 </tbody>
 </table>
@@ -3145,41 +3256,6 @@ host is defined.</p>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="skyline_functions.alert_expiry_check">
-<code class="descname">alert_expiry_check</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>metric</em>, <em>metric_timestamp</em>, <em>added_by</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#alert_expiry_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.alert_expiry_check" title="Permalink to this definition">¶</a></dt>
-<dd><p>Only check if the metric does not a EXPIRATION_TIME key set, panorama
-uses the alert EXPIRATION_TIME for the relevant alert setting contexts
-whether that be analyzer, mirage, boundary, etc and sets its own
-cache_keys in redis.  This prevents large amounts of data being added
-in terms of duplicate anomaly records in Panorama and timeseries json and
-image files in crucible samples so that anomalies are recorded at the same
-EXPIRATION_TIME as alerts.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
-<li><strong>metric</strong> (<em>str</em>) &#8211; metric name</li>
-<li><strong>added_by</strong> (<em>str</em>) &#8211; which app requested the alert_expiry_check</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">True</span></code>, <code class="docutils literal"><span class="pre">False</span></code></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
-</td>
-</tr>
-</tbody>
-</table>
-<ul class="simple">
-<li>If inside the alert expiry period returns <code class="docutils literal"><span class="pre">True</span></code></li>
-<li>If not in the alert expiry period or unknown returns <code class="docutils literal"><span class="pre">False</span></code></li>
-</ul>
 </dd></dl>
 
 <dl class="function">
@@ -3510,7 +3586,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

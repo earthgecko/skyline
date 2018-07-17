@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Roadmap &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Roadmap &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="next" title="skyline package" href="skyline.html"/>
         <link rel="prev" title="Development - pytz" href="development/pytz.html"/> 
 
@@ -108,6 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -125,7 +126,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#meteor">Meteor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#constellations">Constellations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constellations-updated-20150526-now-to-be-known-as-luminosity">Constellations (Updated 20150526 now to be known as Luminosity)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#skyline-and-nasa-fits-data">Skyline and NASA/FITS data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#nupic">NuPIC</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#nupic-predictions-and-graphite-timeseries">NuPIC predictions and Graphite timeseries</a><ul>
@@ -191,6 +192,9 @@
 <p>Things on the horizon :)</p>
 <p>This is not really a roadmap per se it is more just a collection of
 ideas at the moment, in no particular order.</p>
+<p>UPDATE 20180526 - Skyline itself now seems to write its own roadmap and also
+seems to be plotting it&#8217;s own course.  Regardless of any whaffle you may read
+here.</p>
 <div class="section" id="further-performance-improvements-and-python-3-5">
 <h2>Further performance improvements and Python-3.5<a class="headerlink" href="#further-performance-improvements-and-python-3-5" title="Permalink to this headline">¶</a></h2>
 <p>Further performance improvements where possible with the use of cython.
@@ -199,6 +203,8 @@ for scipy and limited numpy support. pypy would be a quick win if it
 were possible, so cython where applicable is the obvious choice.</p>
 <p>Continue updating the code base to ensure that everything can be run on
 &gt;= Python-3.5.x</p>
+<p>UPDATE 20180526 - Skyline has not been cooperative here in terms of it&#8217;s own
+roadmap and plotted course.</p>
 </div>
 <div class="section" id="ionosphere">
 <h2>Ionosphere<a class="headerlink" href="#ionosphere" title="Permalink to this headline">¶</a></h2>
@@ -209,15 +215,18 @@ accuracy of the anomaly detection via multiple avenues of analysis.</p>
 <div class="section" id="in-progress">
 <h3>In progress<a class="headerlink" href="#in-progress" title="Permalink to this headline">¶</a></h3>
 <p>See <a class="reference external" href="ionosphere.html">Ionosphere</a> and <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a></p>
+<p>UPDATE 20180526 - Ionosphere development, still in progress in small increments</p>
+<p>UPDATE 20180715 - Ionosphere stable</p>
 </div>
 </div>
 <div class="section" id="meteor">
 <h2>Meteor<a class="headerlink" href="#meteor" title="Permalink to this headline">¶</a></h2>
 <p>Add the ability to inject data into a data set and test a metric, the workflow,
 algorithms, alerters and the apps themselves,etc.</p>
+<p>UPDATE 20180526 - Skyline has not been cooperative here.</p>
 </div>
-<div class="section" id="constellations">
-<h2>Constellations<a class="headerlink" href="#constellations" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="constellations-updated-20150526-now-to-be-known-as-luminosity">
+<h2>Constellations (Updated 20150526 now to be known as Luminosity)<a class="headerlink" href="#constellations-updated-20150526-now-to-be-known-as-luminosity" title="Permalink to this headline">¶</a></h2>
 <p>A pure Python implementation of the Oculus functionality, but not
 necessarily exactly the same, but similar. Calculating in realtime using
 the redis data and fingerprinting the slope/gradient/alphabet of the
@@ -229,6 +238,17 @@ requirement for the additional overheads of ruby and Elasticsearch.</p>
 <p>This would allow for the correlations to be determined for any metrics
 at any point within the <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> period.</p>
 <p>Help wanted.</p>
+<p>UPDATE 20180526 - Skyline HAS been cooperative here and hooked up with
+Linkedin/luminol to provide Skyline Luminosity and adding back the additional
+dimension of correlations, it has managed to provide a fairly good root cause
+analysis dimension to Skyline too.  Ticked. Although I still like the app
+Skyline meme of Constellations, just have to think up or find another cool thing
+(similarly related) to name Constellations.  No doubt in the next roadmap
+edition, this may be updated with something like, &#8220;Skyline and other parties
+have not been cooperative here.&#8221;  Take that as ode to yourselves Linkedin, the
+name was even changed to fit in with paying homeage to your library, however if
+the aim here is to be accurate the app should be called skyline/paulbourke...
+Which gives me an idea :)</p>
 </div>
 <div class="section" id="skyline-and-nasa-fits-data">
 <h2>Skyline and NASA/FITS data<a class="headerlink" href="#skyline-and-nasa-fits-data" title="Permalink to this headline">¶</a></h2>
@@ -250,6 +270,7 @@ data sets</li>
 <p>It should be possible for Skyline to be able to ingest any FITS data
 file or ingest an image file from a FITS file and feed it to scikit-image,
 etc.</p>
+<p>UPDATE 20180526 - Skyline and other parties have not been cooperative here.</p>
 </div>
 <div class="section" id="nupic">
 <h2>NuPIC<a class="headerlink" href="#nupic" title="Permalink to this headline">¶</a></h2>
@@ -312,6 +333,7 @@ axis as above)</p>
 <p>Quite amazing.  It a not beyond the realms of possibility to have a Horizon
 feeding specific metrics to various NuPIC HTM Cortical Learning
 Algorithms models...</p>
+<p>UPDATE 20180526 - Skyline and other parties have not been cooperative here.</p>
 <div class="section" id="update-the-nab-scoreboard">
 <h5>Update the NAB Scoreboard<a class="headerlink" href="#update-the-nab-scoreboard" title="Permalink to this headline">¶</a></h5>
 <p>Look at the automated running of the Numenta Anomaly Benchmark (NAB)
@@ -328,6 +350,7 @@ added or applied to Skyline in the future, e.g:</p>
 <p>Automated NAB benchmark metrics would be a nice thing to have :)</p>
 <p><strong>Update 20170225</strong>: Skyline can no longer necessarily be NAB-ed due to it now
 functioning in multiple temporal resolutions as a whole.</p>
+<p>UPDATE 20180526 - Skyline and other parties have not been cooperative here.</p>
 </div>
 </div>
 </div>
@@ -336,6 +359,7 @@ functioning in multiple temporal resolutions as a whole.</p>
 <h2>Machine learning<a class="headerlink" href="#machine-learning" title="Permalink to this headline">¶</a></h2>
 <p>Bring additional dimensions of machine learning capabilities into Skyline, too
 many avenues to mention...</p>
+<p>UPDATE 20180526 - Skyline and other parties have not been cooperative here.</p>
 </div>
 <div class="section" id="grumpy">
 <h2>Grumpy<a class="headerlink" href="#grumpy" title="Permalink to this headline">¶</a></h2>
@@ -345,6 +369,8 @@ implemented in Grumpy - go running Python -
 may be some mileage in using go instead of multiprocessing in some cases,
 algorithms, ionosphere, tsfresh chunks to go in extract_features rather than
 multiprocessing, scope for investigation.</p>
+<p>UPDATE 20180526 - Skyline and other parties have not been cooperative here.  So
+at least one thing on the roadmap was done.  I guess that is progress :)</p>
 </div>
 </div>
 
@@ -389,7 +415,7 @@ multiprocessing, scope for investigation.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Upgrading &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Upgrading &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../index.html"/>
         <link rel="next" title="Upgrading - Crucible to Ionosphere" href="crucible-to-ionosphere.html"/>
         <link rel="prev" title="Installation" href="../installation.html"/> 
 
@@ -97,6 +97,8 @@
 <li class="toctree-l2"><a class="reference internal" href="etsy-to-ionosphere.html">Upgrading - Etsy to Ionosphere</a></li>
 <li class="toctree-l2"><a class="reference internal" href="etsy-to-crucible.html">Upgrading - Etsy to Crucible</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#backup-your-redis">Backup your Redis!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#backup-your-database">Backup your database!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#upgrading-from-version-to-version">Upgrading from version to version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#upgrading-from-the-etsy-version-of-skyline">Upgrading from the Etsy version of Skyline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#do-a-new-install">Do a new install</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#things-to-note">Things to note</a><ul>
@@ -128,6 +130,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
@@ -209,6 +212,31 @@
 <h2>Backup your Redis!<a class="headerlink" href="#backup-your-redis" title="Permalink to this headline">¶</a></h2>
 <p>Do it.</p>
 </div>
+<div class="section" id="backup-your-database">
+<h2>Backup your database!<a class="headerlink" href="#backup-your-database" title="Permalink to this headline">¶</a></h2>
+<p>Do it.</p>
+</div>
+<div class="section" id="upgrading-from-version-to-version">
+<h2>Upgrading from version to version<a class="headerlink" href="#upgrading-from-version-to-version" title="Permalink to this headline">¶</a></h2>
+<p>All update procedures are documented per release in the relevant Releases page.
+Please ensure you read and carry out as appropriate the steps in each version
+update.  Some releases can skip through a few releases to go from v1.1.8 to
+v.1.1.10 and some releases cannot, you cannot jump from v1.1.x to v.1.2.2 you
+must go from v1.1.x to v1.2.0 and then v.1.2.2</p>
+<p>Although it may be painful going through each version upgrade, it informs you
+each time what has changed and been added.</p>
+<p>In almost all cases one should be able to craft a single SQL from each version
+that has one and diff your current <code class="docutils literal"><span class="pre">`settings.py`</span></code> with the new version
+<code class="docutils literal"><span class="pre">`settings.py`</span></code> and with a combination of stopping all Skyline services,
+backing up DB, applying single SQL and switching to the new Skyline version code
+and your new updated <code class="docutils literal"><span class="pre">`settings.py`</span></code> should be possible if the user does not
+wish to run through the version updates sequentially.  However other than this
+description, the steps and what SQL updates and additions and/or need to be
+applied is left up to the user to determine.  The user should still read each
+release page to ensure they are aware of if any changes are required to any of
+the components related to Skyline, e.g. to the Apache/reverse proxy config,
+Redis, Graphite, etc. or additions outside of Python and pip.</p>
+</div>
 <div class="section" id="upgrading-from-the-etsy-version-of-skyline">
 <h2>Upgrading from the Etsy version of Skyline<a class="headerlink" href="#upgrading-from-the-etsy-version-of-skyline" title="Permalink to this headline">¶</a></h2>
 <p>This section covers the steps involved in upgrading an existing Skyline
@@ -234,7 +262,9 @@ key changes relating to upgrading.</p>
 <h4>Directory structure changes<a class="headerlink" href="#directory-structure-changes" title="Permalink to this headline">¶</a></h4>
 <p>In order to bring Skyline in line with a more standard Python package
 structure the directory structure has had to changed to accommodate
-sphinx autodoc and the setuptools framework.</p>
+sphinx autodoc and the setuptools framework.  This will affect any configuration
+management paths for a templated settings.py and/or to path to the Skyline bin
+directory, etc.</p>
 </div>
 <div class="section" id="settings-py">
 <h4>settings.py<a class="headerlink" href="#settings-py" title="Permalink to this headline">¶</a></h4>
@@ -332,7 +362,7 @@ settings.py to see the additions and all the changes you need to make.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

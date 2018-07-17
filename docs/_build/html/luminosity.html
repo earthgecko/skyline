@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Luminosity &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Luminosity &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="next" title="Redis integration" href="redis-integration.html"/>
         <link rel="prev" title="tsfresh" href="tsfresh.html"/> 
 
@@ -107,12 +107,13 @@
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Luminosity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#luminosity-as-a-replacement-for-kale-oculus">Luminosity as a replacement for Kale Oculus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#differences-between-oculus-and-luminosity">Differences between Oculus and Luminosity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#luminosity-adds">Luminosity adds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#notable-luminosity-related-settings">Notable Luminosity related settings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -171,10 +172,26 @@
             
   <div class="section" id="luminosity">
 <h1>Luminosity<a class="headerlink" href="#luminosity" title="Permalink to this headline">¶</a></h1>
+<p>Requires - Panorama to be enabled and running.</p>
+<p>Luminosity takes the time series of an anomalous metric and then cross
+correlates the time series against all the other metrics time series to find and
+record metrics that are strongly correlated to the anomalous metric, using
+Linkedin&#8217;s Luminol library.</p>
+<p>This information can help in root cause analysis and gives the operator a view
+of other metrics, perhaps on different servers or in different namespaces that
+could be related to anomalous event.</p>
+<p>It handles metrics having a time lagged effect on other metrics is handled with
+time shifted cross correlations time shifted too.  So that if metric.a did
+something 120 seconds ago and metric.b become anomalous 120 seconds later, if
+there is correlation between the time shifted time series, these will be found
+as well and recorded with time shifted value e.g. -60 and a shifted_coefficient</p>
+<p>Cross correlations are only currently only viewable in Ionosphere on training_data
+and features profile pages, however you can query MySQL directly to report on
+any anomalies ad hoc until a full Luminosity webapp page in created.</p>
+<div class="section" id="luminosity-as-a-replacement-for-kale-oculus">
+<h2>Luminosity as a replacement for Kale Oculus<a class="headerlink" href="#luminosity-as-a-replacement-for-kale-oculus" title="Permalink to this headline">¶</a></h2>
 <p>Luminosity is the beginning of an attempt to implement a pure Python replacement
 for the Oculus anomaly correlation component of the Etsy Kale stack.</p>
-<p>Luminosity adds correlations back to Skyline.  Cross correlations to be
-correct.</p>
 <p>Oculus was not moved forward with Skyline in this version of Skyline for a
 number of reasons, those mainly being Ruby, Java and Elasticsearch.
 Luminosity is not about being better than Oculus, Oculus was very good, it is
@@ -184,6 +201,7 @@ Detection and Correlation library to add this near real time correlation back
 into Skyline.</p>
 <p>Luminosity is different to Oculus in a number of ways, however it does provide
 similar information.</p>
+</div>
 <div class="section" id="differences-between-oculus-and-luminosity">
 <h2>Differences between Oculus and Luminosity<a class="headerlink" href="#differences-between-oculus-and-luminosity" title="Permalink to this headline">¶</a></h2>
 <p>Oculus had a very large architectural footprint.
@@ -209,20 +227,9 @@ anomalies and their correlations.  This gives Skyline a near real time root
 cause analysis component and over time enables Skyline to determine and report
 the most strongly correlated metrics.</p>
 <p>luminol.correlate is based on <a class="reference external" href="http://paulbourke.net/miscellaneous/correlate/">http://paulbourke.net/miscellaneous/correlate/</a>
-and for the purposes of understanding the luminol.correlate, a pure
+and for the purposes of understanding the luminol.correlate, a pure Python
 implementation of the Paul Bourke method was implemented and verified with the
 results of the luminol.correlate.</p>
-</div>
-<div class="section" id="notable-luminosity-related-settings">
-<h2>Notable Luminosity related settings<a class="headerlink" href="#notable-luminosity-related-settings" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="skyline.html#settings.CORRELATE_ALERTS_ONLY" title="settings.CORRELATE_ALERTS_ONLY"><code class="xref py py-mod docutils literal"><span class="pre">settings.CORRELATE_ALERTS_ONLY</span></code></a></p>
-<p>By default this is set to <cite>True</cite> in settings.py which only run cross
-correlations on metrics with an alerter setting.  This reduces the number of
-correlations that are recorded in the database.  Non alerter metrics are still
-however cross correlated against when an anomaly triggers on a metric with an
-alert configured.</p>
-<p>If you want to run or are running multiple Skyline instances please see
-<a class="reference external" href="running-multiple-skylines.html">Running multiple Skylines</a></p>
 </div>
 </div>
 
@@ -267,7 +274,7 @@ alert configured.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

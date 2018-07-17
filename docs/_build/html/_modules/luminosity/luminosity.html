@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>luminosity.luminosity &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>luminosity.luminosity &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
@@ -235,6 +236,42 @@
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
+<div class="viewcode-block" id="PaulBourke"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.luminosity.PaulBourke">[docs]</a><span class="k">class</span> <span class="nc">PaulBourke</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # @added 20180526 - Branch #2270: luminosity</span>
+<span class="sd">    The PaulBourke class pays homage to Paul Bourke who originally described</span>
+<span class="sd">    the cross correlation method on which Linkedin&#39;s luminol.correlate library</span>
+<span class="sd">    is based upon, he described this in August 1996 and it is upon this which</span>
+<span class="sd">    Skyline Luminosity is also based.</span>
+
+<span class="sd">    So Skyline has moved from:</span>
+<span class="sd">    Shewhart&#39;s statistical process control circa 1924 tech</span>
+<span class="sd">    To tsfresh - circa 20161029 when it entered Skyline</span>
+<span class="sd">    Now to 1996(2015), although 1996 ideas can still be very, very useful and</span>
+<span class="sd">    work well.</span>
+
+<span class="sd">    Please do visit these following two URLs in order:</span>
+<span class="sd">    http://paulbourke.net/miscellaneous/correlate/thanks_mr_bourke_from_skyline_for  # this will 404 but hopefully he has something watching his 404 rate :)</span>
+<span class="sd">    http://paulbourke.net/miscellaneous/correlate/  # this will 200</span>
+
+<span class="sd">    This is all part of the adventures in Skyline.  If you enjoy this sort of</span>
+<span class="sd">    thing, then I posit to you that Sir Walter Munk is one of the least known</span>
+<span class="sd">    remarkable scientist of tthe current and previous millienia.</span>
+<span class="sd">    Born: October 19, 1917 (age 100 years)</span>
+<span class="sd">    His accomplishments abound, he is like Turing, Marconi, Berners-Lee and</span>
+<span class="sd">    Einstein rolled into Oceangraphy, but few have ever heard of him.</span>
+
+<span class="sd">    If we are giving kudos to Shewhart, tsfresh and Paul Bourke, we can slip</span>
+<span class="sd">    some Walther Munk in here too, although currently he nor his work has</span>
+<span class="sd">    anything to do with Skyline, however there are some ideas, not necessarily</span>
+<span class="sd">    desrcibed in the roadmap, that revolve a byproduct of monitoring surf</span>
+<span class="sd">    conditions via a webcams, which could be used for monitoring tide levels</span>
+<span class="sd">    too, which would be right up Dr Munk&#39;s alley.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
 <div class="viewcode-block" id="Luminosity"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.luminosity.Luminosity">[docs]</a><span class="k">class</span> <span class="nc">Luminosity</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Luminosity class which controls the luminosity thread and spawned</span>
@@ -255,7 +292,11 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Luminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
@@ -504,7 +545,11 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># Report app up</span>
@@ -760,7 +805,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

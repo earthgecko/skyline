@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Upgrading - Etsy to Ionosphere &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Upgrading - Etsy to Ionosphere &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../index.html"/>
         <link rel="up" title="Upgrading" href="index.html"/>
         <link rel="next" title="Upgrading - Etsy to Crucible" href="etsy-to-crucible.html"/>
         <link rel="prev" title="Upgrading - Crucible to Ionosphere" href="crucible-to-ionosphere.html"/> 
@@ -101,6 +101,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="etsy-to-crucible.html">Upgrading - Etsy to Crucible</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#backup-your-redis">Backup your Redis!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#backup-your-database">Backup your database!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#upgrading-from-version-to-version">Upgrading from version to version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="index.html#upgrading-from-the-etsy-version-of-skyline">Upgrading from the Etsy version of Skyline</a></li>
 </ul>
 </li>
@@ -119,6 +121,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
@@ -263,7 +266,7 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 <li>Look at implementing the other new features at your leisure</li>
 <li>Panorama is probably the quickest win if you opted to not install it</li>
 <li>Boundary, Mirage and Ionosphere will take a little assessment over time to see
-what metrics you want to configure them to monitor.  You cannot rush timeseries.</li>
+what metrics you want to configure them to monitor.  You cannot rush time series.</li>
 </ul>
 </div>
 </div>
@@ -309,7 +312,7 @@ what metrics you want to configure them to monitor.  You cannot rush timeseries.
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>Installation &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -117,6 +117,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -175,6 +176,7 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>This is going to take some time.</p>
 <div class="section" id="intended-audience">
 <h2>Intended audience<a class="headerlink" href="#intended-audience" title="Permalink to this headline">¶</a></h2>
 <p>Skyline is not really a <code class="docutils literal"><span class="pre">localhost</span></code> application, it needs lots of data, unless
@@ -187,23 +189,51 @@ and considerations relating to the following components:</p>
 <li>Graphite</li>
 <li>Redis</li>
 <li>MySQL</li>
-<li>Apache</li>
+<li>Apache (or nginx although there are no examples here)</li>
 <li>memcached</li>
 </ul>
-<p>This installation document is specifically related to the required installs and
-configurations of things that are directly related Skyline.  For notes regarding
-automation and configuration management see the section at the end of this page.</p>
+<p>However, these types of assumptions even if stated are not useful or helpful to
+someone not familiar with all the ins and outs of some required thing. This
+installation document is specifically related to the required installs and
+configurations of things that are directly related Skyline.  Although it cannot
+possibly cover all possible set ups or scenarios, it does describe
+recommendations in terms of configurations of the various components and how and
+where they should be run in relation to Skyline.  There are no cfengine, puppet,
+chef, ansible or docker patterns here.</p>
+<p>The documentation is aimed at installing Skyline securely by default.  It is
+possible to run Skyline very insecurely, however this documentation does not
+specify how to do that.  Both the set up and documentation are verbose.  Setting
+up Skyline takes a while.</p>
+<p>Skyline&#8217;s default settings and documentation are aimed to run behind a SSL
+terminated and authenticated reverse proxy and use Redis authentication.  This
+makes the installation process more tedious, but it means that all these
+inconvenient factors are not left as an after thought or added to some TODO list
+or issue when you decide after trying Skyline, &#8220;Yes! I want to Skyline, this is
+cool&#8221;.</p>
+<p>For notes regarding automation and configuration management see the section at
+the end of this page.</p>
 </div>
 <div class="section" id="what-the-components-do">
 <h2>What the components do<a class="headerlink" href="#what-the-components-do" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Graphite - sends metric data to Skyline Horizon via a pickle</li>
+<li>Graphite - sends metric data to Skyline Horizon via a pickle.  Graphite is a
+separate application that will probably be running on another server, although
+Graphite could run on the same server, in a production environment it would
+probably be a remote machine or container.  Graphite is not part of Skyline.</li>
 <li>Redis - stores mod:<cite>settings.FULL_DURATION</cite> seconds (usefully 24 hours worth)
-of timeseries data</li>
-<li>MySQL - stores data about anomalies and timeseries features fingerprints and
-for learning things that are not anomalous.</li>
-<li>Apache - serves the Skyline webapp via gunicorn and handles basic http auth</li>
-<li>memcached - caches Ionosphere MySQL data</li>
+of time series data.  Redis must run on the same host as Skyline.  It may be
+possible to run Redis in another container or VM that was on the same host,
+but this has not been tested.</li>
+<li>MySQL - stores data about anomalies and time series features fingerprints for
+learning things that are not anomalous.  MySQL ideally should run on the same
+host as Skyline or in another container or VM that was on the same host,
+but this has not been tested.</li>
+<li>Apache (or nginx) - serves the Skyline webapp via gunicorn and handles SSL
+termination and basic http auth.  Ideally should run on the same host as
+Skyline.</li>
+<li>memcached - caches Ionosphere MySQL data, must run on the same host as Skyline
+or perhaps in another container or VM that was on the same host, but this has
+not been tested.</li>
 </ul>
 <div class="section" id="sudo">
 <h3><code class="docutils literal"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h3>
@@ -222,16 +252,27 @@ environment, it does not lend itself to repeatability or a common known state.</
 <ul class="simple">
 <li>Create a python-2.7.14 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
 Python virtualenv</a></li>
-<li>Setup firewall rules to restrict access to the following:<ul>
-<li><a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_IP</span></code></a> - default is 127.0.0.1</li>
-<li><a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_PORT</span></code></a> - default 1500</li>
-<li>The IP address and port being used to reverse proxy the Webapp (if implementing) e.g. &lt;YOUR_SERVER_IP_ADDRESS&gt;:8080</li>
-<li>The IP address and port being used by MySQL (if implementing)</li>
-<li>The IP address and ports 2024 and 2025</li>
-<li>The IP address and port being used by Redis</li>
+<li>Please set up all the firewall rules to restrict access to the following
+<strong>before</strong> you continue to install the other components:<ul>
+<li>The IP address and port being used to reverse proxy the Webapp e.g.
+&lt;YOUR_SERVER_IP_ADDRESS&gt;:443, ensure that this is only accessible to
+specified IPs in iptables/ip6tables (further these addresses should also be
+added to the reverse proxy conf as <code class="docutils literal"><span class="pre">Allow</span> <span class="pre">from</span></code> defines when you create
+the reverse proxy conf file).</li>
+<li>The IP address and port being used by MySQL, if you are not binding MySQL to
+127.0.0.1 only, ensure that the MySQL port declared in
+<a class="reference internal" href="skyline.html#settings.PANORAMA_DBPORT" title="settings.PANORAMA_DBPORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_DBPORT</span></code></a> (default 3306) is only accessible to
+specified IPs in iptables/ip6tables</li>
+<li>Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
+default Graphite pickle ports)</li>
+<li>The IP address and port being used by Redis, which if you are not running
+multiple distributed Skyline instances should be 127.0.0.1</li>
+<li>Please ensure you handle all of these with iptables AND ip6tables (or the
+equivalent) before continuing.</li>
 </ul>
 </li>
 <li>Install Redis - see <a class="reference external" href="http://redis.io/">Redis.io</a></li>
+<li>Ensure that you review <a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a></li>
 <li>Ensure Redis has socket enabled <strong>with the following permissions</strong> in your
 redis.conf</li>
 </ul>
@@ -246,8 +287,14 @@ redis.conf</li>
 <a class="reference internal" href="skyline.html#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.REDIS_SOCKET_PATH</span></code></a> to this path</p>
 </div>
 <ul class="simple">
+<li>Ensure Redis has a long <code class="docutils literal"><span class="pre">requirepass</span></code> set in redis.conf</li>
+<li>Ensure Redis <code class="docutils literal"><span class="pre">bind</span></code> is set in redis.conf, consider specifically stating
+<code class="docutils literal"><span class="pre">bind</span> <span class="pre">127.0.0.1</span></code> or <code class="docutils literal"><span class="pre">bind</span> <span class="pre">127.0.0.1</span> <span class="pre">&lt;OTHER_IP_YOU_WANT_REDIS_TO_BIND_TO&gt;</span></code>
+if you are going to run multiple distributed  Skyline instances.</li>
 <li>Start Redis</li>
 <li>Install memcached and start memcached see <a class="reference external" href="https://memcached.org/">memcached.org</a></li>
+<li>Ensure that you start memcached only bound to 127.0.0.1 by passing the daemon
+the option <code class="docutils literal"><span class="pre">-l</span> <span class="pre">127.0.0.1</span></code>, Skyline only requires memcached locally.</li>
 <li>Make the required directories</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir /var/log/skyline
@@ -258,23 +305,28 @@ mkdir -p /opt/skyline/panorama/check
 mkdir -p /opt/skyline/mirage/check
 mkdir -p /opt/skyline/crucible/check
 mkdir -p /opt/skyline/crucible/data
+mkdir -p /opt/skyline/ionosphere
 mkdir /etc/skyline
 mkdir /tmp/skyline
 </pre></div>
 </div>
 <ul class="simple">
 <li>git clone Skyline (git should have been installed in the <a class="reference external" href="running-in-python-virtualenv.html">Running in Python
-virtualenv</a> section)</li>
+virtualenv</a> section) and it is
+recommended to then git checkout the commit reference of the latest stable
+release.</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p /opt/skyline/github
 <span class="nb">cd</span> /opt/skyline/github
 git clone https://github.com/earthgecko/skyline.git
+<span class="c1"># If you wish to switch to a specific commit or the latest release</span>
+<span class="c1">#cd /opt/skyline/github/skyline</span>
+<span class="c1">#git checkout &lt;COMMITREF&gt;</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li>Once again using the Python-2.7.14 virtualenv,  install the requirements using
-the virtualenv pip, this can take a long time, the pandas install takes quite
-a while.</li>
+the virtualenv pip, this can take some time.</li>
 </ul>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -295,30 +347,19 @@ that it is harder for you to err.</p>
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
 
-<span class="c1"># Install the mysql-connector-python package first on its own as due to it</span>
-<span class="c1"># having to be downloaded and installed from MySQL, if it is not installed</span>
-<span class="c1"># an install -r will fail as pip cannot find mysql-connector-python</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5<span class="o">=</span>6d42998cfec6e85b902d4ffa5a35ce86
-
-<span class="c1"># The MySQL download source can now be commented it out of requirements.txt</span>
-cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep -v <span class="s2">&quot;cdn.mysql.com/Downloads\|mysql-connector&quot;</span> &gt; /tmp/requirements.txt
-
-<span class="c1"># This can take lots and lots of minutes...</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /tmp/requirements.txt
-
-<span class="c1"># NOW wait at least 7 minutes (on a Linode 4 vCPU, 4GB RAM, SSD cloud node anyway)</span>
-<span class="c1"># and once completed, deactivate the virtualenv</span>
+<span class="c1"># This can take lots of minutes...</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/requirements.txt
 
 deactivate
 </pre></div>
 </div>
 <ul class="simple">
 <li>Copy the <code class="docutils literal"><span class="pre">skyline.conf</span></code> and edit the <code class="docutils literal"><span class="pre">USE_PYTHON</span></code> as appropriate to your
-setup if it is not using PATH
+set up if it is not using PATH
 <code class="docutils literal"><span class="pre">/opt/python_virtualenv/projects/skyline-py2714/bin/python2.7</span></code></li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>cp /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
-vi /etc/skyline/skyline.conf <span class="c1"># Set USE_PYTHON as appropriate to your setup</span>
+vi /etc/skyline/skyline.conf  <span class="c1"># Set USE_PYTHON as appropriate to your setup</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -328,9 +369,25 @@ reverse proxy.<ul>
 directory <code class="docutils literal"><span class="pre">/opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example</span></code>
 modify all the <code class="docutils literal"><span class="pre">&lt;YOUR_</span></code> variables as appropriate for you environment - see
 <a class="reference external" href="webapp.html#apache-and-gunicorn">Apache and gunicorn</a></li>
-<li>Add a user and password for HTTP authentication, e.g.</li>
+<li>Create a SSL certificate and update the SSL configurations in the Skyline
+Apache config (or your reverse proxy)</li>
 </ul>
 </li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">SSLCertificateFile</span> <span class="s2">&quot;&lt;YOUR_PATH_TO_YOUR_CERTIFICATE_FILE&gt;&quot;</span>
+<span class="n">SSLCertificateKeyFile</span> <span class="s2">&quot;&lt;YOUR_PATH_TO_YOUR_KEY_FILE&gt;&quot;</span>
+<span class="n">SSLCertificateChainFile</span> <span class="s2">&quot;&lt;YOUR_PATH_TO_YOUR_CHAIN_FILE_IF_YOU_HAVE_ONE_OTHERWISE_COMMENT_THIS_LINE_OUT&gt;&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Update your Apache (or reverse proxy config) with the X-Forwarded-Proto header.</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">RequestHeader</span> <span class="nb">set</span> <span class="n">X</span><span class="o">-</span><span class="n">Forwarded</span><span class="o">-</span><span class="n">Proto</span> <span class="s2">&quot;https&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Add a user and password for HTTP authentication, the user does not have to
+be admin it can be anything, e.g.</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>htpasswd -c /etc/httpd/conf.d/.skyline_htpasswd admin
 </pre></div>
@@ -347,49 +404,64 @@ password that you provide in <cite>settings.py</cite> for
 <a class="reference external" href="panorama.html">Panorama</a>) and Ionosphere.</li>
 <li>Edit the <code class="docutils literal"><span class="pre">settings.py</span></code> file and enter your appropriate settings,
 specifically ensure you set the following variables to the correct
-setting for your environment, see the documentation links and docstrings in
-the <cite>settings.py</cite> file for the full descriptions of each variable:<ul>
+settings for your environment, see the documentation links and docstrings in
+the <cite>settings.py</cite> file for the full descriptions of each variable.  Below are
+the variables you must set:<ul>
+<li><a class="reference internal" href="skyline.html#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.REDIS_SOCKET_PATH</span></code></a> if different from <code class="docutils literal"><span class="pre">`/tmp/redis.sock`</span></code></li>
+<li><a class="reference internal" href="skyline.html#settings.REDIS_PASSWORD" title="settings.REDIS_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.REDIS_PASSWORD</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_HOST</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.GRAPHITE_PROTOCOL" title="settings.GRAPHITE_PROTOCOL"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_PROTOCOL</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.GRAPHITE_PORT" title="settings.GRAPHITE_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_PORT</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.CARBON_PORT" title="settings.CARBON_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.CARBON_PORT</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.SERVER_METRICS_NAME" title="settings.SERVER_METRICS_NAME"><code class="xref py py-mod docutils literal"><span class="pre">settings.SERVER_METRICS_NAME</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><code class="xref py py-mod docutils literal"><span class="pre">settings.CANARY_METRIC</span></code></a></li>
-<li><a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> - remember to only add a few key metrics to begin
+with.  If you want Skyline to start working almost immediately AND you
+have Graphite populated with more than 7 days of data, you can enable and
+start Mirage too and declare the SECOND_ORDER_RESOLUTION_HOURS in each
+ALERTS tuple as 168.</li>
+<li><a class="reference internal" href="skyline.html#settings.MIRAGE_ENABLE_ALERTS" title="settings.MIRAGE_ENABLE_ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_ENABLE_ALERTS</span></code></a> set this to <code class="docutils literal"><span class="pre">`True`</span></code> if you want to
+have Mirage running as described above.</li>
 <li><a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.HIPCHAT_OPTS" title="settings.HIPCHAT_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.HIPCHAT_OPTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.PAGERDUTY_OPTS</span></code></a> if to be
 used,  if so ensure that <a class="reference internal" href="skyline.html#settings.HIPCHAT_ENABLED" title="settings.HIPCHAT_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.HIPCHAT_ENABLED</span></code></a> and
 <a class="reference internal" href="skyline.html#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.PAGERDUTY_ENABLED</span></code></a> are set to <code class="docutils literal"><span class="pre">True</span></code></li>
+<li><a class="reference internal" href="skyline.html#settings.HORIZON_IP" title="settings.HORIZON_IP"><code class="xref py py-mod docutils literal"><span class="pre">settings.HORIZON_IP</span></code></a></li>
 <li>If you are deploying with a Skyline MySQL Panorama DB straight away ensure
 that <a class="reference internal" href="skyline.html#settings.PANORAMA_ENABLED" title="settings.PANORAMA_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_ENABLED</span></code></a> is set to <code class="docutils literal"><span class="pre">True</span></code> and set all the
-other Panorama related variables as appropriate.</li>
+other Panorama related variables as appropriate.  Enabling Panorama from the
+start is RECOMMENDED as it is integral to Ionosphere and Luminosity.</li>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.SKYLINE_URL" title="settings.SKYLINE_URL"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKYLINE_URL</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.SERVER_PYTZ_TIMEZONE" title="settings.SERVER_PYTZ_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.SERVER_PYTZ_TIMEZONE</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.MEMCACHE_ENABLED" title="settings.MEMCACHE_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.MEMCACHE_ENABLED</span></code></a></li>
 </ul>
 </li>
-<li>For later implementing and working with Ionosphere and setting up learning (see
-<a class="reference external" href="ionosphere.html">Ionosphere</a>) after you have the other Skyline apps up and
-running.</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /opt/skyline/github/skyline/skyline
 vi settings.py
 </pre></div>
 </div>
 <ul class="simple">
+<li>For later implementing and working with Ionosphere and setting up learning (see
+<a class="reference external" href="ionosphere.html">Ionosphere</a>) after you have the other Skyline apps up and
+running.</li>
 <li>If you are <strong>upgrading</strong>, at this point return to the
 <a class="reference external" href="upgrading/index.html">Upgrading</a> page.</li>
 <li>Before you test Skyline by seeding Redis with some test data, ensure
-that you have configured the firewall/iptables with the appropriate restricted
-access.</li>
+that you have configured the firewall/iptables/ip6tables with the appropriate
+restricted access.</li>
 <li>Start the Skyline apps</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/horizon.d start
 /opt/skyline/github/skyline/bin/analyzer.d start
 /opt/skyline/github/skyline/bin/webapp.d start
-<span class="c1"># And Panorama if you have setup in the DB at this stage</span>
+<span class="c1"># And Panorama if you have set up in the DB at this stage</span>
 /opt/skyline/github/skyline/bin/panorama.d start
 /opt/skyline/github/skyline/bin/ionosphere.d start
+/opt/skyline/github/skyline/bin/luminosity.d start
 </pre></div>
 </div>
 <ul class="simple">
@@ -436,23 +508,25 @@ deactivate
 <ul class="simple">
 <li>Check the Skyline Webapp frontend on the Skyline machine&#8217;s IP address and the
 appropriate port depending whether you are serving it proxied or direct, e.g
-<code class="docutils literal"><span class="pre">http://YOUR_SKYLINE_IP:8080</span></code> or <code class="docutils literal"><span class="pre">http://YOUR_SKYLINE_IP:1500</span></code>.  The
-<code class="docutils literal"><span class="pre">horizon.test.udp</span></code> metric anomaly should be in the dashboard after the
-seed_data.py is complete.  If Panorama is set up you will be able to see that
-in the /panorama view and in the <span class="red">re</span><span class="brow">brow</span> view as well.</li>
-<li>Check the log files again to ensure things are running and there are
-no errors.</li>
+<code class="docutils literal"><span class="pre">https://YOUR_SKYLINE_IP</span></code>.  The <code class="docutils literal"><span class="pre">horizon.test.udp</span></code> metric anomaly should
+be in the dashboard after the seed_data.py is complete.  If Panorama is set
+up you will be able to see that in the /panorama view and in the
+<span class="red">re</span><span class="brow">brow</span> view as well.</li>
 <li>This will ensure that the Horizon service is properly set up and can
 receive data. For real data, you have some options relating to
 getting a data pickle from Graphite see <a class="reference external" href="getting-data-into-skyline.html">Getting data into
 Skyline</a></li>
+<li>Check the log files again to ensure things are running and there are
+no errors.</li>
 <li>Once you have your <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> configured to test them see
 <a class="reference external" href="alert-testing.html">Alert testing</a></li>
-<li>If you have opted to not setup Panorama, later see setup
+<li>Now you can configure your Graphite to pickle data to Skyline see
+<a class="reference external" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li>If you have opted to not set up Panorama, later see set up
 <a class="reference external" href="panorama.html">Panorama</a></li>
-<li>For Mirage setup see <a class="reference external" href="mirage.html">Mirage</a></li>
-<li>For Boundary setup see <a class="reference external" href="boundary.html">Boundary</a></li>
-<li>For Ionosphere setup see <a class="reference external" href="ionosphere.html">Ionosphere</a></li>
+<li>For Mirage set up see <a class="reference external" href="mirage.html">Mirage</a></li>
+<li>For Boundary set up see <a class="reference external" href="boundary.html">Boundary</a></li>
+<li>For Ionosphere set up see <a class="reference external" href="ionosphere.html">Ionosphere</a></li>
 </ul>
 </div>
 <div class="section" id="automation-and-configuration-management-notes">
@@ -474,11 +548,6 @@ directly in configuration management and not use pip to <code class="docutils li
 <code class="docutils literal"><span class="pre">requirements.txt</span></code>, however remember the the virtualenv pip needs to be used
 and pandas needs a LONG timeout value, which not all package classes provide,
 if you use an exec of any sort, ensure the pandas install has a long timeout.</li>
-<li>The mysql-connector-python package is pulled directly from MySQL as no pip
-version exists.  Therefore during the build process it is recommended to pip
-install the MySQL source package first and then the line out comment in
-<code class="docutils literal"><span class="pre">requirements.txt</span></code>.  The <code class="docutils literal"><span class="pre">mysql-connector-python==1.2.3</span></code> line then ensures
-the dependency is fulfilled.</li>
 </ol>
 </div>
 </div>
@@ -524,7 +593,7 @@ the dependency is fulfilled.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

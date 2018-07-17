@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.layers &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>ionosphere.layers &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
@@ -219,14 +220,21 @@
 <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_layers&#39;</span>
 
 
-<div class="viewcode-block" id="run_layer_algorithms"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.layers.run_layer_algorithms">[docs]</a><span class="k">def</span> <span class="nf">run_layer_algorithms</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">layers_id</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">):</span>
-
+<div class="viewcode-block" id="run_layer_algorithms"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.layers.run_layer_algorithms">[docs]</a><span class="k">def</span> <span class="nf">run_layer_algorithms</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">layers_id</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">layers_count</span><span class="p">,</span> <span class="n">layers_checked</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Called by :class:`~skyline.skyline.Ionosphere.spawn_layers_process` to</span>
+<span class="sd">    Called by :class:`~skyline.skyline.Ionosphere.spin_process` to</span>
 <span class="sd">    evaluate anomalies against a custom layers boundary algorithm.</span>
 
 <span class="sd">    :param metric: the metric base_name</span>
+<span class="sd">    :param layers_id: the layer id</span>
+<span class="sd">    :param timeseries: the time series list</span>
+<span class="sd">    :param layers_count: the number of layers for the metric</span>
+<span class="sd">    :param layers_checked: the number of layers that have been checked</span>
 <span class="sd">    :type metric: str</span>
+<span class="sd">    :type layer_id: int</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :type layers_count: int</span>
+<span class="sd">    :type layers_checked: int</span>
 <span class="sd">    :return: True or False</span>
 <span class="sd">    :rtype: boolean</span>
 
@@ -640,7 +648,10 @@
                 <span class="n">metric_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">current_metric_id</span><span class="p">),</span>
                 <span class="n">anomaly_timestamp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span>
                 <span class="n">anomalous_datapoint</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">last_datapoint</span><span class="p">),</span>
-                <span class="n">full_duration</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">))</span>
+                <span class="n">full_duration</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">),</span>
+                <span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
+                <span class="c1">#                  Branch #2270: luminosity</span>
+                <span class="n">layers_count</span><span class="o">=</span><span class="n">layers_count</span><span class="p">,</span> <span class="n">layers_checked</span><span class="o">=</span><span class="n">layers_checked</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
             <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">new_matched_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">inserted_primary_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -694,7 +705,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -28,7 +28,7 @@ See:
 skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Assign a Graphite single time series metric csv file to tsfresh to process and
+Assign a Graphite single tiemseries metric csv file to tsfresh to process and
 calculate the features for.
 
 :param path_to_your_graphite_csv: the full path and filename to your Graphite
@@ -68,4 +68,4 @@ This will output 2 files:
 Your time series features.
 
 .. warning:: Please note that if your time series are recorded in a daylight
-    savings time zone, this has not been tested the DST changes.
+    savings time zone, this has not been tested with DST changes.

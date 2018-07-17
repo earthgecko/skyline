@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.luminosity package &mdash; Skyline 1.2.0-stable documentation</title>
+  <title>skyline.luminosity package &mdash; Skyline 1.2.2-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.0-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.mirage package" href="skyline.mirage.html"/>
         <link rel="prev" title="skyline.ionosphere package" href="skyline.ionosphere.html"/> 
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
@@ -221,6 +222,36 @@
 </div>
 <div class="section" id="module-luminosity.luminosity">
 <span id="skyline-luminosity-luminosity-module"></span><h2>skyline.luminosity.luminosity module<a class="headerlink" href="#module-luminosity.luminosity" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="luminosity.luminosity.PaulBourke">
+<em class="property">class </em><code class="descname">PaulBourke</code><a class="reference internal" href="_modules/luminosity/luminosity.html#PaulBourke"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.luminosity.PaulBourke" title="Permalink to this definition">¶</a></dt>
+<dd><p># &#64;added 20180526 - Branch #2270: luminosity
+The PaulBourke class pays homage to Paul Bourke who originally described
+the cross correlation method on which Linkedin&#8217;s luminol.correlate library
+is based upon, he described this in August 1996 and it is upon this which
+Skyline Luminosity is also based.</p>
+<p>So Skyline has moved from:
+Shewhart&#8217;s statistical process control circa 1924 tech
+To tsfresh - circa 20161029 when it entered Skyline
+Now to 1996(2015), although 1996 ideas can still be very, very useful and
+work well.</p>
+<p>Please do visit these following two URLs in order:
+<a class="reference external" href="http://paulbourke.net/miscellaneous/correlate/thanks_mr_bourke_from_skyline_for">http://paulbourke.net/miscellaneous/correlate/thanks_mr_bourke_from_skyline_for</a>  # this will 404 but hopefully he has something watching his 404 rate :)
+<a class="reference external" href="http://paulbourke.net/miscellaneous/correlate/">http://paulbourke.net/miscellaneous/correlate/</a>  # this will 200</p>
+<p>This is all part of the adventures in Skyline.  If you enjoy this sort of
+thing, then I posit to you that Sir Walter Munk is one of the least known
+remarkable scientist of tthe current and previous millienia.
+Born: October 19, 1917 (age 100 years)
+His accomplishments abound, he is like Turing, Marconi, Berners-Lee and
+Einstein rolled into Oceangraphy, but few have ever heard of him.</p>
+<p>If we are giving kudos to Shewhart, tsfresh and Paul Bourke, we can slip
+some Walther Munk in here too, although currently he nor his work has
+anything to do with Skyline, however there are some ideas, not necessarily
+desrcibed in the roadmap, that revolve a byproduct of monitoring surf
+conditions via a webcams, which could be used for monitoring tide levels
+too, which would be right up Dr Munk&#8217;s alley.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="luminosity.luminosity.Luminosity">
 <em class="property">class </em><code class="descname">Luminosity</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/luminosity/luminosity.html#Luminosity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#luminosity.luminosity.Luminosity" title="Permalink to this definition">¶</a></dt>
@@ -417,7 +448,7 @@ anomaly page</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.0-stable',
+            VERSION:'1.2.2-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
