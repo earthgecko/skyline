@@ -10,7 +10,7 @@ The requirements are:
 - Linux (and probably any environment that supports Python virtualenv
   and bash)
 - virtualenv
-- Python-2.7.12 (running in an isolated vitualenv)
+- Python-2.7.14 (running in an isolated vitualenv)
 - Redis
 - MySQL or mariadb [optional - required for Panorama]
 - A Graphite implementation sending data would help :)
