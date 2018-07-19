@@ -1378,51 +1378,51 @@ def ionosphere_search(default_query, search_query):
         except:
             logger.error('error :: limit is not an integer - %s' % str(limit))
 
-        metrics = []
-        try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.id != 0)
-            result = connection.execute(stmt)
-            for row in result:
-                metric_id = int(row['id'])
-                metric_name = str(row['metric'])
-                metrics.append([metric_id, metric_name])
-            connection.close()
-        except:
-            trace = traceback.format_exc()
-            logger.error('%s' % trace)
-            fail_msg = 'error :: could not determine metrics from metrics table'
-            logger.error('%s' % fail_msg)
-            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
-            # Added missing disposal and raise
-            if engine:
-                engine_disposal(engine)
-            raise
+    metrics = []
+    try:
+        connection = engine.connect()
+        stmt = select([metrics_table]).where(metrics_table.c.id != 0)
+        result = connection.execute(stmt)
+        for row in result:
+            metric_id = int(row['id'])
+            metric_name = str(row['metric'])
+            metrics.append([metric_id, metric_name])
+        connection.close()
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: could not determine metrics from metrics table'
+        logger.error('%s' % fail_msg)
+        # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+        # Added missing disposal and raise
+        if engine:
+            engine_disposal(engine)
+        raise
 
-        if get_metric_profiles:
-            metrics_id = None
-            for metric_obj in metrics:
-                if metrics_id:
-                    break
-                if metric == str(metric_obj[1]):
-                    metrics_id = str(metric_obj[0])
-            new_query_string = query_string.replace('REPLACE_WITH_METRIC_ID', metrics_id)
-            query_string = new_query_string
-            logger.debug('debug :: query_string - %s' % query_string)
+    if get_metric_profiles:
+        metrics_id = None
+        for metric_obj in metrics:
+            if metrics_id:
+                break
+            if metric == str(metric_obj[1]):
+                metrics_id = str(metric_obj[0])
+        new_query_string = query_string.replace('REPLACE_WITH_METRIC_ID', metrics_id)
+        query_string = new_query_string
+        logger.debug('debug :: query_string - %s' % query_string)
 
-        ionosphere_table = None
-        try:
-            ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
-            logger.info(fail_msg)
-        except:
-            trace = traceback.format_exc()
-            logger.error('%s' % trace)
-            fail_msg = 'error :: failed to get ionosphere_table meta for options'
-            logger.error('%s' % fail_msg)
-            if engine:
-                engine_disposal(engine)
-            raise
-        logger.info('%s :: ionosphere_table OK' % function_str)
+    ionosphere_table = None
+    try:
+        ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: failed to get ionosphere_table meta for options'
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        raise
+    logger.info('%s :: ionosphere_table OK' % function_str)
 
     all_fps = []
     try:
@@ -1475,6 +1475,7 @@ def ionosphere_search(default_query, search_query):
                 # @added 20170402 - Feature #2000: Ionosphere - validated
                 fp_validated = int(row['validated'])
                 all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated])
+                logger.info('%s :: %s feature profiles found' % (function_str, str(len(all_fps))))
             except:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
@@ -1510,6 +1511,7 @@ def ionosphere_search(default_query, search_query):
                             break
                     features_profiles_count.append([fp_count, fp_metric_id, str(fp_metric)])
                 connection.close()
+                logger.info('%s :: features_profiles_count %s' % (function_str, str(len(features_profiles_count))))
             except:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)

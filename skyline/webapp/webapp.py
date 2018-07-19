@@ -1072,7 +1072,9 @@ def ionosphere():
 
     if fp_search_req and request_args_len > 1:
         if count_by_metric:
-            features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, fail_msg, trace = ionosphere_search(False, True)
+            # @modified 20180717 - Task #2446: Optimize Ionosphere
+            # Added missing search_success variable
+            features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, search_success, fail_msg, trace = ionosphere_search(False, True)
             return render_template(
                 'ionosphere.html', fp_search=fp_search_req,
                 fp_search_results=fp_search_req,

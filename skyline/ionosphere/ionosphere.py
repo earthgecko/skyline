@@ -1823,6 +1823,12 @@ class Ionosphere(Thread):
                         except:
                             upper_range_not_same = True
                         if max_fp_value and max_anomalous_value and lower_range_similar and upper_range_not_same:
+                            # @added 20180717 - Task #2446: Optimize Ionosphere
+                            #                   Feature #2404: Ionosphere - fluid approximation
+                            # On low values such as 1 and 2, the range_tolerance
+                            # should be adjusted to account for the very small
+                            # range. TODO
+
                             lower_max_fp_value = int(max_fp_value - (max_fp_value * range_tolerance))
                             upper_max_fp_value = int(max_fp_value + (max_fp_value * range_tolerance))
                             if int(max_anomalous_value) in range(lower_max_fp_value, upper_max_fp_value):
