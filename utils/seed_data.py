@@ -125,9 +125,12 @@ def seed():
 
         print 'info :: Congratulations! The data made it in. The Horizon pipeline is working.'
         print 'info :: If your analyzer and webapp were started you should be able to see a triggered anomaly for horizon.test.udp'
+        # @modified 20180715 - Task #2446: Optimize Ionosphere
         # print ('info :: at http://%s:%s' % (str(settings.WEBAPP_IP), str(settings.WEBAPP_PORT)))
-        print ('info :: at %s' % str(SKYLINE_URL))
-
+        # print ('info :: at %s' % str(SKYLINE_URL))
+        # @modified 20180719 - Bug #2460: seed_data.py SKYLINE_URL
+        #                      seed_data.py SKYLINE_URL #60
+        print ('info :: at %s' % str(settings.SKYLINE_URL))
     except NoDataException:
         print 'error :: Woops, looks like the data did not make it into Horizon. Try again?'
         print 'info :: please check your settings.py and ensure that the Horizon and Redis settings are correct.'
