@@ -116,7 +116,6 @@ class Luminosity(Thread):
         Initialize Luminosity
 
         Create the :obj:`redis_conn` a Redis client object
-        Create the :obj:`self.anomalous_metrics` list
         Create the :obj:`correlations` list
         Create the :obj:`mysql_conn` MySQLConnection object
         Create the :obj:`memcache_client` a constructor that does not make a
@@ -133,7 +132,6 @@ class Luminosity(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.anomalous_metrics = Manager().list()
         self.correlations = Manager().list()
         self.mysql_conn = mysql.connector.connect(**config)
         if settings.MEMCACHE_ENABLED:
@@ -509,14 +507,6 @@ class Luminosity(Thread):
                 # Flush metrics to Graphite
                 if not redis_sent_graphite_metrics:
                     try:
-                        total_anomalies = str(len(self.anomalous_metrics))
-                    except:
-                        total_anomalies = '0'
-                    logger.info('total_anomalies    :: %s' % total_anomalies)
-                    send_metric_name = '%s.total_anomalies' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, total_anomalies)
-
-                    try:
                         correlations = str(len(self.correlations))
                     except:
                         correlations = '0'
@@ -532,7 +522,6 @@ class Luminosity(Thread):
                         logger.error('error :: failed to update Redis key - %s up' % cache_key)
 
                     # Reset lists
-                    self.anomalous_metrics[:] = []
                     self.correlations[:] = []
 
                 if process_anomaly_id:
