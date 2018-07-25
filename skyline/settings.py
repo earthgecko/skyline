@@ -235,10 +235,8 @@ SYSLOG_ENABLED = True
 """
 :var SYSLOG_ENABLED: enables Skyline apps to submit anomalous metric
     details to syslog.  Being set to True makes syslog a kind of alerter, like a
-    SMTP alert. also results in all anomalies being
-    recorded in the database by Panorama, this is probably desired.  If you
-    find this is making syslog too noise, set to False, but you will lose
-    non alerter
+    SMTP alert. It also results in all anomalies being recorded in the database
+    by Panorama and this is the desired default.
 :vartype SYSLOG_ENABLED: boolean
 """
 
@@ -256,7 +254,7 @@ PAGERDUTY_ENABLED = False
 
 SLACK_ENABLED = False
 """
-:var SLACK_ENABLED: Enables the Slack alerter
+:var SLACK_ENABLED: Enables the Slack alerter - NOT YET IMPLEMENTED
 :vartype SLACK_ENABLED: boolean
 """
 
@@ -1724,6 +1722,9 @@ OTHER_SKYLINE_REDIS_INSTANCES = []
     there are multiple Skyline instances each with their own Redis.
 :vartype OTHER_SKYLINE_REDIS_INSTANCES: list
 
+THIS IS TO BE DEPRECATED IN v.1.2.5, there is no longer a requirement to access
+Redis remotely between Skyline instances, this has been replaced by a api
+method which uses the REMOTE_SKYLINE_INSTANCES settings below as of v1.2.4.
 For example, the IP or FQDN as a string and the port as an int and the Redis
 password as a str OR if there is no password the boolean None:
 OTHER_SKYLINE_REDIS_INSTANCES = [['192.168.1.10', 6379, 'this_is_the_redis_password'], ['192.168.1.15', 6379, None]]
@@ -1744,6 +1745,25 @@ ALTERNATIVE_SKYLINE_URLS = []
 
 For example (note NO trailing slash):
 ALTERNATIVE_SKYLINE_URLS = ['http://skyline-na.example.com:8080','http://skyline-eu.example.com']
+"""
+
+REMOTE_SKYLINE_INSTANCES = []
+"""
+:var REMOTE_SKYLINE_INSTANCES: This a nested list of any remote instances
+    that Skyline should query for correlation time series this is ONLY
+    applicable if there are multiple Skyline instances each with their own
+    Redis data.  This is for Skyline Luminosity to query other Skyline instances
+    via the luminosity_remote_data API get the relevant time series fragments,
+    by default the previous 12 minutes, for all the metrics on the other Skyline
+    instance/s (gizpped) in order to run correlations in all metrics in the
+    population.
+:vartype REMOTE_SKYLINE_INSTANCES: list
+
+For example, the IP or FQDN, the username and password as a strings str:
+REMOTE_SKYLINE_INSTANCES = [
+    ['http://skyline-na.example.com:8080','remote_WEBAPP_AUTH_USER','remote_WEBAPP_AUTH_USER_PASSWORD'],
+    ['http://skyline-eu.example.com', 'another_remote_WEBAPP_AUTH_USER','another_WEBAPP_AUTH_USER_PASSWORD']]
+
 """
 
 CORRELATE_ALERTS_ONLY = True
