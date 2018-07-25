@@ -32,7 +32,7 @@ logging methodology and so that the user understands conceptually what is being
 logged and what is not being logged.
 
 In terms of Analyzer if errors are encountered in any algorithms, we sample the
-errors.  This achieves a balance between reporting errors useful and not using
+errors.  This achieves a balance between reporting errors usefully and not using
 lots of I/O and disk space if something goes wrong.  Skyline has the potential
 to do a runaway log, but not reporting errors is not useful when you are trying
 to pinpoint what is wrong.
@@ -48,10 +48,14 @@ Each Skyline app has its own log.  These logs are important from a Skyline
 perspective in terms of monitoring the Skyline processes.
 See [Monitoring Skyline]((monitoring-skyline.html))
 
+The logs are also very important in terms of being able to verify all the steps
+and results in the analysis pipeline.
+
 It is recommended to NOT stream the Skyline app logs through any logging
 pipeline e.g. rsyslog, logstash, elasticsearch, etc.  The syslog alert trigger
 was added for this purpose.  If you wish to parse and rate anomalies do so via
-syslog (see below).
+syslog (see below).  Or look at the skyline Graphite metrics or set some alert
+tuples on some of the skyline. Graphite namespace metrics.
 
 Log rotation is handled by the Python TimedRotatingFileHandler and by default
 keeps the 5 last logs:
@@ -64,25 +68,13 @@ keeps the 5 last logs:
             backupCount=5)
 ```
 
-The Skyline app logs and the rotation is relatively cheap on disk space even on
-production machines handling 10s of 1000s of metrics each.
+The Skyline app logs and the rotation is relatively cheap on disk space.
 
 ```
-===============================================================
-HOST:skyline-prod-4-96g-luk1 EXITCODE:0 STDOUT:
-===============================================================
-38M     /var/log/skyline
-===============================================================
-===============================================================
-HOST:skyline-prod-3-40g-ruk2 EXITCODE:0 STDOUT:
-===============================================================
-22M     /var/log/skyline
-===============================================================
-===============================================================
-HOST:skyline-prod-2-96g-luk1 EXITCODE:0 STDOUT:
-===============================================================
-52M     /var/log/skyline
-===============================================================
+141M    /var/log/skyline
+248M    /var/log/skyline
+139M    /var/log/skyline
+330M    /var/log/skyline
 ```
 
 ## Skyline app log preservation
@@ -104,8 +96,24 @@ result in the log being pushed multiple times due to the following scenario:
 In terms of rsyslog pipelining this would result in the log being fully
 submitted again on every restart.
 
+It is possible that a fragment of the source of that the original Skyline
+logging implementation was made from and it is possible that all this is due to
+a method change from the source, it tested OK, but has not been implemented as
+logging is working and needs to work.  So it is horribly fixed, but works and
+testing something else new under all possible conditions is difficult.  So it
+reamins this way for the forseeable future.
+
 ## syslog
 
 With this in mind a syslog alert trigger was added to Skyline apps to handle the
 logging the details of anomalous time series to syslog,  groking the syslog for
-Skyline logs and rates etc is the way to go.
+Skyline logs and rates etc is the way to go or just look as the skyline Graphite
+namespace metrics.
+
+A special mention of the settings.py variable
+
+```SYSLOG_ENABLED = True```
+
+This essentially now a hard requirement for Panorama and Luminosity now.
+If this special alerter is disabled a large chunk of Skyline's new functionality
+is turned off.

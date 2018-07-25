@@ -1015,7 +1015,14 @@ def get_correlations(current_skyline_app, anomaly_id):
             metric_id = row['metric_id']
             metric_name = None
             if metric_id:
-                metric_name = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+                # @modified 20180723 - Feature #2470: Correlations Graphite graph links
+                #                      Branch #2270: luminosity
+                # Return the metric_name as a string not a list, so that the
+                # metric_name string can be used to build links to Graphite
+                # graphs via webapp.py and correlations.html template.
+                # metric_name = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+                metric_name_list = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+                metric_name = str(metric_name_list[0])
             coefficient = row['coefficient']
             shifted = row['shifted']
             shifted_coefficient = row['shifted_coefficient']

@@ -101,7 +101,7 @@ How to update from v1.2.1
 
 .. code-block:: bash
 
-    mv /opt/skyline/github/skyline /opt/skyline/github/skyline/skyline.v1.2.1-luminosity-beta
+    mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.1-luminosity-beta
     mv "$SKYLINE_PATH" /opt/skyline/github/skyline
 
 - Install new requirements e.g.

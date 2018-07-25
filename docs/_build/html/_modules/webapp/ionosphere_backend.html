@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.ionosphere_backend &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>webapp.ionosphere_backend &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -1545,51 +1545,51 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: limit is not an integer - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
 
-        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-                <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-                <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">])</span>
-                <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">])</span>
-            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
-            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not determine metrics from metrics table&#39;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
-            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
-            <span class="c1"># Added missing disposal and raise</span>
-            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
-                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-            <span class="k">raise</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">])</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">])</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not determine metrics from metrics table&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+        <span class="c1"># Added missing disposal and raise</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
 
-        <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
-            <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">for</span> <span class="n">metric_obj</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">metrics_id</span><span class="p">:</span>
-                    <span class="k">break</span>
-                <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_obj</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-                    <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">new_query_string</span> <span class="o">=</span> <span class="n">query_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;REPLACE_WITH_METRIC_ID&#39;</span><span class="p">,</span> <span class="n">metrics_id</span><span class="p">)</span>
-            <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: query_string - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
+        <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">metric_obj</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">metrics_id</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_obj</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_obj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">new_query_string</span> <span class="o">=</span> <span class="n">query_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;REPLACE_WITH_METRIC_ID&#39;</span><span class="p">,</span> <span class="n">metrics_id</span><span class="p">)</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: query_string - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
-        <span class="n">ionosphere_table</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">ionosphere_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
-            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get ionosphere_table meta for options&#39;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
-                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
-            <span class="k">raise</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: ionosphere_table OK&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+    <span class="n">ionosphere_table</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get ionosphere_table meta for options&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: ionosphere_table OK&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
 
     <span class="n">all_fps</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1642,6 +1642,7 @@
                 <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
                 <span class="n">fp_validated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">])</span>
                 <span class="n">all_fps</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">fp_metric_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_metric</span><span class="p">),</span> <span class="n">full_duration</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">tsfresh_version</span><span class="p">,</span> <span class="n">calc_time</span><span class="p">,</span> <span class="n">features_count</span><span class="p">,</span> <span class="n">features_sum</span><span class="p">,</span> <span class="n">deleted</span><span class="p">,</span> <span class="n">fp_matched_count</span><span class="p">,</span> <span class="n">human_date</span><span class="p">,</span> <span class="n">created_timestamp</span><span class="p">,</span> <span class="n">fp_checked_count</span><span class="p">,</span> <span class="n">checked_human_date</span><span class="p">,</span> <span class="n">fp_parent_id</span><span class="p">,</span> <span class="n">fp_generation</span><span class="p">,</span> <span class="n">fp_validated</span><span class="p">])</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> feature profiles found&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_fps</span><span class="p">))))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -1677,6 +1678,7 @@
                             <span class="k">break</span>
                     <span class="n">features_profiles_count</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_count</span><span class="p">,</span> <span class="n">fp_metric_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_metric</span><span class="p">)])</span>
                 <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features_profiles_count </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features_profiles_count</span><span class="p">))))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -4250,7 +4252,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

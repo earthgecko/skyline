@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>skyline package &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -963,10 +963,8 @@ imported and means that not all alerter related modules in
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><strong>SYSLOG_ENABLED</strong></a> (<em>boolean</em>) &#8211; enables Skyline apps to submit anomalous metric
 details to syslog.  Being set to True makes syslog a kind of alerter, like a
-SMTP alert. also results in all anomalies being
-recorded in the database by Panorama, this is probably desired.  If you
-find this is making syslog too noise, set to False, but you will lose
-non alerter</td>
+SMTP alert. It also results in all anomalies being recorded in the database
+by Panorama and this is the desired default.</td>
 </tr>
 </tbody>
 </table>
@@ -1005,7 +1003,7 @@ non alerter</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Slack alerter</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Slack alerter - NOT YET IMPLEMENTED</td>
 </tr>
 </tbody>
 </table>
@@ -3070,7 +3068,10 @@ there are multiple Skyline instances each with their own Redis.</td>
 </tr>
 </tbody>
 </table>
-<p>For example, the IP or FQDN as a string and the port as an int and the Redis
+<p>THIS IS TO BE DEPRECATED IN v.1.2.5, there is no longer a requirement to access
+Redis remotely between Skyline instances, this has been replaced by a api
+method which uses the REMOTE_SKYLINE_INSTANCES settings below as of v1.2.4.
+For example, the IP or FQDN as a string and the port as an int and the Redis
 password as a str OR if there is no password the boolean None:
 OTHER_SKYLINE_REDIS_INSTANCES = [[&#8216;192.168.1.10&#8217;, 6379, &#8216;this_is_the_redis_password&#8217;], [&#8216;192.168.1.15&#8217;, 6379, None]]</p>
 <div class="admonition note">
@@ -3097,6 +3098,31 @@ with their own Redis.</td>
 </table>
 <p>For example (note NO trailing slash):
 ALTERNATIVE_SKYLINE_URLS = [&#8216;<a class="reference external" href="http://skyline-na.example.com:8080','http://skyline-eu.example.com">http://skyline-na.example.com:8080&#8217;,&#8217;http://skyline-eu.example.com</a>&#8216;]</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.REMOTE_SKYLINE_INSTANCES">
+<code class="descname">REMOTE_SKYLINE_INSTANCES</code><em class="property"> = []</em><a class="headerlink" href="#settings.REMOTE_SKYLINE_INSTANCES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.REMOTE_SKYLINE_INSTANCES" title="settings.REMOTE_SKYLINE_INSTANCES"><strong>REMOTE_SKYLINE_INSTANCES</strong></a> (<em>list</em>) &#8211; This a nested list of any remote instances
+that Skyline should query for correlation time series this is ONLY
+applicable if there are multiple Skyline instances each with their own
+Redis data.  This is for Skyline Luminosity to query other Skyline instances
+via the luminosity_remote_data API get the relevant time series fragments,
+by default the previous 12 minutes, for all the metrics on the other Skyline
+instance/s (gizpped) in order to run correlations in all metrics in the
+population.</td>
+</tr>
+</tbody>
+</table>
+<p>For example, the IP or FQDN, the username and password as a strings str:
+REMOTE_SKYLINE_INSTANCES = [</p>
+<blockquote>
+<div>[&#8216;<a class="reference external" href="http://skyline-na.example.com:8080','remote_WEBAPP_AUTH_USER','remote_WEBAPP_AUTH_USER_PASSWORD">http://skyline-na.example.com:8080&#8217;,&#8217;remote_WEBAPP_AUTH_USER&#8217;,&#8217;remote_WEBAPP_AUTH_USER_PASSWORD</a>&#8216;],
+[&#8216;<a class="reference external" href="http://skyline-eu.example.com">http://skyline-eu.example.com</a>&#8216;, &#8216;another_remote_WEBAPP_AUTH_USER&#8217;,&#8217;another_WEBAPP_AUTH_USER_PASSWORD&#8217;]]</div></blockquote>
 </dd></dl>
 
 <dl class="data">
@@ -3586,7 +3612,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

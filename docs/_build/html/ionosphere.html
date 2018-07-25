@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Ionosphere &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>Ionosphere &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
         <link rel="next" title="tsfresh" href="tsfresh.html"/>
         <link rel="prev" title="Webapp" href="webapp.html"/> 
 
@@ -410,6 +410,29 @@ to see the relevant Analyzer <a class="reference internal" href="skyline.html#se
 the fuller duration of the metric&#8217;s <code class="docutils literal"><span class="pre">learn_full_duration</span></code>.</p>
 <p>You can teach Ionosphere badly, but to unteach it is just a click of the Disable
 features profile button.</p>
+<p>Skyline learning is not perfect.  There are certain metrics that learning seems
+not to work as well on as other metrics, 5min and 15min load_average metrics
+fall into this category.  Do not go overboard on learning do it slowly and
+incrementally.  All LEARNT features profiles have the ability to be validated,
+however this is not a hard requirement, unvalidated features profiles will still
+be used in analysis, the validated flag is currently simply there to give the
+operation a view of what LEARNT features profiles have not been assessed to
+determine their accuracy.  Skyline will also LEARN from an unvalidated features
+profile.  Therefore the operator needs to review and validate or disable
+features profiles every so often, this can be achieved when reviewing and
+training on not anomalous patterns is done, whenever training data for a metric
+is assessed it is easy to review all features profiles for that metric during
+this phase by using the <span class="skyblue">Existing ::</span> <span class="red">features profiles page link</span>
+on the training page.</p>
+<p>To begin with try and start with only creating features profiles and only
+implementing learning occasionally when you are certain that a metric has a
+very &#8220;normal&#8221; pattern over 30 days.  Initially just creating features profiles
+and not trying to learn on all of them, will give you a good idea of what
+Skyline Ionosphere is doing when you look at the Ionosphere matches pages and
+review matches.  Having a few learn features profiles as well, will also give
+you a good idea of what is being done when Skyline is learning, when you look
+at the Ionosphere features profiles page and reviewing the <span class="red">learnt</span>
+features profiles on the <span class="skyblue">Search ::</span> <span class="red">features profiles</span> page.</p>
 </div>
 </div>
 <div class="section" id="how-ionosphere-works-a-simple-overview">
@@ -468,7 +491,7 @@ any anomalies found for the metric to Ionosphere instead of just alerting.</li>
 features with <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> for the 3sigma anomalous time series and then compares
 the common features sums with those of previously recorded features profiles.
 If the two values are less than
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a>,
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR</span></code></a>,
 Ionosphere will deem the time series as not anomalous and update the related
 training data as MATCHED and update the features profile matched count in the
 database.</li>
@@ -479,7 +502,7 @@ series from the original features profile time series (which is stored in the
 database) and the 3sigma anomalous time series.  It creates a features profile
 for each Min-Max scaled (standardized) time series and then compares the
 features sums and determines whether the difference is below the
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR</span></code></a> and
 will deem it as not anomalous and update the related training data as MATCHED
 and update the features profile matched count in the database.</li>
 <li>If Ionosphere does <strong>not</strong> find a features profile match, it analyses the time
@@ -939,7 +962,7 @@ profile page data on-demand.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -191,8 +191,8 @@
 
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">select</span>
 
-<span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
-<span class="c1">#                  Branch #2270: luminosity</span>
+<span class="c1"># @added 20180715 - Task #2446: Optimize Ionosphere</span>
+<span class="c1">#                   Branch #2270: luminosity</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">desc</span>
 
 <span class="c1"># @added 20161213 - Branch #1790: test_tsfresh</span>
@@ -1990,6 +1990,12 @@
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">upper_range_not_same</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">if</span> <span class="n">max_fp_value</span> <span class="ow">and</span> <span class="n">max_anomalous_value</span> <span class="ow">and</span> <span class="n">lower_range_similar</span> <span class="ow">and</span> <span class="n">upper_range_not_same</span><span class="p">:</span>
+                            <span class="c1"># @added 20180717 - Task #2446: Optimize Ionosphere</span>
+                            <span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
+                            <span class="c1"># On low values such as 1 and 2, the range_tolerance</span>
+                            <span class="c1"># should be adjusted to account for the very small</span>
+                            <span class="c1"># range. TODO</span>
+
                             <span class="n">lower_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">-</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
                             <span class="n">upper_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">+</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
                             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lower_max_fp_value</span><span class="p">,</span> <span class="n">upper_max_fp_value</span><span class="p">):</span>
@@ -3229,7 +3235,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

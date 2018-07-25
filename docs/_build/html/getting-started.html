@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>Getting started &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
         <link rel="next" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/>
         <link rel="prev" title="Requirements" href="requirements.html"/> 
 
@@ -95,7 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#enabling-metrics-incrementally">Enabling metrics incrementally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enabling-skyline-modules-incrementally">Enabling Skyline modules incrementally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#start-with-horizon-analyzer-webapp-luminosity-and-panorama">Start with Horizon, Analyzer, Webapp, Luminosity and Panorama</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#add-mirage-parameters-to-the-alerts">Add Mirage parameters to the <code class="docutils literal"><span class="pre">ALERTS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-mirage-parameters-to-settings-alerts">Add Mirage parameters to <code class="docutils literal"><span class="pre">settings.ALERTS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-boundary-settings">Add Boundary settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#train-ionosphere">Train Ionosphere</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ignore-crucible">Ignore Crucible</a></li>
@@ -251,8 +251,8 @@ settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
 bring them online too.  However do consider enabling Ionosphere from the outset
 as well.</p>
 </div>
-<div class="section" id="add-mirage-parameters-to-the-alerts">
-<h2>Add Mirage parameters to the <code class="docutils literal"><span class="pre">ALERTS</span></code><a class="headerlink" href="#add-mirage-parameters-to-the-alerts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="add-mirage-parameters-to-settings-alerts">
+<h2>Add Mirage parameters to <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a><a class="headerlink" href="#add-mirage-parameters-to-settings-alerts" title="Permalink to this headline">¶</a></h2>
 <p>Once you have an overview of metrics that have seasonality that are greater
 than the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>, you can add their Mirage parameters to
 the <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuples and start the Mirage daemon.</p>
@@ -270,10 +270,10 @@ is NOT anomalous.</p>
 </div>
 <div class="section" id="ignore-crucible">
 <h2>Ignore Crucible<a class="headerlink" href="#ignore-crucible" title="Permalink to this headline">¶</a></h2>
-<p>EXPERIMENTAL</p>
+<p>Still EXPERIMENTAL - for the time being.</p>
 <p>By default Crucible is enabled in the <code class="docutils literal"><span class="pre">settings.py</span></code> however, for other Skyline
 modules to send Crucible data, Crucible has to be enabled via the appropriate
-<code class="docutils literal"><span class="pre">settings.py</span></code> variable for each module.</p>
+<code class="docutils literal"><span class="pre">settings.py</span></code> variable for each module, Analyzer and Mirage, etc.</p>
 <p>Crucible has 2 roles:</p>
 <ol class="arabic simple">
 <li>Store resources (time series json and graph pngs) for triggered anomalies -
@@ -329,7 +329,7 @@ time series of any metric directly through the UI.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

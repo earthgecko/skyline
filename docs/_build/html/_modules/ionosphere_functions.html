@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -1182,7 +1182,14 @@
             <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
             <span class="n">metric_name</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
-                <span class="n">metric_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics_list_name</span> <span class="k">for</span> <span class="n">metrics_list_id</span><span class="p">,</span> <span class="n">metrics_list_name</span> <span class="ow">in</span> <span class="n">metrics_list</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_list_id</span><span class="p">)]</span>
+                <span class="c1"># @modified 20180723 - Feature #2470: Correlations Graphite graph links</span>
+                <span class="c1">#                      Branch #2270: luminosity</span>
+                <span class="c1"># Return the metric_name as a string not a list, so that the</span>
+                <span class="c1"># metric_name string can be used to build links to Graphite</span>
+                <span class="c1"># graphs via webapp.py and correlations.html template.</span>
+                <span class="c1"># metric_name = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]</span>
+                <span class="n">metric_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics_list_name</span> <span class="k">for</span> <span class="n">metrics_list_id</span><span class="p">,</span> <span class="n">metrics_list_name</span> <span class="ow">in</span> <span class="n">metrics_list</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_list_id</span><span class="p">)]</span>
+                <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">coefficient</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;coefficient&#39;</span><span class="p">]</span>
             <span class="n">shifted</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;shifted&#39;</span><span class="p">]</span>
             <span class="n">shifted_coefficient</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;shifted_coefficient&#39;</span><span class="p">]</span>
@@ -1236,7 +1243,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
