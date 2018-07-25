@@ -89,8 +89,8 @@ settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
 bring them online too.  However do consider enabling Ionosphere from the outset
 as well.
 
-Add Mirage parameters to the ``ALERTS``
----------------------------------------
+Add Mirage parameters to :mod:`settings.ALERTS`
+-----------------------------------------------
 
 Once you have an overview of metrics that have seasonality that are greater
 than the :mod:`settings.FULL_DURATION`, you can add their Mirage parameters to
@@ -112,11 +112,11 @@ is NOT anomalous.
 Ignore Crucible
 ---------------
 
-EXPERIMENTAL
+Still EXPERIMENTAL - for the time being.
 
 By default Crucible is enabled in the ``settings.py`` however, for other Skyline
 modules to send Crucible data, Crucible has to be enabled via the appropriate
-``settings.py`` variable for each module.
+``settings.py`` variable for each module, Analyzer and Mirage, etc.
 
 Crucible has 2 roles:
 

@@ -1,0 +1,18 @@
+==============================
+1.2.3 - the luminosity branch
+==============================
+
+v1.2.3-luminosity - July 19, 2018
+
+Minor bug fixes release and you can safely upgrade to v1.2.4 directly from
+v1.2.2 skipping the release of v.1.2.3
+
+Changes from v1.2.2
+-------------------
+
+- Added missing settings. prefix to seed_data.py SKYLINE_URL (fixes #60) refs
+  2460
+- fix ionosphere_search, added missing search_success to broken
+  ionosphere_search (2446, 2448)
+- Made a TODO comment regarding range_tolerance on low range minmax values
+  comparison

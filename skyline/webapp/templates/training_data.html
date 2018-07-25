@@ -501,7 +501,12 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 		      <tr>
 		        <td>D layer <code>[required]</code></td>
 		        <td>if value <select name="d_condition">
-              <option value="==">==</option>
+<!-- @modified 20180820 - Task #2446: Optimize Ionosphere
+#                         Feature #2464: luminosity_remote_data
+# Changed from > to less intiutive but normal more accurate >= which is mostly
+# used in this layer.
+-->
+              <option value=">=">>=</option>
             {% for item in value_condition_list %}
                   <option value="{{ item }}">{{ item }}</option>
             {% endfor %}
@@ -535,7 +540,12 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 		      <tr>
 		        <td>E layer <code>[required]</code></td>
 		        <td>if value <select name="e_condition">
-              <option value="<"><</option>
+<!-- @modified 20180820 - Task #2446: Optimize Ionosphere
+#                         Feature #2464: luminosity_remote_data
+# Changed from == to less intiutive but normal more accurate <= which is mostly
+# used in this layer.
+-->
+              <option value="<="><=</option>
             {% for item in value_condition_list %}
                   <option value="{{ item }}">{{ item }}</option>
             {% endfor %}

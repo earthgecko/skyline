@@ -136,16 +136,39 @@ Skyline fairly hard to tame, in terms of how useful it is and tuning the noise
 is difficult.  Tuning the noise to make it constantly useful and not just noisy,
 removes the "without the need to configure a model/thresholds" element somewhat.
 
+It has been generally accepted now that a basic 3-sigma anomaly detection
+implementation is not generally useful in the operations and machine metrics
+space.
+
+> I still remember taking Skyline and applying it to one of our customer's metrics, and turning 100,000 metrics into 10,000 anomalies. It just created more noise from the noise.
+
+This is still true of Skyline today, it will still detect the 10000 anomalies
+and it should.
+
 So why continue developing Skyline?
 
-The first way to make Skyline MUCH better than the manner it was implemented and
-framed by Etsy, is to **NOT** try and use it to anomaly detect on 1000s of
-metrics in the first place.  Using Skyline as a scapel rather than a sword.
+To try and make it better and more useful.  3-sigma anomaly detection works,
+but it works too well.  Therefore there is an opportunity to see if it is
+possible to augment 3-sigma methods with additional analyses with new and
+different techniques, including the use of historic data in real time, to be
+more useful and provide additional insight into related time series data.  One
+of the key paradigm shifts that is perhaps needed is to change the mindset that
+anomaly detection and alerting are synonymous with each other or related in any
+way, which seems to be general public opinion.  Skyline does anomaly detection,
+anomaly deflection, training and learning, and alerting is simply a byproduct of
+this analysis pipeline, if you want to enable it.
 
-Within in this paradigm, Skyline has been much improved in many ways and is
-very useful at doing anomaly detection on your KEY metrics.  The ongoing
-development of Skyline has been focused on improving Skyline in the following
-ways:
+The first way to make Skyline MUCH better than the manner it was implemented and
+framed by Etsy, is to **NOT** try and use it to alert on 1000s of metrics in the
+first place.  Using Skyline as a scapel for alerting and a sword for anomaly
+detecting, rather than using it as a sword for anomaly detecting AND alerting.
+
+Within in this paradigm, Skyline is still essentially 3-sigma based, however
+now being augmented with additional analysis and methods, Skyline has been
+much improved in many ways and is very useful at doing anomaly detection,
+recording anomalies, correlating and alerting and training on your KEY metrics.
+The ongoing development of Skyline has been focused on improving Skyline in the
+following ways:
 
 - Improving the anomaly detection methodologies used in the 3-sigma context.
 - Extending Skyline's 3-sigma methodology to enable the operator and Skyline to
@@ -177,6 +200,14 @@ learning, Skyline is FAST.  Processing and analysing 1000s and 1000s of
 constantly changing time series, every minute of every day and it can do it in
 multiple resolutions, on a fairly low end commodity server.
 
+Is Skyline better than other things at anomaly detection?  Unknown.  The
+development of Skyline is not focused on making it be better than other things
+or the best, it is focused on trying to make Skyline better than it was and
+currently is.  Unfortunately Skyline no longer fits the NAB benchmark method as
+it's methods operate exclusively in the real time arena on real time data,
+historic data and trained patternsand this could not be bolted into a NAB test
+and would violate the NAB benchmark requirements.
+
 The new look of Skyline apps
 ----------------------------
 
@@ -198,9 +229,9 @@ various modes of operation that are modular and self contained, so that only the
 desired apps need to be enabled, although the stack is now much more useful with
 them all running.  This modular nature also isolated the apps from one another
 in terms of operation, meaning an error or failure in one does not necessarily
-the others.
+affect others.
 
-Skyline can now be feed/query and analyse time series on an adhoc basis, on the
+Skyline can now be feed/query and analyse time series on an ad hoc basis, on the
 fly.  This means Skyline can now be used to analyse and process static data too,
 it is no longer just a machine/app metric fed system, if anyone wanted to use
 it to analyse historic data.

@@ -10,8 +10,16 @@ from flask import request
 # import mysql.connector
 # from mysql.connector import errorcode
 
+# @added 20180720 - Feature #2464: luminosity_remote_data
+# Added redis and msgpack
+from redis import StrictRedis
+from msgpack import Unpacker
+
 import settings
-from skyline_functions import mysql_select
+from skyline_functions import (
+    mysql_select,
+    # @added 20180720 - Feature #2464: luminosity_remote_data
+    nonNegativeDerivative, in_list, is_derivative_metric)
 
 import skyline_version
 skyline_version = skyline_version.__absolute_version__
@@ -44,6 +52,13 @@ try:
 except:
     logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings')
     ENABLE_WEBAPP_DEBUG = False
+
+# @added 20180720 - Feature #2464: luminosity_remote_data
+# Added REDIS_CONN
+if settings.REDIS_PASSWORD:
+    REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+else:
+    REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
 
 def panorama_request():
@@ -434,3 +449,110 @@ def get_list(thing):
         logger.info('things: %s' % str(things))
 
     return things
+
+
+# @added 20180720 - Feature #2464: luminosity_remote_data
+def luminosity_remote_data(anomaly_timestamp):
+    """
+    Gets all the unique_metrics from Redis and then mgets Redis data for all
+    metrics.  The data is then preprocessed for the remote Skyline luminosity
+    instance and only the relevant fragments of the time series are
+    returned.  This return is then gzipped by the Flask Webapp response to
+    ensure the minimum about of bandwidth is used.
+
+    :param anomaly_timestamp: the anomaly timestamp
+    :type anomaly_timestamp: int
+    :return: list
+    :rtype: list
+
+    """
+
+    message = 'luminosity_remote_data returned'
+    success = False
+    luminosity_data = []
+    logger.info('luminosity_remote_data :: determining unique_metrics')
+    unique_metrics = []
+    # If you modify the values of 61 or 600 here, it must be modified in the
+    # luminosity_remote_data function in
+    # skyline/luminosity/process_correlations.py as well
+    from_timestamp = int(anomaly_timestamp) - 600
+    until_timestamp = int(anomaly_timestamp) + 61
+
+    try:
+        unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+    except Exception as e:
+        logger.error('error :: %s' % str(e))
+        logger.error('error :: luminosity_remote_data :: could not determine unique_metrics from Redis set')
+    if not unique_metrics:
+        message = 'error :: luminosity_remote_data :: could not determine unique_metrics from Redis set'
+        return luminosity_data, success, message
+    logger.info('luminosity_remote_data :: %s unique_metrics' % str(len(unique_metrics)))
+
+    # assigned metrics
+    assigned_min = 0
+    assigned_max = len(unique_metrics)
+    assigned_keys = range(assigned_min, assigned_max)
+
+    # Compile assigned metrics
+    assigned_metrics = [unique_metrics[index] for index in assigned_keys]
+    # Check if this process is unnecessary
+    if len(assigned_metrics) == 0:
+        message = 'error :: luminosity_remote_data :: assigned_metrics length is 0'
+        logger.error(message)
+        return luminosity_data, success, message
+
+    # Multi get series
+    raw_assigned_failed = True
+    try:
+        raw_assigned = REDIS_CONN.mget(assigned_metrics)
+        raw_assigned_failed = False
+    except:
+        logger.info(traceback.format_exc())
+        message = 'error :: luminosity_remote_data :: failed to mget raw_assigned'
+        logger.error(message)
+        return luminosity_data, success, message
+    if raw_assigned_failed:
+        message = 'error :: luminosity_remote_data :: failed to mget raw_assigned'
+        logger.error(message)
+        return luminosity_data, success, message
+
+    # Distill timeseries strings into lists
+    for i, metric_name in enumerate(assigned_metrics):
+        timeseries = []
+        try:
+            raw_series = raw_assigned[i]
+            unpacker = Unpacker(use_list=False)
+            unpacker.feed(raw_series)
+            timeseries = list(unpacker)
+        except:
+            timeseries = []
+
+        if not timeseries:
+            continue
+
+        # Convert the time series if this is a known_derivative_metric
+        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        known_derivative_metric = is_derivative_metric('webapp', base_name)
+        if known_derivative_metric:
+            try:
+                derivative_timeseries = nonNegativeDerivative(timeseries)
+                timeseries = derivative_timeseries
+            except:
+                logger.error('error :: nonNegativeDerivative failed')
+
+        correlate_ts = []
+        for ts, value in timeseries:
+            if int(ts) < from_timestamp:
+                continue
+            if int(ts) <= anomaly_timestamp:
+                correlate_ts.append((int(ts), value))
+            if int(ts) > (anomaly_timestamp + until_timestamp):
+                break
+        if not correlate_ts:
+            continue
+        metric_data = [str(metric_name), correlate_ts]
+        luminosity_data.append(metric_data)
+
+    logger.info('luminosity_remote_data :: %s valid metric time series data preprocessed for the remote request' % str(len(luminosity_data)))
+
+    return luminosity_data, success, message

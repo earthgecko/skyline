@@ -17,6 +17,17 @@
 
   {% if correlations != False %}
 	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">cross correlations ::</span></span></span> {{ correlations|length }} (listed strongest 1.0000 to weakest 0.0)</h4>
+<!-- # @added 20180723 - Feature #2470: Correlations Graphite graph links
+#                        Branch #2270: luminosity
+# Added Graphite graph links to Correlations block
+-->
+	  <div class="alert alert-warning">
+      These are the correlations from the entire metric population that fall within settings.LUMINOL_CROSS_CORRELATION_THRESHOLD,
+      they are not necessarily all <strong>contextually related</strong>, but the <strong>contextually related</strong>
+      correlations are listed here if there are any.  These are simply the <strong>numeric</strong> correlations it is currently
+      up to the operator to review them.  As it is assumed that the operator may know which metrics are likely to correlate
+      with this anomaly on {{ for_metric }}, until such a time as Skyline can, something on the roadmap.
+	  </div>
 		  <table class="table table-hover">
 		    <thead>
 		      <tr>
@@ -27,10 +38,15 @@
 		      </tr>
 		    </thead>
 		    <tbody>
-    {% for correlation_item in correlations %}
+    {% for correlation_item in correlations_with_graph_links %}
 		      <tr>
-		        <td>{{ correlation_item[0] }}</td>
-		        <td>{{ correlation_item[1] }}</td>
+<!-- # @modified 20180723 - Feature #2470: Correlations Graphite graph links
+#                           Branch #2270: luminosity
+# Added Graphite graph links to the Correlations block in training_data and
+# features_profile pages
+		        <td>{{ correlation_item[0] }}</td>-->
+		        <td><a target='_blank' href="{{ correlation_item[4] }}">{{ correlation_item[0] }}</a></td>
+ 		        <td>{{ correlation_item[1] }}</td>
 		        <td>{{ correlation_item[2] }}</td>
 		        <td>{{ correlation_item[3] }}</td>
 		      </tr>
