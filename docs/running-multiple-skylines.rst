@@ -17,23 +17,21 @@ instances.
 
 The following settings pertain to running multiple Skyline instances:
 
-- :mod:`settings.OTHER_SKYLINE_REDIS_INSTANCES`
 - :mod:`settings.ALTERNATIVE_SKYLINE_URLS`
+- :mod:`settings.REMOTE_SKYLINE_INSTANCES`
 
-Up until the introduction of Luminosity, Skyline's Redis requirement was
-localhost only, it was bound to 127.0.0.1 and was accessed by the Skyline apps
-via socket only, apart from :red:`re`:brow:`brow` which connected on localhost.
-If Skyline is run on multiple instances, Luminosity now adds a requirement for
-Redis to be accessed remotely in order for Luminosity to cross correlate all
-metrics.  This requires additional configuration and set up steps to properly
-secure the Redis instances.
+With the introduction of Luminosity a requirement for Skyline to pull the time
+series data from remote Skyline instances was added to allow for cross
+correlation of all the metrics in the population.  Skyline does this via a api
+endpoint and preprocesses the time series data for Luminosity on the remote
+Skyline instance and returns only the fragments (gzipped) of time series
+required for analysis, by default the previous 12 minutes, to minimise bandwidth
+and ensure maintain performance.
 
-Skyline's preferred method of handling remote connections to Redis is via a
-SSL tunnel using stunnel.  Although Redis recommends spiped, stunnel performance
-is much better and stunnel is easier to implement as there are distro packages
-for stunnel.
+Webapp UI
+---------
 
-Setting up stunnel
-------------------
-
-docs TDB at some point
+Please note that not all the functionality in the Webapp UI is compatible or
+multiple instance aware.  However where any "not in Redis" UI errors are found,
+accessing the Skyine Webapp UI on which the metric resides in Redis will resolve
+the issue.

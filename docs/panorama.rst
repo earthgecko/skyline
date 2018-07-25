@@ -12,6 +12,9 @@ at :mod:`settings.PANORAMA_EXPIRY_TIME`, the default is 900 seconds.  Although
 this may result in a lot of entries in the anomalies DB table, it is useful for
 helping with root cause analysis.
 
+New records are used to trigger further analysis of the metric population in
+Luminosity.
+
 The :mod:`settings.PANORAMA_CHECK_MAX_AGE` ensures that Panorama only processes
 checks that are not older than this value.  This mitigates against Panorama
 stampeding against the MySQL database, if either Panorama or MySQL were stopped

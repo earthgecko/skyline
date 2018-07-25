@@ -97,7 +97,10 @@ Steps
   - Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
     default Graphite pickle ports)
   - The IP address and port being used by Redis, which if you are not running
-    multiple distributed Skyline instances should be 127.0.0.1
+    multiple distributed Skyline instances should be 127.0.0.1, even if you are
+    running multiple distributed Skyline instances this can and still should be
+    127.0.0.1 as Skyline makes an API endpoint available to remote Skyline
+    instances for any required remote Redis data retrieval and preprocessing.
   - Please ensure you handle all of these with iptables AND ip6tables (or the
     equivalent) before continuing.
 
@@ -266,6 +269,17 @@ Steps
 
     cd /opt/skyline/github/skyline/skyline
     vi settings.py
+
+.. note:: a special settings variable that needs mentioning is the alerter
+  :mod:`settings.SYSLOG_ENABLED`.  This variable by default is ```True``` and
+  in this mode Skyline sends all anomalies to syslog and Panorama to record ALL
+  anomalies to the database not just anomalies for metrics that have a
+  :mod:`settings.ALERTS` tuple defined.  However this is the desired default
+  state.  This setting basically enables the anomaly detection on everything
+  with 3-sigma and builds the anomalies database, it is not noisy.  At this
+  point in your implementation the distinction between alerts and general
+  Skyline anomaly detection and constructing an anomalies data set must once
+  again be pointed out.
 
 - For later implementing and working with Ionosphere and setting up learning (see
   `Ionosphere <ionosphere.html>`__) after you have the other Skyline apps up and
