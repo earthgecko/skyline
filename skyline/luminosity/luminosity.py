@@ -133,6 +133,9 @@ class Luminosity(Thread):
         self.parent_pid = parent_pid
         self.current_pid = getpid()
         self.correlations = Manager().list()
+        # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
+        self.metrics_checked_for_correlation = Manager().list()
+        self.runtimes = Manager().list()
         self.mysql_conn = mysql.connector.connect(**config)
         if settings.MEMCACHE_ENABLED:
             self.memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
@@ -252,7 +255,9 @@ class Luminosity(Thread):
                 logger.error('error :: failed to close memcache_client')
 
         try:
-            base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations = process_correlations(i, anomaly_id)
+            # @modified 20180720 - Task #2462: Implement useful metrics for Luminosity
+            # Added runtime
+            base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime = process_correlations(i, anomaly_id)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: processing correlations')
@@ -261,8 +266,16 @@ class Luminosity(Thread):
         # @added 20180414 - Bug #2352: Luminosity no metrics MySQL error
         # Do not query with an empty string
         if not correlated_metrics:
-            logger.info('no correlations found for %s anomaly id %s' % (base_name, str(anomaly_id)))
+            logger.info('no correlations found for %s anomaly id %s' % (
+                base_name, str(anomaly_id)))
             return False
+        else:
+            logger.info('%s correlations found for %s anomaly id %s' % (
+                str(len(correlated_metrics)), base_name, str(anomaly_id)))
+
+        # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
+        self.metrics_checked_for_correlation.append(metrics_checked_for_correlation)
+        self.runtimes.append(runtime)
 
         metrics_str = ''
         for metric_name in correlated_metrics:
@@ -284,13 +297,21 @@ class Luminosity(Thread):
         correlated_metrics_list = []
         for metric_id, metric in results:
             correlated_metrics_list.append([int(metric_id), str(metric)])
+        logger.info('number of metric ids determined from the metrics tables - %s' % str(len(correlated_metrics_list)))
+
+        correlations_shifted_too_far = 0
         if sorted_correlations:
+            logger.info('number of correlations shifted too far - %s' % str(correlations_shifted_too_far))
+            logger.info('sorted_correlations :: %s' % str(sorted_correlations))
             luminosity_correlations = []
             for metric, coefficient, shifted, shifted_coefficient in sorted_correlations:
                 for metric_id, metric_name in correlated_metrics_list:
                     if metric == metric_name:
                         if shifted < 2:
                             luminosity_correlations.append([anomaly_id, int(metric_id), coefficient, shifted, shifted_coefficient])
+                        else:
+                            correlations_shifted_too_far += 1
+            logger.info('number of correlations shifted too far - %s' % str(correlations_shifted_too_far))
             first_value_not_added = True
             values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES '
 
@@ -298,9 +319,14 @@ class Luminosity(Thread):
             # Only try and insert if there are values present
             values_present = False
 
+            number_of_correlations_in_insert = 0
             for anomaly_id, metric_id, coefficient, shifted, shifted_coefficient in luminosity_correlations:
                 if coefficient:
                     values_present = True
+                # @added 20170720 - Task #2462: Implement useful metrics for Luminosity
+                # Populate the self.correlations list to send a count to Graphite
+                    self.correlations.append(coefficient)
+                    number_of_correlations_in_insert += 1
                 ins_values = '(%s,%s,%s,%s,%s)' % (str(anomaly_id),
                                                    str(metric_id),
                                                    str(round(coefficient, 5)),
@@ -325,6 +351,10 @@ class Luminosity(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: MySQL insert - %s' % str(values_string))
+        if luminosity_populated:
+            logger.info('%s correlations added to database for %s anomaly id %s' % (
+                str(number_of_correlations_in_insert), base_name, str(anomaly_id)))
+            logger.info('values_string :: %s' % str(values_string))
 
         return luminosity_populated
 
@@ -514,6 +544,27 @@ class Luminosity(Thread):
                     send_metric_name = '%s.correlations' % skyline_app_graphite_namespace
                     send_graphite_metric(skyline_app, send_metric_name, correlations)
 
+                    # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
+                    #                   Branch #2270: luminosity
+                    # runtime metric to monitor the time it takes to process
+                    # correlations
+                    try:
+                        if len(self.runtimes) > 1:
+                            avg_runtime = sum(self.runtimes) / len(self.runtimes)
+                        else:
+                            avg_runtime = sum(self.runtimes)
+                    except:
+                        avg_runtime = '0'
+                    logger.info('avg_runtime       :: %s' % str(avg_runtime))
+                    send_metric_name = '%s.avg_runtime' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, str(avg_runtime))
+                    try:
+                        metrics_checked_for_correlation = str(sum(self.metrics_checked_for_correlation))
+                    except:
+                        metrics_checked_for_correlation = '0'
+                    logger.info('metrics_checked_for_correlation   :: %s' % metrics_checked_for_correlation)
+                    send_metric_name = '%s.metrics_checked_for_correlation' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, metrics_checked_for_correlation)
                     sent_graphite_metrics_now = int(time())
                     try:
                         self.redis_conn.setex(cache_key, 59, sent_graphite_metrics_now)
@@ -523,6 +574,37 @@ class Luminosity(Thread):
 
                     # Reset lists
                     self.correlations[:] = []
+                    # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
+                    self.runtimes[:] = []
+                    self.metrics_checked_for_correlation[:] = []
+
+                # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
+                #                   Feature #2464: luminosity_remote_data
+                # Added the ability to add a Redis key to overview the memcached
+                # key luminosity.last.processed.anomaly.id some it does not have
+                # to be changed via telnet to memcache.
+                if not process_anomaly_id or not redis_sent_graphite_metrics:
+                    cache_key = '%s.last.processed.anomaly.id' % skyline_app
+                    redis_last_processed_anomaly_id_redis_key = False
+                    try:
+                        redis_last_processed_anomaly_id_redis_key = self.redis_conn.get(cache_key)
+                    except Exception as e:
+                        logger.error('error :: could not query Redis for key %s: %s' % (cache_key, e))
+                    if redis_last_processed_anomaly_id_redis_key:
+                        logger.info('found Redis %s key to override the mecache key setting process_anomaly_id to %s' % (cache_key, str(redis_last_processed_anomaly_id_redis_key)))
+                        try:
+                            process_anomaly_id = int(redis_last_processed_anomaly_id_redis_key)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to set process_anomaly_id from Rdis override key value')
+                        # And remove the Redis override key as it is only meant
+                        # to override once to allow for a replay for debug
+                        # purposes only.
+                        try:
+                            self.redis_conn.setex(cache_key, 1, int(redis_last_processed_anomaly_id_redis_key))
+                            logger.info('updated Redis key - %s' % cache_key)
+                        except:
+                            logger.error('error :: failed to update Redis key - %s up to 1 second expiring to delete it.' % cache_key)
 
                 if process_anomaly_id:
                     break
