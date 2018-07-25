@@ -51,6 +51,15 @@ import hashlib
 from sys import version_info
 from ast import literal_eval
 
+# @added 20180721 - Feature #2464: luminosity_remote_data
+# Use a gzipped response as the response as raw preprocessed time series
+# added cStringIO, gzip and functools to implement Gzip for particular views
+# http://flask.pocoo.org/snippets/122/
+from flask import after_this_request
+#from cStringIO import StringIO as IO
+import gzip
+import functools
+
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 import os.path
@@ -65,7 +74,10 @@ from skyline_functions import (
     in_list,
 )
 
-from backend import panorama_request, get_list
+from backend import (
+    panorama_request, get_list,
+    # @added 20180720 - Feature #2464: luminosity_remote_data
+    luminosity_remote_data)
 from ionosphere_backend import (
     ionosphere_data, ionosphere_metric_data,
     # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -120,6 +132,15 @@ logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 access_logger = logging.getLogger('werkzeug')
 
 python_version = int(version_info[0])
+
+# @added 20180721 - Feature #2464: luminosity_remote_data
+# Use a gzipped response as the response as raw preprocessed time series
+# added cStringIO to implement Gzip for particular views
+# http://flask.pocoo.org/snippets/122/
+if python_version == 2:
+    from StringIO import StringIO as IO
+if python_version == 3:
+    import io as IO
 
 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
 if settings.REDIS_PASSWORD:
@@ -238,6 +259,42 @@ def requires_auth(f):
             return True
     return decorated
 
+# @added 20180721 - Feature #2464: luminosity_remote_data
+# Use a gzipped response as the response as raw preprocessed time series with
+# an implementation of Gzip for particular views
+# http://flask.pocoo.org/snippets/122/
+def gzipped(f):
+    @functools.wraps(f)
+    def view_func(*args, **kwargs):
+        @after_this_request
+        def zipper(response):
+            accept_encoding = request.headers.get('Accept-Encoding', '')
+
+            if 'gzip' not in accept_encoding.lower():
+                return response
+
+            response.direct_passthrough = False
+
+            if (response.status_code < 200 or
+                response.status_code >= 300 or
+                'Content-Encoding' in response.headers):
+                return response
+            gzip_buffer = IO()
+            gzip_file = gzip.GzipFile(mode='wb',
+                                      fileobj=gzip_buffer)
+            gzip_file.write(response.data)
+            gzip_file.close()
+
+            response.data = gzip_buffer.getvalue()
+            response.headers['Content-Encoding'] = 'gzip'
+            response.headers['Vary'] = 'Accept-Encoding'
+            response.headers['Content-Length'] = len(response.data)
+
+            return response
+
+        return f(*args, **kwargs)
+
+    return view_func
 
 @app.errorhandler(500)
 def internal_error(message, traceback_format_exc):
@@ -419,7 +476,39 @@ def version():
 
 
 @app.route("/api", methods=['GET'])
-def data():
+# @modified 20180720 - Feature #2464: luminosity_remote_data
+# Rnamed def from data to api for the purpose of trying to add some
+# documentation relating to the API endpoints and their required parameters,
+# the results or error and status codes they return and the context in which
+# they are used.
+# def data():
+def api():
+    # @added 20180720 - Feature #2464: luminosity_remote_data
+    # Added luminosity_remote_data endpoint, requires two request parameter:
+    if 'luminosity_remote_data' in request.args:
+        anomaly_timestamp = None
+        if 'anomaly_timestamp' in request.args:
+            anomaly_timestamp_str = request.args.get(str('anomaly_timestamp'), None)
+            try:
+                anomaly_timestamp = int(anomaly_timestamp_str)
+            except:
+                anomaly_timestamp = None
+        else:
+            resp = json.dumps(
+                {'results': 'Error: no anomaly_timestamp parameter was passed to /api?luminosity_remote_data'})
+            return resp, 400
+        luminosity_data = []
+        if anomaly_timestamp:
+            luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
+            if luminosity_data:
+                resp = json.dumps(
+                    {'results': luminosity_data})
+                return resp, 200
+            else:
+                resp = json.dumps(
+                    {'results': 'No data found'})
+                return resp, 404
+
     if 'metric' in request.args:
         metric = request.args.get(str('metric'), None)
         try:
@@ -509,6 +598,37 @@ def data():
         {'results': 'Error: No argument passed - try /api?metric= or /api?graphite_metric='})
     return resp, 404
 
+
+# @added 20180721 - Feature #2464: luminosity_remote_data
+# Add a specific route for the luminosity_remote_data endpoint so that the
+# response can be gzipped as even the preprocessed data can run into megabyte
+# reponses.
+@app.route("/luminosity_remote_data", methods=['GET'])
+@gzipped
+def luminosity_remote_data_endpoint():
+    # The luminosity_remote_data_endpoint, requires onerequest parameter:
+    if 'anomaly_timestamp' in request.args:
+        anomaly_timestamp_str = request.args.get(str('anomaly_timestamp'), None)
+        try:
+            anomaly_timestamp = int(anomaly_timestamp_str)
+        except:
+            anomaly_timestamp = None
+    else:
+        resp = json.dumps(
+            {'results': 'Error: no anomaly_timestamp parameter was passed to /luminosity_remote_data'})
+        return resp, 400
+    luminosity_data = []
+    if anomaly_timestamp:
+        luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
+        if luminosity_data:
+            resp = json.dumps(
+                {'results': luminosity_data})
+            logger.info('returning gzipped response')
+            return resp, 200
+        else:
+            resp = json.dumps(
+                {'results': 'No data found'})
+            return resp, 404
 
 @app.route("/docs")
 @requires_auth
@@ -2295,6 +2415,7 @@ def ionosphere():
             # Add correlations to features_profile and training_data pages if a
             # panorama_anomaly_id is present
             correlations = False
+            correlations_with_graph_links = []
             if p_id:
                 try:
                     correlations, fail_msg, trace = get_correlations(skyline_app, p_id)
@@ -2303,6 +2424,23 @@ def ionosphere():
                     fail_msg = 'error :: Webapp error with search_ionosphere'
                     logger.error(fail_msg)
                     return internal_error(fail_msg, trace)
+                if correlations:
+                    # @added 20180723 - Feature #2470: Correlations Graphite graph links
+                    #                   Branch #2270: luminosity
+                    # Added Graphite graph links to Correlations block
+                    for metric_name, coefficient, shifted, shifted_coefficient in correlations:
+                        from_timestamp = int(requested_timestamp) - m_full_duration
+                        graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+                        graphite_until = datetime.datetime.fromtimestamp(int(requested_timestamp)).strftime('%H:%M_%Y%m%d')
+                        unencoded_graph_title = '%s\ncorrelated with anomaly id %s' % (
+                            metric_name, str(p_id))
+                        graph_title_string = quote(unencoded_graph_title, safe='')
+                        graph_title = '&title=%s' % graph_title_string
+                        if settings.GRAPHITE_PORT != '':
+                            correlation_graphite_link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                        else:
+                            correlation_graphite_link = '%s://%s/render/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                        correlations_with_graph_links.append([metric_name, coefficient, shifted, shifted_coefficient, str(correlation_graphite_link)])
 
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
@@ -2359,6 +2497,11 @@ def ionosphere():
                 # Added minmax scaling
                 minmax=minmax,
                 correlations=correlations,
+                # @added 20180723 - Feature #2470: Correlations Graphite graph links
+                #                   Branch #2270: luminosity
+                # Added Graphite graph links to the Correlations block in
+                # the correlations.html and training_data.html templates
+                correlations_with_graph_links=correlations_with_graph_links,
                 matched_from_datetime=matched_from_datetime,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
@@ -2438,7 +2581,6 @@ def utilities():
         error_string = traceback.format_exc()
         logger.error('error :: failed to render utilities.html: %s' % str(error_string))
         return 'Uh oh ... a Skyline 500 :(', 500
-
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow
