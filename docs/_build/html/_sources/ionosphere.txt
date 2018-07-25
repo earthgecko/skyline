@@ -258,6 +258,31 @@ the fuller duration of the metric's ``learn_full_duration``.
 You can teach Ionosphere badly, but to unteach it is just a click of the Disable
 features profile button.
 
+Skyline learning is not perfect.  There are certain metrics that learning seems
+not to work as well on as other metrics, 5min and 15min load_average metrics
+fall into this category.  Do not go overboard on learning do it slowly and
+incrementally.  All LEARNT features profiles have the ability to be validated,
+however this is not a hard requirement, unvalidated features profiles will still
+be used in analysis, the validated flag is currently simply there to give the
+operation a view of what LEARNT features profiles have not been assessed to
+determine their accuracy.  Skyline will also LEARN from an unvalidated features
+profile.  Therefore the operator needs to review and validate or disable
+features profiles every so often, this can be achieved when reviewing and
+training on not anomalous patterns is done, whenever training data for a metric
+is assessed it is easy to review all features profiles for that metric during
+this phase by using the :skyblue:`Existing ::` :red:`features profiles page link`
+on the training page.
+
+To begin with try and start with only creating features profiles and only
+implementing learning occasionally when you are certain that a metric has a
+very "normal" pattern over 30 days.  Initially just creating features profiles
+and not trying to learn on all of them, will give you a good idea of what
+Skyline Ionosphere is doing when you look at the Ionosphere matches pages and
+review matches.  Having a few learn features profiles as well, will also give
+you a good idea of what is being done when Skyline is learning, when you look
+at the Ionosphere features profiles page and reviewing the :red:`learnt`
+features profiles on the :skyblue:`Search ::` :red:`features profiles` page.
+
 How Ionosphere works - a simple overview
 ----------------------------------------
 
@@ -320,7 +345,7 @@ Ionosphere calculates the features and then then use the sum of these values.
   features with |tsfresh| for the 3sigma anomalous time series and then compares
   the common features sums with those of previously recorded features profiles.
   If the two values are less than
-  :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN`,
+  :mod:`settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR`,
   Ionosphere will deem the time series as not anomalous and update the related
   training data as MATCHED and update the features profile matched count in the
   database.
@@ -331,7 +356,7 @@ Ionosphere calculates the features and then then use the sum of these values.
   database) and the 3sigma anomalous time series.  It creates a features profile
   for each Min-Max scaled (standardized) time series and then compares the
   features sums and determines whether the difference is below the
-  :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN` and
+  :mod:`settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR` and
   will deem it as not anomalous and update the related training data as MATCHED
   and update the features profile matched count in the database.
 - If Ionosphere does **not** find a features profile match, it analyses the time

@@ -1,0 +1,109 @@
+==============================
+1.2.4 - the luminosity branch
+==============================
+
+v1.2.4-luminosity - July 25, 2018
+
+Changes from v1.2.3
+-------------------
+
+- Bumped to v1.2.4-stable-luminosity
+- Changed from > to less intuitive but normally more accurate >= which is mostly
+  used in D layer and from == to less intuitive but normally more accurate <=
+  which is mostly used in E layer (2446, 2464)
+- Added the luminosity_remote_data API endpoint to replace the Redis method in
+  get_remote_correlations in process_correlations.py.  This has been replaced
+  by preprocessing the Luminosity data request on the remote Skyline instance
+  and returning only the relevant fragments of the time series gzipped. (2464)
+- Added the REMOTE_SKYLINE_INSTANCES variable to settings.py to begin the
+  deprecation of any requirement for Skyline to have to query a remote Redis
+  with API endpoint replacements. Using 'Gzip for particular views' as per
+  http://flask.pocoo.org/snippets/122/ (2464)
+- Implement correlations and avg_runtime Graphite metrics for luminosity (2462)
+- Added Graphite graph links to the Correlations block in training_data and
+  features_profile pages. The ['metric_name'] string has been replaced with a
+  link the the Graphite graph for the metric with the appropriate datetime
+  values (from=&until=) for the metric at the point of correlation. (2470)
+- Added info about correlations and their contextual accuracy in the
+  Correlations block in the UI (2470)
+- Update Constellations in the roadmap
+- Updated doc rst files, corrected typos and pasteos
+
+Update notes
+------------
+
+- NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.4.
+- There is are no SQL changes with this release.
+- There is one settings.py change, the addition of
+  :mod:`settings.REMOTE_SKYLINE_INSTANCES`
+- There are no changes in requirements.txt
+
+How to update from v1.2.2 or v1.2.3
+-----------------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version skyline/settings.py with the new version of
+  skyline/settings.py and create a new settings.py in the temp location
+  appropriate for Skyline v1.2.4 and your set up, ready to be deployed.
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    NEW_SKYLINE_VERSION="v1.2.4-stable-luminosity"                     # Your new Skyline version
+    OLD_SKYLINE_VERSION="v1.2.3-stable-luminosity"                     # Your old Skyline version
+    # OR
+    # OLD_SKYLINE_VERSION="v1.2.2-stable-luminosity"
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.4 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.2-luminosity-stable
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done

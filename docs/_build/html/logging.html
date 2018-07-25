@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Logging &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>Logging &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
         <link rel="next" title="Tuning tips" href="tuning-tips.html"/>
         <link rel="prev" title="Skyline and friends" href="skyline-and-friends.html"/> 
 
@@ -202,7 +202,7 @@ simply as un-log like.</p>
 logging methodology and so that the user understands conceptually what is being
 logged and what is not being logged.</p>
 <p>In terms of Analyzer if errors are encountered in any algorithms, we sample the
-errors.  This achieves a balance between reporting errors useful and not using
+errors.  This achieves a balance between reporting errors usefully and not using
 lots of I/O and disk space if something goes wrong.  Skyline has the potential
 to do a runaway log, but not reporting errors is not useful when you are trying
 to pinpoint what is wrong.</p>
@@ -215,10 +215,13 @@ the performance or operation of Skyline in anyway.</p>
 <p>Each Skyline app has its own log.  These logs are important from a Skyline
 perspective in terms of monitoring the Skyline processes.
 See <a class="reference external" href="(monitoring-skyline.html)">Monitoring Skyline</a></p>
+<p>The logs are also very important in terms of being able to verify all the steps
+and results in the analysis pipeline.</p>
 <p>It is recommended to NOT stream the Skyline app logs through any logging
 pipeline e.g. rsyslog, logstash, elasticsearch, etc.  The syslog alert trigger
 was added for this purpose.  If you wish to parse and rate anomalies do so via
-syslog (see below).</p>
+syslog (see below).  Or look at the skyline Graphite metrics or set some alert
+tuples on some of the skyline. Graphite namespace metrics.</p>
 <p>Log rotation is handled by the Python TimedRotatingFileHandler and by default
 keeps the 5 last logs:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">TimedRotatingFileHandler</span><span class="p">(</span>
@@ -228,23 +231,11 @@ keeps the 5 last logs:</p>
             <span class="n">backupCount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The Skyline app logs and the rotation is relatively cheap on disk space even on
-production machines handling 10s of 1000s of metrics each.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">===============================================================</span>
-<span class="n">HOST</span><span class="p">:</span><span class="n">skyline</span><span class="o">-</span><span class="n">prod</span><span class="o">-</span><span class="mi">4</span><span class="o">-</span><span class="mi">96</span><span class="n">g</span><span class="o">-</span><span class="n">luk1</span> <span class="n">EXITCODE</span><span class="p">:</span><span class="mi">0</span> <span class="n">STDOUT</span><span class="p">:</span>
-<span class="o">===============================================================</span>
-<span class="mi">38</span><span class="n">M</span>     <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
-<span class="o">===============================================================</span>
-<span class="o">===============================================================</span>
-<span class="n">HOST</span><span class="p">:</span><span class="n">skyline</span><span class="o">-</span><span class="n">prod</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="mi">40</span><span class="n">g</span><span class="o">-</span><span class="n">ruk2</span> <span class="n">EXITCODE</span><span class="p">:</span><span class="mi">0</span> <span class="n">STDOUT</span><span class="p">:</span>
-<span class="o">===============================================================</span>
-<span class="mi">22</span><span class="n">M</span>     <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
-<span class="o">===============================================================</span>
-<span class="o">===============================================================</span>
-<span class="n">HOST</span><span class="p">:</span><span class="n">skyline</span><span class="o">-</span><span class="n">prod</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="mi">96</span><span class="n">g</span><span class="o">-</span><span class="n">luk1</span> <span class="n">EXITCODE</span><span class="p">:</span><span class="mi">0</span> <span class="n">STDOUT</span><span class="p">:</span>
-<span class="o">===============================================================</span>
-<span class="mi">52</span><span class="n">M</span>     <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
-<span class="o">===============================================================</span>
+<p>The Skyline app logs and the rotation is relatively cheap on disk space.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">141</span><span class="n">M</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
+<span class="mi">248</span><span class="n">M</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
+<span class="mi">139</span><span class="n">M</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
+<span class="mi">330</span><span class="n">M</span>    <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">skyline</span>
 </pre></div>
 </div>
 </div>
@@ -266,12 +257,24 @@ new log file</li>
 </ul>
 <p>In terms of rsyslog pipelining this would result in the log being fully
 submitted again on every restart.</p>
+<p>It is possible that a fragment of the source of that the original Skyline
+logging implementation was made from and it is possible that all this is due to
+a method change from the source, it tested OK, but has not been implemented as
+logging is working and needs to work.  So it is horribly fixed, but works and
+testing something else new under all possible conditions is difficult.  So it
+reamins this way for the forseeable future.</p>
 </div>
 <div class="section" id="syslog">
 <span id="syslog"></span><h2>syslog<a class="headerlink" href="#syslog" title="Permalink to this headline">¶</a></h2>
 <p>With this in mind a syslog alert trigger was added to Skyline apps to handle the
 logging the details of anomalous time series to syslog,  groking the syslog for
-Skyline logs and rates etc is the way to go.</p>
+Skyline logs and rates etc is the way to go or just look as the skyline Graphite
+namespace metrics.</p>
+<p>A special mention of the settings.py variable</p>
+<p><code class="docutils literal"><span class="pre">SYSLOG_ENABLED</span> <span class="pre">=</span> <span class="pre">True</span></code></p>
+<p>This essentially now a hard requirement for Panorama and Luminosity now.
+If this special alerter is disabled a large chunk of Skyline&#8217;s new functionality
+is turned off.</p>
 </div>
 </div>
 
@@ -316,7 +319,7 @@ Skyline logs and rates etc is the way to go.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

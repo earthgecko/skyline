@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Running multiple Skyline instances &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>Running multiple Skyline instances &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
         <link rel="next" title="Skyline and friends" href="skyline-and-friends.html"/>
         <link rel="prev" title="Redis integration" href="redis-integration.html"/> 
 
@@ -109,7 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Running multiple Skyline instances</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#setting-up-stunnel">Setting up stunnel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#webapp-ui">Webapp UI</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
@@ -180,23 +180,22 @@ would pickle to a Skyline instance and for there to be multiple Skyline
 instances.</p>
 <p>The following settings pertain to running multiple Skyline instances:</p>
 <ul class="simple">
-<li><a class="reference internal" href="skyline.html#settings.OTHER_SKYLINE_REDIS_INSTANCES" title="settings.OTHER_SKYLINE_REDIS_INSTANCES"><code class="xref py py-mod docutils literal"><span class="pre">settings.OTHER_SKYLINE_REDIS_INSTANCES</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.ALTERNATIVE_SKYLINE_URLS" title="settings.ALTERNATIVE_SKYLINE_URLS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALTERNATIVE_SKYLINE_URLS</span></code></a></li>
+<li><a class="reference internal" href="skyline.html#settings.REMOTE_SKYLINE_INSTANCES" title="settings.REMOTE_SKYLINE_INSTANCES"><code class="xref py py-mod docutils literal"><span class="pre">settings.REMOTE_SKYLINE_INSTANCES</span></code></a></li>
 </ul>
-<p>Up until the introduction of Luminosity, Skyline&#8217;s Redis requirement was
-localhost only, it was bound to 127.0.0.1 and was accessed by the Skyline apps
-via socket only, apart from <span class="red">re</span><span class="brow">brow</span> which connected on localhost.
-If Skyline is run on multiple instances, Luminosity now adds a requirement for
-Redis to be accessed remotely in order for Luminosity to cross correlate all
-metrics.  This requires additional configuration and set up steps to properly
-secure the Redis instances.</p>
-<p>Skyline&#8217;s preferred method of handling remote connections to Redis is via a
-SSL tunnel using stunnel.  Although Redis recommends spiped, stunnel performance
-is much better and stunnel is easier to implement as there are distro packages
-for stunnel.</p>
-<div class="section" id="setting-up-stunnel">
-<h2>Setting up stunnel<a class="headerlink" href="#setting-up-stunnel" title="Permalink to this headline">¶</a></h2>
-<p>docs TDB at some point</p>
+<p>With the introduction of Luminosity a requirement for Skyline to pull the time
+series data from remote Skyline instances was added to allow for cross
+correlation of all the metrics in the population.  Skyline does this via a api
+endpoint and preprocesses the time series data for Luminosity on the remote
+Skyline instance and returns only the fragments (gzipped) of time series
+required for analysis, by default the previous 12 minutes, to minimise bandwidth
+and ensure maintain performance.</p>
+<div class="section" id="webapp-ui">
+<h2>Webapp UI<a class="headerlink" href="#webapp-ui" title="Permalink to this headline">¶</a></h2>
+<p>Please note that not all the functionality in the Webapp UI is compatible or
+multiple instance aware.  However where any &#8220;not in Redis&#8221; UI errors are found,
+accessing the Skyine Webapp UI on which the metric resides in Redis will resolve
+the issue.</p>
 </div>
 </div>
 
@@ -241,7 +240,7 @@ for stunnel.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

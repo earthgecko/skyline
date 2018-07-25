@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Luminosity &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>Luminosity &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
         <link rel="next" title="Redis integration" href="redis-integration.html"/>
         <link rel="prev" title="tsfresh" href="tsfresh.html"/> 
 
@@ -110,6 +110,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#luminosity-as-a-replacement-for-kale-oculus">Luminosity as a replacement for Kale Oculus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#differences-between-oculus-and-luminosity">Differences between Oculus and Luminosity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#luminosity-adds">Luminosity adds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-luminosity-on-multiple-distributed-skyline-instances">Running Luminosity on multiple, distributed Skyline instances</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -172,7 +173,8 @@
             
   <div class="section" id="luminosity">
 <h1>Luminosity<a class="headerlink" href="#luminosity" title="Permalink to this headline">¶</a></h1>
-<p>Requires - Panorama to be enabled and running.</p>
+<p>Requires - Panorama to be enabled and running.  It is enabled and configured
+via the <code class="docutils literal"><span class="pre">LUMINOSITY_</span></code> variables in <code class="docutils literal"><span class="pre">settings.py</span></code>.</p>
 <p>Luminosity takes the time series of an anomalous metric and then cross
 correlates the time series against all the other metrics time series to find and
 record metrics that are strongly correlated to the anomalous metric, using
@@ -184,10 +186,23 @@ could be related to anomalous event.</p>
 time shifted cross correlations time shifted too.  So that if metric.a did
 something 120 seconds ago and metric.b become anomalous 120 seconds later, if
 there is correlation between the time shifted time series, these will be found
-as well and recorded with time shifted value e.g. -60 and a shifted_coefficient</p>
-<p>Cross correlations are only currently only viewable in Ionosphere on training_data
+as well and recorded with time shifted value e.g. -120 and a
+shifted_coefficient</p>
+<p>Cross correlations are only currently viewable in Ionosphere on training_data
 and features profile pages, however you can query MySQL directly to report on
-any anomalies ad hoc until a full Luminosity webapp page in created.</p>
+any <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> anomalies ad hoc until a full Luminosity webapp page
+is created.</p>
+<p>These are the correlations from the entire metric population that fall within
+<a class="reference internal" href="skyline.html#settings.LUMINOL_CROSS_CORRELATION_THRESHOLD" title="settings.LUMINOL_CROSS_CORRELATION_THRESHOLD"><code class="xref py py-mod docutils literal"><span class="pre">settings.LUMINOL_CROSS_CORRELATION_THRESHOLD</span></code></a>, they are not necessarily
+all contextually related, but the contextually related correlations are listed
+for the anomaly.  These are simply the numeric correlations it is currently
+up to the operator to review them.  As it is assumed that the operator may know
+which metrics are likely to correlate with this anomaly on the specific metric,
+until such a time as Skyline can, something on the roadmap.</p>
+<p>At the current at this stage of development Luminosity adds lots of noise along
+with the signals in the correlations, somewhat similar to the original Analyzer.
+This is just the start, to be able to try and make it better and useful, the
+data is needed first.</p>
 <div class="section" id="luminosity-as-a-replacement-for-kale-oculus">
 <h2>Luminosity as a replacement for Kale Oculus<a class="headerlink" href="#luminosity-as-a-replacement-for-kale-oculus" title="Permalink to this headline">¶</a></h2>
 <p>Luminosity is the beginning of an attempt to implement a pure Python replacement
@@ -230,6 +245,10 @@ the most strongly correlated metrics.</p>
 and for the purposes of understanding the luminol.correlate, a pure Python
 implementation of the Paul Bourke method was implemented and verified with the
 results of the luminol.correlate.</p>
+</div>
+<div class="section" id="running-luminosity-on-multiple-distributed-skyline-instances">
+<h2>Running Luminosity on multiple, distributed Skyline instances<a class="headerlink" href="#running-luminosity-on-multiple-distributed-skyline-instances" title="Permalink to this headline">¶</a></h2>
+<p>Please see <a class="reference external" href="running-multiple-skylines.html">Running multiple Skyline instances</a></p>
 </div>
 </div>
 
@@ -274,7 +293,7 @@ results of the luminol.correlate.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.2.2-stable documentation</title>
+  <title>Installation &mdash; Skyline 1.2.4-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.2-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -266,7 +266,10 @@ specified IPs in iptables/ip6tables</li>
 <li>Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
 default Graphite pickle ports)</li>
 <li>The IP address and port being used by Redis, which if you are not running
-multiple distributed Skyline instances should be 127.0.0.1</li>
+multiple distributed Skyline instances should be 127.0.0.1, even if you are
+running multiple distributed Skyline instances this can and still should be
+127.0.0.1 as Skyline makes an API endpoint available to remote Skyline
+instances for any required remote Redis data retrieval and preprocessing.</li>
 <li>Please ensure you handle all of these with iptables AND ip6tables (or the
 equivalent) before continuing.</li>
 </ul>
@@ -444,6 +447,19 @@ start is RECOMMENDED as it is integral to Ionosphere and Luminosity.</li>
 vi settings.py
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">a special settings variable that needs mentioning is the alerter
+<a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.SYSLOG_ENABLED</span></code></a>.  This variable by default is <code class="docutils literal"><span class="pre">`True`</span></code> and
+in this mode Skyline sends all anomalies to syslog and Panorama to record ALL
+anomalies to the database not just anomalies for metrics that have a
+<a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple defined.  However this is the desired default
+state.  This setting basically enables the anomaly detection on everything
+with 3-sigma and builds the anomalies database, it is not noisy.  At this
+point in your implementation the distinction between alerts and general
+Skyline anomaly detection and constructing an anomalies data set must once
+again be pointed out.</p>
+</div>
 <ul class="simple">
 <li>For later implementing and working with Ionosphere and setting up learning (see
 <a class="reference external" href="ionosphere.html">Ionosphere</a>) after you have the other Skyline apps up and
@@ -593,7 +609,7 @@ if you use an exec of any sort, ensure the pandas install has a long timeout.</l
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.2-stable',
+            VERSION:'1.2.4-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -80,6 +80,31 @@ name was even changed to fit in with paying homeage to your library, however if
 the aim here is to be accurate the app should be called skyline/paulbourke...
 Which gives me an idea :)
 
+UPDATE 20180723 - Skyline HAS now been cooperative here and provided itself with
+data under which some of the Constellations meme roadmap item could be reborn,
+after being railroaded by Luminol and Luminosity.  It was a well liked meme and
+it was difficult to accept and implement this meme functionality under anything
+other than Luminosity.  However, now Luminosity is implemented, Skyline has once
+again pushed its own roadmap forward, as now it needs try and learn/compute what
+cross correlations are now strongly contextually related within the population
+of cross correlations per anomaly.  A lot of cross correlations are purely valid
+numeric correlations, however within the population of metrics, they often have
+no contextual correlations to one another, one is not related to the other in
+any way or form.
+
+It is here Constellations can be reborn by an effort to try and develop a method
+by which Skyline can learn/compute related metrics in a meaningful manner and
+hopefully a useful manner.  Also try and learn/compute what metrics are never
+related to each other.  Describe constellations and not in the literal sense,
+constellations can be found in a constellation too.  Maps.  Map the population,
+tribes, names, places, stars and know who is who, what is what, who did what, who
+affects what, who affects what and what affects what.  Map it all, somehow.
+Just thoughts and reflections on v1.2.0 thru v1.2.4, Skyline again has opened
+itself another avenue of data from some added functionality.  Mapping and taming
+the correlations.  This time if possible with no operator training, but simply
+trying to learn/compute from all the available data.  Perhaps it can ask the
+operator to review what it figured out and get their opinion on it.  Who knows
+where this would go?  Through a lot of time undoubtedly, that much is certain.
 
 Skyline and NASA/FITS data
 ==========================
