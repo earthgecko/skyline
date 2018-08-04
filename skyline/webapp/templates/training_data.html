@@ -766,12 +766,21 @@ Image file: {{ image }}<br><br>
 	  </div>
   {% endif %}
 
+<!-- # @added 20180803 - Feature #2482: last 30 data points on training_data page
+# Display the last 30 data points on the training_data page to inform the
+# operator of the Redis graph data points for comparison with any
+# Existing :: layers -->
+  {% if last_i_ts_json %}
+	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span></span> at FULL_DURATION of ({{ redis_full_duration }}) for reviewing the Redis data graph and comparing to any existing layers</h4>
+    {{ last_i_ts_json }}
+  {% endif %}
+
 <!-- # @added 20180414 - Branch #2270: luminosity -->
   {% if panorama_anomaly_id %}
     {% include "correlations.html" %}
   {% endif %}
 
-      <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span></span> files</h4>
+    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span></span> files</h4>
       <table>
         <tr>
           <th>[filename, path_and_filename]</th>
@@ -788,14 +797,14 @@ Image file: {{ image }}<br><br>
   {% if data_ok == True %}
       <br><p>
 <!-- # @modified 20170309 - Feature #1960: ionosphere_layers
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>-->
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]]</span></h4>
+    <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>-->
+    <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]]</span></h4>
       {{ timeseries[-30:] }}
 <!-- # @added 20170309 - Feature #1960: ionosphere_layers
 Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
 based features profile -->
     {% if ionosphere_json %}
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]]</span></h4>
+    <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]]</span></h4>
       {{ ionosphere_json[-30:] }}
     {% endif %}
   {% endif %}
