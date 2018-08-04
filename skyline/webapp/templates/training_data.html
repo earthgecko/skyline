@@ -739,6 +739,16 @@ Image file: {{ image }}<br><br>
   {% endfor %}
         <p style="clear: both;">
 
+<!-- # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data -->
+  {% if graphite_now_images %}
+	  <div class="alert alert-danger">
+    If the Graphite graphs are not displaying as derivatives you can reload them and set the metric
+    as having strictly increasing monotonicity - see <a href="/static/docs/monotonic-metrics.html#">docs</a>
+      <a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&load_derivative_graphs=true">
+      <button type="button" onclick="return confirm('Are you sure you want to set this metric to strictly increasing monotonicity?');"><b>Load derivative graphs</b></button></a>
+	  </div>
+  {% endif %}
+
   {% for image in metric_images %}
     {% if '.redis.plot' in image %}
       <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>

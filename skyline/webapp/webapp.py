@@ -72,6 +72,8 @@ from skyline_functions import (
     get_graphite_metric,
     # @added 20170604 - Feature #2034: analyse_derivatives
     in_list,
+    # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+    set_metric_as_derivative,
 )
 
 from backend import (
@@ -1060,6 +1062,8 @@ def ionosphere():
                         'fp_matches',
                         # @added 20170917 - Feature #1996: Ionosphere - matches page
                         'fp_id', 'layer_id',
+                        # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+                        'load_derivative_graphs',
                         ]
 
         count_by_metric = None
@@ -1312,6 +1316,8 @@ def ionosphere():
         'disable_fp',
         # @added 20170917 - Feature #1996: Ionosphere - matches page
         'matched_fp_id', 'matched_layer_id',
+        # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+        'load_derivative_graphs',
     ]
 
     determine_metric = False
@@ -1353,6 +1359,8 @@ def ionosphere():
             metric_arg = False
             metric_td_arg = False
             timestamp_td_arg = False
+            # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+            set_derivative_metric = False
 
             if 'fp_view' in request.args:
                 fp_view = request.args.get(str('fp_view'), None)
@@ -1746,6 +1754,15 @@ def ionosphere():
                 if metric_arg or metric_td_arg:
                     if key == 'metric' or key == 'metric_td':
                         base_name = str(value)
+
+                # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+                if timestamp_arg and metric_arg:
+                    if key == 'load_derivative_graphs':
+                        if str(value) == 'true':
+                            set_derivative_metric = set_metric_as_derivative(skyline_app, base_name)
+                if set_derivative_metric:
+                    return_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(settings.SKYLINE_URL), str(requested_timestamp), str(base_name))
+                    return redirect(return_url)
 
                 if timestamp_arg and metric_arg:
                     timeseries_dir = base_name.replace('.', '/')
