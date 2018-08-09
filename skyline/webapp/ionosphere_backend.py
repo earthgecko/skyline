@@ -3835,7 +3835,15 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     try:
         del metric_list
     except:
-        logger.error('error :: failed to del metrics')
+        logger.error('error :: failed to del metrics_list')
+
+    # @added 20180809 - Bug #2496: error reported on no matches found
+    #                   https://github.com/earthgecko/skyline/issues/64
+    # If there are no matches return this information in matches to prevent
+    # webapp from reporting an error
+    if not matches:
+        # [[1505560867, 39793, 'features_profile', 782, 'None', 'stats.skyline-dev-3-40g-gra1.vda.ioInProgress', 'ionosphere?fp_matched=true...'],
+        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None']]
 
     return matches, fail_msg, trace
 
