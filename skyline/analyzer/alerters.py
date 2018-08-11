@@ -951,10 +951,11 @@ def alert_syslog(alert, metric, context):
         return
 
 
+# @added 20180807 - Feature #2492: alert on stale metrics (github #67)
 def alert_stale_digest(alert, metric, context):
     """
     Called by :func:`~trigger_alert` and sends a digest alert via smtp of the
-    stale metrics to the default recipient and to hipchat if enabled
+    stale metrics to the default recipient
 
     """
     LOCAL_DEBUG = False

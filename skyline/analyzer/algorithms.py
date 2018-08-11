@@ -48,6 +48,17 @@ try:
 except:
     send_algorithm_run_metrics = False
 
+# @added 20180807 - Feature #2492: alert on stale metrics
+try:
+    from settings import ALERT_ON_STALE_METRICS
+    alert_on_stale_metrics = settings.ALERT_ON_STALE_METRICS
+except:
+    alert_on_stale_metrics = False
+try:
+    from settings import ALERT_ON_STALE_PERIOD
+    alert_on_stale_metrics = settings.ALERT_ON_STALE_PERIOD
+except:
+    alert_on_stale_metrics = 300
 
 """
 This is no man's land. Do anything you want in here,
@@ -510,6 +521,30 @@ def run_selected_algorithm(timeseries, metric_name):
     """
     Filter timeseries and run selected algorithm.
     """
+
+    # @added 20180807 - Feature #2492: alert on stale metrics
+    # Determine if a metric has stopped sending data and if so add to the
+    # analyzer.alert_on_stale_metrics Redis set
+    if alert_on_stale_metrics:
+        add_to_alert_on_stale_metrics = False
+        if time() - timeseries[-1][0] >= ALERT_ON_STALE_PERIOD:
+            add_to_alert_on_stale_metrics = True
+        if time() - timeseries[-1][0] >= STALE_PERIOD:
+            add_to_alert_on_stale_metrics = False
+        if add_to_alert_on_stale_metrics:
+            try:
+                redis_conn.ping()
+            except:
+                from redis import StrictRedis
+                if REDIS_PASSWORD:
+                    redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
+                else:
+                    redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+            try:
+                redis_conn.sadd('analyzer.alert_on_stale_metrics', metric_name)
+            except:
+                pass
+
     # Get rid of short series
     if len(timeseries) < MIN_TOLERABLE_LENGTH:
         raise TooShort()
