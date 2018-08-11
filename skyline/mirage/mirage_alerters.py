@@ -15,6 +15,8 @@ import traceback
 import redis
 from msgpack import Unpacker
 import datetime as dt
+# @added 20180809 - Bug #2498: Incorrect scale in some graphs
+from time import time
 # @modified 20160820 - Issue #23 Test dependency updates
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
@@ -232,16 +234,37 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     if settings.GRAPHITE_PORT != '':
         graphite_port = str(settings.GRAPHITE_PORT)
 
-    link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
-        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-        graphite_port, str(int(second_order_resolution_in_hours)),
-        metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    # @added 20180809 - Bug #2498: Incorrect scale in some graphs
+    # If -xhours is used the scale is incorrect if x hours > than first
+    # retention period, passing from and until renders the graph with the
+    # correct scale.
+    from_timestamp = int(time())
+    until_timestamp = from_timestamp - int(second_order_resolution_seconds)
+    graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_from - %s' % str(graphite_from))
+    graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_until - %s' % str(graphite_until))
+
+    # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+    # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+    #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+    #     graphite_port, str(int(second_order_resolution_in_hours)),
+    #     metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+        str(graphite_from), str(graphite_until), metric[1],
+        settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     # @added 20170603 - Feature #2034: analyse_derivatives
     if known_derivative_metric:
-        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, str(int(second_order_resolution_in_hours)),
-            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+        # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+        #     graphite_port, str(int(second_order_resolution_in_hours)),
+        #     metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+            str(graphite_from), str(graphite_until), metric[1],
+            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
     image_data = None
@@ -815,10 +838,25 @@ def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
         graph_title_string = quote(unencoded_graph_title, safe='')
         graph_title = '&title=%s' % graph_title_string
 
+        # @added 20180809 - Bug #2498: Incorrect scale in some graphs
+        # If -xhours is used the scale is incorrect if x hours > than first
+        # retention period, passing from and until renders the graph with the
+        # correct scale.
+        from_timestamp = int(time())
+        until_timestamp = from_timestamp - int(second_order_resolution_seconds)
+        graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+        logger.info('graphite_from - %s' % str(graphite_from))
+        graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+        logger.info('graphite_until - %s' % str(graphite_until))
+
         if settings.GRAPHITE_PORT != '':
-            link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+            # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         else:
-            link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+            # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
         for room in rooms:
