@@ -60,6 +60,11 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+try:
+    DO_NOT_ALERT_ON_STALE_METRICS = settings.DO_NOT_ALERT_ON_STALE_METRICS
+except:
+    DO_NOT_ALERT_ON_STALE_METRICS = []
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 LOCAL_DEBUG = False
@@ -1690,6 +1695,20 @@ class Analyzer(Thread):
                 except:
                     alert_on_stale_metrics = []
                 for metric_name in alert_on_stale_metrics:
+                    metric_namespace_elements = metric_name.split('.')
+                    process_metric = True
+                    for do_not_alert_namespace in DO_NOT_ALERT_ON_STALE_METRICS:
+                        if do_not_alert_namespace in metric_name:
+                            process_metric = False
+                            break
+                        do_not_alert_namespace_namespace_elements = do_not_alert_namespace.split('.')
+                        elements_matched = set(metric_namespace_elements) & set(do_not_alert_namespace_namespace_elements)
+                        if len(elements_matched) == len(do_not_alert_namespace_namespace_elements):
+                            process_metric = False
+                            break
+
+                    if not process_metric:
+                        continue
                     base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
                     cache_key = 'last_alert.stale.%s' % (base_name)
                     last_alert = False
@@ -1713,7 +1732,7 @@ class Analyzer(Thread):
                         logger.info('stale metrics :: %s' % str(stale_metrics_to_alert_on))
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: could not send email to recipient :: %s' % str(recipient))
+                        logger.error('error :: could not send alert on stale digest email')
                     del stale_metrics_to_alert_on
                     del alert
                     del metric

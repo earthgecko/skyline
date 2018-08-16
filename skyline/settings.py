@@ -319,6 +319,22 @@ STALE_PERIOD = 500
 :vartype STALE_PERIOD: int
 """
 
+ALERT_ON_STALE_METRICS = True
+"""
+:var ALERT_ON_STALE_METRICS: Send a digest alert of all metrics that stop
+    populating their time series data.
+:vartype ALERT_ON_STALE_METRICS: boolean
+"""
+
+ALERT_ON_STALE_PERIOD = 300
+"""
+:var ALERT_ON_STALE_PERIOD: This is the duration, in seconds, after which an
+    alert will be sent for a metric if it stops sending data.  The digest alert
+    will only occur once while in the window between the ALERT_ON_STALE_PERIOD
+    and the STALE_PERIOD.
+:vartype ALERT_ON_STALE_PERIOD: int
+"""
+
 MIN_TOLERABLE_LENGTH = 1
 """
 :var MIN_TOLERABLE_LENGTH: This is the minimum length of a timeseries, in
@@ -516,6 +532,21 @@ trigger again.
 
 .. note:: Consider using the default skyline_test.alerters.test for testing
     alerts with.
+
+"""
+
+DO_NOT_ALERT_ON_STALE_METRICS = [
+    # DO NOT alert if these metrics go stale
+    'donot_alert_on_stale.metric_known_to_go_stale',
+]
+"""
+:var DO_NOT_ALERT_ON_STALE_METRICS: Metrics to not digest alert on if they
+    are becoming stale.
+:vartype DO_NOT_ALERT_ON_STALE_METRICS: list
+
+These are metrics that you do not want a Skyline stale digest alert on.  Works
+in the same way that SKIP_LIST does, it matches in the string or dotted
+namespace elements.
 
 """
 

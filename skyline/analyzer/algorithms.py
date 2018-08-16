@@ -527,10 +527,26 @@ def run_selected_algorithm(timeseries, metric_name):
     # analyzer.alert_on_stale_metrics Redis set
     if alert_on_stale_metrics:
         add_to_alert_on_stale_metrics = False
-        if time() - timeseries[-1][0] >= ALERT_ON_STALE_PERIOD:
-            add_to_alert_on_stale_metrics = True
-        if time() - timeseries[-1][0] >= STALE_PERIOD:
+        # @modified 20180816 - Feature #2492: alert on stale metrics
+        # Added try and except to prevent some errors that are encounter between
+        # 00:14 and 00:17 on some days
+        # Traceback (most recent call last):
+        # File "/opt/skyline/github/skyline/skyline/analyzer/analyzer.py", line 394, in spin_process
+        # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
+        # File "/opt/skyline/github/skyline/skyline/analyzer/algorithms.py", line 530, in run_selected_algorithm
+        # if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
+        # IndexError: list index out of range
+        try:
+            if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
+                add_to_alert_on_stale_metrics = True
+        except:
             add_to_alert_on_stale_metrics = False
+        try:
+            if int(time()) - int(timeseries[-1][0]) >= STALE_PERIOD:
+                add_to_alert_on_stale_metrics = False
+        except:
+            add_to_alert_on_stale_metrics = False
+
         if add_to_alert_on_stale_metrics:
             try:
                 redis_conn.ping()
