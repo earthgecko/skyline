@@ -107,7 +107,11 @@ from ionosphere_backend import (
     # @added 20170916 - Feature #1996: Ionosphere - matches page
     get_fp_matches,
     # @added 20170917 - Feature #1996: Ionosphere - matches page
-    get_matched_id_resources,)
+    get_matched_id_resources,
+    # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
+    get_features_profiles_to_validate,
+    # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
+    get_metrics_with_features_profiles_to_validate,)
 
 from features_profile import feature_name_id, calculate_features_profile
 from tsfresh_feature_names import TSFRESH_VERSION
@@ -998,6 +1002,120 @@ def ionosphere():
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
 
+    # @added 20180419 - Feature #1996: Ionosphere - matches page
+    #                   Branch #2270: luminosity
+    # Change the default search parameters to return all matches for the
+    # past 24 hours
+    matched_request_timestamp = int(time.time())
+    default_matched_from_timestamp = matched_request_timestamp - 86400
+    matched_from_datetime = time.strftime('%Y%m%d %H:%M', time.localtime(default_matched_from_timestamp))
+
+    # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
+    features_profiles_to_validate = []
+    fp_validate_req = False
+    if 'fp_validate' in request.args:
+        fp_validate_req = request.args.get(str('fp_validate'), None)
+        if fp_validate_req == 'true':
+            fp_validate_req = True
+    if fp_validate_req:
+        metric_found = False
+        timestamp = False
+        base_name = False
+        for i in request.args:
+            key = str(i)
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+            if key == 'order':
+                order = str(value)
+                if order == 'DESC':
+                    ordered_by = 'DESC'
+                if order == 'ASC':
+                    ordered_by = 'ASC'
+            if key == 'limit':
+                limit = str(value)
+                try:
+                    test_limit = int(limit) + 0
+                    limited_by = test_limit
+                except:
+                    logger.error('error :: limit is not an integer - %s' % str(limit))
+                    limited_by = '30'
+            if key == 'metric':
+                base_name = str(value)
+                if base_name == 'all':
+                    metric_found = True
+                    metric_name = 'all'
+                    limited_by = 0
+                    ordered_by = 'DESC'
+                if not metric_found:
+                    metric_name = settings.FULL_NAMESPACE + base_name
+                    try:
+                        unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                    except:
+                        logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                        logger.info(traceback.format_exc())
+                        return 'Internal Server Error', 500
+                    if metric_name in unique_metrics:
+                        metric_found = True
+                    # @added 20180423 - Feature #2034: analyse_derivatives
+                    #                   Branch #2270: luminosity
+                    other_unique_metrics = []
+                    if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        metric_found_in_other_redis = False
+                        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                        # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                        for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                            if not metric_found_in_other_redis:
+                                try:
+                                    if redis_password:
+                                        other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port), password=str(redis_password))
+                                    else:
+                                        other_redis_conn = redis.StrictRedis(host=str(redis_ip), port=int(redis_port))
+                                    other_unique_metrics = list(other_redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                                if metric_name in other_unique_metrics:
+                                    metric_found_in_other_redis = True
+                                    metric_found = True
+                                    logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
+        if metric_found:
+            features_profiles_to_validate = []
+            if metric_name != 'all':
+                try:
+                    features_profiles_to_validate, fail_msg, trace = get_features_profiles_to_validate(base_name)
+                    # features_profiles_to_validate
+                    # [ fp_id, metric_id, metric, full_duration, anomaly_timestamp,
+                    #   fp_parent_id, parent_full_duration, parent_anomaly_timestamp,
+                    #   fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri,
+                    #   parent_prent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri,
+                    #   minimum_full_duration, maximum_full_duration]
+                    logger.info('%s features profiles found that need validating for %s' % (
+                        str(len(features_profiles_to_validate)), base_name))
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Uh oh ... a Skyline 500 using get_features_profiles_to_validate(%s)' % str(base_name)
+                    return internal_error(message, trace)
+            try:
+                default_learn_full_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS) * 24 * 60 * 60
+            except:
+                default_learn_full_duration = 30 * 24 * 60 * 60
+            metrics_with_features_profiles_to_validate = []
+            if not features_profiles_to_validate:
+                # metrics_with_features_profiles_to_validate
+                # [[metric_id, metric, fps_to_validate_count]]
+                metrics_with_features_profiles_to_validate, fail_msg, trace = get_metrics_with_features_profiles_to_validate()
+                logger.info('no features_profiles_to_validate was passed so determined metrics_with_features_profiles_to_validate')
+
+            return render_template(
+                'ionosphere.html', fp_validate=fp_validate_req,
+                features_profiles_to_validate=features_profiles_to_validate,
+                metrics_with_features_profiles_to_validate=metrics_with_features_profiles_to_validate,
+                for_metric=base_name, order=ordered_by, limit=limited_by,
+                default_learn_full_duration=default_learn_full_duration,
+                matched_from_datetime=matched_from_datetime,
+                version=skyline_version,
+                duration=(time.time() - start), print_debug=False), 200
+
     # @added 20170220 - Feature #1862: Ionosphere features profiles search page
     # Ionosphere features profiles by generations
     fp_search_req = None
@@ -1012,14 +1130,6 @@ def ionosphere():
             fp_search_or_matches_req = True
         else:
             fp_search_req = False
-
-    # @added 20180419 - Feature #1996: Ionosphere - matches page
-    #                   Branch #2270: luminosity
-    # Change the default search parameters to return all matches for the
-    # past 24 hours
-    matched_request_timestamp = int(time.time())
-    default_matched_from_timestamp = matched_request_timestamp - 86400
-    matched_from_datetime = time.strftime('%Y%m%d %H:%M', time.localtime(default_matched_from_timestamp))
 
     # @added 20170916 - Feature #1996: Ionosphere - matches page
     fp_matches_req = None
@@ -1475,6 +1585,27 @@ def ionosphere():
                         return resp, 400
 
                     redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
+
+                    # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
+                    validate_fp_req = False
+                    if 'validate_fp' in request.args:
+                        validate_fp_req = request.args.get(str('validate_fp'), None)
+                        if validate_fp_req == 'true':
+                            validate_fp_req = True
+                    if validate_fp_req:
+                        redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&validate_fp=true' % (
+                            settings.SKYLINE_URL, str(use_timestamp), base_name)
+
+                    # @added 20180816 - Feature #2430: Ionosphere validate learnt features profiles page
+                    disable_fp_req = False
+                    if 'disable_fp' in request.args:
+                        disable_fp_id = request.args.get(str('disable_fp'), None)
+                        if isinstance(int(disable_fp_id), int):
+                            disable_fp_req = True
+                    if disable_fp_req:
+                        redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&disable_fp=%s' % (
+                            settings.SKYLINE_URL, str(use_timestamp), base_name,
+                            str(disable_fp_id))
 
                     # @added 20170917 - Feature #1996: Ionosphere - matches page
                     if matched_fp_id:

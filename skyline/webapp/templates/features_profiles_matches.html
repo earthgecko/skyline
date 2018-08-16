@@ -39,6 +39,7 @@
 #                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
 		  <li class="active"><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+	    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
 		</ul>
@@ -121,8 +122,8 @@ count
 
   {% if fp_matches_results %}
 	  <div class="tab-pane active" id="matches">
-      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
-          limited by {{ fp_matches_results|length }} features profile matches ordered by {{ order }}</h4>
+      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles and layers :: </span></span></span>{{ for_metric }} -
+          limited by {{ fp_matches_results|length }} features profile and layers matches ordered by {{ order }}</h4>
 			<table class="table table-hover">
 				<thead>
 					<tr>

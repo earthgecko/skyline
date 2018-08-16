@@ -40,6 +40,7 @@
 #                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
 		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		  <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
 		</ul>
@@ -334,6 +335,10 @@ count
 	  <div class="tab-pane active" id="search">
       <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
           limited by {{ features_profiles|length }} features profiles ordered by {{ order }}</h4>
+      <h5><span class="logo"><span class="sky">Validate ::</span> <span class="re">metric features profiles :: </span></span></span>
+        <a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC"><span class="logo">{{ for_metric }}</a></h5>
+
+
 			<table class="table table-hover">
 				<thead>
 					<tr>
@@ -341,9 +346,9 @@ count
       tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
       matched_count10, human_date11, created_timestamp12, checked_count13,
       checked_human_date14, parent_id15, generation16, validated17] -->
-            <th>fp_ip</th>
+            <th>fp id</th>
             <th>metric</th>
-            <th>parent_id</th>
+            <th>parent id</th>
             <th>generation</th>
             <th>origin</th>
             <th>full duration</th>
