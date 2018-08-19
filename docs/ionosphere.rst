@@ -300,7 +300,14 @@ will also happen sometimes when there is missing data in a time series.
 Ensure that you review and validate LEARNT features profiles often to ensure
 that incorrect LEARNT features profiles are disabled as soon as possible.
 
-..warning:: A **important** note on learning.  When you let Ionosphere learn
+The validate features profile page is useful for this. See
+|validate_features_profile_demo_page|
+
+.. |validate_features_profile_demo_page| raw:: html
+
+   <a href="_static/ionosphere_demo/fp_validate_demo_page/validate_features_profiles.demo.html" target="_blank">Ionosphere validate features profile demo page</a>
+
+.. warning:: A **important** note on learning.  When you let Ionosphere learn
   you create a lot of work for yourself in terms of validating every learnt
   profile that Ionosphere learns.  If Ionosphere learns badly and you do not
   keep up to date with validating learnt features profiles, Ionosphere could end
