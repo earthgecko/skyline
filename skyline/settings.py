@@ -1434,8 +1434,14 @@ IONOSPHERE_ENABLED = True
 
 IONOSPHERE_PROCESSES = 1
 """
-:var IONOSPHERE_PROCESSES: Number of processes to assign to Panorama, should never
-    need more than 1
+:var IONOSPHERE_PROCESSES: Number of processes to assign to Ionosphere, however
+    Ionosphere should never need more than 1 and is effectively hard coded as
+    such currently.  This variable is only declared for the purpose of
+    maintaining a standard set up in each module and to possibly enable more
+    than one processor on Ionosphere in the future, should there be a
+    requirement for Ionosphere to analyse the metrics quicker.  Running
+    Ionosphere with more than one process is untested and currently it is
+    hard coded to be 1 (https://github.com/earthgecko/skyline/issues/69)
 :vartype IONOSPHERE_ENABLED: int
 """
 
