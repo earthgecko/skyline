@@ -10,8 +10,8 @@ Welcome to Skyline.
 What is Skyline?
 ----------------
 
-Skyline v1.2.2 - For those interested in anomaly detection and deflection in
-streamed time series data.
+For those interested in anomaly detection and deflection in streamed time series
+data.
 
 Anomaly deflection.  The obvious next evolution in the use of all the anomaly
 detection data?
