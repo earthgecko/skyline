@@ -36,7 +36,7 @@ After that we can clone the project’s repository
 
 
 ```
-git clone https://github.com/etsy/skyline.git
+git clone https://github.com/earthgecko/skyline.git
 ```
 
 Once we have the project we can change into the folder and start going through

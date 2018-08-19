@@ -884,12 +884,27 @@ def ionosphere_learn(timestamp):
             remove_work_list_from_redis_set(learn_metric_list)
             continue
 
+        # @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
+        # With the introduction of calculating the nonNegativeDerivative in both
+        # Analyzer and Mirage before the initial analysis, both apps are now
+        # passing the preprocessed time series to the send_anomalous_metric_to
+        # function. However in skyline/ionosphere/learn.py the metric is still
+        # being checked to determine if it is in derivative_metrics and the
+        # nonNegativeDerivative function is being applied to the existing json
+        # data, if the json data already exists. This is incorrect. It is
+        # correct in the context of learn.py having to fetch the the data from
+        # Graphite, however applying nonNegativeDerivative to existing json data
+        # is incorrect and does not have the desired result.
+        preprocessed_learn_json_data_exists = False
+
         # Create a learn json data if it does not exist
         got_learn_json = False
         learn_json_file = '%s/%s.json' % (metric_learn_data_dir, base_name)
         if os.path.isfile(learn_json_file):
             logger.info('learn :: learning data ts json available - %s' % (learn_json_file))
             got_learn_json = True
+            # @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
+            preprocessed_learn_json_data_exists = True
         else:
             try:
                 logger.info(
@@ -925,47 +940,55 @@ def ionosphere_learn(timestamp):
                 raw_timeseries = f.read()
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
                 timeseries = literal_eval(timeseries_array_str)
-                datapoints = timeseries
+                # @modified 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
+                # Not required if the preprocessed json exists
+                # datapoints = timeseries
 
-            # @added 20170603 - Feature #2034: analyse_derivatives
-            # Convert the values of metrics strictly increasing monotonically
-            # to their deriative products
-            known_derivative_metric = False
-            try:
-                derivative_metrics = list(redis_conn.smembers('derivative_metrics'))
-            except:
-                derivative_metrics = []
-            if metric in derivative_metrics:
-                known_derivative_metric = True
-            if known_derivative_metric:
-                try:
-                    non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
-                except:
-                    non_derivative_monotonic_metrics = []
-                skip_derivative = in_list(metric, non_derivative_monotonic_metrics)
-                if skip_derivative:
-                    known_derivative_metric = False
-            if known_derivative_metric:
-                try:
-                    derivative_timeseries = nonNegativeDerivative(timeseries)
-                    datapoints = derivative_timeseries
-                except:
-                    logger.error('error :: nonNegativeDerivative failed')
+            # @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
+            # Only calculate the derivative_timeseries if the preprocessed json
+            # data did not exist and the data was fetched from Graphite by
+            # wrapping the entire derivate block in this if condition
+            if not preprocessed_learn_json_data_exists:
 
-                validated_timeseries = []
-                for datapoint in datapoints:
+                # @added 20170603 - Feature #2034: analyse_derivatives
+                # Convert the values of metrics strictly increasing monotonically
+                # to their deriative products
+                known_derivative_metric = False
+                try:
+                    derivative_metrics = list(redis_conn.smembers('derivative_metrics'))
+                except:
+                    derivative_metrics = []
+                if metric in derivative_metrics:
+                    known_derivative_metric = True
+                if known_derivative_metric:
                     try:
-                        new_datapoint = [int(datapoint[0]), float(datapoint[1])]
-                        validated_timeseries.append(new_datapoint)
-                    # @modified 20170913 - Task #2160: Test skyline with bandit
-                    # Added nosec to exclude from bandit tests
-                    except:  # nosec
-                        continue
-                timeseries = validated_timeseries
+                        non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+                    except:
+                        non_derivative_monotonic_metrics = []
+                    skip_derivative = in_list(metric, non_derivative_monotonic_metrics)
+                    if skip_derivative:
+                        known_derivative_metric = False
+                if known_derivative_metric:
+                    try:
+                        derivative_timeseries = nonNegativeDerivative(timeseries)
+                        datapoints = derivative_timeseries
+                    except:
+                        logger.error('error :: nonNegativeDerivative failed')
 
-                # @modified 20170129 - Bug #1898: Ionosphere - missing json
-                # logger.info('learn :: data points surfaced :: %s' % (len(timeseries)))
-                logger.info('learn :: data points surfaced :: %s' % (str(len(timeseries))))
+                    validated_timeseries = []
+                    for datapoint in datapoints:
+                        try:
+                            new_datapoint = [int(datapoint[0]), float(datapoint[1])]
+                            validated_timeseries.append(new_datapoint)
+                        # @modified 20170913 - Task #2160: Test skyline with bandit
+                        # Added nosec to exclude from bandit tests
+                        except:  # nosec
+                            continue
+                    timeseries = validated_timeseries
+
+                    # @modified 20170129 - Bug #1898: Ionosphere - missing json
+                    # logger.info('learn :: data points surfaced :: %s' % (len(timeseries)))
+                    logger.info('learn :: data points surfaced :: %s' % (str(len(timeseries))))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: learn :: failed to read learning data ts json - %s' % (learn_json_file))

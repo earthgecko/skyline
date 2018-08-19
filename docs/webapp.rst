@@ -11,9 +11,9 @@ UI to:
 
 * Visualise the latest anomalies that have been triggered.
 * Visualise historic anomalies that have been recorded by Panorama.
-* An api to query Redis for a metric timeseries which returns the timeseries in
+* An api to query Redis for a metric time series which returns the time series in
   json e.g. ``/api?metric=skyline.analyzer.hostname.total_metrics``
-* An api to query Graphite for a metric timeseries which returns the timeseries in
+* An api to query Graphite for a metric time series which returns the time series in
   json that takes the following parameters:
 
   * ``graphite_metric`` - metric name
@@ -127,7 +127,7 @@ Restricted by default
 
 These simple measures are an attempt to ensure that the Skyline web UI is not
 totally open by default, but rather totally restricted by default.  This adds a
-bit of defense in depth and hopefully will mitigate against unauthorized access
+bit of defence in depth and hopefully will mitigate against unauthorized access
 in the event that some day, someone may have their firewall misconfigured in
 some way, either through error or accident.
 
@@ -157,23 +157,23 @@ various filters, which are converted into MySQL ``SELECT`` queries which
 return the details regarding the anomalies found from the search criteria.  The
 Webapp then returns these to the browser and the client side javascript then
 passes the relevant metric details to the Webapp api endpoint to surface the
-metric timeseries from Graphite and the api returns the timeseries json to the
-browser to graph the timeseries.
+metric time series from Graphite and the api returns the time series json to the
+browser to graph the time series.
 
 Closest approximations
 ----------------------
 
 The Panorama anomaly records only hold the details regarding the anomaly, not
 the data.  The Panorama UI takes the returned anomalies from a search and
-retrieves the timeseries for the time period relevant to the anomaly from
-Graphite on demand.  The UI graphs the timeseries to visualise the context of
+retrieves the time series for the time period relevant to the anomaly from
+Graphite on demand.  The UI graphs the time series to visualise the context of
 the anomaly, as best possible.  Due to the fact that Panorama is storing anomaly
-details in real time and the Panorama web UI is surfacing timeseries
-historically, any Graphite aggregations in timeseries can result in the specific
-anomalous datapoint not being present in the related timeseries.  In these
+details in real time and the Panorama web UI is surfacing time series
+historically, any Graphite aggregations in time series can result in the specific
+anomalous data point not being present in the related time series.  In these
 instances the Panorama graphs will indicate this and visually present a closest
 approximation of where the anomalous line would be, using a thicker, orange
-horizontal line as the indicator, rather than the thinner, normal red horizontal
+vertical line as the indicator, rather than the thinner, normal red horizontal
 line.
 
 .. image:: images/panorama.closest.approximation.aggregrated.png
@@ -187,12 +187,12 @@ used the javascript ``Date`` function to generate the datetime ticker, etc.  If
 your Graphite server happens to be in a different time zone to user browser,
 this would display clock skews where the Panorama reported anomaly details do
 not match the graph times displayed.  Webapp in the Panorama view allows you to
-either use the browser time zone or use a fixed timezone so that all rendered
+either use the browser time zone or use a fixed time zone so that all rendered
 graphs are the same no matter where is the world they are viewed from.
 
 By default, the browser time zone setting is used, as per the original Skyline
 UI, you can use :mod:`settings.WEBAPP_USER_TIMEZONE` and
-:mod:`settings.WEBAPP_FIXED_TIMEZONE` to modify this behavior if required.
+:mod:`settings.WEBAPP_FIXED_TIMEZONE` to modify this behaviour if required.
 
 :red:`re`:brow:`brow`
 =====================
@@ -215,18 +215,5 @@ With the addition of a number of Panorama and other app related keys,
 :red:`re`:brow:`brow` adds a window into Redis, to allow for the verification of
 key creation and providing a view of ``*last_alert.*`` and
 ``panorama.mysql_ids.*`` keys.
-
-Basic function
---------------
-
-The Panorama web UI allows you to search the anomalies recorded by Panorama in
-the database.  It currently allows you to search through the anomaly records by
-various filters, which are converted into MySQL ``SELECT`` queries which
-return the details regarding the anomalies found from the search criteria.  The
-Webapp then returns these to the browser and the client side javascript then
-passes the relevant metric details to the Webapp api endpoint to surface the
-metric timeseries from Graphite and the api returns the timeseries json to the
-browser to graph the timeseries.
-
 
 .. _rebrow: https://github.com/marians/rebrow

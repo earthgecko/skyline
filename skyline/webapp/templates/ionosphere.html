@@ -20,6 +20,9 @@
 <!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
 {% elif fp_matches %}
 		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
+<!-- # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page -->
+{% elif fp_validate %}
+		<li class="active"><span class="logo"><span class="sky">Features profiles</span> <span class="re">to validate</span></span></li>
 {% else %}
   {% if metric_files %}
 		<li><a href="/ionosphere?metric_td={{ for_metric }}">training data</a></li>
@@ -39,6 +42,9 @@
 <!-- # @added 20170916 - Feature #1996: Ionosphere - matches page -->
 {% elif fp_matches %}
     {% include "features_profiles_matches.html" %}
+<!-- # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page -->
+{% elif fp_validate %}
+    {% include "validate_features_profiles.html" %}
 {% else %}
     {% include "training_data.html" %}
 {% endif %}

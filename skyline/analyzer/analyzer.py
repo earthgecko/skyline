@@ -60,6 +60,11 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+try:
+    DO_NOT_ALERT_ON_STALE_METRICS = settings.DO_NOT_ALERT_ON_STALE_METRICS
+except:
+    DO_NOT_ALERT_ON_STALE_METRICS = []
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 LOCAL_DEBUG = False
@@ -965,6 +970,12 @@ class Analyzer(Thread):
                             logger.info('deleted Redis analyzer.stale set to refresh')
                         except:
                             logger.info('no Redis set to delete - analyzer.stale')
+                    # @added 20180807 - Feature #2492: alert on stale metrics
+                    try:
+                        self.redis_conn.delete('analyzer.alert_on_stale_metrics')
+                        logger.info('deleted Redis analyzer.alert_on_stale_metrics set to refresh')
+                    except:
+                        logger.info('no Redis set to delete - analyzer.alert_on_stale_metrics')
 
                 for alert in settings.ALERTS:
                     for metric in unique_metrics:
@@ -1675,6 +1686,58 @@ class Analyzer(Thread):
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run after algorithm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+            # @added 20180807 - Feature #2492: alert on stale metrics
+            if settings.ALERT_ON_STALE_METRICS:
+                stale_metrics_to_alert_on = []
+                try:
+                    alert_on_stale_metrics = list(self.redis_conn.smembers('analyzer.alert_on_stale_metrics'))
+                except:
+                    alert_on_stale_metrics = []
+                for metric_name in alert_on_stale_metrics:
+                    metric_namespace_elements = metric_name.split('.')
+                    process_metric = True
+                    for do_not_alert_namespace in DO_NOT_ALERT_ON_STALE_METRICS:
+                        if do_not_alert_namespace in metric_name:
+                            process_metric = False
+                            break
+                        do_not_alert_namespace_namespace_elements = do_not_alert_namespace.split('.')
+                        elements_matched = set(metric_namespace_elements) & set(do_not_alert_namespace_namespace_elements)
+                        if len(elements_matched) == len(do_not_alert_namespace_namespace_elements):
+                            process_metric = False
+                            break
+
+                    if not process_metric:
+                        continue
+                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    cache_key = 'last_alert.stale.%s' % (base_name)
+                    last_alert = False
+                    try:
+                        last_alert = self.redis_conn.get(cache_key)
+                    except Exception as e:
+                        logger.error('error :: could not query Redis for cache_key: %s' % e)
+                    if not last_alert:
+                        stale_metrics_to_alert_on.append(base_name)
+                        try:
+                            self.redis_conn.setex(cache_key, int(time()), int(settings.STALE_PERIOD))
+                        except:
+                            logger.error('error :: failed to add %s Redis key' % cache_key)
+                if stale_metrics_to_alert_on:
+                    alert = ('stale_metrics', 'stale_digest', settings.STALE_PERIOD)
+                    metric = (len(stale_metrics_to_alert_on), stale_metrics_to_alert_on, int(time()))
+                    context = 'Analyzer'
+                    try:
+                        trigger_alert(alert, metric, context)
+                        logger.info('digest alerted on %s stale metrics' % str(len(stale_metrics_to_alert_on)))
+                        logger.info('stale metrics :: %s' % str(stale_metrics_to_alert_on))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not send alert on stale digest email')
+                    del stale_metrics_to_alert_on
+                    del alert
+                    del metric
+                else:
+                    logger.info('there are no stale metrics to alert on')
 
             run_time = time() - now
             total_metrics = str(len(unique_metrics))

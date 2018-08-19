@@ -120,8 +120,9 @@ Steps
 
 - Ensure Redis has a long ``requirepass`` set in redis.conf
 - Ensure Redis ``bind`` is set in redis.conf, consider specifically stating
-  ``bind 127.0.0.1`` or ``bind 127.0.0.1 <OTHER_IP_YOU_WANT_REDIS_TO_BIND_TO>``
-  if you are going to run multiple distributed  Skyline instances.
+  ``bind 127.0.0.1`` even if you are going to run multiple distributed Skyline
+  instances, Skyline gets remote Redis data preprocessed via a Skyline API so
+  there is no need to bind Redis to any other IP.
 - Start Redis
 - Install memcached and start memcached see `memcached.org <https://memcached.org/>`__
 - Ensure that you start memcached only bound to 127.0.0.1 by passing the daemon

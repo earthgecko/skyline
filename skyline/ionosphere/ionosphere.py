@@ -98,6 +98,22 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+# @added 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
+# Number of processes to assign to Ionosphere, however Ionosphere should never
+# need more than 1 and is effectively hard coded as such currently.  This
+# variable is only declared for the purpose of maintaining a standard set up in
+# each module and to possibly enable more than one processor on Ionosphere in
+# the future, should there be a requirement for Ionosphere to analyse the
+# metrics quicker.  Running Ionosphere with more than one process is untested
+# and currently it is hard coded to be 1
+# (https://github.com/earthgecko/skyline/issues/69)
+try:
+    ionosphere_processes = settings.IONOSPHERE_PROCESSES
+    if ionosphere_processes != 1:
+        ionosphere_processes = 1
+except:
+    ionosphere_processes = 1
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 max_age_seconds = settings.IONOSPHERE_CHECK_MAX_AGE
@@ -1828,7 +1844,6 @@ class Ionosphere(Thread):
                             # On low values such as 1 and 2, the range_tolerance
                             # should be adjusted to account for the very small
                             # range. TODO
-
                             lower_max_fp_value = int(max_fp_value - (max_fp_value * range_tolerance))
                             upper_max_fp_value = int(max_fp_value + (max_fp_value * range_tolerance))
                             if int(max_anomalous_value) in range(lower_max_fp_value, upper_max_fp_value):
@@ -2939,7 +2954,9 @@ class Ionosphere(Thread):
             spawned_pids = []
             pid_count = 0
             now = time()
-            for i in range(1, settings.IONOSPHERE_PROCESSES + 1):
+            # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
+            # for i in range(1, settings.IONOSPHERE_PROCESSES + 1):
+            for i in range(1, ionosphere_processes + 1):
                 if ionosphere_job:
                     try:
                         p = Process(target=self.spin_process, args=(i, metric_check_file))
@@ -2948,7 +2965,9 @@ class Ionosphere(Thread):
                         logger.info(
                             'starting %s of %s %s' % (
                                 str(pid_count),
-                                str(settings.IONOSPHERE_PROCESSES),
+                                # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
+                                # str(settings.IONOSPHERE_PROCESSES),
+                                str(ionosphere_processes),
                                 function_name))
                         p.start()
                         spawned_pids.append(p.pid)
@@ -2966,7 +2985,9 @@ class Ionosphere(Thread):
                         logger.info(
                             'starting %s of %s %s' % (
                                 str(pid_count),
-                                str(settings.IONOSPHERE_PROCESSES),
+                                # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
+                                # str(settings.IONOSPHERE_PROCESSES),
+                                str(ionosphere_processes),
                                 function_name))
                         p.start()
                         spawned_pids.append(p.pid)
@@ -2990,7 +3011,9 @@ class Ionosphere(Thread):
                     time_to_run = time() - p_starts
                     logger.info(
                         '%s %s completed in %.2f seconds' % (
-                            str(settings.IONOSPHERE_PROCESSES),
+                            # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
+                            # str(settings.IONOSPHERE_PROCESSES),
+                            str(ionosphere_processes),
                             function_name, time_to_run))
                     break
             else:

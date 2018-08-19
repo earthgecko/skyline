@@ -1344,3 +1344,63 @@ def is_derivative_metric(current_skyline_app, base_name):
         return True
 
     return False
+
+# @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+def set_metric_as_derivative(current_skyline_app, base_name):
+    """
+    Add the metric to the derivative_metrics Redis set and create a
+    z_derivative_metrics Redis key.
+
+    :param current_skyline_app: the Skyline app that is calling the function
+    :type current_skyline_app: str
+    :param base_name: the metric base_name
+    :type base_name: str
+    :return: boolean
+    :rtype: boolean
+
+    """
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    current_logger.info('set_metric_as_derivative :: %s' % str(base_name))
+    return_boolean = True
+    REDIS_CONN = None
+
+    try:
+        if settings.REDIS_PASSWORD:
+            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        from redis import StrictRedis
+    if not REDIS_CONN:
+        try:
+            if settings.REDIS_PASSWORD:
+                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        except:
+            current_logger.error('error :: set_metric_as_derivative - Redis connection failed')
+    if not REDIS_CONN:
+        return return_boolean
+
+    metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(base_name))
+    try:
+        REDIS_CONN.sadd('derivative_metrics', metric_name)
+        current_logger.info('set_metric_as_derivative :: %s added to derivative_metrics Redis set' % str(metric_name))
+    except:
+        current_logger.info(traceback.format_exc())
+        current_logger.error('error :: failed to add metric to Redis derivative_metrics set')
+        return_boolean = False
+
+    derivative_metric_key = 'z.derivative_metric.%s' % str(base_name)
+    try:
+        last_expire_set = int(time())
+        REDIS_CONN.setex(
+            derivative_metric_key, settings.FULL_DURATION, last_expire_set)
+    except Exception as e:
+        current_logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+        return_boolean = False
+
+    return return_boolean

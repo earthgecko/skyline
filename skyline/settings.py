@@ -319,6 +319,22 @@ STALE_PERIOD = 500
 :vartype STALE_PERIOD: int
 """
 
+ALERT_ON_STALE_METRICS = True
+"""
+:var ALERT_ON_STALE_METRICS: Send a digest alert of all metrics that stop
+    populating their time series data.
+:vartype ALERT_ON_STALE_METRICS: boolean
+"""
+
+ALERT_ON_STALE_PERIOD = 300
+"""
+:var ALERT_ON_STALE_PERIOD: This is the duration, in seconds, after which an
+    alert will be sent for a metric if it stops sending data.  The digest alert
+    will only occur once while in the window between the ALERT_ON_STALE_PERIOD
+    and the STALE_PERIOD.
+:vartype ALERT_ON_STALE_PERIOD: int
+"""
+
 MIN_TOLERABLE_LENGTH = 1
 """
 :var MIN_TOLERABLE_LENGTH: This is the minimum length of a timeseries, in
@@ -516,6 +532,21 @@ trigger again.
 
 .. note:: Consider using the default skyline_test.alerters.test for testing
     alerts with.
+
+"""
+
+DO_NOT_ALERT_ON_STALE_METRICS = [
+    # DO NOT alert if these metrics go stale
+    'donot_alert_on_stale.metric_known_to_go_stale',
+]
+"""
+:var DO_NOT_ALERT_ON_STALE_METRICS: Metrics to not digest alert on if they
+    are becoming stale.
+:vartype DO_NOT_ALERT_ON_STALE_METRICS: list
+
+These are metrics that you do not want a Skyline stale digest alert on.  Works
+in the same way that SKIP_LIST does, it matches in the string or dotted
+namespace elements.
 
 """
 
@@ -1403,8 +1434,14 @@ IONOSPHERE_ENABLED = True
 
 IONOSPHERE_PROCESSES = 1
 """
-:var IONOSPHERE_PROCESSES: Number of processes to assign to Panorama, should never
-    need more than 1
+:var IONOSPHERE_PROCESSES: Number of processes to assign to Ionosphere, however
+    Ionosphere should never need more than 1 and is effectively hard coded as
+    such currently.  This variable is only declared for the purpose of
+    maintaining a standard set up in each module and to possibly enable more
+    than one processor on Ionosphere in the future, should there be a
+    requirement for Ionosphere to analyse the metrics quicker.  Running
+    Ionosphere with more than one process is untested and currently it is
+    hard coded to be 1 (https://github.com/earthgecko/skyline/issues/69)
 :vartype IONOSPHERE_ENABLED: int
 """
 

@@ -83,19 +83,24 @@
 #                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
 		    <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 			  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 			  <li class="active"><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
   {% elif list_by == 'metric' %}
 			  <li><a href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 		    <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 			  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 			  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
   {% else %}
 			  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 		    <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 			  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 			  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
   {% endif %}
+
 			</ul>
 			<div class="tab-content">
 {% endif %}

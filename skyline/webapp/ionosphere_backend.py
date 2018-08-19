@@ -990,8 +990,14 @@ def features_profile_details(fp_id):
         row = result.fetchone()
         fp_details_object = row
         connection.close()
-        tsfresh_version = row['tsfresh_version']
-        calc_time = row['calc_time']
+        try:
+            tsfresh_version = row['tsfresh_version']
+        except:
+            tsfresh_version = 'unknown'
+        try:
+            calc_time = row['calc_time']
+        except:
+            calc_time = 'unknown'
         full_duration = row['full_duration']
         features_count = row['features_count']
         features_sum = row['features_sum']
@@ -1160,9 +1166,11 @@ def ionosphere_search(default_query, search_query):
             if not count_request:
                 get_metric_profiles = True
                 query_string = 'SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID'
+                needs_and = True
             else:
                 new_query_string = 'SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID'
                 query_string = new_query_string
+                needs_and = True
 
     if 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
@@ -1475,7 +1483,7 @@ def ionosphere_search(default_query, search_query):
                 # @added 20170402 - Feature #2000: Ionosphere - validated
                 fp_validated = int(row['validated'])
                 all_fps.append([fp_id, fp_metric_id, str(fp_metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated])
-                logger.info('%s :: %s feature profiles found' % (function_str, str(len(all_fps))))
+                # logger.info('%s :: %s feature profiles found' % (function_str, str(len(all_fps))))
             except:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
@@ -1650,7 +1658,19 @@ def ionosphere_search(default_query, search_query):
                     # Added layers information to the features_profiles items
                     if fp_layers_id > 0:
                         layers_present = True
-                    features_profiles.append([fp_id, metric_id, str(metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id])
+                    # @modified 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
+                    # Fix bug and make this function output useable to
+                    # get_features_profiles_to_validate
+                    append_to_features_profile_list = True
+                    if 'validated_equals' in request.args:
+                        validated_equals = request.args.get('validated_equals', 'any')
+                    else:
+                        validated_equals = 'any'
+                    if validated_equals == 'false':
+                        if fp_validated == 1:
+                            append_to_features_profile_list = False
+                    if append_to_features_profile_list:
+                        features_profiles.append([fp_id, metric_id, str(metric), full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id])
                     # @added 20170912 - Feature #2056: ionosphere - disabled_features_profiles
                     features_profile_enabled = int(row['enabled'])
                     if features_profile_enabled == 1:
@@ -1736,25 +1756,30 @@ def ionosphere_search(default_query, search_query):
             if engine:
                 engine_disposal(engine)
             raise
-        # Add the layers information to the features_profiles list
-        features_profiles_and_layers = []
-        if features_profiles:
-            # @modified 20170402 - Feature #2000: Ionosphere - validated
-            for fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id in features_profiles:
-                default_values = True
-                if int(fp_layers_id) > 0:
-                    for layer_id, layer_fp_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in features_profiles_layers:
-                        if int(fp_layers_id) == int(layer_id):
-                            default_values = False
-                            break
-                if default_values:
-                    layer_id = 0
-                    layer_matched_count = 0
-                    layer_human_date = 'none'
-                    layer_check_count = 0
-                    layer_checked_human_date = 'none'
-                    layer_label = 'none'
-                features_profiles_and_layers.append([fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label])
+    # Add the layers information to the features_profiles list
+    features_profiles_and_layers = []
+    if features_profiles:
+        # @modified 20170402 - Feature #2000: Ionosphere - validated
+        for fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id in features_profiles:
+            default_values = True
+            # @modified 20180816 - Feature #2430: Ionosphere validate learnt features profiles page
+            # Moved default_values to before the evalution as it was found
+            # that sometimes the features_profiles had 19 elements if a
+            # features profile had no layer or 23 elements if there was a
+            # layer
+            if default_values:
+                layer_id = 0
+                layer_matched_count = 0
+                layer_human_date = 'none'
+                layer_check_count = 0
+                layer_checked_human_date = 'none'
+                layer_label = 'none'
+            if int(fp_layers_id) > 0:
+                for layer_id, layer_fp_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in features_profiles_layers:
+                    if int(fp_layers_id) == int(layer_id):
+                        default_values = False
+                        break
+            features_profiles_and_layers.append([fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label])
 
         old_features_profile_list = features_profiles
         features_profiles = features_profiles_and_layers
@@ -3835,7 +3860,15 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     try:
         del metric_list
     except:
-        logger.error('error :: failed to del metrics')
+        logger.error('error :: failed to del metrics_list')
+
+    # @added 20180809 - Bug #2496: error reported on no matches found
+    #                   https://github.com/earthgecko/skyline/issues/64
+    # If there are no matches return this information in matches to prevent
+    # webapp from reporting an error
+    if not matches:
+        # [[1505560867, 39793, 'features_profile', 782, 'None', 'stats.skyline-dev-3-40g-gra1.vda.ioInProgress', 'ionosphere?fp_matched=true...'],
+        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None']]
 
     return matches, fail_msg, trace
 
@@ -4052,3 +4085,268 @@ metric_timestamp    :: %s     | human_date :: %s
             graph_image_file = None
 
     return matched_details, True, fail_msg, trace, matched_details_object, graph_image_file
+
+
+# @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
+def get_features_profiles_to_validate(base_name):
+    """
+    Get the details for Ionosphere features profiles that need to be validated
+    for a metric and returns a list of the details for each of the features
+    profile including the ionosphere_image API URIs for all the relevant graph
+    images for the weabpp Ionosphere validate_features_profiles page.
+    [[  fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,
+        fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,
+        fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,
+        fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,
+        maximum_full_duration]]
+
+    :param base_name: metric base_name
+    :type base_name: str
+    :return: list of lists
+    :rtype:  [[int, int, str, int, int, int, int, int, str, str, str, str, int, str, str, int, int]]
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: get_feature_profiles_validate'
+
+    trace = 'none'
+    fail_msg = 'none'
+
+    # Query the ionosphere_functions function for base_name, validated == false
+    # and get the details for each features profile that needs to be validated
+    features_profiles_to_validate = []
+    search_success = False
+    fps = []
+    try:
+        fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, search_success, fail_msg, trace = ionosphere_search(False, True)
+        logger.info('fp object :: %s' % str(fps))
+    except:
+        trace = traceback.format_exc()
+        fail_msg = 'error :: %s :: error with search_ionosphere' % function_str
+        logger.error(fail_msg)
+        return (features_profiles_to_validate, fail_msg, trace)
+    if not search_success:
+        trace = traceback.format_exc()
+        fail_msg = 'error :: %s :: Webapp error with search_ionosphere' % function_str
+        logger.error(fail_msg)
+        return (features_profiles_to_validate, fail_msg, trace)
+
+    # Determine the minimum and maximum full durations from the returned fps so
+    # this can be used later to determine what class of features profile is
+    # being dealt with in terms of whether the features profile is a
+    # full_duration LEARNT features profile or a settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
+    # LEARNT features profile.  This allows for determining the correct other
+    # resolution ionosphere_image URIs which are interpolated for display in the
+    # HTML table on the validate_features_profiles page.
+    minimum_full_duration = None
+    maximum_full_duration = None
+    # [fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label]
+    # [4029, 157, 'stats.skyline-dev-3.vda1.ioTime', 604800, 1534001973, '0.4.0', 0.841248, 210, 70108436036.9, 0, 0, 'never matched', '2018-08-11 16:41:04', 0, 'never checked', 3865, 6, 0, 0]
+    # for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id in fps:
+    for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in fps:
+        if not minimum_full_duration:
+            minimum_full_duration = int(fp_full_duration)
+        else:
+            if int(fp_full_duration) < int(minimum_full_duration):
+                minimum_full_duration = int(fp_full_duration)
+        if not maximum_full_duration:
+            maximum_full_duration = int(fp_full_duration)
+        else:
+            if int(fp_full_duration) > int(maximum_full_duration):
+                maximum_full_duration = int(fp_full_duration)
+
+    # Get the features profile parent details (or parent parent if needed) to
+    # determine the correct arguments for the ionosphere_image URIs for the
+    # graph images of the parent, from which the fp being evaluated this was
+    # learn for side-by-side visual comparison to inform the user and all for
+    # them to
+    # [fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label]
+    # for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id in fps:
+    for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in fps:
+        if int(fp_parent_id) == 0:
+            continue
+        if int(fp_validated) == 1:
+            continue
+        parent_fp_details_object = None
+        parent_parent_fp_id = None
+        try:
+            parent_fp_details, success, fail_msg, trace, parent_fp_details_object = features_profile_details(fp_parent_id)
+        except:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: %s :: failed to get parent_fp_details_object from features_profile_details for parent fp_id %s' % (
+                function_str, str(fp_parent_id))
+            logger.error(fail_msg)
+            return (features_profiles_to_validate, fail_msg, trace)
+        if not parent_fp_details_object:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: %s :: no parent_fp_details_object from features_profile_details for parent fp_id %s' % (
+                function_str, str(fp_parent_id))
+            logger.error(fail_msg)
+            return (features_profiles_to_validate, fail_msg, trace)
+        parent_full_duration = parent_fp_details_object['full_duration']
+
+        # If the features profile is learnt at a full_duration of
+        # settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS (aka
+        # maximum_full_duration), the graphs of the parent's parent fp ip are
+        # required.  This is because a features profile that is LEARNT in the
+        # learn full duration in days context, will essentially have the same
+        # graphs as it's parent.  Therefore the graphs of the parent's parent
+        # are required to allow for the side-by-side visual comparsion.
+        get_parent_parent = False
+        if int(fp_full_duration) > int(minimum_full_duration):
+            get_parent_parent = True
+
+        try:
+            parent_parent_fp_id = parent_fp_details_object['parent_id']
+        except:
+            parent_parent_fp_id = 0
+        if int(parent_parent_fp_id) == 0:
+            get_parent_parent = False
+
+        parent_parent_fp_details_object = None
+        if get_parent_parent:
+            try:
+                parent_parent_fp_id = parent_fp_details_object['parent_id']
+                parent_parent_fp_details, success, fail_msg, trace, parent_parent_fp_details_object = features_profile_details(parent_parent_fp_id)
+                parent_parent_full_duration = parent_parent_fp_details_object['full_duration']
+                parent_parent_anomaly_timestamp = parent_parent_fp_details_object['anomaly_timestamp']
+            except:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: %s :: failed to get parent_parent_fp_details_object from features_profile_details for parent parent fp_id %s' % (
+                    function_str, str(parent_parent_fp_id))
+                logger.error(fail_msg)
+                return (features_profiles_to_validate, fail_msg, trace)
+        if not parent_fp_details_object:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: %s :: no parent_fp_details_object from features_profile_details for parent fp_id %s' % (
+                function_str, str(fp_parent_id))
+            logger.error(fail_msg)
+            return (features_profiles_to_validate, fail_msg, trace)
+        parent_full_duration = parent_fp_details_object['full_duration']
+        parent_anomaly_timestamp = parent_fp_details_object['anomaly_timestamp']
+
+        metric_timeseries_dir = base_name.replace('.', '/')
+        # https://skyline.example.com/ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/skyline-1/io/received/1526312070/stats.skyline-1.io.received.graphite_now.168h.png
+        # Existing image URLs are namespaced and available via the API from:
+        # ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/<base_name>/io/received/<timestamp>/<graphite_metric_namespace>.graphite_now.<full_duration_in_hours>h.png
+        fp_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+            str(anomaly_timestamp))
+        full_duration_in_hours = fp_full_duration / 60 / 60
+        fp_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(anomaly_timestamp)))
+        fp_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
+            str(fp_data_dir), base_name, str(int(full_duration_in_hours)))
+        if int(fp_full_duration) < maximum_full_duration:
+            fp_hours = int(maximum_full_duration / 60 / 60)
+            get_hours = str(fp_hours)
+        else:
+            fp_hours = int(minimum_full_duration / 60 / 60)
+            get_hours = str(fp_hours)
+        fp_learn_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
+            str(fp_data_dir), base_name, get_hours)
+
+        # For this is a LEARNT feature profile at settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
+        # the we want to compare the graph to the parent's parent graph at
+        # settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
+        parent_fp_date_str = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(parent_anomaly_timestamp)))
+        parent_fp_date = '%s - using parent fp id %s' % (str(parent_fp_date_str), str(int(fp_parent_id)))
+        if get_parent_parent and parent_parent_fp_details_object:
+            parent_fp_data_dir = '%s/%s/%s' % (
+                settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                str(parent_parent_anomaly_timestamp))
+            if parent_parent_full_duration < maximum_full_duration:
+                parent_full_duration_in_hours = int(minimum_full_duration) / 60 / 60
+            else:
+                parent_full_duration_in_hours = int(parent_parent_full_duration) / 60 / 60
+            parent_parent_fp_date_str = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(parent_parent_anomaly_timestamp)))
+            parent_fp_date = '%s - using parent\'s parent fp id %s' % (str(parent_parent_fp_date_str), str(int(parent_parent_fp_id)))
+        else:
+            parent_fp_data_dir = '%s/%s/%s' % (
+                settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                str(parent_anomaly_timestamp))
+            if parent_full_duration > fp_full_duration:
+                parent_full_duration_in_hours = int(fp_full_duration) / 60 / 60
+            else:
+                parent_full_duration_in_hours = int(parent_full_duration) / 60 / 60
+        parent_fp_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
+            str(parent_fp_data_dir), base_name, str(int(parent_full_duration_in_hours)))
+        if int(fp_full_duration) == maximum_full_duration:
+            fp_hours = int(minimum_full_duration / 60 / 60)
+            get_hours = str(fp_hours)
+        else:
+            fp_hours = int(maximum_full_duration / 60 / 60)
+            get_hours = str(fp_hours)
+        parent_fp_learn_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
+            # str(parent_fp_data_dir), base_name, str(int(parent_full_duration_in_hours)))
+            str(parent_fp_data_dir), base_name, get_hours)
+
+        features_profiles_to_validate.append([fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration, maximum_full_duration])
+
+    logger.info('%s :: features_profiles_to_validate - %s' % (
+        function_str, str(features_profiles_to_validate)))
+    return (features_profiles_to_validate, fail_msg, trace)
+
+
+# @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
+def get_metrics_with_features_profiles_to_validate():
+    """
+    Get the metrics with Ionosphere features profiles that need to be validated
+    and return a list of the details for each metric.
+    [[metric_id, metric, fps_to_validate_count]]
+
+    :return: list of lists
+    :rtype:  [[int, str, int]]
+
+    """
+    logger = logging.getLogger(skyline_app_logger)
+
+    function_str = 'ionoshere_backend.py :: get_metrics_with_features_profiles_to_validate'
+
+    trace = 'none'
+    fail_msg = 'none'
+
+    # Query the ionosphere_functions function for base_name, validated == false
+    # and get the details for each features profile that needs to be validated
+    metrics_with_features_profiles_to_validate = []
+    search_success = False
+    fps = []
+    try:
+        fps, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, search_success, fail_msg, trace = ionosphere_search(False, True)
+    except:
+        trace = traceback.format_exc()
+        fail_msg = 'error :: %s :: error with search_ionosphere' % function_str
+        logger.error(fail_msg)
+        return (metrics_with_features_profiles_to_validate, fail_msg, trace)
+    if not search_success:
+        trace = traceback.format_exc()
+        fail_msg = 'error :: %s :: Webapp error with search_ionosphere' % function_str
+        logger.error(fail_msg)
+        return (metrics_with_features_profiles_to_validate, fail_msg, trace)
+
+    # Determine the minimum and maximum full durations from the returned fps so
+    # this can be used later to determine what class of features profile is
+    # being dealt with in terms of whether the features profile is a
+    # full_duration LEARNT features profile or a settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS
+    # LEARNT features profile.  This allows for determining the correct other
+    # resolution ionosphere_image URIs which are interpolated for display in the
+    # HTML table on the validate_features_profiles page.
+    # [fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label]
+    metric_ids_with_fps_to_validate = []
+    # for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id in fps:
+    for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in fps:
+        if metric_id not in metric_ids_with_fps_to_validate:
+            metric_ids_with_fps_to_validate.append(metric_id)
+    for i_metric_id in metric_ids_with_fps_to_validate:
+        fps_to_validate_count = 0
+        for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in fps:
+            if i_metric_id != metric_id:
+                continue
+            if fp_validated == 0:
+                fps_to_validate_count += 1
+                i_metric = metric
+        if fps_to_validate_count > 0:
+            metrics_with_features_profiles_to_validate.append([i_metric_id, i_metric, fps_to_validate_count])
+    logger.info('%s :: metrics with features profiles to validate - %s' % (
+        function_str, str(metrics_with_features_profiles_to_validate)))
+    return (metrics_with_features_profiles_to_validate, fail_msg, trace)

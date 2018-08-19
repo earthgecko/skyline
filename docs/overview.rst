@@ -49,7 +49,7 @@ https://github.com/blue-yonder/tsfresh and evaluation against boundary layer
 algorithms to determine whether a 3-sigma triggered anomaly is actually a normal,
 known pattern in the data.
 
-The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm -
+The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm -
 SITTSSCA first coined here :) compares the generated fingerprints of the two
 time series and can determine if they closely resemble each other in terms of:
 
@@ -62,10 +62,10 @@ time series and can determine if they closely resemble each other in terms of:
   (https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value)
   http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy
 
-The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm
+The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm
 compares how close the fingerprint values are as a percentage and
-varying this percentage variable will either focusing the algorithm with greater
-precision the closer to 0% the parameter gets, the perfect match (or possibly
+varying this percentage variable will either focus the algorithm with greater
+precision, the closer to 0% the parameter gets, the perfect match (or possibly
 a mirror match too - unkonwn/untested) or it will incrementally increase the
 tolerance as the percentage variable increases and the matching will become
 less and less reliable.
@@ -140,10 +140,12 @@ It has been generally accepted now that a basic 3-sigma anomaly detection
 implementation is not generally useful in the operations and machine metrics
 space.
 
-> I still remember taking Skyline and applying it to one of our customer's metrics, and turning 100,000 metrics into 10,000 anomalies. It just created more noise from the noise.
+:David Gildeh: "I still remember taking Skyline and applying it to one of our
+  customer's metrics, and turning 100,000 metrics into 10,000 anomalies. It just
+  created more noise from the noise." https://blog.outlyer.com/what-good-is-anomaly-detection
 
 This is still true of Skyline today, it will still detect the 10000 anomalies
-and it should.
+and it **should**.
 
 So why continue developing Skyline?
 

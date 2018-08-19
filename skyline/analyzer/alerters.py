@@ -15,6 +15,8 @@ import traceback
 import redis
 from msgpack import Unpacker
 import datetime as dt
+# @added 20180809 - Bug #2498: Incorrect scale in some graphs
+from time import time
 # @modified 20160820 - Issue #23 Test dependency updates
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
@@ -219,15 +221,37 @@ def alert_smtp(alert, metric, context):
     if settings.GRAPHITE_PORT != '':
         graphite_port = str(settings.GRAPHITE_PORT)
 
-    link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
-        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-        graphite_port, str(int(full_duration_in_hours)), metric[1],
+    # @added 20180809 - Bug #2498: Incorrect scale in some graphs
+    # If -xhours is used the scale is incorrect if x hours > than first
+    # retention period, passing from and until renders the graph with the
+    # correct scale.
+    from_timestamp = int(time())
+    until_timestamp = from_timestamp - full_duration_seconds
+    graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_from - %s' % str(graphite_from))
+    graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_until - %s' % str(graphite_until))
+
+    # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+    # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+    #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+    #     graphite_port, str(int(full_duration_in_hours)), metric[1],
+    #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+        str(graphite_from), str(graphite_until), metric[1],
         settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+
     # @added 20170603 - Feature #2034: analyse_derivatives
     if known_derivative_metric:
-        link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+        # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+        #     graphite_port, str(int(full_duration_in_hours)), metric[1],
+        #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, str(int(full_duration_in_hours)), metric[1],
+            graphite_port, str(graphite_from), str(graphite_until), metric[1],
             settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
@@ -673,8 +697,8 @@ def alert_smtp(alert, metric, context):
         more_body += '<br>'
         more_body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
     except:
-        logger.error('error :: alert_smtp - could not build body')
         logger.info(traceback.format_exc())
+        logger.error('error :: alert_smtp - could not build body')
 
     # @modified 20180524 - Task #2384: Change alerters to cc other recipients
     # Do not send to each recipient, send to primary_recipient and cc the other
@@ -862,15 +886,36 @@ def alert_hipchat(alert, metric, context):
         graph_title_string = quote(unencoded_graph_title, safe='')
         graph_title = '&title=%s' % graph_title_string
 
+        # @added 20180809 - Bug #2498: Incorrect scale in some graphs
+        # If -xhours is used the scale is incorrect if x hours > than first
+        # retention period, passing from and until renders the graph with the
+        # correct scale.
+        from_timestamp = int(time())
+        until_timestamp = from_timestamp - full_duration_seconds
+        graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+        logger.info('graphite_from - %s' % str(graphite_from))
+        graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+        logger.info('graphite_until - %s' % str(graphite_until))
+
         if settings.GRAPHITE_PORT != '':
-            link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+            # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1],
+            #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1],
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         else:
-            link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+            # link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     full_duration_in_hours, metric[1],
+            #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                full_duration_in_hours, metric[1],
+                str(graphite_from), str(graphite_until), metric[1],
                 settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
@@ -904,6 +949,59 @@ def alert_syslog(alert, metric, context):
         syslog.syslog(4, message)
     else:
         return
+
+
+# @added 20180807 - Feature #2492: alert on stale metrics (github #67)
+def alert_stale_digest(alert, metric, context):
+    """
+    Called by :func:`~trigger_alert` and sends a digest alert via smtp of the
+    stale metrics to the default recipient
+
+    """
+    LOCAL_DEBUG = False
+    logger = logging.getLogger(skyline_app_logger)
+    if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+        logger.info('debug :: alert_stale_digest - sending smtp digest alert of stale metrics')
+
+    try:
+        recipient = settings.SMTP_OPTS['default_recipient']
+    except:
+        logger.error('error :: alert_stale_digest - no known default_recipient')
+        return False
+
+    try:
+        body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
+        body += '<font color="black"><b>Stale metrics (no data sent for ~%s seconds):</b></font><br>' % str(settings.ALERT_ON_STALE_PERIOD)
+        for metric_name in metric[1]:
+            body += '<font color="black">%s</font><br>' % str(metric_name)
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: alert_stale_digest - could not build body')
+        try:
+            msg = MIMEMultipart('mixed')
+            cs_ = charset.Charset('utf-8')
+            cs_.header_encoding = charset.QP
+            cs_.body_encoding = charset.QP
+            msg.set_charset(cs_)
+            msg['Subject'] = '[Skyline alert] - %s ALERT - stale metrics' % (context)
+            msg['From'] = sender
+            msg['To'] = recipient
+            msg.attach(MIMEText(body, 'html'))
+            msg.replace_header('content-transfer-encoding', 'quoted-printable')
+            msg.attach(MIMEText(more_body, 'html'))
+        except:
+            logger.error('error :: alert_smtp - could not attach')
+            logger.info(traceback.format_exc())
+
+        s = SMTP('127.0.0.1')
+        try:
+            s.sendmail(sender, recipient, msg.as_string())
+            logger.info('alert_stale_digest - sent email to recipient :: %s' % str(recipient))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: alert_stale_digest - could not send email to recipient :: %s' % str(recipient))
+        s.quit()
+    return
 
 
 def trigger_alert(alert, metric, context):

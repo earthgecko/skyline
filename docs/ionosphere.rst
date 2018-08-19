@@ -258,6 +258,10 @@ the fuller duration of the metric's ``learn_full_duration``.
 You can teach Ionosphere badly, but to unteach it is just a click of the Disable
 features profile button.
 
+Use Ionosphere learning sparingly, although it is a feature, it will also
+generates an ongoing requirement for you to review and validate what it has
+learnt.
+
 Skyline learning is not perfect.  There are certain metrics that learning seems
 not to work as well on as other metrics, 5min and 15min load_average metrics
 fall into this category.  Do not go overboard on learning do it slowly and
@@ -271,10 +275,11 @@ features profiles every so often, this can be achieved when reviewing and
 training on not anomalous patterns is done, whenever training data for a metric
 is assessed it is easy to review all features profiles for that metric during
 this phase by using the :skyblue:`Existing ::` :red:`features profiles page link`
-on the training page.
+on the training page and using the Ionosphere Validate page for side-by-side
+comparisons.
 
 To begin with try and start with only creating features profiles and only
-implementing learning occasionally when you are certain that a metric has a
+implementing learning very occasionally when you are certain that a metric has a
 very "normal" pattern over 30 days.  Initially just creating features profiles
 and not trying to learn on all of them, will give you a good idea of what
 Skyline Ionosphere is doing when you look at the Ionosphere matches pages and
@@ -282,6 +287,28 @@ review matches.  Having a few learn features profiles as well, will also give
 you a good idea of what is being done when Skyline is learning, when you look
 at the Ionosphere features profiles page and reviewing the :red:`learnt`
 features profiles on the :skyblue:`Search ::` :red:`features profiles` page.
+
+Bad LEARNT features profiles
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Due to Ionosphere using a :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN`
+percentage difference to learn with, it is going to get some learning wrong as
+far as we humans are concerned.  Due to the algorithm using a percentage
+difference and not exact matches means that occasionally Ionosphere is going to
+learn badly, which is often the case with load_avg metrics it seems and this
+will also happen sometimes when there is missing data in a time series.
+Ensure that you review and validate LEARNT features profiles often to ensure
+that incorrect LEARNT features profiles are disabled as soon as possible.
+
+..warning:: A **important** note on learning.  When you let Ionosphere learn
+  you create a lot of work for yourself in terms of validating every learnt
+  profile that Ionosphere learns.  If Ionosphere learns badly and you do not
+  keep up to date with validating learnt features profiles, Ionosphere could end
+  up silencing genuine anomalies which you would **want** to be alerted on.
+  The minimise and mitigate Ionosphere learning badly too many times, it is
+  possible to set the :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS`
+  variable to 2 instead of the current default of 16 (as of v1.2.5), but as a
+  general rule of thumb, using learning sparingly and validate often.
 
 How Ionosphere works - a simple overview
 ----------------------------------------
