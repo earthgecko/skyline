@@ -2,7 +2,7 @@
 1.2.5 - the luminosity branch
 ==============================
 
-v1.2.5-luminosity - August 1x, 2018
+v1.2.5-luminosity - August 19, 2018
 
 Changes from v1.2.4
 -------------------
