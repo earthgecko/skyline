@@ -1,0 +1,92 @@
+==============================
+1.2.6 - the luminosity branch
+==============================
+
+v1.2.6-luminosity - August 21, 2018
+
+Changes from v1.2.5
+-------------------
+
+- Bumped version to v1.2.6
+- Documentation changes for v1.2.6-stable-luminosity relating to requiring
+  virtualenv==15.2.0 durng the set up
+- Fix SQL errors (fixes #73)
+
+Update notes
+------------
+
+- NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.5
+- There is are only changes to the create SQL, if you have a DB set up at v1.2.5
+  there are NO required changes with this release.
+
+How to update from v1.2.2, v1.2.3, v1.2.4 or v1.2.5
+---------------------------------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version skyline/settings.py with the new version of
+  skyline/settings.py and create a new settings.py in the temp location
+  appropriate for Skyline v1.2.6 and your set up, ready to be deployed.
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    NEW_SKYLINE_VERSION="v1.2.6-stable-luminosity"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v1.2.5-stable-luminosity"    # Your old Skyline version
+    # OR
+    # OLD_SKYLINE_VERSION="v1.2.2-stable-luminosity"
+    # OLD_SKYLINE_VERSION="v1.2.3-stable-luminosity"
+    # etc
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.6 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.4-luminosity-stable
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done

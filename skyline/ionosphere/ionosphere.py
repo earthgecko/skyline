@@ -1776,6 +1776,8 @@ class Ionosphere(Thread):
                     # @added 20180621 - Feature #2404: Ionosphere - fluid approximation
                     # Check ranges and only Min-Max scale if the 2 time series
                     # are similar in range
+                    # @added 20180819 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
+                    # TODO
                     try:
                         range_tolerance = settings.IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE
                     except:

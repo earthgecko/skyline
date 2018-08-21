@@ -50,16 +50,16 @@ Regardless of your OS as long as you have pip installed you can install
 virtualenv. *NOTE:* if you are using a version of Python virtualenv
 already, this may not suit your setup.
 
-virtualenv must be >= 15.0.1 due to some recent changes in the pip and
-setuptools, see **Recent changes in the pip environment** section in
-`Requirements <requirements.html#recent-changes-in-the-pip-environment>`__
+virtualenv must be >= 15.0.1 and <16.0.0 due to some recent changes in pip,
+setuptools and virtualenv, see **Recent changes in the pip environment** section
+in `Requirements <requirements.html#recent-changes-in-the-pip-environment>`__
 for more details.
 
 This is using your system pip at this point only to install virtualenv.
 
 .. code-block:: bash
 
-    pip install 'virtualenv>=15.0.1'
+    pip install 'virtualenv==15.2.0'
 
 Python version
 ~~~~~~~~~~~~~~

@@ -231,8 +231,9 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 /*
 # @added 20161229 - Feature #1830: Ionosphere alerts
 # Record times checked
-*/
+# @modified 20180821 - Bug #2546: Fix SQL errors
   `last_checked` INT(10) DEFAULT 0 COMMENT 'the unix timestamp of the last time this feature profile was checked',
+*/
   `checked_count` INT(10) DEFAULT 0 COMMENT 'the number of times this feature profile has been checked',
 /*
 # @added 20170110 - Feature #1854: Ionosphere learn - generations
@@ -247,7 +248,11 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 /* # @added 20170305 - Feature #1960: ionosphere_layers */
   `layers_id` INT(11) DEFAULT 0 COMMENT 'the id of the ionosphere_layers profile, 0 being none',
   PRIMARY KEY (id),
+/*
+# @modified 20180821 - Bug #2546: Fix SQL errors
   INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layer_id`))
+*/
+  INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layers_id`))
   ENGINE=InnoDB;
 
 /*
