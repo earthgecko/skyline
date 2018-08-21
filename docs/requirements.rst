@@ -36,6 +36,9 @@ distribute is one of the requirements on packages that pip tries to
 install. However, it is needed for Mirage if you are trying to
 run/upgrade on Python-2.6
 
+virtualenv 15.2.0 is the last version of virtualenv that supports Python 2.6,
+virtualenv 16.0.0 requires Python 2.7
+
 .. note:  Everything below this point on the page is for people upgrading.  It
   concerns the implications on/with older versions of things.
 

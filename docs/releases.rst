@@ -5,6 +5,7 @@ Release Notes
    :maxdepth: 1
    :glob:
 
+   releases/1_2_6
    releases/1_2_5
    releases/1_2_4
    releases/1_2_3
