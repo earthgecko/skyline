@@ -69,7 +69,7 @@ How to update from v1.2.2, v1.2.3, v1.2.4 or v1.2.5
 
 .. code-block:: bash
 
-    mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.4-luminosity-stable
+    mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.5-luminosity-stable
     mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
 
 - Start the all Skyline services (change as appropriate for your set up) e.g.
