@@ -2,11 +2,8 @@
 Getting data into Skyline
 =========================
 
-You currently have two options to get data into Skyline, via the Horizon
-service:
-
-A note on time snyc
-===================
+Firstly a note on time snyc
+===========================
 
 Although it may seems obvious, it is important to note that any metrics
 coming into Graphite and Skyline should come from synchronised sources.
@@ -16,6 +13,31 @@ functioning of certain algorithms which expect very recent datapoints.
 Time drift does decrease the accuracy and effectiveness of some
 algorithms. In terms of machine related metrics, normal production grade
 time snychronisation will suffice.
+
+Secondly a note on the reliability of metric data
+=================================================
+
+There are many ways to get data to Graphite and Skyline, however some are better
+than others.  The first and most important point is that your metric pipeline
+should be transported via TCP, from source, to Graphite, to Skyline.  Although
+the original Skyline set up in the days of statsd UDP only and where UDP
+transport was seen as acceptable (and it possibly is in a LAN environment).
+Data analysis with metrics shipped via any UDP in a distributed and/or cloud
+environments is not as effective in terms of analysis as TCP shipped metrics.
+
+For Skyline to do the full spectrum of analysis both in the real time and
+historic data contexts, it needs **reliable** data, with as few missing data
+points as possible.
+
+Although collectd is great it ships via UDP, which is not great.  So ensure that
+your metric pipeline is fully TCP transported.  statsd now has a TCP listener,
+sensu is good for server metrics and there are lots of options.
+
+Now getting the data in
+=======================
+
+You currently have two options to get data into Skyline, via the Horizon
+service:
 
 TCP pickles
 ===========
@@ -76,6 +98,8 @@ code for the exact protocol), you'll be able to stream to this listener.
 
 UDP messagepack
 ===============
+
+Genreally do not use this.  It is UDP, but has not been removed.
 
 Horizon also accepts metrics in the form of messagepack encoded strings
 over UDP, on port 2025. The format is
