@@ -1692,6 +1692,7 @@ class Analyzer(Thread):
                 stale_metrics_to_alert_on = []
                 try:
                     alert_on_stale_metrics = list(self.redis_conn.smembers('analyzer.alert_on_stale_metrics'))
+                    logger.info('alert_on_stale_metrics :: %s' % str(alert_on_stale_metrics))
                 except:
                     alert_on_stale_metrics = []
                 for metric_name in alert_on_stale_metrics:
@@ -1719,7 +1720,10 @@ class Analyzer(Thread):
                     if not last_alert:
                         stale_metrics_to_alert_on.append(base_name)
                         try:
-                            self.redis_conn.setex(cache_key, int(time()), int(settings.STALE_PERIOD))
+                            # @modified 20180828 - Bug #2568: alert on stale metrics not firing
+                            # Those expired in the year 2067
+                            # self.redis_conn.setex(cache_key, int(time()), int(settings.STALE_PERIOD))
+                            self.redis_conn.setex(cache_key, int(settings.STALE_PERIOD), int(time()))
                         except:
                             logger.error('error :: failed to add %s Redis key' % cache_key)
                 if stale_metrics_to_alert_on:
