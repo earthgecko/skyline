@@ -51,14 +51,14 @@ except:
 # @added 20180807 - Feature #2492: alert on stale metrics
 try:
     from settings import ALERT_ON_STALE_METRICS
-    alert_on_stale_metrics = settings.ALERT_ON_STALE_METRICS
+#    ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
 except:
-    alert_on_stale_metrics = False
+    ALERT_ON_STALE_METRICS = False
 try:
     from settings import ALERT_ON_STALE_PERIOD
-    alert_on_stale_metrics = settings.ALERT_ON_STALE_PERIOD
+#    ALERT_ON_STALE_PERIOD = settings.ALERT_ON_STALE_PERIOD
 except:
-    alert_on_stale_metrics = 300
+    ALERT_ON_STALE_PERIOD = 300
 
 """
 This is no man's land. Do anything you want in here,
@@ -525,7 +525,7 @@ def run_selected_algorithm(timeseries, metric_name):
     # @added 20180807 - Feature #2492: alert on stale metrics
     # Determine if a metric has stopped sending data and if so add to the
     # analyzer.alert_on_stale_metrics Redis set
-    if alert_on_stale_metrics:
+    if ALERT_ON_STALE_METRICS:
         add_to_alert_on_stale_metrics = False
         # @modified 20180816 - Feature #2492: alert on stale metrics
         # Added try and except to prevent some errors that are encounter between
@@ -540,6 +540,8 @@ def run_selected_algorithm(timeseries, metric_name):
             if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
                 add_to_alert_on_stale_metrics = True
         except:
+            # @modified 20180816 -
+            #                      Feature #2492: alert on stale metrics
             add_to_alert_on_stale_metrics = False
         try:
             if int(time()) - int(timeseries[-1][0]) >= STALE_PERIOD:

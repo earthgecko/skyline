@@ -100,7 +100,7 @@ def alert_smtp(alert, metric, context):
 
     """
     LOCAL_DEBUG = False
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - sending smtp alert')
         logger.info('debug :: alert_smtp - Memory usage at start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -959,12 +959,22 @@ def alert_stale_digest(alert, metric, context):
 
     """
     LOCAL_DEBUG = False
-    logger = logging.getLogger(skyline_app_logger)
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_stale_digest - sending smtp digest alert of stale metrics')
 
+    # @added 20180828 - Bug #2568: alert on stale metrics not firing
+    # Create a new list from the metric[1] tuple item
+    logger.info('alert_stale_digest - metric :: %s' % str(metric))
+    stale_metrics = metric[1]
+    logger.info('alert_stale_digest - stale_metrics :: %s' % str(stale_metrics))
+
+    sender = settings.SMTP_OPTS['sender']
     try:
-        recipient = settings.SMTP_OPTS['default_recipient']
+        # @modified 20180828 - Bug #2568: alert on stale metrics not firing
+        # That was a list not a str
+        # recipient = settings.SMTP_OPTS['default_recipient']
+        recipient = settings.SMTP_OPTS['default_recipient'][0]
+        logger.info('alert_stale_digest - sending smtp digest alert to %s' % str(recipient))
     except:
         logger.error('error :: alert_stale_digest - no known default_recipient')
         return False
@@ -972,35 +982,38 @@ def alert_stale_digest(alert, metric, context):
     try:
         body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
         body += '<font color="black"><b>Stale metrics (no data sent for ~%s seconds):</b></font><br>' % str(settings.ALERT_ON_STALE_PERIOD)
-        for metric_name in metric[1]:
+        # @modified 20180828 - Bug #2568: alert on stale metrics not firing
+        # for metric_name in stale_metric[1]:
+        for metric_name in stale_metrics:
             body += '<font color="black">%s</font><br>' % str(metric_name)
     except:
         logger.info(traceback.format_exc())
         logger.error('error :: alert_stale_digest - could not build body')
-        try:
-            msg = MIMEMultipart('mixed')
-            cs_ = charset.Charset('utf-8')
-            cs_.header_encoding = charset.QP
-            cs_.body_encoding = charset.QP
-            msg.set_charset(cs_)
-            msg['Subject'] = '[Skyline alert] - %s ALERT - stale metrics' % (context)
-            msg['From'] = sender
-            msg['To'] = recipient
-            msg.attach(MIMEText(body, 'html'))
-            msg.replace_header('content-transfer-encoding', 'quoted-printable')
-            msg.attach(MIMEText(more_body, 'html'))
-        except:
-            logger.error('error :: alert_smtp - could not attach')
-            logger.info(traceback.format_exc())
+    try:
+        msg = MIMEMultipart('mixed')
+        cs_ = charset.Charset('utf-8')
+        cs_.header_encoding = charset.QP
+        cs_.body_encoding = charset.QP
+        msg.set_charset(cs_)
+        msg['Subject'] = '[Skyline alert] - %s ALERT - %s stale metrics' % (context, str(len(stale_metrics)))
+        msg['From'] = sender
+        msg['To'] = recipient
+        msg.attach(MIMEText(body, 'html'))
+        msg.replace_header('content-transfer-encoding', 'quoted-printable')
+        #msg.attach(MIMEText(body, 'html'))
+        logger.info('alert_stale_digest - msg attached')
+    except:
+        logger.error('error :: alert_smtp - could not attach')
+        logger.info(traceback.format_exc())
 
-        s = SMTP('127.0.0.1')
-        try:
-            s.sendmail(sender, recipient, msg.as_string())
-            logger.info('alert_stale_digest - sent email to recipient :: %s' % str(recipient))
-        except:
-            logger.info(traceback.format_exc())
-            logger.error('error :: alert_stale_digest - could not send email to recipient :: %s' % str(recipient))
-        s.quit()
+    s = SMTP('127.0.0.1')
+    try:
+        s.sendmail(sender, recipient, msg.as_string())
+        logger.info('alert_stale_digest - sent email to recipient :: %s' % str(recipient))
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: alert_stale_digest - could not send email to recipient :: %s' % str(recipient))
+    s.quit()
     return
 
 

@@ -11,6 +11,9 @@ import traceback
 import redis
 import msgpack
 
+# @added 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+import random
+
 # Get the current working directory of this file.
 # http://stackoverflow.com/a/4060259/120999
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
@@ -32,35 +35,62 @@ def seed():
     if not settings.UDP_PORT:
         print 'error  :: could not determine the settings.UDP_PORT, please check you settings.py'
     else:
-        print 'info   :: settings.UDP_PORT :: ' + str(settings.UDP_PORT)
+        print 'info   :: settings.UDP_PORT :: %s' % str(settings.UDP_PORT)
+
+    # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+    #                      seed_data.py testing with UDP does not work GH77
+    # The use of a UDP socket test is flawed as it will always pass and never
+    # except unless Horizon is bound to all, so use settings.HORIZON_IP
+    if not settings.HORIZON_IP:
+        print 'error  :: could not determine the settings.HORIZON_IP, please check you settings.py'
+    else:
+        HORIZON_IP = settings.HORIZON_IP
+        print 'info   :: settings.HORIZON_IP :: %s' % str(HORIZON_IP)
 
     horizon_params_ok = False
     horizon_use_ip = False
     connect_test_metric = 'horizon.test.params'
     connect_test_datapoint = 1
     packet = msgpack.packb((connect_test_metric, connect_test_datapoint))
-    test_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    try:
-        test_sock.sendto(packet, (socket.gethostname(), settings.UDP_PORT))
-        horizon_params_ok = True
-        print 'notice :: Horizon parameters OK'
-    except Exception as e:
-        print 'warning :: there is an issue with the Horizon parameters'
-        traceback.print_exc()
-        print 'info   :: this is possibly a hostname related issue'
-        print 'notice :: trying on 127.0.0.1'
+    # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+    #                      seed_data.py testing with UDP does not work GH77
+    # The use of a UDP socket test is flawed as it will always pass and never
+    # except unless Horizon is bound to all.
+    if settings.HORIZON_IP == '0.0.0.0':
+        test_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            test_sock.sendto(packet, (socket.gethostname(), settings.UDP_PORT))
+            horizon_params_ok = True
+            print 'notice :: Horizon parameters OK'
+        except Exception as e:
+            print 'warning :: there is an issue with the Horizon parameters'
+            traceback.print_exc()
+            print 'info   :: this is possibly a hostname related issue'
+            print 'notice :: trying on 127.0.0.1'
 
     if not horizon_params_ok:
+        # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+        #                      seed_data.py testing with UDP does not work GH77
+        # There is no certainty that an anomaly can be triggered here as UDP is
+        # used and some data points do not make it into Redis via UDP.
+        # test_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        test_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
-            test_sock.sendto(packet, ('127.0.0.1', settings.UDP_PORT))
+            # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+            # Use the settings.HORIZON_IP value
+            # test_sock.sendto(packet, ('127.0.0.1', settings.UDP_PORT))
+            test_sock.sendto(packet, (settings.HORIZON_IP, settings.UDP_PORT))
             horizon_params_ok = True
-            horizon_use_ip = '127.0.0.1'
-            print 'notice :: using 127.0.0.1 - OK'
+            # horizon_use_ip = '127.0.0.1'
+            horizon_use_ip = settings.HORIZON_IP
+            # print 'notice :: using 127.0.0.1 - OK'
+            print 'notice :: using %s from settings.HORIZON_IP - OK' % str(settings.HORIZON_IP)
         except Exception as e:
             print 'warn   :: there is an issue with the Horizon parameters'
             traceback.print_exc()
-            print 'warn :: Horizon is not available on UDP via 127.0.0.1'
+            # print 'warn :: Horizon is not available on UDP via 127.0.0.1'
+            print 'warn :: Horizon is not available on UDP via %s as defined in settings.HORIZON_IP' % str(settings.HORIZON_IP)
             print 'error :: %s' % str(e)
 
     if not horizon_params_ok:
@@ -71,17 +101,45 @@ def seed():
     print 'info   :: this takes a while...'
     metric = 'horizon.test.udp'
     metric_set = 'unique_metrics'
-    initial = int(time.time()) - settings.MAX_RESOLUTION
+    # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+    #                      seed_data.py testing with UDP does not work GH77
+    # Only use the time series up until the current timestamp to it can be used
+    # in testing and triggering an anomaly
+    # initial = int(time.time()) - settings.MAX_RESOLUTION
+    end_timestamp = int(time.time())
+    initial = end_timestamp - settings.MAX_RESOLUTION
 
     with open(join(__location__, 'data.json'), 'r') as f:
         data = json.loads(f.read())
         series = data['results']
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
         datapoints_sent = 0
         update_user_output = 0
         for datapoint in series:
             datapoint[0] = initial
             initial += 1
+
+            # @added 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+            #                   seed_data.py testing with UDP does not work GH77
+            # Triggering anomaly for testing purposes also NOTE that the data
+            # sent via UDP is consistently missing the last 10 data points sent,
+            # reason unknow, however to below method works for testing.
+            if initial >= (end_timestamp - 14):
+                # Send an anomalous data point
+                add_random = random.randint(500,2000)
+                original_value = int(datapoint[1])
+                if initial == (end_timestamp - 10):
+                    anomalous_datapoint = int(datapoint[1]) + 4000
+                    datapoint[1] = float(anomalous_datapoint)
+                    print 'notice :: adding final anomalous data point - %s - value was %s and was modified with + 4000' % (
+                        str(datapoint), str(original_value))
+                else:
+                    anomalous_datapoint = original_value + add_random
+                    datapoint[1] = float(anomalous_datapoint)
+                    print 'notice :: adding anomalous data point - %s - value was %s and was modified with + %s' % (
+                        str(datapoint), str(original_value), str(add_random))
+
             packet = msgpack.packb((metric, datapoint))
 
             if not horizon_use_ip:
@@ -94,7 +152,11 @@ def seed():
             if update_user_output == 1000:
                 update_user_output = 0
                 print 'notice :: ' + str(datapoints_sent) + ' datapoints sent'
+            if initial == end_timestamp:
+                break
 
+    print 'notice :: last sent data point - %s' % str(datapoint)
+    print 'notice :: total data points sent - %s' % str(datapoints_sent)
     print 'notice :: connecting to Redis to query data and validate Horizon populated Redis with data'
 
     # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
@@ -112,6 +174,14 @@ def seed():
         x = r.get(settings.FULL_NAMESPACE + metric)
         if x is None:
             raise NoDataException
+        # @added 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+        #                   seed_data.py testing with UDP does not work GH77
+        else:
+            unpacker = msgpack.Unpacker(use_list=False)
+            unpacker.feed(x)
+            timeseries = list(unpacker)
+            print 'info :: %s%s key exists and the time series has %s data points' % (
+                settings.FULL_NAMESPACE, metric, str(len(timeseries)))
 
         # Ignore the mini namespace if OCULUS_HOST isn't set.
         if settings.OCULUS_HOST != "":

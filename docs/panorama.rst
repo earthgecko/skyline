@@ -13,7 +13,9 @@ this may result in a lot of entries in the anomalies DB table, it is useful for
 helping with root cause analysis.
 
 New records are used to trigger further analysis of the metric population in
-Luminosity.
+Luminosity to analyse the metric population for cross correlations.  However,
+only metrics with a :mod:`settings.ALERTS` tuple trigger Luminosity, but all
+metric anomalies are recorded.
 
 The :mod:`settings.PANORAMA_CHECK_MAX_AGE` ensures that Panorama only processes
 checks that are not older than this value.  This mitigates against Panorama
@@ -48,7 +50,16 @@ access the database with the user and password you configure in ``settings.py``
   really big data sets may invalidate this in the future, Gaia DR1 MySQL say :)
 
 - See ``skyline.sql`` in your cloned Skyline repo for the schema creation script
-- Enable Panorama and set the other Panorama settings in ``settings.py``
+  and create the skyline database (also create a user with permissions on the
+  database, e.g.
+
+```
+mysql -u root -p < /opt/skyline/github/skyline/skyline/skyline.sql
+mysql -u root -p -e "GRANT ALL ON skyline.* TO 'skyline'@'localhost' IDENTIFIED BY '$YOUR_MYSQL_SKYLINE_PASSWORD' \
+FLUSH PRIVILEGES;"
+```
+
+- Enable Panorama and review the other Panorama settings in ``settings.py``
 - Start Panorama (use your appropriate PATH) - or go back to `Installation`_ and
   continue with the installation steps and Panorama will be started later in the
   installation process.
