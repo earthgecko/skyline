@@ -1690,6 +1690,7 @@ class Analyzer(Thread):
             # @added 20180807 - Feature #2492: alert on stale metrics
             if settings.ALERT_ON_STALE_METRICS:
                 stale_metrics_to_alert_on = []
+                alert_on_stale_metrics = []
                 try:
                     alert_on_stale_metrics = list(self.redis_conn.smembers('analyzer.alert_on_stale_metrics'))
                     logger.info('alert_on_stale_metrics :: %s' % str(alert_on_stale_metrics))
@@ -1742,6 +1743,7 @@ class Analyzer(Thread):
                     del metric
                 else:
                     logger.info('there are no stale metrics to alert on')
+                del stale_metrics_to_alert_on
 
             run_time = time() - now
             total_metrics = str(len(unique_metrics))
