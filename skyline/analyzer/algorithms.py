@@ -287,7 +287,24 @@ def least_squares(timeseries):
         # This results and residual are unused
         # results = np.linalg.lstsq(A, y)
         # residual = results[1]
-        m, c = np.linalg.lstsq(A, y)[0]
+
+        # @modified 20180910 - Task #2588: Update dependencies
+        # Changed in version numpy 1.14.0: If not set, a FutureWarning is given.
+        # The previous default of -1 will use the machine precision as rcond
+        # parameter, the new default will use the machine precision times
+        # max(M, N). To silence the warning and use the new default, use
+        # rcond=None, to keep using the old behavior, use rcond=-1.
+        # Tested with time series - /opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1491468474/stats.statsd.processing_time.mirage.redis.24h.json
+        # new rcond=None resulted in:
+        # np.linalg.lstsq(A, y, rcond=None)[0]
+        # >>> array([3.85656116e-11, 2.58582310e-20])
+        # Original default results in:
+        # np.linalg.lstsq(A, y, rcond=-1)[0]
+        # >>> array([ 4.10251589e-07, -6.11801949e+02])
+        # Changed to pass rcond=-1
+        # m, c = np.linalg.lstsq(A, y)[0]
+        m, c = np.linalg.lstsq(A, y, rcond=-1)[0]
+
         errors = []
         # Evaluate append once, not every time in the loop - this gains ~0.020 s on
         # every timeseries potentially @earthgecko #1310

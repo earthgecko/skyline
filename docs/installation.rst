@@ -104,6 +104,10 @@ Steps
   - Please ensure you handle all of these with iptables AND ip6tables (or the
     equivalent) before continuing.
 
+- Should you wish to review the build steps and component builds and installs
+  there is a build script for **testing** purposes in utils/dawn/skyline.dawn.sh
+  see `Dawn <development/dawn.html>`__ section)
+
 - Install Redis - see `Redis.io <http://redis.io/>`__
 - Ensure that you review https://redis.io/topics/security
 - Ensure Redis has socket enabled **with the following permissions** in your
@@ -178,6 +182,11 @@ Steps
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
+
+    # As of statsmodels 0.9.0 numpy, et al need to be installed before
+    # statsmodels in requirements
+    # https://github.com/statsmodels/statsmodels/issues/4654
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
 
     # This can take lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
@@ -272,7 +281,7 @@ Steps
     vi settings.py
 
 .. note:: a special settings variable that needs mentioning is the alerter
-  :mod:`settings.SYSLOG_ENABLED`.  This variable by default is ```True``` and
+  :mod:`settings.SYSLOG_ENABLED`.  This variable by default is ``True`` and
   in this mode Skyline sends all anomalies to syslog and Panorama to record ALL
   anomalies to the database not just anomalies for metrics that have a
   :mod:`settings.ALERTS` tuple defined.  However this is the desired default

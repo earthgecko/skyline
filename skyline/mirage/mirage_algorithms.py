@@ -231,10 +231,13 @@ def mean_subtraction_cumulation(timeseries, second_order_resolution_seconds):
         series = pandas.Series([x[1] if x[1] else 0 for x in timeseries])
         series = series - series[0:len(series) - 1].mean()
         stdDev = series[0:len(series) - 1].std()
-        if PANDAS_VERSION < '0.18.0':
-            expAverage = pandas.stats.moments.ewma(series, com=15)
-        else:
-            expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
+
+        # @modified 20180910 - Task #2588: Update dependencies
+        # This expAverage is unused
+        # if PANDAS_VERSION < '0.18.0':
+        #     expAverage = pandas.stats.moments.ewma(series, com=15)
+        # else:
+        #     expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
 
         if PANDAS_VERSION < '0.17.0':
             return abs(series.iget(-1)) > 3 * stdDev
@@ -257,9 +260,18 @@ def least_squares(timeseries, second_order_resolution_seconds):
         x = np.array([t[0] for t in timeseries])
         y = np.array([t[1] for t in timeseries])
         A = np.vstack([x, np.ones(len(x))]).T
-        results = np.linalg.lstsq(A, y)
-        residual = results[1]
-        m, c = np.linalg.lstsq(A, y)[0]
+
+        # @modified 20180910 - Task #2588: Update dependencies
+        # This results and residual are unused
+        # results = np.linalg.lstsq(A, y)
+        # residual = results[1]
+
+        # @modified 20180910 - Task #2588: Update dependencies
+        # Changed in version numpy 1.14.0 - see full comments in
+        # analyzer/algorithms.py under least_squares np.linalg.lstsq
+        # m, c = np.linalg.lstsq(A, y)[0]
+        m, c = np.linalg.lstsq(A, y, rcond=-1)[0]
+
         errors = []
         # Evaluate append once, not every time in the loop - this gains ~0.020 s
         # on every timeseries potentially @earthgecko #1310
