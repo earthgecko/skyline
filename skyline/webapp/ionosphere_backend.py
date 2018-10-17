@@ -2390,7 +2390,7 @@ def feature_profile_layers_detail(fp_layers_id):
     :param fp_layers_id: the features profile layers_id
     :type fp_id: str
     :return: tuple
-    :rtype:  (str, boolean, str, str)
+    :rtype:  (str, boolean, str, str, object)
 
     """
     logger = logging.getLogger(skyline_app_logger)
@@ -3105,20 +3105,36 @@ def edit_ionosphere_layers(layers_id):
 
 
 # @added 20170402 - Feature #2000: Ionosphere - validated
-def validate_fp(fp_id):
+# @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+# Extended the validate_fp function to validate a single fp id or all the unvalidated,
+# enabled features profiles for a metric_id
+# def validate_fp(fp_id):
+def validate_fp(update_id, id_column_name):
     """
-    Validate a features profile.
+    Validate a single features profile or validate all enabled, unvalidated
+    features profiles for a metric_id.
 
-    :param fp_id: the features profile id to validate
-    :return: array
-    :rtype: array
+    :param update_id: the features profile id or metric_id to validate
+    :type update_id: int
+    :param id_column_name: the column name to select where on, e.g. id or metric_id
+    :type where: str
+
+    :return: tuple
+    :rtype:  (boolean, str, str)
 
     """
     logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: validate_fp'
 
-    logger.info('%s validating fp_id %s' % (function_str, str(fp_id)))
+    # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+    fp_id = update_id
+
+    # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+    if id_column_name == 'id':
+        logger.info('%s validating fp_id %s' % (function_str, str(fp_id)))
+    if id_column_name == 'metric_id':
+        logger.info('%s validating all enabled and unvalidated features profiles for metric_id - %s' % (function_str, str(update_id)))
 
     trace = 'none'
     fail_msg = 'none'
@@ -3146,7 +3162,12 @@ def validate_fp(fp_id):
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
-        fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
+        # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+        # fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
+        if id_column_name == 'id':
+            fail_msg = 'error :: ionosphere_backend :: %s :: failed to get ionosphere_table meta for fp_id %s' % (function_str, str(fp_id))
+        if id_column_name == 'metric_id':
+            fail_msg = 'error :: ionosphere_backend ::  %s :: failed to get ionosphere_table meta for metric_id - %s' % (function_str, str(update_id))
         logger.error('%s' % fail_msg)
         if engine:
             engine_disposal(engine)
@@ -3154,17 +3175,34 @@ def validate_fp(fp_id):
 
     try:
         connection = engine.connect()
-        connection.execute(
-            ionosphere_table.update(
-                ionosphere_table.c.id == int(fp_id)).
-            values(validated=1))
+        # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+        # fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
+        if id_column_name == 'id':
+            connection.execute(
+                ionosphere_table.update(
+                    ionosphere_table.c.id == int(fp_id)).
+                values(validated=1))
+        if id_column_name == 'metric_id':
+            stmt = ionosphere_table.update().\
+                values(validated=1).\
+                where(ionosphere_table.c.metric_id == int(update_id)).\
+                where(ionosphere_table.c.validated == 0).\
+                where(ionosphere_table.c.enabled == 1)
+            connection.execute(stmt)
         connection.close()
-        logger.info('updated validated for %s' % (str(fp_id)))
+        if id_column_name == 'id':
+            logger.info('updated validated for %s' % (str(fp_id)))
+        if id_column_name == 'metric_id':
+            logger.info('updated validated for all enabled, unvalidated features profiles for metric_id - %s' % (str(update_id)))
     except:
         trace = traceback.format_exc()
         logger.error(trace)
-        logger.error('error :: could not update validated for fp_id %s ' % str(fp_id))
-        fail_msg = 'error :: could not update label for fp_id %s ' % str(fp_id)
+        if id_column_name == 'id':
+            logger.error('error :: could not update validated for fp_id %s ' % str(fp_id))
+            fail_msg = 'error :: could not update validated label for fp_id %s ' % str(fp_id)
+        if id_column_name == 'metric_id':
+            logger.error('error :: could not update validated for all enabled, unvalidated features profiles for metric_id - %s ' % str(update_id))
+            fail_msg = 'error :: could not update validated labels for all enabled, unvalidated features profiles for metric_id - %s ' % str(update_id)
         if engine:
             engine_disposal(engine)
         raise
@@ -3174,7 +3212,10 @@ def validate_fp(fp_id):
     if engine:
         engine_disposal(engine)
 
-    return True, fail_msg, trace
+    if id_column_name == 'id':
+        return True, fail_msg, trace
+    if id_column_name == 'metric_id':
+        return True, fail_msg, trace
 
 
 # @added 20170617 - Feature #2054: ionosphere.save.training_data
@@ -3839,7 +3880,17 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             anomaly_timestamp = int(row['anomaly_timestamp'])
             metric_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(anomaly_timestamp)))
             match_id = int(row['id'])
-            matched_by = 'layers'
+            # @modified 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+            # matched_by = 'layers'
+            try:
+                approx_close = int(row['approx_close'])
+            except:
+                approx_close = 0
+            if approx_close == 0:
+                matched_by = 'layers'
+            else:
+                matched_by = 'layers - approx_close'
+
             fp_id = int(row['fp_id'])
             layer_id = int(row['layer_id'])
             # Get metric name, first get metric id from the features profile
@@ -3850,6 +3901,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             except:
                 metric = 'UNKNOWN'
             uri_to_matched_page = 'None'
+
             matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
 
     sorted_matches = sorted(matches, key=lambda x: x[0])
@@ -3868,7 +3920,9 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     # webapp from reporting an error
     if not matches:
         # [[1505560867, 39793, 'features_profile', 782, 'None', 'stats.skyline-dev-3-40g-gra1.vda.ioInProgress', 'ionosphere?fp_matched=true...'],
-        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None']]
+        # @modified 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+        # matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None']]
+        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None', 'None']]
 
     return matches, fail_msg, trace
 
@@ -4168,6 +4222,11 @@ def get_features_profiles_to_validate(base_name):
             continue
         if int(fp_validated) == 1:
             continue
+
+        # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+        if fp_id not in enabled_list:
+            continue
+
         parent_fp_details_object = None
         parent_parent_fp_id = None
         try:
@@ -4281,7 +4340,10 @@ def get_features_profiles_to_validate(base_name):
             # str(parent_fp_data_dir), base_name, str(int(parent_full_duration_in_hours)))
             str(parent_fp_data_dir), base_name, get_hours)
 
-        features_profiles_to_validate.append([fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration, maximum_full_duration])
+        # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+        # Only add to features_profiles_to_validate if fp_id in enabled_list
+        if fp_id in enabled_list:
+            features_profiles_to_validate.append([fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration, maximum_full_duration])
 
     logger.info('%s :: features_profiles_to_validate - %s' % (
         function_str, str(features_profiles_to_validate)))
@@ -4335,6 +4397,12 @@ def get_metrics_with_features_profiles_to_validate():
     metric_ids_with_fps_to_validate = []
     # for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id in fps:
     for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in fps:
+
+        # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+        # Only add to features_profiles_to_validate if fp_id in enabled_list
+        if fp_id not in enabled_list:
+            continue
+
         if metric_id not in metric_ids_with_fps_to_validate:
             metric_ids_with_fps_to_validate.append(metric_id)
     for i_metric_id in metric_ids_with_fps_to_validate:
@@ -4342,6 +4410,11 @@ def get_metrics_with_features_profiles_to_validate():
         for fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label in fps:
             if i_metric_id != metric_id:
                 continue
+            # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+            # Only add to features_profiles_to_validate if fp_id in enabled_list
+            if fp_id not in enabled_list:
+                continue
+
             if fp_validated == 0:
                 fps_to_validate_count += 1
                 i_metric = metric
