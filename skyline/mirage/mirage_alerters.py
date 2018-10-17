@@ -238,8 +238,17 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     # If -xhours is used the scale is incorrect if x hours > than first
     # retention period, passing from and until renders the graph with the
     # correct scale.
-    from_timestamp = int(time())
-    until_timestamp = from_timestamp - int(second_order_resolution_seconds)
+    # @modified 20181009 - Feature #2618: alert_slack
+    #                      Bug #2498: Incorrect scale in some graphs
+    # Corrected the from_timestamp and until_timestamp as they were incorrectly
+    # order, however Graphite still rendered the correct graph as it plotted
+    # reverse, which is the same.  Also using the metric[0] value instead of
+    # time()
+    # from_timestamp = int(time())
+    # until_timestamp = from_timestamp - int(second_order_resolution_seconds)
+    until_timestamp = int(metric[2])
+    from_timestamp = until_timestamp - int(second_order_resolution_seconds)
+
     graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_from - %s' % str(graphite_from))
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
@@ -842,8 +851,17 @@ def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
         # If -xhours is used the scale is incorrect if x hours > than first
         # retention period, passing from and until renders the graph with the
         # correct scale.
-        from_timestamp = int(time())
-        until_timestamp = from_timestamp - int(second_order_resolution_seconds)
+        # @modified 20181009 - Feature #2618: alert_slack
+        #                      Bug #2498: Incorrect scale in some graphs
+        # Corrected the from_timestamp and until_timestamp as they were incorrectly
+        # order, however Graphite still rendered the correct graph as it plotted
+        # reverse, which is the same.  Also using the metric[0] value instead of
+        # time()
+        # from_timestamp = int(time())
+        # until_timestamp = from_timestamp - int(second_order_resolution_seconds)
+        until_timestamp = int(metric[2])
+        from_timestamp = until_timestamp - int(second_order_resolution_seconds)
+
         graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
         logger.info('graphite_from - %s' % str(graphite_from))
         graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
@@ -882,6 +900,240 @@ def alert_syslog(alert, metric, second_order_resolution_seconds, context):
         return False
 
 
+# @added 20181006 - Feature #2618: alert_slack
+def alert_slack(alert, metric, second_order_resolution_seconds, context):
+
+    if not settings.SLACK_ENABLED:
+        return False
+
+    from slackclient import SlackClient
+    import simplejson as json
+    logger.info('alert_slack - anomalous metric :: alert: %s, metric: %s' % (str(alert), str(metric)))
+    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+
+    full_duration_in_hours = int(second_order_resolution_seconds) / 3600
+    second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
+
+    # The known_derivative_metric state is determine in case we need to surface
+    # the png image from Graphite if the Ionosphere image is not available for
+    # some reason.  This will result in Skyline at least still sending an alert
+    # to slack, even if some gear fails in Ionosphere or slack alerting is used
+    # without Ionosphere enabled. Yes not DRY but multiprocessing and spawn
+    # safe.
+    known_derivative_metric = False
+    try:
+        if settings.REDIS_PASSWORD:
+            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        logger.error('error :: alert_slack - redis connection failed')
+    try:
+        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+    except:
+        derivative_metrics = []
+    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+    if redis_metric_name in derivative_metrics:
+        known_derivative_metric = True
+    if known_derivative_metric:
+        try:
+            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+        except:
+            non_derivative_monotonic_metrics = []
+        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+        if skip_derivative:
+            known_derivative_metric = False
+
+    if known_derivative_metric:
+        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - derivative graph - %s' % (
+            context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+        slack_title = '*Skyline %s - ALERT* on %s at %s hours - derivative graph - %s' % (
+            context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+            str(metric[0]))
+    else:
+        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
+            context, str(int(second_order_resolution_in_hours)),
+            str(metric[0]))
+        slack_title = '*Skyline %s - ALERT* on %s at %s hours - %s' % (
+            context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+            str(metric[0]))
+
+    graph_title_string = quote(unencoded_graph_title, safe='')
+    graph_title = '&title=%s' % graph_title_string
+    until_timestamp = int(metric[2])
+    from_timestamp = until_timestamp - int(second_order_resolution_seconds)
+    graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_from - %s' % str(graphite_from))
+    graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_until - %s' % str(graphite_until))
+
+    if settings.GRAPHITE_PORT != '':
+        if known_derivative_metric:
+            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        else:
+            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    else:
+        if known_derivative_metric:
+            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                str(graphite_from), str(graphite_until), metric[1],
+                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        else:
+            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                str(graphite_from), str(graphite_until), metric[1],
+                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+
+    # slack does not allow embedded images, nor will it fetch links behind
+    # authentication so Skyline uploads a png graphite image with the message
+    image_file = None
+
+    # Use the Ionosphere image if it exists
+    if settings.IONOSPHERE_ENABLED:
+        timeseries_dir = base_name.replace('.', '/')
+        training_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
+            timeseries_dir)
+        graphite_image_file = '%s/%s.%s.graphite.%sh.png' % (
+            training_data_dir, base_name, skyline_app,
+            str(int(full_duration_in_hours)))
+        logger.info('alert_slack - interpolated Ionosphere Graphite image :: %s' % (
+            graphite_image_file))
+    else:
+        graphite_image_file = None
+        logger.info('alert_slack - no Ionosphere Graphite image interpolated')
+
+    if graphite_image_file:
+        if os.path.isfile(graphite_image_file):
+            image_file = graphite_image_file
+            logger.info('alert_slack - interpolated Ionosphere Graphite image file exists :: %s' % (
+                graphite_image_file))
+        else:
+            logger.error('error :: alert_slack - interpolated Ionosphere Graphite image file not found :: %s' % (
+                graphite_image_file))
+
+    if not image_file:
+        # Fetch the png from Graphite
+        try:
+            image_data = urllib2.urlopen(link).read()  # nosec
+        except urllib2.URLError:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_slack - failed to get image graph')
+            logger.error('error :: alert_slack - %s' % str(link))
+            image_data = None
+        if image_data:
+            image_file = '%s/%s.%s.graphite.%sh.png' % (
+                settings.SKYLINE_TMP_DIR, base_name, skyline_app,
+                str(int(full_duration_in_hours)))
+            try:
+                write_data_to_file(skyline_app, image_file, 'w', image_data)
+                logger.info('alert_slack - added Graphite image :: %s' % (
+                    image_file))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error(
+                    'error :: alert_slack - failed to add %s Graphite image' % (
+                        image_file))
+                image_file = None
+    try:
+        filename = os.path.basename(image_file)
+    except:
+        filename = None
+
+    try:
+        bot_user_oauth_access_token = settings.SLACK_OPTS['bot_user_oauth_access_token']
+    except:
+        logger.error('error :: alert_slack - could not determine bot_user_oauth_access_token')
+        return False
+    try:
+        channels = settings.SLACK_OPTS['channels'][alert[0]]
+    except:
+        logger.error('error :: alert_slack - could not determine channel')
+        return False
+
+    try:
+        icon_emoji = settings.SLACK_OPTS['icon_emoji']
+    except:
+        icon_emoji = ':chart_with_upwards_trend:'
+
+    try:
+        sc = SlackClient(bot_user_oauth_access_token)
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: alert_slack - could not initiate SlackClient')
+        return False
+
+    ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+        settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
+
+    # This block is not used but left heve as it is the pattern for sending
+    # messages using the chat.postMessage methods and could possibly be the
+    # failover for a files.upload error or future messages.
+    message_payload  = json.dumps([{
+        "fallback": slack_title + ' - ' + link,
+        "title": slack_title,
+        "title_link": link,
+        "image_url": link,
+        "text": 'Ionosphere training data :: ' + ionosphere_link,
+        "color": "#764FA5"
+    }])
+    send_slack_message = False
+
+    for channel in channels:
+        if send_slack_message:
+            try:
+                send_message = sc.api_call(
+                    'chat.postMessage',
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    attachments=message_payload)
+                if not send_message['ok']:
+                    logger.error('error :: alert_slack - failed to send slack message')
+                else:
+                    logger.info('alert_slack - sent slack message')
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: alert_slack - could not send_message')
+                return False
+
+        if settings.IONOSPHERE_ENABLED:
+            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link>'
+        else:
+            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
+
+        try:
+            # slack does not allow embedded images, nor links behind authentication
+            # or color text, so we have jump through all the API hoops to end up
+            # having to upload an image with a very basic message.
+            if os.path.isfile(image_file):
+                slack_file_upload = sc.api_call(
+                    'files.upload', filename=filename, channels=channel,
+                    initial_comment=initial_comment, file=open(image_file, 'rb'))
+                if not slack_file_upload['ok']:
+                    logger.error('error :: alert_slack - failed to send slack message')
+            else:
+                send_text = initial_comment + '  ::  error :: there was no graph image to upload'
+                send_message = sc.api_call(
+                    'chat.postMessage',
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    text=send_text)
+                if not send_message['ok']:
+                    logger.error('error :: alert_slack - failed to send slack message')
+                else:
+                    logger.info('alert_slack - sent slack message')
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: alert_slack - could not upload file')
+            return False
+
+
 def trigger_alert(alert, metric, second_order_resolution_seconds, context):
     """
     Called by :class:`~skyline.skyline.Mirage.run` to trigger an alert,
@@ -894,7 +1146,7 @@ def trigger_alert(alert, metric, second_order_resolution_seconds, context):
         alert[0]: The matched substring of the anomalous metric\n
         alert[1]: the name of the strategy being used to alert\n
         alert[2]: The timeout of the alert that was triggered\n
-        alert[3]: The SECOND_ORDER_RESOLUTION_HOURS\n
+        alert[3]: The SECOND_ORDER_RESOLUTION_HOURS in seconds\n
     :param meric:
         The metric tuple.\n
         metric[0]: the anomalous value\n
