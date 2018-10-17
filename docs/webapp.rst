@@ -86,7 +86,7 @@ package and requirements.txt
 
 See ``etc/skyline.httpd.conf.d.example`` for an example of an Apache conf.d
 configuration file to serve the Webapp via gunicorn and reverse proxy on port
-8080 with basic HTTP authentication and restricted IP access.  Note that your
+443 with basic HTTP authentication and restricted IP access.  Note that your
 username and password must match in both the Apache htpasswd and the
 :mod:`settings.WEBAPP_AUTH_USER`/:mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
 contexts as Apache will authenticate the user and forward on the authentication

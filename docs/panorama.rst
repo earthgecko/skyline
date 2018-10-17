@@ -53,11 +53,11 @@ access the database with the user and password you configure in ``settings.py``
   and create the skyline database (also create a user with permissions on the
   database, e.g.
 
-```
-mysql -u root -p < /opt/skyline/github/skyline/skyline/skyline.sql
-mysql -u root -p -e "GRANT ALL ON skyline.* TO 'skyline'@'localhost' IDENTIFIED BY '$YOUR_MYSQL_SKYLINE_PASSWORD' \
-FLUSH PRIVILEGES;"
-```
+.. code-block:: bash
+
+    mysql -u root -p < /opt/skyline/github/skyline/skyline/skyline.sql
+    mysql -u root -p -e "GRANT ALL ON skyline.* TO 'skyline'@'localhost' IDENTIFIED BY '$YOUR_MYSQL_SKYLINE_PASSWORD' \
+    FLUSH PRIVILEGES;"
 
 - Enable Panorama and review the other Panorama settings in ``settings.py``
 - Start Panorama (use your appropriate PATH) - or go back to `Installation`_ and

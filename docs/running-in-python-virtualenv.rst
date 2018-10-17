@@ -39,7 +39,7 @@ requires the following system dependencies:
 .. code-block:: bash
 
     apt-get -y install build-essential
-    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev \
+    apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev \
       libreadline6-dev libgdbm-dev libncurses5 libncurses5-dev libncursesw5 \
       libfreetype6-dev libxft-dev python-pip wget tar git
 
@@ -55,7 +55,7 @@ setuptools and virtualenv, see **Recent changes in the pip environment** section
 in `Requirements <requirements.html#recent-changes-in-the-pip-environment>`__
 for more details.
 
-This is using your system pip at this point only to install virtualenv.
+This is using your **system** pip at this point only to install virtualenv.
 
 .. code-block:: bash
 
