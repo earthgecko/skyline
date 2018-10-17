@@ -20,12 +20,17 @@ from time import sleep
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 import time
-from datetime import datetime, timedelta
+# @modified 20180918 - Feature #2602: Graphs in search_features_profiles
+# from datetime import datetime, timedelta
+from datetime import timedelta
+
 import os
 import base64
 
 # flask things for rebrow
-from flask import session, g, url_for, flash, Markup, json
+# @modified 20180918 - Feature #2602: Graphs in search_features_profiles
+# from flask import session, g, url_for, flash, Markup, json
+from flask import url_for, Markup
 
 # For secret_key
 import uuid
@@ -40,6 +45,13 @@ import pytz
 # Added auth to rebrow as per https://github.com/marians/rebrow/pull/20 by
 # elky84
 from six.moves.urllib.parse import quote
+
+# @modified 20180918 - Feature #2602: Graphs in search_features_profiles
+#from features_profile import feature_name_id, calculate_features_profile
+from features_profile import calculate_features_profile
+
+from tsfresh_feature_names import TSFRESH_VERSION
+
 # @modified 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
 # Use PyJWT instead of pycryptodome
 # from Crypto.Cipher import AES
@@ -56,7 +68,7 @@ from ast import literal_eval
 # added cStringIO, gzip and functools to implement Gzip for particular views
 # http://flask.pocoo.org/snippets/122/
 from flask import after_this_request
-#from cStringIO import StringIO as IO
+# from cStringIO import StringIO as IO
 import gzip
 import functools
 
@@ -112,9 +124,6 @@ from ionosphere_backend import (
     get_features_profiles_to_validate,
     # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
     get_metrics_with_features_profiles_to_validate,)
-
-from features_profile import feature_name_id, calculate_features_profile
-from tsfresh_feature_names import TSFRESH_VERSION
 
 # @added 20170114 - Feature #1854: Ionosphere learn
 # Decoupled the create_features_profile from ionosphere_backend and moved to
@@ -265,6 +274,7 @@ def requires_auth(f):
             return True
     return decorated
 
+
 # @added 20180721 - Feature #2464: luminosity_remote_data
 # Use a gzipped response as the response as raw preprocessed time series with
 # an implementation of Gzip for particular views
@@ -281,9 +291,7 @@ def gzipped(f):
 
             response.direct_passthrough = False
 
-            if (response.status_code < 200 or
-                response.status_code >= 300 or
-                'Content-Encoding' in response.headers):
+            if (response.status_code < 200 or response.status_code >= 300 or 'Content-Encoding' in response.headers):
                 return response
             gzip_buffer = IO()
             gzip_file = gzip.GzipFile(mode='wb',
@@ -301,6 +309,7 @@ def gzipped(f):
         return f(*args, **kwargs)
 
     return view_func
+
 
 @app.errorhandler(500)
 def internal_error(message, traceback_format_exc):
@@ -330,7 +339,7 @@ def internal_error(message, traceback_format_exc):
     logger.debug('debug :: %s' % str(message))
     logger.debug('debug :: request url :: %s' % str(request.url))
     logger.debug('debug :: request referrer :: %s' % str(request.referrer))
-    resp = '<pre>%s</pre><pre>%s</pre>' % (str(message), str(traceback_format_exc))
+    # resp = '<pre>%s</pre><pre>%s</pre>' % (str(message), str(traceback_format_exc))
 #    return(resp), 500
     server_name = settings.SERVER_METRICS_NAME
     return render_template(
@@ -405,7 +414,6 @@ def now():
 @app.route("/then")
 @requires_auth
 def then():
-    start = time.time()
     try:
         return render_template('then.html'), 200
     except:
@@ -635,6 +643,7 @@ def luminosity_remote_data_endpoint():
             resp = json.dumps(
                 {'results': 'No data found'})
             return resp, 404
+
 
 @app.route("/docs")
 @requires_auth
@@ -1021,10 +1030,42 @@ def ionosphere():
         metric_found = False
         timestamp = False
         base_name = False
+        # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+        # Added the validate_all context and function
+        validate_all = False
+        all_validated = False
+        metric_id = False
+        validated_count = 0
+
         for i in request.args:
             key = str(i)
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
+
+            # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+            # Added the validate_all context and function
+            if key == 'validate_all':
+                if str(value) == 'true':
+                    validate_all = True
+            if key == 'all_validated':
+                if str(value) == 'true':
+                    all_validated = True
+                    # Ensure that validate_all is set to False so another call
+                    # is not made to the validate_all function
+                    validate_all = False
+            if key == 'metric_id':
+                try:
+                    if isinstance(int(value), int):
+                        metric_id = int(value)
+                except:
+                    logger.error('error :: the metric_id request parameter was passed but is not an int - %s' % str(value))
+            if key == 'validated_count':
+                try:
+                    if isinstance(int(value), int):
+                        validated_count = int(value)
+                except:
+                    logger.error('error :: the validated_count request parameter was passed but is not an int - %s' % str(value))
+
             if key == 'order':
                 order = str(value)
                 if order == 'DESC':
@@ -1079,6 +1120,32 @@ def ionosphere():
                                     metric_found = True
                                     logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
         if metric_found:
+
+            # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+            # Added the validate_all context and function, first do the
+            # validate_all if it has been passed
+            if validate_all and metric_id:
+                features_profiles_to_validate_count = 0
+                try:
+                    features_profiles_to_validate, fail_msg, trace = get_features_profiles_to_validate(base_name)
+                    features_profiles_to_validate_count = len(features_profiles_to_validate)
+                    logger.info('%s features profiles found that need validating for %s with metric_id %s' % (
+                        str(features_profiles_to_validate_count), base_name, str(metric_id)))
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Uh oh ... a Skyline 500 using get_features_profiles_to_validate(%s) with metric_id %s' % (str(base_name), str(metric_id))
+                    return internal_error(message, trace)
+                if features_profiles_to_validate_count > 0:
+                    try:
+                        all_validated, fail_msg, traceback_format_exc = validate_fp(int(metric_id), 'metric_id')
+                        logger.info('validated all the enabled, unvalidated features profiles for metric_id - %s' % str(metric_id))
+                        if all_validated:
+                            validated_count = features_profiles_to_validate_count
+                    except:
+                        trace = traceback.format_exc()
+                        message = 'Uh oh ... a Skyline 500 using get_features_profiles_to_validate(%s) with metric_id %s' % (str(base_name), str(metric_id))
+                        return internal_error(message, trace)
+
             features_profiles_to_validate = []
             if metric_name != 'all':
                 try:
@@ -1113,6 +1180,8 @@ def ionosphere():
                 for_metric=base_name, order=ordered_by, limit=limited_by,
                 default_learn_full_duration=default_learn_full_duration,
                 matched_from_datetime=matched_from_datetime,
+                validate_all=validate_all, all_validated=all_validated,
+                validated_count=validated_count,
                 version=skyline_version,
                 duration=(time.time() - start), print_debug=False), 200
 
@@ -1174,6 +1243,8 @@ def ionosphere():
                         'fp_id', 'layer_id',
                         # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
                         'load_derivative_graphs',
+                        # @added 20180917 - Feature #2602: Graphs in search_features_profiles
+                        'show_graphs',
                         ]
 
         count_by_metric = None
@@ -1318,6 +1389,10 @@ def ionosphere():
                 version=skyline_version,
                 duration=(time.time() - start), print_debug=False), 200
 
+        # @added 20180917 - Feature #2602: Graphs in search_features_profiles
+        features_profiles_with_images = []
+        show_graphs = False
+
         if get_metric_profiles:
             search_success = False
             try:
@@ -1330,6 +1405,83 @@ def ionosphere():
             if not search_success:
                 return internal_error(fail_msg, trace)
 
+            # @added 20180917 - Feature #2602: Graaphs in search_features_profiles
+            if search_success and fps:
+                show_graphs = request.args.get(str('show_graphs'), False)
+                if show_graphs == 'true':
+                    show_graphs = True
+            if search_success and fps and show_graphs:
+                query_context = 'features_profiles'
+                for fp_elements in fps:
+                    # Get images
+                    try:
+                        fp_id = fp_elements[0]
+                        base_name = fp_elements[2]
+                        requested_timestamp = fp_elements[4]
+                        mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list = ionosphere_metric_data(requested_timestamp, base_name, query_context, fp_id)
+                        new_fp = []
+                        for fp_element in fp_elements:
+                            new_fp.append(fp_element)
+
+                        # @added 20180918 - Feature #2602: Graphs in search_features_profiles
+                        # The images are required to be sorted here in terms of
+                        # only passing the Redis image (if present) and the
+                        # full duration graph, as it is a bit too much
+                        # achieve in the Jinja template.
+                        full_duration_float = fp_elements[3]
+                        full_duration = int(full_duration_float)
+                        full_duration_in_hours = full_duration / 60 / 60
+                        full_duration_in_hours_image_string = '.%sh.png' % str(int(full_duration_in_hours))
+                        show_graph_images = []
+                        redis_image = 'No Redis data graph'
+                        full_duration_image = 'No full duration graph'
+                        # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
+                        # Append individual redis_image and full_duration_image
+                        # list elements instead of just added the images or
+                        #  gimages list
+                        # if images:
+                        #     new_fp.append(images)
+                        # else:
+                        #     new_fp.append(gimages)
+                        if images:
+                            for image in images:
+                                if '.redis.plot' in image:
+                                    redis_image = image
+                                if full_duration_in_hours_image_string in image:
+                                    full_duration_image = image
+                        else:
+                            for image in gimages:
+                                if '.redis.plot' in image:
+                                    redis_image = image
+                                if full_duration_in_hours_image_string in image:
+                                    full_duration_image = image
+                        if full_duration_image == 'No full duration graph':
+                            for image in gimages:
+                                if full_duration_in_hours_image_string in image:
+                                    full_duration_image = image
+                        new_fp.append(full_duration_image)
+                        new_fp.append(redis_image)
+
+                        features_profiles_with_images.append(new_fp)
+                    except:
+                        message = 'Uh oh ... a Skyline 500 :('
+                        trace = traceback.format_exc()
+                        return internal_error(message, trace)
+
+            if not features_profiles_with_images:
+                if fps:
+                    for fp_elements in fps:
+                        try:
+                            new_fp = []
+                            for fp_element in fp_elements:
+                                new_fp.append(fp_element)
+                            new_fp.append(None)
+                            features_profiles_with_images.append(new_fp)
+                        except:
+                            message = 'Uh oh ... a Skyline 500 :('
+                            trace = traceback.format_exc()
+                            return internal_error(message, trace)
+
             # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
             # Added enabled_list to display DISABLED in search_features_profiles
             # page results.
@@ -1340,6 +1492,9 @@ def ionosphere():
                 matched_count=mc, checked_count=cc, generation_count=gc,
                 enabled_list=enabled_list,
                 matched_from_datetime=matched_from_datetime,
+                # @added 20180917 - Feature #2602: Graphs in search_features_profiles
+                features_profiles_with_images=features_profiles_with_images,
+                show_graphs=show_graphs,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=False), 200
 
@@ -1891,6 +2046,24 @@ def ionosphere():
                     if key == 'load_derivative_graphs':
                         if str(value) == 'true':
                             set_derivative_metric = set_metric_as_derivative(skyline_app, base_name)
+                            # @added 20180918 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+                            # Remove any graphite_now png files that are present
+                            # so that the webapp recreates the pngs as
+                            # nonNegativeDerivative graphs.
+                            # TODO - handle caching
+                            try:
+                                timeseries_dir = base_name.replace('.', '/')
+                                ionosphere_data_dir = '%s/%s/%s' % (
+                                    settings.IONOSPHERE_DATA_FOLDER,
+                                    requested_timestamp, timeseries_dir)
+                                pattern = 'graphite_now'
+                                for f in os.listdir(ionosphere_data_dir):
+                                    if re.search(pattern, f):
+                                        remove_graphite_now_file = os.path.join(ionosphere_data_dir, f)
+                                        os.remove(remove_graphite_now_file)
+                                        logger.info('removed graphite_now image at user request - %s' % remove_graphite_now_file)
+                            except:
+                                logger.error('failed to remove graphite_now images')
                 if set_derivative_metric:
                     return_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(settings.SKYLINE_URL), str(requested_timestamp), str(base_name))
                     return redirect(return_url)
@@ -2235,7 +2408,10 @@ def ionosphere():
             if validate:
                 logger.info('validating - fp_ip %s' % str(fp_id))
                 try:
-                    validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id)
+                    # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+                    # Added the extended validate_fp parameter of id_column_name
+                    # validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id)
+                    validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id')
                     logger.info('validated fp_id - %s' % str(fp_id))
                 except:
                     trace = traceback.format_exc()
@@ -2559,6 +2735,12 @@ def ionosphere():
                 minmax = int(matched_details_object['minmax'])
                 logger.info('the fp match has minmax set to %s' % str(minmax))
 
+            # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+            approx_close = 0
+            if matched_layer_id:
+                approx_close = int(matched_details_object['approx_close'])
+                logger.info('the layers match has approx_close set to %s' % str(approx_close))
+
             # @added 20180414 - Branch #2270: luminosity
             # Add correlations to features_profile and training_data pages if a
             # panorama_anomaly_id is present
@@ -2651,6 +2833,8 @@ def ionosphere():
                 # the correlations.html and training_data.html templates
                 correlations_with_graph_links=correlations_with_graph_links,
                 matched_from_datetime=matched_from_datetime,
+                # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+                approx_close=approx_close,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -2729,6 +2913,7 @@ def utilities():
         error_string = traceback.format_exc()
         logger.error('error :: failed to render utilities.html: %s' % str(error_string))
         return 'Uh oh ... a Skyline 500 :(', 500
+
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow
