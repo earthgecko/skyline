@@ -117,6 +117,9 @@ class Analyzer(Thread):
         # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
         self.smtp_alerter_metrics = Manager().list()
         self.non_smtp_alerter_metrics = Manager().list()
+        # @added 20180903 - Feature #2580: illuminance
+        #                   Feature #1986: flux
+        self.illuminance_datapoints = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -389,6 +392,15 @@ class Analyzer(Thread):
                     timeseries = derivative_timeseries
                 except:
                     logger.error('error :: nonNegativeDerivative failed')
+
+            # @added 20180903 - Feature #2580: illuminance
+            #                   Feature #1986: flux
+            try:
+                illuminance_datapoint = timeseries[-1][1]
+                if '.illuminance' not in metric_name:
+                    self.illuminance_datapoints.append(illuminance_datapoint)
+            except:
+                pass
 
             try:
                 anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
@@ -1287,6 +1299,9 @@ class Analyzer(Thread):
             if not ionosphere_alerts:
                 ionosphere_alerts = []
 
+            # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
+            ionosphere_anomalous_metrics = []
+
             ionosphere_metric_alerts = []
             if len(ionosphere_alerts) != 0:
                 logger.info('Ionosphere alert/s requested :: %s' % str(ionosphere_alerts))
@@ -1300,6 +1315,9 @@ class Analyzer(Thread):
                         triggered_algorithms = send_alert_for[3]
                         anomalous_metric = [value, base_name, metric_timestamp]
                         self.all_anomalous_metrics.append(anomalous_metric)
+                        # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
+                        ionosphere_anomalous_metrics.append(anomalous_metric)
+
                         for algorithm in triggered_algorithms:
                             key = algorithm
                             if key not in anomaly_breakdown.keys():
@@ -1320,6 +1338,10 @@ class Analyzer(Thread):
                     # Handle alerting for Ionosphere
                     # for metric in self.anomalous_metrics:
                     for metric in self.all_anomalous_metrics:
+                        # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
+                        # Set each metric to the default Analyzer context
+                        context = 'Analyzer'
+
                         pattern_match = False
                         # Absolute match
                         if str(metric[1]) == str(alert[0]):
@@ -1368,6 +1390,7 @@ class Analyzer(Thread):
                                     (metric[1],
                                         str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
                                         matched_by))
+                                context = 'Mirage'
                             except:
                                 mirage_metric = False
                                 if LOCAL_DEBUG:
@@ -1520,6 +1543,24 @@ class Analyzer(Thread):
                                     logger.info('not alerting on ionosphere_alerts Ionosphere metric - last_alert key exists - %s' % str(metric[1]))
                                     logger.info('so alert resources will not be created for this ionosphere_alerts Ionosphere metric - %s' % str(metric[1]))
                                 continue
+
+                            # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
+                            # Due to ionosphere_alerts being added to the
+                            # self.all_anomalous_metrics after Analyzer metrics
+                            # here we need to ensure that we only alert on the
+                            # last item for the metric in the list so that the
+                            # alert is not sent out with any current
+                            # anomaly data from the current Analyzer run, but
+                            # with the data from the ionosphere_alerts item.
+                            if context == 'Ionosphere':
+                                for check_metric in ionosphere_anomalous_metrics:
+                                    if metric[1] == check_metric[1]:
+                                        if metric[2] != check_metric[2]:
+                                            # If the timestamps do not match
+                                            # then it is the list item from
+                                            # the Analyzer anomaly, not the
+                                            # Ionosphere list item
+                                            continue
 
                             try:
                                 self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
@@ -1863,6 +1904,19 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage before reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+            # @added 20180903 - Feature #2580: illuminance
+            #                   Feature #1986: flux
+            try:
+                illuminance_sum = sum(self.illuminance_datapoints)
+                illuminance = str(illuminance_sum)
+            except:
+                illuminance = 0
+            logger.info('illuminance        :: %s' % illuminance)
+            send_metric_name = '%s.illuminance' % skyline_app_graphite_namespace
+            # @modified 20181017 - Feature #2580: illuminance
+            # Disabled for now as in concept phase
+            # send_graphite_metric(skyline_app, send_metric_name, illuminance)
+
             # Reset counters
             self.anomalous_metrics[:] = []
             self.mirage_metrics[:] = []
@@ -1879,6 +1933,8 @@ class Analyzer(Thread):
             # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
             self.smtp_alerter_metrics[:] = []
             self.non_smtp_alerter_metrics[:] = []
+            # @added 20180903 - Feature #1986: illuminance
+            self.illuminance_datapoints[:] = []
 
             unique_metrics = []
             raw_series = None
@@ -1908,6 +1964,17 @@ class Analyzer(Thread):
                 del run_time
             except:
                 logger.error('error :: failed to del run_time')
+
+            # @added 20180903 - Feature #2580: illuminance
+            #                   Feature #1986: flux
+            try:
+                del illuminance_sum
+            except:
+                logger.error('error :: failed to del illuminance_sum')
+            try:
+                del illuminance
+            except:
+                logger.error('error :: failed to del illuminance')
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage after reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
