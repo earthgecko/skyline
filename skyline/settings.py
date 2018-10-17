@@ -488,6 +488,7 @@ ALERTS = (
     ('skyline', 'smtp', 1800),
     ('skyline_test.alerters.test', 'smtp', 1800),
     ('skyline_test.alerters.test', 'hipchat', 1800),
+    ('skyline_test.alerters.test', 'slack', 1800),  # slack alerts MUST be declared afer smtp
     ('skyline_test.alerters.test', 'pagerduty', 1800),
 )
 """
@@ -515,6 +516,8 @@ trigger again.
         ('metric4.thing\..*.\.requests', 'stmp', 900),
         # mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and Mirage is enabled
         ('metric5.thing.*.rpm', 'smtp', 900, 168),
+        # NOTE: all slack alert tuples MUST be declared AFTER smtp alert tuples
+        ('metric3', 'slack', 600),
     )
 
 - Alert tuple parameters are:
@@ -532,6 +535,9 @@ trigger again.
 
 .. note:: Consider using the default skyline_test.alerters.test for testing
     alerts with.
+
+.. note:: All slack alerts must be declared AFTER smtp alerts as slack alerts
+    use the smtp resources to send to slack.
 
 """
 
@@ -631,6 +637,26 @@ HIPCHAT_OPTS = {
 :vartype HIPCHAT_OPTS: dictionary
 
 HipChat alerts require python-simple-hipchat
+"""
+
+SLACK_OPTS = {
+    # Bot User OAuth Access Token
+    'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token',
+    # list of slack channels to notify about each anomaly
+    # (similar to SMTP_OPTS['recipients'])
+    # channel names - you can either pass the channel name (#general) or encoded
+    # ID (C024BE91L)
+    'channels': {
+        'skyline': ('#general',),
+        'skyline_test.alerters.test': ('#general',),
+    },
+    'icon_emoji': ':chart_with_upwards_trend:',
+}
+"""
+:var SLACK_OPTS: Your slack settings.
+:vartype SLACK_OPTS: dictionary
+
+slack alerts require slackclient
 """
 
 PAGERDUTY_OPTS = {
@@ -1491,10 +1517,13 @@ IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR = 86400
 :vartype IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR: int
 """
 
-SKYLINE_URL = 'http://skyline.example.com:8080'
+SKYLINE_URL = 'https://skyline.example.com'
 """
 :var SKYLINE_URL: The http or https URL (and port if required) to access your
-    Skyline on (no trailing slash).
+    Skyline on (no trailing slash).  For example if you were not using SSL
+    termination and listening on a specific port it could be like
+    http://skyline.example.com:8080'
+
 :vartype SKYLINE_URL: str
 """
 
@@ -1550,6 +1579,18 @@ IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE = 0.15
     and comparing time series that are in significantly different ranges and
     only applying Min-Max scaling comparisons when it is sensible to do so.
 :vartype IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE: float
+"""
+
+IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE = True
+"""
+:var IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE: The D and E boundary limits will
+    be matched if the value is approximately close to the limit.  This is only
+    implemented on boundary values that are > 10.  The approximately close value
+    is calculated as within 10 percent for limit values between 11 and 29 and
+    within 5 percent when the limit value >= 30.  It is only applied to the D
+    layer with a '>' or '>=' condition and to the E layer with a '<' or '<='
+    condition.
+:vartype IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE: boolean
 """
 
 IONOSPHERE_LEARN = True
@@ -1623,7 +1664,7 @@ IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS = 3661
 """
 :var IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS: The number of seconds that
     Ionosphere should wait before surfacing the metric timeseries for to learn
-    from.  What Graphite aggregration do you want the retention at before
+    from.  What Graphite aggregration do you want the retention to run before
     querying it to learn from?
     Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG
 :vartype IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS: int
@@ -1700,7 +1741,7 @@ IONOSPHERE_AUTOBUILD = True
 """
 :var IONOSPHERE_AUTOBUILD: Make best effort attempt to auto provision any
     features_profiles directory and resources that have been deleted or are
-    missing.
+    missing.  NOT IMPLEMENTED YET
 :vartype IONOSPHERE_AUTOBUILD: boolean
 
 .. note:: This is highlighted as a setting as the number of features_profiles
@@ -1717,7 +1758,7 @@ IONOSPHERE_AUTOBUILD = True
     with whatever resoultion is available for that time period.
     This allows the operator to delete/prune feature profile dirs by possibly least
     matched by age, etc or all and still be able to surface the available features
-    profile page data on-demand.
+    profile page data on-demand.  NOT IMPLEMENTED YET
 
 """
 

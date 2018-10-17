@@ -422,7 +422,7 @@ The learning role
   :mod:`settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN` or the
   metric specific ``max_percent_diff_from_origin``
 
-..note:: Ionosphere does not currently use Min-Max scaling in the learning role,
+.. note:: Ionosphere does not currently use Min-Max scaling in the learning role,
   the learnt features profiles are only created with the time series at the
   original scale.
 
@@ -515,7 +515,7 @@ Evolutionary learning - generations
 
 Ionosphere uses an evolutionary learning model that records (and limits) the
 generations of trained and learnt features profiles per metric.  Limits can be
-set in ```settings.py`` and played around with.  For veterans of Skyline, these
+set in ``settings.py`` and played around with.  For veterans of Skyline, these
 tend to be much like :mod:`settings.CONSENSUS`, what is the correct ``CONSENSUS``?
 
 They are tweak and tunable.  Keep them low, you give Ionosphere less
@@ -542,8 +542,27 @@ work helps or hinders depending on your outlook...
 "Shit lots of stuff is anomalous" can often lead to lots of work, debugging,
 fine tuning and making better or polishing a turd or diamante.
 
+DISABLED features profiles
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ionosphere learning is not perfect, sometimes it will get it wrong as far as a
+human is concerned.  Luckily that does not happen often, but it will happen.
+
+Ionosphere lets the operator disable any features profile that they deem as
+anomalous.  This can be due to a features profile having been LEARNT and the
+operator thinks it to be anomalous or an operator could create a features
+profile that they decide was in error, this can especially be true when on
+re-evaluating after creating with the "and LEARN" option enabled, but looking at
+the 30 day data and thinking... "hmmm actually I do not really want it to learn
+that spike from 2 weeks ago".
+
+If a features profile is DISABLED, all its progeny features profiles are
+disabled as well.  This ensures that every features profile was LEARNT from the
+profile and any that were LEARNT from any of them are disabled too so that the
+pattern is removed from evaluation during analysis of the metric in the future.
+
 Layers
-^^^^^^
+------
 
 Ionosphere allows the operator to train Skyline a not anomalous time series
 in terms of generating a features profile to be compared to anomalies in the
@@ -558,7 +577,8 @@ and ONLY at :mod:`settings.FULL_DURATION` time series.  The operator should
 limit their layers values to within acceptable bounds of the range within the
 features profile.  The operator should not try and use a single layer to try and
 describe the entire range they "think" the metric can go to, a layer is meant to
-match with a features profile, not a metric.  If this methodology is followed,
+match with a features profile, not a metric, however see the Matching
+approximately close section immediate below. If this methodology is followed,
 layers and features profiles "retire" around the same time as metrics change
 over time, an old features profile that no longer describes the current active
 motion state will no longer ever be matched, neither should its layers.  One of
@@ -583,6 +603,25 @@ time series after Analyzer/Mirage and Ionosphere features comparisons.
   relation to the Redis graph that is presented in the Train :: layers section
   and to the Last :: 30 datapoints :: at FULL_DURATION section just below that
   section, to ensure they are using relevant ranges.
+
+Matching approximately close
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :mod:`settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE` variable
+enables a margin of tolerance to be applied to layers D and E.  This is enabled
+by default and D and E boundary limits are matched if the value is approximately
+close to the limit.  This is only implemented on boundary values that are > 10.
+The approximately close value is calculated as 10 percent for limit values
+between 11 and 29 and within 5 percent when the limit value >= 30.  It is only
+applied to the D layer with a '>' or '>=' condition and to the E layer with a
+'<' or '<=' condition.  This makes the layers more effect and means that if a
+limit on a layer is set to 52 and the data point is 53, the layer will match
+and you probably want it to as well.  If approximately_close is not used you
+will find it frustrating the number of times an anomaly is triggered where it
+did not match a layer by small margin.
+
+How layers are defined
+^^^^^^^^^^^^^^^^^^^^^^
 
 The layers are defined as:
 
@@ -675,27 +714,8 @@ where required.
 However, in this example,  if you want to ensure that your 200 status code count
 does not hit 0 or drop off a cliff, you would configure Boundary to watch it.
 
-DISABLED features profiles
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Ionosphere learning is not perfect, sometimes it will get it wrong as far as a
-human is concerned.  Luckily that does not happen often, but it will happen.
-
-Ionosphere lets the operator disable any features profile that they deem as
-anomalous.  This can be due to a features profile having been LEARNT and the
-operator thinks it to be anomalous or an operator could create a features
-profile that they decide was in error, this can especially be true when on
-re-evaluating after creating with the "and LEARN" option enabled, but looking at
-the 30 day data and thinking... "hmmm actually I do not really want it to learn
-that spike from 2 weeks ago".
-
-If a features profile is DISABLED, all its progeny features profiles are
-disabled as well.  This ensures that every features profile was LEARNT from the
-profile and any that were LEARNT from any of them are disabled too so that the
-pattern is removed from evaluation during analysis of the metric in the future.
-
 No machine learning
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 Ionosphere brings **no** machine learning to Skyline per se.  It is merely making
 programmatic decisions based on the data it is provided with, things a human

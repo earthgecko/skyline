@@ -15,6 +15,9 @@ from sqlalchemy.sql import select
 import numpy as np
 import scipy
 
+# @added 20180828 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+import math
+
 import settings
 
 from database import (
@@ -333,6 +336,76 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
            '<=': operator.le,
            '>=': operator.ge}
 
+    # @added 20180919 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+    # Record in the database
+    d_approximately_close = False
+    e_approximately_close = False
+
+    # @added 20180828 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+    try:
+        use_approximately_close = settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE
+    except:
+        use_approximately_close = False
+    d_log_string = 'matches'
+    e_log_string = 'matches'
+    if use_approximately_close:
+        original_d_boundary_limit = d_boundary_limit
+        original_e_boundary_limit = e_boundary_limit
+        d_boundary_percent_tolerance = False
+        e_boundary_percent_tolerance = False
+        if d_condition == '>' or d_condition == '>=':
+            # Do not use approximately_close on values less than 10
+            if d_boundary_limit <= 10:
+                d_boundary_percent_tolerance = False
+                logger.info(
+                    'layers :: no approximately_close tolerance added to D layer boundary limit of %s as < 10' % (
+                        str(original_d_boundary_limit)))
+            if d_boundary_limit >= 11 and d_boundary_limit < 30:
+                d_boundary_percent_tolerance = 10
+            if d_boundary_limit >= 30:
+                d_boundary_percent_tolerance = 5
+            if d_boundary_percent_tolerance:
+                try:
+                    d_boundary_limit_tolerance = int(math.ceil((d_boundary_limit / 100.0) * d_boundary_percent_tolerance))
+                    d_boundary_limit = d_boundary_limit + d_boundary_limit_tolerance
+                    logger.info(
+                        'layers :: added a tolerance of %s to D layer boundary limit of %s, d_boundary_limit now %s' % (
+                            str(d_boundary_limit_tolerance),
+                            str(original_d_boundary_limit),
+                            str(d_boundary_limit)))
+                    d_log_string = 'matches (approximately_close)'
+                    # @added 20180919 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+                    d_approximately_close = True
+                except:
+                    d_boundary_limit = original_d_boundary_limit
+        if e_condition == '<' or e_condition == '<=':
+            e_boundary_limit_tolerance = False
+            e_boundary_percent_tolerance = False
+            # Do not use approximately_close on values less than 10
+            if e_boundary_limit <= 10:
+                e_boundary_limit_tolerance = False
+                logger.info(
+                    'layers :: no approximately_close tolerance added to E layer boundary limit of %s as < 10' % (
+                        str(original_e_boundary_limit)))
+            if e_boundary_limit >= 11 and e_boundary_limit < 30:
+                e_boundary_percent_tolerance = 10
+            if e_boundary_limit >= 30:
+                e_boundary_percent_tolerance = 5
+            if e_boundary_percent_tolerance:
+                try:
+                    e_boundary_limit_tolerance = int(math.ceil((e_boundary_limit / 100.0) * e_boundary_percent_tolerance))
+                    e_boundary_limit = e_boundary_limit - e_boundary_limit_tolerance
+                    logger.info(
+                        'layers :: subtracted a tolerance of %s to E layer boundary limit of %s, e_boundary_limit now %s' % (
+                            str(e_boundary_limit_tolerance),
+                            str(original_e_boundary_limit),
+                            str(e_boundary_limit)))
+                    e_log_string = 'matches (approximately_close)'
+                    # @added 20180919 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+                    e_approximately_close = True
+                except:
+                    e_boundary_limit = original_e_boundary_limit
+
     # D layer
     # @modified 20170307 - Feature #1960: ionosphere_layers
     # Use except on everything, remember how fast Skyline can iterate
@@ -342,11 +415,21 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
         if op_func_result:
             if engine:
                 layers_engine_disposal(engine)
+            # @modified 20180828 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+            # logger.info(
+            #     'layers :: discarding as the last value %s in the timeseries matches D layer boundary %s %s' % (
+            #         str(last_datapoint), str(d_condition),
+            #         str(d_boundary_limit)))
             logger.info(
-                'layers :: discarding as the last value %s in the timeseries matches D layer boundary %s %s' % (
-                    str(last_datapoint), str(d_condition),
+                'layers :: discarding as the last value %s in the time series %s D layer boundary %s %s' % (
+                    str(last_datapoint), d_log_string, str(d_condition),
                     str(d_boundary_limit)))
             return False
+        else:
+            # @added 20181014 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+            logger.info(
+                'layers :: the last value %s in the time series does not breach D layer boundary of %s %s' % (
+                    str(last_datapoint), str(d_condition), str(d_boundary_limit)))
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: layers :: invalid D layer op_func for layers_id %s - %s' % (str(layers_id), base_name))
@@ -418,8 +501,12 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
                 # e_layer_matched = False
             else:
                 e_layer_matched = True
-                logger.info('layers :: %s was %s and matches the E layer boundary of %s as not anomalous' % (
-                    str(understandable_message_str), str(value),
+                # @modified 20180828 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+                # logger.info('layers :: %s was %s and matches the E layer boundary of %s as not anomalous' % (
+                #     str(understandable_message_str), str(value),
+                #     str(e_boundary_limit)))
+                logger.info('layers :: %s was %s and %s the E layer boundary of %s as not anomalous' % (
+                    str(understandable_message_str), str(value), e_log_string,
                     str(e_boundary_limit)))
                 break
 
@@ -473,6 +560,68 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
                 layers_engine_disposal(engine)
             return False
 
+        # @added 20180919 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+        approx_close = 0
+        if d_approximately_close or e_approximately_close:
+            approx_close = 1
+
+        # @added 20181013 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+        # In order to correctly label whether to match is an approximately_close
+        # match or not, the values need to be reassessed here using the original
+        # boundary limits, otherwise all matches are labelled as approx_close
+        # if approximately_close is enabled.
+        if use_approximately_close and approx_close:
+            original_d_boundary_limit_matched = False
+            original_e_boundary_limit_matched = False
+            if d_approximately_close:
+                if d_condition == '>' or d_condition == '>=':
+                    try:
+                        op_func = ops[d_condition]
+                        op_func_result = op_func(last_datapoint, original_d_boundary_limit)
+                        if op_func_result:
+                            logger.info(
+                                'layers :: the original D boundary limit of %s would have been breached if the approximately_close tolerance was not added' % (
+                                    str(original_d_boundary_limit)))
+                        else:
+                            logger.info(
+                                'layers :: the original D boundary limit of %s would have passed without the approximately_close tolerance added' % (
+                                    str(original_d_boundary_limit)))
+                            original_d_boundary_limit_matched = True
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: layers :: invalid original_d_boundary_limit D layer op_func check for layers_id %s - %s' % (str(layers_id), base_name))
+            if e_approximately_close:
+                try:
+                    op_func = ops[e_condition]
+                    count = 0
+                    while count < e_boundary_times:
+                        count += 1
+                        if count == 1:
+                            understandable_message_str = 'the last and latest value in the timeseries'
+                        if count == 2:
+                            understandable_message_str = 'the 2nd last value in the timeseries'
+                        if count == 3:
+                            understandable_message_str = 'the 3rd last value in the timeseries'
+                        if count >= 4:
+                            understandable_message_str = 'the %sth last value in the timeseries' % str(count)
+                        value = float(timeseries[-count][1])
+                        op_func_result = op_func(value, original_e_boundary_limit)
+                        if op_func_result:
+                            original_e_boundary_limit_matched = True
+                            logger.info('layers :: %s was %s and the original E layer boundary of %s matches as not anomalous' % (
+                                str(understandable_message_str), str(value),
+                                str(original_e_boundary_limit)))
+                            break
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: layers :: invalid original_e_boundary_limit E layer op_func check for layers_id %s - %s' % (str(layers_id), base_name))
+            if original_d_boundary_limit_matched or original_e_boundary_limit_matched:
+                approx_close = 0
+                logger.info('layers :: approximately_close values were not needed to obtain a match, not labelling approx_close')
+            else:
+                approx_close = 1
+                logger.info('layers :: approximately_close values were needed to obtain a match, labelling approx_close')
+
         try:
             connection = engine.connect()
             ins = ionosphere_layers_matched_table.insert().values(
@@ -484,7 +633,9 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
                 full_duration=int(settings.FULL_DURATION),
                 # @added 2018075 - Task #2446: Optimize Ionosphere
                 #                  Branch #2270: luminosity
-                layers_count=layers_count, layers_checked=layers_checked)
+                layers_count=layers_count, layers_checked=layers_checked,
+                # @added 20180919 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+                approx_close=approx_close)
             result = connection.execute(ins)
             connection.close()
             new_matched_id = result.inserted_primary_key[0]

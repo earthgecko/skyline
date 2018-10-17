@@ -390,6 +390,10 @@ Added layers_count and layers_checked
 */
   `layers_count` INT(10) DEFAULT 0 COMMENT 'the total number of layers for the metric which were valid to check',
   `layers_checked` INT(10) DEFAULT 0 COMMENT 'the number of layers checked until the match was made',
+/*
+# @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+*/
+  `approx_close` TINYINT(4) DEFAULT 0 COMMENT 'whether the match was made using approximately_close, 0 being no',
   PRIMARY KEY (id),
   INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`))
   ENGINE=InnoDB;
