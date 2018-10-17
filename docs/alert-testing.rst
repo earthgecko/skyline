@@ -6,13 +6,13 @@ The settings.py has a default non-existent metric namespace for testing your
 alerters, in the ``skyline_test.alerters.test`` :mod:`settings.ALERTS` tuple.
 
 If you want to test your email, Hipchat room and Pagerduty OPTS are correctly
-configured and working, do the following, once again using the Python-2.7.12
+configured and working, do the following, once again using the Python-2.7.14
 virtualenv and documentation PATHs as an example:
 
 .. code-block:: bash
 
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py2712"
+  PROJECT="skyline-py2714"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
