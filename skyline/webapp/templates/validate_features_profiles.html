@@ -70,7 +70,7 @@
   		      </tr>
   		      <tr>
   		        <td>metric:</td>
-  		        <td><input type="text" name="metric" value="none" /></td>
+  		        <td><input type="text" name="metric" value="all" /></td>
   		      </tr>
   		      <tr>
   		        <td>validated</td>
@@ -135,6 +135,16 @@
 	  <div class="tab-pane active" id="validate">
       <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
           there were no features profiles found that require validating</h4>
+
+<!-- @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page -->
+      {% if all_validated %}
+        {% if validated_count > 0 %}
+    	  <div class="alert alert-success">
+    	    <strong>Validated</strong>: {{ validated_count }} features profiles for {{ for_metric }} - OK
+    	  </div>
+        {% endif %}
+      {% endif %}
+
   {% endif %}
 {% endif %}
 
@@ -142,6 +152,32 @@
 	  <div class="tab-pane active" id="validate">
       <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
           limited by {{ features_profiles_to_validate|length }} features profiles ordered by {{ order }}</h4>
+
+<!-- @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+# Allow the operator to validate all learnt features profiles that are to be
+# valiated on the page -->
+		  <table class="table table-hover">
+		    <thead>
+		      <tr>
+		        <th>Validate ALL</th>
+		        <th></th>
+		      </tr>
+		    </thead>
+		    <tbody>
+		      <tr>
+		        <td>You can validate ALL the learnt features profiles in one action.
+            This will validate all the features profiles listed below.  Please
+            <strong>ensure that you first disable</strong> any of the features
+            profiles below that you <strong>do not want to valdated</strong> and
+            <strong>refresh</strong> this page before you use Validate ALL.
+            This action simply validates ALL enabled features profiles for
+            {{ for_metric }} that are not validated.</td>
+		        <td><a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC&validate_all=true&metric_id={{ features_profiles_to_validate[0][1] }}">
+            <button type="button">Validate ALL</button></a></td>
+		      </tr>
+		    </tbody>
+		  </table>
+
 			<table class="table table-hover">
       The below table gives you a side-by-side visual comparison of the graphs of the features profile
       and the graphs of the parent (or parent's parent) that the features profile was LEARNT from.
@@ -249,6 +285,7 @@
 				</tbody>
 			</table>
 		</div>
+
 {% endif %}
     </div> <!-- END div class="col-md-12" -->
 
