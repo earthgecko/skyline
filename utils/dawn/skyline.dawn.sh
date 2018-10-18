@@ -8,6 +8,7 @@
 #                     Feature #2562: skyline.dawn.centos7.sh
 # @modified 20180915 - Feature #2550: skyline.dawn.sh - added skyline user
 #                      Task #2596: Build Skyline on nodes at v1.2.8
+# @modified 20181018 - Task #2596: Build Skyline on nodes at v1.2.8
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -865,6 +866,14 @@ source bin/activate
 bin/python${PYTHON_MAJOR_VERSION} /opt/skyline/github/skyline/utils/seed_data.py
 deactivate
 cd /tmp || exit
+
+# @added 20181018 - Task #2596: Build Skyline on nodes at v1.2.8
+# SELinux prevents Apache from initiating outbound connections
+if [ "$OS" == "CentOS" ]; then
+  if [ $CENTOS_7 -eq 1 ]; then
+    /usr/sbin/setsebool -P httpd_can_network_connect 1
+  fi
+fi
 
 if [ "$OS" == "CentOS" ]; then
   if [ $CENTOS_6 -eq 1 ]; then
