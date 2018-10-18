@@ -104,10 +104,9 @@ Steps
   - Please ensure you handle all of these with iptables AND ip6tables (or the
     equivalent) before continuing.
 
-- Should you wish to review the build steps and component builds and installs
-  there is a build script for **testing** purposes in utils/dawn/skyline.dawn.sh
-  see `Dawn <development/dawn.html>`__ section)
-
+- Should you wish to review the build steps, component builds and installs
+  described below, there is a build script for **testing** purposes **only** in
+  utils/dawn/skyline.dawn.sh see `Dawn <development/dawn.html>`__ section)
 - Install Redis - see `Redis.io <http://redis.io/>`__
 - Ensure that you review https://redis.io/topics/security
 - Ensure Redis has socket enabled **with the following permissions** in your
