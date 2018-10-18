@@ -310,11 +310,15 @@ you need to try and be quicker next time.
 <!-- # @added 20180620 - Feature #2404: Ionosphere - fluid approximation -->
     {% if minmax == 1 %}
     <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is a Min-Max scaled match</span></span></span></h4></center>
-  {% endif %}
+    {% endif %}
       <br>
   {% endif %}
   {% if matched_layer_id %}
       <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">layers ::</span> ionosphere_layers_matched id - {{ matched_layer_id }}</span></span></span></h4></center>
+<!-- # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers -->
+    {% if approx_close == 1 %}
+      <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is an approximately_close match</span></span></span></h4></center>
+    {% endif %}
       <br>
   {% endif %}
 
@@ -360,6 +364,8 @@ layers, but big tables may hinder easy navigation in the training page, so a
 link and new tab is ok.
 -->
 	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
+<!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h4>
 
   	  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">details ::</span></span></span> features profile ionosphere_layers id {{ layer_id }}</h4>
   {% if layer_details %}

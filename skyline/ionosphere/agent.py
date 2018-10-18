@@ -126,9 +126,10 @@ if __name__ == "__main__":
             configuration_error = False
             mysql_up = True
             cnx.close()
+            logger.info('database user name or password - connected OK')
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                logger.error('error :: something is wrong with your user name or password')
+                logger.error('error :: something is wrong with your database user name or password')
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
                 logger.error('error :: the %s database does not exist' % settings.PANORAMA_DATABASE)
             else:

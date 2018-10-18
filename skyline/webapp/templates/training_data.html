@@ -390,6 +390,8 @@ layers, but big tables may hinder easy navigation in the training page, so a
 link and new tab is ok.
 -->
 	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
+<!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
+	  <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
 
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the existing layers and algorithms for the metric
@@ -552,7 +554,7 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 <!-- @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats
               <input type="number" name="e_boundary_limit" value="0" /> in the last-->
   		        <input type="text" name="e_boundary_limit" value="0" /> in the last
-              <input type="number" name="e_boundary_times" value="3" /> values in the timeseries - <code>not anomalous</code>
+              <input type="number" name="e_boundary_times" value="3" /> values in the timeseries - <code>not_anomalous</code> True
             </select></td>
 		      </tr>
 		      <tr>
@@ -563,7 +565,7 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 		        <td>Enabled: <select name="es_layer">
               <option value="false">false</option>
               </select>
-		          if day in <input type="text" name="es_day" value="['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']" /> - <code>not anomalous</code><br>
+		          if day in <input type="text" name="es_day" value="['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']" /> - <code>not_anomalous</code><br>
               A Python list - example <code>['tue']</code> or <code>['sat', 'sun']</code><br>
               <code>NOT IMPLEMENTED YET</code>
             </td>
@@ -577,7 +579,7 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 		        <td>Enabled: <select name="f1_layer">
               <option value="false">false</option>
               </select>
-              if from_time > <input type="text" name="f1_from_time" value="0000" /> (format HHMM) - <code>not anomalous</code><br>
+              if from_time > <input type="text" name="f1_from_time" value="0000" /> (format HHMM) - <code>not_anomalous</code><br>
               <code>NOT IMPLEMENTED YET</code>
             </td>
 		      </tr>
@@ -587,7 +589,7 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 		        <td>Enabled: <select name="f1_layer">
               <option value="false">false</option>
               </select>
-              if until_time < <input type="text" name="f2_until_time" value="2359" /> (format HHMM) - <code>not anomalous</code><br>
+              if until_time < <input type="text" name="f2_until_time" value="2359" /> (format HHMM) - <code>not_anomalous</code><br>
               <code>NOT IMPLEMENTED YET</code>
             </td>
 		      </tr>

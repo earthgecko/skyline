@@ -130,8 +130,6 @@ failed_checks_dir = '%s_failed' % settings.IONOSPHERE_CHECK_PATH
 last_purge_key = '%s.last_purge_ts' % skyline_app
 
 LOCAL_DEBUG = False
-if this_host == 'zpf-skyline-dev-3-40g-gra1':
-    LOCAL_DEBUG = True
 
 
 class Ionosphere(Thread):
@@ -1233,7 +1231,12 @@ class Ionosphere(Thread):
                     fp_layers_id = int(row['layers_id'])
                     if fp_layers_id > 0:
                         fp_layers_present = True
-                    fp_layers_ids.append(fp_layers_id)
+                    # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+                    # Only add the fp_layers_id if > 0
+                    # fp_layers_ids.append(fp_layers_id)
+                    if fp_layers_id > 0:
+                        if fp_layers_id not in fp_layers_ids:
+                            fp_layers_ids.append(fp_layers_id)
 
                     # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
                     # Added all_fp_ids
@@ -1436,7 +1439,9 @@ class Ionosphere(Thread):
         # @added 2018075 - Task #2446: Optimize Ionosphere
         #                  Branch #2270: luminosity
         fp_checked = 0
-        layers_checked = 0
+        # @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page
+        # layers_checked = 0
+        layers_checked_count = 0
 
         # Compare calculated features to feature values for each fp id
         not_anomalous = False
@@ -2332,7 +2337,7 @@ class Ionosphere(Thread):
                     check_layers_algorithms = False
                     logger.info('ionosphere_learn - layers algorithms check - False')
                 else:
-                    logger.info('layers algorithms check - True')
+                    logger.info('layers algorithms check - True, %s layers to be checked' % str(fp_layers_count))
             else:
                 logger.info('a features profile matched as not_anomalous - layers algorithms check - False')
 
@@ -2365,12 +2370,19 @@ class Ionosphere(Thread):
                 matched_layers_id = None
                 for layers_id in fp_layers_ids:
                     if not_anomalous:
+                        logger.info('checking layers_id %s - %s layers profiles of %s possible layers' % (
+                            str(layers_id), str(layers_checked_count), str(fp_layers_count)))
+                    if not_anomalous:
+                        logger.info('skipping checking layers_id %s - %s layers profiles of %s possible layers as layer id %s already matched' % (
+                            str(layers_id), str(layers_checked_count), str(fp_layers_count), str(matched_layers_id)))
                         continue
                     if int(layers_id) != 0:
 
                         # @added 2018075 - Task #2446: Optimize Ionosphere
                         #                  Branch #2270: luminosity
-                        layers_checked += 1
+                        # @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page
+                        # layers_checked += 1
+                        layers_checked_count += 1
 
                         # Get the layers algorithms and run then on the timeseries
                         # @modified 20170307 - Feature #1960: ionosphere_layers
@@ -2380,7 +2392,9 @@ class Ionosphere(Thread):
                             # @added 2018075 - Task #2446: Optimize Ionosphere
                             #                  Branch #2270: luminosity
                             # not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries)
-                            not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries, fp_layers_count, layers_checked)
+                            # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+                            # not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries, fp_layers_count, layers_checked)
+                            not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries, fp_layers_count, layers_checked_count)
                             if not_anomalous:
                                 matched_layers_id = layers_id
                         except:
@@ -2388,10 +2402,10 @@ class Ionosphere(Thread):
                             logger.error('error :: run_layer_algorithms failed for layers_id - %s' % (str(layers_id)))
                         if not_anomalous:
                             logger.info('not_anomalous :: layers_id %s was matched after checking %s layers profiles of %s possible layers' % (
-                                str(layers_id), str(layers_checked), str(fp_layers_count)))
+                                str(layers_id), str(layers_checked_count), str(fp_layers_count)))
                         else:
                             logger.info('still anomalous :: layers_id %s was NOT matched after checking %s layers profiles of %s possible layers' % (
-                                str(layers_id), str(layers_checked), str(fp_layers_count)))
+                                str(layers_id), str(layers_checked_count), str(fp_layers_count)))
                 if not not_anomalous:
                     logger.info('anomalous - no features profiles layers were matched - %s' % base_name)
 
@@ -2831,12 +2845,14 @@ class Ionosphere(Thread):
 
                     # @added 20170306 - Feature #1960: ionosphere_layers
                     try:
-                        layers_checked = str(len(self.layers_checked))
+                        # @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page
+                        # layers_checked = str(len(self.layers_checked))
+                        str_layers_checked = str(len(self.layers_checked))
                     except:
-                        layers_checked = '0'
-                    logger.info('layers checked count  :: %s' % layers_checked)
+                        str_layers_checked = '0'
+                    logger.info('layers checked count  :: %s' % str_layers_checked)
                     send_metric_name = '%s.layers_checked' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, layers_checked)
+                    send_graphite_metric(skyline_app, send_metric_name, str_layers_checked)
 
                     if settings.PANORAMA_ENABLED:
                         try:

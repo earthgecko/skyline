@@ -193,14 +193,6 @@ Added matched_greater_than query to the search features profile page -->
                 </select> (NOTE: this overrides the above metric value if one is specified)</td>
   		      </tr>
   		      <tr>
-              <td>Features profiles count by metric:</td>
-              <td><select name="count_by_metric">
-                <option value="false">false</option>
-                <option value="true">true</option>
-              </select> (NOTE: this overrides the above metric value if one is specified)</td>
-  		      </tr>
-
-  		      <tr>
                 <td>limit</td>
                 <td><input type="number" name="limit" min="0" max="100" value="30" /> use 0 for unlimited</td>
   		      </tr>
@@ -209,6 +201,13 @@ Added matched_greater_than query to the search features profile page -->
   		        <td><select name="order">
                 <option value="DESC">DESC</option>
                 <option value="ASC">ASC</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>show graphs:</td>
+  		        <td><select name="show_graphs">
+                <option value="false">false</option>
+                <option value="true">true</option>
               </select></td>
   		      </tr>
   		    </tbody>
@@ -335,6 +334,16 @@ count
 	  <div class="tab-pane active" id="search">
       <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
           limited by {{ features_profiles|length }} features profiles ordered by {{ order }}</h4>
+
+<!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
+    {% if show_graphs == True %}
+	    <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link without graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h5>
+    {% else %}
+      {% if for_metric != 'all' %}
+      <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
+      {% endif %}
+    {% endif %}
+
       <h5><span class="logo"><span class="sky">Validate ::</span> <span class="re">metric features profiles :: </span></span></span>
         <a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC"><span class="logo">{{ for_metric }}</a></h5>
 
@@ -345,8 +354,16 @@ count
 <!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
       tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
       matched_count10, human_date11, created_timestamp12, checked_count13,
-      checked_human_date14, parent_id15, generation16, validated17] -->
+      checked_human_date14, parent_id15, generation16, validated17, ...,
+      full_duration_image24, redis_image25],
+# @added 20180917 - Feature #2602: Graphs in search_features_profiles
+ -->
             <th>fp id</th>
+<!-- # @added 20180917 - Feature #2602: Graphs in search_features_profiles -->
+  {% if show_graphs == True %}
+            <th>Full duration image</th>
+            <th>Redis image</th>
+  {% endif %}
             <th>metric</th>
             <th>parent id</th>
             <th>generation</th>
@@ -374,11 +391,35 @@ count
 					</tr>
 				</thead>
 				<tbody>
-  {% for item in features_profiles %}
+<!-- # @modified 20180917 - Feature #2602: Graphs in search_features_profiles
+  {#% for item in features_profiles %#} -->
+  {% for item in features_profiles_with_images %}
           <tr>
             <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
               <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[0] }}</a>
             </td>
+<!-- # @added 20180917 - Feature #2602: Graphs in search_features_profiles -->
+<!-- # @modified 20180917 - Feature #2602: Graphs in search_features_profiles -->
+    {% if show_graphs == True %}
+      {% set fullDurationHours = item[3] / 60 / 60 %}
+      {% set fullDurationHoursInt = fullDurationHours|int %}
+      {% set fullDurationHoursString = '.' + fullDurationHoursInt|string + 'h.' %}
+<!-- # @modified 20180918 - Feature #2602: Graphs in search_features_profiles -->
+      {% if item[24] %}
+        {% if item[24] == 'No full duration graph' %}
+            <td>No full duration image</td>
+        {% else %}
+            <td><img src="ionosphere_images?image={{ item[24] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
+        {% endif %}
+      {% endif %}
+      {% if item[25] %}
+        {% if item[25] == 'No Redis data graph' %}
+            <td>No Redis image</td>
+        {% else %}
+            <td><img src="ionosphere_images?image={{ item[25] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
+        {% endif %}
+      {% endif %}
+    {% endif %}
             <td><code>{{ item[2] }}</code></td>
             <td onclick="window.location='?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}'">
               <a href="?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}">{{ item[15] }}</a>

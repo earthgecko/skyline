@@ -124,15 +124,20 @@ def seed():
             #                   seed_data.py testing with UDP does not work GH77
             # Triggering anomaly for testing purposes also NOTE that the data
             # sent via UDP is consistently missing the last 10 data points sent,
-            # reason unknow, however to below method works for testing.
+            # reason unknown, however to below method works for testing.
             if initial >= (end_timestamp - 14):
                 # Send an anomalous data point
                 add_random = random.randint(500,2000)
                 original_value = int(datapoint[1])
                 if initial == (end_timestamp - 10):
-                    anomalous_datapoint = int(datapoint[1]) + 4000
+                    anomalous_datapoint = int(datapoint[1]) + 8000
                     datapoint[1] = float(anomalous_datapoint)
-                    print 'notice :: adding final anomalous data point - %s - value was %s and was modified with + 4000' % (
+                    print 'notice :: adding final anomalous data point - %s - value was %s and was modified with + 8000' % (
+                        str(datapoint), str(original_value))
+                elif initial == end_timestamp:
+                    anomalous_datapoint = int(datapoint[1]) + 11100
+                    datapoint[1] = float(anomalous_datapoint)
+                    print 'notice :: adding final anomalous data point - %s - value was %s and was modified with + 11000' % (
                         str(datapoint), str(original_value))
                 else:
                     anomalous_datapoint = original_value + add_random
@@ -194,13 +199,17 @@ def seed():
                 raise NoDataException
 
         print 'info :: Congratulations! The data made it in. The Horizon pipeline is working.'
-        print 'info :: If your analyzer and webapp were started you should be able to see a triggered anomaly for horizon.test.udp'
+        print 'info :: If your analyzer and webapp are started you should be able to see a'
         # @modified 20180715 - Task #2446: Optimize Ionosphere
         # print ('info :: at http://%s:%s' % (str(settings.WEBAPP_IP), str(settings.WEBAPP_PORT)))
         # print ('info :: at %s' % str(SKYLINE_URL))
         # @modified 20180719 - Bug #2460: seed_data.py SKYLINE_URL
         #                      seed_data.py SKYLINE_URL #60
-        print ('info :: at %s' % str(settings.SKYLINE_URL))
+        # @modified 20180915 - Feature #2550: skyline.dawn.sh
+        # Added metric name and views to the output
+        # print ('info :: at %s' % str(settings.SKYLINE_URL))
+        print ('info ::  triggered anomaly and data for the horizon.test.udp metric in the')
+        print ('info ::  now, then, Panorama and rebrow views at %s' % str(settings.SKYLINE_URL))
     except NoDataException:
         print 'error :: Woops, looks like the data did not make it into Horizon. Try again?'
         print 'info :: please check your settings.py and ensure that the Horizon and Redis settings are correct.'

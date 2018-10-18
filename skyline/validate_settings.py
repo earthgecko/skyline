@@ -407,6 +407,38 @@ def validate_settings_variables(current_skyline_app):
             print ('error :: LUMINOL_CROSS_CORRELATION_THRESHOLD should be a float between 0.0 and 1.0000')
             invalid_variables = True
 
+    # @added 20181009 - Feature #2618: alert_slack
+    try:
+        TEST_ALERTS = settings.ALERTS
+    except:
+        TEST_ALERTS = False
+        current_logger.error('error :: no ALERTS have been declared in settings.py, exiting, please fix setting.py')
+        print ('error :: no ALERTS have been declared in settings.py, exiting, please fix setting.py')
+        invalid_variables = True
+    try:
+        TEST_SLACK_ENABLED = settings.SLACK_ENABLED
+    except:
+        TEST_SLACK_ENABLED = False
+    if TEST_SLACK_ENABLED and TEST_ALERTS:
+        # Test that all slack alert tuples are declared AFTER smtp alert tuples
+        slack_order_set = False
+        smtp_set = False
+        for alert in settings.ALERTS:
+            if alert[1] == 'smtp':
+                smtp_set = True
+                if slack_order_set:
+                    current_logger.error('error :: exiting, a slack alert tuple set before an smtp alert tuple, please fix setting.py')
+                    print('error :: a slack alert tuple set before an smtp alert tuple')
+                    invalid_variables = True
+                    break
+            if alert[1] == 'slack':
+                if not smtp_set:
+                    current_logger.error('error :: exiting, a slack alert tuple set before an smtp alert tuple, please fix setting.py')
+                    print('error :: a slack alert tuple set before an smtp alert tuple')
+                    invalid_variables = True
+                    break
+                slack_order_set = True
+
     if invalid_variables:
         return False
 

@@ -1,12 +1,19 @@
 from __future__ import division
+# @modified 20180910 - Task #2588: Update dependencies
+# matplotlib.use is now required before statsmodels.api
+from matplotlib import use as matplotlib_use
+matplotlib_use('Agg')
+
 import pandas
 import numpy as np
 import scipy
 import statsmodels.api as sm
 # @modified 20160821 - Issue #23 Test dependency updates
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
+# @modified 20180910 - Task #2588: Update dependencies
+# import matplotlib
+# matplotlib.use('Agg')
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import traceback
 import logging
