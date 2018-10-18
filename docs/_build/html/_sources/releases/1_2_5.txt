@@ -1,0 +1,137 @@
+==============================
+1.2.5 - the luminosity branch
+==============================
+
+v1.2.5-luminosity - August 19, 2018
+
+Changes from v1.2.4
+-------------------
+
+- Bumped to v1.2.5-stable-luminosity
+- Display the last 30 data points on the training_data page to inform the
+  operator of the Redis graph data points for comparison with any
+  Existing :: layers (2482)
+- Allow user to specifically set metric as a derivative metric in training_data.
+  If a metric has not been analysed in terms of being a strictly monotonic
+  metric due to a reset of the metric, allow the operator to set this in the
+  training_data page and reload the graphs. (2488)
+- Report no matches found if no matches are found, fixes #64, closes #64 (2496)
+- Added the functionality for Skyline to send a digest alert on metrics that
+  stop sending data, this digest alert will only be sent once for a metric once
+  between ALERT_ON_STALE_PERIOD and STALE_PERIOD and a key set with the expiry
+  of STALE_PERIOD if the metric has been alerted on. After the STALE_PERIOD has
+  passed, the alert evaluation will no longer be done, ensuring that these
+  alerts are not noisy  (closes #67) (2492)
+- If from=-<x>hours is used as a Graphite render parameter the scale is
+  incorrect if x hours > than first retention period, passing the absolute from
+  and until parameter renders the graph with the correct scale for the
+  resolution (fixes #65 and closes #65) (2498).
+- nonNegativeDerivative applied twice in learn.py to existing json data, with
+  the introduction of calculating the nonNegativeDerivative in both  Analyzer
+  and Mirage before the initial analysis, both apps are now passing the
+  preprocessed time series to the send_anomalous_metric_to function. However in
+  skyline/ionosphere/learn.py the metric is still being checked to determine if
+  it is in derivative_metrics and the nonNegativeDerivative function was being
+  applied to the existing json data, if the json data already exists. This was
+  incorrect. It is correct in the context of learn.py having to fetch the the
+  data from Graphite, however applying nonNegativeDerivative to existing json
+  data was incorrect and did not have the desired result (fixes #66 and closes #66)
+  (2506)
+- Added try and except to prevent some errors that are encounter between 00:14
+  and 00:17 on some days (2492) #67
+  +        # if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
+  +        # IndexError: list index out of range
+    #68 Ionosphere validate learnt features profiles page
+    IssueID #2430: Ionosphere validate learnt features profiles page (#68)
+- Added get_features_profiles_to_validate and get_metrics_with_features_profiles_to_validate
+  functions to skyline/webapp/ionosphere_backend.py (2430, #68)
+- Added validate_features_profiles.html template and added the context to the
+  other pages (2430, #68)
+- Hard code IONOSPHERE_PROCESSES to 1. This variable is only declared for
+  the purpose of maintaining a standard set up in each module and to possibly
+  enable more than one processor on Ionosphere in the future, should there be a
+  requirement for Ionosphere to analyse the metrics quicker.  Running Ionosphere
+  with more than one process is untested and currently it is hard coded to be 1,
+  fixes #69 and closes #69 (2526)
+- Added docs validate_features_profiles demo page resources (2430, #68)
+
+Update notes
+------------
+
+- NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.5
+- There is are no SQL changes with this release.
+- There are 2 additional variables added to settings.py change:
+  :mod:`settings.ALERT_ON_STALE_METRICS`, :mod:`settings.ALERT_ON_STALE_PERIOD`
+  and :mod:`settings.DO_NOT_ALERT_ON_STALE_METRICS`
+- There are no changes in requirements.txt
+
+How to update from v1.2.2, v1.2.3 or v1.2.4
+-------------------------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version skyline/settings.py with the new version of
+  skyline/settings.py and create a new settings.py in the temp location
+  appropriate for Skyline v1.2.5 and your set up, ready to be deployed.
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    NEW_SKYLINE_VERSION="v1.2.5-stable-luminosity"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v1.2.4-stable-luminosity"    # Your old Skyline version
+    # OR
+    # OLD_SKYLINE_VERSION="v1.2.2-stable-luminosity"
+    # OLD_SKYLINE_VERSION="v1.2.3-stable-luminosity"
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.5 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.4-luminosity-stable
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done

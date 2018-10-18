@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.webapp package &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>skyline.webapp package &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="prev" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/> 
 
@@ -419,7 +419,7 @@ array of the features profiles that matched the query.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str)</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str, object)</td>
 </tr>
 </tbody>
 </table>
@@ -481,17 +481,24 @@ array of the features profiles that matched the query.</p>
 
 <dl class="function">
 <dt id="webapp.ionosphere_backend.validate_fp">
-<code class="descname">validate_fp</code><span class="sig-paren">(</span><em>fp_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_fp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Validate a features profile.</p>
+<code class="descname">validate_fp</code><span class="sig-paren">(</span><em>update_id</em>, <em>id_column_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_fp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a single features profile or validate all enabled, unvalidated
+features profiles for a metric_id.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> &#8211; the features profile id to validate</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>update_id</strong> (<em>int</em>) &#8211; the features profile id or metric_id to validate</li>
+<li><strong>id_column_name</strong> &#8211; the column name to select where on, e.g. id or metric_id</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(boolean, str, str)</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -616,6 +623,51 @@ profiles, the whole family tree.</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="webapp.ionosphere_backend.get_features_profiles_to_validate">
+<code class="descname">get_features_profiles_to_validate</code><span class="sig-paren">(</span><em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_features_profiles_to_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_features_profiles_to_validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the details for Ionosphere features profiles that need to be validated
+for a metric and returns a list of the details for each of the features
+profile including the ionosphere_image API URIs for all the relevant graph
+images for the weabpp Ionosphere validate_features_profiles page.
+[[  fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,</p>
+<blockquote>
+<div>fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,
+fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,
+fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,
+maximum_full_duration]]</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) &#8211; metric base_name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of lists</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">[[int, int, str, int, int, int, int, int, str, str, str, str, int, str, str, int, int]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.get_metrics_with_features_profiles_to_validate">
+<code class="descname">get_metrics_with_features_profiles_to_validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_metrics_with_features_profiles_to_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_metrics_with_features_profiles_to_validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the metrics with Ionosphere features profiles that need to be validated
+and return a list of the details for each metric.
+[[metric_id, metric, fps_to_validate_count]]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of lists</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">[[int, str, int]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-webapp.utilities">
 <span id="skyline-webapp-utilities-module"></span><h2>skyline.webapp.utilities module<a class="headerlink" href="#module-webapp.utilities" title="Permalink to this headline">¶</a></h2>
@@ -702,7 +754,7 @@ Mirage should surface the metric timeseries for</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

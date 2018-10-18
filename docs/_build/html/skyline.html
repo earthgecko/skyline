@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>skyline package &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -1106,6 +1106,36 @@ seconds.</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.ALERT_ON_STALE_METRICS">
+<code class="descname">ALERT_ON_STALE_METRICS</code><em class="property"> = True</em><a class="headerlink" href="#settings.ALERT_ON_STALE_METRICS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ALERT_ON_STALE_METRICS" title="settings.ALERT_ON_STALE_METRICS"><strong>ALERT_ON_STALE_METRICS</strong></a> (<em>boolean</em>) &#8211; Send a digest alert of all metrics that stop
+populating their time series data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.ALERT_ON_STALE_PERIOD">
+<code class="descname">ALERT_ON_STALE_PERIOD</code><em class="property"> = 300</em><a class="headerlink" href="#settings.ALERT_ON_STALE_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ALERT_ON_STALE_PERIOD" title="settings.ALERT_ON_STALE_PERIOD"><strong>ALERT_ON_STALE_PERIOD</strong></a> (<em>int</em>) &#8211; This is the duration, in seconds, after which an
+alert will be sent for a metric if it stops sending data.  The digest alert
+will only occur once while in the window between the ALERT_ON_STALE_PERIOD
+and the STALE_PERIOD.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.MIN_TOLERABLE_LENGTH">
 <code class="descname">MIN_TOLERABLE_LENGTH</code><em class="property"> = 1</em><a class="headerlink" href="#settings.MIN_TOLERABLE_LENGTH" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -1358,7 +1388,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 
 <dl class="data">
 <dt id="settings.ALERTS">
-<code class="descname">ALERTS</code><em class="property"> = (('skyline', 'smtp', 1800), ('skyline_test.alerters.test', 'smtp', 1800), ('skyline_test.alerters.test', 'hipchat', 1800), ('skyline_test.alerters.test', 'pagerduty', 1800))</em><a class="headerlink" href="#settings.ALERTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ALERTS</code><em class="property"> = (('skyline', 'smtp', 1800), ('skyline_test.alerters.test', 'smtp', 1800), ('skyline_test.alerters.test', 'hipchat', 1800), ('skyline_test.alerters.test', 'slack', 1800), ('skyline_test.alerters.test', 'pagerduty', 1800))</em><a class="headerlink" href="#settings.ALERTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1387,6 +1417,8 @@ trigger again.</p>
     <span class="p">(</span><span class="s1">&#39;metric4.thing\..*.\.requests&#39;</span><span class="p">,</span> <span class="s1">&#39;stmp&#39;</span><span class="p">,</span> <span class="mi">900</span><span class="p">),</span>
     <span class="c1"># mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and Mirage is enabled</span>
     <span class="p">(</span><span class="s1">&#39;metric5.thing.*.rpm&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">900</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>
+    <span class="c1"># NOTE: all slack alert tuples MUST be declared AFTER smtp alert tuples</span>
+    <span class="p">(</span><span class="s1">&#39;metric3&#39;</span><span class="p">,</span> <span class="s1">&#39;slack&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1415,6 +1447,28 @@ should surface the metric timeseries for</li>
 <p class="last">Consider using the default skyline_test.alerters.test for testing
 alerts with.</p>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All slack alerts must be declared AFTER smtp alerts as slack alerts
+use the smtp resources to send to slack.</p>
+</div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.DO_NOT_ALERT_ON_STALE_METRICS">
+<code class="descname">DO_NOT_ALERT_ON_STALE_METRICS</code><em class="property"> = ['donot_alert_on_stale.metric_known_to_go_stale']</em><a class="headerlink" href="#settings.DO_NOT_ALERT_ON_STALE_METRICS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DO_NOT_ALERT_ON_STALE_METRICS" title="settings.DO_NOT_ALERT_ON_STALE_METRICS"><strong>DO_NOT_ALERT_ON_STALE_METRICS</strong></a> (<em>list</em>) &#8211; Metrics to not digest alert on if they
+are becoming stale.</td>
+</tr>
+</tbody>
+</table>
+<p>These are metrics that you do not want a Skyline stale digest alert on.  Works
+in the same way that SKIP_LIST does, it matches in the string or dotted
+namespace elements.</p>
 </dd></dl>
 
 <dl class="data">
@@ -1498,6 +1552,20 @@ defined.</p>
 </tbody>
 </table>
 <p>HipChat alerts require python-simple-hipchat</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SLACK_OPTS">
+<code class="descname">SLACK_OPTS</code><em class="property"> = {'channels': {'skyline': ('#general',), 'skyline_test.alerters.test': ('#general',)}, 'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'icon_emoji': ':chart_with_upwards_trend:'}</em><a class="headerlink" href="#settings.SLACK_OPTS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_OPTS" title="settings.SLACK_OPTS"><strong>SLACK_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your slack settings.</td>
+</tr>
+</tbody>
+</table>
+<p>slack alerts require slackclient</p>
 </dd></dl>
 
 <dl class="data">
@@ -2608,8 +2676,14 @@ anomalies to for Ionosphere to check to a file on disk - absolute path</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROCESSES" title="settings.IONOSPHERE_PROCESSES"><strong>IONOSPHERE_PROCESSES</strong></a> &#8211; Number of processes to assign to Panorama, should never
-need more than 1</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_PROCESSES" title="settings.IONOSPHERE_PROCESSES"><strong>IONOSPHERE_PROCESSES</strong></a> &#8211; Number of processes to assign to Ionosphere, however
+Ionosphere should never need more than 1 and is effectively hard coded as
+such currently.  This variable is only declared for the purpose of
+maintaining a standard set up in each module and to possibly enable more
+than one processor on Ionosphere in the future, should there be a
+requirement for Ionosphere to analyse the metrics quicker.  Running
+Ionosphere with more than one process is untested and currently it is
+hard coded to be 1 (<a class="reference external" href="https://github.com/earthgecko/skyline/issues/69">https://github.com/earthgecko/skyline/issues/69</a>)</td>
 </tr>
 </tbody>
 </table>
@@ -2705,13 +2779,15 @@ data files for this long, for the operator to review.</td>
 
 <dl class="data">
 <dt id="settings.SKYLINE_URL">
-<code class="descname">SKYLINE_URL</code><em class="property"> = 'http://skyline.example.com:8080'</em><a class="headerlink" href="#settings.SKYLINE_URL" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SKYLINE_URL</code><em class="property"> = 'https://skyline.example.com'</em><a class="headerlink" href="#settings.SKYLINE_URL" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_URL" title="settings.SKYLINE_URL"><strong>SKYLINE_URL</strong></a> (<em>str</em>) &#8211; The http or https URL (and port if required) to access your
-Skyline on (no trailing slash).</td>
+Skyline on (no trailing slash).  For example if you were not using SSL
+termination and listening on a specific port it could be like
+<a class="reference external" href="http://skyline.example.com:8080">http://skyline.example.com:8080</a>&#8216;</td>
 </tr>
 </tbody>
 </table>
@@ -2778,6 +2854,25 @@ series and the anomalous time series are within these margins.  The default
 being 0.15 (or 15 percent).  This prevents Ionosphere from Min-Max scaling
 and comparing time series that are in significantly different ranges and
 only applying Min-Max scaling comparisons when it is sensible to do so.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE">
+<code class="descname">IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE" title="settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE"><strong>IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE</strong></a> (<em>boolean</em>) &#8211; The D and E boundary limits will
+be matched if the value is approximately close to the limit.  This is only
+implemented on boundary values that are &gt; 10.  The approximately close value
+is calculated as within 10 percent for limit values between 11 and 29 and
+within 5 percent when the limit value &gt;= 30.  It is only applied to the D
+layer with a &#8216;&gt;&#8217; or &#8216;&gt;=&#8217; condition and to the E layer with a &#8216;&lt;&#8217; or &#8216;&lt;=&#8217;
+condition.</td>
 </tr>
 </tbody>
 </table>
@@ -2888,7 +2983,7 @@ Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>IONOSPHERE_LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</strong> &#8211; The number of seconds that
 Ionosphere should wait before surfacing the metric timeseries for to learn
-from.  What Graphite aggregration do you want the retention at before
+from.  What Graphite aggregration do you want the retention to run before
 querying it to learn from?
 Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
 </tr>
@@ -2978,7 +3073,7 @@ profile for a metric in the namespace.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_AUTOBUILD" title="settings.IONOSPHERE_AUTOBUILD"><strong>IONOSPHERE_AUTOBUILD</strong></a> (<em>boolean</em>) &#8211; Make best effort attempt to auto provision any
 features_profiles directory and resources that have been deleted or are
-missing.</td>
+missing.  NOT IMPLEMENTED YET</td>
 </tr>
 </tbody>
 </table>
@@ -2998,7 +3093,7 @@ plot could be remade and all the Graphite graphs could be made as best effort
 with whatever resoultion is available for that time period.
 This allows the operator to delete/prune feature profile dirs by possibly least
 matched by age, etc or all and still be able to surface the available features
-profile page data on-demand.</p>
+profile page data on-demand.  NOT IMPLEMENTED YET</p>
 </div>
 </dd></dl>
 
@@ -3479,6 +3574,31 @@ dotted elements within the metric namespace used in Horizon/worker</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="skyline_functions.set_metric_as_derivative">
+<code class="descname">set_metric_as_derivative</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#set_metric_as_derivative"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.set_metric_as_derivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the metric to the derivative_metrics Redis set and create a
+z_derivative_metrics Redis key.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the Skyline app that is calling the function</li>
+<li><strong>base_name</strong> (<em>str</em>) &#8211; the metric base_name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">boolean</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_version">
 <span id="skyline-skyline-version-module"></span><h2>skyline.skyline_version module<a class="headerlink" href="#module-skyline_version" title="Permalink to this headline">¶</a></h2>
@@ -3612,7 +3732,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

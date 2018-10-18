@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -1511,6 +1511,66 @@
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="kc">False</span></div>
+
+<span class="c1"># @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data</span>
+<div class="viewcode-block" id="set_metric_as_derivative"><a class="viewcode-back" href="../skyline.html#skyline_functions.set_metric_as_derivative">[docs]</a><span class="k">def</span> <span class="nf">set_metric_as_derivative</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add the metric to the derivative_metrics Redis set and create a</span>
+<span class="sd">    z_derivative_metrics Redis key.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app that is calling the function</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :param base_name: the metric base_name</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :return: boolean</span>
+<span class="sd">    :rtype: boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set_metric_as_derivative :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+    <span class="n">return_boolean</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: set_metric_as_derivative - Redis connection failed&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">return_boolean</span>
+
+    <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set_metric_as_derivative :: </span><span class="si">%s</span><span class="s1"> added to derivative_metrics Redis set&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis derivative_metrics set&#39;</span><span class="p">)</span>
+        <span class="n">return_boolean</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">derivative_metric_key</span> <span class="o">=</span> <span class="s1">&#39;z.derivative_metric.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">last_expire_set</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+            <span class="n">derivative_metric_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="n">last_expire_set</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not set Redis derivative_metric key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">return_boolean</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">return_boolean</span></div>
 </pre></div>
 
            </div>
@@ -1544,7 +1604,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -5,6 +5,7 @@ Development
 .. toctree::
 
 	building-documentation.rst
+	dawn.rst
 	webapp.rst
 	debugging.rst
 	ionosphere.rst

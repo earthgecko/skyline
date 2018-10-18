@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Running Skyline in a Python virtualenv &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>Running Skyline in a Python virtualenv &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="Installation" href="installation.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -208,7 +208,7 @@ yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel <span 
 <li>Debian family</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>apt-get -y install build-essential
-apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev <span class="se">\</span>
+apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev <span class="se">\</span>
   libreadline6-dev libgdbm-dev libncurses5 libncurses5-dev libncursesw5 <span class="se">\</span>
   libfreetype6-dev libxft-dev python-pip wget tar git
 </pre></div>
@@ -219,12 +219,12 @@ apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev lib64bz2-dev <s
 <p>Regardless of your OS as long as you have pip installed you can install
 virtualenv. <em>NOTE:</em> if you are using a version of Python virtualenv
 already, this may not suit your setup.</p>
-<p>virtualenv must be &gt;= 15.0.1 due to some recent changes in the pip and
-setuptools, see <strong>Recent changes in the pip environment</strong> section in
-<a class="reference external" href="requirements.html#recent-changes-in-the-pip-environment">Requirements</a>
+<p>virtualenv must be &gt;= 15.0.1 and &lt;16.0.0 due to some recent changes in pip,
+setuptools and virtualenv, see <strong>Recent changes in the pip environment</strong> section
+in <a class="reference external" href="requirements.html#recent-changes-in-the-pip-environment">Requirements</a>
 for more details.</p>
-<p>This is using your system pip at this point only to install virtualenv.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install <span class="s1">&#39;virtualenv&gt;=15.0.1&#39;</span>
+<p>This is using your <strong>system</strong> pip at this point only to install virtualenv.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install <span class="s1">&#39;virtualenv==15.2.0&#39;</span>
 </pre></div>
 </div>
 </div>
@@ -326,7 +326,7 @@ virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span c
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

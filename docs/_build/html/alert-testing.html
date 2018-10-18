@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Alert testing &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>Alert testing &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="Strictly increasing monotonicity" href="monotonic-metrics.html"/>
         <link rel="prev" title="Getting data into Skyline" href="getting-data-into-skyline.html"/> 
 
@@ -170,10 +170,10 @@
 <p>The settings.py has a default non-existent metric namespace for testing your
 alerters, in the <code class="docutils literal"><span class="pre">skyline_test.alerters.test</span></code> <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple.</p>
 <p>If you want to test your email, Hipchat room and Pagerduty OPTS are correctly
-configured and working, do the following, once again using the Python-2.7.12
+configured and working, do the following, once again using the Python-2.7.14
 virtualenv and documentation PATHs as an example:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2712&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
@@ -226,7 +226,7 @@ graphs sent with the alerts will have <strong>no data</strong> in them.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

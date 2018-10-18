@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link href="https://raw.githubusercontent.com/earthgecko/skyline/master/skyline/webapp/static/images/favicon.ico" rel="icon" type="image/x-icon">
+  </head>
+    <body>
+        <title>Skyline</title>
+
+
+        <script src="Skyline_files/mousetrap.js"></script>
+<!-- @added 20160703 - Feature #1464: Webapp rebrow
+Updated bootstrap, dygraph and jquery (only to 2.2.4 as bootstrap needs < 3.0)
+bootstrap was update for the rebrow (https://github.com/marians/rebrow) layout
+elements.
+jquery was just updated - live() deprecated, changed to move
+dygraph was just updated.
+The strftime js (https://github.com/samsonjs/strftime/tree/v0.9.2) was added as
+dygraph-1.1.1 no longer includes the strftime library.
+fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v4.6.3
+-->
+        <script src="Skyline_files/jquery.js"></script>
+        <script src="Skyline_files/strftime-min.js"></script>
+        <script src="Skyline_files/dygraph-combined.js"></script>
+        <script src="Skyline_files/bootstrap.js"></script>
+
+<!-- @added 20170122 - Feature #1876: Ionosphere - training_data learn countdown
+Using https://github.com/rendro/countdown
+
+<             var endDate = "";
+---
+>             var oldendDate = "";
+>             var newendDate = " UTC";
+>             var endDate = date.toString();
+
+-->
+
+
+        <link rel="stylesheet" href="Skyline_files/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="Skyline_files/bootstrap-theme.css">
+        <link rel="stylesheet" href="Skyline_files/font-awesome.css">
+        <link rel="stylesheet" href="Skyline_files/skyline.css">
+
+  <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html"><span class="sky">Sky</span><span class="re">line</span></a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+        		<li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">now</a></li>
+          	<li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">then</a></li>
+          	<li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Panorama</a></li>
+          	<li class="active"><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Ionosphere</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html"><span class="logo"><span class="re">re</span>brow</span></a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Utilities</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">docs</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">app_settings</a></li>
+            <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">api</a></li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </div>
+
+  <div class="container">
+
+
+
+
+<!-- BEGIN /ionosphere block -->
+
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Home</a></li>
+		<li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Ionosphere</a></li>
+
+		<li class="active"><span class="logo"><span class="sky">Features profiles</span> <span class="re">to validate</span></span></li>
+
+  </div>
+</ol>
+
+
+
+<!-- BEGIN /ionosphere>?fp_validate=true block -->
+
+
+
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li class="active"><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Search</a></li>
+<!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
+# Return matches for the last 24 hours as the default -->
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Matches</a></li>
+		  <li class="active"><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">Validate</a></li>
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">List by metrics</a></li>
+		  <li><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">List by date</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles to validate</span></span></h4>
+
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Validate features profile search</td>
+  		        <td><select name="fp_validate">
+                <option value="true" selected="selected">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input name="metric" value="none" type="text"></td>
+  		      </tr>
+  		      <tr>
+  		        <td>validated</td>
+  		        <td><select name="validated_equals">
+                <option value="false" selected="selected">false</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+                <td>limit</td>
+                <td><input name="limit" min="0" max="100" value="30" type="number"> use 0 for unlimited</td>
+  		      </tr>
+  		      <tr>
+  		        <td>order by:</td>
+  		        <td><select name="order">
+                <option value="DESC" selected="selected">DESC</option>
+                <option value="ASC">ASC</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input value="Search" type="submit">
+      </form>
+
+<!-- collapse button div -->
+      </div>
+
+      </div>
+
+
+
+
+
+
+	  <div class="tab-pane active" id="validate">
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>stats.statsd.processing_time -
+          limited by 2 features profiles ordered by DESC</h4>
+
+      The below table gives you a side-by-side visual comparison of the graphs of the features profile
+      and the graphs of the parent (or parent's parent) that the features profile was LEARNT from.
+      You can validate and/or disable each using the checkboxes and buttons provided.
+      In future hopefully you will be able to tick all the boxes you want and
+      submit them with one Submit button.  However until then, each has to be
+      done individually and a new tab is opened, which does at least allow for
+      confirmation that the features profile has actually been validated.
+      Note: In Chrome and Chromium the images may display too large, a quick
+      workaround is to decrease the zoom in your browser window using the
+      combination of the Crtl + - keys.
+				<table class="table table-hover"><thead>
+					<tr>
+<!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
+      fp_parent_id5, parent_full_duration6, parent_anomaly_timestamp7,
+      fp_date8, fp_graph_uri9, parent_fp_date10, parent_fp_graph_uri11,
+      parent_parent_fp_id12, fp_learn_graph_uri13,
+      parent_fp_learn_fp_graph_uri14, minimum_full_duration15,
+      maximum_full_duration16] -->
+            <th>fp id</th>
+            <th>parent fp id</th>
+            <th>parent's parent fp id</th>
+            <th>metric</th>
+            <th>full duration</th>
+            <th>disable</th>
+            <th>validate</th>
+            <th>fp_graph</th>
+            <th>parent fp_graph</th>
+					</tr>
+				</thead>
+				<tbody>
+
+          <tr>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=673&amp;metric=stats.statsd.processing_time'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">673</a>
+            </td>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=657&amp;metric=stats.statsd.processing_time'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">657</a>
+            </td>
+
+            <td onclick="window.location='?fp_view=true&amp;fp_id=None&amp;metric=stats.statsd.processing_time'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">None</a>
+            </td>
+
+            <td><code>stats.statsd.processing_time</code></td>
+            <td>86400</td>
+            <td>
+              <input name="disable" type="checkbox">&nbsp;
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html" target="_blank">
+              <button type="button">Disable</button></a>
+            </td>
+            <td>
+              <input name="validate" type="checkbox">&nbsp;
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html" target="_blank">
+              <button type="button">Validate</button></a>
+            </td>
+            <td>
+              2017-02-23 02:54:33 UTC fp id 673<br>
+
+              <br>24.0 hours at this time was:<br>
+
+              <img src="Skyline_files/ionosphere_images.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487818473/stats.statsd.processing_time.graphite_now.24h.png
+
+
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">from</span></span> resolution (720.0 hours):<br>
+
+              <img src="Skyline_files/ionosphere_images_002.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487818473/stats.statsd.processing_time.graphite_now.720h.png
+
+            </td>
+
+            <td>
+              2017-02-21 19:58:23 UTC - using parent fp id 657<br>
+
+              <br>24.0 hours at this time was:<br>
+
+              <img src="Skyline_files/ionosphere_images_003.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487707103/stats.statsd.processing_time.graphite_now.24h.png
+
+
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">with</span></span> resolution (24.0 hours):<br>
+
+              <img src="Skyline_files/ionosphere_images_004.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+
+              <br>fp id None at 24.0 hours
+
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487707103/stats.statsd.processing_time.graphite_now.720h.png
+
+            </td>
+          </tr>
+
+          <tr>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=674&amp;metric=stats.statsd.processing_time'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">674</a>
+            </td>
+            <td onclick="window.location='?fp_view=true&amp;fp_id=673&amp;metric=stats.statsd.processing_time'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">673</a>
+            </td>
+
+            <td onclick="window.location='?fp_view=true&amp;fp_id=657&amp;metric=stats.statsd.processing_time'">
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">657</a>
+            </td>
+
+            <td><code>stats.statsd.processing_time</code></td>
+            <td>2592000</td>
+            <td>
+              <input name="disable" type="checkbox">&nbsp;
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html" target="_blank">
+              <button type="button">Disable</button></a>
+            </td>
+            <td>
+              <input name="validate" type="checkbox">&nbsp;
+              <a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html" target="_blank">
+              <button type="button">Validate</button></a>
+            </td>
+            <td>
+              2017-02-23 02:54:33 UTC fp id 674<br>
+
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">from</span></span> resolution 720.0 hours:<br>
+
+              <img src="Skyline_files/ionosphere_images_002.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487818473/stats.statsd.processing_time.graphite_now.720h.png
+
+
+              <br>24.0 hours at this time was:<br>
+
+              <img src="Skyline_files/ionosphere_images.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487818473/stats.statsd.processing_time.graphite_now.24h.png
+
+            </td>
+
+            <td>
+              2017-02-21 19:58:23 UTC - using parent's parent fp id 657<br>
+
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">with</span></span> resolution (720.0 hours):<br>
+
+              <img src="Skyline_files/ionosphere_images_004.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487707103/stats.statsd.processing_time.graphite_now.720h.png
+
+
+              <br>24.0 hours at this time was:<br>
+
+              <img src="Skyline_files/ionosphere_images_003.png" alt="stats.statsd.processing_time timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+
+              <br>fp id 657 at 24.0 hours
+
+              <br>ionosphere_images?image=/opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1487707103/stats.statsd.processing_time.graphite_now.24h.png
+
+            </td>
+          </tr>
+
+				</tbody>
+			</table>
+		</div>
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+
+
+
+
+
+
+<!-- END /ionosphere?fp_validate=true block -->
+
+
+
+<!-- END /ionosphere block -->
+
+
+
+  <div class="footer">
+    <div class="container">
+    	<div class="row">
+<!--
+        <div class="col-xs-6 col-md-4">
+-->
+        <div class="col-xs-6 col-md-4">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> is free software under the terms of the MIT license. Contribute :: <a href="https://github.com/earthgecko/skyline/" target="_blank">GitHub</a>.
+        </div>
+        <div class="col-xs-6 col-md-4">
+
+      		<p class="text-right">Page render took :: 1745.163 milliseconds</p>
+
+      	</div>
+        <div class="col-xs-6 col-md-4">
+
+      		<a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html"></a><p class="text-right"><a href="http://earthgecko-skyline.readthedocs.io/en/latest/ionosphere.html">version :: Skyline (luminosity v1.2.5-stable)</a></p>
+
+      	</div>
+    </div>
+
+
+<!--
+# @added 20170119 - Branch #922: ionosphere
+#                   Task #1718: review.tsfresh
+-->
+
+    	<div class="row">
+        <div class="col-md-9">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> Ionosphere was made possible by the very featureful tsfresh package <a href="https://github.com/blue-yonder/tsfresh" target="_blank">GitHub - https://github.com/blue-yonder/tsfresh</a>.
+        </div>
+        <div class="col-md-3">
+      		<p class="text-right"></p>
+      	</div>
+    </div>
+
+
+  </div>
+
+
+</div></body></html>

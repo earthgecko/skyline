@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>Installation &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -274,6 +274,9 @@ instances for any required remote Redis data retrieval and preprocessing.</li>
 equivalent) before continuing.</li>
 </ul>
 </li>
+<li>Should you wish to review the build steps, component builds and installs
+described below, there is a build script for <strong>testing</strong> purposes <strong>only</strong> in
+utils/dawn/skyline.dawn.sh see <a class="reference external" href="development/dawn.html">Dawn</a> section)</li>
 <li>Install Redis - see <a class="reference external" href="http://redis.io/">Redis.io</a></li>
 <li>Ensure that you review <a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a></li>
 <li>Ensure Redis has socket enabled <strong>with the following permissions</strong> in your
@@ -292,8 +295,9 @@ redis.conf</li>
 <ul class="simple">
 <li>Ensure Redis has a long <code class="docutils literal"><span class="pre">requirepass</span></code> set in redis.conf</li>
 <li>Ensure Redis <code class="docutils literal"><span class="pre">bind</span></code> is set in redis.conf, consider specifically stating
-<code class="docutils literal"><span class="pre">bind</span> <span class="pre">127.0.0.1</span></code> or <code class="docutils literal"><span class="pre">bind</span> <span class="pre">127.0.0.1</span> <span class="pre">&lt;OTHER_IP_YOU_WANT_REDIS_TO_BIND_TO&gt;</span></code>
-if you are going to run multiple distributed  Skyline instances.</li>
+<code class="docutils literal"><span class="pre">bind</span> <span class="pre">127.0.0.1</span></code> even if you are going to run multiple distributed Skyline
+instances, Skyline gets remote Redis data preprocessed via a Skyline API so
+there is no need to bind Redis to any other IP.</li>
 <li>Start Redis</li>
 <li>Install memcached and start memcached see <a class="reference external" href="https://memcached.org/">memcached.org</a></li>
 <li>Ensure that you start memcached only bound to 127.0.0.1 by passing the daemon
@@ -349,6 +353,11 @@ that it is harder for you to err.</p>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
+
+<span class="c1"># As of statsmodels 0.9.0 numpy, et al need to be installed before</span>
+<span class="c1"># statsmodels in requirements</span>
+<span class="c1"># https://github.com/statsmodels/statsmodels/issues/4654</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^numpy\|^scipy\|^patsy\|^pandas&quot;</span> <span class="p">|</span> tr <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span><span class="k">)</span>
 
 <span class="c1"># This can take lots of minutes...</span>
 bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/requirements.txt
@@ -450,7 +459,7 @@ vi settings.py
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">a special settings variable that needs mentioning is the alerter
-<a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.SYSLOG_ENABLED</span></code></a>.  This variable by default is <code class="docutils literal"><span class="pre">`True`</span></code> and
+<a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.SYSLOG_ENABLED</span></code></a>.  This variable by default is <code class="docutils literal"><span class="pre">True</span></code> and
 in this mode Skyline sends all anomalies to syslog and Panorama to record ALL
 anomalies to the database not just anomalies for metrics that have a
 <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple defined.  However this is the desired default
@@ -609,7 +618,7 @@ if you use an exec of any sort, ensure the pandas install has a long timeout.</l
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

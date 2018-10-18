@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Development - dawn &mdash; Skyline 1.2.8-stable documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../index.html"/>
+        <link rel="up" title="Development" href="index.html"/>
+        <link rel="next" title="Development - Webapp" href="webapp.html"/>
+        <link rel="prev" title="Building documentation" href="building-documentation.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Development - dawn</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-script-utils-dawn-skyline-dawn-sh">Build script - utils/dawn/skyline.dawn.sh</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="webapp.html">Development - Webapp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">Development - Debugging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ionosphere.html">Development - Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tsfresh.html">Development - tsfresh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytz.html">Development - pytz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#dry">DRY</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#on-going-refactoring">On going refactoring</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Development</a> &raquo;</li>
+      
+    <li>Development - dawn</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/development/dawn.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="development-dawn">
+<h1>Development - dawn<a class="headerlink" href="#development-dawn" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="build-script-utils-dawn-skyline-dawn-sh">
+<h2>Build script - utils/dawn/skyline.dawn.sh<a class="headerlink" href="#build-script-utils-dawn-skyline-dawn-sh" title="Permalink to this headline">¶</a></h2>
+<p>The Skyline dawn branch adds a build script for <strong>TESTING</strong> only, it is not
+recommended for production use.  However seeing as it they may be used by people
+for testing, they are written to try and ensure secure a set up as possible,
+with the exception of the definitions of iptables/iptables6/ufw.  It should not
+be used to deploy any other kind of environment unless the other components such
+as Graphite, iptables/iptables6/ufw are configured at the same time.  The build
+script is suitable for:</p>
+<ul class="simple">
+<li>CentOS 6.9</li>
+<li>CentOS 7.5</li>
+<li>Ubuntu 16.04.4 LTS</li>
+</ul>
+<p>The build script has user defined variables that can be edited directly in the
+script or read from /etc/skyline/skyline.dawn.conf.  The build script does the
+following:</p>
+<ul class="simple">
+<li>Install the build requirements via yum or apt-get</li>
+<li>Install the MySQL/mariadb server via yum or apt-get, configures it for
+<code class="docutils literal"><span class="pre">innodb_file_per_table=1</span></code>,starts it and secures it.</li>
+<li>Downloads, builds, installs, configures and starts Redis</li>
+<li>Installs memcached and its dependencies, configures and starts it</li>
+<li>Creates a skyline system user</li>
+<li>Downloads, builds and deploys the current Skyline Python version (2.7.14) and
+sets up the Skyline Python virtualenv</li>
+<li>Creates the required Skyline directories</li>
+<li>Clones the Skyline repo and checkouts the declared version</li>
+<li>Installs Skyline requirements.txt</li>
+<li>Install Apache and deploys the Skyline reverse proxy vhost config and creates
+the htpasswd resource</li>
+<li>Creates a self-signed SSL certificate for the Skyline reverse proxy vhost</li>
+<li>Deploys the Skyline settings.py with the declared variables</li>
+<li>Creates the Skyline MySQL/mariadb database and grants privileges</li>
+<li>Starts the Skyline services</li>
+<li>Seeds Skyline with an anomalous time series data for horizon.test.udp and
+which creates an anomaly to be reviewed in the Skyline UI</li>
+<li>The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
+be run in an idempotent manner.</li>
+</ul>
+<p>Example usage:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Fetch</span>
+wget -O skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
+<span class="c1"># Always review scripts before running them</span>
+cat /tmp/skyline.dawn.sh
+<span class="c1"># Determine public IP address</span>
+<span class="nv">USE_IP</span><span class="o">=</span><span class="k">$(</span>ifconfig <span class="p">|</span> grep -v <span class="s2">&quot;127.0.0.1&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;inet addr:&quot;</span> <span class="p">|</span> cut -d<span class="s1">&#39;:&#39;</span> -f2 <span class="p">|</span> cut -d<span class="s1">&#39; &#39;</span> -f1<span class="k">)</span>
+<span class="k">if</span> <span class="o">[</span> -f /etc/redhat-release <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+  <span class="nv">CENTOS_7</span><span class="o">=</span><span class="k">$(</span>cat /etc/redhat-release <span class="p">|</span> grep -c <span class="s2">&quot;release 7\.&quot;</span><span class="k">)</span>
+  <span class="k">if</span> <span class="o">[</span> <span class="nv">$CENTOS_7</span> -eq <span class="m">1</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+    <span class="nv">USE_IP</span><span class="o">=</span><span class="k">$(</span>ifconfig <span class="p">|</span> grep -v <span class="s2">&quot;127.0.0.1&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;inet &quot;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s/.*inet //g;s/ .*//g&#39;</span><span class="k">)</span>
+  <span class="k">fi</span>
+<span class="k">fi</span>
+<span class="c1"># Create the Skyline config dir</span>
+mkdir -p /etc/skyline
+<span class="c1"># Create the Skyline dawn config</span>
+<span class="nb">echo</span> <span class="s1">&#39;YOUR_SERVER_IP_ADDRESS=&quot;&#39;</span><span class="nv">$USE_IP</span><span class="s1">&#39;&quot;                      # YOUR Skyline server public IP address</span>
+<span class="s1">YOUR_SKYLINE_SERVER_FQDN=&quot;YOUR_SKYLINE_FQDN&quot;                  # YOUR Skyline server FQDN</span>
+<span class="s1">YOUR_EMAIL=&quot;YOUR_EMAIL&quot;                                       # YOUR email address for the httpd server admin</span>
+<span class="s1">YOUR_OTHER_IP_ADDRESS=&quot;YOUR_IP_ADDRESS&quot;                       # YOUR current public IP address that you will be connecting from</span>
+<span class="s1">WEBAPP_AUTH_USER=&quot;admin&quot;                                      # The username you want to use for http authentication</span>
+<span class="s1">WEBAPP_AUTH_USER_PASSWORD=&quot;SET_HTTP_AUTH_PASSWORD&quot;            # The password you want to use for http authentication</span>
+<span class="s1">MYSQL_ROOT_PASSWORD=&quot;SET_THE_ROOT_MYSQL_USER_PASSWORD&quot;        # The MySQL root user password</span>
+<span class="s1">MYSQL_SKYLINE_PASSWORD=&quot;SET_THE_SKYLINE_MYSQL_USER_PASSWORD&quot;  # The Skyline DB user password</span>
+<span class="s1">REDIS_PASSWORD=&quot;SET_A_REALLY_REALLY_LONG_Redis_PASSWORD&quot;      # The Redis password</span>
+<span class="s1">SKYLINE_RELEASE=&quot;master&quot;                                      # The Skyline release/branch/commit to deploy&#39;</span> &gt; /etc/skyline/skyline.dawn.conf
+<span class="c1"># Run it</span>
+chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
+/tmp/skyline.dawn.sh
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="webapp.html" class="btn btn-neutral float-right" title="Development - Webapp" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="building-documentation.html" class="btn btn-neutral" title="Building documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2.8-stable',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

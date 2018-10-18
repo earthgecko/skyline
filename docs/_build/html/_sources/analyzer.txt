@@ -100,9 +100,9 @@ changes or we have.
 Metrics monotonicity
 ====================
 
-Analyzer is used to identify what metric timeseries are strictly increasing
+Analyzer is used to identify what metric time series are strictly increasing
 monotonically, metrics that have an incrementing increasing count, so that these
-timeseriers can be handled via their derivative products where appropriate.  For
+time series can be handled via their derivative products where appropriate.  For
 full details see `Monotonic metrics <monotonic-metrics.html>`__
 
 Push to Mirage
@@ -111,6 +111,14 @@ Push to Mirage
 Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than :mod:`settings.FULL_DURATION` to the Mirage
 service, see `Mirage <mirage.html>`__.
+
+Push to Ionosphere
+==================
+
+Analyzer pushes anomalous metrics that are ionosphere_enabled to Ionosphere
+to check if the anomalous time series is known to be NOT ANOMALOUS due to it's
+features profile matching a known NOT ANOMALOUS features profile see
+`Ionosphere <ionosphere.html>`__.
 
 Analyzer :mod:`settings.ALERTS`
 ===============================

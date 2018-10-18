@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.algorithms &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>analyzer.algorithms &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -215,6 +215,17 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="kc">False</span>
 
+<span class="c1"># @added 20180807 - Feature #2492: alert on stale metrics</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">ALERT_ON_STALE_METRICS</span>
+<span class="c1">#    ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">ALERT_ON_STALE_METRICS</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">ALERT_ON_STALE_PERIOD</span>
+<span class="c1">#    ALERT_ON_STALE_PERIOD = settings.ALERT_ON_STALE_PERIOD</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">ALERT_ON_STALE_PERIOD</span> <span class="o">=</span> <span class="mi">300</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
@@ -443,7 +454,24 @@
         <span class="c1"># This results and residual are unused</span>
         <span class="c1"># results = np.linalg.lstsq(A, y)</span>
         <span class="c1"># residual = results[1]</span>
-        <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
+        <span class="c1"># Changed in version numpy 1.14.0: If not set, a FutureWarning is given.</span>
+        <span class="c1"># The previous default of -1 will use the machine precision as rcond</span>
+        <span class="c1"># parameter, the new default will use the machine precision times</span>
+        <span class="c1"># max(M, N). To silence the warning and use the new default, use</span>
+        <span class="c1"># rcond=None, to keep using the old behavior, use rcond=-1.</span>
+        <span class="c1"># Tested with time series - /opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1491468474/stats.statsd.processing_time.mirage.redis.24h.json</span>
+        <span class="c1"># new rcond=None resulted in:</span>
+        <span class="c1"># np.linalg.lstsq(A, y, rcond=None)[0]</span>
+        <span class="c1"># &gt;&gt;&gt; array([3.85656116e-11, 2.58582310e-20])</span>
+        <span class="c1"># Original default results in:</span>
+        <span class="c1"># np.linalg.lstsq(A, y, rcond=-1)[0]</span>
+        <span class="c1"># &gt;&gt;&gt; array([ 4.10251589e-07, -6.11801949e+02])</span>
+        <span class="c1"># Changed to pass rcond=-1</span>
+        <span class="c1"># m, c = np.linalg.lstsq(A, y)[0]</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Evaluate append once, not every time in the loop - this gains ~0.020 s on</span>
         <span class="c1"># every timeseries potentially @earthgecko #1310</span>
@@ -677,6 +705,48 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter timeseries and run selected algorithm.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># @added 20180807 - Feature #2492: alert on stale metrics</span>
+    <span class="c1"># Determine if a metric has stopped sending data and if so add to the</span>
+    <span class="c1"># analyzer.alert_on_stale_metrics Redis set</span>
+    <span class="k">if</span> <span class="n">ALERT_ON_STALE_METRICS</span><span class="p">:</span>
+        <span class="n">add_to_alert_on_stale_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># @modified 20180816 - Feature #2492: alert on stale metrics</span>
+        <span class="c1"># Added try and except to prevent some errors that are encounter between</span>
+        <span class="c1"># 00:14 and 00:17 on some days</span>
+        <span class="c1"># Traceback (most recent call last):</span>
+        <span class="c1"># File &quot;/opt/skyline/github/skyline/skyline/analyzer/analyzer.py&quot;, line 394, in spin_process</span>
+        <span class="c1"># anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)</span>
+        <span class="c1"># File &quot;/opt/skyline/github/skyline/skyline/analyzer/algorithms.py&quot;, line 530, in run_selected_algorithm</span>
+        <span class="c1"># if int(time()) - int(timeseries[-1][0]) &gt;= ALERT_ON_STALE_PERIOD:</span>
+        <span class="c1"># IndexError: list index out of range</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">ALERT_ON_STALE_PERIOD</span><span class="p">:</span>
+                <span class="n">add_to_alert_on_stale_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># @modified 20180816 -</span>
+            <span class="c1">#                      Feature #2492: alert on stale metrics</span>
+            <span class="n">add_to_alert_on_stale_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">STALE_PERIOD</span><span class="p">:</span>
+                <span class="n">add_to_alert_on_stale_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">add_to_alert_on_stale_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">add_to_alert_on_stale_metrics</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+                <span class="k">if</span> <span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+                    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;analyzer.alert_on_stale_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
     <span class="c1"># Get rid of short series</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
@@ -818,7 +888,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

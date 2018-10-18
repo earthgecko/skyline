@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>validate_settings &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>validate_settings &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -574,6 +574,38 @@
             <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: LUMINOL_CROSS_CORRELATION_THRESHOLD should be a float between 0.0 and 1.0000&#39;</span><span class="p">)</span>
             <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
 
+    <span class="c1"># @added 20181009 - Feature #2618: alert_slack</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_ALERTS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">TEST_ALERTS</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: no ALERTS have been declared in settings.py, exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;error :: no ALERTS have been declared in settings.py, exiting, please fix setting.py&#39;</span><span class="p">)</span>
+        <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">TEST_SLACK_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">TEST_SLACK_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">TEST_SLACK_ENABLED</span> <span class="ow">and</span> <span class="n">TEST_ALERTS</span><span class="p">:</span>
+        <span class="c1"># Test that all slack alert tuples are declared AFTER smtp alert tuples</span>
+        <span class="n">slack_order_set</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">smtp_set</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
+                <span class="n">smtp_set</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">slack_order_set</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, a slack alert tuple set before an smtp alert tuple, please fix setting.py&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error :: a slack alert tuple set before an smtp alert tuple&#39;</span><span class="p">)</span>
+                    <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;slack&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">smtp_set</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exiting, a slack alert tuple set before an smtp alert tuple, please fix setting.py&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error :: a slack alert tuple set before an smtp alert tuple&#39;</span><span class="p">)</span>
+                    <span class="n">invalid_variables</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+                <span class="n">slack_order_set</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="k">if</span> <span class="n">invalid_variables</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 
@@ -611,7 +643,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
