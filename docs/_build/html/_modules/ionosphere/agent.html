@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.agent &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>ionosphere.agent &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -293,9 +293,10 @@
             <span class="n">configuration_error</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">mysql_up</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">cnx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;database user name or password - connected OK&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errorcode</span><span class="o">.</span><span class="n">ER_ACCESS_DENIED_ERROR</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: something is wrong with your user name or password&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: something is wrong with your database user name or password&#39;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">err</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errorcode</span><span class="o">.</span><span class="n">ER_BAD_DB_ERROR</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: the </span><span class="si">%s</span><span class="s1"> database does not exist&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -352,7 +353,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

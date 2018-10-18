@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crucible.crucible_algorithms &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>crucible.crucible_algorithms &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -166,14 +166,21 @@
             
   <h1>Source code for crucible.crucible_algorithms</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
+<span class="c1"># matplotlib.use is now required before statsmodels.api</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">use</span> <span class="k">as</span> <span class="n">matplotlib_use</span>
+<span class="n">matplotlib_use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 <span class="c1"># @modified 20160821 - Issue #23 Test dependency updates</span>
 <span class="c1"># Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile</span>
+<span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
+<span class="c1"># import matplotlib</span>
+<span class="c1"># matplotlib.use(&#39;Agg&#39;)</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
-<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -704,7 +711,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Skyline and friends &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>Skyline and friends &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="Logging" href="logging.html"/>
         <link rel="prev" title="Running multiple Skyline instances" href="running-multiple-skylines.html"/> 
 
@@ -115,7 +115,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#statsd">Statsd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#buckyserver">BuckyServer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#buckyserver">BuckyServer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#some-advantages-to-using-buckyserver">Some advantages to using Buckyserver</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#sensu">Sensu</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#riemann">Riemann</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#logstash">Logstash</a></li>
@@ -203,26 +206,44 @@ over time, in terms of:</p>
 <li>being able monitoring the overall performance of your &#8220;things&#8221; over time</li>
 </ul>
 </li>
-<li>To the new user these things may seem like uninteresting, probably never to be
-looked much metrics, however over time they will describe your ups and downs,
+<li>To the new user these things may seem uninteresting, probably never to be
+looked metrics, however over time they will describe your ups and downs,
 your highs and lows and hopefully add to your understanding of your &#8220;things&#8221;</li>
 </ul>
 </div>
 </div>
 <div class="section" id="statsd">
 <span id="statsd"></span><h2>Statsd<a class="headerlink" href="#statsd" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://github.com/etsy/stats">Statsd</a> feeds graphite so it is quite handy.</p>
+<p><a class="reference external" href="https://github.com/etsy/stats">Statsd</a> feeds graphite so it is quite handy.
+Use TCP, not UDP</p>
 </div>
 <div class="section" id="buckyserver">
 <span id="buckyserver"></span><h2>BuckyServer<a class="headerlink" href="#buckyserver" title="Permalink to this headline">¶</a></h2>
 <p>Before tcp transport was added to Statsd was
 <a class="reference external" href="https://github.com/HubSpot/BuckyServer">BuckyServer</a> for long haul TCP
-transport of your metrics to local Statsd -&gt; Graphite.</p>
+transport of your metrics to Statsd -&gt; Graphite.</p>
+<div class="section" id="some-advantages-to-using-buckyserver">
+<span id="some-advantages-to-using-buckyserver"></span><h3>Some advantages to using Buckyserver<a class="headerlink" href="#some-advantages-to-using-buckyserver" title="Permalink to this headline">¶</a></h3>
+<p>Although the introduction of another node app may seem like too much effort or
+additional complexity, using Buckyserver also has additional advantages.
+Although Statd does allow for Multi-Metric Packets the total length of the
+payload must be within the MTU of all your hops, a very hard variable to know
+and quite a hassle to calculate dynamic in scripts/apps.</p>
+<p>Buckysever has the advantage of being able to ship lots of metrics with a single
+POST, which is useful for shipping custom or app metrics and has no size limits.</p>
+<p>Using Statsd and Buckyserver also allows one to describe 2 methods of shipping
+data in scripts/apps, via Buckyserver and via Statsd.  This allows you to ship
+via the Buckyserver method and if that fails failover to the Statsd method,
+where each metric can be iterated through in your script/app and sent
+individually, if you do not want the hassle of dealing with Multi-Metric Packet
+payload size.  Running Buckyserver and Statsd on the same instance allows for
+these types of advanced usage and has proved to be very reliable.</p>
+</div>
 </div>
 <div class="section" id="sensu">
 <span id="sensu"></span><h2>Sensu<a class="headerlink" href="#sensu" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://sensuapp.org/">Sensu</a> can feed Graphite -
-<a class="reference external" href="https://github.com/sensu/sensu">Sensu on github</a></p>
+<p><a class="reference external" href="https://sensuapp.org/">Sensu</a> can feed Graphite like collectd but uses TCP not
+UDP for transport - <a class="reference external" href="https://github.com/sensu/sensu">Sensu on github</a></p>
 </div>
 <div class="section" id="riemann">
 <span id="riemann"></span><h2>Riemann<a class="headerlink" href="#riemann" title="Permalink to this headline">¶</a></h2>
@@ -236,8 +257,9 @@ transport of your metrics to local Statsd -&gt; Graphite.</p>
 </div>
 <div class="section" id="many-more">
 <span id="many-more"></span><h2>Many more<a class="headerlink" href="#many-more" title="Permalink to this headline">¶</a></h2>
-<p>There are a great deal of apps that can feed Skyline, this just just to mention
-a few.</p>
+<p>There are a great deal of apps that can feed Skyline, this is just mentioning
+a few.  However bear in mind, that whatever you use, try and ensure that it is
+TCP and not UDP based.</p>
 </div>
 </div>
 
@@ -282,7 +304,7 @@ a few.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

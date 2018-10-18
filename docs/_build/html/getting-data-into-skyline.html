@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting data into Skyline &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>Getting data into Skyline &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="Alert testing" href="alert-testing.html"/>
         <link rel="prev" title="Upgrading - Etsy to Crucible" href="upgrading/etsy-to-crucible.html"/> 
 
@@ -94,7 +94,9 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting data into Skyline</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#a-note-on-time-snyc">A note on time snyc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#firstly-a-note-on-time-snyc">Firstly a note on time snyc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#secondly-a-note-on-the-reliability-of-metric-data">Secondly a note on the reliability of metric data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#now-getting-the-data-in">Now getting the data in</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tcp-pickles">TCP pickles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#udp-messagepack">UDP messagepack</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-a-listener">Adding a Listener</a></li>
@@ -174,10 +176,8 @@
             
   <div class="section" id="getting-data-into-skyline">
 <h1>Getting data into Skyline<a class="headerlink" href="#getting-data-into-skyline" title="Permalink to this headline">¶</a></h1>
-<p>You currently have two options to get data into Skyline, via the Horizon
-service:</p>
-<div class="section" id="a-note-on-time-snyc">
-<h2>A note on time snyc<a class="headerlink" href="#a-note-on-time-snyc" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="firstly-a-note-on-time-snyc">
+<h2>Firstly a note on time snyc<a class="headerlink" href="#firstly-a-note-on-time-snyc" title="Permalink to this headline">¶</a></h2>
 <p>Although it may seems obvious, it is important to note that any metrics
 coming into Graphite and Skyline should come from synchronised sources.
 If there is more than 60 seconds (or highest resolution metric), certain
@@ -186,6 +186,27 @@ functioning of certain algorithms which expect very recent datapoints.
 Time drift does decrease the accuracy and effectiveness of some
 algorithms. In terms of machine related metrics, normal production grade
 time snychronisation will suffice.</p>
+</div>
+<div class="section" id="secondly-a-note-on-the-reliability-of-metric-data">
+<h2>Secondly a note on the reliability of metric data<a class="headerlink" href="#secondly-a-note-on-the-reliability-of-metric-data" title="Permalink to this headline">¶</a></h2>
+<p>There are many ways to get data to Graphite and Skyline, however some are better
+than others.  The first and most important point is that your metric pipeline
+should be transported via TCP, from source, to Graphite, to Skyline.  Although
+the original Skyline set up in the days of statsd UDP only and where UDP
+transport was seen as acceptable (and it possibly is in a LAN environment).
+Data analysis with metrics shipped via any UDP in a distributed and/or cloud
+environments is not as effective in terms of analysis as TCP shipped metrics.</p>
+<p>For Skyline to do the full spectrum of analysis both in the real time and
+historic data contexts, it needs <strong>reliable</strong> data, with as few missing data
+points as possible.</p>
+<p>Although collectd is great it ships via UDP, which is not great.  So ensure that
+your metric pipeline is fully TCP transported.  statsd now has a TCP listener,
+sensu is good for server metrics and there are lots of options.</p>
+</div>
+<div class="section" id="now-getting-the-data-in">
+<h2>Now getting the data in<a class="headerlink" href="#now-getting-the-data-in" title="Permalink to this headline">¶</a></h2>
+<p>You currently have two options to get data into Skyline, via the Horizon
+service:</p>
 </div>
 <div class="section" id="tcp-pickles">
 <h2>TCP pickles<a class="headerlink" href="#tcp-pickles" title="Permalink to this headline">¶</a></h2>
@@ -236,6 +257,7 @@ code for the exact protocol), you&#8217;ll be able to stream to this listener.</
 </div>
 <div class="section" id="udp-messagepack">
 <h2>UDP messagepack<a class="headerlink" href="#udp-messagepack" title="Permalink to this headline">¶</a></h2>
+<p>Genreally do not use this.  It is UDP, but has not been removed.</p>
 <p>Horizon also accepts metrics in the form of messagepack encoded strings
 over UDP, on port 2025. The format is
 <code class="docutils literal"><span class="pre">[&lt;metric</span> <span class="pre">name&gt;,</span> <span class="pre">[&lt;timestamp&gt;,</span> <span class="pre">&lt;value&gt;]]</span></code>. Simply encode your metrics
@@ -309,7 +331,7 @@ into Redis.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

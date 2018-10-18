@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.analyzer &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>analyzer.analyzer &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -227,6 +227,11 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">DO_NOT_ALERT_ON_STALE_METRICS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DO_NOT_ALERT_ON_STALE_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">DO_NOT_ALERT_ON_STALE_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
+
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
@@ -279,6 +284,9 @@
         <span class="c1"># Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20180903 - Feature #2580: illuminance</span>
+        <span class="c1">#                   Feature #1986: flux</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illuminance_datapoints</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Analyzer.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer.Analyzer.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -551,6 +559,15 @@
                     <span class="n">timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20180903 - Feature #2580: illuminance</span>
+            <span class="c1">#                   Feature #1986: flux</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">illuminance_datapoint</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s1">&#39;.illuminance&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">illuminance_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">illuminance_datapoint</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
@@ -1132,6 +1149,12 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted Redis analyzer.stale set to refresh&#39;</span><span class="p">)</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no Redis set to delete - analyzer.stale&#39;</span><span class="p">)</span>
+                    <span class="c1"># @added 20180807 - Feature #2492: alert on stale metrics</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;analyzer.alert_on_stale_metrics&#39;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted Redis analyzer.alert_on_stale_metrics set to refresh&#39;</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no Redis set to delete - analyzer.alert_on_stale_metrics&#39;</span><span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
@@ -1443,6 +1466,9 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts</span><span class="p">:</span>
                 <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="p">[]</span>
 
+            <span class="c1"># @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point</span>
+            <span class="n">ionosphere_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
             <span class="n">ionosphere_metric_alerts</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_alerts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Ionosphere alert/s requested :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_alerts</span><span class="p">))</span>
@@ -1456,6 +1482,9 @@
                         <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="n">send_alert_for</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
                         <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">)</span>
+                        <span class="c1"># @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point</span>
+                        <span class="n">ionosphere_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">)</span>
+
                         <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">triggered_algorithms</span><span class="p">:</span>
                             <span class="n">key</span> <span class="o">=</span> <span class="n">algorithm</span>
                             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -1476,6 +1505,10 @@
                     <span class="c1"># Handle alerting for Ionosphere</span>
                     <span class="c1"># for metric in self.anomalous_metrics:</span>
                     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span><span class="p">:</span>
+                        <span class="c1"># @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point</span>
+                        <span class="c1"># Set each metric to the default Analyzer context</span>
+                        <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;Analyzer&#39;</span>
+
                         <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="c1"># Absolute match</span>
                         <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -1524,6 +1557,7 @@
                                     <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                                         <span class="nb">str</span><span class="p">(</span><span class="n">SECOND_ORDER_RESOLUTION_FULL_DURATION</span><span class="p">),</span>
                                         <span class="n">matched_by</span><span class="p">))</span>
+                                <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;Mirage&#39;</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">mirage_metric</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
@@ -1676,6 +1710,24 @@
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not alerting on ionosphere_alerts Ionosphere metric - last_alert key exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;so alert resources will not be created for this ionosphere_alerts Ionosphere metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                 <span class="k">continue</span>
+
+                            <span class="c1"># @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point</span>
+                            <span class="c1"># Due to ionosphere_alerts being added to the</span>
+                            <span class="c1"># self.all_anomalous_metrics after Analyzer metrics</span>
+                            <span class="c1"># here we need to ensure that we only alert on the</span>
+                            <span class="c1"># last item for the metric in the list so that the</span>
+                            <span class="c1"># alert is not sent out with any current</span>
+                            <span class="c1"># anomaly data from the current Analyzer run, but</span>
+                            <span class="c1"># with the data from the ionosphere_alerts item.</span>
+                            <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Ionosphere&#39;</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">check_metric</span> <span class="ow">in</span> <span class="n">ionosphere_anomalous_metrics</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">check_metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                                        <span class="k">if</span> <span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">check_metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                                            <span class="c1"># If the timestamps do not match</span>
+                                            <span class="c1"># then it is the list item from</span>
+                                            <span class="c1"># the Analyzer anomaly, not the</span>
+                                            <span class="c1"># Ionosphere list item</span>
+                                            <span class="k">continue</span>
 
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -1843,6 +1895,64 @@
             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage in run after algorithm run times: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
+            <span class="c1"># @added 20180807 - Feature #2492: alert on stale metrics</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERT_ON_STALE_METRICS</span><span class="p">:</span>
+                <span class="n">stale_metrics_to_alert_on</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">alert_on_stale_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">alert_on_stale_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;analyzer.alert_on_stale_metrics&#39;</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_on_stale_metrics :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_on_stale_metrics</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">alert_on_stale_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">alert_on_stale_metrics</span><span class="p">:</span>
+                    <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">for</span> <span class="n">do_not_alert_namespace</span> <span class="ow">in</span> <span class="n">DO_NOT_ALERT_ON_STALE_METRICS</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">do_not_alert_namespace</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
+                            <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">break</span>
+                        <span class="n">do_not_alert_namespace_namespace_elements</span> <span class="o">=</span> <span class="n">do_not_alert_namespace</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                        <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">do_not_alert_namespace_namespace_elements</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">do_not_alert_namespace_namespace_elements</span><span class="p">):</span>
+                            <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">break</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">process_metric</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;last_alert.stale.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                    <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">last_alert</span><span class="p">:</span>
+                        <span class="n">stale_metrics_to_alert_on</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># @modified 20180828 - Bug #2568: alert on stale metrics not firing</span>
+                            <span class="c1"># Those expired in the year 2067</span>
+                            <span class="c1"># self.redis_conn.setex(cache_key, int(time()), int(settings.STALE_PERIOD))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">STALE_PERIOD</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> Redis key&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">stale_metrics_to_alert_on</span><span class="p">:</span>
+                    <span class="n">alert</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;stale_metrics&#39;</span><span class="p">,</span> <span class="s1">&#39;stale_digest&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">STALE_PERIOD</span><span class="p">)</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stale_metrics_to_alert_on</span><span class="p">),</span> <span class="n">stale_metrics_to_alert_on</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                    <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;Analyzer&#39;</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;digest alerted on </span><span class="si">%s</span><span class="s1"> stale metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stale_metrics_to_alert_on</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stale metrics :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">stale_metrics_to_alert_on</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not send alert on stale digest email&#39;</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">stale_metrics_to_alert_on</span>
+                    <span class="k">del</span> <span class="n">alert</span>
+                    <span class="k">del</span> <span class="n">metric</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;there are no stale metrics to alert on&#39;</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">stale_metrics_to_alert_on</span>
+
             <span class="n">run_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
             <span class="n">total_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">))</span>
             <span class="n">total_analyzed</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
@@ -1961,6 +2071,19 @@
             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage before reset counters: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 
+            <span class="c1"># @added 20180903 - Feature #2580: illuminance</span>
+            <span class="c1">#                   Feature #1986: flux</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">illuminance_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">illuminance_datapoints</span><span class="p">)</span>
+                <span class="n">illuminance</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">illuminance_sum</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">illuminance</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;illuminance        :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">illuminance</span><span class="p">)</span>
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.illuminance&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+            <span class="c1"># @modified 20181017 - Feature #2580: illuminance</span>
+            <span class="c1"># Disabled for now as in concept phase</span>
+            <span class="c1"># send_graphite_metric(skyline_app, send_metric_name, illuminance)</span>
+
             <span class="c1"># Reset counters</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mirage_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1977,6 +2100,8 @@
             <span class="c1"># Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># @added 20180903 - Feature #1986: illuminance</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">illuminance_datapoints</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="n">unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2006,6 +2131,17 @@
                 <span class="k">del</span> <span class="n">run_time</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del run_time&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20180903 - Feature #2580: illuminance</span>
+            <span class="c1">#                   Feature #1986: flux</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">illuminance_sum</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del illuminance_sum&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">illuminance</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to del illuminance&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage after reset counters: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
@@ -2117,7 +2253,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

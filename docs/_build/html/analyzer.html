@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Analyzer &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>Analyzer &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="Analyzer Optimizations" href="analyzer-optimizations.html"/>
         <link rel="prev" title="Horizon" href="horizon.html"/> 
 
@@ -103,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#explanation-of-exceptions">Explanation of Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metrics-monotonicity">Metrics monotonicity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#push-to-mirage">Push to Mirage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#push-to-ionosphere">Push to Ionosphere</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#analyzer-settings-alerts">Analyzer <code class="docutils literal"><span class="pre">settings.ALERTS</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#order-matters">Order Matters</a></li>
 </ul>
@@ -263,9 +264,9 @@ changes or we have.</p>
 </div>
 <div class="section" id="metrics-monotonicity">
 <h2>Metrics monotonicity<a class="headerlink" href="#metrics-monotonicity" title="Permalink to this headline">¶</a></h2>
-<p>Analyzer is used to identify what metric timeseries are strictly increasing
+<p>Analyzer is used to identify what metric time series are strictly increasing
 monotonically, metrics that have an incrementing increasing count, so that these
-timeseriers can be handled via their derivative products where appropriate.  For
+time series can be handled via their derivative products where appropriate.  For
 full details see <a class="reference external" href="monotonic-metrics.html">Monotonic metrics</a></p>
 </div>
 <div class="section" id="push-to-mirage">
@@ -273,6 +274,13 @@ full details see <a class="reference external" href="monotonic-metrics.html">Mon
 <p>Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> to the Mirage
 service, see <a class="reference external" href="mirage.html">Mirage</a>.</p>
+</div>
+<div class="section" id="push-to-ionosphere">
+<h2>Push to Ionosphere<a class="headerlink" href="#push-to-ionosphere" title="Permalink to this headline">¶</a></h2>
+<p>Analyzer pushes anomalous metrics that are ionosphere_enabled to Ionosphere
+to check if the anomalous time series is known to be NOT ANOMALOUS due to it&#8217;s
+features profile matching a known NOT ANOMALOUS features profile see
+<a class="reference external" href="ionosphere.html">Ionosphere</a>.</p>
 </div>
 <div class="section" id="analyzer-settings-alerts">
 <h2>Analyzer <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a><a class="headerlink" href="#analyzer-settings-alerts" title="Permalink to this headline">¶</a></h2>
@@ -435,7 +443,7 @@ layers.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

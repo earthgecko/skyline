@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_algorithms &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>mirage.mirage_algorithms &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -398,10 +398,13 @@
         <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
         <span class="n">series</span> <span class="o">=</span> <span class="n">series</span> <span class="o">-</span> <span class="n">series</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.18.0&#39;</span><span class="p">:</span>
-            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
+        <span class="c1"># This expAverage is unused</span>
+        <span class="c1"># if PANDAS_VERSION &lt; &#39;0.18.0&#39;:</span>
+        <span class="c1">#     expAverage = pandas.stats.moments.ewma(series, com=15)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()</span>
 
         <span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
@@ -424,9 +427,18 @@
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="n">residual</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
+        <span class="c1"># This results and residual are unused</span>
+        <span class="c1"># results = np.linalg.lstsq(A, y)</span>
+        <span class="c1"># residual = results[1]</span>
+
+        <span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
+        <span class="c1"># Changed in version numpy 1.14.0 - see full comments in</span>
+        <span class="c1"># analyzer/algorithms.py under least_squares np.linalg.lstsq</span>
+        <span class="c1"># m, c = np.linalg.lstsq(A, y)[0]</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Evaluate append once, not every time in the loop - this gains ~0.020 s</span>
         <span class="c1"># on every timeseries potentially @earthgecko #1310</span>
@@ -688,7 +700,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

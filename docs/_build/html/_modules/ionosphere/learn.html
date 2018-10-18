@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.learn &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>ionosphere.learn &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -1051,12 +1051,27 @@
             <span class="n">remove_work_list_from_redis_set</span><span class="p">(</span><span class="n">learn_metric_list</span><span class="p">)</span>
             <span class="k">continue</span>
 
+        <span class="c1"># @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data</span>
+        <span class="c1"># With the introduction of calculating the nonNegativeDerivative in both</span>
+        <span class="c1"># Analyzer and Mirage before the initial analysis, both apps are now</span>
+        <span class="c1"># passing the preprocessed time series to the send_anomalous_metric_to</span>
+        <span class="c1"># function. However in skyline/ionosphere/learn.py the metric is still</span>
+        <span class="c1"># being checked to determine if it is in derivative_metrics and the</span>
+        <span class="c1"># nonNegativeDerivative function is being applied to the existing json</span>
+        <span class="c1"># data, if the json data already exists. This is incorrect. It is</span>
+        <span class="c1"># correct in the context of learn.py having to fetch the the data from</span>
+        <span class="c1"># Graphite, however applying nonNegativeDerivative to existing json data</span>
+        <span class="c1"># is incorrect and does not have the desired result.</span>
+        <span class="n">preprocessed_learn_json_data_exists</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="c1"># Create a learn json data if it does not exist</span>
         <span class="n">got_learn_json</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">learn_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_learn_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">learn_json_file</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: learning data ts json available - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">learn_json_file</span><span class="p">))</span>
             <span class="n">got_learn_json</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data</span>
+            <span class="n">preprocessed_learn_json_data_exists</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -1092,47 +1107,55 @@
                 <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                 <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
-                <span class="n">datapoints</span> <span class="o">=</span> <span class="n">timeseries</span>
+                <span class="c1"># @modified 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data</span>
+                <span class="c1"># Not required if the preprocessed json exists</span>
+                <span class="c1"># datapoints = timeseries</span>
 
-            <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
-            <span class="c1"># Convert the values of metrics strictly increasing monotonically</span>
-            <span class="c1"># to their deriative products</span>
-            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
-                <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
-                    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
-                    <span class="n">datapoints</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
+            <span class="c1"># @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data</span>
+            <span class="c1"># Only calculate the derivative_timeseries if the preprocessed json</span>
+            <span class="c1"># data did not exist and the data was fetched from Graphite by</span>
+            <span class="c1"># wrapping the entire derivate block in this if condition</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">preprocessed_learn_json_data_exists</span><span class="p">:</span>
 
-                <span class="n">validated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
+                <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
+                <span class="c1"># Convert the values of metrics strictly increasing monotonically</span>
+                <span class="c1"># to their deriative products</span>
+                <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+                    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">new_datapoint</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-                        <span class="n">validated_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
-                    <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
-                    <span class="c1"># Added nosec to exclude from bandit tests</span>
-                    <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
-                        <span class="k">continue</span>
-                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">validated_timeseries</span>
+                        <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+                        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                        <span class="n">datapoints</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
 
-                <span class="c1"># @modified 20170129 - Bug #1898: Ionosphere - missing json</span>
-                <span class="c1"># logger.info(&#39;learn :: data points surfaced :: %s&#39; % (len(timeseries)))</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: data points surfaced :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+                    <span class="n">validated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">new_datapoint</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                            <span class="n">validated_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
+                        <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
+                        <span class="c1"># Added nosec to exclude from bandit tests</span>
+                        <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
+                            <span class="k">continue</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">validated_timeseries</span>
+
+                    <span class="c1"># @modified 20170129 - Bug #1898: Ionosphere - missing json</span>
+                    <span class="c1"># logger.info(&#39;learn :: data points surfaced :: %s&#39; % (len(timeseries)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: data points surfaced :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed to read learning data ts json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">learn_json_file</span><span class="p">))</span>
@@ -1639,7 +1662,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

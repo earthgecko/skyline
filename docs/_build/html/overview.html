@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>Overview &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="index.html"/>
         <link rel="next" title="Requirements" href="requirements.html"/>
         <link rel="prev" title="Skyline documentation" href="index.html"/> 
 
@@ -181,8 +181,8 @@
 <p>Welcome to Skyline.</p>
 <div class="section" id="what-is-skyline">
 <h2>What is Skyline?<a class="headerlink" href="#what-is-skyline" title="Permalink to this headline">¶</a></h2>
-<p>Skyline v1.2.2 - For those interested in anomaly detection and deflection in
-streamed time series data.</p>
+<p>For those interested in anomaly detection and deflection in streamed time series
+data.</p>
 <p>Anomaly deflection.  The obvious next evolution in the use of all the anomaly
 detection data?</p>
 <p>Skyline is a Python based anomaly detection/deflection stack that analyses,
@@ -217,7 +217,7 @@ have been extracted using the tsfresh features extraction package -
 <a class="reference external" href="https://github.com/blue-yonder/tsfresh">https://github.com/blue-yonder/tsfresh</a> and evaluation against boundary layer
 algorithms to determine whether a 3-sigma triggered anomaly is actually a normal,
 known pattern in the data.</p>
-<p>The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm -
+<p>The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm -
 SITTSSCA first coined here :) compares the generated fingerprints of the two
 time series and can determine if they closely resemble each other in terms of:</p>
 <ul class="simple">
@@ -230,10 +230,10 @@ may vary the window length for best resolution.”
 (<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)
 <a class="reference external" href="http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy">http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy</a></li>
 </ul>
-<p>The Skyline-Ionosphere-Tsfresh Time Series Similairities Comparison Algorithm
+<p>The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm
 compares how close the fingerprint values are as a percentage and
-varying this percentage variable will either focusing the algorithm with greater
-precision the closer to 0% the parameter gets, the perfect match (or possibly
+varying this percentage variable will either focus the algorithm with greater
+precision, the closer to 0% the parameter gets, the perfect match (or possibly
 a mirror match too - unkonwn/untested) or it will incrementally increase the
 tolerance as the percentage variable increases and the matching will become
 less and less reliable.</p>
@@ -292,9 +292,18 @@ removes the &#8220;without the need to configure a model/thresholds&#8221; eleme
 <p>It has been generally accepted now that a basic 3-sigma anomaly detection
 implementation is not generally useful in the operations and machine metrics
 space.</p>
-<p>&gt; I still remember taking Skyline and applying it to one of our customer&#8217;s metrics, and turning 100,000 metrics into 10,000 anomalies. It just created more noise from the noise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">David Gildeh:</th><td class="field-body">&#8220;I still remember taking Skyline and applying it to one of our
+customer&#8217;s metrics, and turning 100,000 metrics into 10,000 anomalies. It just
+created more noise from the noise.&#8221; <a class="reference external" href="https://blog.outlyer.com/what-good-is-anomaly-detection">https://blog.outlyer.com/what-good-is-anomaly-detection</a></td>
+</tr>
+</tbody>
+</table>
 <p>This is still true of Skyline today, it will still detect the 10000 anomalies
-and it should.</p>
+and it <strong>should</strong>.</p>
 <p>So why continue developing Skyline?</p>
 <p>To try and make it better and more useful.  3-sigma anomaly detection works,
 but it works too well.  Therefore there is an opportunity to see if it is
@@ -467,7 +476,7 @@ Steinbach&#8217;s excellent <a class="reference external" href="https://github.c
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

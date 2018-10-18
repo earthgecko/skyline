@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.2.4-stable documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.2.8-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.4-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -265,6 +265,22 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
+<span class="c1"># @added 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
+<span class="c1"># Number of processes to assign to Ionosphere, however Ionosphere should never</span>
+<span class="c1"># need more than 1 and is effectively hard coded as such currently.  This</span>
+<span class="c1"># variable is only declared for the purpose of maintaining a standard set up in</span>
+<span class="c1"># each module and to possibly enable more than one processor on Ionosphere in</span>
+<span class="c1"># the future, should there be a requirement for Ionosphere to analyse the</span>
+<span class="c1"># metrics quicker.  Running Ionosphere with more than one process is untested</span>
+<span class="c1"># and currently it is hard coded to be 1</span>
+<span class="c1"># (https://github.com/earthgecko/skyline/issues/69)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ionosphere_processes</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span>
+    <span class="k">if</span> <span class="n">ionosphere_processes</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ionosphere_processes</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">ionosphere_processes</span> <span class="o">=</span> <span class="mi">1</span>
+
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
 <span class="n">max_age_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_MAX_AGE</span>
@@ -281,8 +297,6 @@
 <span class="n">last_purge_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.last_purge_ts&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
 
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="k">if</span> <span class="n">this_host</span> <span class="o">==</span> <span class="s1">&#39;zpf-skyline-dev-3-40g-gra1&#39;</span><span class="p">:</span>
-    <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="Ionosphere"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere">[docs]</a><span class="k">class</span> <span class="nc">Ionosphere</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
@@ -1384,7 +1398,12 @@
                     <span class="n">fp_layers_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;layers_id&#39;</span><span class="p">])</span>
                     <span class="k">if</span> <span class="n">fp_layers_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">fp_layers_present</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">fp_layers_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_layers_id</span><span class="p">)</span>
+                    <span class="c1"># @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page</span>
+                    <span class="c1"># Only add the fp_layers_id if &gt; 0</span>
+                    <span class="c1"># fp_layers_ids.append(fp_layers_id)</span>
+                    <span class="k">if</span> <span class="n">fp_layers_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">fp_layers_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fp_layers_ids</span><span class="p">:</span>
+                            <span class="n">fp_layers_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_layers_id</span><span class="p">)</span>
 
                     <span class="c1"># @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs</span>
                     <span class="c1"># Added all_fp_ids</span>
@@ -1587,7 +1606,9 @@
         <span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
         <span class="c1">#                  Branch #2270: luminosity</span>
         <span class="n">fp_checked</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">layers_checked</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page</span>
+        <span class="c1"># layers_checked = 0</span>
+        <span class="n">layers_checked_count</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># Compare calculated features to feature values for each fp id</span>
         <span class="n">not_anomalous</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1927,6 +1948,8 @@
                     <span class="c1"># @added 20180621 - Feature #2404: Ionosphere - fluid approximation</span>
                     <span class="c1"># Check ranges and only Min-Max scale if the 2 time series</span>
                     <span class="c1"># are similar in range</span>
+                    <span class="c1"># @added 20180819 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges</span>
+                    <span class="c1"># TODO</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">range_tolerance</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE</span>
                     <span class="k">except</span><span class="p">:</span>
@@ -1995,7 +2018,6 @@
                             <span class="c1"># On low values such as 1 and 2, the range_tolerance</span>
                             <span class="c1"># should be adjusted to account for the very small</span>
                             <span class="c1"># range. TODO</span>
-
                             <span class="n">lower_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">-</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
                             <span class="n">upper_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">+</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
                             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lower_max_fp_value</span><span class="p">,</span> <span class="n">upper_max_fp_value</span><span class="p">):</span>
@@ -2482,7 +2504,7 @@
                     <span class="n">check_layers_algorithms</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_learn - layers algorithms check - False&#39;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers algorithms check - True&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers algorithms check - True, </span><span class="si">%s</span><span class="s1"> layers to be checked&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;a features profile matched as not_anomalous - layers algorithms check - False&#39;</span><span class="p">)</span>
 
@@ -2515,12 +2537,19 @@
                 <span class="n">matched_layers_id</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">for</span> <span class="n">layers_id</span> <span class="ow">in</span> <span class="n">fp_layers_ids</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking layers_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> layers profiles of </span><span class="si">%s</span><span class="s1"> possible layers&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_checked_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skipping checking layers_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> layers profiles of </span><span class="si">%s</span><span class="s1"> possible layers as layer id </span><span class="si">%s</span><span class="s1"> already matched&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_checked_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_layers_id</span><span class="p">)))</span>
                         <span class="k">continue</span>
                     <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
 
                         <span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
                         <span class="c1">#                  Branch #2270: luminosity</span>
-                        <span class="n">layers_checked</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="c1"># @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page</span>
+                        <span class="c1"># layers_checked += 1</span>
+                        <span class="n">layers_checked_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
                         <span class="c1"># Get the layers algorithms and run then on the timeseries</span>
                         <span class="c1"># @modified 20170307 - Feature #1960: ionosphere_layers</span>
@@ -2530,7 +2559,9 @@
                             <span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
                             <span class="c1">#                  Branch #2270: luminosity</span>
                             <span class="c1"># not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries)</span>
-                            <span class="n">not_anomalous</span> <span class="o">=</span> <span class="n">run_layer_algorithms</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">layers_id</span><span class="p">,</span> <span class="n">anomalous_timeseries</span><span class="p">,</span> <span class="n">fp_layers_count</span><span class="p">,</span> <span class="n">layers_checked</span><span class="p">)</span>
+                            <span class="c1"># @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page</span>
+                            <span class="c1"># not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries, fp_layers_count, layers_checked)</span>
+                            <span class="n">not_anomalous</span> <span class="o">=</span> <span class="n">run_layer_algorithms</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">layers_id</span><span class="p">,</span> <span class="n">anomalous_timeseries</span><span class="p">,</span> <span class="n">fp_layers_count</span><span class="p">,</span> <span class="n">layers_checked_count</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
                                 <span class="n">matched_layers_id</span> <span class="o">=</span> <span class="n">layers_id</span>
                         <span class="k">except</span><span class="p">:</span>
@@ -2538,10 +2569,10 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: run_layer_algorithms failed for layers_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)))</span>
                         <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not_anomalous :: layers_id </span><span class="si">%s</span><span class="s1"> was matched after checking </span><span class="si">%s</span><span class="s1"> layers profiles of </span><span class="si">%s</span><span class="s1"> possible layers&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_checked</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">)))</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_checked_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">)))</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;still anomalous :: layers_id </span><span class="si">%s</span><span class="s1"> was NOT matched after checking </span><span class="si">%s</span><span class="s1"> layers profiles of </span><span class="si">%s</span><span class="s1"> possible layers&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_checked</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">)))</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">layers_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_checked_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_layers_count</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">not_anomalous</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous - no features profiles layers were matched - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
 
@@ -2981,12 +3012,14 @@
 
                     <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">layers_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="p">))</span>
+                        <span class="c1"># @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page</span>
+                        <span class="c1"># layers_checked = str(len(self.layers_checked))</span>
+                        <span class="n">str_layers_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
-                        <span class="n">layers_checked</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers checked count  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">layers_checked</span><span class="p">)</span>
+                        <span class="n">str_layers_checked</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers checked count  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">str_layers_checked</span><span class="p">)</span>
                     <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.layers_checked&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
-                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">layers_checked</span><span class="p">)</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">str_layers_checked</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
@@ -3106,7 +3139,9 @@
             <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
+            <span class="c1"># for i in range(1, settings.IONOSPHERE_PROCESSES + 1):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ionosphere_processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">ionosphere_job</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">))</span>
@@ -3115,7 +3150,9 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                             <span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
+                                <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
+                                <span class="c1"># str(settings.IONOSPHERE_PROCESSES),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
                                 <span class="n">function_name</span><span class="p">))</span>
                         <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                         <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
@@ -3133,7 +3170,9 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                             <span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
+                                <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
+                                <span class="c1"># str(settings.IONOSPHERE_PROCESSES),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
                                 <span class="n">function_name</span><span class="p">))</span>
                         <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                         <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
@@ -3157,7 +3196,9 @@
                     <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
+                            <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
+                            <span class="c1"># str(settings.IONOSPHERE_PROCESSES),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
                             <span class="n">function_name</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
@@ -3235,7 +3276,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.4-stable',
+            VERSION:'1.2.8-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
