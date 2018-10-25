@@ -1382,7 +1382,9 @@ class Analyzer(Thread):
 
                         if settings.ENABLE_MIRAGE:
                             try:
-                                SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                                # @modified 20181023 - Feature #2618: alert_slack
+                                # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                                SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
                                 mirage_metric = True
                                 analyzer_metric = False
                                 logger.info(
@@ -1418,7 +1420,8 @@ class Analyzer(Thread):
                             try:
                                 self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
                             except:
-                                logger.error('error :: failed to add mirage.metrics Redis key')
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to add mirage.metrics Redis key - %s' % str(mirage_metric_cache_key))
 
                             # metric_timestamp = int(time())
                             # anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
