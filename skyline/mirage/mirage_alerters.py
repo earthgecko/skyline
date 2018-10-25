@@ -16,7 +16,9 @@ import redis
 from msgpack import Unpacker
 import datetime as dt
 # @added 20180809 - Bug #2498: Incorrect scale in some graphs
-from time import time
+# @modified 20181025 - Feature #2618: alert_slack
+# Added gmtime and strftime
+from time import (time, gmtime, strftime)
 # @modified 20160820 - Issue #23 Test dependency updates
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
@@ -966,6 +968,12 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     logger.info('graphite_from - %s' % str(graphite_from))
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
+    # @added 20181025 - Feature #2618: alert_slack
+    # Added date and time info so you do not have to mouseover the slack
+    # message to determine the time at which the alert came in
+    timezone = strftime("%Z", gmtime())
+    human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+    slack_time_string = '%s %s' % (human_anomaly_time, timezone)
 
     if settings.GRAPHITE_PORT != '':
         if known_derivative_metric:
@@ -1103,9 +1111,14 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                 return False
 
         if settings.IONOSPHERE_ENABLED:
-            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link>'
+            # @modified 20181025 - Feature #2618: alert_slack
+            # Added date and time info so you do not have to mouseover the slack
+            # message to determine the time at which the alert came in
+            # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link>'
+            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
         else:
-            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
+            # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
+            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\nFor anomaly at ' + slack_time_string
 
         try:
             # slack does not allow embedded images, nor links behind authentication
