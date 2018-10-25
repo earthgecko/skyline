@@ -77,7 +77,11 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
   `app_id` INT(11) NOT NULL COMMENT 'app id',
   `source_id` INT(11) NOT NULL COMMENT 'source id',
   `anomaly_timestamp` INT(11) NOT NULL COMMENT 'anomaly unix timestamp, see notes on historic dates above',
-  `anomalous_datapoint` DECIMAL(18,6) NOT NULL COMMENT 'anomalous datapoint',
+/* @modified 20181025 - Bug #2638: anomalies db table - anomalous_datapoint greater than DECIMAL
+# Changed DECIMAL(18,6) to DECIMAL(65,6) for really large numbers
+#  `anomalous_datapoint` DECIMAL(18,6) NOT NULL COMMENT 'anomalous datapoint',
+*/
+  `anomalous_datapoint` DECIMAL(65,6) NOT NULL COMMENT 'anomalous datapoint',
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries in which the anomaly was detected, can be 0 if not relevant',
 /*
 # store numeric array in mysql numpy
