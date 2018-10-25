@@ -230,7 +230,8 @@ class Mirage(Thread):
         metric_vars_array = []
         for var_array in metric_vars:
             # @modified 20181023 - Feature #2618: alert_slack
-            # Wrapped in try except
+            # Wrapped in try except for debugging issue where the
+            # hours_to_resolve was interpolating to hours_to_resolve = "t"
             try:
                 key = None
                 value = None
