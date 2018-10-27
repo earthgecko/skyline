@@ -48,7 +48,7 @@ Example usage:
 .. code-block:: bash
 
   # Fetch
-  wget -O skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
+  wget -O /tmp/skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
   # Always review scripts before running them
   cat /tmp/skyline.dawn.sh
   # Determine public IP address
@@ -59,7 +59,8 @@ Example usage:
       USE_IP=$(ifconfig | grep -v "127.0.0.1" | grep "inet " | sed -e 's/.*inet //g;s/ .*//g')
     fi
   fi
-  # Create the Skyline config dir
+  # Create the Skyline config dir REPLACE THE YOUR_ and SET_ variables with your
+  # own
   mkdir -p /etc/skyline
   # Create the Skyline dawn config
   echo 'YOUR_SERVER_IP_ADDRESS="'$USE_IP'"                      # YOUR Skyline server public IP address
