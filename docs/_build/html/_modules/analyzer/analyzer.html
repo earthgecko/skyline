@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.analyzer &mdash; Skyline 1.2.8-stable documentation</title>
+  <title>analyzer.analyzer &mdash; Skyline 1.2.9-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -1549,7 +1549,9 @@
 
                         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_MIRAGE</span><span class="p">:</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">SECOND_ORDER_RESOLUTION_FULL_DURATION</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                                <span class="c1"># @modified 20181023 - Feature #2618: alert_slack</span>
+                                <span class="c1"># SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]</span>
+                                <span class="n">SECOND_ORDER_RESOLUTION_FULL_DURATION</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
                                 <span class="n">mirage_metric</span> <span class="o">=</span> <span class="kc">True</span>
                                 <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -1585,7 +1587,8 @@
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">mirage_metric_cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                             <span class="k">except</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add mirage.metrics Redis key&#39;</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add mirage.metrics Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_metric_cache_key</span><span class="p">))</span>
 
                             <span class="c1"># metric_timestamp = int(time())</span>
                             <span class="c1"># anomaly_check_file = &#39;%s/%s.%s.txt&#39; % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])</span>
@@ -2253,7 +2256,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.8-stable',
+            VERSION:'1.2.9-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

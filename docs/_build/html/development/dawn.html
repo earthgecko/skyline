@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - dawn &mdash; Skyline 1.2.8-stable documentation</title>
+  <title>Development - dawn &mdash; Skyline 1.2.9-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development - Webapp" href="webapp.html"/>
         <link rel="prev" title="Building documentation" href="building-documentation.html"/> 
@@ -226,7 +226,7 @@ be run in an idempotent manner.</li>
 </ul>
 <p>Example usage:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Fetch</span>
-wget -O skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
+wget -O /tmp/skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
 <span class="c1"># Always review scripts before running them</span>
 cat /tmp/skyline.dawn.sh
 <span class="c1"># Determine public IP address</span>
@@ -237,7 +237,8 @@ cat /tmp/skyline.dawn.sh
     <span class="nv">USE_IP</span><span class="o">=</span><span class="k">$(</span>ifconfig <span class="p">|</span> grep -v <span class="s2">&quot;127.0.0.1&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;inet &quot;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s/.*inet //g;s/ .*//g&#39;</span><span class="k">)</span>
   <span class="k">fi</span>
 <span class="k">fi</span>
-<span class="c1"># Create the Skyline config dir</span>
+<span class="c1"># Create the Skyline config dir REPLACE THE YOUR_ and SET_ variables with your</span>
+<span class="c1"># own</span>
 mkdir -p /etc/skyline
 <span class="c1"># Create the Skyline dawn config</span>
 <span class="nb">echo</span> <span class="s1">&#39;YOUR_SERVER_IP_ADDRESS=&quot;&#39;</span><span class="nv">$USE_IP</span><span class="s1">&#39;&quot;                      # YOUR Skyline server public IP address</span>
@@ -299,7 +300,7 @@ chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.8-stable',
+            VERSION:'1.2.9-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

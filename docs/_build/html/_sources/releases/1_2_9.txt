@@ -1,0 +1,145 @@
+=============================
+1.2.9 - the luminosity branch
+=============================
+
+v1.2.9-luminosity - October 27, 2018
+
+Minor bug fixes
+---------------
+
+Described below.
+
+Changes from v1.2.7
+-------------------
+
+- Bumped version to v1.2.8
+- A fix mirage issue when slack alert tuples were added where the
+  hours_to_resolve was interpolating to hours_to_resolve = "t" from the
+  metric_vars (2618)
+- Added date and time info so you do not have to mouseover the slack message to
+  determine the time at which the alert came in (2618)
+- SQL update. Changed anomalies anomalous_datapoint column data type from
+  DECIMAL(18,6) to DECIMAL(65,6) for very long numbers (2638)
+- Updated docs, some typos and docstrings in settings.py (2642)
+
+Update notes
+------------
+
+- NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.9
+- You can only upgrade to v1.2.9 from v1.2.8
+- There is a change to the DB and a SQL update
+- There are no functional changes to settings.py other than some changes to
+  docstrings
+
+How to update from v1.2.8
+-------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+
+.. code-block:: bash
+
+    NEW_SKYLINE_VERSION="v1.2.9-stable-luminosity"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v1.2.8-stable-luminosity"    # Your old Skyline version
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "$NEW_SKYLINE_PATH"
+    cd "$NEW_SKYLINE_PATH"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+- Create the new settings.py from your existing settings.py as there are no
+  changes between v1.2.8 and v1.2.9.
+
+.. code-block:: bash
+
+    # Create the settings.py from your existing settings.py as there are no
+    # changes between v1.2.8 and v1.2.9
+    cat "${CURRENT_SKYLINE_PATH}/skyline/settings.py" > "${NEW_SKYLINE_PATH}/skyline/settings.py"
+
+- Stop Skyline Ionosphere and Panorama services.
+- Backup your Skyline database.
+- Apply the SQL update to your Skyline database as per described below, change
+  the below variables as appropriate to your set up.
+
+.. code-block:: bash
+
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="<YOUR_MYSQL_USER>"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.v1.2.9.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/luminosity-v1.2.9-stable.sql
+
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.9 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv "$CURRENT_SKYLINE_PATH" "/opt/skyline/github/skyline.$OLD_SKYLINE_VERSION"
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done
+
+- Check the logs
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done
