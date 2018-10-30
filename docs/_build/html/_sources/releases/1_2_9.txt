@@ -2,7 +2,7 @@
 1.2.9 - the luminosity branch
 =============================
 
-v1.2.9-luminosity - October 27, 2018
+v1.2.9-luminosity - October 30, 2018
 
 Security update and minor bug fixes
 -----------------------------------
