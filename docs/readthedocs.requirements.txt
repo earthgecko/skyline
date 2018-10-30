@@ -35,7 +35,7 @@ pandas==0.23.4
 patsy==0.5.0
 statsmodels==0.8.0
 msgpack-python==0.5.6
-requests==2.19.1
+requests==2.20.0
 python-simple-hipchat==0.4.0
 pygerduty==0.37.0
 mysql-connector-python==8.0.6
