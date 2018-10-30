@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.2.8 - the luminosity and dawn branches &mdash; Skyline 1.2.8-stable documentation</title>
+  <title>1.2.8 - the luminosity and dawn branches &mdash; Skyline 1.2.9-stable documentation</title>
   
 
   
@@ -35,10 +35,10 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
         <link rel="next" title="1.2.7 - the luminosity branch" href="1_2_7.html"/>
-        <link rel="prev" title="Release Notes" href="../releases.html"/> 
+        <link rel="prev" title="1.2.9 - the luminosity branch" href="1_2_9.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -118,6 +118,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_2_9.html">1.2.9 - the luminosity branch</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.8 - the luminosity and dawn branches</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#new-functionality">New functionality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#minor-bug-fixes-and-maintenance">Minor bug fixes and maintenance</a></li>
@@ -349,6 +350,25 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
 </pre></div>
 </div>
 <ul class="simple">
+<li>Update the pip dependencies, e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+<span class="c1"># As of statsmodels 0.9.0 numpy, et al need to be installed before</span>
+<span class="c1"># statsmodels in requirements</span>
+<span class="c1"># https://github.com/statsmodels/statsmodels/issues/4654</span>
+<span class="c1"># This can take lots of minutes with the new pandas</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^numpy\|^scipy\|^patsy\|^pandas&quot;</span> <span class="p">|</span> tr <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span><span class="k">)</span>
+<span class="c1"># Remove the luminol egg as it will already be installed and pip will moan</span>
+cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep -v luminol &gt; /tmp/requirements.txt
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /tmp/requirements.txt
+deactivate
+</pre></div>
+</div>
+<ul class="simple">
 <li>Start the all Skyline services (change as appropriate for your set up) e.g.</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
@@ -380,7 +400,7 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
         <a href="1_2_7.html" class="btn btn-neutral float-right" title="1.2.7 - the luminosity branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../releases.html" class="btn btn-neutral" title="Release Notes" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_2_9.html" class="btn btn-neutral" title="1.2.9 - the luminosity branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -411,7 +431,7 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.8-stable',
+            VERSION:'1.2.9-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

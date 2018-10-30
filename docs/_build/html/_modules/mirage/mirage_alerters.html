@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_alerters &mdash; Skyline 1.2.8-stable documentation</title>
+  <title>mirage.mirage_alerters &mdash; Skyline 1.2.9-stable documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.8-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -183,7 +183,9 @@
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span>
 <span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="c1"># @added 20180809 - Bug #2498: Incorrect scale in some graphs</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="c1"># @modified 20181025 - Feature #2618: alert_slack</span>
+<span class="c1"># Added gmtime and strftime</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span><span class="p">)</span>
 <span class="c1"># @modified 20160820 - Issue #23 Test dependency updates</span>
 <span class="c1"># Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
@@ -1133,6 +1135,15 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">))</span>
     <span class="n">graphite_until</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_until - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">))</span>
+    <span class="c1"># @added 20181025 - Feature #2618: alert_slack</span>
+    <span class="c1"># Added date and time info so you do not have to mouseover the slack</span>
+    <span class="c1"># message to determine the time at which the alert came in</span>
+    <span class="n">timezone</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Z&quot;</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">())</span>
+    <span class="c1"># @modified 20181029 - Feature #2618: alert_slack</span>
+    <span class="c1"># Use the standard UNIX data format</span>
+    <span class="c1"># human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;)</span>
+    <span class="n">human_anomaly_time</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%c</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">slack_time_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">human_anomaly_time</span><span class="p">,</span> <span class="n">timezone</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
@@ -1270,9 +1281,14 @@
                 <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
-            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt;&#39;</span>
+            <span class="c1"># @modified 20181025 - Feature #2618: alert_slack</span>
+            <span class="c1"># Added date and time info so you do not have to mouseover the slack</span>
+            <span class="c1"># message to determine the time at which the alert came in</span>
+            <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;\n*Ionosphere training dir* :: &lt;&#39; + ionosphere_link + &#39;|training data link&gt;&#39;</span>
+            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;&#39;</span>
+            <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;&#39;</span>
+            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">For anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># slack does not allow embedded images, nor links behind authentication</span>
@@ -1367,7 +1383,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.8-stable',
+            VERSION:'1.2.9-stable',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

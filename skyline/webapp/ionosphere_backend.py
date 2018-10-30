@@ -2687,6 +2687,11 @@ def metric_layers_alogrithms(base_name):
         raise  # to webapp to return in the UI
 
     if not metric_id:
+        # @added 20181024 - Bug #2638: anomalies db table - anomalous_datapoint greater than DECIMAL
+        # For debugging
+        trace = traceback.format_exc()
+        logger.error(trace)
+
         fail_msg = 'error :: no id for %s' % str(base_name)
         logger.error('%s' % fail_msg)
         if engine:

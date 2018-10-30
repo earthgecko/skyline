@@ -254,7 +254,7 @@ PAGERDUTY_ENABLED = False
 
 SLACK_ENABLED = False
 """
-:var SLACK_ENABLED: Enables the Slack alerter - NOT YET IMPLEMENTED
+:var SLACK_ENABLED: Enables the Slack alerter
 :vartype SLACK_ENABLED: boolean
 """
 

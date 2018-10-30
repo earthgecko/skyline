@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.2.2 - the luminosity branch &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>1.2.9 - the luminosity branch &mdash; Skyline 1.2.9-stable documentation</title>
   
 
   
@@ -37,8 +37,8 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Skyline 1.2.9-stable documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.2.1 - the luminosity branch" href="1_2_1.html"/>
-        <link rel="prev" title="1.2.3 - the luminosity branch" href="1_2_3.html"/> 
+        <link rel="next" title="1.2.8 - the luminosity and dawn branches" href="1_2_8.html"/>
+        <link rel="prev" title="Release Notes" href="../releases.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -118,19 +118,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="1_2_9.html">1.2.9 - the luminosity branch</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.9 - the luminosity branch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#security-update-and-minor-bug-fixes">Security update and minor bug fixes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changes-from-v1-2-8">Changes from v1.2.8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v1-2-8">How to update from v1.2.8</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_8.html">1.2.8 - the luminosity and dawn branches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_7.html">1.2.7 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_6.html">1.2.6 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_5.html">1.2.5 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_4.html">1.2.4 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_3.html">1.2.3 - the luminosity branch</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.2 - the luminosity branch</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#changes-from-v1-2-1">Changes from v1.2.1</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v1-2-1">How to update from v1.2.1</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_2.html">1.2.2 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_1.html">1.2.1 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_0.html">1.2.0 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_1_11.html">1.1.11 - the ionosphere branch</a></li>
@@ -192,11 +193,11 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.2.2 - the luminosity branch</li>
+    <li>1.2.9 - the luminosity branch</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_2_2.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_2_9.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -207,53 +208,104 @@
            <div itemprop="articleBody">
             
   <div class="section" id="the-luminosity-branch">
-<h1>1.2.2 - the luminosity branch<a class="headerlink" href="#the-luminosity-branch" title="Permalink to this headline">¶</a></h1>
-<p>v1.2.2-luminosity - July 17, 2018</p>
-<div class="section" id="changes-from-v1-2-1">
-<h2>Changes from v1.2.1<a class="headerlink" href="#changes-from-v1-2-1" title="Permalink to this headline">¶</a></h2>
+<h1>1.2.9 - the luminosity branch<a class="headerlink" href="#the-luminosity-branch" title="Permalink to this headline">¶</a></h1>
+<p>v1.2.9-luminosity - October 30, 2018</p>
+<div class="section" id="security-update-and-minor-bug-fixes">
+<h2>Security update and minor bug fixes<a class="headerlink" href="#security-update-and-minor-bug-fixes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Bumped to v1.2.2 - luminosity-v1.2.2-stable</li>
-<li>Added SQL updates for #2446: Optimize Ionosphere</li>
-<li>Modified ionosphere.py to use order_by to ensure that the latest fps and
-layers are checked first.  This improves Ionosphere performance probably
-significantly as new features profiles and layers tend to match more than
-older ones (it seems/ed).  Although there is no definitive data on this yet,
-matching newer first is more descriptive of the recent activity.  Without
-running a Skyline Ionosphere instance collecting fp_count, fp_checked,
-layers_count and layers_checked in the original Ionosphere configuration of
-oldest to newest, it will remain a question as to whether this actually an
-optimization or not, but initial numbers look promising.</li>
-<li>Added stats to ionosphere.py, layers.py amd ionosphere matched tables on
-fp/layers counts vs how many were checked until match</li>
-<li>Added missing logger defines to luminosity/process_correlations.py</li>
-<li>Corrected settings.py docstrings on SECRET_KEY and OTHER_SKYLINE_REDIS_INSTANCES</li>
-<li>Changed created column position in skyline/webapp/templates/search_features_profiles.html
-to be the first date column as this is more intuitive.</li>
-<li>Typo line in skyline/webapp/templates/training_data.html</li>
-<li>Use ALTERNATIVE_SKYLINE_URLS with multiple Skyine instances to either redirect
-to the other Skyline instance if there are only 2 or give a list of
-ALTERNATIVE_SKYLINE_URLS if many than 2 Skyline instances in
-skyline/webapp/webapp.py</li>
-<li>Corrected utils/seed_data.py to report SKYLINE_URL</li>
-<li>Added to known bugs in the training_data page (Issue #52: Ionosphere learn
-countdown clock at 0 when client and server timezone differs) refs #2450</li>
-<li>Updated documentation</li>
+<li>Secuirty update - update Python requests library to 2.20.0 for CVE-2018-18074.
+A manual update of the requests version is possible in-situ without needed to
+deploy the full release, in your venv simply activate the venv and run
+<code class="docutils literal"><span class="pre">bin/pip2.7</span> <span class="pre">install</span> <span class="pre">requests==2.20.0</span></code></li>
+<li>Minor bug fixes are described below.</li>
+</ul>
+</div>
+<div class="section" id="changes-from-v1-2-8">
+<h2>Changes from v1.2.8<a class="headerlink" href="#changes-from-v1-2-8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Bumped version to v1.2.9</li>
+<li>A fix mirage issue when slack alert tuples were added where the
+hours_to_resolve was interpolating to hours_to_resolve = &#8220;t&#8221; from the
+metric_vars (2618)</li>
+<li>Added date and time info so you do not have to mouseover the slack message to
+determine the time at which the alert came in (2618)</li>
+<li>SQL update. Changed anomalies anomalous_datapoint column data type from
+DECIMAL(18,6) to DECIMAL(65,6) for very long numbers (2638)</li>
+<li>Updated docs, some typos and docstrings in settings.py (2642)</li>
+<li>Update requests dependency to 2.22.0 (2652) CVE-2018-18074</li>
 </ul>
 </div>
 <div class="section" id="update-notes">
 <h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>NOTE: If you are running v1.x you cannot upgrade from v1.x directly to v1.2.2.</li>
+<li>NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.9</li>
+<li>You can only upgrade to v1.2.9 from v1.2.8</li>
+<li>There is a change to the DB and a SQL update</li>
+<li>There are no functional changes to settings.py other than some changes to
+docstrings</li>
 </ul>
 </div>
-<div class="section" id="how-to-update-from-v1-2-1">
-<h2>How to update from v1.2.1<a class="headerlink" href="#how-to-update-from-v1-2-1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="how-to-update-from-v1-2-8">
+<h2>How to update from v1.2.8<a class="headerlink" href="#how-to-update-from-v1-2-8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Update the pip requests dependency for CVE-2018-18074, e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="nv">requests</span><span class="o">==</span><span class="m">2</span>.20.0
+deactivate
+<span class="c1"># Restart all Skyline services</span>
+<span class="c1"># Restart Apache</span>
+</pre></div>
+</div>
 <ul class="simple">
 <li>Download the new release tag or clone/update to get it to a temp location,
 ready to be deployed.</li>
-<li>Diff your current running version settings.py with skyline/settings.py and
-create a new settings.py in the temp location appropriate for Skyline v1.2.2
-and your set up, ready to be deployed.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.9-stable-luminosity&quot;</span>    <span class="c1"># Your new Skyline version</span>
+<span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.8-stable-luminosity&quot;</span>    <span class="c1"># Your old Skyline version</span>
+
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span>                 <span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># Your new Skyline path</span>
+
+mkdir -p <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span>
+git clone https://github.com/earthgecko/skyline .
+git checkout <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Create the new settings.py from your existing settings.py as there are no
+changes between v1.2.8 and v1.2.9.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Create the settings.py from your existing settings.py as there are no</span>
+<span class="c1"># changes between v1.2.8 and v1.2.9</span>
+cat <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span> &gt; <span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Stop Skyline Ionosphere and Panorama services.</li>
+<li>Backup your Skyline database.</li>
+<li>Apply the SQL update to your Skyline database as per described below, change
+the below variables as appropriate to your set up.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span>  <span class="c1"># Where you want to backup the DB to</span>
+<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;&lt;YOUR_MYSQL_USER&gt;&quot;</span>
+<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Your MySQL IP</span>
+<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>  <span class="c1"># Your MySQL Skyline DB name</span>
+
+<span class="c1"># Backup DB</span>
+mkdir -p <span class="nv">$BACKUP_DIR</span>
+mysqldump -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &gt; <span class="nv">$BACKUP_DIR</span>/pre.v1.2.9.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Update DB</span>
+mysql -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &lt; <span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/updates/sql/luminosity-v1.2.9-stable.sql</span>
+</pre></div>
+</div>
+<ul class="simple">
 <li>Stop all the Skyline services and ensure any service controls such as monit,
 supervisor or systemd do not start them again, (change as appropriate for
 your set up) e.g.</li>
@@ -275,70 +327,16 @@ your set up) e.g.</li>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Backup your Skyline database.</li>
-<li>Apply the SQL update to your Skyline database, change the below variables as
-appropriate to your set up.</li>
-</ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span>  <span class="c1"># Where you want to backup the DB to</span>
-<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;&lt;YOUR_MYSQL_USER&gt;&quot;</span>
-<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Your MySQL IP</span>
-<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>  <span class="c1"># Your MySQL Skyline DB name</span>
-<span class="nv">SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline.v1.2.2-luminosity-stable&quot;</span>  <span class="c1"># Your new Skyline path</span>
-
-<span class="c1"># Backup DB</span>
-mkdir -p <span class="nv">$BACKUP_DIR</span>
-mysqldump -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &gt; <span class="nv">$BACKUP_DIR</span>/pre.v1.2.2.<span class="nv">$MYSQL_DB</span>.sql
-
-<span class="c1"># Update DB</span>
-mysql -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &lt; <span class="nv">$SKYLINE_PATH</span>/updates/sql/luminosity-v1.2.1-beta-to-v1.2.2-stable.sql
-</pre></div>
-</div>
-<ul class="simple">
-<li>Backup your Redis database, e.g. replace your Redis dump.rdb path as appropriate.</li>
-</ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Backup the Redis dump</span>
-<span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span>  <span class="c1"># Where you want to backup the Redis dump to</span>
-cp /var/lib/redis/dump.rdb <span class="nv">$BACKUP_DIR</span>/pre.v1.2.2.redis.dump.rdb
-</pre></div>
-</div>
-<ul class="simple">
 <li>Move your current Skyline directory to a backup directory and move the new
-Skyline v1.2.2 with your new settings.py from the temp location to your
+Skyline v1.2.9 with your new settings.py from the temp location to your
 working Skyline directory, (change your paths as appropriate) e.g.</li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.1-luminosity-beta
-mv <span class="s2">&quot;</span><span class="nv">$SKYLINE_PATH</span><span class="s2">&quot;</span> /opt/skyline/github/skyline
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mv <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;/opt/skyline/github/skyline.</span><span class="nv">$OLD_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Install new requirements e.g.</li>
-</ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
-<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
-
-<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nb">source</span> bin/activate
-
-<span class="c1"># SEE NOTE BELOW</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/requirements.txt
-
-deactivate
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you are running v1.2.x and have already installed the luminol fork
-the pip install will error similar to the the below, this is expected and can
-be ignored, it is the last package in requirements.txt so all other deps will
-install.</p>
-</div>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>AssertionError: No <span class="nb">source</span> dir <span class="k">for</span> luminol from git+git://github.com/earthgecko/luminol@d429044#egg<span class="o">=</span>luminol in ./lib/python2.7/site-packages <span class="o">(</span>from -r /opt/skyline/github/skyline/requirements.txt <span class="o">(</span>line <span class="m">317</span><span class="o">))</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li>Start the all Skyline services, remembering to start bin/luminosity.d too, (
-change as appropriate for your set up) e.g.</li>
+<li>Start the all Skyline services (change as appropriate for your set up) e.g.</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
 <span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;panorama</span>
@@ -354,6 +352,24 @@ change as appropriate for your set up) e.g.</li>
 <span class="k">do</span>
   /etc/init.d/<span class="nv">$i</span> start
 <span class="k">done</span>
+<span class="c1"># RESTART Apache if it was not restarted when requests was updated above</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check the logs</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+tail -n <span class="m">20</span> /var/log/skyline/*.log
+
+<span class="c1"># Any errors - each app</span>
+find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> skyline_logfile
+<span class="k">do</span>
+  <span class="nb">echo</span> <span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+  cat <span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span> <span class="p">|</span> grep -B2 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n <span class="m">60</span>
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
 </pre></div>
 </div>
 </div>
@@ -366,10 +382,10 @@ change as appropriate for your set up) e.g.</li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_2_1.html" class="btn btn-neutral float-right" title="1.2.1 - the luminosity branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="1_2_8.html" class="btn btn-neutral float-right" title="1.2.8 - the luminosity and dawn branches" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_2_3.html" class="btn btn-neutral" title="1.2.3 - the luminosity branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../releases.html" class="btn btn-neutral" title="Release Notes" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

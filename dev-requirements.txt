@@ -232,7 +232,9 @@ msgpack-python==0.5.6
 #requests==2.18.3
 # @modified 20180910 - Task #2588: Update dependencies
 #requests==2.18.4
-requests==2.19.1
+# @modified 20181030 - Support #2652: CVE-2018-18074 - Skyline requests
+#requests==2.19.1
+requests==2.20.0
 
 # ALERTERS - uncomment any alerters you want to enable
 python-simple-hipchat==0.4.0

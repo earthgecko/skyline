@@ -229,32 +229,40 @@ class Mirage(Thread):
 
         metric_vars_array = []
         for var_array in metric_vars:
-            key = None
-            value = None
-            if var_array[0] in string_keys:
-                key = var_array[0]
-                _value_str = str(var_array[1]).replace("'", '')
-                value_str = str(_value_str).replace('"', '')
-                value = str(value_str)
-                if var_array[0] == 'metric':
-                    metric = value
-            if var_array[0] in float_keys:
-                key = var_array[0]
-                _value_str = str(var_array[1]).replace("'", '')
-                value_str = str(_value_str).replace('"', '')
-                value = float(value_str)
-            if var_array[0] in int_keys:
-                key = var_array[0]
-                _value_str = str(var_array[1]).replace("'", '')
-                value_str = str(_value_str).replace('"', '')
-                value = int(float(value_str))
-            if key:
-                metric_vars_array.append([key, value])
+            # @modified 20181023 - Feature #2618: alert_slack
+            # Wrapped in try except for debugging issue where the
+            # hours_to_resolve was interpolating to hours_to_resolve = "t"
+            try:
+                key = None
+                value = None
+                if var_array[0] in string_keys:
+                    key = var_array[0]
+                    _value_str = str(var_array[1]).replace("'", '')
+                    value_str = str(_value_str).replace('"', '')
+                    value = str(value_str)
+                    if var_array[0] == 'metric':
+                        metric = value
+                if var_array[0] in float_keys:
+                    key = var_array[0]
+                    _value_str = str(var_array[1]).replace("'", '')
+                    value_str = str(_value_str).replace('"', '')
+                    value = float(value_str)
+                if var_array[0] in int_keys:
+                    key = var_array[0]
+                    _value_str = str(var_array[1]).replace("'", '')
+                    value_str = str(_value_str).replace('"', '')
+                    value = int(float(value_str))
+                if key:
+                    metric_vars_array.append([key, value])
 
-            if len(metric_vars_array) == 0:
-                logger.error(
-                    'error :: loading metric variables - none found' % (
-                        str(metric_vars_file)))
+                if len(metric_vars_array) == 0:
+                    logger.error(
+                        'error :: loading metric variables - none found' % (
+                            str(metric_vars_file)))
+                    return False
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
                 return False
 
         logger.info('debug :: metric_vars for %s' % str(metric))
