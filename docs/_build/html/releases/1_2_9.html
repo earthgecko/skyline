@@ -119,8 +119,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.9 - the luminosity branch</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#minor-bug-fixes">Minor bug fixes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changes-from-v1-2-7">Changes from v1.2.7</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security-update-and-minor-bug-fixes">Security update and minor bug fixes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changes-from-v1-2-8">Changes from v1.2.8</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v1-2-8">How to update from v1.2.8</a></li>
 </ul>
@@ -210,14 +210,20 @@
   <div class="section" id="the-luminosity-branch">
 <h1>1.2.9 - the luminosity branch<a class="headerlink" href="#the-luminosity-branch" title="Permalink to this headline">¶</a></h1>
 <p>v1.2.9-luminosity - October 27, 2018</p>
-<div class="section" id="minor-bug-fixes">
-<h2>Minor bug fixes<a class="headerlink" href="#minor-bug-fixes" title="Permalink to this headline">¶</a></h2>
-<p>Described below.</p>
-</div>
-<div class="section" id="changes-from-v1-2-7">
-<h2>Changes from v1.2.7<a class="headerlink" href="#changes-from-v1-2-7" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="security-update-and-minor-bug-fixes">
+<h2>Security update and minor bug fixes<a class="headerlink" href="#security-update-and-minor-bug-fixes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Bumped version to v1.2.8</li>
+<li>Secuirty update - update Python requests library to 2.20.0 for CVE-2018-18074.
+A manual update of the requests version is possible in-situ without needed to
+deploy the full release, in your venv simply activate the venv and run
+<code class="docutils literal"><span class="pre">bin/pip2.7</span> <span class="pre">install</span> <span class="pre">requests==2.20.0</span></code></li>
+<li>Minor bug fixes are described below.</li>
+</ul>
+</div>
+<div class="section" id="changes-from-v1-2-8">
+<h2>Changes from v1.2.8<a class="headerlink" href="#changes-from-v1-2-8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Bumped version to v1.2.9</li>
 <li>A fix mirage issue when slack alert tuples were added where the
 hours_to_resolve was interpolating to hours_to_resolve = &#8220;t&#8221; from the
 metric_vars (2618)</li>
@@ -226,6 +232,7 @@ determine the time at which the alert came in (2618)</li>
 <li>SQL update. Changed anomalies anomalous_datapoint column data type from
 DECIMAL(18,6) to DECIMAL(65,6) for very long numbers (2638)</li>
 <li>Updated docs, some typos and docstrings in settings.py (2642)</li>
+<li>Update requests dependency to 2.22.0 (2652) CVE-2018-18074</li>
 </ul>
 </div>
 <div class="section" id="update-notes">
@@ -240,6 +247,20 @@ docstrings</li>
 </div>
 <div class="section" id="how-to-update-from-v1-2-8">
 <h2>How to update from v1.2.8<a class="headerlink" href="#how-to-update-from-v1-2-8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Update the pip requests dependency for CVE-2018-18074, e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="nv">requests</span><span class="o">==</span><span class="m">2</span>.20.0
+deactivate
+<span class="c1"># Restart all Skyline services</span>
+<span class="c1"># Restart Apache</span>
+</pre></div>
+</div>
 <ul class="simple">
 <li>Download the new release tag or clone/update to get it to a temp location,
 ready to be deployed.</li>
@@ -331,6 +352,7 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
 <span class="k">do</span>
   /etc/init.d/<span class="nv">$i</span> start
 <span class="k">done</span>
+<span class="c1"># RESTART Apache if it was not restarted when requests was updated above</span>
 </pre></div>
 </div>
 <ul class="simple">

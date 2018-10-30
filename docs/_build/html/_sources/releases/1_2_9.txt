@@ -4,15 +4,19 @@
 
 v1.2.9-luminosity - October 27, 2018
 
-Minor bug fixes
----------------
+Security update and minor bug fixes
+-----------------------------------
 
-Described below.
+- Secuirty update - update Python requests library to 2.20.0 for CVE-2018-18074.
+  A manual update of the requests version is possible in-situ without needed to
+  deploy the full release, in your venv simply activate the venv and run
+  ``bin/pip2.7 install requests==2.20.0``
+- Minor bug fixes are described below.
 
-Changes from v1.2.7
+Changes from v1.2.8
 -------------------
 
-- Bumped version to v1.2.8
+- Bumped version to v1.2.9
 - A fix mirage issue when slack alert tuples were added where the
   hours_to_resolve was interpolating to hours_to_resolve = "t" from the
   metric_vars (2618)
@@ -21,6 +25,7 @@ Changes from v1.2.7
 - SQL update. Changed anomalies anomalous_datapoint column data type from
   DECIMAL(18,6) to DECIMAL(65,6) for very long numbers (2638)
 - Updated docs, some typos and docstrings in settings.py (2642)
+- Update requests dependency to 2.22.0 (2652) CVE-2018-18074
 
 Update notes
 ------------
@@ -33,6 +38,20 @@ Update notes
 
 How to update from v1.2.8
 -------------------------
+
+- Update the pip requests dependency for CVE-2018-18074, e.g.
+
+.. code-block:: bash
+
+    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    PROJECT="skyline-py2714"
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+    bin/"pip${PYTHON_MAJOR_VERSION}" install requests==2.20.0
+    deactivate
+    # Restart all Skyline services
+    # Restart Apache
 
 - Download the new release tag or clone/update to get it to a temp location,
   ready to be deployed.
@@ -126,6 +145,7 @@ How to update from v1.2.8
     do
       /etc/init.d/$i start
     done
+    # RESTART Apache if it was not restarted when requests was updated above
 
 - Check the logs
 
