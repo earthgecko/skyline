@@ -4,10 +4,14 @@
 
 v1.2.9-luminosity - October 27, 2018
 
-Minor bug fixes
----------------
+Security update and minor bug fixes
+-----------------------------------
 
-Described below.
+- Secuirty update - update Python requests library to 2.20.0 for CVE-2018-18074.
+  A manual update of the requests version is possible in-situ without needed to
+  deploy the full release, in your venv simply activate the venv and run
+  ``bin/pip2.7 install requests==2.20.0``
+- Minor bug fixes are described below.
 
 Changes from v1.2.8
 -------------------
@@ -46,6 +50,8 @@ How to update from v1.2.8
     source bin/activate
     bin/"pip${PYTHON_MAJOR_VERSION}" install requests==2.20.0
     deactivate
+    # Restart all Skyline services
+    # Restart Apache
 
 - Download the new release tag or clone/update to get it to a temp location,
   ready to be deployed.
@@ -139,6 +145,7 @@ How to update from v1.2.8
     do
       /etc/init.d/$i start
     done
+    # RESTART Apache if it was not restarted when requests was updated above
 
 - Check the logs
 
