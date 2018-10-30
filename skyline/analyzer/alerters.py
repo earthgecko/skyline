@@ -1104,7 +1104,10 @@ def alert_slack(alert, metric, context):
     # Added date and time info so you do not have to mouseover the slack
     # message to determine the time at which the alert came in
     timezone = strftime("%Z", gmtime())
-    human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+    # @modified 20181029 - Feature #2618: alert_slack
+    # Use the standard UNIX data format
+    # human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+    human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%c')
     slack_time_string = '%s %s' % (human_anomaly_time, timezone)
 
     if settings.GRAPHITE_PORT != '':
