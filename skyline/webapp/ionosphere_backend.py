@@ -613,9 +613,13 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
     try:
         if settings.WEBAPP_AUTH_ENABLED:
-            r = requests.get(url, timeout=2, auth=(user, password))
+            # @modified 20181106 - Bug #2668: Increase timeout on requests panorama id
+            # r = requests.get(url, timeout=2, auth=(user, password))
+            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password))
         else:
-            r = requests.get(url, timeout=2)
+            # @modified 20181106 - Bug #2668: Increase timeout on requests panorama id
+            # r = requests.get(url, timeout=2)
+            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT)
         panorama_resp = True
     except:
         logger.error(traceback.format_exc())
