@@ -1,0 +1,87 @@
+==============================
+1.2.10 - the luminosity branch
+==============================
+
+v1.2.10-luminosity - November 19, 2018
+
+Bug fixes release
+-----------------------
+
+- Bug fixes are described below.
+
+Changes from v1.2.9
+-------------------
+
+- Bumped version to v1.2.10
+- Stop analyzer stalling if there is no stale_metrics_to_alert_on list to delete
+  (2492)
+- Remove Ionosphere check files is key exists instead of failing check file this
+  was here for initially debugging, no longer needed (2680)
+- To reduce the amount of I/O used by Mirage in this loop check and reduce the
+  number of log entries for 'not alerting - Ionosphere metric' a check is made
+  if the metric_name has already been check, if so continue (2682)
+- Handle if the metrics_var_file has not been set and is still False so that the
+  path.isfile does not error with:
+  ``'TypeError: coercing to Unicode: need string or buffer, bool found'``
+- Handle 0.0 float in value variable (2708, 2234)
+- Noted wget and net-tools required in dawn docs
+
+Update notes
+------------
+
+- NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.10
+- You can only upgrade to v1.2.9 from v1.2.8
+- There is no change to the DB
+- There are no changes to settings.py
+
+How to update from v1.2.9
+-------------------------
+
+- There is no requirement for a full upgrade as described in previous release
+  notes, but you can if you want to as per previous release notes or if you have
+  some other reason related to configuration management or git referencing.
+- To simply upgrade v.1.2.9 in-situ do
+
+.. code-block:: bash
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"  # Your Skyline path
+    GITHUB_TREE_URL="https://raw.githubusercontent.com/earthgecko/skyline/v1.2.10-stable-luminosity"
+    cd $CURRENT_SKYLINE_PATH
+    cp skyline/skyline_version.py skyline/skyline_version.py.v1.2.8.bak
+    cp skyline/analyzer/analyzer.py skyline/analyzer/analyzer.py.v1.2.8.bak
+    cp skyline/mirage/mirage.py skyline/mirage/mirage.py.v1.2.8.bak
+    cp skyline/ionosphere/ionosphere.py skyline/ionosphere/ionosphere.py.v1.2.8.bak
+    cp skyline/ionosphere/learn.py skyline/ionosphere/learn.py.v1.2.8.bak
+    cp skyline/webapp/ionosphere_backend.py skyline/webapp/ionosphere_backend.py.v1.2.8.bak
+    wget -O skyline/skyline_version.py "${GITHUB_TREE_URL}/skyline/skyline_version.py"
+    wget -O skyline/analyzer/analyzer.py "${GITHUB_TREE_URL}/skyline/analyzer/analyzer.py"
+    wget -O skyline/mirage/mirage.py "${GITHUB_TREE_URL}/skyline/mirage/mirage.py"
+    wget -O skyline/ionosphere/ionosphere.py "${GITHUB_TREE_URL}/skyline/ionosphere/ionosphere.py"
+    wget -O skyline/ionosphere/learn.py "${GITHUB_TREE_URL}/skyline/ionosphere/learn.py"
+    wget -O skyline/webapp/ionosphere_backend.py "${GITHUB_TREE_URL}/skyline/webapp/ionosphere_backend.py"
+    # Restart analyzer, mirage, ionosphere and webapp
+    SKYLINE_SERVICES="analyzer
+    mirage
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i restart
+    done
+
+- Check the logs
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done

@@ -1782,12 +1782,17 @@ class Analyzer(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: could not send alert on stale digest email')
-                    del stale_metrics_to_alert_on
-                    del alert
-                    del metric
+                    # @modified 20181117 - Feature #2492: alert on stale metrics
+                    # Stop analyzer stalling if there is no
+                    # stale_metrics_to_alert_on list to delete
+                    try:
+                        del stale_metrics_to_alert_on
+                        del alert
+                        del metric
+                    except:
+                        pass
                 else:
                     logger.info('there are no stale metrics to alert on')
-                del stale_metrics_to_alert_on
 
             run_time = time() - now
             total_metrics = str(len(unique_metrics))

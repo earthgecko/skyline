@@ -624,9 +624,15 @@ class Ionosphere(Thread):
         if not check_done:
             logger.info('check done check - no check cache key - %s' % ionosphere_check_cache_key)
         else:
-            logger.error('error :: a check cache key exists - %s' % ionosphere_check_cache_key)
-            logger.error('error :: failing check to prevent multiple iterations over this check')
-            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            # @modified 20181113 - Task #2680: Remove Ionosphere check files is key exists
+            # This was here for initially debugging, no longer needed
+            # logger.error('error :: a check cache key exists - %s' % ionosphere_check_cache_key)
+            # logger.error('error :: failing check to prevent multiple iterations over this check')
+            # fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            logger.info('a check cache key exists - %s' % (ionosphere_check_cache_key))
+            logger.info('to prevent multiple iterations over this check removing %s' % (
+                str(metric_check_file)))
+            self.remove_metric_check_file(str(metric_check_file))
             return
         try:
             check_process_start = int(time())
@@ -697,9 +703,13 @@ class Ionosphere(Thread):
             value = None
 
         if not value:
-            logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
-            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
-            return
+            # @modified 20181119 - Bug #2708: Failing to load metric vars
+            if value == 0.0:
+                pass
+            else:
+                logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                return
 
         from_timestamp = None
         try:

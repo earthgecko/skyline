@@ -751,9 +751,13 @@ def ionosphere_learn(timestamp):
             value = None
 
         if not value:
-            logger.error('error :: learn :: failed to load value variable from check file - %s' % (metric_check_file))
-            remove_work_list_from_redis_set(learn_metric_list)
-            continue
+            # @modified 20181119 - Bug #2708: Failing to load metric vars
+            if value == 0.0:
+                pass
+            else:
+                logger.error('error :: learn :: failed to load value variable from check file - %s' % (metric_check_file))
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
 
         from_timestamp = None
         try:

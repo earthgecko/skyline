@@ -115,9 +115,12 @@ class Mirage(Thread):
         # @added 20170603 - Feature #2034: analyse_derivatives
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            self.redis_conn = StrictRedis(
+                password=settings.REDIS_PASSWORD,
+                unix_socket_path=settings.REDIS_SOCKET_PATH)
         else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            self.redis_conn = StrictRedis(
+                unix_socket_path=settings.REDIS_SOCKET_PATH)
 
     def check_if_parent_is_alive(self):
         """
@@ -262,7 +265,7 @@ class Mirage(Thread):
                     return False
             except:
                 logger.info(traceback.format_exc())
-                logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
+                logger.error('error :: failed to load metric variables from check file - %s' % (metric_vars_file))
                 return False
 
         logger.info('debug :: metric_vars for %s' % str(metric))
@@ -393,8 +396,13 @@ class Mirage(Thread):
             logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
             return
         if not value:
-            logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
-            return
+            # @modified 20181119 - Bug #2708: Failing to load metric vars
+            if value == 0.0:
+                pass
+            else:
+                logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
+                return
+
 
 #        if len(metric_vars.hours_to_resolve) == 0:
 #            return
@@ -1193,7 +1201,17 @@ class Mirage(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % base_name)
 
+            # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
+            # To reduce the amount of I/O used by Mirage in this loop check
+            # and reduce the number of log entries for 'not alerting - Ionosphere metric'
+            # a check is made if the metric_name has already been check, if
+            # so continue
+            not_alerting_for_ionosphere = 'none'
+
             for alert in settings.ALERTS:
+                # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
+                not_an_ionosphere_metric_check_done = 'none'
+
                 for metric in self.anomalous_metrics:
                     # @added 20161228 - Feature #1830: Ionosphere alerts
                     #                   Branch #922: Ionosphere
@@ -1201,6 +1219,11 @@ class Mirage(Thread):
                     # metrics if Ionosphere is up
                     metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
                     if metric_name in ionosphere_unique_metrics:
+
+                        # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
+                        if not_alerting_for_ionosphere == metric_name:
+                            continue
+
                         ionosphere_up = False
                         try:
                             ionosphere_up = self.redis_conn.get('ionosphere')
@@ -1208,12 +1231,23 @@ class Mirage(Thread):
                             logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
                         if ionosphere_up:
                             logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+
+                            # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
+                            not_alerting_for_ionosphere = metric_name
+
                             continue
                         else:
                             logger.error('error :: Ionosphere not report up')
                             logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
                     else:
-                        logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+                        # @modified 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
+                        # logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+                        if not_an_ionosphere_metric_check_done == metric_name:
+                            # Do not log multiple times for this either
+                            not_an_ionosphere_metric_check_done = metric_name
+                        else:
+                            logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+                            not_an_ionosphere_metric_check_done = metric_name
 
                     ALERT_MATCH_PATTERN = alert[0]
                     METRIC_PATTERN = metric[1]
