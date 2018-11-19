@@ -10,6 +10,10 @@ Welcome to Skyline.
 What is Skyline?
 ----------------
 
+Skyline is your ears and eyes, it is remarkably good at telling you when a state
+changes.  It does not just chew bubblegum, it blows bubbles too.
+
+But really Skyline is ...
 For those interested in anomaly detection and deflection in streamed time series
 data.
 
@@ -18,14 +22,14 @@ detection data?
 
 Skyline is a Python based anomaly detection/deflection stack that analyses,
 anomaly detects, deflects, fingerprints and learns vast amounts of streamed
-time series data.
+time series data.  Skyline has a number of isolated modules/apps that:
 
-- Skyline ingests streamed metric time series data - skyline/horizon
-- Skyline uses a ```CONSENSUS``` of 3-sigma algorithms to detect anomalies on
+- ingests streamed metric time series data - skyline/horizon
+- use a ```CONSENSUS``` of 3-sigma algorithms to detect anomalies on
   batch processed, streamed metric time series data - skyline/analyzer - anomaly
   detector
-- It handles large and small seasonality in the data - skyline/mirage -
-  anomaly deflector and detector
+- Handle large and small seasonality in the data - skyline/mirage - anomaly
+  deflector and detector
 - You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
   anomaly deflector
 - It records all your anomalies - skyline/panorama - anomaly memory

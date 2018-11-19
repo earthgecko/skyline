@@ -478,7 +478,22 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
 
     metric_vars_ok = False
     metric_vars = ['error: could not read metrics vars file', metric_vars_file]
-    if path.isfile(metric_vars_file):
+
+    # @added 20181114 - Bug #2684: ionosphere_backend.py - metric_vars_file not set
+    # Handle if the metrics_var_file has not been set and is still False so
+    # that the path.isfile does not error with
+    # TypeError: coercing to Unicode: need string or buffer, bool found
+    metric_vars_file_exists = False
+    if metric_vars_file:
+        try:
+            if path.isfile(metric_vars_file):
+                metric_vars_file_exists = True
+        except:
+            logger.error('error :: metric_vars_file %s ws not found' % str(metric_vars_file))
+
+    # @modified 20181114 - Bug #2684: ionosphere_backend.py - metric_vars_file not set
+    # if path.isfile(metric_vars_file):
+    if metric_vars_file_exists:
         try:
             # @modified 20170104 - Feature #1842: Ionosphere - Graphite now graphs
             #                      Feature #1830: Ionosphere alerts
@@ -491,9 +506,14 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             metric_vars = new_load_metric_vars(metric_vars_file)
             metric_vars_ok = True
         except:
+            trace = traceback.format_exc()
+            logger.error(trace)
             metric_vars_ok = False
-            logger.error(traceback.format_exc())
+            # logger.error(traceback.format_exc())
+            fail_msg = metric_vars
+            logger.error('%s' % fail_msg)
             logger.error('error :: failed to load metric_vars from: %s' % str(metric_vars_file))
+            raise  # to webapp to return in the UI
 
     # TODO
     # Make a sample ts for lite frontend

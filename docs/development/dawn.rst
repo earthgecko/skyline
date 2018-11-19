@@ -47,10 +47,13 @@ Example usage:
 
 .. code-block:: bash
 
-  # Fetch
+  # Fetch needs wget installed
   wget -O /tmp/skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
   # Always review scripts before running them
   cat /tmp/skyline.dawn.sh
+  if [ -f /etc/redhat-release ]; then
+    yum -y install net-tools
+  fi
   # Determine public IP address
   USE_IP=$(ifconfig | grep -v "127.0.0.1" | grep "inet addr:" | cut -d':' -f2 | cut -d' ' -f1)
   if [ -f /etc/redhat-release ]; then
