@@ -558,7 +558,7 @@ def api():
                         aggregated_timeseries, fail_msg, trace = aggregate_timeseries(base_name, timeseries, aggregate_by)
                     except:
                         trace = traceback.format_exc()
-                        message = 'Uh oh ... a Skyline 500 using get_features_profiles_to_validate(%s)' % str(base_name)
+                        message = 'Uh oh ... a Skyline 500 using aggregate_timeseries on %s' % str(base_name)
                         return internal_error(message, trace)
                     if not aggregated_timeseries:
                         return internal_error(fail_msg, trace)
