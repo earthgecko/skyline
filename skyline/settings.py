@@ -1414,6 +1414,25 @@ ENABLE_WEBAPP_DEBUG = False
 :vartype ENABLE_WEBAPP_DEBUG: boolean
 """
 
+WEBAPP_PREPROCESS_TIMESERIES = False
+"""
+:var WEBAPP_PREPROCESS_TIMESERIES: Allow for the time series to be aggregated by
+    median or sum per minute so that webapp can return a reasonable number of
+    data points for dyngraph to load and display in the browser without causing
+    lag.  This is achieved by aggregating the time series using either the
+    median of values or the sum as defined by
+    settings.WEBAPP_PREPROCESS_AGGREGATE_BY.  At the interval defined by
+    settings.
+:vartype WEBAPP_PREPROCESS_TIMESERIES: boolean
+"""
+
+WEBAPP_PREPROCESS_AGGREGATE_BY = 'median'
+"""
+:var WEBAPP_PREPROCESS_AGGREGATE_BY: The method by which to aggregate the time
+    series by.  Valid strings here are 'median' and 'sum'.
+    settings.WEBAPP_PREPROCESS_AGGREGATE_BY.
+:vartype WEBAPP_PREPROCESS_AGGREGATE_BY: str
+"""
 
 """
 Ionosphere settings

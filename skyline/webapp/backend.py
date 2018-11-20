@@ -556,3 +556,75 @@ def luminosity_remote_data(anomaly_timestamp):
     logger.info('luminosity_remote_data :: %s valid metric time series data preprocessed for the remote request' % str(len(luminosity_data)))
 
     return luminosity_data, success, message
+
+# @added 20181119 - Feature #2714: webapp - now - preprocess time series
+# Allow for the time series to be aggregated by median or sum per interval
+# period
+def aggregate_timeseries(base_name, timeseries, aggregate_by):
+    """
+    Allow for the time series to be aggregated by median or sum
+    per minute so that webapp can return a reasonable number of data points for
+    dyngraph to load and display in the browser without causing lag.  This is
+    achieved by aggregating the time series using either the median of values
+    per minute or the sum.
+
+    :param base_name: the base_name of the metric
+    :type base_name: str
+    :param timeseries: the time series to aggregate
+    :type timeseries: list
+    :param aggregate_by: the method to be used to aggregate the time series by
+    :type aggregate_by: str
+    :return: (list, str, str)
+    :rtype: tuple
+
+    """
+
+    import pandas as pd
+    trace = 'none'
+    fail_msg = 'none'
+
+    aggregated_timeseries = []
+    logger.info('aggregate_timeseries :: aggregating time series for %s by %s at a %s second interval' % (
+        base_name, aggregate_by, str(aggregation_interval)))
+
+    if len(timeseries) < 60:
+        logger.info('aggregate_timeseries :: time series for %s less than 60 datapoints, too short' % base_name)
+        trace = 'none'
+        fail_msg = 'aggregate_timeseries :: time series for %s less than 60 datapoints, too short' % base_name
+        return aggregated_timeseries, trace, fail_msg
+
+    try:
+        epoch_timeseries = []
+        for ts, value in timeseries:
+            epoch_timeseries.append((int(ts), value))
+        df = pd.DataFrame(epoch_timeseries)
+        df.columns = ['ts', 'value']
+        df['ts'] = pd.to_datetime(df['ts'],unit='s')
+        aggregate_by = 'median'
+        if aggregate_by == 'median':
+            aggregated_df = df.resample('1T', on='ts').median()
+        if aggregate_by == 'sum':
+            aggregated_df = df.resample('1T', on='ts').sum()
+        epoch_aggregated_df = aggregated_df.index.astype(np.int64) // 10 ** 9
+        value_aggregated_df = aggregated_df['value'].to_frame()
+        timestamps = []
+        for index, ts in new_epoch_aggregated_df.iterrows():
+            timestamps.append(ts[0])
+        values = []
+        for index, value in value_aggregated_df.iterrows():
+            values.append(value[0])
+        aggregated_timeseries = []
+        for ts, value in zip(timestamps, values):
+            aggregated_timeseries.append((ts, value))
+        ended_at = time.time()
+        seconds_to_run = int(ended_at) - int(started_at)
+        logger.info('aggregate_timeseries :: aggregated time series for %s in %s seconds' % (
+            base_name, str(seconds_to_run)))
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        logger.error('aggregate_timeseries :: failed to aggregate time series for %s' % base_name)
+        fail_msg = 'aggregate_timeseries :: failed to aggregate time series for %s' % base_name
+        return aggregated_timeseries, trace, fail_msg
+
+    return aggregated_timeseries, fail_msg, trace

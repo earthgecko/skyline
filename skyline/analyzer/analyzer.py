@@ -393,6 +393,9 @@ class Analyzer(Thread):
             try:
                 anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
 
+                if anomalous:
+                    logger.info('anomaly detected - %s - anomalous is %s' % (metric_name, str(anomalous)))
+
                 # If it's anomalous, add it to list
                 if anomalous:
                     base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)

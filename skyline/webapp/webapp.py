@@ -79,7 +79,9 @@ from skyline_functions import (
 from backend import (
     panorama_request, get_list,
     # @added 20180720 - Feature #2464: luminosity_remote_data
-    luminosity_remote_data)
+    luminosity_remote_data,
+    # @added 20181120 - Feature #2714: webapp - now - preprocess time series
+    aggregate_timeseries)
 from ionosphere_backend import (
     ionosphere_data, ionosphere_metric_data,
     # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -521,12 +523,48 @@ def api():
             raw_series = REDIS_CONN.get(metric)
             if not raw_series:
                 resp = json.dumps(
-                    {'results': 'Error: No metric by that name - try /api?metric=' + settings.FULL_NAMESPACE + 'metric_namespace'})
+                    {'results': 'Error: No metric by that name - perhaps try /api?metric=' + settings.FULL_NAMESPACE + metric})
                 return resp, 404
             else:
-                unpacker = Unpacker(use_list=False)
-                unpacker.feed(raw_series)
-                timeseries = [item[:2] for item in unpacker]
+                # @modified 20181119 - Feature #2714: webapp - now - preprocess time series
+                # Wrapped in try except
+                try:
+                    unpacker = Unpacker(use_list=False)
+                    unpacker.feed(raw_series)
+                    timeseries = [item[:2] for item in unpacker]
+                except Exception as e:
+                    error = "Error: " + e
+                    resp = json.dumps({'results': error})
+                    return resp, 500
+
+                # Only sample some of the time series
+                # @added 20181119 - Feature #2714: webapp - now - preprocess time series
+                # Allow for the time series to be aggregated by median or sum
+                # per minute - interval hardcoded to 60 seconds for '1T' pandas
+                # resample
+                try:
+                    preprocess_timeseries = settings.WEBAPP_PREPROCESS_TIMESERIES
+                except:
+                    preprocess_timeseries = False
+                if preprocess_timeseries:
+                    try:
+                        aggregate_by = settings.WEBAPP_PREPROCESS_AGGREGATE_BY
+                    except:
+                        aggregate_by = False
+                    if not aggregate_by:
+                        aggregate_by = 'median'
+                    try:
+                        base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                        aggregated_timeseries, fail_msg, trace = aggregate_timeseries(base_name, timeseries, aggregate_by)
+                    except:
+                        trace = traceback.format_exc()
+                        message = 'Uh oh ... a Skyline 500 using get_features_profiles_to_validate(%s)' % str(base_name)
+                        return internal_error(message, trace)
+                    if not aggregated_timeseries:
+                        return internal_error(fail_msg, trace)
+                    else:
+                        timeseries = aggregated_timeseries
+
                 resp = json.dumps({'results': timeseries})
                 return resp, 200
         except Exception as e:
