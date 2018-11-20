@@ -597,6 +597,7 @@ def aggregate_timeseries(base_name, timeseries, aggregate_by):
         epoch_timeseries = []
         for ts, value in timeseries:
             epoch_timeseries.append((int(ts), value))
+        del timeseries
         df = pd.DataFrame(epoch_timeseries)
         df.columns = ['ts', 'value']
         df['ts'] = pd.to_datetime(df['ts'],unit='s')
@@ -605,14 +606,18 @@ def aggregate_timeseries(base_name, timeseries, aggregate_by):
             aggregated_df = df.resample('1T', on='ts').median()
         if aggregate_by == 'sum':
             aggregated_df = df.resample('1T', on='ts').sum()
+        del df
         epoch_aggregated_df = aggregated_df.index.astype(np.int64) // 10 ** 9
         value_aggregated_df = aggregated_df['value'].to_frame()
+        del aggregated_df
         timestamps = []
         for index, ts in new_epoch_aggregated_df.iterrows():
             timestamps.append(ts[0])
+        del new_epoch_aggregated_df
         values = []
         for index, value in value_aggregated_df.iterrows():
             values.append(value[0])
+        del value_aggregated_df
         aggregated_timeseries = []
         for ts, value in zip(timestamps, values):
             aggregated_timeseries.append((ts, value))

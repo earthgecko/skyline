@@ -564,8 +564,10 @@ def api():
                         return internal_error(fail_msg, trace)
                     else:
                         timeseries = aggregated_timeseries
+                        del aggregated_timeseries
 
                 resp = json.dumps({'results': timeseries})
+                del timeseries
                 return resp, 200
         except Exception as e:
             error = "Error: " + e
