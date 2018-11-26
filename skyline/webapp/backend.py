@@ -15,6 +15,8 @@ from flask import request
 from redis import StrictRedis
 from msgpack import Unpacker
 
+import numpy as np
+
 import settings
 from skyline_functions import (
     mysql_select,
@@ -584,8 +586,8 @@ def aggregate_timeseries(base_name, timeseries, aggregate_by):
     fail_msg = 'none'
 
     aggregated_timeseries = []
-    logger.info('aggregate_timeseries :: aggregating time series for %s by %s at a %s second interval' % (
-        base_name, aggregate_by, str(aggregation_interval)))
+    logger.info('aggregate_timeseries :: aggregating time series for %s by %s at a 60 second interval' % (
+        base_name, aggregate_by))
 
     if len(timeseries) < 60:
         logger.info('aggregate_timeseries :: time series for %s less than 60 datapoints, too short' % base_name)
@@ -611,9 +613,9 @@ def aggregate_timeseries(base_name, timeseries, aggregate_by):
         value_aggregated_df = aggregated_df['value'].to_frame()
         del aggregated_df
         timestamps = []
-        for index, ts in new_epoch_aggregated_df.iterrows():
+        for index, ts in epoch_aggregated_df.iterrows():
             timestamps.append(ts[0])
-        del new_epoch_aggregated_df
+        del epoch_aggregated_df
         values = []
         for index, value in value_aggregated_df.iterrows():
             values.append(value[0])
