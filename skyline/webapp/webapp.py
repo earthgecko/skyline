@@ -123,7 +123,12 @@ from ionosphere_backend import (
     # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
     get_features_profiles_to_validate,
     # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
-    get_metrics_with_features_profiles_to_validate,)
+    get_metrics_with_features_profiles_to_validate,
+    # @added 20181205 - Bug #2746: webapp time out - Graphs in search_features_profiles
+    #                   Feature #2602: Graphs in search_features_profiles
+    ionosphere_show_graphs,)
+
+#from utilites import alerts_matcher
 
 # @added 20170114 - Feature #1854: Ionosphere learn
 # Decoupled the create_features_profile from ionosphere_backend and moved to
@@ -1380,6 +1385,7 @@ def ionosphere():
             # @modified 20180717 - Task #2446: Optimize Ionosphere
             # Added missing search_success variable
             features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, search_success, fail_msg, trace = ionosphere_search(False, True)
+
             return render_template(
                 'ionosphere.html', fp_search=fp_search_req,
                 fp_search_results=fp_search_req,
@@ -1405,7 +1411,7 @@ def ionosphere():
             if not search_success:
                 return internal_error(fail_msg, trace)
 
-            # @added 20180917 - Feature #2602: Graaphs in search_features_profiles
+            # @added 20180917 - Feature #2602: Graphs in search_features_profiles
             if search_success and fps:
                 show_graphs = request.args.get(str('show_graphs'), False)
                 if show_graphs == 'true':
@@ -1418,7 +1424,14 @@ def ionosphere():
                         fp_id = fp_elements[0]
                         base_name = fp_elements[2]
                         requested_timestamp = fp_elements[4]
-                        mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list = ionosphere_metric_data(requested_timestamp, base_name, query_context, fp_id)
+
+                        # @modified 20181205 - Bug #2746: webapp time out - Graphs in search_features_profiles
+                        #                      Feature #2602: Graphs in search_features_profiles
+                        # This function was causing the webapp to time out due
+                        # to fetching all the matched Graphite graphs
+                        # mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list = ionosphere_metric_data(requested_timestamp, base_name, query_context, fp_id)
+                        images, gimages = ionosphere_show_graphs(requested_timestamp, base_name, fp_id)
+
                         new_fp = []
                         for fp_element in fp_elements:
                             new_fp.append(fp_element)

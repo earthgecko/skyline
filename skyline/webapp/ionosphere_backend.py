@@ -4452,3 +4452,63 @@ def get_metrics_with_features_profiles_to_validate():
     logger.info('%s :: metrics with features profiles to validate - %s' % (
         function_str, str(metrics_with_features_profiles_to_validate)))
     return (metrics_with_features_profiles_to_validate, fail_msg, trace)
+
+
+# @added 20181205 - Bug #2746: webapp time out - Graphs in search_features_profiles
+#                   Feature #2602: Graphs in search_features_profiles
+def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
+    """
+    Get a list of all graphs
+    """
+
+    base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    log_context = 'features profile data show graphs'
+    logger.info('%s requested for %s at %s' % (
+        log_context, str(base_name), str(requested_timestamp)))
+    images = []
+    timeseries_dir = base_name.replace('.', '/')
+    metric_data_dir = '%s/%s/%s' % (
+        settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
+        str(requested_timestamp))
+
+    td_files = listdir(metric_data_dir)
+    for i_file in td_files:
+        metric_file = path.join(metric_data_dir, i_file)
+        if i_file.endswith('.png'):
+            # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
+            # Exclude any graphite_now png files from the images lists
+            append_image = True
+            if '.graphite_now.' in i_file:
+                append_image = False
+            # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
+            # Exclude any matched.fp-id images
+            if '.matched.fp_id' in i_file:
+                append_image = False
+            # @added 20170308 - Feature #1960: ionosphere_layers
+            #                   Feature #1852: Ionosphere - features_profile matched graphite graphs
+            # Exclude any matched.fp-id images
+            if '.matched.layers.fp_id' in i_file:
+                append_image = False
+            if append_image:
+                images.append(str(metric_file))
+
+    graphite_now_images = []
+    graphite_now = int(time.time())
+    graph_resolutions = []
+    graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
+    # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
+    # Exclude if matches TARGET_HOURS - unique only
+    _graph_resolutions = sorted(set(graph_resolutions))
+    graph_resolutions = _graph_resolutions
+
+    for target_hours in graph_resolutions:
+        graph_image = False
+        try:
+            graph_image_file = '%s/%s.graphite_now.%sh.png' % (metric_data_dir, base_name, str(target_hours))
+            if path.isfile(graph_image_file):
+                graphite_now_images.append(graph_image_file)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get Graphite graph at %s hours for %s' % (str(target_hours), base_name))
+
+    return (images, graphite_now_images)
