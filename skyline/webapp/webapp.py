@@ -750,6 +750,12 @@ def panorama():
                     # @added 20180423 - Feature #2034: analyse_derivatives
                     #                   Branch #2270: luminosity
                     other_unique_metrics = []
+                    # @added 20190105 - Bug #2792: webapp 500 error on no metric
+                    # This needs to be set before the below conditional check
+                    # otherwise webapp return a 500 server error instead of a
+                    # 404 if the metric does not exist
+                    metric_found_in_other_redis = False
+
                     if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
                         metric_found_in_other_redis = False
 
