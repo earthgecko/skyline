@@ -24,7 +24,10 @@ import settings
 # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
 # Added move_file
 from skyline_functions import (
-    send_graphite_metric, write_data_to_file, move_file)
+    send_graphite_metric, write_data_to_file, move_file,
+    # @added 20181126 - Task #2742: Update Boundary
+    #                   Feature #2034: analyse_derivatives
+    nonNegativeDerivative, in_list)
 
 from boundary_alerters import trigger_alert
 from boundary_algorithms import run_selected_algorithm
@@ -386,6 +389,33 @@ class Boundary(Thread):
                     logger.info('WOULD RUN run_selected_algorithm = %s' % run_tupple)
 
                 if run_tupple:
+                    # @added 20181126 - Task #2742: Update Boundary
+                    #                   Feature #2034: analyse_derivatives
+                    # Convert the values of metrics strictly increasing monotonically
+                    # to their deriative products
+                    known_derivative_metric = False
+                    try:
+                        derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+                    except:
+                        derivative_metrics = []
+                    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+                    if redis_metric_name in derivative_metrics:
+                        known_derivative_metric = True
+                    if known_derivative_metric:
+                        try:
+                            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+                        except:
+                            non_derivative_monotonic_metrics = []
+                        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+                        if skip_derivative:
+                            known_derivative_metric = False
+                    if known_derivative_metric:
+                        try:
+                            derivative_timeseries = nonNegativeDerivative(timeseries)
+                            timeseries = derivative_timeseries
+                        except:
+                            logger.error('error :: nonNegativeDerivative failed')
+
                     # Submit the timeseries and settings to run_selected_algorithm
                     anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm = run_selected_algorithm(
                         timeseries, metric_name,
