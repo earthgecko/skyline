@@ -75,6 +75,10 @@ import functools
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 import os.path
+# @added 20190116 - Cross-Site Scripting Security Vulnerability #85
+#                   Bug #2816: Cross-Site Scripting Security Vulnerability
+from flask import escape as flask_escape
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
@@ -781,7 +785,10 @@ def panorama():
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
 
             if key == 'count_by_metric':
                 count_by_metric_invalid = True
@@ -813,7 +820,10 @@ def panorama():
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
 
             if key == 'from_timestamp' or key == 'until_timestamp':
                 timestamp_format_invalid = True
@@ -840,7 +850,10 @@ def panorama():
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
 
             if key == 'source':
                 if value != 'all':
@@ -849,7 +862,10 @@ def panorama():
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
 
             if key == 'algorithm':
                 if value != 'all':
@@ -858,7 +874,10 @@ def panorama():
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
 
             if key == 'host':
                 if value != 'all':
@@ -867,7 +886,10 @@ def panorama():
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
 
             if key == 'limit':
                 limit_invalid = True
@@ -880,7 +902,10 @@ def panorama():
                     logger.error(error_string)
                     resp = json.dumps(
                         {'results': error_string})
-                    return resp, 400
+                    # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                    # return resp, 400
+                    return flask_escape(resp), 400
 
                 new_value = int(value)
                 try:
@@ -894,7 +919,10 @@ def panorama():
                     logger.error(error_string)
                     resp = json.dumps(
                         {'results': error_string})
-                    return resp, 400
+                    # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                    # return resp, 400
+                    return flask_escape(resp), 400
 
             if key == 'order':
                 order_invalid = True
@@ -907,7 +935,10 @@ def panorama():
                     logger.error(error_string)
                     resp = json.dumps(
                         {'results': error_string})
-                    return resp, 400
+                    # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                    # return resp, 400
+                    return flask_escape(resp), 400
 
     # @added 20161127 - Branch #922: ionosphere
     if get_anomaly_id:
@@ -1353,7 +1384,10 @@ def ionosphere():
                     logger.error(error_string)
                     resp = json.dumps(
                         {'results': error_string})
-                    return resp, 404
+                    # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                    # return resp, 404
+                    return flask_escape(resp), 404
                 else:
                     get_metric_profiles = True
                     metric = str(value)
@@ -1382,7 +1416,10 @@ def ionosphere():
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
                 if matching:
                     metric_like = str(value)
 
@@ -1533,14 +1570,22 @@ def ionosphere():
                     if test_fp_id > 0:
                         fp_id = str(test_fp_id)
                     else:
-                        fp_id = None
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # Test that the fp_id is an int first
+                        # fp_id = None
+                        logger.error('error :: invalid request argument - fp_id is not an int')
+                        return 'Bad Request', 400
                     logger.info('fp_id now set to %s' % (str(fp_id)))
                 except:
-                    error_string = 'error :: the fp_id argument was was passed but not as an int - %s' % str(value)
+                    error_string = 'error :: the fp_id argument was passed but not as an int - %s' % str(value)
                     logger.error(error_string)
                     resp = json.dumps(
                         {'results': error_string})
-                    return resp, 404
+                    # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                    # return resp, 404
+                    return flask_escape(resp), 404
             if key == 'layer_id':
                 logger.info('request key %s set to %s' % (key, str(value)))
                 try:
@@ -1551,11 +1596,14 @@ def ionosphere():
                         layer_id = None
                     logger.info('layer_id now set to %s' % (str(layer_id)))
                 except:
-                    error_string = 'error :: the layer_id argument was was passed but not as an int - %s' % str(value)
+                    error_string = 'error :: the layer_id argument was passed but not as an int - %s' % str(value)
                     logger.error(error_string)
                     resp = json.dumps(
                         {'results': error_string})
-                    return resp, 404
+                    # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                    # return resp, 404
+                    return flask_escape(resp), 404
 
         logger.info('get_fp_matches with arguments :: %s, %s, %s, %s, %s, %s, %s, %s' % (
             str(metric), str(metric_like), str(fp_id), str(layer_id),
@@ -1659,6 +1707,16 @@ def ionosphere():
                 # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
                 # Determine the features profile dir path for a fp_id
                 if 'fp_id' in request.args:
+                    # @added 20190116 - Cross-Site Scripting Security Vulnerability #85
+                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                    # Test that the fp_id is an int first
+                    try:
+                        test_fp_id = request.args.get(str('fp_id'))
+                        test_fp_id_valid = int(test_fp_id) + 1
+                    except:
+                        logger.error('error :: invalid request argument - fp_id is not an int')
+                        return 'Bad Request', 400
+
                     fp_id = request.args.get(str('fp_id'), None)
                     metric_timestamp = 0
                     try:
@@ -1756,7 +1814,10 @@ def ionosphere():
 
                         resp = json.dumps(
                             {'results': 'Error: no timestamp feature profiles data dir found for feature profile id - ' + str(fp_id) + ' - go on... nothing here.'})
-                        return resp, 400
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 400
+                        return flask_escape(resp), 400
 
                     redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
 
@@ -1911,7 +1972,10 @@ def ionosphere():
                                     {'results': 'Error: not a numeric epoch timestamp for ' + str(key) + ' - ' + str(value) + ' - please pass a proper epoch timestamp'})
 
                     if not valid_rt_timestamp:
-                        return resp, 400
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 400
+                        return flask_escape(resp), 400
 
                 # @added 20170617 - Feature #2054: ionosphere.save.training_data
                 if key == 'save_training_data':
@@ -1944,7 +2008,10 @@ def ionosphere():
                                 {'results': 'Error: not a numeric epoch timestamp for ' + str(key) + ' - ' + str(value) + ' - please pass a proper epoch timestamp'})
 
                     if not valid_timestamp:
-                        return resp, 400
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 400
+                        return flask_escape(resp), 400
 
                     # if not fp_view:
                     if check_for_purged:
@@ -1992,7 +2059,10 @@ def ionosphere():
                                         {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
 
                     if not valid_timestamp:
-                        return resp, 404
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
 
                 if key == 'timestamp':
                     requested_timestamp = str(value)
@@ -2048,7 +2118,10 @@ def ionosphere():
                             logger.error(error_string)
                             resp = json.dumps(
                                 {'results': error_string})
-                            return resp, 404
+                            # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                            #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                            # return resp, 404
+                            return flask_escape(resp), 404
 
                 if key == 'metric':
                     metric_arg = True
@@ -2107,7 +2180,10 @@ def ionosphere():
                                 (key, str(value), ionosphere_data_dir))
                             resp = json.dumps(
                                 {'results': 'Error: no training data dir exists - ' + ionosphere_data_dir + ' - go on... nothing here.'})
-                            return resp, 404
+                            # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                            #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                            # return resp, 404
+                            return flask_escape(resp), 404
                     else:
                         ionosphere_profiles_dir = '%s/%s/%s' % (
                             settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
@@ -2155,7 +2231,10 @@ def ionosphere():
                             else:
                                 resp = json.dumps(
                                     {'results': 'Error: no features profile dir exists - ' + ionosphere_profiles_dir + ' - go on... nothing here.'})
-                                return resp, 404
+                                # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                                #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                                # return resp, 404
+                                return flask_escape(resp), 404
 
         logger.info('arguments validated - OK')
 
