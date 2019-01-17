@@ -1268,17 +1268,21 @@ def alert_slack(alert, metric, context):
                         # mappings.  This may be important in terms of only
                         # doing slack_thread_updates on the primary Skyline
                         # slack channel.
-                        slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
-                        slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
-                        # In terms of the generated Slack URLS for threads the
-                        # timestamps have no dots e.g.:
-                        # https://<an_org>.slack.com/archives/<a_channel>/p1543994173000700
-                        # However in terms of the sc.api_call the thread_ts
-                        # needs the format declared in the dict response e.g.
-                        # u'ts': u'1543994173.000700'}]} with the dot so in this
-                        # case '1543994173.000700'
-                        slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
-                        logger.info('alert_slack - the slack_thread_ts is %s)' % str(slack_thread_ts))
+                        try:
+                            slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                            slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                            # In terms of the generated Slack URLS for threads the
+                            # timestamps have no dots e.g.:
+                            # https://<an_org>.slack.com/archives/<a_channel>/p1543994173000700
+                            # However in terms of the sc.api_call the thread_ts
+                            # needs the format declared in the dict response e.g.
+                            # u'ts': u'1543994173.000700'}]} with the dot so in this
+                            # case '1543994173.000700'
+                            slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                            logger.info('alert_slack - the slack_thread_ts is %s)' % str(slack_thread_ts))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: alert_slack - faied to determine slack_thread_ts')
                         # Insert into Redis for Panorama to process?
                         # No anomaly_id will be known here so it needs
                         # metric, timestamp, slack_group, slack_thread_ts
