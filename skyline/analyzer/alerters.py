@@ -135,7 +135,7 @@ def alert_smtp(alert, metric, context):
     # For backwards compatibility
     if '@' in alert[1]:
         sender = settings.ALERT_SENDER
-        recipient = alert[1]
+        recipients = alert[1]
     else:
         sender = settings.SMTP_OPTS['sender']
         # @modified 20160806 - Added default_recipient
@@ -1023,7 +1023,7 @@ def alert_stale_digest(alert, metric, context):
         msg['To'] = recipient
         msg.attach(MIMEText(body, 'html'))
         msg.replace_header('content-transfer-encoding', 'quoted-printable')
-        #msg.attach(MIMEText(body, 'html'))
+        # msg.attach(MIMEText(body, 'html'))
         logger.info('alert_stale_digest - msg attached')
     except:
         logger.error('error :: alert_smtp - could not attach')
@@ -1215,7 +1215,7 @@ def alert_slack(alert, metric, context):
     ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
         settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
 
-    message_payload  = json.dumps([{
+    message_payload = json.dumps([{
         "fallback": slack_title + ' - ' + link,
         "title": slack_title,
         "title_link": link,
@@ -1230,10 +1230,10 @@ def alert_slack(alert, metric, context):
             # Added date and time info so you do not have to mouseover the slack
             # message to determine the time at which the alert came in
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link>'
-            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
+            initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
         else:
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
-            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\nFor anomaly at ' + slack_time_string
+            initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
         try:
             # slack does not allow embedded images, nor links behind authentication
             # so we have to upload an image with the message
@@ -1243,9 +1243,63 @@ def alert_slack(alert, metric, context):
                     initial_comment=initial_comment, file=open(image_file, 'rb'))
                 if not slack_file_upload['ok']:
                     logger.error('error :: alert_slack - failed to send slack message')
+                # @added 20181205 - Branch #2646: slack
+                # TODO
+                # The slack message id needs to be determined here so that it
+                # can be recorded against the anamoly id and so that webapp can
+                # notify the message thread when a training_data page is
+                # reviewed, a feature profile is created and/or a layers profile
+                # is created.  A basic description of this functionally is terms
+                # of the webapp code changes and the changes required to the DB
+                # and Panorama/Redis to achieve the desired goal.
+                # TODO - Panorama workload and DB changes.
+                else:
+                    try:
+                        slack_thread_updates = settings.SLACK_THREAD_UPDATES
+                    except:
+                        slack_thread_updates = False
+                    if slack_thread_updates:
+                        # This is basically the channel id of your channel, the
+                        # name could be used so that if in future it is used or
+                        # displayed in a UI or just you plain looking at the
+                        # DB table data, it is human understandable, humans do
+                        # not see the channel id, they knoow the channels by
+                        # names.  Skyline could have it's own channel id name DB
+                        # mappings.  This may be important in terms of only
+                        # doing slack_thread_updates on the primary Skyline
+                        # slack channel.
+                        slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                        slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                        # In terms of the generated Slack URLS for threads the
+                        # timestamps have no dots e.g.:
+                        # https://<an_org>.slack.com/archives/<a_channel>/p1543994173000700
+                        # However in terms of the sc.api_call the thread_ts
+                        # needs the format declared in the dict response e.g.
+                        # u'ts': u'1543994173.000700'}]} with the dot so in this
+                        # case '1543994173.000700'
+                        slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                        logger.info('alert_slack - the slack_thread_ts is %s)' % str(slack_thread_ts))
+                        # Insert into Redis for Panorama to process?
+                        # No anomaly_id will be known here so it needs
+                        # metric, timestamp, slack_group, slack_thread_ts
+                        # Panorama will have to surface the anomaly_id and create a
+                        # slack_alerts table record for it:
+                        # anomaly_id, slack_group, slack_thread_ts, app, context, reason
+                        # where context is one of the following:
+                        # alerted, training_data_viewed, features_profile_created
+                        # layer_profile_created
+                        # And reason is a note e.g. daily rsync backup, the
+                        # reason being any note/s attached to the action, maybe
+                        # the profile label.  The reason is more important in
+                        # the webapp context for user notes/sharing, the reason
+                        # in the context of alerters will simply be:
+                        # reason = 'alerted'
+                        # slack_thread_updated = slack_thread_update(
+                        #    app, base_name, int(until_timestamp),
+                        #    str(slack_group), str(slack_thread_ts), str(reason))
             else:
                 send_text = initial_comment + '  ::  error :: there was no graph image to upload'
-                send_messae = sc.api_call(
+                send_message = sc.api_call(
                     'chat.postMessage',
                     channel=channel,
                     icon_emoji=icon_emoji,
