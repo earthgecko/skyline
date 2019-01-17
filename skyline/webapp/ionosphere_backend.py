@@ -26,6 +26,10 @@ from sqlalchemy.sql import select
 # @added 20170916 - Feature #1996: Ionosphere - matches page
 from pymemcache.client.base import Client as pymemcache_Client
 
+# @added 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+#                   Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+from sqlalchemy.sql import text
+
 import settings
 import skyline_version
 # from skyline_functions import (
@@ -1199,17 +1203,38 @@ def ionosphere_search(default_query, search_query):
     if 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
         if from_timestamp and from_timestamp != 'all':
-
             if ":" in from_timestamp:
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
                 from_timestamp = str(int(new_from_timestamp))
 
+            # @added 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+            #                   Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+            # Validate from_timestamp
+            try:
+                validate_from_timestamp = int(from_timestamp) + 1
+                int_from_timestamp = validate_from_timestamp - 1
+                validated_from_timestamp = str(int_from_timestamp)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: could not validate from_timestamp'
+                logger.error('%s' % fail_msg)
+                raise
+
             if needs_and:
-                new_query_string = '%s AND anomaly_timestamp >= %s' % (query_string, from_timestamp)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s AND anomaly_timestamp >= %s' % (query_string, from_timestamp)
+                new_query_string = '%s AND anomaly_timestamp >= %s' % (query_string, validate_from_timestamp)
                 query_string = new_query_string
                 needs_and = True
             else:
-                new_query_string = '%s WHERE anomaly_timestamp >= %s' % (query_string, from_timestamp)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s WHERE anomaly_timestamp >= %s' % (query_string, from_timestamp)
+                new_query_string = '%s WHERE anomaly_timestamp >= %s' % (query_string, validated_from_timestamp)
                 query_string = new_query_string
                 needs_and = True
 
@@ -1220,24 +1245,68 @@ def ionosphere_search(default_query, search_query):
                 new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
                 until_timestamp = str(int(new_until_timestamp))
 
+            # @added 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+            #                   Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+            # Validate until_timestamp
+            try:
+                validate_until_timestamp = int(until_timestamp) + 1
+                int_until_timestamp = validate_until_timestamp - 1
+                validated_until_timestamp = str(int_until_timestamp)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: could not validate until_timestamp'
+                logger.error('%s' % fail_msg)
+                raise
+
             if needs_and:
-                new_query_string = '%s AND anomaly_timestamp <= %s' % (query_string, until_timestamp)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s AND anomaly_timestamp <= %s' % (query_string, until_timestamp)
+                new_query_string = '%s AND anomaly_timestamp <= %s' % (query_string, validated_until_timestamp)
                 query_string = new_query_string
                 needs_and = True
             else:
-                new_query_string = '%s WHERE anomaly_timestamp <= %s' % (query_string, until_timestamp)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s WHERE anomaly_timestamp <= %s' % (query_string, until_timestamp)
+                new_query_string = '%s WHERE anomaly_timestamp <= %s' % (query_string, validated_until_timestamp)
                 query_string = new_query_string
                 needs_and = True
 
     if 'generation_greater_than' in request.args:
         generation_greater_than = request.args.get('generation_greater_than', None)
         if generation_greater_than and generation_greater_than != '0':
+            # @added 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+            #                   Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+            # Validate generation_greater_than
+            try:
+                validate_generation_greater_than = int(generation_greater_than) + 1
+                int_generation_greater_than = validate_generation_greater_than - 1
+                validated_generation_greater_than = str(int_generation_greater_than)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: could not validate generation_greater_than'
+                logger.error('%s' % fail_msg)
+                raise
+
             if needs_and:
-                new_query_string = '%s AND generation > %s' % (query_string, generation_greater_than)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s AND generation > %s' % (query_string, generation_greater_than)
+                new_query_string = '%s AND generation > %s' % (query_string, validated_generation_greater_than)
                 query_string = new_query_string
                 needs_and = True
             else:
-                new_query_string = '%s WHERE generation > %s' % (query_string, generation_greater_than)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s WHERE generation > %s' % (query_string, generation_greater_than)
+                new_query_string = '%s WHERE generation > %s' % (query_string, validated_generation_greater_than)
                 query_string = new_query_string
                 needs_and = True
 
@@ -1245,12 +1314,34 @@ def ionosphere_search(default_query, search_query):
     if 'layers_id_greater_than' in request.args:
         layers_id_greater_than = request.args.get('layers_id_greater_than', None)
         if layers_id_greater_than and layers_id_greater_than != '0':
+            # @added 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+            #                   Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+            # Validate layers_id_greater_than
+            try:
+                validate_layers_id_greater_than = int(layers_id_greater_than) + 1
+                int_layers_id_greater_than = validate_layers_id_greater_than - 1
+                validated_layers_id_greater_than = str(int_layers_id_greater_than)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: could not validate layers_id_greater_than'
+                logger.error('%s' % fail_msg)
+                raise
+
             if needs_and:
-                new_query_string = '%s AND layers_id > %s' % (query_string, layers_id_greater_than)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s AND layers_id > %s' % (query_string, layers_id_greater_than)
+                new_query_string = '%s AND layers_id > %s' % (query_string, validated_layers_id_greater_than)
                 query_string = new_query_string
                 needs_and = True
             else:
-                new_query_string = '%s WHERE layers_id > %s' % (query_string, layers_id_greater_than)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s WHERE layers_id > %s' % (query_string, layers_id_greater_than)
+                new_query_string = '%s WHERE layers_id > %s' % (query_string, validated_layers_id_greater_than)
                 query_string = new_query_string
                 needs_and = True
 
@@ -1275,12 +1366,34 @@ def ionosphere_search(default_query, search_query):
     if 'matched_greater_than' in request.args:
         matched_greater_than = request.args.get('matched_greater_than', None)
         if matched_greater_than and matched_greater_than != '0':
+            # @added 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+            #                   Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+            # Validate matched_greater_than
+            try:
+                validate_matched_greater_than = int(matched_greater_than) + 1
+                int_matched_greater_than = validate_matched_greater_than - 1
+                validated_matched_greater_than = str(int_matched_greater_than)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: could not validate matched_greater_than'
+                logger.error('%s' % fail_msg)
+                raise
+
             if needs_and:
-                new_query_string = '%s AND matched_count > %s' % (query_string, matched_greater_than)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s AND matched_count > %s' % (query_string, matched_greater_than)
+                new_query_string = '%s AND matched_count > %s' % (query_string, validated_matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
             else:
-                new_query_string = '%s WHERE matched_count > %s' % (query_string, matched_greater_than)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # Use validated variable
+                # new_query_string = '%s WHERE matched_count > %s' % (query_string, matched_greater_than)
+                new_query_string = '%s WHERE matched_count > %s' % (query_string, validated_matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
 
@@ -1354,13 +1467,21 @@ def ionosphere_search(default_query, search_query):
             # SQLAlchemy requires the MySQL wildcard % to be %% to prevent
             # interpreting the % as a printf-like format character
             python_escaped_metric_like = metric_like_str.replace('%', '%%')
+            # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+            #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+            # Change the query
             # nosec to exclude from bandit tests
-            metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
-            logger.info('executing metrics_like_query - %s' % metrics_like_query)
+            # metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
+            # logger.info('executing metrics_like_query - %s' % metrics_like_query)
+            like_string_var = str(metric_like_str)
+            metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
             metric_ids = ''
             try:
                 connection = engine.connect()
-                results = connection.execute(metrics_like_query)
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # results = connection.execute(metrics_like_query)
+                results = connection.execute(metrics_like_query, like_string=metric_like_str)
                 connection.close()
                 for row in results:
                     metric_id = str(row[0])
@@ -1403,9 +1524,12 @@ def ionosphere_search(default_query, search_query):
     if 'limit' in request.args:
         limit = request.args.get('limit', '30')
         try:
-            test_limit = int(limit) + 0
+            validate_limit = int(limit) + 0
             if int(limit) != 0:
-                new_query_string = '%s LIMIT %s' % (query_string, str(limit))
+                # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+                #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+                # new_query_string = '%s LIMIT %s' % (query_string, str(limit))
+                new_query_string = '%s LIMIT %s' % (query_string, str(validate_limit))
                 query_string = new_query_string
         except:
             logger.error('error :: limit is not an integer - %s' % str(limit))
