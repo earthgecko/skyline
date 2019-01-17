@@ -8,8 +8,8 @@ high-resolution time series which need constant monitoring. Once a metrics
 stream is set up from Graphite, additional metrics are automatically added to
 Skyline for analysis. Skyline's easily extended algorithms attempt to
 automatically detect what it means for each metric to be anomalous.  Once set up
-and running and Skyline allows the user to train it what is not anomalous on a
-per metric basis.
+and running, Skyline allows the user to train it what is not anomalous on a per
+metric basis.
 
 ## Improvements to the original Etsy Skyline
 
