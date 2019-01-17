@@ -1087,8 +1087,8 @@ settings block.
 
 BOUNDARY_METRICS = (
     # ('metric', 'algorithm', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
-    ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp|hipchat|pagerduty'),
-    ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp'),
+    ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp'),
+    ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'),
     ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'),
     ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
 )
@@ -1141,7 +1141,9 @@ different ranges to pre-filter some noise.
     surpressed.  Try 1 if you are getting the occassional false positive, try 2.
     Note - Any :func:`.boundary_algorithms.greater_than` metrics should have
     this as 1.
-:param ALERT_VIAS: pipe separated alerters to send to.
+:param ALERT_VIAS: pipe separated alerters to send to, valid options smtp,
+    pagerduty, hipchat and slack.  This could therefore be 'smtp', 'smtp|slack',
+    'pagerduty|slack', etc
 :type metric: str
 :type algorithm: str
 :type EXPIRATION_TIME: int
@@ -1158,7 +1160,7 @@ different ranges to pre-filter some noise.
 
     ('stats_counts.someapp.things', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp'),
     ('stats_counts.someapp.things.an_important_thing.requests', 'detect_drop_off_cliff', 600, 100, 3600, 0, 2, 'smtp|pagerduty'),
-    ('stats_counts.otherapp.things.*.requests', 'detect_drop_off_cliff', 600, 500, 3600, 0, 2, 'smtp|hipchat'),
+    ('stats_counts.otherapp.things.*.requests', 'detect_drop_off_cliff', 600, 500, 3600, 0, 2, 'smtp|slack'),
 
 - In the above all ``stats_counts.someapp.things*`` would be painted with a 1800
   ``EXPIRATION_TIME`` and 500 ``MIN_AVERAGE``, but those values would be
@@ -1174,11 +1176,6 @@ BOUNDARY_AUTOAGGRERATION = False
 This is used to autoaggregate a timeseries with :func:`.autoaggregate_ts`, if a
 timeseries dataset has 6 data points per minute but only one data value every
 minute then autoaggregate can be used to aggregate the required sample.
-"""
-
-"""
-:var :
-:vartype :
 """
 
 BOUNDARY_AUTOAGGRERATION_METRICS = (
@@ -1214,6 +1211,7 @@ BOUNDARY_ALERTER_OPTS = {
         'smtp': 60,
         'pagerduty': 1800,
         'hipchat': 1800,
+        'slack': 1800,
     },
     # If alerter keys >= limit in the above alerter_expiration_time do not alert
     # to this channel until keys < limit
@@ -1221,6 +1219,7 @@ BOUNDARY_ALERTER_OPTS = {
         'smtp': 100,
         'pagerduty': 15,
         'hipchat': 30,
+        'slack': 30,
     },
 }
 """
@@ -1298,6 +1297,26 @@ BOUNDARY_PAGERDUTY_OPTS = {
 :vartype BOUNDARY_PAGERDUTY_OPTS: dictionary
 
 PagerDuty alerts require pygerduty
+"""
+
+BOUNDARY_SLACK_OPTS = {
+    # Bot User OAuth Access Token
+    'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token',
+    # list of slack channels to notify about each anomaly
+    # (similar to BOUNDARY_SMTP_OPTS['recipients'])
+    # channel names - you can either pass the channel name (#general) or encoded
+    # ID (C024BE91L)
+    'channels': {
+        'skyline': ('#general',),
+        'skyline_test.alerters.test': ('#general',),
+    },
+    'icon_emoji': ':chart_with_upwards_trend:',
+}
+"""
+:var BOUNDARY_SLACK_OPTS: Your slack settings.
+:vartype BOUNDARY_SLACK_OPTS: dictionary
+
+slack alerts require slackclient
 """
 
 """
@@ -1439,7 +1458,6 @@ ENABLE_WEBAPP_DEBUG = False
 :var ENABLE_WEBAPP_DEBUG: Enables some app specific debugging to log.
 :vartype ENABLE_WEBAPP_DEBUG: boolean
 """
-
 
 """
 Ionosphere settings

@@ -14,11 +14,20 @@ from time import time
 import datetime
 import os.path
 import sys
+
+# @added 20181126 - Task #2742: Update Boundary
+#                   Feature #2618: alert_slack
+# Added dt, redis, gmtime and strftime
+import datetime as dt
+import redis
+from time import (gmtime, strftime)
+
 python_version = int(sys.version_info[0])
 if python_version == 2:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
     from email.MIMEImage import MIMEImage
+    from email import charset
 if python_version == 3:
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -27,6 +36,10 @@ if python_version == 3:
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+# @added 20181126 - Task #2742: Update Boundary
+#                   Feature #2034: analyse_derivatives
+#                   Feature #2618: alert_slack
+from skyline_functions import (write_data_to_file, in_list)
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
@@ -109,19 +122,66 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
 
     unencoded_graph_title = 'Skyline Boundary - %s at %s hours - %s - %s' % (
         alert_context, graphite_previous_hours, metric_name, datapoint)
+
+    # @added 20181126 - Task #2742: Update Boundary
+    #                   Feature #2034: analyse_derivatives
+    # Added deriative functions to convert the values of metrics strictly
+    # increasing monotonically to their deriative products in alert graphs and
+    # specify it in the graph_title
+    known_derivative_metric = False
+    try:
+        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+        if settings.REDIS_PASSWORD:
+            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        logger.error('error :: alert_smtp - redis connection failed')
+    try:
+        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+    except:
+        derivative_metrics = []
+    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric_name))
+    if redis_metric_name in derivative_metrics:
+        known_derivative_metric = True
+    if known_derivative_metric:
+        try:
+            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+        except:
+            non_derivative_monotonic_metrics = []
+        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+        if skip_derivative:
+            known_derivative_metric = False
+    if known_derivative_metric:
+        unencoded_graph_title = 'Skyline Boundary - %s at %s hours - derivative graph - %s - %s' % (
+            alert_context, graphite_previous_hours, metric_name, datapoint)
+
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
 
+    # @added 20181126 - Bug #2498: Incorrect scale in some graphs
+    #                   Task #2742: Update Boundary
+    # If -xhours is used the scale is incorrect if x hours > than first
+    # retention period, passing from and until renders the graph with the
+    # correct scale.
+    graphite_port = '80'
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=%s' % (
-            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
-            graphite_previous_hours, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
-            graph_title, graphite_graph_line_color)
-    else:
-        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=%s' % (
-            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_previous_hours,
-            metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
-            graphite_graph_line_color)
+        graphite_port = str(settings.GRAPHITE_PORT)
+    until_timestamp = int(time())
+    from_seconds_ago = graphite_previous_hours * 3600
+    from_timestamp = until_timestamp - from_seconds_ago
+    graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_from - %s' % str(graphite_from))
+    graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_until - %s' % str(graphite_until))
+    graphite_target = 'target=cactiStyle(%s)'
+    if known_derivative_metric:
+        graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s))'
+    link = '%s://%s:%s/render/?from=%s&until=%s&%s%s%s&colorList=%s' % (
+        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+        str(graphite_from), str(graphite_until), graphite_target,
+        settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
+        graphite_graph_line_color)
 
     content_id = metric_name
     image_data = None
@@ -213,7 +273,6 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
             notify_rooms.append(rooms)
         except:
             for room in settings.BOUNDARY_HIPCHAT_OPTS['rooms']:
-                print(room)
                 CHECK_MATCH_PATTERN = room
                 check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
                 pattern_match = check_match_pattern.match(metric_name)
@@ -285,6 +344,210 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
         return False
 
 
+# @added 20181126 - Task #2742: Update Boundary
+#                   Feature #2618: alert_slack
+def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
+
+    if not settings.SLACK_ENABLED:
+        return False
+
+    from slackclient import SlackClient
+    metric = metric_name
+    logger.info('alert_slack - anomalous metric :: metric: %s - %s' % (metric, algorithm))
+    base_name = metric
+    alert_algo = str(algorithm)
+    alert_context = alert_algo.upper()
+
+    # The known_derivative_metric state is determine in case we need to surface
+    # the png image from Graphite if the Ionosphere image is not available for
+    # some reason.  This will result in Skyline at least still sending an alert
+    # to slack, even if some gear fails in Ionosphere or slack alerting is used
+    # without Ionosphere enabled. Yes not DRY but multiprocessing and spawn
+    # safe.
+    known_derivative_metric = False
+    try:
+        if settings.REDIS_PASSWORD:
+            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        logger.error('error :: alert_slack - redis connection failed')
+    try:
+        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+    except:
+        derivative_metrics = []
+    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+    if redis_metric_name in derivative_metrics:
+        known_derivative_metric = True
+    if known_derivative_metric:
+        try:
+            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+        except:
+            non_derivative_monotonic_metrics = []
+        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+        if skip_derivative:
+            known_derivative_metric = False
+
+    if known_derivative_metric:
+        unencoded_graph_title = 'Skyline Boundary - ALERT %s at %s hours - derivative graph - %s' % (
+            alert_context, str(graphite_previous_hours), metric)
+        slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - derivative graph - %s' % (
+            alert_context, metric, str(graphite_previous_hours), datapoint)
+    else:
+        unencoded_graph_title = 'Skyline Boundary - ALERT %s at %s hours - %s' % (
+            alert_context, str(graphite_previous_hours), metric)
+        slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - %s' % (
+            alert_context, metric, str(graphite_previous_hours), datapoint)
+
+    graph_title_string = quote(unencoded_graph_title, safe='')
+    graph_title = '&title=%s' % graph_title_string
+
+    until_timestamp = int(time())
+    target_seconds = int((graphite_previous_hours * 60) * 60)
+    from_timestamp = str(until_timestamp - target_seconds)
+
+    graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_from - %s' % str(graphite_from))
+    graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+    logger.info('graphite_until - %s' % str(graphite_until))
+    # @added 20181025 - Feature #2618: alert_slack
+    # Added date and time info so you do not have to mouseover the slack
+    # message to determine the time at which the alert came in
+    timezone = strftime("%Z", gmtime())
+    # @modified 20181029 - Feature #2618: alert_slack
+    # Use the standard UNIX data format
+    # human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+    human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%c')
+    slack_time_string = '%s %s' % (human_anomaly_time, timezone)
+
+    if settings.GRAPHITE_PORT != '':
+        if known_derivative_metric:
+            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+                metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        else:
+            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+                metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    else:
+        if known_derivative_metric:
+            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                str(graphite_from), str(graphite_until), metric,
+                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        else:
+            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                str(graphite_from), str(graphite_until), metric,
+                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+
+    # slack does not allow embedded images, nor will it fetch links behind
+    # authentication so Skyline uploads a png graphite image with the message
+    image_file = None
+
+    # Fetch the png from Graphite
+    try:
+        image_data = urllib2.urlopen(link).read()  # nosec
+    except urllib2.URLError:
+        logger.error(traceback.format_exc())
+        logger.error('error :: alert_slack - failed to get image graph')
+        logger.error('error :: alert_slack - %s' % str(link))
+        image_data = None
+    if image_data:
+        image_file = '%s/%s.%s.graphite.%sh.png' % (
+            settings.SKYLINE_TMP_DIR, base_name, skyline_app,
+            str(int(graphite_previous_hours)))
+        try:
+            write_data_to_file(skyline_app, image_file, 'w', image_data)
+            logger.info('alert_slack - added Graphite image :: %s' % (
+                image_file))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error(
+                'error :: alert_slack - failed to add %s Graphite image' % (
+                    image_file))
+            image_file = None
+    try:
+        filename = os.path.basename(image_file)
+    except:
+        filename = None
+
+    try:
+        bot_user_oauth_access_token = settings.BOUNDARY_SLACK_OPTS['bot_user_oauth_access_token']
+    except:
+        logger.error('error :: alert_slack - could not determine bot_user_oauth_access_token')
+        return False
+
+    # Allow for absolute path metric namespaces but also allow for and match
+    # match wildcard namepaces if there is not an absolute path metric namespace
+    channels = 'unknown'
+    notify_channels = []
+    matched_channels = []
+    try:
+        channels = settings.BOUNDARY_SLACK_OPTS['channels'][metric_name]
+        notify_channels.append(channels)
+    except:
+        for channel in settings.BOUNDARY_SLACK_OPTS['channels']:
+            CHECK_MATCH_PATTERN = channel
+            check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+            pattern_match = check_match_pattern.match(metric_name)
+            if pattern_match:
+                matched_channels.append(channel)
+
+    if matched_channels != []:
+        for i_metric_name in matched_channels:
+            channels = settings.BOUNDARY_SLACK_OPTS['channels'][i_metric_name]
+            notify_channels.append(channels)
+
+    if not notify_channels:
+        logger.error('error :: alert_slack - could not determine channel')
+        return False
+    else:
+        channels = notify_channels
+
+    try:
+        icon_emoji = settings.BOUNDARY_SLACK_OPTS['icon_emoji']
+    except:
+        icon_emoji = ':chart_with_upwards_trend:'
+
+    try:
+        sc = SlackClient(bot_user_oauth_access_token)
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: alert_slack - could not initiate SlackClient')
+        return False
+
+    for channel in channels:
+        initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
+        try:
+            # slack does not allow embedded images, nor links behind authentication
+            # or color text, so we have jump through all the API hoops to end up
+            # having to upload an image with a very basic message.
+            if os.path.isfile(image_file):
+                slack_file_upload = sc.api_call(
+                    'files.upload', filename=filename, channels=channel,
+                    initial_comment=initial_comment, file=open(image_file, 'rb'))
+                if not slack_file_upload['ok']:
+                    logger.error('error :: alert_slack - failed to send slack message')
+            else:
+                send_text = initial_comment + '  ::  error :: there was no graph image to upload'
+                send_message = sc.api_call(
+                    'chat.postMessage',
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    text=send_text)
+                if not send_message['ok']:
+                    logger.error('error :: alert_slack - failed to send slack message')
+                else:
+                    logger.info('alert_slack - sent slack message')
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: alert_slack - could not upload file')
+            return False
+
+
 def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm):
 
     if alerter == 'smtp':
@@ -295,5 +558,5 @@ def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigg
     try:
         getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm)
     except:
-        logger.error('error :: alerters - %s - getattr error' % strategy)
         logger.info(traceback.format_exc())
+        logger.error('error :: alerters - %s - getattr error' % strategy)

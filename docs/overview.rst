@@ -123,10 +123,10 @@ system. It was originally built to enable passive monitoring of hundreds of
 thousands of metrics, without the need to configure a model/thresholds for each
 one, as you might do with Nagios.  It was designed to be used wherever there are
 a large quantity of high-resolution time series which need constant monitoring.
-Once a metric stream was set up (from statsd, Graphite or other), additional
-metrics are automatically added to Skyline for analysis, anomaly detection,
-alerting and briefly published in the Webapp frontend.  `github/etsy`_ stopped
-actively maintaining Skyline in 2014.
+Once a metric stream was set up from Graphite, additional metrics are
+automatically added to Skyline for analysis, anomaly detection, alerting and
+briefly published in the Webapp frontend.  `github/etsy`_ stopped actively
+maintaining Skyline in 2014.
 
 Skyline - as a work in progress
 -------------------------------
@@ -211,7 +211,7 @@ development of Skyline is not focused on making it be better than other things
 or the best, it is focused on trying to make Skyline better than it was and
 currently is.  Unfortunately Skyline no longer fits the NAB benchmark method as
 it's methods operate exclusively in the real time arena on real time data,
-historic data and trained patternsand this could not be bolted into a NAB test
+historic data and trained patterns and this could not be bolted into a NAB test
 and would violate the NAB benchmark requirements.
 
 The new look of Skyline apps

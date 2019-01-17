@@ -1403,4 +1403,55 @@ def set_metric_as_derivative(current_skyline_app, base_name):
         current_logger.error('error :: could not set Redis derivative_metric key: %s' % e)
         return_boolean = False
 
+    # @added 20190108 - Bug #2796: set_metric_as_derivative remove from non_derivative_metrics
+    # Remove the metric from the non_derivative_metrics Redis set.  This set is
+    # normally managed by Analyzer and although the metric is added to the
+    # derivative_metrics set above, it only gets removed from the
+    # non_derivative_metrics set after the Analyzer Redis key
+    # analyzer.derivative_metrics_expiry expires, which can be up to 300 seconds
+    # when the derivative_metrics and non_derivative_metrics Redis sets are
+    # recreated
+    current_logger.info('set_metric_as_derivative :: removing %s from non_derivative_metrics' % str(base_name))
+    try:
+        non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
+    except:
+        non_derivative_metrics = []
+    new_non_derivative_metrics = []
+    len_non_derivative_metrics = len(non_derivative_metrics)
+    current_logger.info('set_metric_as_derivative :: %s metrics in non_derivative_metrics before the removal' % str(len_non_derivative_metrics))
+    if non_derivative_metrics:
+        for i_metric_name in non_derivative_metrics:
+            if i_metric_name != metric_name:
+                new_non_derivative_metrics.append(i_metric_name)
+    if new_non_derivative_metrics:
+        all_redis_ops_ok = True
+        for i_metric_name in new_non_derivative_metrics:
+            try:
+                REDIS_CONN.sadd('new_non_derivative_metrics', i_metric_name)
+            except:
+                all_redis_ops_ok = False
+                current_logger.error('error :: failed to add metric %s to Redis new_non_derivative_metrics set' % str(i_metric_name))
+        if all_redis_ops_ok:
+            try:
+                REDIS_CONN.rename('non_derivative_metrics', 'old_non_derivative_metrics')
+            except Exception as e:
+                current_logger.error('error :: could not rename Redis set non_derivative_metrics to old_non_derivative_metrics: %s' % str(e))
+                return_boolean = False
+            try:
+                REDIS_CONN.rename('new_non_derivative_metrics', 'non_derivative_metrics')
+                current_logger.info('set_metric_as_derivative :: removed %s from non_derivative_metrics' % str(base_name))
+            except Exception as e:
+                current_logger.error('error :: could not rename Redis set new_non_derivative_metrics to non_derivative_metrics: %s' % str(e))
+                return_boolean = False
+            try:
+                REDIS_CONN.delete('old_non_derivative_metrics')
+            except Exception as e:
+                current_logger.error('error :: could not delta Redis set old_non_derivative_metrics: %s' % str(e))
+    try:
+        non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
+    except:
+        non_derivative_metrics = []
+    len_non_derivative_metrics = len(non_derivative_metrics)
+    current_logger.info('set_metric_as_derivative :: %s metrics in non_derivative_metrics after the removal of %s' % (str(len_non_derivative_metrics), str(metric_name)))
+
     return return_boolean

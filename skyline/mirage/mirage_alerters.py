@@ -1086,7 +1086,7 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     # This block is not used but left heve as it is the pattern for sending
     # messages using the chat.postMessage methods and could possibly be the
     # failover for a files.upload error or future messages.
-    message_payload  = json.dumps([{
+    message_payload = json.dumps([{
         "fallback": slack_title + ' - ' + link,
         "title": slack_title,
         "title_link": link,
@@ -1118,10 +1118,10 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             # Added date and time info so you do not have to mouseover the slack
             # message to determine the time at which the alert came in
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link>'
-            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
+            initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
         else:
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
-            initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\nFor anomaly at ' + slack_time_string
+            initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
 
         try:
             # slack does not allow embedded images, nor links behind authentication

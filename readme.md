@@ -1,22 +1,20 @@
 ## Skyline
 
-version - Luminosity
-
-![skyline web app](skyline.png)
-
 Skyline is a near real time anomaly detection system, built to enable
 passive monitoring of hundreds of thousands of metrics, without the need
 to configure a model/thresholds for each one, as you might do with Nagios.
 It is designed to be used wherever there are a large quantity of
 high-resolution time series which need constant monitoring. Once a metrics
-stream is set up (from StatsD or Graphite or another source), additional
-metrics are automatically added to Skyline for analysis. Skyline's easily
-extended algorithms attempt to automatically detect what it means for each
-metric to be anomalous.
+stream is set up from Graphite, additional metrics are automatically added to
+Skyline for analysis. Skyline's easily extended algorithms attempt to
+automatically detect what it means for each metric to be anomalous.  Once set up
+and running, Skyline allows the user to train it what is not anomalous on a per
+metric basis.
 
 ## Improvements to the original Etsy Skyline
- 
-- Improving the anomaly detection methodologies used in the 3-sigma context.
+
+- Improving the anomaly detection methodologies used in the 3-sigma context to
+  vastly increase performance.
 - Extending Skyline's 3-sigma methodology to enable the operator and Skyline to
   handle seasonality in metrics.
 - The addition of an anomalies database for learning and root cause analysis.
@@ -31,12 +29,11 @@ metric to be anomalous.
 
 ## Documentation
 
-All the Skyline documentation is available online at
-http://earthgecko-skyline.readthedocs.io/en/latest/
+Skyline documentation is available online at http://earthgecko-skyline.readthedocs.io/en/latest/
 
 The documentation for your version is also viewable in a clone locally in your
 browser at `file://<PATH_TO_YOUR_CLONE>/docs/_build/html/index.html` and via the
-the Skyline Webapp frontend.
+the Skyline Webapp frontend via the docs tab.
 
 ## Other
 
