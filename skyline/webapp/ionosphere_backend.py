@@ -523,7 +523,10 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # Make a sample ts for lite frontend
 
     ts_json_ok = False
-    ts_json = ['error: no timeseries json file', ts_json_file]
+    # @modified 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file
+    # ts_json = ['error: no timeseries json file', ts_json_file]
+    ts_json = []
+
     if path.isfile(ts_json_file):
         try:
             # ts_json = []
@@ -533,6 +536,14 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             ts_json_ok = True
         except:
             ts_json_ok = False
+            # @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file
+            ts_json = ['error: could not read the time series from the json file', ts_json_file]
+            logger.error('error :: could not read the time series from the json file - %s' % str(ts_json_file))
+
+    else:
+    # @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file
+        ts_json = ['error: no timeseries json file', ts_json_file]
+        logger.error('error :: no timeseries json file - %s' % str(ts_json_file))
 
     # @added 20170309 - Feature #1960: ionosphere_layers
     # Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
