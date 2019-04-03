@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>skyline_functions &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -1570,6 +1571,57 @@
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not set Redis derivative_metric key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
         <span class="n">return_boolean</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># @added 20190108 - Bug #2796: set_metric_as_derivative remove from non_derivative_metrics</span>
+    <span class="c1"># Remove the metric from the non_derivative_metrics Redis set.  This set is</span>
+    <span class="c1"># normally managed by Analyzer and although the metric is added to the</span>
+    <span class="c1"># derivative_metrics set above, it only gets removed from the</span>
+    <span class="c1"># non_derivative_metrics set after the Analyzer Redis key</span>
+    <span class="c1"># analyzer.derivative_metrics_expiry expires, which can be up to 300 seconds</span>
+    <span class="c1"># when the derivative_metrics and non_derivative_metrics Redis sets are</span>
+    <span class="c1"># recreated</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set_metric_as_derivative :: removing </span><span class="si">%s</span><span class="s1"> from non_derivative_metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">new_non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">len_non_derivative_metrics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_derivative_metrics</span><span class="p">)</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set_metric_as_derivative :: </span><span class="si">%s</span><span class="s1"> metrics in non_derivative_metrics before the removal&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">len_non_derivative_metrics</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i_metric_name</span> <span class="ow">in</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i_metric_name</span> <span class="o">!=</span> <span class="n">metric_name</span><span class="p">:</span>
+                <span class="n">new_non_derivative_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_metric_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new_non_derivative_metrics</span><span class="p">:</span>
+        <span class="n">all_redis_ops_ok</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">i_metric_name</span> <span class="ow">in</span> <span class="n">new_non_derivative_metrics</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;new_non_derivative_metrics&#39;</span><span class="p">,</span> <span class="n">i_metric_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">all_redis_ops_ok</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric </span><span class="si">%s</span><span class="s1"> to Redis new_non_derivative_metrics set&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_metric_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">all_redis_ops_ok</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">,</span> <span class="s1">&#39;old_non_derivative_metrics&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not rename Redis set non_derivative_metrics to old_non_derivative_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="n">return_boolean</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;new_non_derivative_metrics&#39;</span><span class="p">,</span> <span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set_metric_as_derivative :: removed </span><span class="si">%s</span><span class="s1"> from non_derivative_metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not rename Redis set new_non_derivative_metrics to non_derivative_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="n">return_boolean</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;old_non_derivative_metrics&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not delta Redis set old_non_derivative_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">len_non_derivative_metrics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_derivative_metrics</span><span class="p">)</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set_metric_as_derivative :: </span><span class="si">%s</span><span class="s1"> metrics in non_derivative_metrics after the removal of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">len_non_derivative_metrics</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)))</span>
+
     <span class="k">return</span> <span class="n">return_boolean</span></div>
 </pre></div>
 
@@ -1604,7 +1656,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

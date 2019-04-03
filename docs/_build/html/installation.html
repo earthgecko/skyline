@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>Installation &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -97,7 +97,22 @@
 <li class="toctree-l3"><a class="reference internal" href="#sudo"><code class="docutils literal"><span class="pre">sudo</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-configuration">Skyline configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#firewall">Firewall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dawn">Dawn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#redis">Redis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memcached">memcached</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-directories">Skyline directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-and-dependencies-install">Skyline and dependencies install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#apache-reverse-proxy">Apache reverse proxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-database">Skyline database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-settings">Skyline settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#starting-and-testing-the-skyline-installation">Starting and testing the Skyline installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-graphite-to-send-data-to-skyline">Configure Graphite to send data to Skyline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-skyline-components">Other Skyline components</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#automation-and-configuration-management-notes">Automation and configuration management notes</a></li>
 </ul>
 </li>
@@ -114,6 +129,7 @@
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -220,20 +236,19 @@ the end of this page.</p>
 separate application that will probably be running on another server, although
 Graphite could run on the same server, in a production environment it would
 probably be a remote machine or container.  Graphite is not part of Skyline.</li>
-<li>Redis - stores mod:<cite>settings.FULL_DURATION</cite> seconds (usefully 24 hours worth)
-of time series data.  Redis must run on the same host as Skyline.  It may be
-possible to run Redis in another container or VM that was on the same host,
-but this has not been tested.</li>
-<li>MySQL - stores data about anomalies and time series features fingerprints for
-learning things that are not anomalous.  MySQL ideally should run on the same
-host as Skyline or in another container or VM that was on the same host,
-but this has not been tested.</li>
+<li>Redis - stores <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> seconds (usefully 24 hours worth)
+of time series data that Graphite sends to Skyline Horizon.  Skyline Analyzer
+pulls the data from Redis for analysis.  Redis must run on the same host as
+Skyline.  It may be possible to run Redis in another container or VM that was
+on the same host, but this has not been tested.</li>
+<li>MySQL/mariadb - stores data about anomalies and time series features
+fingerprints for learning things that are not anomalous.  MySQL can run on the
+same host as Skyline or it can be remote.</li>
 <li>Apache (or nginx) - serves the Skyline webapp via gunicorn and handles SSL
 termination and basic http auth.  Ideally should run on the same host as
 Skyline.</li>
-<li>memcached - caches Ionosphere MySQL data, must run on the same host as Skyline
-or perhaps in another container or VM that was on the same host, but this has
-not been tested.</li>
+<li>memcached - caches Ionosphere MySQL data, memcached should ideally be run on
+the same host as Skyline.</li>
 </ul>
 <div class="section" id="sudo">
 <h3><code class="docutils literal"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h3>
@@ -249,6 +264,15 @@ Python-2.7.14 virtualenv, if you choose to deploy Skyline another way, you are
 on your own.  Although it is possible to run Skyline in a different type of
 environment, it does not lend itself to repeatability or a common known state.</p>
 </div>
+<div class="section" id="skyline-configuration">
+<h3>Skyline configuration<a class="headerlink" href="#skyline-configuration" title="Permalink to this headline">¶</a></h3>
+<p>All Skyline configuration is handled in <code class="docutils literal"><span class="pre">skyline/settings.py</span></code> and in this
+documentation configuration options are referred to via their docstrings name
+e.g. <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> which links to their description in the
+documentation.</p>
+</div>
+<div class="section" id="firewall">
+<h3>Firewall<a class="headerlink" href="#firewall" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Create a python-2.7.14 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
 Python virtualenv</a></li>
@@ -259,9 +283,9 @@ Python virtualenv</a></li>
 specified IPs in iptables/ip6tables (further these addresses should also be
 added to the reverse proxy conf as <code class="docutils literal"><span class="pre">Allow</span> <span class="pre">from</span></code> defines when you create
 the reverse proxy conf file).</li>
-<li>The IP address and port being used by MySQL, if you are not binding MySQL to
-127.0.0.1 only, ensure that the MySQL port declared in
-<a class="reference internal" href="skyline.html#settings.PANORAMA_DBPORT" title="settings.PANORAMA_DBPORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_DBPORT</span></code></a> (default 3306) is only accessible to
+<li>The IP address and port being used by MySQL/mariadb, if you are not binding
+MySQL/mariadb to 127.0.0.1 only, ensure that the MySQL/mariadb port declared
+in <a class="reference internal" href="skyline.html#settings.PANORAMA_DBPORT" title="settings.PANORAMA_DBPORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_DBPORT</span></code></a> (default 3306) is only accessible to
 specified IPs in iptables/ip6tables</li>
 <li>Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
 default Graphite pickle ports)</li>
@@ -274,9 +298,20 @@ instances for any required remote Redis data retrieval and preprocessing.</li>
 equivalent) before continuing.</li>
 </ul>
 </li>
+</ul>
+</div>
+<div class="section" id="dawn">
+<h3>Dawn<a class="headerlink" href="#dawn" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>Should you wish to review the build steps, component builds and installs
-described below, there is a build script for <strong>testing</strong> purposes <strong>only</strong> in
-utils/dawn/skyline.dawn.sh see <a class="reference external" href="development/dawn.html">Dawn</a> section)</li>
+described below, there is a convenience build script for <strong>testing</strong> purposes
+<strong>only</strong> in <cite>utils/dawn/skyline.dawn.sh</cite> see
+<a class="reference external" href="development/dawn.html">Dawn</a> section)</li>
+</ul>
+</div>
+<div class="section" id="redis">
+<h3>Redis<a class="headerlink" href="#redis" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>Install Redis - see <a class="reference external" href="http://redis.io/">Redis.io</a></li>
 <li>Ensure that you review <a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a></li>
 <li>Ensure Redis has socket enabled <strong>with the following permissions</strong> in your
@@ -299,9 +334,19 @@ redis.conf</li>
 instances, Skyline gets remote Redis data preprocessed via a Skyline API so
 there is no need to bind Redis to any other IP.</li>
 <li>Start Redis</li>
+</ul>
+</div>
+<div class="section" id="memcached">
+<h3>memcached<a class="headerlink" href="#memcached" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>Install memcached and start memcached see <a class="reference external" href="https://memcached.org/">memcached.org</a></li>
 <li>Ensure that you start memcached only bound to 127.0.0.1 by passing the daemon
 the option <code class="docutils literal"><span class="pre">-l</span> <span class="pre">127.0.0.1</span></code>, Skyline only requires memcached locally.</li>
+</ul>
+</div>
+<div class="section" id="skyline-directories">
+<h3>Skyline directories<a class="headerlink" href="#skyline-directories" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>Make the required directories</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir /var/log/skyline
@@ -317,6 +362,15 @@ mkdir /etc/skyline
 mkdir /tmp/skyline
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Ensure you provide the appropriate ownership and permissions to the
+above specified directories for the user you wish to run the Skyline process
+as.</p>
+</div>
+</div>
+<div class="section" id="skyline-and-dependencies-install">
+<h3>Skyline and dependencies install<a class="headerlink" href="#skyline-and-dependencies-install" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>git clone Skyline (git should have been installed in the <a class="reference external" href="running-in-python-virtualenv.html">Running in Python
 virtualenv</a> section) and it is
@@ -357,7 +411,8 @@ that it is harder for you to err.</p>
 <span class="c1"># As of statsmodels 0.9.0 numpy, et al need to be installed before</span>
 <span class="c1"># statsmodels in requirements</span>
 <span class="c1"># https://github.com/statsmodels/statsmodels/issues/4654</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^numpy\|^scipy\|^patsy\|^pandas&quot;</span> <span class="p">|</span> tr <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span><span class="k">)</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^numpy\|^scipy\|^patsy&quot;</span> <span class="p">|</span> tr <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span><span class="k">)</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^pandas&quot;</span><span class="k">)</span>
 
 <span class="c1"># This can take lots of minutes...</span>
 bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/requirements.txt
@@ -374,6 +429,9 @@ set up if it is not using PATH
 vi /etc/skyline/skyline.conf  <span class="c1"># Set USE_PYTHON as appropriate to your setup</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="apache-reverse-proxy">
+<h3>Apache reverse proxy<a class="headerlink" href="#apache-reverse-proxy" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>OPTIONAL but <strong>recommended</strong>, serving the Webapp via gunicorn with an Apache
 reverse proxy.<ul>
@@ -412,13 +470,23 @@ password that you provide in <cite>settings.py</cite> for
 </div>
 <ul class="simple">
 <li>Deploy your Skyline Apache configuration file and restart httpd.</li>
-<li>Create the Skyline MySQL database for Panorama (see
+</ul>
+</div>
+<div class="section" id="skyline-database">
+<h3>Skyline database<a class="headerlink" href="#skyline-database" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Create the Skyline MySQL/mariadb database for Panorama (see
 <a class="reference external" href="panorama.html">Panorama</a>) and Ionosphere.</li>
-<li>Edit the <code class="docutils literal"><span class="pre">settings.py</span></code> file and enter your appropriate settings,
+</ul>
+</div>
+<div class="section" id="skyline-settings">
+<h3>Skyline settings<a class="headerlink" href="#skyline-settings" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Edit the <code class="docutils literal"><span class="pre">skyline/settings.py</span></code> file and enter your appropriate settings,
 specifically ensure you set the following variables to the correct
 settings for your environment, see the documentation links and docstrings in
-the <cite>settings.py</cite> file for the full descriptions of each variable.  Below are
-the variables you must set:<ul>
+the <code class="docutils literal"><span class="pre">skyline/settings.py</span></code> file for the full descriptions of each variable.
+Below are the variables you must set:<ul>
 <li><a class="reference internal" href="skyline.html#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.REDIS_SOCKET_PATH</span></code></a> if different from <code class="docutils literal"><span class="pre">`/tmp/redis.sock`</span></code></li>
 <li><a class="reference internal" href="skyline.html#settings.REDIS_PASSWORD" title="settings.REDIS_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.REDIS_PASSWORD</span></code></a></li>
 <li><a class="reference internal" href="skyline.html#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_HOST</span></code></a></li>
@@ -476,6 +544,11 @@ again be pointed out.</p>
 running.</li>
 <li>If you are <strong>upgrading</strong>, at this point return to the
 <a class="reference external" href="upgrading/index.html">Upgrading</a> page.</li>
+</ul>
+</div>
+<div class="section" id="starting-and-testing-the-skyline-installation">
+<h3>Starting and testing the Skyline installation<a class="headerlink" href="#starting-and-testing-the-skyline-installation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>Before you test Skyline by seeding Redis with some test data, ensure
 that you have configured the firewall/iptables/ip6tables with the appropriate
 restricted access.</li>
@@ -497,8 +570,8 @@ no errors.</li>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">When checking a log make sure you check the log for the appropriate
-time, Skyline can log lots fast, so short tails may miss some event you
-expect between that restart and tail.</p>
+time, Skyline can log fast, so short tails may miss some event you expect
+between the restart and tail.</p>
 </div>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Check what the logs reported when the apps started</span>
 head -n <span class="m">20</span> /var/log/skyline/*.log
@@ -546,14 +619,27 @@ Skyline</a></li>
 no errors.</li>
 <li>Once you have your <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> configured to test them see
 <a class="reference external" href="alert-testing.html">Alert testing</a></li>
+</ul>
+</div>
+<div class="section" id="configure-graphite-to-send-data-to-skyline">
+<h3>Configure Graphite to send data to Skyline<a class="headerlink" href="#configure-graphite-to-send-data-to-skyline" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>Now you can configure your Graphite to pickle data to Skyline see
 <a class="reference external" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li>If you have opted to not set up Panorama, later see set up
 <a class="reference external" href="panorama.html">Panorama</a></li>
+</ul>
+</div>
+<div class="section" id="other-skyline-components">
+<h3>Other Skyline components<a class="headerlink" href="#other-skyline-components" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>For Mirage set up see <a class="reference external" href="mirage.html">Mirage</a></li>
 <li>For Boundary set up see <a class="reference external" href="boundary.html">Boundary</a></li>
-<li>For Ionosphere set up see <a class="reference external" href="ionosphere.html">Ionosphere</a></li>
+<li>For more in-depth Ionosphere set up see <a class="reference external" href="ionosphere.html">Ionosphere</a>
+however Ionosphere is only relevant once Skyline has at least
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> data in Redis.</li>
 </ul>
+</div>
 </div>
 <div class="section" id="automation-and-configuration-management-notes">
 <h2>Automation and configuration management notes<a class="headerlink" href="#automation-and-configuration-management-notes" title="Permalink to this headline">¶</a></h2>
@@ -619,7 +705,7 @@ if you use an exec of any sort, ensure the pandas install has a long timeout.</l
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

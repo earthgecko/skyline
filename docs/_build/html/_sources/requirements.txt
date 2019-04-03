@@ -4,7 +4,7 @@ Requirements
 
 The requirements are:
 
-- First you need Graphite
+- First you need an instance of Graphite running
 - Then you need some things feeding Graphite metrics (see statsd, sensu, riemann
   buckyserver, nc)
 - Linux (and probably any environment that supports Python virtualenv
@@ -12,8 +12,7 @@ The requirements are:
 - virtualenv
 - Python-2.7.14 (running in an isolated vitualenv)
 - Redis
-- MySQL or mariadb [optional - required for Panorama]
-- A Graphite implementation sending data would help :)
+- MySQL/mariadb
 
 ``requirements.txt``
 ####################

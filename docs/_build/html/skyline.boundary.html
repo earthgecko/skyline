@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.boundary package &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>skyline.boundary package &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.crucible package" href="skyline.crucible.html"/>
         <link rel="prev" title="skyline.analyzer_dev package" href="skyline.analyzer_dev.html"/> 
@@ -106,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -295,6 +296,11 @@ datapoint, metric_name, expiration_time, algorithm</p>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="boundary.boundary_alerters.alert_slack">
+<code class="descname">alert_slack</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_slack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_slack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="boundary.boundary_alerters.trigger_alert">
 <code class="descname">trigger_alert</code><span class="sig-paren">(</span><em>alerter</em>, <em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -398,7 +404,7 @@ lower value datapoints, but it still matches drops off cliffs.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -177,10 +178,10 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
-
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
+<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">create_engine</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy.dialects.mysql</span> <span class="k">import</span> <span class="n">DOUBLE</span><span class="p">,</span> <span class="n">TINYINT</span>
@@ -191,12 +192,11 @@
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">import</span> <span class="nn">skyline_version</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">RepresentsInt</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">get_graphite_metric</span><span class="p">)</span>
+    <span class="n">RepresentsInt</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_FEATURES</span>
 
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span>
-    <span class="n">ionosphere_matched_table_meta</span><span class="p">,</span>
     <span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
     <span class="n">luminosity_table_meta</span><span class="p">)</span>
 
@@ -296,7 +296,6 @@
         <span class="n">max_percent_diff_from_origin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">namespace_config</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_NAMESPACE_CONFIG</span><span class="p">:</span>
             <span class="n">NAMESPACE_MATCH_PATTERN</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace_config</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">base_name</span>
             <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Match by regex</span>
@@ -382,20 +381,15 @@
     <span class="n">base_name</span> <span class="o">=</span> <span class="n">data_for_metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;training data&#39;</span>
-        <span class="n">ionosphere_learn_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_human&#39;</span>
-    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profiles&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;features profile data&#39;</span>
-
-    <span class="c1"># @added 20170113 - Feature #1854: Ionosphere learn</span>
-    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
-        <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;learn&#39;</span>
+        <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_human&#39;</span>
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: </span><span class="si">%s</span><span class="s1"> :: requested for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">)))</span>
 
     <span class="n">metric_timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
+    <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="c1"># Added context ionosphere_echo</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
         <span class="n">metric_training_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span>
             <span class="n">metric_timeseries_dir</span><span class="p">)</span>
@@ -424,9 +418,8 @@
     <span class="n">features_profile_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span><span class="p">,</span> <span class="n">metric_timeseries_dir</span><span class="p">)</span>
 
-    <span class="n">ts_features_profile_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span><span class="p">,</span> <span class="n">metric_timeseries_dir</span><span class="p">,</span>
-        <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">))</span>
+    <span class="n">ts_features_profile_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">features_profile_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">))</span>
 
     <span class="n">features_profile_created_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.fp.created.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
@@ -439,7 +432,6 @@
     <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
     <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
     <span class="n">new_fp_id</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">calculated_with_tsfresh</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">calculated_time</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">fcount</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">fsum</span> <span class="o">=</span> <span class="kc">None</span>
@@ -454,12 +446,11 @@
             <span class="k">return</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
 
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">):</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: getting features profile details from from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">features_profile_details_file</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: getting features profile details from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">features_profile_details_file</span><span class="p">)</span>
         <span class="c1"># Read the details file</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">fp_details_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="n">fp_details</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_details_str</span><span class="p">)</span>
-        <span class="n">calculated_with_tsfresh</span> <span class="o">=</span> <span class="n">fp_details</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">calculated_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_details</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="n">fcount</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_details</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
         <span class="n">fsum</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_details</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
@@ -516,8 +507,6 @@
             <span class="n">feature_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">feature_name_item</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span>
                 <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">TSFRESH_FEATURES</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">feature_name_item</span><span class="p">:</span>
-                <span class="n">feature_name_id</span> <span class="o">=</span> <span class="n">feature_name_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">feature_name_item</span><span class="p">:</span>
                 <span class="n">feature_name_list</span> <span class="o">=</span> <span class="n">feature_name_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">fname_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">feature_name_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -604,7 +593,6 @@
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: metrics_table OK&#39;</span><span class="p">)</span>
 
-    <span class="n">metric_db_object</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="c1"># @modified 20161209 -  - Branch #922: ionosphere</span>
@@ -657,9 +645,11 @@
     <span class="c1"># @added 20170120 - Feature #1854: Ionosphere learn</span>
     <span class="c1"># Always use the timestamp from the anomaly file</span>
     <span class="n">use_anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+    <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="c1"># Added ionosphere_echo</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">):</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: determining the full duration from anomaly_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_check_file</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: determining the metric_timestamp from anomaly_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_check_file</span><span class="p">)</span>
             <span class="c1"># Read the details file</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_check_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">anomaly_details</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
@@ -704,6 +694,13 @@
     <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">fp_validated</span> <span class="o">=</span> <span class="mi">1</span>
 
+    <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="c1"># Added ionosphere_echo</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+        <span class="n">echo_fp_value</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">echo_fp_value</span> <span class="o">=</span> <span class="mi">0</span>
+
     <span class="n">new_fp_id</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -712,13 +709,32 @@
         <span class="c1"># @modified 20170120 - Feature #1854: Ionosphere learn</span>
         <span class="c1"># Added anomaly_timestamp</span>
         <span class="c1"># @modified 20170403 - Feature #2000: Ionosphere - validated</span>
-        <span class="n">ins</span> <span class="o">=</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">(</span>
-            <span class="n">metric_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="n">full_duration</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">),</span>
-            <span class="n">anomaly_timestamp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">),</span>
-            <span class="n">enabled</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tsfresh_version</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tsfresh_version</span><span class="p">),</span>
-            <span class="n">calc_time</span><span class="o">=</span><span class="n">calculated_time</span><span class="p">,</span> <span class="n">features_count</span><span class="o">=</span><span class="n">fcount</span><span class="p">,</span>
-            <span class="n">features_sum</span><span class="o">=</span><span class="n">fsum</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="n">fp_parent_id</span><span class="p">,</span>
-            <span class="n">generation</span><span class="o">=</span><span class="n">fp_generation</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="n">fp_validated</span><span class="p">)</span>
+        <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+        <span class="c1"># Added ionosphere_echo echo_fp</span>
+        <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+        <span class="c1"># Handle ionosphere_echo change in timestamp to the next second and a mismatch</span>
+        <span class="c1"># of 1 second between the features profile directory timestamp and the DB</span>
+        <span class="c1"># created_timestamp</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+            <span class="n">ts_for_db</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">)</span>
+            <span class="n">db_created_timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">ts_for_db</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+            <span class="n">ins</span> <span class="o">=</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">(</span>
+                <span class="n">metric_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="n">full_duration</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">),</span>
+                <span class="n">anomaly_timestamp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">),</span>
+                <span class="n">enabled</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tsfresh_version</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tsfresh_version</span><span class="p">),</span>
+                <span class="n">calc_time</span><span class="o">=</span><span class="n">calculated_time</span><span class="p">,</span> <span class="n">features_count</span><span class="o">=</span><span class="n">fcount</span><span class="p">,</span>
+                <span class="n">features_sum</span><span class="o">=</span><span class="n">fsum</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="n">fp_parent_id</span><span class="p">,</span>
+                <span class="n">generation</span><span class="o">=</span><span class="n">fp_generation</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="n">fp_validated</span><span class="p">,</span>
+                <span class="n">echo_fp</span><span class="o">=</span><span class="n">echo_fp_value</span><span class="p">,</span> <span class="n">created_timestamp</span><span class="o">=</span><span class="n">db_created_timestamp</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ins</span> <span class="o">=</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">(</span>
+                <span class="n">metric_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="n">full_duration</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">),</span>
+                <span class="n">anomaly_timestamp</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">),</span>
+                <span class="n">enabled</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tsfresh_version</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tsfresh_version</span><span class="p">),</span>
+                <span class="n">calc_time</span><span class="o">=</span><span class="n">calculated_time</span><span class="p">,</span> <span class="n">features_count</span><span class="o">=</span><span class="n">fcount</span><span class="p">,</span>
+                <span class="n">features_sum</span><span class="o">=</span><span class="n">fsum</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="n">fp_parent_id</span><span class="p">,</span>
+                <span class="n">generation</span><span class="o">=</span><span class="n">fp_generation</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="n">fp_validated</span><span class="p">,</span>
+                <span class="n">echo_fp</span><span class="o">=</span><span class="n">echo_fp_value</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">new_fp_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">inserted_primary_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -897,6 +913,12 @@
     <span class="c1"># Insert timeseries that the features profile was created from</span>
     <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">anomaly_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+        <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">anomaly_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: metric anomaly json found OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
@@ -925,6 +947,7 @@
 
     <span class="c1"># Convert the timeseries to csv</span>
     <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">raw_timeseries</span>
     <span class="n">timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
 
     <span class="n">datapoints</span> <span class="o">=</span> <span class="n">timeseries</span>
@@ -937,6 +960,10 @@
         <span class="c1"># Added nosec to exclude from bandit tests</span>
         <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
             <span class="k">continue</span>
+
+    <span class="k">del</span> <span class="n">timeseries</span>
+    <span class="k">del</span> <span class="n">timeseries_array_str</span>
+    <span class="k">del</span> <span class="n">datapoints</span>
 
     <span class="n">insert_statement</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">validated_timeseries</span><span class="p">:</span>
@@ -958,7 +985,10 @@
                 <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: </span><span class="si">%s</span><span class="s1"> - automated so the table should exists continuing&#39;</span> <span class="o">%</span> <span class="n">context</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: </span><span class="si">%s</span><span class="s1"> - automated so the table should exist continuing&#39;</span> <span class="o">%</span> <span class="n">context</span><span class="p">)</span>
+
+    <span class="k">del</span> <span class="n">validated_timeseries</span>
+    <span class="k">del</span> <span class="n">insert_statement</span>
 
     <span class="c1"># Create a created features profile file</span>
     <span class="k">try</span><span class="p">:</span>
@@ -971,6 +1001,7 @@
             <span class="nb">str</span><span class="p">(</span><span class="n">calculated_time</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fcount</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fsum</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">),</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">fp_parent_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">))</span>
         <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">features_profile_created_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">data</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -1070,7 +1101,7 @@
             <span class="c1">#       had a use_full_duration features profile created, however</span>
             <span class="c1">#       due to the fact that it is in learn, suggests that it did</span>
             <span class="c1">#       have, not 100% sure.</span>
-            <span class="n">origin_fp_id_was_allowed_to_learn</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># origin_fp_id_was_allowed_to_learn = False</span>
             <span class="n">child_use_full_duration_count_of_origin_fp_id</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="c1"># TODO: Determine the state</span>
             <span class="c1"># child_use_full_duration_count_of_origin_fp_id = SELECT COUNT(id) FROM ionosphere WHERE parent_id=origin_fp_id AND full_duration=use_full_duration</span>
@@ -1243,7 +1274,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,0 +1,665 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ionosphere.echo &mdash; Skyline 1.2.11 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>ionosphere.echo</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ionosphere.echo</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="p">(</span><span class="n">select</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">mkdir_p</span><span class="p">,</span> <span class="n">get_memcache_metric_object</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">features_profile</span> <span class="k">import</span> <span class="n">calculate_features_profile</span>
+
+<span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">)</span>
+
+<span class="c1"># @added 2017014 - Feature #1854: Ionosphere learn</span>
+<span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="k">import</span> <span class="n">create_features_profile</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Converting one settings variable into a local variable, just because it is a</span>
+<span class="c1"># long string otherwise.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_echo&#39;</span>
+
+
+<div class="viewcode-block" id="echo_get_metric_from_metrics"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.echo.echo_get_metric_from_metrics">[docs]</a><span class="k">def</span> <span class="nf">echo_get_metric_from_metrics</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by :func:`~learn` and returns the metric id and metric db object</span>
+
+<span class="sd">    :param timestamp: timestamp at which learn was called</span>
+<span class="sd">    :type timestamp: int</span>
+<span class="sd">    :return: tuple</span>
+<span class="sd">    :rtype: (int, object)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+    <span class="n">metrics_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">metric_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Get the metrics_table metadata</span>
+    <span class="n">metrics_table</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: metrics_table OK for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">row</span>
+        <span class="n">metrics_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: could not determine id from metrics table for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">metrics_id</span><span class="p">,</span> <span class="n">metric_db_object</span></div>
+
+
+<span class="c1"># @added 20190326 - Feature #2484: FULL_DURATION feature profiles</span>
+<div class="viewcode-block" id="ionosphere_echo"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.echo.ionosphere_echo">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_echo</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">mirage_full_duration</span><span class="p">):</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+    <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_echo&#39;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: started with child_process_pid - </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+    <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Allow for 3 seconds</span>
+        <span class="n">ionosphere_echo_max_fp_create_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_MAX_FP_CREATE_TIME</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">ionosphere_echo_max_fp_create_time</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">echo_started_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">echo_get_an_engine</span><span class="p">():</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: ionosphere_echo :: get_an_engine :: failed to get MySQL engine&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+    <span class="k">def</span> <span class="nf">echo_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: MySQL engine disposed of&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: calling engine.dispose()&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: no MySQL engine to dispose of&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Determine the metric details from the database</span>
+    <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">metric_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Get the metric db object data to memcache it is exists</span>
+    <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">get_memcache_metric_object</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">metric_db_object</span><span class="p">:</span>
+        <span class="n">metrics_id</span> <span class="o">=</span> <span class="n">metric_db_object</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: determined metric id </span><span class="si">%s</span><span class="s1"> from memcache for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Only if no memcache data</span>
+        <span class="c1"># Get a MySQL engine</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">echo_get_an_engine</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">log_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: determining metric id from DB as not found in memcache for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: could not get a MySQL engine to get metric_db_object&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: engine not obtained to get metric_db_object&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_id</span><span class="p">,</span> <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">echo_get_metric_from_metrics</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">echo_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed get the metric details from the database&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metrics_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed get the metrics_id from the database&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+            <span class="n">echo_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_db_object</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed get the metric_db_object from the database&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: exiting this work but not removing work item, as database may be available again before the work expires&#39;</span><span class="p">)</span>
+            <span class="n">echo_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span>
+
+    <span class="c1"># Determine the metric fp ids from the database</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: getting MySQL engine to determine fp ids for metric id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">echo_get_an_engine</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: could not get a MySQL engine to get fp_ids&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: engine not obtained to get fp_ids&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: ionosphere_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed to get ionosphere_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="c1"># Determine the fp_ids that exist for the metric</span>
+    <span class="n">echo_fp_ids_result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="n">metrics_id</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">desc</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+        <span class="n">echo_fp_ids</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="n">echo_fp_ids_result</span> <span class="o">=</span> <span class="p">[{</span><span class="n">column</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rowproxy</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">for</span> <span class="n">rowproxy</span> <span class="ow">in</span> <span class="n">echo_fp_ids</span><span class="p">]</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: could not determine fp ids from DB for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">echo_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">echo_fp_ids_result</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: no echo_fp_ids_result - could not determine fp ids from DB for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: echo_fp_ids_result - determined fp ids from DB for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">db_fp_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">echo_fp_ids_result</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: </span><span class="si">%s</span><span class="s1"> features profile ids found&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_fp_count</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: could not calculate len of echo_fp_ids_result&#39;</span><span class="p">)</span>
+
+    <span class="n">echo_enabled_mirage_fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">echo_fp_ids_result</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;deleted&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1"># Only create features profiles at settings.FULL_DURATION for Mirage</span>
+        <span class="c1"># features profiles if the fp has been validated</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">mirage_full_duration</span><span class="p">):</span>
+            <span class="n">fp_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">echo_enabled_mirage_fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+
+    <span class="n">echo_enabled_mirage_fp_ids_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">echo_enabled_mirage_fp_ids</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: </span><span class="si">%s</span><span class="s1"> Mirage features profile ids found&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_enabled_mirage_fp_ids_count</span><span class="p">))</span>
+
+    <span class="c1"># Check which Mirage features profile do not have has a</span>
+    <span class="c1"># settings.FULL_DURATION features profile</span>
+    <span class="n">mirage_fd_fp_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">echo_create_fd_fp_for</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">validated_mirage_fp_id</span> <span class="ow">in</span> <span class="n">echo_enabled_mirage_fp_ids</span><span class="p">:</span>
+        <span class="n">mirage_fd_fp_exists</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">echo_fp_ids_result</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;parent_id&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">validated_mirage_fp_id</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">):</span>
+                <span class="n">mirage_fd_fp_exists</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">mirage_fd_fp_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mirage_fd_fp_exists</span><span class="p">:</span>
+            <span class="n">echo_create_fd_fp_for</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">validated_mirage_fp_id</span><span class="p">))</span>
+
+    <span class="k">del</span> <span class="n">echo_enabled_mirage_fp_ids</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: there are </span><span class="si">%s</span><span class="s1"> FULL_DURATION features profiles for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mirage_fd_fp_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+
+    <span class="n">echo_create_fd_fp_for_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">echo_create_fd_fp_for</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: </span><span class="si">%s</span><span class="s1"> FULL_DURATION features profiles to be created for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_create_fd_fp_for_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+    <span class="n">echo_created_fp_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">last_created_fp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">mirage_fp_id</span> <span class="ow">in</span> <span class="n">echo_create_fd_fp_for</span><span class="p">:</span>
+        <span class="n">fp_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">echo_fp_ids_result</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mirage_fp_id</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fp_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">])</span>
+                <span class="n">fp_generation</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_timestamp</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_generation</span><span class="p">:</span>
+            <span class="n">fp_generation</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">time_check_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">echo_runtime</span> <span class="o">=</span> <span class="n">time_check_now</span> <span class="o">-</span> <span class="n">echo_started_at</span>
+        <span class="k">if</span> <span class="n">echo_runtime</span> <span class="o">&gt;=</span> <span class="n">ionosphere_echo_max_fp_create_time</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: ionosphere_echo running for </span><span class="si">%s</span><span class="s1"> seconds, exiting before IONOSPHERE_ECHO_MAX_FP_CREATE_TIME of </span><span class="si">%s</span><span class="s1"> seconds is breached&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_runtime</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_echo_max_fp_create_time</span><span class="p">)))</span>
+            <span class="k">break</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: creating FULL_DURATION features profile based on data from fp id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mirage_fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_echo&#39;</span>
+        <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_human&#39;</span>
+        <span class="n">generation</span> <span class="o">=</span> <span class="n">fp_generation</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># What is the path of the features profile files</span>
+        <span class="n">metric_timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">metric_fp_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span><span class="p">,</span> <span class="n">metric_timeseries_dir</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">fp_timestamp</span><span class="p">))</span>
+
+        <span class="c1"># What is the path of the new training data dir to copy the files to</span>
+        <span class="c1"># and create it</span>
+        <span class="n">created_ts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="c1"># Ensure features profile creation timestamps do not overlap</span>
+        <span class="k">if</span> <span class="n">last_created_fp</span> <span class="o">==</span> <span class="n">created_ts</span><span class="p">:</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">created_ts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+            <span class="n">last_created_fp</span> <span class="o">=</span> <span class="n">created_ts</span>
+
+        <span class="n">metric_training_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">created_ts</span><span class="p">),</span> <span class="n">metric_timeseries_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: training data dir created - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_training_data_dir</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed to create training data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_training_data_dir</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">metric_fp_data_dir</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: features profile data dir does not exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_data_dir</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">data_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">glob_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/*.*&#39;</span> <span class="o">%</span> <span class="n">metric_fp_data_dir</span>
+            <span class="n">data_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">glob_path</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: glob could not read - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_data_dir</span><span class="p">)</span>
+
+        <span class="c1"># Make a list of the files to copy</span>
+        <span class="n">copy_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i_file</span> <span class="ow">in</span> <span class="n">data_files</span><span class="p">:</span>
+            <span class="c1"># Exclude all the file resources related to the Mirage</span>
+            <span class="c1"># full_duration features profile</span>
+            <span class="k">if</span> <span class="s1">&#39;matched.fp_id&#39;</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="s1">&#39;fp.created.txt&#39;</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="s1">&#39;fp.details.txt&#39;</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="s1">&#39;csv.features.transposed.csv&#39;</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># Specifically include the required files</span>
+            <span class="k">if</span> <span class="s1">&#39;graphite_now&#39;</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="n">copy_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span>
+            <span class="n">echo_metric_txt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+            <span class="k">if</span> <span class="n">echo_metric_txt</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="n">copy_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span>
+            <span class="n">echo_metric_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+            <span class="k">if</span> <span class="n">echo_metric_json</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="n">copy_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;mirage.graphite&#39;</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="n">copy_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;mirage.redis&#39;</span> <span class="ow">in</span> <span class="n">i_file</span><span class="p">:</span>
+                <span class="n">copy_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span>
+
+        <span class="c1"># Copy the required files to the new training_data dir</span>
+        <span class="k">for</span> <span class="n">i_file</span> <span class="ow">in</span> <span class="n">copy_files</span><span class="p">:</span>
+            <span class="n">copying_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span>
+            <span class="n">dest_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">copying_filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dest_file</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">i_file</span><span class="p">,</span> <span class="n">metric_training_data_dir</span><span class="p">)</span>
+                    <span class="c1"># logger.info(&#39;ionosphere_echo ::  training data copied - %s&#39; % (i_file))</span>
+                <span class="k">except</span> <span class="n">shutil</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo ::  shutil error - training data not copied to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_training_data_dir</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo ::  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="c1"># Any error saying that the directory doesn&#39;t exist</span>
+                <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo ::  OSError error - training data not copied to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_training_data_dir</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="n">calculated_feature_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.tsfresh.input.csv.features.transposed.csv&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">calculated_feature_file_found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">fp_csv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">):</span>
+            <span class="n">calculated_feature_file_found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">fp_csv</span> <span class="o">=</span> <span class="n">calculated_feature_file</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: calculated features file is available - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">))</span>
+        <span class="n">echo_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">calculated_feature_file_found</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: calculating features from mirage.redis data ts json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">echo_json_file</span><span class="p">))</span>
+            <span class="n">str_created_ts</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">created_ts</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fp_csv</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="n">fp_exists</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">,</span> <span class="n">f_calc</span> <span class="o">=</span> <span class="n">calculate_features_profile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">str_created_ts</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed to calculate features&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: using available calculated features file&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: calculated features - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed to calculate features no file found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">calculated_feature_file</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Create the new settings.FULL_DURATION features profile</span>
+        <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_human&#39;</span>
+        <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fp_id</span><span class="p">,</span> <span class="n">fp_in_successful</span><span class="p">,</span> <span class="n">fp_exists</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">create_features_profile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">created_ts</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">ionosphere_job</span><span class="p">,</span> <span class="n">mirage_fp_id</span><span class="p">,</span> <span class="n">generation</span><span class="p">,</span> <span class="n">fp_learn</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: failed to create a settings.FULL_DURATION features profile from fp_id </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mirage_fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_in_successful</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo :: create_features_profile failed&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">echo_created_fp_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;ionosphere_echo :: new generation </span><span class="si">%s</span><span class="s1"> features profile with id </span><span class="si">%s</span><span class="s1"> settings.FULL_DURATION created from parent feature profile with id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">generation</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_fp_id</span><span class="p">)))</span>
+
+    <span class="k">del</span> <span class="n">echo_create_fd_fp_for</span>
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">echo_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: created </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> FULL_DURATION features profile that were to be created for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_created_fp_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_create_fd_fp_for_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'1.2.11',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

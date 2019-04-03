@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - dawn &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>Development - dawn &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development - Webapp" href="webapp.html"/>
         <link rel="prev" title="Building documentation" href="building-documentation.html"/> 
@@ -106,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -187,8 +188,8 @@
 <div class="section" id="build-script-utils-dawn-skyline-dawn-sh">
 <h2>Build script - utils/dawn/skyline.dawn.sh<a class="headerlink" href="#build-script-utils-dawn-skyline-dawn-sh" title="Permalink to this headline">¶</a></h2>
 <p>The Skyline dawn branch adds a build script for <strong>TESTING</strong> only, it is not
-recommended for production use.  However seeing as it they may be used by people
-for testing, they are written to try and ensure secure a set up as possible,
+recommended for production use.  However seeing as it may be used by people
+for testing, it is written to try and ensure secure a set up as possible,
 with the exception of the definitions of iptables/iptables6/ufw.  It should not
 be used to deploy any other kind of environment unless the other components such
 as Graphite, iptables/iptables6/ufw are configured at the same time.  The build
@@ -216,11 +217,11 @@ sets up the Skyline Python virtualenv</li>
 <li>Install Apache and deploys the Skyline reverse proxy vhost config and creates
 the htpasswd resource</li>
 <li>Creates a self-signed SSL certificate for the Skyline reverse proxy vhost</li>
-<li>Deploys the Skyline settings.py with the declared variables</li>
+<li>Deploys the Skyline <code class="docutils literal"><span class="pre">skyline/settings.py</span></code> with the declared variables</li>
 <li>Creates the Skyline MySQL/mariadb database and grants privileges</li>
 <li>Starts the Skyline services</li>
-<li>Seeds Skyline with an anomalous time series data for horizon.test.udp and
-which creates an anomaly to be reviewed in the Skyline UI</li>
+<li>Seeds Skyline with an anomalous time series data for <code class="docutils literal"><span class="pre">horizon.test.udp</span></code>
+metric and which creates an anomaly to be reviewed in the Skyline webapp UI</li>
 <li>The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
 be run in an idempotent manner.</li>
 </ul>
@@ -229,9 +230,13 @@ be run in an idempotent manner.</li>
 wget -O /tmp/skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
 <span class="c1"># Always review scripts before running them</span>
 cat /tmp/skyline.dawn.sh
+<span class="k">if</span> <span class="o">[</span> -f /etc/redhat-release <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+  yum -y install net-tools
+<span class="k">fi</span>
 <span class="c1"># Determine public IP address</span>
 <span class="nv">USE_IP</span><span class="o">=</span><span class="k">$(</span>ifconfig <span class="p">|</span> grep -v <span class="s2">&quot;127.0.0.1&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;inet addr:&quot;</span> <span class="p">|</span> cut -d<span class="s1">&#39;:&#39;</span> -f2 <span class="p">|</span> cut -d<span class="s1">&#39; &#39;</span> -f1<span class="k">)</span>
 <span class="k">if</span> <span class="o">[</span> -f /etc/redhat-release <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+  yum -y install net-tools
   <span class="nv">CENTOS_7</span><span class="o">=</span><span class="k">$(</span>cat /etc/redhat-release <span class="p">|</span> grep -c <span class="s2">&quot;release 7\.&quot;</span><span class="k">)</span>
   <span class="k">if</span> <span class="o">[</span> <span class="nv">$CENTOS_7</span> -eq <span class="m">1</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
     <span class="nv">USE_IP</span><span class="o">=</span><span class="k">$(</span>ifconfig <span class="p">|</span> grep -v <span class="s2">&quot;127.0.0.1&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;inet &quot;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s/.*inet //g;s/ .*//g&#39;</span><span class="k">)</span>
@@ -251,6 +256,10 @@ mkdir -p /etc/skyline
 <span class="s1">MYSQL_SKYLINE_PASSWORD=&quot;SET_THE_SKYLINE_MYSQL_USER_PASSWORD&quot;  # The Skyline DB user password</span>
 <span class="s1">REDIS_PASSWORD=&quot;SET_A_REALLY_REALLY_LONG_Redis_PASSWORD&quot;      # The Redis password</span>
 <span class="s1">SKYLINE_RELEASE=&quot;master&quot;                                      # The Skyline release/branch/commit to deploy&#39;</span> &gt; /etc/skyline/skyline.dawn.conf
+<span class="c1"># Check that the configurations are as desired, specifically check that</span>
+<span class="c1"># the IP address declared in YOUR_SERVER_IP_ADDRESS from the USE_IP variable</span>
+<span class="c1"># is correct</span>
+cat /etc/skyline/skyline.dawn.conf
 <span class="c1"># Run it</span>
 chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
 /tmp/skyline.dawn.sh
@@ -300,7 +309,7 @@ chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

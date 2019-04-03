@@ -1,0 +1,132 @@
+======
+1.2.12
+======
+
+v1.2.12 - April 3, 2019
+
+New functionality release
+-------------------------
+
+- Adds the ability for Skyline Boundary to handle very short time series.
+- Adds the new Ionosphere echo functionality related to improving the matching
+  of Mirage based features profiles by between 30-50% depending on the metric.
+  See https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html
+
+Changes from v1.2.11
+--------------------
+
+- Allow Boundary to analyse short time series (#88, #2862)
+- Bifurcate dependencies for py3 testing (#2588, #2828)
+- Added functionality and changes to implement Ionosphere echo (#2484)
+
+Update notes
+------------
+
+- You can only upgrade to v1.2.12 from v1.2.11
+- There are changes to the DB
+- There are some changes to settings.py
+
+How to update from v1.2.11
+--------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version skyline/settings.py with the new version of
+  skyline/settings.py and create a new settings.py in the temp location
+  appropriate for Skyline v1.2.12 and your set up with the new IONOSPHERE_ECHO
+  settings, ready to be deployed.
+- Stop Skyline Ionosphere and Panorama services.
+- Backup your Skyline database.
+- Apply the SQL update to your Skyline database as per described below, change
+  the below variables as appropriate to your set up.
+
+.. code-block:: bash
+
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="<YOUR_MYSQL_USER>"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.v1.2.12.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/v1.2.12-stable.sql
+
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    NEW_SKYLINE_VERSION="v1.2.12"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v1.2.11"    # Your old Skyline version
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.12 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv "$CURRENT_SKYLINE_PATH" "${CURRENT_SKYLINE_PATH}.${OLD_SKYLINE_VERSION}"
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done
+
+- Check the logs
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done
