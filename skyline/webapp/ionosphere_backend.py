@@ -118,7 +118,6 @@ def ionosphere_get_metrics_dir(requested_timestamp, context):
                 if re.search(requested_timestamp, root) and data_file:
                     metric_name = file.replace('.json', '')
                     add_metric = True
-                    metric_file = path.join(root, file)
                 else:
                     add_metric = False
                 if add_metric:
@@ -375,10 +374,6 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         return metric_vars_array
 
     base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
-    if context == 'training_data':
-        log_context = 'training data'
-    if context == 'features_profiles':
-        log_context = 'features profile data'
     logger.info('%s requested for %s at %s' % (
         context, str(base_name), str(requested_timestamp)))
     metric_paths = []
@@ -408,6 +403,11 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             timeseries_dir)
 
     human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(requested_timestamp)))
+
+    # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+    # For ionosphere_echo features profiles
+    fp_anomaly_timestamp = int(requested_timestamp)
+
     metric_var_filename = '%s.txt' % str(base_name)
     metric_vars_file = False
     ts_json_filename = '%s.json' % str(base_name)
@@ -541,14 +541,13 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             logger.error('error :: could not read the time series from the json file - %s' % str(ts_json_file))
 
     else:
-    # @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file
+        # @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file
         ts_json = ['error: no timeseries json file', ts_json_file]
         logger.error('error :: no timeseries json file - %s' % str(ts_json_file))
 
     # @added 20170309 - Feature #1960: ionosphere_layers
     # Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
     # based features profile
-    ionosphere_json_ok = False
     ionosphere_json = False
     ionosphere_json = []
 
@@ -562,7 +561,6 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             with open(ionosphere_json_file) as f:
                 for line in f:
                     ionosphere_json.append(line)
-            ionosphere_json_ok = True
             # @added 20170331 - Task #1988: Review - Ionosphere layers - always show layers
             #                   Feature #1960: ionosphere_layers
             # Return the anomalous_timeseries as an array to sample
@@ -571,7 +569,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
             anomalous_timeseries = literal_eval(timeseries_array_str)
         except:
-            ionosphere_json_ok = False
+            logger.error('error :: failed to get time series from ionosphere_json_file - %s' % str(ionosphere_json_file))
     # @added 20171130 - Task #1988: Review - Ionosphere layers - always show layers
     #                   Feature #1960: ionosphere_layers
     # Return the anomalous_timeseries as an array to sample and just use the
@@ -777,10 +775,10 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
 
         # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
         # Added details of match anomalies for verification added to tsfresh_version
-        all_calc_features_sum = None
-        all_calc_features_count = None
-        sum_common_values = None
-        common_features_count = None
+        # all_calc_features_sum = None
+        # all_calc_features_count = None
+        # sum_common_values = None
+        # common_features_count = None
         # That is more than it looks...
 
         try:
@@ -822,6 +820,37 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                     last_matched_timestamps.append(ts)
                 last_graph_timestamp = int(ts)
 
+        # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+        fp_db_full_duration = None
+        try:
+            ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('ionosphere_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get ionosphere_table meta for fp id %s' % str(fp_id))
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        try:
+            connection = engine.connect()
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
+            result = connection.execute(stmt)
+            for row in result:
+                fp_db_full_duration = int(row['full_duration'])
+                logger.info('found fp id full_duration from the DB - %s' % (str(fp_db_full_duration)))
+                # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+                # For ionosphere_echo features profiles
+                fp_anomaly_timestamp = int(row['anomaly_timestamp'])
+                logger.info('found fp anomaly_timestamp from the DB - %s' % (str(fp_anomaly_timestamp)))
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine full_duration from ionosphere for fp_id %s' % str(fp_id))
+            if engine:
+                engine_disposal(engine)
+            raise
+
         for matched_timestamp in last_matched_timestamps:
             # Get Graphite images
             graph_image = False
@@ -829,6 +858,8 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 key = 'full_duration'
                 value_list = [var_array[1] for var_array in metric_vars if var_array[0] == key]
                 full_duration = int(value_list[0])
+                if fp_db_full_duration:
+                    full_duration = fp_db_full_duration
                 from_timestamp = str(int(matched_timestamp) - int(full_duration))
                 until_timestamp = str(matched_timestamp)
                 graph_image_file = '%s/%s.matched.fp_id-%s.%s.png' % (metric_data_dir, base_name, str(fp_id), str(matched_timestamp))
@@ -960,7 +991,10 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         anomalous_timeseries, fp_id_matched,
         # @added 20170401 - Task #1988: Review - Ionosphere layers - added fp_details_list
         #                   Feature #1960: ionosphere_layers
-        fp_details_list)
+        fp_details_list,
+        # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+        # For ionosphere_echo features profiles
+        fp_anomaly_timestamp)
 
 
 # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -1940,7 +1974,7 @@ def ionosphere_search(default_query, search_query):
                         break
             features_profiles_and_layers.append([fp_id, metric_id, metric, full_duration, anomaly_timestamp, tsfresh_version, calc_time, features_count, features_sum, deleted, fp_matched_count, human_date, created_timestamp, fp_checked_count, checked_human_date, fp_parent_id, fp_generation, fp_validated, fp_layers_id, layer_matched_count, layer_human_date, layer_check_count, layer_checked_human_date, layer_label])
 
-        old_features_profile_list = features_profiles
+        # old_features_profile_list = features_profiles
         features_profiles = features_profiles_and_layers
 
         full_duration_list = None
@@ -3958,6 +3992,27 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 except:  # nosec
                     pass
 
+    # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+    # Added ionosphere_echo, get the ids of all echo_fp features profiles
+    echo_fp_ids = []
+    if settings.IONOSPHERE_ECHO_ENABLED:
+        echo_fp_ids_stmt = 'SELECT id FROM ionosphere WHERE echo_fp=1'
+        try:
+            connection = engine.connect()
+            results = connection.execute(echo_fp_ids_stmt)
+            connection.close()
+            for row in results:
+                fp_id = int(row[0])
+                echo_fp_ids.append(fp_id)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not determine echo fp ids from ionosphere table')
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+        logger.info('Determined %s echo_fp fp ids' % str(len(echo_fp_ids)))
+
 # ionosphere_matched table layout
 # | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version |
 # | 39793 |   782 |       1505560867 |      9856.36758282061 |                     210 |  9813.63277426169 |                   150 | 0.4.0           |
@@ -4007,6 +4062,16 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             else:
                 matched_by = 'features profile - minmax'
             fp_id = int(row['fp_id'])
+
+            # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+            # Added ionosphere_echo
+            if settings.IONOSPHERE_ECHO_ENABLED:
+                for echo_fp_id in echo_fp_ids:
+                    if echo_fp_id == fp_id:
+                        new_matched_by = '%s - echo' % matched_by
+                        matched_by = new_matched_by
+                        break
+
             layer_id = 'None'
             # Get metric name, first get metric id from the features profile
             # record
@@ -4628,7 +4693,6 @@ def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
                 images.append(str(metric_file))
 
     graphite_now_images = []
-    graphite_now = int(time.time())
     graph_resolutions = []
     graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
     # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
@@ -4637,7 +4701,6 @@ def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
     graph_resolutions = _graph_resolutions
 
     for target_hours in graph_resolutions:
-        graph_image = False
         try:
             graph_image_file = '%s/%s.graphite_now.%sh.png' % (metric_data_dir, base_name, str(target_hours))
             if path.isfile(graph_image_file):

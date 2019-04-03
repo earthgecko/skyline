@@ -13,7 +13,7 @@ from threading import Thread
 from multiprocessing import Process, Manager
 import re
 from shutil import rmtree
-import csv
+# import csv
 from ast import literal_eval
 from datetime import datetime
 
@@ -71,6 +71,12 @@ from learn import ionosphere_learn
 
 # @added 20170306 - Feature #1960: ionosphere_layers
 from layers import run_layer_algorithms
+
+# @added 20190322 - Feature #2484: FULL_DURATION feature profiles
+from common_functions import (
+    get_metrics_db_object, get_calculated_features)
+# @added 20190327 - Feature #2484
+from echo import ionosphere_echo
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -545,6 +551,75 @@ class Ionosphere(Thread):
         # learn(timestamp)
         ionosphere_learn(timestamp)
 
+    # @added 20190326 - Feature #2484
+    def process_ionosphere_echo(self, i, metric_check_file):
+        """
+        Spawn a process_ionosphere_echo check to create features profiles at
+        settings.FULL_DURATION for Mirage metrics
+
+        :param i: python process id
+        :param metric_check_file: full path to the metric check file
+        :type i: object
+        :type metric_check_file: str
+        :return: boolean
+        :rtype: boolean
+
+        """
+
+        try:
+            # Load and validate metric variables
+            metric_vars_array = self.new_load_metric_vars(str(metric_check_file))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: process_ionosphere_echo :: failed to load metric variables from check file - %s' % (metric_check_file))
+            return
+        added_by = None
+        try:
+            key = 'added_by'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_by = str(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: metric variable - added_by - %s' % added_by)
+        except:
+            logger.error('error :: process_ionosphere_echo failed to read added_by variable from check file - %s' % (metric_check_file))
+            added_by = None
+        if not added_by:
+            return
+        if added_by != 'mirage':
+            logger.info('process_ionosphere_echo :: only mirage metrics are processed not metrics added_by %s' % added_by)
+            return
+        metric = None
+        try:
+            # metric_vars.metric
+            key = 'metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric = str(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: metric variable - metric - %s' % metric)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to read metric variable from check file - %s' % (metric_check_file))
+            metric = None
+        if not metric:
+            logger.error('error :: process_ionosphere_echo failed to load metric variable from check file - %s' % (metric_check_file))
+            return
+        full_duration = None
+        try:
+            # metric_vars.full_duration
+            key = 'full_duration'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            full_duration = int(value_list[0])
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: metric variable - full_duration - %s' % str(full_duration))
+        except:
+            logger.error('error :: process_ionosphere_echo failed to read full_duration variable from check file - %s' % (metric_check_file))
+            full_duration = None
+        if not full_duration:
+            return
+
+        logger.info('process_ionosphere_echo :: processing - %s' % (metric))
+        ionosphere_echo(metric, full_duration)
+
     def spin_process(self, i, metric_check_file):
         """
         Assign an anomalous metric to check against features profiles.
@@ -580,12 +655,20 @@ class Ionosphere(Thread):
         child_process_pid = os.getpid()
         logger.info('child_process_pid - %s' % str(child_process_pid))
 
+        try:
+            max_ionosphere_runtime = settings.IONOSPHERE_MAX_RUNTIME
+        except:
+            max_ionosphere_runtime = 120
+
+
         if settings.ENABLE_IONOSPHERE_DEBUG:
             logger.info('debug :: processing metric check - %s' % metric_check_file)
 
         if not os.path.isfile(str(metric_check_file)):
             logger.error('error :: file not found - metric_check_file - %s' % (str(metric_check_file)))
             return
+
+        engine = None
 
         check_file_name = os.path.basename(str(metric_check_file))
         if settings.ENABLE_IONOSPHERE_DEBUG:
@@ -899,132 +982,31 @@ class Ionosphere(Thread):
         # the generations values avaialble in it.  Here we go! Learn!
         metrics_db_object = None
 
-        # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
-        # Try memcache first
-        try:
-            engine
-        except:
-            engine = None
-        memcache_metrics_db_object = None
-        metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
-        memcache_metric_dict = None
-        if settings.MEMCACHE_ENABLED:
-            memcache_metric_dict = get_memcache_metric_object(skyline_app, base_name)
-
-        query_metric_table = True
-        if memcache_metric_dict:
-            query_metric_table = False
-            metrics_id = int(memcache_metric_dict['id'])
-            metric_ionosphere_enabled = int(memcache_metric_dict['ionosphere_enabled'])
-            metrics_db_object = memcache_metric_dict
-            if metric_ionosphere_enabled is not None:
-                training_metric = False
-            else:
-                training_metric = True
-            logger.info('using %s key data from memcache' % metrics_db_object_key)
-
-        # Check if the metric has ionosphere_enabled, if not remove the check
-        # file but not the data directory
-        # @modified 20161230 - Feature #1830: Ionosphere alerts
-        # Use SQLAlchemy method
-        # query = "SELECT ionosphere_enabled FROM metrics WHERE metric='%s'" % metric
-        # result = mysql_select(skyline_app, query)
-        # if str(result[0]) != '1':
-        #     logger.info('Ionosphere not enabled on %s' % (metric))
-        #     # @modified 20161222 - do not remove metric file until features
-        #     # calculated
-        #     # self.remove_metric_check_file(str(metric_check_file))
-        #     # return
-        #     training_metric = True
-        # @modified 20170825 - Task #2132: Optimise Ionosphere DB usage
-        # If no memcache data then MySQL query_metric_table
-        if query_metric_table:
+        # @modified 20190325 - Feature #2484: FULL_DURATION feature profiles
+        # Moved get_metrics_db_object block to common_functions.py
+        metrics_db_object = get_metrics_db_object(base_name)
+        if metrics_db_object:
             try:
-                engine, log_msg, trace = get_an_engine()
-                logger.info(log_msg)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not get a MySQL engine to determine ionosphere_enabled')
-
-            if not engine:
-                logger.error('error :: engine not obtained to determine ionosphere_enabled')
-
-            # Get the metrics_table metadata
-            metrics_table = None
-            try:
-                metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-                logger.info('metrics_table OK for %s' % base_name)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to get metrics_table meta for %s' % base_name)
-
-            try:
-                connection = engine.connect()
-                # stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))
-                stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-                result = connection.execute(stmt)
-                try:
-                    result
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: got no result from MySQL from metrics table for - %s' % base_name)
-                row = result.fetchone()
-                # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
-                # @modified - 20180524 - Task #2132: Optimise Ionosphere DB usage
-                # Feature #2378: Add redis auth to Skyline and rebrow
-                # Wrapped memcache_metrics_db_object, metrics_id,
-                # metric_ionosphere_enabled and metrics_db_object in if row
-                # as if row is None it can fail with:
-                # TypeError: 'NoneType' object is not iterable
-                # memcache_metrics_db_object = dict(row)
-                if row:
-                    memcache_metrics_db_object = dict(row)
-                    metrics_id = row['id']
-                    metric_ionosphere_enabled = row['ionosphere_enabled']
-                    # @added 20170115 - Feature #1854: Ionosphere learn - generations
-                    # Create the metrics_db_object so it is available throughout
-                    # Here we go! Learn!
-                    metrics_db_object = row
-                else:
-                    logger.info('could not determine metric id for %s' % base_name)
-
-                connection.close()
-
+                metrics_id = int(metrics_db_object['id'])
+                metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
                 if metric_ionosphere_enabled is not None:
                     training_metric = False
                 else:
-                    # @modified 20161222 - do not remove metric file until features
-                    # calculated
-                    # self.remove_metric_check_file(str(metric_check_file))
-                    # return
                     training_metric = True
-                    # self.training_metrics.append(base_name)
+                if metric_ionosphere_enabled == 1:
+                    training_metric = False
             except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not determine ionosphere_enabled from metrics table for - %s' % base_name)
+                logger.error('error :: could not determine values from metrics_db_object for %s' % base_name)
+                metrics_id = None
                 metric_ionosphere_enabled = None
                 training_metric = True
-                # self.training_metrics.append(base_name)
-
-        # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
-        # Add the metric db object data to memcache
-        if settings.MEMCACHE_ENABLED and query_metric_table:
-            try:
-                memcache_metric_dict = {}
-                for k, v in memcache_metrics_db_object.iteritems():
-                    key_name = str(k)
-                    key_value = str(v)
-                    memcache_metric_dict[key_name] = key_value
-                self.memcache_client.set(metrics_db_object_key, memcache_metric_dict, expire=3600)
-                logger.info('set the memcache key - %s' % metrics_db_object_key)
-            except:
-                logger.error('error :: failed to set %s from memcache' % metrics_db_object_key)
-            try:
-                self.memcache_client.close()
-            except:
-                # @modified 20170913 - Task #2160: Test skyline with bandit
-                # pass
-                logger.error('error :: failed to close memcache_client')
+        else:
+            metrics_id = None
+            metric_ionosphere_enabled = None
+            training_metric = True
+            logger.error('error :: could not determine metric id from memcache or metrics tables for %s' % base_name)
+            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+            return
 
         # @added 20170116 - Feature #1854: Ionosphere learn - generations
         # If this is added_by ionosphere_learn the id is only
@@ -1120,6 +1102,7 @@ class Ionosphere(Thread):
         if training_metric:
             logger.info('training metric - %s' % (base_name))
 
+        redis_anomaly_json = False
         if added_by == 'mirage':
             logger.info('checking training data Redis json is available')
             # Always calculate features for both the SECOND_ORDER_RESOLUTION_SECONDS
@@ -1217,6 +1200,12 @@ class Ionosphere(Thread):
             fp_layers_ids = []
             fp_layers_present = False
 
+            # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
+            # After the features profile evaluations this fps_db_object will
+            # be used to determine what settings.FULL_DURATION features
+            # profiles need to be created for ionosphere_echo
+            fps_db_object = None
+
             try:
                 connection = engine.connect()
                 # @modified 2018075 - Task #2446: Optimize Ionosphere
@@ -1226,9 +1215,12 @@ class Ionosphere(Thread):
                 # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
                 stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
                 result = connection.execute(stmt)
-                for row in result:
-                    # @added 20170116 - Feature #1854: Ionosphere learn
-                    # if a features profiles is not enabled or deleted, skip it
+                # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
+                # To be used for ionosphere_echo
+                fps_db_object = [{column: value for column, value in rowproxy.items()} for rowproxy in result]
+
+                # for row in result:
+                for row in fps_db_object:
                     if row['enabled'] != 1:
                         continue
                     if row['deleted'] == 1:
@@ -1288,6 +1280,7 @@ class Ionosphere(Thread):
                                         str(fp_id), base_name))
                     else:
                         logger.info('not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+
                 # @added 20170115 - Feature #1854: Ionosphere learn - generations
                 # Create the fp_ids_db_object so it is available throughout
                 # Here we go! Learn!
@@ -1426,18 +1419,7 @@ class Ionosphere(Thread):
         # Create an array of the calculated features
         calculated_features = []
         if calculated_feature_file_found:
-            count_id = 0
-            with open(calculated_feature_file, 'rb') as fr:
-                reader = csv.reader(fr, delimiter=',')
-                for i, line in enumerate(reader):
-                    if str(line[0]) != '':
-                        if ',' in line[0]:
-                            feature_name = '"%s"' % str(line[0])
-                        else:
-                            feature_name = str(line[0])
-                        count_id += 1
-                        calc_value = float(line[1])
-                        calculated_features.append([feature_name, calc_value])
+            calculated_features = get_calculated_features(calculated_feature_file)
 
         if len(calculated_features) == 0:
             logger.error('error :: no calculated features were determined from - %s' % (calculated_feature_file))
@@ -1445,6 +1427,8 @@ class Ionosphere(Thread):
             if engine:
                 engine_disposal(engine)
             return
+        else:
+            logger.info('%s calculated features determined' % (str(len(calculated_feature_file))))
 
         # @added 2018075 - Task #2446: Optimize Ionosphere
         #                  Branch #2270: luminosity
@@ -1452,6 +1436,66 @@ class Ionosphere(Thread):
         # @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page
         # layers_checked = 0
         layers_checked_count = 0
+
+        # @added 20190314 - Feature #2484: FULL_DURATION feature profiles
+        # Here we add the bifurcation to also create a features
+        # profile at FULL_DURATION for all Mirage metrics.  With a
+        # view to increase the number of matches trained metric
+        # achieve by also allowing for the creation and comparing of
+        # the FULL_DURATION features profiles as well.
+        echo_check = False
+        echo_calculated_feature_file = False
+        echo_calculated_feature_file_found = False
+        echo_calculated_features = []
+        echo_fp_ids = []
+        echo_anomalous_timeseries = None
+        if added_by == 'mirage':
+            try:
+                echo_enabled = settings.IONOSPHERE_ECHO_ENABLED
+            except:
+                echo_enabled = False
+            if echo_enabled:
+                echo_check = True
+        if echo_check:
+            try:
+                if fps_db_object:
+                    for row in fps_db_object:
+                        if int(row['full_duration']) == int(settings.FULL_DURATION):
+                            fp_ids.append(int(row['id']))
+                            echo_fp_ids.append(int(row['id']))
+                            logger.info('appending ionosphere_echo fp id %s matched full_duration  of %s - %s' % (str(row['id']), str(settings.FULL_DURATION), base_name))
+                fp_count_with_echo = len(fp_ids)
+                echo_fp_count = len(echo_fp_ids)
+                if echo_fp_count == 0:
+                    echo_check = False
+                if echo_fp_count > 0:
+                    logger.info('added an additional %s echo fp ids for %s' % (str(echo_fp_count), base_name))
+                    logger.info('determined a total of %s fp ids (incl. echo) for %s' % (str(fp_count_with_echo), base_name))
+                    echo_calculated_feature_file = '%s/%s.echo.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
+                    if os.path.isfile(echo_calculated_feature_file):
+                        logger.info('echo calculated features available - %s' % (echo_calculated_feature_file))
+                        echo_calculated_feature_file_found = True
+                    else:
+                        use_context = 'ionosphere_echo_check'
+                        f_calc = None
+                        try:
+                            fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, use_context)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to calculate features')
+                    if os.path.isfile(echo_calculated_feature_file):
+                        logger.info('echo calculated features available - %s' % (echo_calculated_feature_file))
+                        echo_calculated_feature_file_found = True
+                    echo_calculated_features = []
+                    if echo_calculated_feature_file_found:
+                        try:
+                            echo_calculated_features = get_calculated_features(echo_calculated_feature_file)
+                        except:
+                            logger.error('error :: ionosphere_echo_check no echo_calculated_features were determined')
+                            echo_calculated_features = False
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to process echo')
 
         # Compare calculated features to feature values for each fp id
         not_anomalous = False
@@ -1463,6 +1507,16 @@ class Ionosphere(Thread):
                     if engine:
                         engine_disposal(engine)
                     return False
+
+                # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+                check_type = 'ionosphere'
+                if echo_check:
+                    for echo_fp_id in echo_fp_ids:
+                        if fp_id == echo_fp_id:
+                            check_type = 'ionosphere_echo_check'
+                if check_type == 'ionosphere_echo_check':
+                    if not echo_calculated_features:
+                        continue
 
                 # @added 2018075 - Task #2446: Optimize Ionosphere
                 #                  Branch #2270: luminosity
@@ -1549,14 +1603,27 @@ class Ionosphere(Thread):
                 #                   Feature #1844: ionosphere_matched DB table
                 # Added the calculated features sum for verification purposes
                 all_calc_features_sum_list = []
-                for feature_name, calc_value in calculated_features:
+
+                # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+                if check_type == 'ionosphere':
+                    use_calculated_features = calculated_features
+                if check_type == 'ionosphere_echo_check':
+                    use_calculated_features = echo_calculated_features
+
+                # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+                # Bifurcate for ionosphere_echo_check
+                # for feature_name, calc_value in calculated_features:
+                for feature_name, calc_value in use_calculated_features:
                     all_calc_features_sum_list.append(float(calc_value))
                 all_calc_features_sum = sum(all_calc_features_sum_list)
 
                 # Convert feature names in calculated_features to their id
                 logger.info('converting tsfresh feature names to Skyline feature ids')
                 calc_features_by_id = []
-                for feature_name, calc_value in calculated_features:
+                # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+                # Bifurcate for ionosphere_echo_check
+                # for feature_name, calc_value in calculated_features:
+                for feature_name, calc_value in use_calculated_features:
                     for skyline_feature_id, name in TSFRESH_FEATURES:
                         if feature_name == name:
                             calc_features_by_id.append([skyline_feature_id, float(calc_value)])
@@ -1670,14 +1737,29 @@ class Ionosphere(Thread):
                     new_pdiff = percent_different * -1
                     percent_different = new_pdiff
 
-                if percent_different < settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:
+                # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+                # Bifurcate for ionosphere_echo_check
+                if check_type == 'ionosphere':
+                    use_percent_similar = float(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR)
+                if check_type == 'ionosphere_echo_check':
+                    try:
+                        use_percent_similar = float(settings.IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR)
+                    except:
+                        use_percent_similar = 2.0
+
+                # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+                # Bifurcate for ionosphere_echo_check
+                # if percent_different < settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:
+                if percent_different < use_percent_similar:
                     not_anomalous = True
                     # log
                     logger.info('not anomalous - features profile match - %s' % base_name)
                     logger.info(
                         'calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
-                        (str(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR),
+                        (str(use_percent_similar),
                             str(fp_id), str(percent_different)))
+                    if check_type == 'ionosphere_echo_check':
+                        logger.info('ionosphere_echo_check - not anomalous with fp id %s for %s' % (str(fp_id), base_name))
 
                 # @added 20180617 - Feature #2404: Ionosphere - fluid approximation
                 # Now if not matched use Min-Max scaling as per
@@ -1762,6 +1844,7 @@ class Ionosphere(Thread):
                             test_anomalous_timeseries = anomalous_timeseries
                             if len(test_anomalous_timeseries) > 0:
                                 anomalous_timeseries_not_defined = False
+                                ionosphere_anomalous_timeseries = test_anomalous_timeseries
                         except:
                             logger.info('anomalous_timeseries is not defined loading from anomaly json')
 
@@ -1770,24 +1853,58 @@ class Ionosphere(Thread):
                             settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
                             timeseries_dir)
                         anomaly_json = '%s/%s.json' % (metric_data_dir, base_name)
-                        if anomalous_timeseries_not_defined:
+
+                        # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+                        # Bifurcate for ionosphere_echo_check
+                        if check_type == 'ionosphere_echo_check':
+                            anomaly_json = redis_anomaly_json
+                            if not echo_anomalous_timeseries:
+                                try:
+                                    with open((redis_anomaly_json), 'r') as f:
+                                        raw_timeseries = f.read()
+                                    timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                                    del raw_timeseries
+                                    echo_anomalous_timeseries = literal_eval(timeseries_array_str)
+                                    del timeseries_array_str
+                                    if len(echo_anomalous_timeseries) > 0:
+                                        logger.info('echo_anomalous_timeseries was populated from anomaly json %s with %s data points from for creating the minmax_anomalous_ts' % (redis_anomaly_json, str(len(echo_anomalous_timeseries))))
+                                    else:
+                                        logger.error('error :: echo_anomalous_timeseries for minmax_anomalous_ts is not populated from anomaly json - %s' % redis_anomaly_json)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: could not create echo_anomalous_timeseries from anomaly json %s' % redis_anomaly_json)
+                            else:
+                                logger.info('echo_anomalous_timeseries has %s data points from for creating the minmax_anomalous_ts' % (str(len(echo_anomalous_timeseries))))
+
+                        # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+                        # if anomalous_timeseries_not_defined:
+                        if anomalous_timeseries_not_defined and check_type == 'ionosphere':
                             try:
                                 with open((anomaly_json), 'r') as f:
                                     raw_timeseries = f.read()
                                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                                del raw_timeseries
                                 anomalous_timeseries = literal_eval(timeseries_array_str)
+                                del timeseries_array_str
                                 if len(anomalous_timeseries) > 0:
                                     logger.info('anomalous_timeseries was populated from anomaly json %s with %s data points from for creating the minmax_anomalous_ts' % (anomaly_json, str(len(anomalous_timeseries))))
+                                    ionosphere_anomalous_timeseries = anomalous_timeseries
                                 else:
                                     logger.error('error :: anomalous_timeseries for minmax_anomalous_ts is not populated from anomaly json - %s' % anomaly_json)
                             except:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: could not create anomalous_timeseries from anomaly json %s' % anomaly_json)
                         else:
-                            logger.info('anomalous_timeseries has %s data points from for creating the minmax_anomalous_ts' % (str(len(anomalous_timeseries))))
+                            if check_type == 'ionosphere':
+                                logger.info('anomalous_timeseries has %s data points from for creating the minmax_anomalous_ts' % (str(len(anomalous_timeseries))))
 
-                        anomalous_ts_values_count = len(anomalous_timeseries)
+                        # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+                        if check_type == 'ionosphere':
+                            use_anomalous_timeseries = anomalous_timeseries
+                        if check_type == 'ionosphere_echo_check':
+                            use_anomalous_timeseries = echo_anomalous_timeseries
 
+                        anomalous_ts_values_count = len(use_anomalous_timeseries)
                     # @added 20180621 - Feature #2404: Ionosphere - fluid approximation
                     # Check ranges and only Min-Max scale if the 2 time series
                     # are similar in range
@@ -1814,7 +1931,7 @@ class Ionosphere(Thread):
                             min_fp_value = False
                             max_fp_value = False
                         try:
-                            minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
+                            minmax_anomalous_values = [x2[1] for x2 in use_anomalous_timeseries]
                             min_anomalous_value = min(minmax_anomalous_values)
                             max_anomalous_value = max(minmax_anomalous_values)
                         except:
@@ -1822,55 +1939,60 @@ class Ionosphere(Thread):
                             max_anomalous_value = False
                         lower_range_not_same = True
                         try:
-                            if int(min_fp_value) == int(min_anomalous_value):
-                                lower_range_not_same = False
-                                lower_range_similar = True
-                                logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
-                                    str(min_fp_value), str(min_anomalous_value)))
-                        except:
-                            lower_range_not_same = True
-                        if min_fp_value and min_anomalous_value and lower_range_not_same:
-                            if int(min_fp_value) == int(min_anomalous_value):
-                                lower_range_similar = True
-                                logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
-                                    str(min_fp_value), str(min_anomalous_value)))
-                            else:
-                                lower_min_fp_value = int(min_fp_value - (min_fp_value * range_tolerance))
-                                upper_min_fp_value = int(min_fp_value + (min_fp_value * range_tolerance))
-                                if int(min_anomalous_value) in range(lower_min_fp_value, upper_min_fp_value):
+                            try:
+                                if int(min_fp_value) == int(min_anomalous_value):
+                                    lower_range_not_same = False
                                     lower_range_similar = True
-                                    logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are similar within %s percent of each other' % (
-                                        str(min_fp_value),
-                                        str(min_anomalous_value),
-                                        str(range_tolerance_percentage)))
-                        if not lower_range_similar:
-                            logger.info('lower range of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are not similar' % (
-                                str(min_fp_value), str(min_anomalous_value)))
-                        upper_range_not_same = True
-                        try:
-                            if int(max_fp_value) == int(max_anomalous_value):
-                                upper_range_not_same = False
-                                upper_range_similar = True
-                                logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
-                                    str(max_fp_value), str(max_anomalous_value)))
-                        except:
+                                    logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
+                                        str(min_fp_value), str(min_anomalous_value)))
+                            except:
+                                lower_range_not_same = True
+                            if min_fp_value and min_anomalous_value and lower_range_not_same:
+                                if int(min_fp_value) == int(min_anomalous_value):
+                                    lower_range_similar = True
+                                    logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
+                                        str(min_fp_value), str(min_anomalous_value)))
+                                else:
+                                    lower_min_fp_value = int(min_fp_value - (min_fp_value * range_tolerance))
+                                    upper_min_fp_value = int(min_fp_value + (min_fp_value * range_tolerance))
+                                    if int(min_anomalous_value) in range(lower_min_fp_value, upper_min_fp_value):
+                                        lower_range_similar = True
+                                        logger.info('min value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are similar within %s percent of each other' % (
+                                            str(min_fp_value),
+                                            str(min_anomalous_value),
+                                            str(range_tolerance_percentage)))
+                            if not lower_range_similar:
+                                logger.info('lower range of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are not similar' % (
+                                    str(min_fp_value), str(min_anomalous_value)))
                             upper_range_not_same = True
-                        if max_fp_value and max_anomalous_value and lower_range_similar and upper_range_not_same:
-                            # @added 20180717 - Task #2446: Optimize Ionosphere
-                            #                   Feature #2404: Ionosphere - fluid approximation
-                            # On low values such as 1 and 2, the range_tolerance
-                            # should be adjusted to account for the very small
-                            # range. TODO
-                            lower_max_fp_value = int(max_fp_value - (max_fp_value * range_tolerance))
-                            upper_max_fp_value = int(max_fp_value + (max_fp_value * range_tolerance))
-                            if int(max_anomalous_value) in range(lower_max_fp_value, upper_max_fp_value):
-                                upper_range_similar = True
-                                logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are similar within %s percent of each other' % (
-                                    str(max_fp_value), str(max_anomalous_value),
-                                    str(range_tolerance_percentage)))
-                            else:
-                                logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are not similar' % (
-                                    str(max_fp_value), str(max_anomalous_value)))
+                            try:
+                                if int(max_fp_value) == int(max_anomalous_value):
+                                    upper_range_not_same = False
+                                    upper_range_similar = True
+                                    logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are the same' % (
+                                        str(max_fp_value), str(max_anomalous_value)))
+                            except:
+                                upper_range_not_same = True
+                            if max_fp_value and max_anomalous_value and lower_range_similar and upper_range_not_same:
+                                # @added 20180717 - Task #2446: Optimize Ionosphere
+                                #                   Feature #2404: Ionosphere - fluid approximation
+                                # On low values such as 1 and 2, the range_tolerance
+                                # should be adjusted to account for the very small
+                                # range. TODO
+                                lower_max_fp_value = int(max_fp_value - (max_fp_value * range_tolerance))
+                                upper_max_fp_value = int(max_fp_value + (max_fp_value * range_tolerance))
+                                if int(max_anomalous_value) in range(lower_max_fp_value, upper_max_fp_value):
+                                    upper_range_similar = True
+                                    logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are similar within %s percent of each other' % (
+                                        str(max_fp_value), str(max_anomalous_value),
+                                        str(range_tolerance_percentage)))
+                                else:
+                                    logger.info('max value of fp_id_metric_ts (%s) and anomalous_timeseries (%s) are not similar' % (
+                                        str(max_fp_value), str(max_anomalous_value)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not calculate range similarity with the current anomalous_timeseries and the fp id %s time series' % (str(fp_id)))
+
                     if lower_range_similar and upper_range_similar:
                         range_similar = True
                     else:
@@ -1901,7 +2023,7 @@ class Ionosphere(Thread):
                         minmax_fp_ts_values_count = len(minmax_fp_ts)
                         if minmax_fp_ts_values_count - anomalous_ts_values_count in range(-14, 14):
                             try:
-                                minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
+                                minmax_anomalous_values = [x2[1] for x2 in use_anomalous_timeseries]
                                 x_np = np.asarray(minmax_anomalous_values)
                                 # Min-Max scaling
                                 np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
@@ -1909,7 +2031,7 @@ class Ionosphere(Thread):
                                     minmax_anomalous_ts.append([ts[0], v])
                             except:
                                 logger.error(traceback.format_exc())
-                                logger.error('error :: could not minmax scale current time series anomalous_timeseries for %s' % (str(fp_id), str(base_name)))
+                                logger.error('error :: could not determine np_minmax with current time series anomalous_timeseries and fp id %s time series' % (str(fp_id)))
                             if len(minmax_anomalous_ts) > 0:
                                 logger.info('minmax_anomalous_ts is populated with %s data points' % str(len(minmax_anomalous_ts)))
                             else:
@@ -1942,6 +2064,7 @@ class Ionosphere(Thread):
                                     converted.append(new_datapoint)
                                 except:  # nosec
                                     continue
+                            del datapoints
                             if LOCAL_DEBUG:
                                 if len(converted) > 0:
                                     logger.debug('debug :: converted is populated')
@@ -1955,6 +2078,7 @@ class Ionosphere(Thread):
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: could not write to file %s' % (str(minmax_fp_ts_csv)))
+                            del converted
                         else:
                             logger.info('file found %s, using for data' % minmax_fp_ts_csv)
 
@@ -1976,11 +2100,13 @@ class Ionosphere(Thread):
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to created df_features from %s' % (str(minmax_fp_ts_csv)))
+                        del df
                         # Create transposed features csv
                         if not os.path.isfile(minmax_fp_fname_out):
                             # Transpose
                             df_t = df_features.transpose()
                             df_t.to_csv(minmax_fp_fname_out)
+                            del df_t
                         else:
                             if LOCAL_DEBUG:
                                 logger.debug('debug :: file exists - %s' % minmax_fp_fname_out)
@@ -2014,10 +2140,12 @@ class Ionosphere(Thread):
                                     converted.append(new_datapoint)
                                 except:  # nosec
                                     continue
+                            del datapoints
                             for ts, value in converted:
                                 utc_ts_line = '%s,%s,%s\n' % (base_name, str(int(ts)), str(value))
                                 with open(anomalous_ts_csv, 'a') as fh:
                                     fh.write(utc_ts_line)
+                            del converted
 
                         df = pd.read_csv(anomalous_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
                         df.columns = ['metric', 'timestamp', 'value']
@@ -2025,11 +2153,14 @@ class Ionosphere(Thread):
                             df, column_id='metric', column_sort='timestamp', column_kind=None,
                             column_value=None, feature_extraction_settings=tsf_settings)
 
+                        del df
+
                         # Create transposed features csv
                         if not os.path.isfile(anomalous_fp_fname_out):
                             # Transpose
                             df_t = df_features_current.transpose()
                             df_t.to_csv(anomalous_fp_fname_out)
+                            del df_t
                         # Calculate the count and sum of the features values
                         df_sum_2 = pd.read_csv(
                             anomalous_fp_fname_out, delimiter=',', header=0,
@@ -2074,19 +2205,60 @@ class Ionosphere(Thread):
                                 new_pdiff = percent_different * -1
                                 percent_different = new_pdiff
 
-                            if percent_different < settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:
+                            # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+                            # Bifurcate for ionosphere_echo_check
+                            if check_type == 'ionosphere':
+                                mm_use_percent_similar = float(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR)
+                            if check_type == 'ionosphere_echo_check':
+                                try:
+                                    mm_use_percent_similar = float(settings.IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR)
+                                except:
+                                    mm_use_percent_similar = 3.5
+
+                            # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+                            # if percent_different < settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:
+                            if percent_different < mm_use_percent_similar:
                                 minmax_not_anomalous = True
                                 # log
                                 logger.info('not anomalous - minmax scaled features profile match - %s - %s' % (base_name, str(minmax_not_anomalous)))
                                 logger.info(
                                     'minmax scaled calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
-                                    (str(settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR),
+                                    (str(mm_use_percent_similar),
                                         str(fp_id), str(percent_different)))
+                                if check_type == 'ionosphere_echo_check':
+                                    logger.info('ionosphere_echo_check :: not anomalous - minmax scaled features profile match - %s' % (base_name))
+
                             if minmax_not_anomalous:
                                 not_anomalous = True
                                 minmax = 1
                                 # Created time series resources for graphing in
                                 # the matched page
+                            try:
+                                if os.path.isfile(minmax_fp_ts_csv):
+                                    self.remove_metric_check_file(str(minmax_fp_ts_csv))
+                            except:
+                                pass
+                            try:
+                                if os.path.isfile(minmax_fp_fname_out):
+                                    self.remove_metric_check_file(str(minmax_fp_fname_out))
+                            except:
+                                pass
+
+                # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+                # Clean up echo files
+                if echo_check:
+                    echo_calculated_feature_file = '%s/%s.echo.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
+                    try:
+                        if os.path.isfile(echo_calculated_feature_file):
+                            self.remove_metric_check_file(str(echo_calculated_feature_file))
+                    except:
+                        pass
+                    echo_features_file = '%s/%s.%s.echo.fp.details.txt' % (metric_training_data_dir, str(metric_timestamp), base_name)
+                    try:
+                        if os.path.isfile(echo_features_file):
+                            self.remove_metric_check_file(str(echo_features_file))
+                    except:
+                        pass
 
                 # Clean up
                 if minmax_check:
@@ -2960,6 +3132,66 @@ class Ionosphere(Thread):
             logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
 
             if ionosphere_job:
+
+                # @added 20190326 - Feature #2484
+                # First process ionosphere_echo to create any missing
+                try:
+                    ionosphere_echo_enabled = settings.IONOSPHERE_ECHO_ENABLED
+                except:
+                    ionosphere_echo_enabled = False
+                if ionosphere_echo_enabled:
+                    # Spawn a single process_ionosphere_echo process
+                    function_name = 'process_ionosphere_echo'
+                    pids = []
+                    spawned_pids = []
+                    pid_count = 0
+                    now = time()
+                    for i in range(1, ionosphere_processes + 1):
+                        try:
+                            p = Process(target=self.process_ionosphere_echo, args=(i, metric_check_file))
+                            pids.append(p)
+                            pid_count += 1
+                            logger.info(
+                                'starting %s of %s %s' % (
+                                    str(pid_count), str(ionosphere_processes),
+                                    function_name))
+                            p.start()
+                            spawned_pids.append(p.pid)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to start %s' % function_name)
+                            continue
+                    # Self monitor the process and terminate if the
+                    # process_ionosphere_echo has run for too long
+                    try:
+                        ionosphere_echo_max_fp_create_time = settings.IONOSPHERE_ECHO_MAX_FP_CREATE_TIME
+                    except:
+                        ionosphere_echo_max_fp_create_time = 55
+                    p_starts = time()
+                    while time() - p_starts <= ionosphere_echo_max_fp_create_time:
+                        if any(p.is_alive() for p in pids):
+                            # Just to avoid hogging the CPU
+                            sleep(.1)
+                        else:
+                            # All the processes are done, break now.
+                            time_to_run = time() - p_starts
+                            logger.info(
+                                '%s %s completed in %.2f seconds' % (
+                                    str(ionosphere_processes),
+                                    function_name, time_to_run))
+                            break
+                    else:
+                        # We only enter this if we didn't 'break' above.
+                        logger.info('timed out, killing all %s processes' % (function_name))
+                        for p in pids:
+                            try:
+                                p.terminate()
+                                # p.join()
+                                logger.info('killed %s process' % (function_name))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: killing all %s processes' % function_name)
+
                 logger.info('processing - %s' % str(metric_var_files_sorted[0]))
                 function_name = 'spin_process'
 
@@ -3030,7 +3262,14 @@ class Ionosphere(Thread):
             # @modified 20180621 - Feature #2404: Ionosphere - fluid approximation
             # Increase run time to 55 seconds to allow for Min-Max scaling
             # while time() - p_starts <= 20:
-            while time() - p_starts <= 55:
+            # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+            # Added ionosphere_echo which takes more time
+            # while time() - p_starts <= 55:
+            try:
+                max_ionosphere_runtime = settings.IONOSPHERE_MAX_RUNTIME
+            except:
+                max_ionosphere_runtime = 120
+            while time() - p_starts <= max_ionosphere_runtime:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)

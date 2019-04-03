@@ -146,7 +146,17 @@ count
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
+<!-- # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+     # Added ionosphere_echo -->
+        {% if 'echo' in item[2]  %}
+          {% if 'minmax' in item[2]  %}
+            <td><span class="logo"><span class="sky">features profile - minmax <span class="re">echo</span></span></td>
+          {% else %}
+            <td><span class="logo"><span class="sky">features profile <span class="re">echo</span></span></td>
+          {% endif %}
+        {% else %}
             <td><span class="logo"><span class="sky">{{ item[2] }}</span></span></td>
+        {% endif %}
       {% else %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>

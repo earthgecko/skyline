@@ -47,7 +47,7 @@ import pytz
 from six.moves.urllib.parse import quote
 
 # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
-#from features_profile import feature_name_id, calculate_features_profile
+# from features_profile import feature_name_id, calculate_features_profile
 from features_profile import calculate_features_profile
 
 from tsfresh_feature_names import TSFRESH_VERSION
@@ -1060,6 +1060,10 @@ def ionosphere():
     matched_request_timestamp = int(time.time())
     default_matched_from_timestamp = matched_request_timestamp - 86400
     matched_from_datetime = time.strftime('%Y%m%d %H:%M', time.localtime(default_matched_from_timestamp))
+
+    # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+    # Added ionosphere_echo
+    echo_hdate = False
 
     # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
     features_profiles_to_validate = []
@@ -2599,7 +2603,9 @@ def ionosphere():
             #                   Feature #1960: ionosphere_layers
             # Return the anomalous_timeseries as an array to sample and fp_id_matched
             # @added 20170401 - Task #1988: Review - Ionosphere layers - added fp_id_created
-            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
+            # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+            # Added fp_anomaly_timestamp ionosphere_echo features profiles
+            mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list, fp_anomaly_timestamp = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
 
             # @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json
             # Show the last 30
@@ -2650,6 +2656,13 @@ def ionosphere():
                 trace = traceback.format_exc()
                 return internal_error(message, trace)
 
+            # @added 20190330 - Feature #2484: FULL_DURATION feature profiles
+            # For Ionosphere echo and adding red borders on the matched graphs
+            if m_full_duration_in_hours:
+                m_fd_in_hours_img_str = '%sh.png' % str(m_full_duration_in_hours)
+            else:
+                m_fd_in_hours_img_str = False
+
             # @added 20170105 - Feature #1842: Ionosphere - Graphite now graphs
             # We want to sort the images so that the Graphite image is always
             # displayed first in he training_data.html page AND we want Graphite
@@ -2670,6 +2683,10 @@ def ionosphere():
             # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
             fp_enabled = False
 
+            # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+            # Added ionosphere_echo
+            echo_fp_value = 0
+
             # Determine the parent_id and generation as they were added to the
             # fp_details_object
             if fp_details:
@@ -2681,10 +2698,29 @@ def ionosphere():
                     # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
                     if int(fp_details_object['enabled']) == 1:
                         fp_enabled = True
+                    # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+                    # Added ionosphere_echo
+                    try:
+                        echo_fp_value = int(fp_details_object['echo_fp'])
+                    except:
+                        pass
                 except:
                     trace = traceback.format_exc()
                     message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
                     return internal_error(message, trace)
+
+                # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+                # Added ionosphere_echo
+                echo_hdate = hdate
+                if echo_fp_value == 1:
+                    try:
+                        # echo_hdate = datetime.datetime.utcfromtimestamp(fp_anomaly_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+                        echo_hdate = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(fp_anomaly_timestamp)))
+                    except:
+                        trace = traceback.format_exc()
+                        fail_msg = 'error :: Webapp failed to determine the echo_hdate from the fp_anomaly_timestamp'
+                        logger.error(fail_msg)
+                        return internal_error(fail_msg, trace)
 
             # @added 20170114 -  Feature #1854: Ionosphere learn - generations
             # The fp_id will be in the fp_details_object, but if this is a
@@ -2933,6 +2969,10 @@ def ionosphere():
                 matched_from_datetime=matched_from_datetime,
                 # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
                 approx_close=approx_close,
+                # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
+                # Added ionosphere_echo
+                echo_fp=echo_fp_value, echo_human_date=echo_hdate,
+                metric_full_duration_in_hours_image_str=m_fd_in_hours_img_str,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

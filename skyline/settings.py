@@ -1459,6 +1459,26 @@ ENABLE_WEBAPP_DEBUG = False
 :vartype ENABLE_WEBAPP_DEBUG: boolean
 """
 
+WEBAPP_PREPROCESS_TIMESERIES = False
+"""
+:var WEBAPP_PREPROCESS_TIMESERIES: Allow for the time series to be aggregated by
+    median or sum per minute so that webapp can return a reasonable number of
+    data points for dyngraph to load and display in the browser without causing
+    lag.  This is achieved by aggregating the time series using either the
+    median of values or the sum as defined by
+    settings.WEBAPP_PREPROCESS_AGGREGATE_BY.  At the interval defined by
+    settings.  Not implemented - UNDER DEVELOPMENT
+:vartype WEBAPP_PREPROCESS_TIMESERIES: boolean
+"""
+
+WEBAPP_PREPROCESS_AGGREGATE_BY = 'median'
+"""
+:var WEBAPP_PREPROCESS_AGGREGATE_BY: The method by which to aggregate the time
+    series by.  Valid strings here are 'median' and 'sum'.
+    settings.WEBAPP_PREPROCESS_AGGREGATE_BY. Not implemented - UNDER DEVELOPMENT
+:vartype WEBAPP_PREPROCESS_AGGREGATE_BY: str
+"""
+
 """
 Ionosphere settings
 """
@@ -1487,6 +1507,13 @@ IONOSPHERE_PROCESSES = 1
     Ionosphere with more than one process is untested and currently it is
     hard coded to be 1 (https://github.com/earthgecko/skyline/issues/69)
 :vartype IONOSPHERE_ENABLED: int
+"""
+
+IONOSPHERE_MAX_RUNTIME = 120
+"""
+:var IONOSPHERE_MAX_RUNTIME: The maximum number of seconds an Ionosphere check
+    should run for.
+:vartype IONOSPHERE_MAX_RUNTIME: int
 """
 
 ENABLE_IONOSPHERE_DEBUG = False
@@ -1597,6 +1624,51 @@ IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE = 0.15
     and comparing time series that are in significantly different ranges and
     only applying Min-Max scaling comparisons when it is sensible to do so.
 :vartype IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE: float
+"""
+
+IONOSPHERE_ECHO_ENABLED = True
+"""
+:var IONOSPHERE_ECHO_ENABLED: This enables Ionosphere to create and test
+    features profiles for Mirage metrics but at settings.FULL_DURATION as well.
+    Features profiles will be made on the fly for any existing, validated Mirage
+    metric features profiles.  Ionosphere's matching performance is increased
+    between 30 to 50 percent when Ionosphere echo is run.
+:vartype IONOSPHERE_ECHO_ENABLED: boolean
+"""
+
+IONOSPHERE_ECHO_MAX_FP_CREATE_TIME = 55
+"""
+:var IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: The maximum number of seconds an
+    Ionosphere echo process should run creating FULL_DURATION features profiles
+    for created Mirage features profiles.  This setting is specifically relevant
+    for Skyline implematations pre Ionosphere echo (v1.2.12) to prevent timeouts
+    if Ionosphere echo needs to make > 30 echo features profiles for Mirage
+    metrics with lots of existing features profiles.
+:vartype IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: int
+"""
+
+IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR = 2.5
+"""
+:var IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: In terms of Ionosphere echo a
+    value of 2.0 is the default.  This default is above the normal
+    IONOSPHERE_FEATURES_PERCENT_SIMILAR due to that fact that the the resolution
+    of Ionosphere echo is at FULL_DURATION.  During testing this value was
+    tested at 1.0, 2 and 2.5, with 2.5 resulting in the most desirable results
+    in terms of matching time series that are similarly not anomalous.
+:vartype IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: float
+"""
+
+IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR = 3.5
+"""
+:var IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: In terms of
+    Ionosphere echo Min-Max scaling percentage similar, a value of 3.5 is the
+    default.  This default is above the normal IONOSPHERE_FEATURES_PERCENT_SIMILAR
+    due to that fact that the the resolution of Ionosphere echo is at FULL_DURATION
+    and echo is using the normal IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE to
+    determine if Min-Max scaling should be run.  During testing this value was
+    tested at 1, 2 and 3.5, with 3.5 resulting in the most desirable results in
+    terms of matching time series that are similarly not anomalous.
+:vartype IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: float
 """
 
 IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE = True

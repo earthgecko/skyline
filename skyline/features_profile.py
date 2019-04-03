@@ -81,6 +81,21 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     if context == 'ionosphere_learn':
         log_context = 'ionosphere :: learn'
 
+    # TODO
+    # @added 20190314 - Feature #2484: FULL_DURATION feature profiles
+    # Here we add the bifurcation to also create a features
+    # profile at FULL_DURATION for all Mirage metrics.  With a
+    # view to increase the number of matches trained metric
+    # achieve by also allowing for the creation and comparing of
+    # the FULL_DURATION features profiles as well.
+    # How I am not certain but needs to tie up with this Feature in:
+    # skyline/ionosphere/ionosphere.py
+    # skyline/webapp/webapp.py
+    if context == 'ionosphere_echo':
+        log_context = 'ionosphere :: echo'
+    if context == 'ionosphere_echo_check':
+        log_context = 'ionosphere :: echo check'
+
     current_logger.info('%s feature profile creation requested for %s at %s' % (
         log_context, base_name, timestamp))
 
@@ -97,11 +112,24 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_LEARN_FOLDER, timestamp, timeseries_dir)
 
+    # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+    # Added ionosphere_echo and ionosphere_echo_check
+    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+        metric_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, timestamp, timeseries_dir)
+
     features_profile_created_file = '%s/%s.%s.fp.created.txt' % (
         metric_data_dir, str(timestamp), base_name)
 
     features_profile_details_file = '%s/%s.%s.fp.details.txt' % (
         metric_data_dir, str(timestamp), base_name)
+
+    # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+    if context == 'ionosphere_echo_check':
+        features_profile_created_file = '%s/%s.%s.echo.fp.created.txt' % (
+            metric_data_dir, str(timestamp), base_name)
+        features_profile_details_file = '%s/%s.%s.echo.fp.details.txt' % (
+            metric_data_dir, str(timestamp), base_name)
 
     # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
     # Added metric_check_file and ts_full_duration is needed to be determined
@@ -121,7 +149,18 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
                     ts_full_duration = str(int(full_duration_array[1]))
 
     anomaly_json = '%s/%s.json' % (metric_data_dir, base_name)
+
+    # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+        ts_full_duration = str(settings.FULL_DURATION)
+        full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
+        anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_data_dir, base_name, str(full_duration_in_hours))
+
     ts_csv = '%s/%s.tsfresh.input.csv' % (metric_data_dir, base_name)
+    # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+    if context == 'ionosphere_echo_check':
+        ts_csv = '%s/%s.echo.tsfresh.input.csv' % (metric_data_dir, base_name)
+
 #    anomaly_json = '/opt/skyline/ionosphere/data/1480104000/stats/statsd/graphiteStats/calculationtime/stats.statsd.graphiteStats.calculationtime.json'
 #    ts_csv = '/opt/skyline/ionosphere/data/1480104000/stats/statsd/graphiteStats/calculationtime/stats.statsd.graphiteStats.calculationtime.tsfresh.input.csv'
     # This is simply to stay in line with tsfresh naming conventions in their
@@ -168,6 +207,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         return str(t_fname_out), True, fp_created, fp_id, 'none', 'none', f_calc
 
     start = timer()
+    raw_timeseries = []
     if os.path.isfile(anomaly_json):
         try:
             # Read the timeseries json file
@@ -190,9 +230,11 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+    del raw_timeseries
     timeseries = literal_eval(timeseries_array_str)
 
     datapoints = timeseries
+    del timeseries
     converted = []
     for datapoint in datapoints:
         try:
@@ -203,6 +245,8 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         except:  # nosec
             continue
 
+    del datapoints
+
     if os.path.isfile(ts_csv):
         os.remove(ts_csv)
 
@@ -211,6 +255,8 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         utc_ts_line = '%s,%s,%s\n' % (metric, str(int(ts)), str(value))
         with open(ts_csv, 'a') as fh:
             fh.write(utc_ts_line)
+
+    del converted
 
     try:
         df = pd.read_csv(ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
@@ -257,6 +303,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     start_feature_extraction = timer()
     current_logger.info('starting extract_features with %s' % str(TSFRESH_VERSION))
+    df_features = False
     try:
         # @modified 20161226 - Bug #1822: tsfresh extract_features process stalling
         # Changed to use the new ReasonableFeatureExtractionSettings that was
@@ -295,11 +342,14 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     current_logger.info(
         'feature extraction took %.6f seconds' % (feature_extraction_time))
 
+    del df
+
     # write to disk
     fname_out = fname_in + '.features.csv'
     # df_features.to_csv(fname_out)
 
     # Transpose
+    df_t = False
     try:
         df_t = df_features.transpose()
         current_logger.info('features transposed')
@@ -313,6 +363,8 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
             current_logger.info('removed %s' % ts_csv)
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+
+    del df_features
 
     # Create transposed features csv
     t_fname_out = fname_in + '.features.transposed.csv'
@@ -329,7 +381,10 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
+    del df_t
+
     # Calculate the count and sum of the features values
+    df_sum = False
     try:
         df_sum = pd.read_csv(
             t_fname_out, delimiter=',', header=0,
@@ -378,6 +433,8 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         current_logger.error('%s' % trace)
         fail_msg = 'error :: failed to write %s' % features_profile_details_file
         current_logger.error('%s' % fail_msg)
+
+    del df_sum
 
     if os.path.isfile(ts_csv):
         os.remove(ts_csv)
