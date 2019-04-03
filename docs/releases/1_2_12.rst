@@ -4,13 +4,19 @@
 
 v1.2.12 - April 3, 2019
 
-New functionality release
--------------------------
+New functionality
+-----------------
 
-- Adds the ability for Skyline Boundary to handle very short time series.
 - Adds the new Ionosphere echo functionality related to improving the matching
   of Mirage based features profiles by between 30-50% depending on the metric.
   See https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html
+
+Fixes
+-----
+
+- Adds the ability for Skyline Boundary to handle very short time series.
+- Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
+  decimal values introduced by numpy==1.15.1 pandas==0.24.3
 
 Changes from v1.2.11
 --------------------
@@ -18,6 +24,8 @@ Changes from v1.2.11
 - Allow Boundary to analyse short time series (#88, #2862)
 - Bifurcate dependencies for py3 testing (#2588, #2828)
 - Added functionality and changes to implement Ionosphere echo (#2484)
+- Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
+  decimal values introduced by numpy==1.15.1 pandas==0.24.3 (2902)
 
 Update notes
 ------------
