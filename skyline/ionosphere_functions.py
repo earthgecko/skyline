@@ -10,10 +10,10 @@ import csv
 import shutil
 import glob
 from ast import literal_eval
-
 import traceback
-from redis import StrictRedis
+from datetime import datetime
 
+from redis import StrictRedis
 from sqlalchemy import (
     create_engine, Column, Table, Integer, String, MetaData, DateTime)
 from sqlalchemy.dialects.mysql import DOUBLE, TINYINT
@@ -24,12 +24,11 @@ from tsfresh import __version__ as tsfresh_version
 import settings
 import skyline_version
 from skyline_functions import (
-    RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)
+    RepresentsInt, mkdir_p, write_data_to_file)
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
     get_engine, ionosphere_table_meta, metrics_table_meta,
-    ionosphere_matched_table_meta,
     # @added 20180414 - Branch #2270: luminosity
     luminosity_table_meta)
 
@@ -129,7 +128,6 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
         max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
         for namespace_config in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG:
             NAMESPACE_MATCH_PATTERN = str(namespace_config[0])
-            METRIC_PATTERN = base_name
             pattern_match = False
             try:
                 # Match by regex
@@ -215,20 +213,15 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
 
     if context == 'training_data':
-        log_context = 'training data'
-        ionosphere_learn_job = 'learn_fp_human'
-    if context == 'features_profiles':
-        log_context = 'features profile data'
-
-    # @added 20170113 - Feature #1854: Ionosphere learn
-    if context == 'ionosphere_learn':
-        log_context = 'learn'
+        ionosphere_job = 'learn_fp_human'
 
     current_logger.info('create_features_profile :: %s :: requested for %s at %s' % (
         context, str(base_name), str(requested_timestamp)))
 
     metric_timeseries_dir = base_name.replace('.', '/')
-    if context == 'training_data':
+    # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+    # Added context ionosphere_echo
+    if context == 'training_data' or context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
         metric_training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
             metric_timeseries_dir)
@@ -257,9 +250,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     features_profile_dir = '%s/%s' % (
         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir)
 
-    ts_features_profile_dir = '%s/%s/%s' % (
-        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
-        str(requested_timestamp))
+    ts_features_profile_dir = '%s/%s' % (
+        features_profile_dir, str(requested_timestamp))
 
     features_profile_created_file = '%s/%s.%s.fp.created.txt' % (
         metric_training_data_dir, str(requested_timestamp), base_name)
@@ -272,7 +264,6 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     trace = 'none'
     fail_msg = 'none'
     new_fp_id = False
-    calculated_with_tsfresh = False
     calculated_time = False
     fcount = None
     fsum = None
@@ -287,12 +278,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             return 'none', False, False, fail_msg, trace
 
     if path.isfile(features_profile_details_file):
-        current_logger.info('create_features_profile :: getting features profile details from from - %s' % features_profile_details_file)
+        current_logger.info('create_features_profile :: getting features profile details from - %s' % features_profile_details_file)
         # Read the details file
         with open(features_profile_details_file, 'r') as f:
             fp_details_str = f.read()
         fp_details = literal_eval(fp_details_str)
-        calculated_with_tsfresh = fp_details[1]
         calculated_time = str(fp_details[2])
         fcount = str(fp_details[3])
         fsum = str(fp_details[4])
@@ -349,8 +339,6 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             feature_name = str(line[0])
             feature_name_item = filter(
                 lambda x: x[1] == feature_name, TSFRESH_FEATURES)
-            if feature_name_item:
-                feature_name_id = feature_name_item[0]
             if feature_name_item:
                 feature_name_list = feature_name_item[0]
                 fname_id = int(feature_name_list[0])
@@ -437,7 +425,6 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     current_logger.info('create_features_profile :: metrics_table OK')
 
-    metric_db_object = None
     try:
         connection = engine.connect()
         # @modified 20161209 -  - Branch #922: ionosphere
@@ -490,9 +477,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # @added 20170120 - Feature #1854: Ionosphere learn
     # Always use the timestamp from the anomaly file
     use_anomaly_timestamp = int(requested_timestamp)
-    if context == 'ionosphere_learn':
+    # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+    # Added ionosphere_echo
+    if context == 'ionosphere_learn' or context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
         if path.isfile(anomaly_check_file):
-            current_logger.info('create_features_profile :: determining the full duration from anomaly_check_file - %s' % anomaly_check_file)
+            current_logger.info('create_features_profile :: determining the metric_timestamp from anomaly_check_file - %s' % anomaly_check_file)
             # Read the details file
             with open(anomaly_check_file, 'r') as f:
                 anomaly_details = f.readlines()
@@ -537,6 +526,13 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if int(fp_generation) <= 1:
         fp_validated = 1
 
+    # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+    # Added ionosphere_echo
+    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+        echo_fp_value = 1
+    else:
+        echo_fp_value = 0
+
     new_fp_id = False
     try:
         connection = engine.connect()
@@ -545,13 +541,32 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # @modified 20170120 - Feature #1854: Ionosphere learn
         # Added anomaly_timestamp
         # @modified 20170403 - Feature #2000: Ionosphere - validated
-        ins = ionosphere_table.insert().values(
-            metric_id=int(metrics_id), full_duration=int(ts_full_duration),
-            anomaly_timestamp=int(use_anomaly_timestamp),
-            enabled=1, tsfresh_version=str(tsfresh_version),
-            calc_time=calculated_time, features_count=fcount,
-            features_sum=fsum, parent_id=fp_parent_id,
-            generation=fp_generation, validated=fp_validated)
+        # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+        # Added ionosphere_echo echo_fp
+        # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
+        # Handle ionosphere_echo change in timestamp to the next second and a mismatch
+        # of 1 second between the features profile directory timestamp and the DB
+        # created_timestamp
+        if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+            ts_for_db = int(requested_timestamp)
+            db_created_timestamp = datetime.utcfromtimestamp(ts_for_db).strftime('%Y-%m-%d %H:%M:%S')
+            ins = ionosphere_table.insert().values(
+                metric_id=int(metrics_id), full_duration=int(ts_full_duration),
+                anomaly_timestamp=int(use_anomaly_timestamp),
+                enabled=1, tsfresh_version=str(tsfresh_version),
+                calc_time=calculated_time, features_count=fcount,
+                features_sum=fsum, parent_id=fp_parent_id,
+                generation=fp_generation, validated=fp_validated,
+                echo_fp=echo_fp_value, created_timestamp=db_created_timestamp)
+        else:
+            ins = ionosphere_table.insert().values(
+                metric_id=int(metrics_id), full_duration=int(ts_full_duration),
+                anomaly_timestamp=int(use_anomaly_timestamp),
+                enabled=1, tsfresh_version=str(tsfresh_version),
+                calc_time=calculated_time, features_count=fcount,
+                features_sum=fsum, parent_id=fp_parent_id,
+                generation=fp_generation, validated=fp_validated,
+                echo_fp=echo_fp_value)
         result = connection.execute(ins)
         connection.close()
         new_fp_id = result.inserted_primary_key[0]
@@ -730,6 +745,12 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # Insert timeseries that the features profile was created from
     raw_timeseries = []
     anomaly_json = '%s/%s.json' % (metric_training_data_dir, base_name)
+
+    # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
+    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+        full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
+        anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, base_name, str(full_duration_in_hours))
+
     if path.isfile(anomaly_json):
         current_logger.info('create_features_profile :: metric anomaly json found OK - %s' % (anomaly_json))
         try:
@@ -758,6 +779,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     # Convert the timeseries to csv
     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+    del raw_timeseries
     timeseries = literal_eval(timeseries_array_str)
 
     datapoints = timeseries
@@ -770,6 +792,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # Added nosec to exclude from bandit tests
         except:  # nosec
             continue
+
+    del timeseries
+    del timeseries_array_str
+    del datapoints
 
     insert_statement = []
     for ts, value in validated_timeseries:
@@ -791,7 +817,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 fp_create_engine_disposal(current_skyline_app, engine)
             raise
         else:
-            current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
+            current_logger.info('create_features_profile :: %s - automated so the table should exist continuing' % context)
+
+    del validated_timeseries
+    del insert_statement
 
     # Create a created features profile file
     try:
@@ -804,6 +833,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             str(calculated_time), str(fcount), str(fsum), str(ts_full_duration),
             str(fp_parent_id), str(fp_generation))
         write_data_to_file(current_skyline_app, features_profile_created_file, 'w', data)
+        del data
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
@@ -903,7 +933,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             #       had a use_full_duration features profile created, however
             #       due to the fact that it is in learn, suggests that it did
             #       have, not 100% sure.
-            origin_fp_id_was_allowed_to_learn = False
+            # origin_fp_id_was_allowed_to_learn = False
             child_use_full_duration_count_of_origin_fp_id = 1
             # TODO: Determine the state
             # child_use_full_duration_count_of_origin_fp_id = SELECT COUNT(id) FROM ionosphere WHERE parent_id=origin_fp_id AND full_duration=use_full_duration

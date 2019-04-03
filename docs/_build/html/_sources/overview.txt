@@ -10,6 +10,10 @@ Welcome to Skyline.
 What is Skyline?
 ----------------
 
+Skyline is your ears and eyes, it is remarkably good at telling you when a state
+changes.  It does not just chew bubblegum, it blows bubbles too.
+
+But really Skyline is ...
 For those interested in anomaly detection and deflection in streamed time series
 data.
 
@@ -18,14 +22,14 @@ detection data?
 
 Skyline is a Python based anomaly detection/deflection stack that analyses,
 anomaly detects, deflects, fingerprints and learns vast amounts of streamed
-time series data.
+time series data.  Skyline has a number of isolated modules/apps that:
 
-- Skyline ingests streamed metric time series data - skyline/horizon
-- Skyline uses a ```CONSENSUS``` of 3-sigma algorithms to detect anomalies on
+- ingests streamed metric time series data - skyline/horizon
+- use a ```CONSENSUS``` of 3-sigma algorithms to detect anomalies on
   batch processed, streamed metric time series data - skyline/analyzer - anomaly
   detector
-- It handles large and small seasonality in the data - skyline/mirage -
-  anomaly deflector and detector
+- Handle large and small seasonality in the data - skyline/mirage - anomaly
+  deflector and detector
 - You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
   anomaly deflector
 - It records all your anomalies - skyline/panorama - anomaly memory
@@ -119,10 +123,10 @@ system. It was originally built to enable passive monitoring of hundreds of
 thousands of metrics, without the need to configure a model/thresholds for each
 one, as you might do with Nagios.  It was designed to be used wherever there are
 a large quantity of high-resolution time series which need constant monitoring.
-Once a metric stream was set up (from statsd, Graphite or other), additional
-metrics are automatically added to Skyline for analysis, anomaly detection,
-alerting and briefly published in the Webapp frontend.  `github/etsy`_ stopped
-actively maintaining Skyline in 2014.
+Once a metric stream was set up from Graphite, additional metrics are
+automatically added to Skyline for analysis, anomaly detection, alerting and
+briefly published in the Webapp frontend.  `github/etsy`_ stopped actively
+maintaining Skyline in 2014.
 
 Skyline - as a work in progress
 -------------------------------
@@ -207,7 +211,7 @@ development of Skyline is not focused on making it be better than other things
 or the best, it is focused on trying to make Skyline better than it was and
 currently is.  Unfortunately Skyline no longer fits the NAB benchmark method as
 it's methods operate exclusively in the real time arena on real time data,
-historic data and trained patternsand this could not be bolted into a NAB test
+historic data and trained patterns and this could not be bolted into a NAB test
 and would violate the NAB benchmark requirements.
 
 The new look of Skyline apps

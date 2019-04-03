@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.ionosphere package &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>skyline.ionosphere package &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.luminosity package" href="skyline.luminosity.html"/>
         <link rel="prev" title="skyline.horizon package" href="skyline.horizon.html"/> 
@@ -106,6 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -131,6 +132,8 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.ionosphere package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.agent">skyline.ionosphere.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.common_functions">skyline.ionosphere.common_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.echo">skyline.ionosphere.echo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.ionosphere">skyline.ionosphere.ionosphere module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.layers">skyline.ionosphere.layers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.learn">skyline.ionosphere.learn module</a></li>
@@ -224,6 +227,65 @@
 <dd></dd></dl>
 
 </dd></dl>
+
+</div>
+<div class="section" id="module-ionosphere.common_functions">
+<span id="skyline-ionosphere-common-functions-module"></span><h2>skyline.ionosphere.common_functions module<a class="headerlink" href="#module-ionosphere.common_functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ionosphere.common_functions.get_metrics_db_object">
+<code class="descname">get_metrics_db_object</code><span class="sig-paren">(</span><em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_metrics_db_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.get_metrics_db_object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ionosphere.common_functions.get_calculated_features">
+<code class="descname">get_calculated_features</code><span class="sig-paren">(</span><em>calculated_feature_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_calculated_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.get_calculated_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">spin_process</span></code> to
+create a list of feature_names and their calc_values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>calculated_feature_file</strong> (<em>str</em>) &#8211; the full path and file name of the
+features.transposed.csv file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">calculated_features</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ionosphere.common_functions.minmax_scale_check">
+<code class="descname">minmax_scale_check</code><span class="sig-paren">(</span><em>fp_id_metric_ts</em>, <em>anomalous_timeseries</em>, <em>range_tolerance</em>, <em>range_tolerance_percentage</em>, <em>fp_id</em>, <em>base_name</em>, <em>metric_timestamp</em>, <em>features_percentage_diff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#minmax_scale_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.minmax_scale_check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ionosphere.echo">
+<span id="skyline-ionosphere-echo-module"></span><h2>skyline.ionosphere.echo module<a class="headerlink" href="#module-ionosphere.echo" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ionosphere.echo.echo_get_metric_from_metrics">
+<code class="descname">echo_get_metric_from_metrics</code><span class="sig-paren">(</span><em>base_name</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#echo_get_metric_from_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.echo.echo_get_metric_from_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-func docutils literal"><span class="pre">learn()</span></code> and returns the metric id and metric db object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) &#8211; timestamp at which learn was called</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(int, object)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ionosphere.echo.ionosphere_echo">
+<code class="descname">ionosphere_echo</code><span class="sig-paren">(</span><em>base_name</em>, <em>mirage_full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#ionosphere_echo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.echo.ionosphere_echo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-ionosphere.ionosphere">
@@ -334,6 +396,31 @@ multiprocessing methodology the was introduced in Analyzer and Mirage
 in the context of the process objects being cleared down and the learn
 processes cannot create memory leaks as the process always terminates or
 is terminated this prevents any memory leaks in the parent.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ionosphere.ionosphere.Ionosphere.process_ionosphere_echo">
+<code class="descname">process_ionosphere_echo</code><span class="sig-paren">(</span><em>i</em>, <em>metric_check_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.process_ionosphere_echo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.process_ionosphere_echo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn a process_ionosphere_echo check to create features profiles at
+settings.FULL_DURATION for Mirage metrics</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i</strong> (<em>object</em>) &#8211; python process id</li>
+<li><strong>metric_check_file</strong> (<em>str</em>) &#8211; full path to the metric check file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">boolean</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -592,7 +679,7 @@ at use_full_duration via learn.
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

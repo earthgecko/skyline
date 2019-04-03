@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>boundary.boundary_algorithms &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>boundary.boundary_algorithms &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -275,7 +276,10 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the datapoint is less than metric_trigger</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+    <span class="c1"># @modified 20190312 - Task #2862: Allow Boundary to analyse short time series</span>
+    <span class="c1">#                      https://github.com/earthgecko/skyline/issues/88</span>
+    <span class="c1"># if len(timeseries) &lt; 10:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">metric_trigger</span><span class="p">:</span>
@@ -291,8 +295,10 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the datapoint is greater than metric_trigger</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+    <span class="c1"># @modified 20190312 - Task #2862: Allow Boundary to analyse short time series</span>
+    <span class="c1">#                      https://github.com/earthgecko/skyline/issues/88</span>
+    <span class="c1"># if len(timeseries) &lt; 10:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">metric_trigger</span><span class="p">:</span>
@@ -460,10 +466,14 @@
                 <span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
 
     <span class="c1"># Get rid of short series</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: TooShort - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
-        <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
+    <span class="c1"># @modified 20190312 - Task #2862: Allow Boundary to analyse short time series</span>
+    <span class="c1">#                      https://github.com/earthgecko/skyline/issues/88</span>
+    <span class="c1"># Allow class as TooShort if the algorithm is detect_drop_off_cliff</span>
+    <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;detect_drop_off_cliff&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: TooShort - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
 
     <span class="c1"># Get rid of stale series</span>
     <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">STALE_PERIOD</span><span class="p">:</span>
@@ -500,7 +510,10 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: TooShort - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
             <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+    <span class="c1"># @modified 20190312 - Task #2862: Allow Boundary to analyse short time series</span>
+    <span class="c1">#                      https://github.com/earthgecko/skyline/issues/88</span>
+    <span class="c1"># if len(timeseries) &lt; 10:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s1">&#39;debug :: timeseries too short - </span><span class="si">%s</span><span class="s1"> - timeseries length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -569,7 +582,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

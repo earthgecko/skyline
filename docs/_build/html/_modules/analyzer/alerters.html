@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.alerters &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>analyzer.alerters &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -302,7 +303,7 @@
     <span class="c1"># For backwards compatibility</span>
     <span class="k">if</span> <span class="s1">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERT_SENDER</span>
-        <span class="n">recipient</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">recipients</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">sender</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
         <span class="c1"># @modified 20160806 - Added default_recipient</span>
@@ -1190,7 +1191,7 @@
         <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;To&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipient</span>
         <span class="n">msg</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">MIMEText</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">))</span>
         <span class="n">msg</span><span class="o">.</span><span class="n">replace_header</span><span class="p">(</span><span class="s1">&#39;content-transfer-encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;quoted-printable&#39;</span><span class="p">)</span>
-        <span class="c1">#msg.attach(MIMEText(body, &#39;html&#39;))</span>
+        <span class="c1"># msg.attach(MIMEText(body, &#39;html&#39;))</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_stale_digest - msg attached&#39;</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not attach&#39;</span><span class="p">)</span>
@@ -1382,7 +1383,7 @@
     <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
-    <span class="n">message_payload</span>  <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([{</span>
+    <span class="n">message_payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([{</span>
         <span class="s2">&quot;fallback&quot;</span><span class="p">:</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="n">link</span><span class="p">,</span>
         <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">slack_title</span><span class="p">,</span>
         <span class="s2">&quot;title_link&quot;</span><span class="p">:</span> <span class="n">link</span><span class="p">,</span>
@@ -1397,10 +1398,10 @@
             <span class="c1"># Added date and time info so you do not have to mouseover the slack</span>
             <span class="c1"># message to determine the time at which the alert came in</span>
             <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;\n*Ionosphere training dir* :: &lt;&#39; + ionosphere_link + &#39;|training data link&gt;&#39;</span>
-            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
+            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;&#39;</span>
-            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">For anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
+            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">For anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># slack does not allow embedded images, nor links behind authentication</span>
             <span class="c1"># so we have to upload an image with the message</span>
@@ -1410,9 +1411,67 @@
                     <span class="n">initial_comment</span><span class="o">=</span><span class="n">initial_comment</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - failed to send slack message&#39;</span><span class="p">)</span>
+                <span class="c1"># @added 20181205 - Branch #2646: slack</span>
+                <span class="c1"># TODO</span>
+                <span class="c1"># The slack message id needs to be determined here so that it</span>
+                <span class="c1"># can be recorded against the anamoly id and so that webapp can</span>
+                <span class="c1"># notify the message thread when a training_data page is</span>
+                <span class="c1"># reviewed, a feature profile is created and/or a layers profile</span>
+                <span class="c1"># is created.  A basic description of this functionally is terms</span>
+                <span class="c1"># of the webapp code changes and the changes required to the DB</span>
+                <span class="c1"># and Panorama/Redis to achieve the desired goal.</span>
+                <span class="c1"># TODO - Panorama workload and DB changes.</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">slack_thread_updates</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_THREAD_UPDATES</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">slack_thread_updates</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">slack_thread_updates</span><span class="p">:</span>
+                        <span class="c1"># This is basically the channel id of your channel, the</span>
+                        <span class="c1"># name could be used so that if in future it is used or</span>
+                        <span class="c1"># displayed in a UI or just you plain looking at the</span>
+                        <span class="c1"># DB table data, it is human understandable, humans do</span>
+                        <span class="c1"># not see the channel id, they knoow the channels by</span>
+                        <span class="c1"># names.  Skyline could have it&#39;s own channel id name DB</span>
+                        <span class="c1"># mappings.  This may be important in terms of only</span>
+                        <span class="c1"># doing slack_thread_updates on the primary Skyline</span>
+                        <span class="c1"># slack channel.</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">slack_group</span> <span class="o">=</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;groups&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                            <span class="n">slack_group_list</span> <span class="o">=</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;shares&#39;</span><span class="p">][</span><span class="s1">&#39;private&#39;</span><span class="p">][</span><span class="n">slack_group</span><span class="p">]</span>
+                            <span class="c1"># In terms of the generated Slack URLS for threads the</span>
+                            <span class="c1"># timestamps have no dots e.g.:</span>
+                            <span class="c1"># https://&lt;an_org&gt;.slack.com/archives/&lt;a_channel&gt;/p1543994173000700</span>
+                            <span class="c1"># However in terms of the sc.api_call the thread_ts</span>
+                            <span class="c1"># needs the format declared in the dict response e.g.</span>
+                            <span class="c1"># u&#39;ts&#39;: u&#39;1543994173.000700&#39;}]} with the dot so in this</span>
+                            <span class="c1"># case &#39;1543994173.000700&#39;</span>
+                            <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="n">slack_group_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - the slack_thread_ts is </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - faied to determine slack_thread_ts&#39;</span><span class="p">)</span>
+                        <span class="c1"># Insert into Redis for Panorama to process?</span>
+                        <span class="c1"># No anomaly_id will be known here so it needs</span>
+                        <span class="c1"># metric, timestamp, slack_group, slack_thread_ts</span>
+                        <span class="c1"># Panorama will have to surface the anomaly_id and create a</span>
+                        <span class="c1"># slack_alerts table record for it:</span>
+                        <span class="c1"># anomaly_id, slack_group, slack_thread_ts, app, context, reason</span>
+                        <span class="c1"># where context is one of the following:</span>
+                        <span class="c1"># alerted, training_data_viewed, features_profile_created</span>
+                        <span class="c1"># layer_profile_created</span>
+                        <span class="c1"># And reason is a note e.g. daily rsync backup, the</span>
+                        <span class="c1"># reason being any note/s attached to the action, maybe</span>
+                        <span class="c1"># the profile label.  The reason is more important in</span>
+                        <span class="c1"># the webapp context for user notes/sharing, the reason</span>
+                        <span class="c1"># in the context of alerters will simply be:</span>
+                        <span class="c1"># reason = &#39;alerted&#39;</span>
+                        <span class="c1"># slack_thread_updated = slack_thread_update(</span>
+                        <span class="c1">#    app, base_name, int(until_timestamp),</span>
+                        <span class="c1">#    str(slack_group), str(slack_thread_ts), str(reason))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">send_text</span> <span class="o">=</span> <span class="n">initial_comment</span> <span class="o">+</span> <span class="s1">&#39;  ::  error :: there was no graph image to upload&#39;</span>
-                <span class="n">send_messae</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">api_call</span><span class="p">(</span>
+                <span class="n">send_message</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">api_call</span><span class="p">(</span>
                     <span class="s1">&#39;chat.postMessage&#39;</span><span class="p">,</span>
                     <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span>
                     <span class="n">icon_emoji</span><span class="o">=</span><span class="n">icon_emoji</span><span class="p">,</span>
@@ -1495,7 +1554,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

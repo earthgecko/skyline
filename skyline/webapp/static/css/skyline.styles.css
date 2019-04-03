@@ -795,3 +795,80 @@ countdown css
   text-transform: uppercase;
   text-align: left;
 }
+
+/* @added 20190330 - Feature #2484: FULL_DURATION feature profiles
+ionosphere echo matched red border
+*/
+.IonospherreEchoMatchedImageBorder {
+    border-width: 5px;
+    border-color: Red;
+}
+/* Main container */
+.overlay-image {
+ position: absolute;
+ width: auto;
+}
+/* Original image */
+.overlay-image .image {
+ display: block;
+ width: 100%;
+ height: auto;
+ float: left;
+ margin-right: 1%;
+ margin-bottom: 0.5em;
+}
+/* Original text overlay */
+.overlay-image .text {
+ color: #6698FF;
+ font-size: 30px;
+ line-height: 1.5em;
+ text-shadow: 2px 2px 2px #000;
+ text-align: center;
+ position: absolute;
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+ width: 100%;
+}
+
+.overlay-mirage {
+/* position: absolute; */
+  position: relative;
+  width: auto;
+  text-align: center;
+}
+.overlay-mirage-image {
+ display: block;
+/* width: auto; */
+ width: 40%;
+ height: auto;
+ float: left;
+ margin-right: 1%;
+ margin-bottom: 0.5em;
+}
+/* .overlay-mirage .text {
+ display: block;
+ width: auto;
+ height: auto;
+ color: #6698FF;
+ font-size: 20px;
+ line-height: 1.5em;
+/* text-shadow: px 2px 2px #000;
+ text-align: center;
+/* position: absolute;
+ position: relative; */
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+/* width: 100%;
+} */
+
+.overlay-mirage-matched_text {
+ color: #6698FF;
+ font-size: 40px;
+ line-height: 1.5em;
+ position: absolute;
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+}

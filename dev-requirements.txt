@@ -199,7 +199,6 @@ patsy==0.5.0
 
 # @modified 20170809 - Task #2138: Update deps
 #statsmodels==0.6.1
-# @modified 20180910 - Task #2588: Update dependencies
 #statsmodels==0.8.0
 # @modified 20180915 - Bug #2600: statsmodels-0.9.0 - cannot import name _representation
 #                      Task #2596: Build Skyline on nodes at v1.2.8
@@ -210,7 +209,12 @@ patsy==0.5.0
 # statsmodels is not tested on current versions of numpy and scipy, rolled
 # back to 0.8.0 as this works with the latest versions whereas 0.9.0 does not
 #statsmodels==0.9.0
-statsmodels==0.8.0
+# @modified 20180910 - Task #2588: Update dependencies
+# @modified 20190130 - Task #2828: Skyline - Python 3.7.2
+# Python 3 requires statsmodels 0.9.0
+#statsmodels==0.8.0
+statsmodels==0.8.0; python_version < '2.8'
+statsmodels==0.9.0; python_version >= '3.6'
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #msgpack-python==0.4.7

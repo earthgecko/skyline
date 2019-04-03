@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -180,7 +181,7 @@
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
-<span class="kn">import</span> <span class="nn">csv</span>
+<span class="c1"># import csv</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
@@ -238,6 +239,12 @@
 
 <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
 <span class="kn">from</span> <span class="nn">layers</span> <span class="k">import</span> <span class="n">run_layer_algorithms</span>
+
+<span class="c1"># @added 20190322 - Feature #2484: FULL_DURATION feature profiles</span>
+<span class="kn">from</span> <span class="nn">common_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">get_metrics_db_object</span><span class="p">,</span> <span class="n">get_calculated_features</span><span class="p">)</span>
+<span class="c1"># @added 20190327 - Feature #2484</span>
+<span class="kn">from</span> <span class="nn">echo</span> <span class="k">import</span> <span class="n">ionosphere_echo</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -712,6 +719,75 @@
         <span class="c1"># learn(timestamp)</span>
         <span class="n">ionosphere_learn</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span></div>
 
+    <span class="c1"># @added 20190326 - Feature #2484</span>
+<div class="viewcode-block" id="Ionosphere.process_ionosphere_echo"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.process_ionosphere_echo">[docs]</a>    <span class="k">def</span> <span class="nf">process_ionosphere_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Spawn a process_ionosphere_echo check to create features profiles at</span>
+<span class="sd">        settings.FULL_DURATION for Mirage metrics</span>
+
+<span class="sd">        :param i: python process id</span>
+<span class="sd">        :param metric_check_file: full path to the metric check file</span>
+<span class="sd">        :type i: object</span>
+<span class="sd">        :type metric_check_file: str</span>
+<span class="sd">        :return: boolean</span>
+<span class="sd">        :rtype: boolean</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Load and validate metric variables</span>
+            <span class="n">metric_vars_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_load_metric_vars</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: process_ionosphere_echo :: failed to load metric variables from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="n">added_by</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;added_by&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">added_by</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - added_by - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: process_ionosphere_echo failed to read added_by variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">added_by</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">added_by</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">added_by</span> <span class="o">!=</span> <span class="s1">&#39;mirage&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: only mirage metrics are processed not metrics added_by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># metric_vars.metric</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;metric&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read metric variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: process_ionosphere_echo failed to load metric variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
+        <span class="n">full_duration</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># metric_vars.full_duration</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;full_duration&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - full_duration - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: process_ionosphere_echo failed to read full_duration variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">full_duration</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="n">ionosphere_echo</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="Ionosphere.spin_process"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign an anomalous metric to check against features profiles.</span>
@@ -747,12 +823,20 @@
         <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;child_process_pid - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">))</span>
 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MAX_RUNTIME</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="mi">120</span>
+
+
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: processing metric check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file not found - metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)))</span>
             <span class="k">return</span>
+
+        <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">check_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
@@ -791,9 +875,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">check_done</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check done check - no check cache key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_check_cache_key</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: a check cache key exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_check_cache_key</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failing check to prevent multiple iterations over this check&#39;</span><span class="p">)</span>
-            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="c1"># @modified 20181113 - Task #2680: Remove Ionosphere check files is key exists</span>
+            <span class="c1"># This was here for initially debugging, no longer needed</span>
+            <span class="c1"># logger.error(&#39;error :: a check cache key exists - %s&#39; % ionosphere_check_cache_key)</span>
+            <span class="c1"># logger.error(&#39;error :: failing check to prevent multiple iterations over this check&#39;)</span>
+            <span class="c1"># fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;a check cache key exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_check_cache_key</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;to prevent multiple iterations over this check removing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">check_process_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
@@ -864,9 +954,13 @@
             <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load value variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
-            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
-            <span class="k">return</span>
+            <span class="c1"># @modified 20181119 - Bug #2708: Failing to load metric vars</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load value variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                <span class="k">return</span>
 
         <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1056,132 +1150,31 @@
         <span class="c1"># the generations values avaialble in it.  Here we go! Learn!</span>
         <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
-        <span class="c1"># Try memcache first</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">engine</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">metrics_db_object_key</span> <span class="o">=</span> <span class="s1">&#39;metrics_db_object.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
-        <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
-            <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="n">get_memcache_metric_object</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-
-        <span class="n">query_metric_table</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="n">memcache_metric_dict</span><span class="p">:</span>
-            <span class="n">query_metric_table</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-            <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
-            <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">memcache_metric_dict</span>
-            <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using </span><span class="si">%s</span><span class="s1"> key data from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
-
-        <span class="c1"># Check if the metric has ionosphere_enabled, if not remove the check</span>
-        <span class="c1"># file but not the data directory</span>
-        <span class="c1"># @modified 20161230 - Feature #1830: Ionosphere alerts</span>
-        <span class="c1"># Use SQLAlchemy method</span>
-        <span class="c1"># query = &quot;SELECT ionosphere_enabled FROM metrics WHERE metric=&#39;%s&#39;&quot; % metric</span>
-        <span class="c1"># result = mysql_select(skyline_app, query)</span>
-        <span class="c1"># if str(result[0]) != &#39;1&#39;:</span>
-        <span class="c1">#     logger.info(&#39;Ionosphere not enabled on %s&#39; % (metric))</span>
-        <span class="c1">#     # @modified 20161222 - do not remove metric file until features</span>
-        <span class="c1">#     # calculated</span>
-        <span class="c1">#     # self.remove_metric_check_file(str(metric_check_file))</span>
-        <span class="c1">#     # return</span>
-        <span class="c1">#     training_metric = True</span>
-        <span class="c1"># @modified 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
-        <span class="c1"># If no memcache data then MySQL query_metric_table</span>
-        <span class="k">if</span> <span class="n">query_metric_table</span><span class="p">:</span>
+        <span class="c1"># @modified 20190325 - Feature #2484: FULL_DURATION feature profiles</span>
+        <span class="c1"># Moved get_metrics_db_object block to common_functions.py</span>
+        <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">get_metrics_db_object</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics_db_object</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to determine ionosphere_enabled&#39;</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine not obtained to determine ionosphere_enabled&#39;</span><span class="p">)</span>
-
-            <span class="c1"># Get the metrics_table metadata</span>
-            <span class="n">metrics_table</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_table OK for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-                <span class="c1"># stmt = select([metrics_table.c.ionosphere_enabled]).where(metrics_table.c.metric == str(metric))</span>
-                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">)</span>
-                <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">result</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: got no result from MySQL from metrics table for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-                <span class="n">row</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
-                <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
-                <span class="c1"># @modified - 20180524 - Task #2132: Optimise Ionosphere DB usage</span>
-                <span class="c1"># Feature #2378: Add redis auth to Skyline and rebrow</span>
-                <span class="c1"># Wrapped memcache_metrics_db_object, metrics_id,</span>
-                <span class="c1"># metric_ionosphere_enabled and metrics_db_object in if row</span>
-                <span class="c1"># as if row is None it can fail with:</span>
-                <span class="c1"># TypeError: &#39;NoneType&#39; object is not iterable</span>
-                <span class="c1"># memcache_metrics_db_object = dict(row)</span>
-                <span class="k">if</span> <span class="n">row</span><span class="p">:</span>
-                    <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-                    <span class="n">metrics_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
-                    <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">]</span>
-                    <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
-                    <span class="c1"># Create the metrics_db_object so it is available throughout</span>
-                    <span class="c1"># Here we go! Learn!</span>
-                    <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">row</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;could not determine metric id for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-
-                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
+                <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_db_object</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_db_object</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># @modified 20161222 - do not remove metric file until features</span>
-                    <span class="c1"># calculated</span>
-                    <span class="c1"># self.remove_metric_check_file(str(metric_check_file))</span>
-                    <span class="c1"># return</span>
                     <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="c1"># self.training_metrics.append(base_name)</span>
+                <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine ionosphere_enabled from metrics table for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine values from metrics_db_object for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="c1"># self.training_metrics.append(base_name)</span>
-
-        <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
-        <span class="c1"># Add the metric db object data to memcache</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span> <span class="ow">and</span> <span class="n">query_metric_table</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">memcache_metrics_db_object</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-                    <span class="n">key_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-                    <span class="n">key_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-                    <span class="n">memcache_metric_dict</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_value</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">metrics_db_object_key</span><span class="p">,</span> <span class="n">memcache_metric_dict</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set the memcache key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
-                <span class="c1"># pass</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metric id from memcache or metrics tables for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="k">return</span>
 
         <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn - generations</span>
         <span class="c1"># If this is added_by ionosphere_learn the id is only</span>
@@ -1277,6 +1270,7 @@
         <span class="k">if</span> <span class="n">training_metric</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;training metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
 
+        <span class="n">redis_anomaly_json</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;mirage&#39;</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking training data Redis json is available&#39;</span><span class="p">)</span>
             <span class="c1"># Always calculate features for both the SECOND_ORDER_RESOLUTION_SECONDS</span>
@@ -1374,6 +1368,12 @@
             <span class="n">fp_layers_ids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">fp_layers_present</span> <span class="o">=</span> <span class="kc">False</span>
 
+            <span class="c1"># @added 20190326 - Feature #2484: FULL_DURATION feature profiles</span>
+            <span class="c1"># After the features profile evaluations this fps_db_object will</span>
+            <span class="c1"># be used to determine what settings.FULL_DURATION features</span>
+            <span class="c1"># profiles need to be created for ionosphere_echo</span>
+            <span class="n">fps_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                 <span class="c1"># @modified 2018075 - Task #2446: Optimize Ionosphere</span>
@@ -1383,9 +1383,12 @@
                 <span class="c1"># stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)</span>
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="n">metrics_id</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">desc</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-                    <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn</span>
-                    <span class="c1"># if a features profiles is not enabled or deleted, skip it</span>
+                <span class="c1"># @added 20190326 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># To be used for ionosphere_echo</span>
+                <span class="n">fps_db_object</span> <span class="o">=</span> <span class="p">[{</span><span class="n">column</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rowproxy</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">for</span> <span class="n">rowproxy</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
+
+                <span class="c1"># for row in result:</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">fps_db_object</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="k">continue</span>
                     <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;deleted&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1445,6 +1448,7 @@
                                         <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not using fp id </span><span class="si">%s</span><span class="s1"> not matched full_duration </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+
                 <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
                 <span class="c1"># Create the fp_ids_db_object so it is available throughout</span>
                 <span class="c1"># Here we go! Learn!</span>
@@ -1583,18 +1587,7 @@
         <span class="c1"># Create an array of the calculated features</span>
         <span class="n">calculated_features</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">calculated_feature_file_found</span><span class="p">:</span>
-            <span class="n">count_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fr</span><span class="p">:</span>
-                <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                            <span class="n">feature_name</span> <span class="o">=</span> <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">feature_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="n">count_id</span> <span class="o">+=</span> <span class="mi">1</span>
-                        <span class="n">calc_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                        <span class="n">calculated_features</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">calc_value</span><span class="p">])</span>
+            <span class="n">calculated_features</span> <span class="o">=</span> <span class="n">get_calculated_features</span><span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">calculated_features</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: no calculated features were determined from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">))</span>
@@ -1602,6 +1595,8 @@
             <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                 <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
             <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> calculated features determined&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">))))</span>
 
         <span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
         <span class="c1">#                  Branch #2270: luminosity</span>
@@ -1609,6 +1604,66 @@
         <span class="c1"># @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page</span>
         <span class="c1"># layers_checked = 0</span>
         <span class="n">layers_checked_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># @added 20190314 - Feature #2484: FULL_DURATION feature profiles</span>
+        <span class="c1"># Here we add the bifurcation to also create a features</span>
+        <span class="c1"># profile at FULL_DURATION for all Mirage metrics.  With a</span>
+        <span class="c1"># view to increase the number of matches trained metric</span>
+        <span class="c1"># achieve by also allowing for the creation and comparing of</span>
+        <span class="c1"># the FULL_DURATION features profiles as well.</span>
+        <span class="n">echo_check</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">echo_calculated_feature_file</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">echo_calculated_feature_file_found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">echo_calculated_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">echo_fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">echo_anomalous_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;mirage&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">echo_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_ENABLED</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">echo_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">echo_enabled</span><span class="p">:</span>
+                <span class="n">echo_check</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">echo_check</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">fps_db_object</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">fps_db_object</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">):</span>
+                            <span class="n">fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span>
+                            <span class="n">echo_fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;appending ionosphere_echo fp id </span><span class="si">%s</span><span class="s1"> matched full_duration  of </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+                <span class="n">fp_count_with_echo</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)</span>
+                <span class="n">echo_fp_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">echo_fp_ids</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">echo_fp_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">echo_check</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">echo_fp_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added an additional </span><span class="si">%s</span><span class="s1"> echo fp ids for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_fp_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determined a total of </span><span class="si">%s</span><span class="s1"> fp ids (incl. echo) for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_count_with_echo</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+                    <span class="n">echo_calculated_feature_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.echo.tsfresh.input.csv.features.transposed.csv&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;echo calculated features available - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">))</span>
+                        <span class="n">echo_calculated_feature_file_found</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">use_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span>
+                        <span class="n">f_calc</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">fp_csv</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="n">fp_exists</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">,</span> <span class="n">f_calc</span> <span class="o">=</span> <span class="n">calculate_features_profile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">use_context</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to calculate features&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;echo calculated features available - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">))</span>
+                        <span class="n">echo_calculated_feature_file_found</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">echo_calculated_features</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">echo_calculated_feature_file_found</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">echo_calculated_features</span> <span class="o">=</span> <span class="n">get_calculated_features</span><span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo_check no echo_calculated_features were determined&#39;</span><span class="p">)</span>
+                            <span class="n">echo_calculated_features</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to process echo&#39;</span><span class="p">)</span>
 
         <span class="c1"># Compare calculated features to feature values for each fp id</span>
         <span class="n">not_anomalous</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1620,6 +1675,16 @@
                     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                     <span class="k">return</span> <span class="kc">False</span>
+
+                <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="n">check_type</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+                <span class="k">if</span> <span class="n">echo_check</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">echo_fp_id</span> <span class="ow">in</span> <span class="n">echo_fp_ids</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">fp_id</span> <span class="o">==</span> <span class="n">echo_fp_id</span><span class="p">:</span>
+                            <span class="n">check_type</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span>
+                <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">echo_calculated_features</span><span class="p">:</span>
+                        <span class="k">continue</span>
 
                 <span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
                 <span class="c1">#                  Branch #2270: luminosity</span>
@@ -1706,14 +1771,27 @@
                 <span class="c1">#                   Feature #1844: ionosphere_matched DB table</span>
                 <span class="c1"># Added the calculated features sum for verification purposes</span>
                 <span class="n">all_calc_features_sum_list</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">calc_value</span> <span class="ow">in</span> <span class="n">calculated_features</span><span class="p">:</span>
+
+                <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+                    <span class="n">use_calculated_features</span> <span class="o">=</span> <span class="n">calculated_features</span>
+                <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                    <span class="n">use_calculated_features</span> <span class="o">=</span> <span class="n">echo_calculated_features</span>
+
+                <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Bifurcate for ionosphere_echo_check</span>
+                <span class="c1"># for feature_name, calc_value in calculated_features:</span>
+                <span class="k">for</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">calc_value</span> <span class="ow">in</span> <span class="n">use_calculated_features</span><span class="p">:</span>
                     <span class="n">all_calc_features_sum_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">calc_value</span><span class="p">))</span>
                 <span class="n">all_calc_features_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_calc_features_sum_list</span><span class="p">)</span>
 
                 <span class="c1"># Convert feature names in calculated_features to their id</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;converting tsfresh feature names to Skyline feature ids&#39;</span><span class="p">)</span>
                 <span class="n">calc_features_by_id</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">calc_value</span> <span class="ow">in</span> <span class="n">calculated_features</span><span class="p">:</span>
+                <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Bifurcate for ionosphere_echo_check</span>
+                <span class="c1"># for feature_name, calc_value in calculated_features:</span>
+                <span class="k">for</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">calc_value</span> <span class="ow">in</span> <span class="n">use_calculated_features</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">skyline_feature_id</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">TSFRESH_FEATURES</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">feature_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                             <span class="n">calc_features_by_id</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">skyline_feature_id</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">calc_value</span><span class="p">)])</span>
@@ -1827,14 +1905,29 @@
                     <span class="n">new_pdiff</span> <span class="o">=</span> <span class="n">percent_different</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
                     <span class="n">percent_different</span> <span class="o">=</span> <span class="n">new_pdiff</span>
 
-                <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_FEATURES_PERCENT_SIMILAR</span><span class="p">:</span>
+                <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Bifurcate for ionosphere_echo_check</span>
+                <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+                    <span class="n">use_percent_similar</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_FEATURES_PERCENT_SIMILAR</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">use_percent_similar</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">use_percent_similar</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+                <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Bifurcate for ionosphere_echo_check</span>
+                <span class="c1"># if percent_different &lt; settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:</span>
+                <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;</span> <span class="n">use_percent_similar</span><span class="p">:</span>
                     <span class="n">not_anomalous</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="c1"># log</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not anomalous - features profile match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s1">&#39;calculated features sum are within </span><span class="si">%s</span><span class="s1"> percent of fp_id </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">, not anomalous&#39;</span> <span class="o">%</span>
-                        <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_FEATURES_PERCENT_SIMILAR</span><span class="p">),</span>
+                        <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">use_percent_similar</span><span class="p">),</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">percent_different</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo_check - not anomalous with fp id </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
 
                 <span class="c1"># @added 20180617 - Feature #2404: Ionosphere - fluid approximation</span>
                 <span class="c1"># Now if not matched use Min-Max scaling as per</span>
@@ -1919,6 +2012,7 @@
                             <span class="n">test_anomalous_timeseries</span> <span class="o">=</span> <span class="n">anomalous_timeseries</span>
                             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_anomalous_timeseries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                 <span class="n">anomalous_timeseries_not_defined</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="n">ionosphere_anomalous_timeseries</span> <span class="o">=</span> <span class="n">test_anomalous_timeseries</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous_timeseries is not defined loading from anomaly json&#39;</span><span class="p">)</span>
 
@@ -1927,24 +2021,58 @@
                             <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span>
                             <span class="n">timeseries_dir</span><span class="p">)</span>
                         <span class="n">anomaly_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">anomalous_timeseries_not_defined</span><span class="p">:</span>
+
+                        <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                        <span class="c1"># Bifurcate for ionosphere_echo_check</span>
+                        <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                            <span class="n">anomaly_json</span> <span class="o">=</span> <span class="n">redis_anomaly_json</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">echo_anomalous_timeseries</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">redis_anomaly_json</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                                        <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                                    <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+                                    <span class="k">del</span> <span class="n">raw_timeseries</span>
+                                    <span class="n">echo_anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+                                    <span class="k">del</span> <span class="n">timeseries_array_str</span>
+                                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">echo_anomalous_timeseries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;echo_anomalous_timeseries was populated from anomaly json </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> data points from for creating the minmax_anomalous_ts&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_anomaly_json</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">echo_anomalous_timeseries</span><span class="p">))))</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: echo_anomalous_timeseries for minmax_anomalous_ts is not populated from anomaly json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_anomaly_json</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not create echo_anomalous_timeseries from anomaly json </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_anomaly_json</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;echo_anomalous_timeseries has </span><span class="si">%s</span><span class="s1"> data points from for creating the minmax_anomalous_ts&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">echo_anomalous_timeseries</span><span class="p">))))</span>
+
+                        <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                        <span class="c1"># if anomalous_timeseries_not_defined:</span>
+                        <span class="k">if</span> <span class="n">anomalous_timeseries_not_defined</span> <span class="ow">and</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">anomaly_json</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                                     <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                                 <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+                                <span class="k">del</span> <span class="n">raw_timeseries</span>
                                 <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+                                <span class="k">del</span> <span class="n">timeseries_array_str</span>
                                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous_timeseries was populated from anomaly json </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> data points from for creating the minmax_anomalous_ts&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">))))</span>
+                                    <span class="n">ionosphere_anomalous_timeseries</span> <span class="o">=</span> <span class="n">anomalous_timeseries</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: anomalous_timeseries for minmax_anomalous_ts is not populated from anomaly json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not create anomalous_timeseries from anomaly json </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous_timeseries has </span><span class="si">%s</span><span class="s1"> data points from for creating the minmax_anomalous_ts&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">))))</span>
+                            <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous_timeseries has </span><span class="si">%s</span><span class="s1"> data points from for creating the minmax_anomalous_ts&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">))))</span>
 
-                        <span class="n">anomalous_ts_values_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">)</span>
+                        <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                        <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+                            <span class="n">use_anomalous_timeseries</span> <span class="o">=</span> <span class="n">anomalous_timeseries</span>
+                        <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                            <span class="n">use_anomalous_timeseries</span> <span class="o">=</span> <span class="n">echo_anomalous_timeseries</span>
 
+                        <span class="n">anomalous_ts_values_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">use_anomalous_timeseries</span><span class="p">)</span>
                     <span class="c1"># @added 20180621 - Feature #2404: Ionosphere - fluid approximation</span>
                     <span class="c1"># Check ranges and only Min-Max scale if the 2 time series</span>
                     <span class="c1"># are similar in range</span>
@@ -1971,7 +2099,7 @@
                             <span class="n">min_fp_value</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="n">max_fp_value</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">minmax_anomalous_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x2</span> <span class="ow">in</span> <span class="n">anomalous_timeseries</span><span class="p">]</span>
+                            <span class="n">minmax_anomalous_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x2</span> <span class="ow">in</span> <span class="n">use_anomalous_timeseries</span><span class="p">]</span>
                             <span class="n">min_anomalous_value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">minmax_anomalous_values</span><span class="p">)</span>
                             <span class="n">max_anomalous_value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">minmax_anomalous_values</span><span class="p">)</span>
                         <span class="k">except</span><span class="p">:</span>
@@ -1979,55 +2107,60 @@
                             <span class="n">max_anomalous_value</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">lower_range_not_same</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">):</span>
-                                <span class="n">lower_range_not_same</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="n">lower_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;min value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are the same&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)))</span>
-                        <span class="k">except</span><span class="p">:</span>
-                            <span class="n">lower_range_not_same</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">if</span> <span class="n">min_fp_value</span> <span class="ow">and</span> <span class="n">min_anomalous_value</span> <span class="ow">and</span> <span class="n">lower_range_not_same</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">):</span>
-                                <span class="n">lower_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;min value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are the same&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)))</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">lower_min_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span> <span class="o">-</span> <span class="p">(</span><span class="n">min_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
-                                <span class="n">upper_min_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span> <span class="o">+</span> <span class="p">(</span><span class="n">min_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
-                                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lower_min_fp_value</span><span class="p">,</span> <span class="n">upper_min_fp_value</span><span class="p">):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">):</span>
+                                    <span class="n">lower_range_not_same</span> <span class="o">=</span> <span class="kc">False</span>
                                     <span class="n">lower_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;min value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are similar within </span><span class="si">%s</span><span class="s1"> percent of each other&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span>
-                                        <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">),</span>
-                                        <span class="nb">str</span><span class="p">(</span><span class="n">range_tolerance_percentage</span><span class="p">)))</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">lower_range_similar</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;lower range of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are not similar&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)))</span>
-                        <span class="n">upper_range_not_same</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">):</span>
-                                <span class="n">upper_range_not_same</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="n">upper_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are the same&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)))</span>
-                        <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;min value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are the same&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">lower_range_not_same</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">min_fp_value</span> <span class="ow">and</span> <span class="n">min_anomalous_value</span> <span class="ow">and</span> <span class="n">lower_range_not_same</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">):</span>
+                                    <span class="n">lower_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;min value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are the same&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)))</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">lower_min_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span> <span class="o">-</span> <span class="p">(</span><span class="n">min_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
+                                    <span class="n">upper_min_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_fp_value</span> <span class="o">+</span> <span class="p">(</span><span class="n">min_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lower_min_fp_value</span><span class="p">,</span> <span class="n">upper_min_fp_value</span><span class="p">):</span>
+                                        <span class="n">lower_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;min value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are similar within </span><span class="si">%s</span><span class="s1"> percent of each other&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">),</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">range_tolerance_percentage</span><span class="p">)))</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">lower_range_similar</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;lower range of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are not similar&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">min_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_anomalous_value</span><span class="p">)))</span>
                             <span class="n">upper_range_not_same</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">if</span> <span class="n">max_fp_value</span> <span class="ow">and</span> <span class="n">max_anomalous_value</span> <span class="ow">and</span> <span class="n">lower_range_similar</span> <span class="ow">and</span> <span class="n">upper_range_not_same</span><span class="p">:</span>
-                            <span class="c1"># @added 20180717 - Task #2446: Optimize Ionosphere</span>
-                            <span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
-                            <span class="c1"># On low values such as 1 and 2, the range_tolerance</span>
-                            <span class="c1"># should be adjusted to account for the very small</span>
-                            <span class="c1"># range. TODO</span>
-                            <span class="n">lower_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">-</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
-                            <span class="n">upper_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">+</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
-                            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lower_max_fp_value</span><span class="p">,</span> <span class="n">upper_max_fp_value</span><span class="p">):</span>
-                                <span class="n">upper_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are similar within </span><span class="si">%s</span><span class="s1"> percent of each other&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">),</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">range_tolerance_percentage</span><span class="p">)))</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are not similar&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)))</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">):</span>
+                                    <span class="n">upper_range_not_same</span> <span class="o">=</span> <span class="kc">False</span>
+                                    <span class="n">upper_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are the same&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">upper_range_not_same</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">max_fp_value</span> <span class="ow">and</span> <span class="n">max_anomalous_value</span> <span class="ow">and</span> <span class="n">lower_range_similar</span> <span class="ow">and</span> <span class="n">upper_range_not_same</span><span class="p">:</span>
+                                <span class="c1"># @added 20180717 - Task #2446: Optimize Ionosphere</span>
+                                <span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
+                                <span class="c1"># On low values such as 1 and 2, the range_tolerance</span>
+                                <span class="c1"># should be adjusted to account for the very small</span>
+                                <span class="c1"># range. TODO</span>
+                                <span class="n">lower_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">-</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
+                                <span class="n">upper_max_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_fp_value</span> <span class="o">+</span> <span class="p">(</span><span class="n">max_fp_value</span> <span class="o">*</span> <span class="n">range_tolerance</span><span class="p">))</span>
+                                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lower_max_fp_value</span><span class="p">,</span> <span class="n">upper_max_fp_value</span><span class="p">):</span>
+                                    <span class="n">upper_range_similar</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are similar within </span><span class="si">%s</span><span class="s1"> percent of each other&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">),</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">range_tolerance_percentage</span><span class="p">)))</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max value of fp_id_metric_ts (</span><span class="si">%s</span><span class="s1">) and anomalous_timeseries (</span><span class="si">%s</span><span class="s1">) are not similar&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">max_fp_value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_anomalous_value</span><span class="p">)))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not calculate range similarity with the current anomalous_timeseries and the fp id </span><span class="si">%s</span><span class="s1"> time series&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+
                     <span class="k">if</span> <span class="n">lower_range_similar</span> <span class="ow">and</span> <span class="n">upper_range_similar</span><span class="p">:</span>
                         <span class="n">range_similar</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -2058,7 +2191,7 @@
                         <span class="n">minmax_fp_ts_values_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">minmax_fp_ts</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">minmax_fp_ts_values_count</span> <span class="o">-</span> <span class="n">anomalous_ts_values_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">):</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">minmax_anomalous_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x2</span> <span class="ow">in</span> <span class="n">anomalous_timeseries</span><span class="p">]</span>
+                                <span class="n">minmax_anomalous_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x2</span> <span class="ow">in</span> <span class="n">use_anomalous_timeseries</span><span class="p">]</span>
                                 <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">minmax_anomalous_values</span><span class="p">)</span>
                                 <span class="c1"># Min-Max scaling</span>
                                 <span class="n">np_minmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_np</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_np</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
@@ -2066,7 +2199,7 @@
                                     <span class="n">minmax_anomalous_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">])</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not minmax scale current time series anomalous_timeseries for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine np_minmax with current time series anomalous_timeseries and fp id </span><span class="si">%s</span><span class="s1"> time series&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
                             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">minmax_anomalous_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;minmax_anomalous_ts is populated with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">minmax_anomalous_ts</span><span class="p">)))</span>
                             <span class="k">else</span><span class="p">:</span>
@@ -2099,6 +2232,7 @@
                                     <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
                                 <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
                                     <span class="k">continue</span>
+                            <span class="k">del</span> <span class="n">datapoints</span>
                             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">converted</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: converted is populated&#39;</span><span class="p">)</span>
@@ -2112,6 +2246,7 @@
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not write to file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_ts_csv</span><span class="p">)))</span>
+                            <span class="k">del</span> <span class="n">converted</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;file found </span><span class="si">%s</span><span class="s1">, using for data&#39;</span> <span class="o">%</span> <span class="n">minmax_fp_ts_csv</span><span class="p">)</span>
 
@@ -2133,11 +2268,13 @@
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to created df_features from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_ts_csv</span><span class="p">)))</span>
+                        <span class="k">del</span> <span class="n">df</span>
                         <span class="c1"># Create transposed features csv</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">minmax_fp_fname_out</span><span class="p">):</span>
                             <span class="c1"># Transpose</span>
                             <span class="n">df_t</span> <span class="o">=</span> <span class="n">df_features</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
                             <span class="n">df_t</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">minmax_fp_fname_out</span><span class="p">)</span>
+                            <span class="k">del</span> <span class="n">df_t</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">minmax_fp_fname_out</span><span class="p">)</span>
@@ -2171,10 +2308,12 @@
                                     <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_datapoint</span><span class="p">)</span>
                                 <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
                                     <span class="k">continue</span>
+                            <span class="k">del</span> <span class="n">datapoints</span>
                             <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">converted</span><span class="p">:</span>
                                 <span class="n">utc_ts_line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalous_ts_csv</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
                                     <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">utc_ts_line</span><span class="p">)</span>
+                            <span class="k">del</span> <span class="n">converted</span>
 
                         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">anomalous_ts_csv</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">])</span>
                         <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
@@ -2182,11 +2321,14 @@
                             <span class="n">df</span><span class="p">,</span> <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">column_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                             <span class="n">column_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feature_extraction_settings</span><span class="o">=</span><span class="n">tsf_settings</span><span class="p">)</span>
 
+                        <span class="k">del</span> <span class="n">df</span>
+
                         <span class="c1"># Create transposed features csv</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomalous_fp_fname_out</span><span class="p">):</span>
                             <span class="c1"># Transpose</span>
                             <span class="n">df_t</span> <span class="o">=</span> <span class="n">df_features_current</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
                             <span class="n">df_t</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">anomalous_fp_fname_out</span><span class="p">)</span>
+                            <span class="k">del</span> <span class="n">df_t</span>
                         <span class="c1"># Calculate the count and sum of the features values</span>
                         <span class="n">df_sum_2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
                             <span class="n">anomalous_fp_fname_out</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -2231,19 +2373,60 @@
                                 <span class="n">new_pdiff</span> <span class="o">=</span> <span class="n">percent_different</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
                                 <span class="n">percent_different</span> <span class="o">=</span> <span class="n">new_pdiff</span>
 
-                            <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_FEATURES_PERCENT_SIMILAR</span><span class="p">:</span>
+                            <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                            <span class="c1"># Bifurcate for ionosphere_echo_check</span>
+                            <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">:</span>
+                                <span class="n">mm_use_percent_similar</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_FEATURES_PERCENT_SIMILAR</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">mm_use_percent_similar</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">mm_use_percent_similar</span> <span class="o">=</span> <span class="mf">3.5</span>
+
+                            <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                            <span class="c1"># if percent_different &lt; settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR:</span>
+                            <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;</span> <span class="n">mm_use_percent_similar</span><span class="p">:</span>
                                 <span class="n">minmax_not_anomalous</span> <span class="o">=</span> <span class="kc">True</span>
                                 <span class="c1"># log</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not anomalous - minmax scaled features profile match - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">minmax_not_anomalous</span><span class="p">)))</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                                     <span class="s1">&#39;minmax scaled calculated features sum are within </span><span class="si">%s</span><span class="s1"> percent of fp_id </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">, not anomalous&#39;</span> <span class="o">%</span>
-                                    <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_FEATURES_PERCENT_SIMILAR</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mm_use_percent_similar</span><span class="p">),</span>
                                         <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">percent_different</span><span class="p">)))</span>
+                                <span class="k">if</span> <span class="n">check_type</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo_check :: not anomalous - minmax scaled features profile match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
                             <span class="k">if</span> <span class="n">minmax_not_anomalous</span><span class="p">:</span>
                                 <span class="n">not_anomalous</span> <span class="o">=</span> <span class="kc">True</span>
                                 <span class="n">minmax</span> <span class="o">=</span> <span class="mi">1</span>
                                 <span class="c1"># Created time series resources for graphing in</span>
                                 <span class="c1"># the matched page</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">minmax_fp_ts_csv</span><span class="p">):</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_ts_csv</span><span class="p">))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">minmax_fp_fname_out</span><span class="p">):</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_fname_out</span><span class="p">))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="k">pass</span>
+
+                <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Clean up echo files</span>
+                <span class="k">if</span> <span class="n">echo_check</span><span class="p">:</span>
+                    <span class="n">echo_calculated_feature_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.echo.tsfresh.input.csv.features.transposed.csv&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="n">echo_features_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.echo.fp.details.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">echo_features_file</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_features_file</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
 
                 <span class="c1"># Clean up</span>
                 <span class="k">if</span> <span class="n">minmax_check</span><span class="p">:</span>
@@ -3117,6 +3300,66 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_non_smtp_alerter_metrics :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="p">)))</span>
 
             <span class="k">if</span> <span class="n">ionosphere_job</span><span class="p">:</span>
+
+                <span class="c1"># @added 20190326 - Feature #2484</span>
+                <span class="c1"># First process ionosphere_echo to create any missing</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ionosphere_echo_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_ENABLED</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">ionosphere_echo_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">ionosphere_echo_enabled</span><span class="p">:</span>
+                    <span class="c1"># Spawn a single process_ionosphere_echo process</span>
+                    <span class="n">function_name</span> <span class="o">=</span> <span class="s1">&#39;process_ionosphere_echo&#39;</span>
+                    <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ionosphere_processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">process_ionosphere_echo</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">))</span>
+                            <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                            <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
+                                    <span class="n">function_name</span><span class="p">))</span>
+                            <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                            <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to start </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">function_name</span><span class="p">)</span>
+                            <span class="k">continue</span>
+                    <span class="c1"># Self monitor the process and terminate if the</span>
+                    <span class="c1"># process_ionosphere_echo has run for too long</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ionosphere_echo_max_fp_create_time</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_MAX_FP_CREATE_TIME</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">ionosphere_echo_max_fp_create_time</span> <span class="o">=</span> <span class="mi">55</span>
+                    <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">ionosphere_echo_max_fp_create_time</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                            <span class="c1"># Just to avoid hogging the CPU</span>
+                            <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># All the processes are done, break now.</span>
+                            <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
+                                    <span class="n">function_name</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
+                            <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timed out, killing all </span><span class="si">%s</span><span class="s1"> processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                                <span class="c1"># p.join()</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;killed </span><span class="si">%s</span><span class="s1"> process&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: killing all </span><span class="si">%s</span><span class="s1"> processes&#39;</span> <span class="o">%</span> <span class="n">function_name</span><span class="p">)</span>
+
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                 <span class="n">function_name</span> <span class="o">=</span> <span class="s1">&#39;spin_process&#39;</span>
 
@@ -3187,7 +3430,14 @@
             <span class="c1"># @modified 20180621 - Feature #2404: Ionosphere - fluid approximation</span>
             <span class="c1"># Increase run time to 55 seconds to allow for Min-Max scaling</span>
             <span class="c1"># while time() - p_starts &lt;= 20:</span>
-            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">55</span><span class="p">:</span>
+            <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
+            <span class="c1"># Added ionosphere_echo which takes more time</span>
+            <span class="c1"># while time() - p_starts &lt;= 55:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MAX_RUNTIME</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="mi">120</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">max_ionosphere_runtime</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
                     <span class="c1"># Just to avoid hogging the CPU</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
@@ -3276,7 +3526,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

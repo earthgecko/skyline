@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_alerters &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>mirage.mirage_alerters &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -1253,7 +1254,7 @@
     <span class="c1"># This block is not used but left heve as it is the pattern for sending</span>
     <span class="c1"># messages using the chat.postMessage methods and could possibly be the</span>
     <span class="c1"># failover for a files.upload error or future messages.</span>
-    <span class="n">message_payload</span>  <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([{</span>
+    <span class="n">message_payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([{</span>
         <span class="s2">&quot;fallback&quot;</span><span class="p">:</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="n">link</span><span class="p">,</span>
         <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">slack_title</span><span class="p">,</span>
         <span class="s2">&quot;title_link&quot;</span><span class="p">:</span> <span class="n">link</span><span class="p">,</span>
@@ -1285,10 +1286,10 @@
             <span class="c1"># Added date and time info so you do not have to mouseover the slack</span>
             <span class="c1"># message to determine the time at which the alert came in</span>
             <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;\n*Ionosphere training dir* :: &lt;&#39; + ionosphere_link + &#39;|training data link&gt;&#39;</span>
-            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
+            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;&#39;</span>
-            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span>  <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">For anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
+            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">For anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># slack does not allow embedded images, nor links behind authentication</span>
@@ -1383,7 +1384,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

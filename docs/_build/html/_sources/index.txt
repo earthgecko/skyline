@@ -30,6 +30,7 @@ Contents:
   panorama
   webapp
   ionosphere
+  ionosphere_echo
   tsfresh
   luminosity
   redis-integration

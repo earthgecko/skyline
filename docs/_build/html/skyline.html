@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>skyline package &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -245,6 +246,8 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.agent">skyline.ionosphere.agent module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.common_functions">skyline.ionosphere.common_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.echo">skyline.ionosphere.echo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.ionosphere">skyline.ionosphere.ionosphere module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.layers">skyline.ionosphere.layers module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.ionosphere.html#module-ionosphere.learn">skyline.ionosphere.learn module</a></li>
@@ -289,7 +292,8 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.ionosphere_backend">skyline.webapp.ionosphere_backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.utilities">skyline.webapp.utilities module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-webapp-module">skyline.webapp.webapp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-webapp-preprocess-module">skyline.webapp.webapp.preprocess module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.webapp">skyline.webapp.webapp module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp">Module contents</a></li>
 </ul>
 </li>
@@ -2193,7 +2197,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 
 <dl class="data">
 <dt id="settings.BOUNDARY_METRICS">
-<code class="descname">BOUNDARY_METRICS</code><em class="property"> = (('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp|hipchat|pagerduty'), ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp'), ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'), ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'))</em><a class="headerlink" href="#settings.BOUNDARY_METRICS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">BOUNDARY_METRICS</code><em class="property"> = (('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp'), ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'), ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'), ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'))</em><a class="headerlink" href="#settings.BOUNDARY_METRICS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2254,7 +2258,9 @@ setting should be 1, maybe 2 maximum to ensure that signals are not being
 surpressed.  Try 1 if you are getting the occassional false positive, try 2.
 Note - Any <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.greater_than" title="boundary.boundary_algorithms.greater_than"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.greater_than()</span></code></a> metrics should have
 this as 1.</li>
-<li><strong>ALERT_VIAS</strong> (<em>str</em>) &#8211; pipe separated alerters to send to.</li>
+<li><strong>ALERT_VIAS</strong> (<em>str</em>) &#8211; pipe separated alerters to send to, valid options smtp,
+pagerduty, hipchat and slack.  This could therefore be &#8216;smtp&#8217;, &#8216;smtp|slack&#8217;,
+&#8216;pagerduty|slack&#8217;, etc</li>
 </ul>
 </td>
 </tr>
@@ -2267,7 +2273,7 @@ namespaces are a parent namespace and an absolute metric path e.g.</p>
 <li><p class="first"><strong>Examples</strong>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="s1">&#39;stats_counts.someapp.things&#39;</span><span class="p">,</span> <span class="s1">&#39;detect_drop_off_cliff&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">),</span>
 <span class="p">(</span><span class="s1">&#39;stats_counts.someapp.things.an_important_thing.requests&#39;</span><span class="p">,</span> <span class="s1">&#39;detect_drop_off_cliff&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;smtp|pagerduty&#39;</span><span class="p">),</span>
-<span class="p">(</span><span class="s1">&#39;stats_counts.otherapp.things.*.requests&#39;</span><span class="p">,</span> <span class="s1">&#39;detect_drop_off_cliff&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;smtp|hipchat&#39;</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;stats_counts.otherapp.things.*.requests&#39;</span><span class="p">,</span> <span class="s1">&#39;detect_drop_off_cliff&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;smtp|slack&#39;</span><span class="p">),</span>
 </pre></div>
 </div>
 </li>
@@ -2337,7 +2343,7 @@ the <code class="docutils literal"><span class="pre">AGGREGATION_VALUE</span></c
 
 <dl class="data">
 <dt id="settings.BOUNDARY_ALERTER_OPTS">
-<code class="descname">BOUNDARY_ALERTER_OPTS</code><em class="property"> = {'alerter_expiration_time': {'pagerduty': 1800, 'hipchat': 1800, 'smtp': 60}, 'alerter_limit': {'pagerduty': 15, 'hipchat': 30, 'smtp': 100}}</em><a class="headerlink" href="#settings.BOUNDARY_ALERTER_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">BOUNDARY_ALERTER_OPTS</code><em class="property"> = {'alerter_expiration_time': {'pagerduty': 1800, 'hipchat': 1800, 'smtp': 60, 'slack': 1800}, 'alerter_limit': {'pagerduty': 15, 'hipchat': 30, 'smtp': 100, 'slack': 30}}</em><a class="headerlink" href="#settings.BOUNDARY_ALERTER_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2397,6 +2403,20 @@ the same methodology that the alerts use, but each alerter is keyed too.</p>
 </tbody>
 </table>
 <p>PagerDuty alerts require pygerduty</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.BOUNDARY_SLACK_OPTS">
+<code class="descname">BOUNDARY_SLACK_OPTS</code><em class="property"> = {'channels': {'skyline': ('#general',), 'skyline_test.alerters.test': ('#general',)}, 'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'icon_emoji': ':chart_with_upwards_trend:'}</em><a class="headerlink" href="#settings.BOUNDARY_SLACK_OPTS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BOUNDARY_SLACK_OPTS" title="settings.BOUNDARY_SLACK_OPTS"><strong>BOUNDARY_SLACK_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your slack settings.</td>
+</tr>
+</tbody>
+</table>
+<p>slack alerts require slackclient</p>
 </dd></dl>
 
 <dl class="data">
@@ -2643,6 +2663,40 @@ timezone so that the Webapp graphs are the same in any location.</p>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.WEBAPP_PREPROCESS_TIMESERIES">
+<code class="descname">WEBAPP_PREPROCESS_TIMESERIES</code><em class="property"> = False</em><a class="headerlink" href="#settings.WEBAPP_PREPROCESS_TIMESERIES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_PREPROCESS_TIMESERIES" title="settings.WEBAPP_PREPROCESS_TIMESERIES"><strong>WEBAPP_PREPROCESS_TIMESERIES</strong></a> (<em>boolean</em>) &#8211; Allow for the time series to be aggregated by
+median or sum per minute so that webapp can return a reasonable number of
+data points for dyngraph to load and display in the browser without causing
+lag.  This is achieved by aggregating the time series using either the
+median of values or the sum as defined by
+settings.WEBAPP_PREPROCESS_AGGREGATE_BY.  At the interval defined by
+settings.  Not implemented - UNDER DEVELOPMENT</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.WEBAPP_PREPROCESS_AGGREGATE_BY">
+<code class="descname">WEBAPP_PREPROCESS_AGGREGATE_BY</code><em class="property"> = 'median'</em><a class="headerlink" href="#settings.WEBAPP_PREPROCESS_AGGREGATE_BY" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_PREPROCESS_AGGREGATE_BY" title="settings.WEBAPP_PREPROCESS_AGGREGATE_BY"><strong>WEBAPP_PREPROCESS_AGGREGATE_BY</strong></a> (<em>str</em>) &#8211; The method by which to aggregate the time
+series by.  Valid strings here are &#8216;median&#8217; and &#8216;sum&#8217;.
+settings.WEBAPP_PREPROCESS_AGGREGATE_BY. Not implemented - UNDER DEVELOPMENT</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.IONOSPHERE_CHECK_PATH">
 <code class="descname">IONOSPHERE_CHECK_PATH</code><em class="property"> = '/opt/skyline/ionosphere/check'</em><a class="headerlink" href="#settings.IONOSPHERE_CHECK_PATH" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -2684,6 +2738,20 @@ than one processor on Ionosphere in the future, should there be a
 requirement for Ionosphere to analyse the metrics quicker.  Running
 Ionosphere with more than one process is untested and currently it is
 hard coded to be 1 (<a class="reference external" href="https://github.com/earthgecko/skyline/issues/69">https://github.com/earthgecko/skyline/issues/69</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_MAX_RUNTIME">
+<code class="descname">IONOSPHERE_MAX_RUNTIME</code><em class="property"> = 120</em><a class="headerlink" href="#settings.IONOSPHERE_MAX_RUNTIME" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_MAX_RUNTIME" title="settings.IONOSPHERE_MAX_RUNTIME"><strong>IONOSPHERE_MAX_RUNTIME</strong></a> (<em>int</em>) &#8211; The maximum number of seconds an Ionosphere check
+should run for.</td>
 </tr>
 </tbody>
 </table>
@@ -2854,6 +2922,79 @@ series and the anomalous time series are within these margins.  The default
 being 0.15 (or 15 percent).  This prevents Ionosphere from Min-Max scaling
 and comparing time series that are in significantly different ranges and
 only applying Min-Max scaling comparisons when it is sensible to do so.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_ECHO_ENABLED">
+<code class="descname">IONOSPHERE_ECHO_ENABLED</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_ECHO_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ECHO_ENABLED" title="settings.IONOSPHERE_ECHO_ENABLED"><strong>IONOSPHERE_ECHO_ENABLED</strong></a> (<em>boolean</em>) &#8211; This enables Ionosphere to create and test
+features profiles for Mirage metrics but at settings.FULL_DURATION as well.
+Features profiles will be made on the fly for any existing, validated Mirage
+metric features profiles.  Ionosphere&#8217;s matching performance is increased
+between 30 to 50 percent when Ionosphere echo is run.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_ECHO_MAX_FP_CREATE_TIME">
+<code class="descname">IONOSPHERE_ECHO_MAX_FP_CREATE_TIME</code><em class="property"> = 55</em><a class="headerlink" href="#settings.IONOSPHERE_ECHO_MAX_FP_CREATE_TIME" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ECHO_MAX_FP_CREATE_TIME" title="settings.IONOSPHERE_ECHO_MAX_FP_CREATE_TIME"><strong>IONOSPHERE_ECHO_MAX_FP_CREATE_TIME</strong></a> (<em>int</em>) &#8211; The maximum number of seconds an
+Ionosphere echo process should run creating FULL_DURATION features profiles
+for created Mirage features profiles.  This setting is specifically relevant
+for Skyline implematations pre Ionosphere echo (v1.2.12) to prevent timeouts
+if Ionosphere echo needs to make &gt; 30 echo features profiles for Mirage
+metrics with lots of existing features profiles.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR">
+<code class="descname">IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR</code><em class="property"> = 2.5</em><a class="headerlink" href="#settings.IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR"><strong>IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR</strong></a> (<em>float</em>) &#8211; In terms of Ionosphere echo a
+value of 2.0 is the default.  This default is above the normal
+IONOSPHERE_FEATURES_PERCENT_SIMILAR due to that fact that the the resolution
+of Ionosphere echo is at FULL_DURATION.  During testing this value was
+tested at 1.0, 2 and 2.5, with 2.5 resulting in the most desirable results
+in terms of matching time series that are similarly not anomalous.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR">
+<code class="descname">IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR</code><em class="property"> = 3.5</em><a class="headerlink" href="#settings.IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR"><strong>IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR</strong></a> (<em>float</em>) &#8211; In terms of
+Ionosphere echo Min-Max scaling percentage similar, a value of 3.5 is the
+default.  This default is above the normal IONOSPHERE_FEATURES_PERCENT_SIMILAR
+due to that fact that the the resolution of Ionosphere echo is at FULL_DURATION
+and echo is using the normal IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE to
+determine if Min-Max scaling should be run.  During testing this value was
+tested at 1, 2 and 3.5, with 3.5 resulting in the most desirable results in
+terms of matching time series that are similarly not anomalous.</td>
 </tr>
 </tbody>
 </table>
@@ -3732,7 +3873,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

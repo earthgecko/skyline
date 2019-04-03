@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Overview &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>Overview &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
         <link rel="next" title="Requirements" href="requirements.html"/>
         <link rel="prev" title="Skyline documentation" href="index.html"/> 
 
@@ -116,6 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -181,20 +182,23 @@
 <p>Welcome to Skyline.</p>
 <div class="section" id="what-is-skyline">
 <h2>What is Skyline?<a class="headerlink" href="#what-is-skyline" title="Permalink to this headline">¶</a></h2>
-<p>For those interested in anomaly detection and deflection in streamed time series
+<p>Skyline is your ears and eyes, it is remarkably good at telling you when a state
+changes.  It does not just chew bubblegum, it blows bubbles too.</p>
+<p>But really Skyline is ...
+For those interested in anomaly detection and deflection in streamed time series
 data.</p>
 <p>Anomaly deflection.  The obvious next evolution in the use of all the anomaly
 detection data?</p>
 <p>Skyline is a Python based anomaly detection/deflection stack that analyses,
 anomaly detects, deflects, fingerprints and learns vast amounts of streamed
-time series data.</p>
+time series data.  Skyline has a number of isolated modules/apps that:</p>
 <ul class="simple">
-<li>Skyline ingests streamed metric time series data - skyline/horizon</li>
-<li>Skyline uses a <code class="docutils literal"><span class="pre">`CONSENSUS`</span></code> of 3-sigma algorithms to detect anomalies on
+<li>ingests streamed metric time series data - skyline/horizon</li>
+<li>use a <code class="docutils literal"><span class="pre">`CONSENSUS`</span></code> of 3-sigma algorithms to detect anomalies on
 batch processed, streamed metric time series data - skyline/analyzer - anomaly
 detector</li>
-<li>It handles large and small seasonality in the data - skyline/mirage -
-anomaly deflector and detector</li>
+<li>Handle large and small seasonality in the data - skyline/mirage - anomaly
+deflector and detector</li>
 <li>You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
 anomaly deflector</li>
 <li>It records all your anomalies - skyline/panorama - anomaly memory</li>
@@ -275,10 +279,10 @@ system. It was originally built to enable passive monitoring of hundreds of
 thousands of metrics, without the need to configure a model/thresholds for each
 one, as you might do with Nagios.  It was designed to be used wherever there are
 a large quantity of high-resolution time series which need constant monitoring.
-Once a metric stream was set up (from statsd, Graphite or other), additional
-metrics are automatically added to Skyline for analysis, anomaly detection,
-alerting and briefly published in the Webapp frontend.  <a class="reference external" href="https://github.com/etsy/skyline">github/etsy</a> stopped
-actively maintaining Skyline in 2014.</p>
+Once a metric stream was set up from Graphite, additional metrics are
+automatically added to Skyline for analysis, anomaly detection, alerting and
+briefly published in the Webapp frontend.  <a class="reference external" href="https://github.com/etsy/skyline">github/etsy</a> stopped actively
+maintaining Skyline in 2014.</p>
 </div>
 <div class="section" id="skyline-as-a-work-in-progress">
 <h2>Skyline - as a work in progress<a class="headerlink" href="#skyline-as-a-work-in-progress" title="Permalink to this headline">¶</a></h2>
@@ -358,7 +362,7 @@ development of Skyline is not focused on making it be better than other things
 or the best, it is focused on trying to make Skyline better than it was and
 currently is.  Unfortunately Skyline no longer fits the NAB benchmark method as
 it&#8217;s methods operate exclusively in the real time arena on real time data,
-historic data and trained patternsand this could not be bolted into a NAB test
+historic data and trained patterns and this could not be bolted into a NAB test
 and would violate the NAB benchmark requirements.</p>
 </div>
 <div class="section" id="the-new-look-of-skyline-apps">
@@ -476,7 +480,7 @@ Steinbach&#8217;s excellent <a class="reference external" href="https://github.c
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -251,6 +251,8 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
   `validated` INT(10) DEFAULT 0 COMMENT 'unix timestamp when validated, 0 being none',
 /* # @added 20170305 - Feature #1960: ionosphere_layers */
   `layers_id` INT(11) DEFAULT 0 COMMENT 'the id of the ionosphere_layers profile, 0 being none',
+/* # @added 20190328 - Feature #2484: FULL_DURATION feature profiles */
+  `echo_fp` tinyint(1) DEFAULT 0 COMMENT 'an echo features profile, 1 being yes and 0 being no',
   PRIMARY KEY (id),
 /*
 # @modified 20180821 - Bug #2546: Fix SQL errors

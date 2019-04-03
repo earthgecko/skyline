@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>boundary.boundary_alerters &mdash; Skyline 1.2.9-stable documentation</title>
+  <title>boundary.boundary_alerters &mdash; Skyline 1.2.11 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.9-stable documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -181,11 +182,20 @@
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="c1"># @added 20181126 - Task #2742: Update Boundary</span>
+<span class="c1">#                   Feature #2618: alert_slack</span>
+<span class="c1"># Added dt, redis, gmtime and strftime</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">redis</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="p">(</span><span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span><span class="p">)</span>
+
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">email.MIMEMultipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
     <span class="kn">from</span> <span class="nn">email.MIMEText</span> <span class="k">import</span> <span class="n">MIMEText</span>
     <span class="kn">from</span> <span class="nn">email.MIMEImage</span> <span class="k">import</span> <span class="n">MIMEImage</span>
+    <span class="kn">from</span> <span class="nn">email</span> <span class="k">import</span> <span class="n">charset</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">email.mime.multipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
     <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="k">import</span> <span class="n">MIMEText</span>
@@ -194,6 +204,10 @@
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="kn">import</span> <span class="nn">settings</span>
+<span class="c1"># @added 20181126 - Task #2742: Update Boundary</span>
+<span class="c1">#                   Feature #2034: analyse_derivatives</span>
+<span class="c1">#                   Feature #2618: alert_slack</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;boundary&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -276,19 +290,66 @@
 
     <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Boundary - </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">alert_context</span><span class="p">,</span> <span class="n">graphite_previous_hours</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">)</span>
+
+    <span class="c1"># @added 20181126 - Task #2742: Update Boundary</span>
+    <span class="c1">#                   Feature #2034: analyse_derivatives</span>
+    <span class="c1"># Added deriative functions to convert the values of metrics strictly</span>
+    <span class="c1"># increasing monotonically to their deriative products in alert graphs and</span>
+    <span class="c1"># specify it in the graph_title</span>
+    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Boundary - </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">alert_context</span><span class="p">,</span> <span class="n">graphite_previous_hours</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">)</span>
+
     <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
 
+    <span class="c1"># @added 20181126 - Bug #2498: Incorrect scale in some graphs</span>
+    <span class="c1">#                   Task #2742: Update Boundary</span>
+    <span class="c1"># If -xhours is used the scale is incorrect if x hours &gt; than first</span>
+    <span class="c1"># retention period, passing from and until renders the graph with the</span>
+    <span class="c1"># correct scale.</span>
+    <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;80&#39;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span>
-            <span class="n">graphite_previous_hours</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span>
-            <span class="n">graph_title</span><span class="p">,</span> <span class="n">graphite_graph_line_color</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=-</span><span class="si">%s</span><span class="s1">hour&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">graphite_previous_hours</span><span class="p">,</span>
-            <span class="n">metric_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span>
-            <span class="n">graphite_graph_line_color</span><span class="p">)</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">)</span>
+    <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">from_seconds_ago</span> <span class="o">=</span> <span class="n">graphite_previous_hours</span> <span class="o">*</span> <span class="mi">3600</span>
+    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">until_timestamp</span> <span class="o">-</span> <span class="n">from_seconds_ago</span>
+    <span class="n">graphite_from</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">))</span>
+    <span class="n">graphite_until</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_until - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">))</span>
+    <span class="n">graphite_target</span> <span class="o">=</span> <span class="s1">&#39;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)&#39;</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">graphite_target</span> <span class="o">=</span> <span class="s1">&#39;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))&#39;</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;</span><span class="si">%s%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">graphite_port</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">graphite_target</span><span class="p">,</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span>
+        <span class="n">graphite_graph_line_color</span><span class="p">)</span>
 
     <span class="n">content_id</span> <span class="o">=</span> <span class="n">metric_name</span>
     <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -380,7 +441,6 @@
             <span class="n">notify_rooms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rooms</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">room</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_HIPCHAT_OPTS</span><span class="p">[</span><span class="s1">&#39;rooms&#39;</span><span class="p">]:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">room</span><span class="p">)</span>
                 <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">room</span>
                 <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
                 <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
@@ -452,6 +512,210 @@
         <span class="k">return</span> <span class="kc">False</span></div>
 
 
+<span class="c1"># @added 20181126 - Task #2742: Update Boundary</span>
+<span class="c1">#                   Feature #2618: alert_slack</span>
+<div class="viewcode-block" id="alert_slack"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.alert_slack">[docs]</a><span class="k">def</span> <span class="nf">alert_slack</span><span class="p">(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="kn">from</span> <span class="nn">slackclient</span> <span class="k">import</span> <span class="n">SlackClient</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_name</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - anomalous metric :: metric: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span>
+    <span class="n">alert_algo</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+    <span class="n">alert_context</span> <span class="o">=</span> <span class="n">alert_algo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="c1"># The known_derivative_metric state is determine in case we need to surface</span>
+    <span class="c1"># the png image from Graphite if the Ionosphere image is not available for</span>
+    <span class="c1"># some reason.  This will result in Skyline at least still sending an alert</span>
+    <span class="c1"># to slack, even if some gear fails in Ionosphere or slack alerting is used</span>
+    <span class="c1"># without Ionosphere enabled. Yes not DRY but multiprocessing and spawn</span>
+    <span class="c1"># safe.</span>
+    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - redis connection failed&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Boundary - ALERT </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_previous_hours</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="n">slack_title</span> <span class="o">=</span> <span class="s1">&#39;*Skyline Boundary - ALERT* </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">alert_context</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_previous_hours</span><span class="p">),</span> <span class="n">datapoint</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline Boundary - ALERT </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_previous_hours</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="n">slack_title</span> <span class="o">=</span> <span class="s1">&#39;*Skyline Boundary - ALERT* </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">alert_context</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_previous_hours</span><span class="p">),</span> <span class="n">datapoint</span><span class="p">)</span>
+
+    <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
+
+    <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">target_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">graphite_previous_hours</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span> <span class="o">-</span> <span class="n">target_seconds</span><span class="p">)</span>
+
+    <span class="n">graphite_from</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">))</span>
+    <span class="n">graphite_until</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_until - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">))</span>
+    <span class="c1"># @added 20181025 - Feature #2618: alert_slack</span>
+    <span class="c1"># Added date and time info so you do not have to mouseover the slack</span>
+    <span class="c1"># message to determine the time at which the alert came in</span>
+    <span class="n">timezone</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Z&quot;</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">())</span>
+    <span class="c1"># @modified 20181029 - Feature #2618: alert_slack</span>
+    <span class="c1"># Use the standard UNIX data format</span>
+    <span class="c1"># human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;)</span>
+    <span class="n">human_anomaly_time</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%c</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">slack_time_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">human_anomaly_time</span><span class="p">,</span> <span class="n">timezone</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+
+    <span class="c1"># slack does not allow embedded images, nor will it fetch links behind</span>
+    <span class="c1"># authentication so Skyline uploads a png graphite image with the message</span>
+    <span class="n">image_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Fetch the png from Graphite</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">link</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
+    <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - failed to get image graph&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
+        <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">image_data</span><span class="p">:</span>
+        <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.graphite.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">graphite_previous_hours</span><span class="p">)))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">image_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">image_data</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - added Graphite image :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">image_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: alert_slack - failed to add </span><span class="si">%s</span><span class="s1"> Graphite image&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">image_file</span><span class="p">))</span>
+            <span class="n">image_file</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">image_file</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">bot_user_oauth_access_token</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;bot_user_oauth_access_token&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not determine bot_user_oauth_access_token&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Allow for absolute path metric namespaces but also allow for and match</span>
+    <span class="c1"># match wildcard namepaces if there is not an absolute path metric namespace</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+    <span class="n">notify_channels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">matched_channels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;channels&#39;</span><span class="p">][</span><span class="n">metric_name</span><span class="p">]</span>
+        <span class="n">notify_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;channels&#39;</span><span class="p">]:</span>
+            <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">channel</span>
+            <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
+            <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                <span class="n">matched_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">matched_channels</span> <span class="o">!=</span> <span class="p">[]:</span>
+        <span class="k">for</span> <span class="n">i_metric_name</span> <span class="ow">in</span> <span class="n">matched_channels</span><span class="p">:</span>
+            <span class="n">channels</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;channels&#39;</span><span class="p">][</span><span class="n">i_metric_name</span><span class="p">]</span>
+            <span class="n">notify_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">notify_channels</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not determine channel&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="n">notify_channels</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">icon_emoji</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;icon_emoji&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">icon_emoji</span> <span class="o">=</span> <span class="s1">&#39;:chart_with_upwards_trend:&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sc</span> <span class="o">=</span> <span class="n">SlackClient</span><span class="p">(</span><span class="n">bot_user_oauth_access_token</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not initiate SlackClient&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+        <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">For anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># slack does not allow embedded images, nor links behind authentication</span>
+            <span class="c1"># or color text, so we have jump through all the API hoops to end up</span>
+            <span class="c1"># having to upload an image with a very basic message.</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">image_file</span><span class="p">):</span>
+                <span class="n">slack_file_upload</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">api_call</span><span class="p">(</span>
+                    <span class="s1">&#39;files.upload&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span>
+                    <span class="n">initial_comment</span><span class="o">=</span><span class="n">initial_comment</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - failed to send slack message&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">send_text</span> <span class="o">=</span> <span class="n">initial_comment</span> <span class="o">+</span> <span class="s1">&#39;  ::  error :: there was no graph image to upload&#39;</span>
+                <span class="n">send_message</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">api_call</span><span class="p">(</span>
+                    <span class="s1">&#39;chat.postMessage&#39;</span><span class="p">,</span>
+                    <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span>
+                    <span class="n">icon_emoji</span><span class="o">=</span><span class="n">icon_emoji</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">send_text</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">send_message</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - failed to send slack message&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - sent slack message&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not upload file&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
 <div class="viewcode-block" id="trigger_alert"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_alerters.trigger_alert">[docs]</a><span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">alerter</span> <span class="o">==</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
@@ -462,8 +726,8 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="nb">getattr</span><span class="p">(</span><span class="n">boundary_alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alerters - </span><span class="si">%s</span><span class="s1"> - getattr error&#39;</span> <span class="o">%</span> <span class="n">strategy</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alerters - </span><span class="si">%s</span><span class="s1"> - getattr error&#39;</span> <span class="o">%</span> <span class="n">strategy</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -497,7 +761,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.9-stable',
+            VERSION:'1.2.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

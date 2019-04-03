@@ -108,7 +108,10 @@ def less_than(timeseries, metric_name, metric_expiration_time, metric_min_averag
     """
     A timeseries is anomalous if the datapoint is less than metric_trigger
     """
-    if len(timeseries) < 10:
+    # @modified 20190312 - Task #2862: Allow Boundary to analyse short time series
+    #                      https://github.com/earthgecko/skyline/issues/88
+    # if len(timeseries) < 10:
+    if len(timeseries) < 1:
         return False
 
     if timeseries[-1][1] < metric_trigger:
@@ -124,8 +127,10 @@ def greater_than(timeseries, metric_name, metric_expiration_time, metric_min_ave
     """
     A timeseries is anomalous if the datapoint is greater than metric_trigger
     """
-
-    if len(timeseries) < 10:
+    # @modified 20190312 - Task #2862: Allow Boundary to analyse short time series
+    #                      https://github.com/earthgecko/skyline/issues/88
+    # if len(timeseries) < 10:
+    if len(timeseries) < 1:
         return False
 
     if timeseries[-1][1] > metric_trigger:
@@ -293,10 +298,14 @@ def run_selected_algorithm(
                 metric_name, algorithm))
 
     # Get rid of short series
-    if len(timeseries) < MIN_TOLERABLE_LENGTH:
-        if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: TooShort - %s, %s' % (metric_name, algorithm))
-        raise TooShort()
+    # @modified 20190312 - Task #2862: Allow Boundary to analyse short time series
+    #                      https://github.com/earthgecko/skyline/issues/88
+    # Allow class as TooShort if the algorithm is detect_drop_off_cliff
+    if algorithm == 'detect_drop_off_cliff':
+        if len(timeseries) < MIN_TOLERABLE_LENGTH:
+            if ENABLE_BOUNDARY_DEBUG:
+                logger.info('debug :: TooShort - %s, %s' % (metric_name, algorithm))
+            raise TooShort()
 
     # Get rid of stale series
     if time() - timeseries[-1][0] > STALE_PERIOD:
@@ -333,7 +342,10 @@ def run_selected_algorithm(
                 logger.info('debug :: TooShort - %s, %s' % (metric_name, algorithm))
             raise TooShort()
 
-    if len(timeseries) < 10:
+    # @modified 20190312 - Task #2862: Allow Boundary to analyse short time series
+    #                      https://github.com/earthgecko/skyline/issues/88
+    # if len(timeseries) < 10:
+    if len(timeseries) < 1:
         if ENABLE_BOUNDARY_DEBUG:
             logger.info(
                 'debug :: timeseries too short - %s - timeseries length - %s' % (
