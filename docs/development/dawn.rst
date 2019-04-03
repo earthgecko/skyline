@@ -6,8 +6,8 @@ Build script - utils/dawn/skyline.dawn.sh
 =========================================
 
 The Skyline dawn branch adds a build script for **TESTING** only, it is not
-recommended for production use.  However seeing as it they may be used by people
-for testing, they are written to try and ensure secure a set up as possible,
+recommended for production use.  However seeing as it may be used by people
+for testing, it is written to try and ensure secure a set up as possible,
 with the exception of the definitions of iptables/iptables6/ufw.  It should not
 be used to deploy any other kind of environment unless the other components such
 as Graphite, iptables/iptables6/ufw are configured at the same time.  The build
@@ -35,11 +35,11 @@ following:
 - Install Apache and deploys the Skyline reverse proxy vhost config and creates
   the htpasswd resource
 - Creates a self-signed SSL certificate for the Skyline reverse proxy vhost
-- Deploys the Skyline settings.py with the declared variables
+- Deploys the Skyline ``skyline/settings.py`` with the declared variables
 - Creates the Skyline MySQL/mariadb database and grants privileges
 - Starts the Skyline services
-- Seeds Skyline with an anomalous time series data for horizon.test.udp and
-  which creates an anomaly to be reviewed in the Skyline UI
+- Seeds Skyline with an anomalous time series data for ``horizon.test.udp``
+  metric and which creates an anomaly to be reviewed in the Skyline webapp UI
 - The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
   be run in an idempotent manner.
 
@@ -47,7 +47,7 @@ Example usage:
 
 .. code-block:: bash
 
-  # Fetch needs wget installed
+  # Fetch
   wget -O /tmp/skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
   # Always review scripts before running them
   cat /tmp/skyline.dawn.sh
@@ -57,6 +57,7 @@ Example usage:
   # Determine public IP address
   USE_IP=$(ifconfig | grep -v "127.0.0.1" | grep "inet addr:" | cut -d':' -f2 | cut -d' ' -f1)
   if [ -f /etc/redhat-release ]; then
+    yum -y install net-tools
     CENTOS_7=$(cat /etc/redhat-release | grep -c "release 7\.")
     if [ $CENTOS_7 -eq 1 ]; then
       USE_IP=$(ifconfig | grep -v "127.0.0.1" | grep "inet " | sed -e 's/.*inet //g;s/ .*//g')
@@ -76,6 +77,10 @@ Example usage:
   MYSQL_SKYLINE_PASSWORD="SET_THE_SKYLINE_MYSQL_USER_PASSWORD"  # The Skyline DB user password
   REDIS_PASSWORD="SET_A_REALLY_REALLY_LONG_Redis_PASSWORD"      # The Redis password
   SKYLINE_RELEASE="master"                                      # The Skyline release/branch/commit to deploy' > /etc/skyline/skyline.dawn.conf
+  # Check that the configurations are as desired, specifically check that
+  # the IP address declared in YOUR_SERVER_IP_ADDRESS from the USE_IP variable
+  # is correct
+  cat /etc/skyline/skyline.dawn.conf
   # Run it
   chmod 0755 /tmp/skyline.dawn.sh
   /tmp/skyline.dawn.sh

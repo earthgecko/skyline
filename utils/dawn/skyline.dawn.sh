@@ -483,6 +483,10 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
     apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev \
       libreadline6-dev libgdbm-dev libncurses5 libncurses5-dev libncursesw5 \
       libfreetype6-dev libxft-dev python-pip wget tar git
+# @added 20190129 - Info #2826: pandas and numpy no longer supporting Python 2.7
+# On Ubuntu 16.04 Python 3.7 requires libffi-dev as per
+# https://github.com/pyenv/pyenv/issues/1183
+    apt-get -y install libffi-dev
   fi
   pip install virtualenv==${VIRTUALENV_VERSION}
   PIP_EXIT_CODE=$?
@@ -591,6 +595,7 @@ if [ ! -d /opt/skyline/github/skyline/.git ]; then
 # Added permissions for skyline user
   chown skyline:skyline -R /opt/skyline/github
 else
+  chown skyline:skyline -R /opt/skyline/github
   echo "Skipping cloning Skyline, already done."
 fi
 
@@ -609,6 +614,9 @@ if [ ! -f "/tmp/skyline.dawn.skyline.${SKYLINE_RELEASE}.txt" ]; then
   chown skyline:skyline -R /opt/skyline/github
   /bin/cp -f /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
 else
+  if [ ! -f /etc/skyline/skyline.conf ]; then
+    /bin/cp -f /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
+  fi
   echo "Skipping checking out Skyline at $SKYLINE_RELEASE, already done."
   sleep 1
 fi
@@ -636,7 +644,8 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
   # As of statsmodels 0.9.0 scipy, et al need to be installed before
   # statsmodels in requirements
   # https://github.com/statsmodels/statsmodels/issues/4654
-  bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
+  bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
+  bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
 
   # This can take lots of minutes...
   bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
@@ -912,7 +921,9 @@ echo "Skyline test deployment completed successfully."
 echo ""
 echo ""
 echo "REMEMBER THIS IS A TEST DEPLOYMENT AND SHOULD BE DESTROYED, there are no firewall rules and no inits"
-echo "and Skyline is running as root"
+# @modified 20180915 - Feature #2550: skyline.dawn.sh
+# Use the skyline user
+# echo "and Skyline is running as root"
 echo "There is no GRAPHITE_HOST configured and there are some errors expected in the logs"
 echo "related to no rows in MySQL tables and memcache, etc"
 echo ""

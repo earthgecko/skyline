@@ -52,20 +52,19 @@ What the components do
   separate application that will probably be running on another server, although
   Graphite could run on the same server, in a production environment it would
   probably be a remote machine or container.  Graphite is not part of Skyline.
-- Redis - stores mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
-  of time series data.  Redis must run on the same host as Skyline.  It may be
-  possible to run Redis in another container or VM that was on the same host,
-  but this has not been tested.
-- MySQL - stores data about anomalies and time series features fingerprints for
-  learning things that are not anomalous.  MySQL ideally should run on the same
-  host as Skyline or in another container or VM that was on the same host,
-  but this has not been tested.
+- Redis - stores :mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
+  of time series data that Graphite sends to Skyline Horizon.  Skyline Analyzer
+  pulls the data from Redis for analysis.  Redis must run on the same host as
+  Skyline.  It may be possible to run Redis in another container or VM that was
+  on the same host, but this has not been tested.
+- MySQL/mariadb - stores data about anomalies and time series features
+  fingerprints for learning things that are not anomalous.  MySQL can run on the
+  same host as Skyline or it can be remote.
 - Apache (or nginx) - serves the Skyline webapp via gunicorn and handles SSL
   termination and basic http auth.  Ideally should run on the same host as
   Skyline.
-- memcached - caches Ionosphere MySQL data, must run on the same host as Skyline
-  or perhaps in another container or VM that was on the same host, but this has
-  not been tested.
+- memcached - caches Ionosphere MySQL data, memcached should ideally be run on
+  the same host as Skyline.
 
 ``sudo``
 ~~~~~~~~
@@ -80,6 +79,17 @@ Steps
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
 
+Skyline configuration
+~~~~~~~~~~~~~~~~~~~~~
+
+All Skyline configuration is handled in ``skyline/settings.py`` and in this
+documentation configuration options are referred to via their docstrings name
+e.g. :mod:`settings.FULL_DURATION` which links to their description in the
+documentation.
+
+Firewall
+~~~~~~~~
+
 - Create a python-2.7.14 virtualenv for Skyline to run in see `Running in
   Python virtualenv <running-in-python-virtualenv.html>`__
 - Please set up all the firewall rules to restrict access to the following
@@ -90,9 +100,9 @@ Steps
     specified IPs in iptables/ip6tables (further these addresses should also be
     added to the reverse proxy conf as ``Allow from`` defines when you create
     the reverse proxy conf file).
-  - The IP address and port being used by MySQL, if you are not binding MySQL to
-    127.0.0.1 only, ensure that the MySQL port declared in
-    :mod:`settings.PANORAMA_DBPORT` (default 3306) is only accessible to
+  - The IP address and port being used by MySQL/mariadb, if you are not binding
+    MySQL/mariadb to 127.0.0.1 only, ensure that the MySQL/mariadb port declared
+    in :mod:`settings.PANORAMA_DBPORT` (default 3306) is only accessible to
     specified IPs in iptables/ip6tables
   - Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
     default Graphite pickle ports)
@@ -104,9 +114,17 @@ Steps
   - Please ensure you handle all of these with iptables AND ip6tables (or the
     equivalent) before continuing.
 
+Dawn
+~~~~
+
 - Should you wish to review the build steps, component builds and installs
-  described below, there is a build script for **testing** purposes **only** in
-  utils/dawn/skyline.dawn.sh see `Dawn <development/dawn.html>`__ section)
+  described below, there is a convenience build script for **testing** purposes
+  **only** in `utils/dawn/skyline.dawn.sh` see
+  `Dawn <development/dawn.html>`__ section)
+
+Redis
+~~~~~
+
 - Install Redis - see `Redis.io <http://redis.io/>`__
 - Ensure that you review https://redis.io/topics/security
 - Ensure Redis has socket enabled **with the following permissions** in your
@@ -127,9 +145,17 @@ Steps
   instances, Skyline gets remote Redis data preprocessed via a Skyline API so
   there is no need to bind Redis to any other IP.
 - Start Redis
+
+memcached
+~~~~~~~~~
+
 - Install memcached and start memcached see `memcached.org <https://memcached.org/>`__
 - Ensure that you start memcached only bound to 127.0.0.1 by passing the daemon
   the option ``-l 127.0.0.1``, Skyline only requires memcached locally.
+
+Skyline directories
+~~~~~~~~~~~~~~~~~~~
+
 - Make the required directories
 
 .. code-block:: bash
@@ -145,6 +171,13 @@ Steps
     mkdir -p /opt/skyline/ionosphere
     mkdir /etc/skyline
     mkdir /tmp/skyline
+
+.. note:: Ensure you provide the appropriate ownership and permissions to the
+  above specified directories for the user you wish to run the Skyline process
+  as.
+
+Skyline and dependencies install
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - git clone Skyline (git should have been installed in the `Running in Python
   virtualenv <running-in-python-virtualenv.html>`__ section) and it is
@@ -185,7 +218,8 @@ Steps
     # As of statsmodels 0.9.0 numpy, et al need to be installed before
     # statsmodels in requirements
     # https://github.com/statsmodels/statsmodels/issues/4654
-    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
 
     # This can take lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
@@ -200,6 +234,9 @@ Steps
 
     cp /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
     vi /etc/skyline/skyline.conf  # Set USE_PYTHON as appropriate to your setup
+
+Apache reverse proxy
+~~~~~~~~~~~~~~~~~~~~
 
 - OPTIONAL but **recommended**, serving the Webapp via gunicorn with an Apache
   reverse proxy.
@@ -235,13 +272,21 @@ Steps
   :mod:`settings.WEBAPP_AUTH_USER` and :mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
 
 - Deploy your Skyline Apache configuration file and restart httpd.
-- Create the Skyline MySQL database for Panorama (see
+
+Skyline database
+~~~~~~~~~~~~~~~~
+
+- Create the Skyline MySQL/mariadb database for Panorama (see
   `Panorama <panorama.html>`__) and Ionosphere.
-- Edit the ``settings.py`` file and enter your appropriate settings,
+
+Skyline settings
+~~~~~~~~~~~~~~~~
+
+- Edit the ``skyline/settings.py`` file and enter your appropriate settings,
   specifically ensure you set the following variables to the correct
   settings for your environment, see the documentation links and docstrings in
-  the `settings.py` file for the full descriptions of each variable.  Below are
-  the variables you must set:
+  the ``skyline/settings.py`` file for the full descriptions of each variable.
+  Below are the variables you must set:
 
   - :mod:`settings.REDIS_SOCKET_PATH` if different from ```/tmp/redis.sock```
   - :mod:`settings.REDIS_PASSWORD`
@@ -294,8 +339,13 @@ Steps
 - For later implementing and working with Ionosphere and setting up learning (see
   `Ionosphere <ionosphere.html>`__) after you have the other Skyline apps up and
   running.
+
 - If you are **upgrading**, at this point return to the
   `Upgrading <upgrading/index.html>`__ page.
+
+Starting and testing the Skyline installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 - Before you test Skyline by seeding Redis with some test data, ensure
   that you have configured the firewall/iptables/ip6tables with the appropriate
   restricted access.
@@ -315,8 +365,8 @@ Steps
   no errors.
 
 .. note:: When checking a log make sure you check the log for the appropriate
-  time, Skyline can log lots fast, so short tails may miss some event you
-  expect between that restart and tail.
+  time, Skyline can log fast, so short tails may miss some event you expect
+  between the restart and tail.
 
 .. code-block:: bash
 
@@ -362,13 +412,23 @@ Steps
   no errors.
 - Once you have your :mod:`settings.ALERTS` configured to test them see
   `Alert testing <alert-testing.html>`__
+
+Configure Graphite to send data to Skyline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 - Now you can configure your Graphite to pickle data to Skyline see
   `Getting data into Skyline <getting-data-into-skyline.html>`__
 - If you have opted to not set up Panorama, later see set up
   `Panorama <panorama.html>`__
+
+Other Skyline components
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 - For Mirage set up see `Mirage <mirage.html>`__
 - For Boundary set up see `Boundary <boundary.html>`__
-- For Ionosphere set up see `Ionosphere <ionosphere.html>`__
+- For more in-depth Ionosphere set up see `Ionosphere <ionosphere.html>`__
+  however Ionosphere is only relevant once Skyline has at least
+  :mod:`settings.FULL_DURATION` data in Redis.
 
 Automation and configuration management notes
 ---------------------------------------------
