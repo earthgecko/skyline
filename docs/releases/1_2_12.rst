@@ -4,6 +4,16 @@
 
 v1.2.12 - April 3, 2019
 
+DOWNGRADED
+----------
+
+Downgrade to a pre-release - April 4, 2019
+
+To add a mechanism that reduces to initial load on Ionosphere when Ionosphere
+echo is enabled if there are a lot of existing Mirage feature profiles and to
+add some self load management to Ionosphere in general under the new Ionosphere
+echo paradigm.
+
 New functionality
 -----------------
 
