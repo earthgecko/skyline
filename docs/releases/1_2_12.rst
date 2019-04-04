@@ -4,8 +4,10 @@
 
 v1.2.12 - April 3, 2019
 
-DOWNGRADED
-----------
+Stable for new installs.  Beta if upgrading.
+
+DOWNGRADED to a pre-release as an update
+----------------------------------------
 
 Downgrade to a pre-release - April 4, 2019
 
