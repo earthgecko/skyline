@@ -19,3 +19,4 @@ mkdir -p /opt/skyline/ionosphere
 mkdir -p /etc/skyline
 mkdir -p /tmp/skyline
 
+cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
