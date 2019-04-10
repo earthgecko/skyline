@@ -42,10 +42,10 @@ YOUR_EMAIL="skyline@wix.com"                                # YOUR email address
 YOUR_OTHER_IP_ADDRESS="0.0.0.0"                          # YOUR current public IP address that you will be connecting from
 WEBAPP_AUTH_USER="admin"                                   # The username you want to use for http authentication
 WEBAPP_AUTH_USER_PASSWORD="$(echo {$HOSTNAME}_skyline)"    # The password you want to use for http authentication
-MYSQL_ROOT_PASSWORD="9N4J3axNpffgYKr8tBqm$"     # The MySQL root user password
-MYSQL_SKYLINE_PASSWORD="9N4J3axNpffgYKr8tBqm$"  # The Skyline DB user password
-REDIS_PASSWORD="9N4J3axNpffgYKr8tBqm$"       # The Redis password
-SKYLINE_RELEASE="v1.2.6-stable-luminosity"                 # The Skyline release to deploy
+MYSQL_ROOT_PASSWORD="XXXXXXXXX"     # The MySQL root user password
+MYSQL_SKYLINE_PASSWORD="XXXXXXXXX"  # The Skyline DB user password
+REDIS_PASSWORD="XXXXXXXXX"       # The Redis password
+SKYLINE_RELEASE="v1.2.12"                 # The Skyline release to deploy
 
 STARTED=$(date)
 #### Check if the user added variables in /etc/skyline/skyline.dawn.conf ####
