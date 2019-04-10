@@ -30,3 +30,5 @@ cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
 bin/horizon.d start
 bin/analyzer.d start
 bin/webapp.d start
+
+tail -f /var/log/skyline/*
