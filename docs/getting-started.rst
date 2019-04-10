@@ -72,7 +72,7 @@ Start with Horizon, Analyzer, Webapp, Luminosity and Panorama
 
 It is advisable to only start the Horizon, Analyzer, Luminosity, Webapp and
 Panorama daemons initially and take time to understand what Skyline is doing.
-Take some time to tune Analyzer's mod:`settings.ALERTS` and learn the patterns
+Take some time to tune Analyzer's :mod:`settings.ALERTS` and learn the patterns
 in your IMPORTANT metrics:
 
 - which metrics trigger anomalies?
