@@ -36,15 +36,15 @@
 # Please replace the values here and populate these variables as appropriate
 # with the values of YOUR set up or write them to /etc/skyline/skyline.dawn.conf
 # to be sourced.
-YOUR_SERVER_IP_ADDRESS="127.0.0.1"                         # YOUR Skyline server public IP address
-YOUR_SKYLINE_SERVER_FQDN="skyline-test.example.com"        # YOUR Skyline server FQDN
-YOUR_EMAIL="me@example.com"                                # YOUR email address for the httpd server admin
-YOUR_OTHER_IP_ADDRESS="127.0.0.1"                          # YOUR current public IP address that you will be connecting from
+YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep -o "inet.*" | cut -d " " -f2)"                         # YOUR Skyline server public IP address
+YOUR_SKYLINE_SERVER_FQDN="$(hostname -f)"        # YOUR Skyline server FQDN
+YOUR_EMAIL="skyline@wix.com"                                # YOUR email address for the httpd server admin
+YOUR_OTHER_IP_ADDRESS="0.0.0.0"                          # YOUR current public IP address that you will be connecting from
 WEBAPP_AUTH_USER="admin"                                   # The username you want to use for http authentication
 WEBAPP_AUTH_USER_PASSWORD="$(echo {$HOSTNAME}_skyline)"    # The password you want to use for http authentication
-MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user password
-MYSQL_SKYLINE_PASSWORD="set_the-skyline-user-db-password"  # The Skyline DB user password
-REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
+MYSQL_ROOT_PASSWORD="9N4J3axNpffgYKr8tBqm$"     # The MySQL root user password
+MYSQL_SKYLINE_PASSWORD="9N4J3axNpffgYKr8tBqm$"  # The Skyline DB user password
+REDIS_PASSWORD="9N4J3axNpffgYKr8tBqm$"       # The Redis password
 SKYLINE_RELEASE="v1.2.6-stable-luminosity"                 # The Skyline release to deploy
 
 STARTED=$(date)
@@ -211,25 +211,20 @@ if [ "$OS" == "CentOS" ]; then
     #fi
   fi
   if [ "$OS_MAJOR_VERSION" == "7" ]; then
-    if [ ! -f /tmp/skyline.dawn.yum.mariadb-server.install.run.txt ]; then
-      echo "Installing mariadb-server"
+    if [ ! -f /tmp/skyline.dawn.yum.mysql-server.install.run.txt ]; then
+      echo "Installing mysql-community-server"
       sleep 1
-      yum -y install mariadb-server
-# @modified 20180915 - Feature #2550: skyline.dawn.sh - added skyline user
-#                      Task #2596: Build Skyline on nodes at v1.2.8
-# Added innodb_file_per_table
-#      sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1/g' /etc/my.cnf.d/server.cnf
-      sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1\ninnodb_file_per_table=1/g' /etc/my.cnf.d/server.cnf
-      systemctl start mariadb
+      yum -y install mysql-community-server
+      systemctl start mysqld
       MYSQL_START_EXIT_CODE=$?
       if [ $MYSQL_START_EXIT_CODE -ne 0 ]; then
         echo "error :: mysqld failed to start"
         exit 1
       fi
-      systemctl enable mariadb
-      echo "True" > /tmp/skyline.dawn.yum.mariadb-server.install.run.txt
+      systemctl enable mysqld
+      echo "True" > /tmp/skyline.dawn.yum.mysql-server.install.run.txt
     else
-      echo "Skipping installing mariadb-server, already done"
+      echo "Skipping installing mysqld-server, already done"
       sleep 1
     fi
   fi
@@ -260,55 +255,17 @@ if [ ! -f /tmp/skyline.dawn.secure.mysql.txt ]; then
     # MySQL 5.1 method
     mysql -e "UPDATE mysql.user SET Password = PASSWORD('$MYSQL_ROOT_PASSWORD') WHERE User = 'root'"
   else
-    mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$MYSQL_ROOT_PASSWORD');"
+    MYSQL_TEMPORARY_PASSWORD=$(grep "temporary password" /var/log/mysqld.log | grep -o "root@localhost.*" | cut -d " " -f2)
+    echo $MYSQL_TEMPORARY_PASSWORD
+    mysql -uroot -p$MYSQL_TEMPORARY_PASSWORD --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION; FLUSH PRIVILEGES;"
   fi
   MYSQL_EXIT_CODE=$?
   if [ $MYSQL_EXIT_CODE -ne 0 ]; then
     echo "error :: failed to set MySQL root password"
     exit 1
   fi
-  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "6" ]]; then
-    # MySQL 5.1 method
-    MYSQL_COMMAND="mysql -e"
-  else
-    MYSQL_COMMAND="mysql -u root -p$MYSQL_ROOT_PASSWORD -e"
-  fi
 
-  if [ "$OS" == "CentOS" ]; then
-    echo "Dropping anonymous MySQL user at localhost"
-    $MYSQL_COMMAND "DROP USER ''@'localhost'"
-    MYSQL_EXIT_CODE=$?
-    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
-      echo "error :: failed to drop anonymous MySQL user from localhost"
-      exit 1
-    fi
-  fi
-
-  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "6" ]]; then
-    echo "Dropping anonymous MySQL user at $HOSTNAME"
-    $MYSQL_COMMAND "DROP USER ''@'$(hostname)'"
-    MYSQL_EXIT_CODE=$?
-    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
-      echo "error :: failed to drop anonymous MySQL user from $HOSTNAME"
-      exit 1
-    fi
-  fi
-  if [ "$OS" == "CentOS" ]; then
-    echo "Dropping test MySQL database"
-    $MYSQL_COMMAND "DROP DATABASE test"
-    MYSQL_EXIT_CODE=$?
-    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
-      echo "error :: failed to drop test MySQL database"
-      exit 1
-    fi
-  fi
-  echo "flushing MySQL privileges"
-  $MYSQL_COMMAND "FLUSH PRIVILEGES"
-  MYSQL_EXIT_CODE=$?
-  if [ $MYSQL_EXIT_CODE -ne 0 ]; then
-    echo "error :: failed flush MySQL privileges"
-    exit 1
-  fi
   echo "True" > /tmp/skyline.dawn.secure.mysql.txt
 else
   echo "Skipping securing MySQL, already done."
@@ -933,3 +890,4 @@ echo ""
 echo "NOT FOR PRODUCTION"
 echo ""
 echo ""
+
