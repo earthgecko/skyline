@@ -546,7 +546,7 @@ if [ ! -d /opt/skyline/github/skyline/.git ]; then
   sleep 1
   mkdir -p /opt/skyline/github
   cd /opt/skyline/github || exit 1
-  git clone https://github.com/earthgecko/skyline.git
+  git clone https://github.com/wix-playground/skyline.git
 # @added 20180915 - Feature #2550: skyline.dawn.sh
 # Added permissions for skyline user
   chown skyline:skyline -R /opt/skyline/github
