@@ -26,3 +26,7 @@ sudo pip install $(cat requirements.txt | grep "^pandas")
 sudo pip install -r requirements.txt
 
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
+
+bin/horizon.d start
+bin/analyzer.d start
+bin/webapp.d start
