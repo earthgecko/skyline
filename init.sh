@@ -26,4 +26,3 @@ sudo pip install $(cat requirements.txt | grep "^pandas")
 sudo pip install -r requirements.txt
 
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
-export PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
