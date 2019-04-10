@@ -14,4 +14,7 @@ mkdir -p /tmp/skyline
 
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
 
+/skyline/bin/horizon.d start
+/skyline/bin/analyzer.d start
+/skyline/bin/webapp.d start
 
