@@ -19,10 +19,10 @@ mkdir -p /opt/skyline/ionosphere
 mkdir -p /etc/skyline
 mkdir -p /tmp/skyline
 
-
-
+cd /skyline
 sudo pip install $(cat requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
 sudo pip install $(cat requirements.txt | grep "^pandas")
 sudo pip install -r requirements.txt
 
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
+export PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
