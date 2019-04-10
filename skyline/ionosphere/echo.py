@@ -271,6 +271,21 @@ def ionosphere_echo(base_name, mirage_full_duration):
     logger.info('ionosphere_echo :: %s FULL_DURATION features profiles to be created for %s' % (str(echo_create_fd_fp_for_count), base_name))
     echo_created_fp_count = 0
 
+    # @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+    #                   Feature #2484: FULL_DURATION feature profiles
+    # Rate limit the creation of ionosphere_echo FULL_DURATION features profiles
+    # this only effects managing the creation of lots of features profiles if
+    # Ionosphere echo is enabled on a Skyline instance with lots of existing
+    # features profiles for Mirage metrics.  Only create 5 FULL_DURATION
+    # features profiles from the latest Mirage based features profiles, which
+    # takes around 10 seconds
+    if echo_create_fd_fp_for_count > 5:
+        logger.info('ionosphere_echo :: rate limiting and only creating the 5 least FULL_DURATION features profiles for %s' % (base_name))
+        # Reverse, newest first, using slicing to produce a reversed copy
+        reverse_echo_create_fd_fp_for = echo_create_fd_fp_for[::-1]
+        rate_limit_echo_create_fd_fp_for = reverse_echo_create_fd_fp_for[0:5]
+        echo_create_fd_fp_for = rate_limit_echo_create_fd_fp_for
+
     last_created_fp = int(time())
     for mirage_fp_id in echo_create_fd_fp_for:
         fp_timestamp = None
