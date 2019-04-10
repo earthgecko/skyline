@@ -9,6 +9,7 @@ sudo rm -rf /usr/src/Python-2.7.14*
 python -V
 
 cd /skyline
+echo $PWD
 sudo pip install docutils
 sudo pip install $(cat requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
 sudo pip install $(cat requirements.txt | grep "^pandas")

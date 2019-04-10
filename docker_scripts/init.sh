@@ -1,3 +1,5 @@
+cd /skyline
+echo $PWD
 mkdir -p /var/log/skyline
 mkdir -p /var/run/skyline
 mkdir -p /var/dump
