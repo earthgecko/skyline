@@ -19,6 +19,8 @@ mkdir -p /opt/skyline/ionosphere
 mkdir -p /etc/skyline
 mkdir -p /tmp/skyline
 
+cd /
+git clone https://github.com/wix-playground/skyline.git
 cd /skyline
 sudo pip install docutils
 sudo pip install $(cat requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
