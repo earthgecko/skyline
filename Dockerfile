@@ -8,3 +8,4 @@ RUN git clone https://github.com/wix-playground/skyline.git
 WORKDIR /skyline
 
 RUN bash init.sh
+ENV PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
