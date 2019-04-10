@@ -19,12 +19,14 @@ mkdir -p /opt/skyline/ionosphere
 mkdir -p /etc/skyline
 mkdir -p /tmp/skyline
 
+cd /skyline
+
 sudo pip install docutils
 sudo pip install $(cat requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
 sudo pip install $(cat requirements.txt | grep "^pandas")
 sudo pip install -r requirements.txt
 
-cd /skyline
+
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
 
 bin/horizon.d start

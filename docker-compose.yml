@@ -1,4 +1,4 @@
-version: '2.3'
+version: '3'
 services:
   mysql:
     image: mysql:latest
@@ -30,7 +30,7 @@ services:
       context: . #current dir as build context
     volumes:
       - .:/skyline
-    links:
+    depends_on:
       - mysql
       - redis-server
 volumes:
