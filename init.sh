@@ -19,4 +19,6 @@ mkdir -p /opt/skyline/ionosphere
 mkdir -p /etc/skyline
 mkdir -p /tmp/skyline
 
+
+sudo pip install -r requirements.txt
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
