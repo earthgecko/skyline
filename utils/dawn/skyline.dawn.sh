@@ -256,10 +256,6 @@ if [ ! -f /tmp/skyline.dawn.secure.mysql.txt ]; then
     mysql -e "UPDATE mysql.user SET Password = PASSWORD('$MYSQL_ROOT_PASSWORD') WHERE User = 'root'"
   else
     MYSQL_TEMPORARY_PASSWORD=$(grep "temporary password" /var/log/mysqld.log | grep -o "root@localhost.*" | cut -d " " -f2)
-<<<<<<< HEAD
-    echo $MYSQL_TEMPORARY_PASSWORD
-=======
->>>>>>> 1a24c6705eadf28911e53e853234c4ea6ec0cca3
     mysql -uroot -p$MYSQL_TEMPORARY_PASSWORD --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION; FLUSH PRIVILEGES;"
   fi
