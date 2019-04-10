@@ -45,7 +45,7 @@ WEBAPP_AUTH_USER_PASSWORD="$(echo {$HOSTNAME}_skyline)"    # The password you wa
 MYSQL_ROOT_PASSWORD="XXXXXXXXX"     # The MySQL root user password
 MYSQL_SKYLINE_PASSWORD="XXXXXXXXX"  # The Skyline DB user password
 REDIS_PASSWORD="XXXXXXXXX"       # The Redis password
-SKYLINE_RELEASE="v1.2.12"                 # The Skyline release to deploy
+SKYLINE_RELEASE="v1.2.121"                 # The Skyline release to deploy
 
 STARTED=$(date)
 #### Check if the user added variables in /etc/skyline/skyline.dawn.conf ####
