@@ -49,7 +49,7 @@ if alerts_enabled:
         if alert[0] == options.metric:
             if options.trigger in alert[1]:
                 print '    Testing Analyzer alerting - against "' + alert[0] + '" to send via ' + alert[1] + "...triggered"
-                metric = (0, options.metric)
+                metric = (0, options.metric, 12345)
                 trigger_alert(alert, metric, context)
                 if syslog_enabled:
                     print '    Testing Analyzer alerting - against "' + alert[0] + '" to send via syslog ' + "...triggered"
