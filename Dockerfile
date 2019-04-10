@@ -18,5 +18,6 @@ EXPOSE :3306
 #graphite collection port
 EXPOSE :2024
 
+RUN git pull
 RUN sh /skyline/init.sh
 
