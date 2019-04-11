@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.2.11 documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.2.13 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.13 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -215,9 +215,12 @@
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">fail_check</span><span class="p">,</span> <span class="n">mysql_select</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
+    <span class="n">fail_check</span><span class="p">,</span> <span class="n">mysql_select</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span>
     <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
-    <span class="n">get_memcache_metric_object</span><span class="p">)</span>
+    <span class="c1"># @modified 20190408 - Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="c1"># Moved to common_functions</span>
+    <span class="c1"># get_memcache_metric_object)</span>
+    <span class="n">mkdir_p</span><span class="p">)</span>
 
 <span class="c1"># @added 20161221 - calculate features for every anomaly, instead of making the</span>
 <span class="c1"># user do it in the frontend or calling the webapp constantly in a cron like</span>
@@ -227,7 +230,11 @@
 <span class="c1"># @modified 20170107 - Feature #1844: ionosphere_matched DB table</span>
 <span class="c1"># Added ionosphere_matched_meta</span>
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span>
+    <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span>
+    <span class="c1"># @added 20170825 - Task #2132: Optimise Ionosphere DB usage</span>
+    <span class="c1"># @modified 20190408 - Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="c1"># Moved to common_functions</span>
+    <span class="c1"># metrics_table_meta,</span>
     <span class="n">ionosphere_matched_table_meta</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_FEATURES</span>
 
@@ -788,14 +795,21 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
         <span class="n">ionosphere_echo</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Ionosphere.spin_process"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
+    <span class="c1"># @modified 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+    <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="c1"># Added the ionosphere_busy parameter</span>
+    <span class="c1"># def spin_process(self, i, metric_check_file):</span>
+<div class="viewcode-block" id="Ionosphere.spin_process"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">,</span> <span class="n">ionosphere_busy</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign an anomalous metric to check against features profiles.</span>
 
 <span class="sd">        :param i: python process id</span>
 <span class="sd">        :param metric_check_file: full path to the metric check file</span>
+<span class="sd">        :param ionosphere_busy: whether to Ionosphere manage and alternate</span>
+<span class="sd">            between normal Ionosphere and echo analysis</span>
 <span class="sd">        :type i: object</span>
 <span class="sd">        :type metric_check_file: str</span>
+<span class="sd">        :type ionosphere_busy: boolen</span>
 <span class="sd">        :return: int</span>
 <span class="sd">        :rtype: int or boolean</span>
 
@@ -824,10 +838,9 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;child_process_pid - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">))</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MAX_RUNTIME</span>
+            <span class="n">ionosphere_max_runtime</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MAX_RUNTIME</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="mi">120</span>
-
+            <span class="n">ionosphere_max_runtime</span> <span class="o">=</span> <span class="mi">120</span>
 
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: processing metric check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
@@ -837,6 +850,7 @@
             <span class="k">return</span>
 
         <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="n">check_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
@@ -1624,6 +1638,77 @@
                 <span class="n">echo_enabled</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">echo_enabled</span><span class="p">:</span>
                 <span class="n">echo_check</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20190403 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+        <span class="c1">#                   Feature #2484: FULL_DURATION feature profiles</span>
+        <span class="c1"># If there are more than 4 metric check files, alternate between normal</span>
+        <span class="c1"># Ionosphere Mirage features profile checks and Ionosphere echo features</span>
+        <span class="c1"># profile checks.</span>
+        <span class="k">if</span> <span class="n">echo_check</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ionosphere_busy</span><span class="p">:</span>
+                <span class="c1"># Check the ionosphere_echo metric Redis keys to see which check</span>
+                <span class="c1"># to run, ionosphere or ionosphere_echo.  If Ionosphere is busy,</span>
+                <span class="c1"># Ionosphere will alternate between normal Ionosphere features</span>
+                <span class="c1"># profiles (Mirage duration) and Ionosphere echo features</span>
+                <span class="c1"># profiles (FULL_DURATION) comparison.</span>
+                <span class="n">echo_ionosphere_check_cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_echo.ionosphere.check.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="n">echo_ionosphere_check_key</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">echo_ionosphere_check_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">echo_ionosphere_check_cache_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">echo_ionosphere_echo_check_cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_echo.echo.check.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="n">echo_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">echo_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">echo_ionosphere_echo_check_cache_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+                <span class="n">create_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">remove_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># If neither the ionosphere or the ionosphere_echo key exist do</span>
+                <span class="c1"># only check ionosphere</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">echo_ionosphere_check_key</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">echo_ionosphere_echo_check_key</span><span class="p">:</span>
+                        <span class="n">echo_check</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_busy - only running normal Mirage feature profiles checks, skipping ionosphere_echo checks&#39;</span><span class="p">)</span>
+                        <span class="n">create_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="n">echo_ionosphere_check_cache_key</span>
+                <span class="c1"># If the ionosphere_echo key exists only check ionosphere</span>
+                <span class="k">if</span> <span class="n">echo_ionosphere_echo_check_key</span><span class="p">:</span>
+                    <span class="n">echo_check</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_busy - only running normal Mirage feature profiles checks, skipping ionosphere_echo checks&#39;</span><span class="p">)</span>
+                    <span class="n">create_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="n">echo_ionosphere_check_cache_key</span>
+                    <span class="n">remove_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="n">echo_ionosphere_echo_check_cache_key</span>
+                <span class="c1"># If ionosphere_echo key exists only check ionosphere</span>
+                <span class="k">if</span> <span class="n">echo_ionosphere_check_key</span><span class="p">:</span>
+                    <span class="n">echo_check</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_busy - skipping the normal Mirage feature profiles checks as run last time and running ionosphere_echo checks this time&#39;</span><span class="p">)</span>
+                    <span class="c1"># Remove the Mirage features profiles from the</span>
+                    <span class="n">fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_busy - removed </span><span class="si">%s</span><span class="s1"> Mirage feature profile ids from fp_ids&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_count</span><span class="p">))</span>
+                    <span class="n">create_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="n">echo_ionosphere_echo_check_cache_key</span>
+                    <span class="n">remove_ionosphere_echo_check_key</span> <span class="o">=</span> <span class="n">echo_ionosphere_check_cache_key</span>
+                <span class="k">if</span> <span class="n">remove_ionosphere_echo_check_key</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">remove_ionosphere_echo_check_key</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;deleted Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">remove_ionosphere_echo_check_key</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s1">&#39;error :: failed to delete Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">remove_ionosphere_echo_check_key</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">create_ionosphere_echo_check_key</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">key_created_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                            <span class="n">create_ionosphere_echo_check_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="p">[</span><span class="n">key_created_at</span><span class="p">])</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;created Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">create_ionosphere_echo_check_key</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s1">&#39;error :: failed to create Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">create_ionosphere_echo_check_key</span><span class="p">))</span>
+
         <span class="k">if</span> <span class="n">echo_check</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">fps_db_object</span><span class="p">:</span>
@@ -1675,6 +1760,18 @@
                     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                     <span class="k">return</span> <span class="kc">False</span>
+
+                <span class="c1"># @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                <span class="c1">#                   Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># If the Ionosphere features profile checks are approaching the</span>
+                <span class="c1"># ionosphere_max_runtime, skip the remaining checks.</span>
+                <span class="n">time_now_check</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                <span class="c1"># Allow 5 seconds for layers checks to be done</span>
+                <span class="n">max_runtime_tolereance</span> <span class="o">=</span> <span class="n">ionosphere_max_runtime</span> <span class="o">-</span> <span class="mi">5</span>
+                <span class="n">running_for</span> <span class="o">=</span> <span class="n">time_now_check</span> <span class="o">-</span> <span class="n">check_process_start</span>
+                <span class="k">if</span> <span class="n">running_for</span> <span class="o">&gt;=</span> <span class="n">max_runtime_tolereance</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features profile checks have been running for </span><span class="si">%s</span><span class="s1"> seconds, the ionosphere_max_runtime is about to be breached, skipping remaining features profile checks&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">running_for</span><span class="p">))</span>
+                    <span class="k">break</span>
 
                 <span class="c1"># @added 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
                 <span class="n">check_type</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
@@ -2012,7 +2109,6 @@
                             <span class="n">test_anomalous_timeseries</span> <span class="o">=</span> <span class="n">anomalous_timeseries</span>
                             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_anomalous_timeseries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                 <span class="n">anomalous_timeseries_not_defined</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="n">ionosphere_anomalous_timeseries</span> <span class="o">=</span> <span class="n">test_anomalous_timeseries</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous_timeseries is not defined loading from anomaly json&#39;</span><span class="p">)</span>
 
@@ -2056,7 +2152,6 @@
                                 <span class="k">del</span> <span class="n">timeseries_array_str</span>
                                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous_timeseries was populated from anomaly json </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> data points from for creating the minmax_anomalous_ts&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">))))</span>
-                                    <span class="n">ionosphere_anomalous_timeseries</span> <span class="o">=</span> <span class="n">anomalous_timeseries</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: anomalous_timeseries for minmax_anomalous_ts is not populated from anomaly json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
                             <span class="k">except</span><span class="p">:</span>
@@ -3253,9 +3348,23 @@
                 <span class="k">if</span> <span class="n">learn_job</span><span class="p">:</span>
                     <span class="k">break</span>
 
+            <span class="c1"># @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+            <span class="c1">#                   Feature #2484: FULL_DURATION feature profiles</span>
+            <span class="c1"># Do not run an Ionosphere and echo checks on a metrics when a lot of</span>
+            <span class="c1"># checks are being done.  Manage the Ionosphere load and increased</span>
+            <span class="c1"># runtime in general that Ionosphere echo has introduced, especially</span>
+            <span class="c1"># when Ionosphere is issued lots of checks, if lots of metrics suddenly</span>
+            <span class="c1"># become anomalous.</span>
+            <span class="n">metric_var_files_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">ionosphere_busy</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="k">if</span> <span class="n">ionosphere_job</span><span class="p">:</span>
                 <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
                 <span class="n">metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="c1"># @added 20190403 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                <span class="c1">#                   Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Added a count of the number of checks to be done</span>
+                <span class="n">metric_var_files_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
 
             <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
             <span class="c1"># Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics</span>
@@ -3307,7 +3416,27 @@
                     <span class="n">ionosphere_echo_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_ENABLED</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">ionosphere_echo_enabled</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="k">if</span> <span class="n">ionosphere_echo_enabled</span><span class="p">:</span>
+
+                <span class="c1"># @added 20190403 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                <span class="c1">#                   Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># If there are more than 2 metric check files, do not run</span>
+                <span class="c1"># process_ionosphere_echo to create echo features profiles</span>
+                <span class="n">run_process_ionosphere_echo</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">metric_var_files_count</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">run_process_ionosphere_echo</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;not running process_ionosphere_echo as there are </span><span class="si">%s</span><span class="s1"> metric check files to be checked&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_count</span><span class="p">)))</span>
+                <span class="c1"># If there are more than 4 metric check files set Ionosphere to</span>
+                <span class="c1"># busy so that Ionosphere alternates between checking the normal</span>
+                <span class="c1"># Ionosphere Mirage features profiles and the Ionosphere echo</span>
+                <span class="c1"># features profiles on subsequent checks of a metric so that</span>
+                <span class="c1"># when Ionosphere is busy it is not checking both sets of</span>
+                <span class="c1"># features profiles on every run.</span>
+                <span class="k">if</span> <span class="n">metric_var_files_count</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">ionosphere_busy</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">ionosphere_echo_enabled</span> <span class="ow">and</span> <span class="n">run_process_ionosphere_echo</span><span class="p">:</span>
                     <span class="c1"># Spawn a single process_ionosphere_echo process</span>
                     <span class="n">function_name</span> <span class="o">=</span> <span class="s1">&#39;process_ionosphere_echo&#39;</span>
                     <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
@@ -3387,7 +3516,16 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ionosphere_processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">ionosphere_job</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                        <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+                        <span class="c1"># Added ionosphere_busy if there are queued checks</span>
+                        <span class="c1"># to ensure that Ionosphere echo is rate limited if a</span>
+                        <span class="c1"># lot of metrics become anomalous and that Ionosphere</span>
+                        <span class="c1"># alternates between normal Mirage features profiles</span>
+                        <span class="c1"># comparisons and Ionosphere echo features profiles</span>
+                        <span class="c1"># during busy times.</span>
+                        <span class="c1"># p = Process(target=self.spin_process, args=(i, metric_check_file))</span>
+                        <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">,</span> <span class="n">ionosphere_busy</span><span class="p">))</span>
                         <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                         <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -3434,10 +3572,10 @@
             <span class="c1"># Added ionosphere_echo which takes more time</span>
             <span class="c1"># while time() - p_starts &lt;= 55:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MAX_RUNTIME</span>
+                <span class="n">ionosphere_max_runtime</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MAX_RUNTIME</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">max_ionosphere_runtime</span> <span class="o">=</span> <span class="mi">120</span>
-            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">max_ionosphere_runtime</span><span class="p">:</span>
+                <span class="n">ionosphere_max_runtime</span> <span class="o">=</span> <span class="mi">120</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">ionosphere_max_runtime</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
                     <span class="c1"># Just to avoid hogging the CPU</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
@@ -3504,7 +3642,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -3526,7 +3664,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.11',
+            VERSION:'1.2.13',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

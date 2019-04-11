@@ -87,11 +87,15 @@ documentation configuration options are referred to via their docstrings name
 e.g. :mod:`settings.FULL_DURATION` which links to their description in the
 documentation.
 
-Firewall
-~~~~~~~~
+Python virtualenv
+~~~~~~~~~~~~~~~~~
 
 - Create a python-2.7.14 virtualenv for Skyline to run in see `Running in
   Python virtualenv <running-in-python-virtualenv.html>`__
+
+Firewall
+~~~~~~~~
+
 - Please set up all the firewall rules to restrict access to the following
   **before** you continue to install the other components:
 

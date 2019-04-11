@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Mirage &mdash; Skyline 1.2.11 documentation</title>
+  <title>Mirage &mdash; Skyline 1.2.13 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.13 documentation" href="index.html"/>
         <link rel="next" title="Boundary" href="boundary.html"/>
         <link rel="prev" title="Analyzer Optimizations" href="analyzer-optimizations.html"/> 
 
@@ -116,6 +116,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#rate-limited">Rate limited</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#periodic-checks">Periodic Checks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-mirage-does">What Mirage does</a></li>
 </ul>
 </li>
@@ -392,6 +393,31 @@ discarding <a class="reference internal" href="skyline.html#settings.MIRAGE_STAL
 signals would still be sent.</p>
 </div>
 </div>
+<div class="section" id="periodic-checks">
+<h2>Periodic Checks<a class="headerlink" href="#periodic-checks" title="Permalink to this headline">¶</a></h2>
+<p>Due to the fact that Analyzer feeds Mirage metrics to check when Analyzer finds
+a Mirage metric anomalous, there are situations where a metric may change fairly
+substantially over a period greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>, for
+example over 36 hours.  In these cases Analyser will not detect these changes as
+anomalous and therefore Mirage will not have a chance to check them.</p>
+<p>Periodic checks can be enabled on Mirage metric namespaces that are declared in
+<a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a>.  It is not advisable to
+analyse all Mirage metrics periodically as this would probably have a
+significant impact on both Skyline and Graphite.</p>
+<p>Periodic checks should only be run on Mirage key metrics.  Periodic checks suit
+KPI metrics that are have fairly constant rate.  Periodic checks should not be
+implemented on general server and app metrics.</p>
+<p>It is important to note that the <a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a>
+will match the exact string and dotted namespace elements as per
+documented in <a class="reference internal" href="skyline.html#settings.SKIP_LIST" title="settings.SKIP_LIST"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKIP_LIST</span></code></a>.</p>
+<p>The types of metrics that suit periodic checks are total/global metrics,
+summed metrics rather than individual metrics.  The type of individual metrics
+that suit Mirage periodic checks are metrics like % disk space used on fairly
+consistent servers that are not expected to fluctuate too drastically over a
+period of days, like a DB server volume.</p>
+<p>You definitely do not what to run all your server or app metrics through Mirage
+periodic checks.</p>
+</div>
 <div class="section" id="what-mirage-does">
 <h2>What Mirage does<a class="headerlink" href="#what-mirage-does" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -438,7 +464,7 @@ as anomalous having not matched any known features profile or layers.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -460,7 +486,7 @@ as anomalous having not matched any known features profile or layers.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.11',
+            VERSION:'1.2.13',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

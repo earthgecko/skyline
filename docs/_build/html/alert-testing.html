@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Alert testing &mdash; Skyline 1.2.11 documentation</title>
+  <title>Alert testing &mdash; Skyline 1.2.13 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.13 documentation" href="index.html"/>
         <link rel="next" title="Strictly increasing monotonicity" href="monotonic-metrics.html"/>
         <link rel="prev" title="Getting data into Skyline" href="getting-data-into-skyline.html"/> 
 
@@ -187,8 +187,6 @@ example:</li>
 <span class="nb">source</span> bin/activate
 <span class="c1"># To test email alert</span>
 python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
-<span class="c1"># To test hipchat alert</span>
-python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger hipchat --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
 <span class="c1"># To test slack alert</span>
 python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
 <span class="c1"># To test pagerduty alert</span>
@@ -196,8 +194,47 @@ python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger pagerduty --
 deactivate
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You should get an alert on each alerter that you have enabled and
+tested.  Do note that the graphs sent with the alerts will have <strong>no data</strong> in
+them.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">the pagerduty alert_testing trigger has not been tested for a long
+time in the verify_alerts.py context.</p>
+</div>
 <p>You should get an alert on each alerter that you have enabled and tested.  Do
 note that the graphs sent with the alerts will have <strong>no data</strong> in them.</p>
+<p>You can expect output such as this, <strong>there will be errors</strong>, these are expected,
+the alerts still get sent.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="o">(</span>skyline-py2714<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py2714<span class="o">]</span> python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
+Verifying alerts <span class="k">for</span>: <span class="s2">&quot;skyline_test.alerters.test&quot;</span>
+Testing Analyzer alerting on skyline_test.alerters.test
+    Testing Analyzer alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via smtp...triggered
+ERROR:analyzerLog:error :: alerters - alert_smtp - getattr error
+    Testing Analyzer alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via syslog ...triggered
+Testing Mirage alerting on skyline_test.alerters.test
+    Testing Mirage alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via smtp...triggered
+ERROR:mirageLog:error :: alert_smtp - unpack timeseries failed
+ERROR:mirageLog:error :: alerters - alert_smtp - getattr error
+    Testing Mirage alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via syslog ...triggered
+Testing Boundary alerting on skyline_test.alerters.test
+    Testing Boundary alerting against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send <span class="k">for</span> smtp<span class="p">|</span>slack via smtp
+<span class="o">(</span>skyline-py2714<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py2714<span class="o">]</span> python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
+Verifying alerts <span class="k">for</span>: <span class="s2">&quot;skyline_test.alerters.test&quot;</span>
+Testing Analyzer alerting on skyline_test.alerters.test
+    Testing Analyzer alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via slack...triggered
+    Testing Analyzer alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via syslog ...triggered
+Testing Mirage alerting on skyline_test.alerters.test
+    Testing Mirage alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via slack...triggered
+    Testing Mirage alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via syslog ...triggered
+Testing Boundary alerting on skyline_test.alerters.test
+    Testing Boundary alerting against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send <span class="k">for</span> smtp<span class="p">|</span>slack via slack
+<span class="o">(</span>skyline-py2714<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py2714<span class="o">]</span>
+</pre></div>
+</div>
 </div>
 
 
@@ -219,7 +256,7 @@ note that the graphs sent with the alerts will have <strong>no data</strong> in 
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -241,7 +278,7 @@ note that the graphs sent with the alerts will have <strong>no data</strong> in 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.11',
+            VERSION:'1.2.13',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
