@@ -104,6 +104,12 @@ MINI_DURATION = 3600
 :vartype MINI_DURATION: str
 """
 
+GRAPHITE_AUTH_HEADER = ''
+"""
+:var GRAPHITE_AUTH_HEADER: the Authorization header for Graphite api
+:vartype GRAPHITE_AUTH_HEADER: str
+"""
+
 GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'
 """
 :var GRAPHITE_HOST: If you have a Graphite host set up, set this metric to get

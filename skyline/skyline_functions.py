@@ -456,7 +456,7 @@ def get_graphite_metric(
     graphite_port = '80'
     if settings.GRAPHITE_PORT != '':
         graphite_port = str(settings.GRAPHITE_PORT)
-    image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
+    image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/api/datasources/proxy/1/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     url = image_url + '&format=' + output_format
 
     if settings.ENABLE_DEBUG:
