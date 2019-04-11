@@ -1,4 +1,4 @@
-sudo apt-get install apache2 -y
+sudo apt-get install apache2 net-tools -y
 
 #### USER DEFINED VARIABLES ####
 YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep -o "inet.*" | cut -d " " -f2)"                         # YOUR Skyline server public IP address
@@ -56,7 +56,7 @@ if [ ! -f $SKYLINE_HTTP_CONF_FILE ]; then
     YOUR_HTPASSWD_FILE="\/etc\/${APACHE_NAME}\/.skyline_htpasswd"
   fi
 
-  cat /opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example \
+  cat /skyline/etc/skyline.httpd.conf.d.example \
     | sed -e 's/<YOUR_SERVER_IP_ADDRESS>/'$YOUR_SERVER_IP_ADDRESS'/g' \
     | sed -e 's/<YOUR_SKYLINE_SERVER_FQDN>/'$YOUR_SKYLINE_SERVER_FQDN'/g' \
     | sed -e 's/<YOUR_EMAIL>/'$YOUR_EMAIL'/g' \
