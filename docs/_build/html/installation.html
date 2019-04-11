@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.2.11 documentation</title>
+  <title>Installation &mdash; Skyline 1.2.13 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.13 documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -99,6 +99,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-configuration">Skyline configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#python-virtualenv">Python virtualenv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#firewall">Firewall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#dawn">Dawn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#redis">Redis</a></li>
@@ -271,11 +272,16 @@ documentation configuration options are referred to via their docstrings name
 e.g. <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> which links to their description in the
 documentation.</p>
 </div>
-<div class="section" id="firewall">
-<h3>Firewall<a class="headerlink" href="#firewall" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="python-virtualenv">
+<h3>Python virtualenv<a class="headerlink" href="#python-virtualenv" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Create a python-2.7.14 virtualenv for Skyline to run in see <a class="reference external" href="running-in-python-virtualenv.html">Running in
 Python virtualenv</a></li>
+</ul>
+</div>
+<div class="section" id="firewall">
+<h3>Firewall<a class="headerlink" href="#firewall" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
 <li>Please set up all the firewall rules to restrict access to the following
 <strong>before</strong> you continue to install the other components:<ul>
 <li>The IP address and port being used to reverse proxy the Webapp e.g.
@@ -683,7 +689,7 @@ if you use an exec of any sort, ensure the pandas install has a long timeout.</l
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -705,7 +711,7 @@ if you use an exec of any sort, ensure the pandas install has a long timeout.</l
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.11',
+            VERSION:'1.2.13',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
