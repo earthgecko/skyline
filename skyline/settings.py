@@ -262,6 +262,18 @@ SLACK_ENABLED = False
 Analyzer settings
 """
 
+ANALYZER_ENABLED = True
+"""
+:var ANALYZER_ENABLED: This enables analysis via Analyzer.  For ADVANCED
+    configurations only.
+    If this is set to False, the Analyzer process can still be started and will
+    process the metrics in the pipeline but it will NOT analyse them, therefore
+    there will be no alerting, no feeding Mirage, etc.  Analyzer will simply run
+    as if there are 0 metrcis.  This allows for an advanced modular set up for
+    running multiple distributed Skyline instance.
+:vartype ANALYZER_ENABLED: boolean
+"""
+
 ANOMALY_DUMP = 'webapp/static/dump/anomalies.json'
 """
 :var ANOMALY_DUMP: This is the location the Skyline agent will write the
@@ -1018,6 +1030,39 @@ settings block.
 
 .. warning:: Not recommended from production, will make a LOT of data files in
     the :mod:`settings.CRUCIBLE_DATA_FOLDER`
+"""
+
+MIRAGE_PERIODIC_CHECK = True
+"""
+:var MIRAGE_PERIODIC_CHECK: This enables Mirage to periodically check metrics
+    matching the namespaces in :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
+    every :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL`.  Mirage should only
+    be configured to periodically analyse key metrics.  For further in depth
+    details regarding Mirage periodic check and their impact, please see the
+    Mirage Periodic Checks documentation at:
+    https://earthgecko-skyline.readthedocs.io/en/latest/mirage.html#periodic-checks
+:vartype MIRAGE_PERIODIC_CHECK: boolean
+"""
+
+MIRAGE_PERIODIC_CHECK_INTERVAL = 3600
+"""
+:var MIRAGE_PERIODIC_CHECK_INTERVAL: This is the interval in seconds at which
+    Mirage should analyse metrics matching the namespaces in
+    :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
+:vartype MIRAGE_PERIODIC_CHECK_INTERVAL: int
+"""
+
+MIRAGE_PERIODIC_CHECK_NAMESPACES = [
+    # Check these Mirage metric namespaces periodically with Mirage
+]
+"""
+:var MIRAGE_PERIODIC_CHECK_NAMESPACES: Mirage metric namespaces to periodically
+    check with Mirage, even if Analyzer does not find them anomalous, Analyzer
+    will ensure that these Mirage metric namespaces are analyzed by Mirage every
+    :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL` seconds.  This works in the
+    same way that :mod:`settings.SKIP_LIST` does, it matches in the string or
+    the dotted namespace elements.
+:vartype MIRAGE_PERIODIC_CHECK_NAMESPACES: list
 """
 
 """

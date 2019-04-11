@@ -1,0 +1,291 @@
+======
+1.2.13
+======
+
+v1.2.13 - April 10, 2019
+
+Incorporates v1.2.12 and v1.2.13
+--------------------------------
+
+These release notes describe how to update from v1.2.11 (and v1.2.12) to v1.2.13.
+Although v1.2.12 was released, it was a pre-release therefore in terms of the
+"How to update" section, the documentation is written to update from v1.2.11.
+If you did update or installed v1.2.12 then please take note of the specific
+notes in the "How to update" section below.
+
+New functionality
+-----------------
+
+- Adds the new Ionosphere echo functionality related to improving the matching
+  of Mirage based features profiles by between 30-50% depending on the metric.
+  See https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html
+  (v1.2.12) (2484, 2904)
+- Add Mirage periodic checks for key metrics declared in
+  MIRAGE_PERIODIC_CHECK_NAMESPACES so that Mirage is analysing each metric
+  more frequently and not only reliant on Analyzer at FULL_DURATION so that
+  substantial changes that over a period somewhat longer than FULL_DURATION are
+  detected by Mirage (2882).
+- Added an ANALYZER_ENABLED setting to allow to disable Analyzer analysis if
+  desired multiple Skyline instances are implemented, allows for hot standby
+  (2916).
+
+Fixes introduced in pre-release v1.2.12
+---------------------------------------
+
+- Adds the ability for Skyline Boundary to handle very short time series.
+- Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
+  decimal values introduced by numpy==1.15.1 pandas==0.24.3
+
+Fixes introduced in release v1.2.13
+-----------------------------------
+
+- Do not run an Ionosphere and echo checks on a metrics when a lot of
+  checks are being done.  Manage the Ionosphere load and increased
+  runtime in general that Ionosphere echo has introduced, especially
+  when Ionosphere is issued lots of checks, if lots of metrics suddenly
+  become anomalous, using the ionosphere_busy parameter. (2904, 2484)
+- If there are more than 4 Ionosphere metric check files, alternate between
+  normal Ionosphere Mirage features profile checks and Ionosphere echo features
+  profile checks. (2904, 2484)
+- Rate limit the creation of ionosphere_echo FULL_DURATION features profiles
+  this only effects managing the creation of lots of features profiles if
+  Ionosphere echo is enabled on a Skyline instance with lots of existing
+  features profiles for Mirage metrics.  Only create 5 FULL_DURATION
+  features profiles from the latest Mirage based features profiles, which
+  takes around 10 seconds.  (2904, 2484)
+- Do not postpone Ionosphere Mirage alerts if there Mirage checks to be done
+  alert first (2904)
+
+Update notes
+------------
+
+- You can only upgrade to v1.2.13 from v1.2.11 and v1.2.12
+- There are changes to the DB (if you are not running v1.2.12)
+- There are some changes to settings.py
+
+How to update from v1.2.11 (and v1.2.12)
+----------------------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Diff your current running version skyline/settings.py with the new version of
+  skyline/settings.py and create a new settings.py in the temp location
+  appropriate for Skyline v1.2.13 and your set up with the new v1.2.12
+  IONOSPHERE_ECHO_ settings (if updating from v1.2.11) and the new
+  ANALYZER_ENABLED and MIRAGE_PERIODIC_ settings from v1.2.13 ready to be
+  deployed.  The new settings to be added for v1.2.13 are:
+
+.. code-block:: python
+
+    ANALYZER_ENABLED = True
+    """
+    :var ANALYZER_ENABLED: This enables analysis via Analyzer.  For ADVANCED
+        configurations only.
+        If this is set to False, the Analyzer process can still be started and will
+        process the metrics in the pipeline but it will NOT analyse them, therefore
+        there will be no alerting, no feeding Mirage, etc.  Analyzer will simply run
+        as if there are 0 metrcis.  This allows for an advanced modular set up for
+        running multiple distributed Skyline instance.
+    :vartype ANALYZER_ENABLED: boolean
+    """
+
+    MIRAGE_PERIODIC_CHECK = True
+    """
+    :var MIRAGE_PERIODIC_CHECK: This enables Mirage to periodically check metrics
+        matching the namespaces in :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
+        every :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL`.  Mirage should only
+        be configured to periodically analyse key metrics.  For further in depth
+        details regarding Mirage periodic check and their impact, please see the
+        Mirage Periodic Checks documentation at:
+        https://earthgecko-skyline.readthedocs.io/en/latest/mirage.html#periodic-checks
+    :vartype MIRAGE_PERIODIC_CHECK: boolean
+    """
+
+    MIRAGE_PERIODIC_CHECK_INTERVAL = 3600
+    """
+    :var MIRAGE_PERIODIC_CHECK_INTERVAL: This is the interval in seconds at which
+        Mirage should analyse metrics matching the namespaces in
+        :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
+    :vartype MIRAGE_PERIODIC_CHECK_INTERVAL: int
+    """
+
+    MIRAGE_PERIODIC_CHECK_NAMESPACES = [
+        # Check these Mirage metric namespaces periodically with Mirage
+    ]
+    """
+    :var MIRAGE_PERIODIC_CHECK_NAMESPACES: Mirage metric namespaces to periodically
+        check with Mirage, even if Analyzer does not find them anomalous, Analyzer
+        will ensure that these Mirage metric namespaces are analyzed by Mirage every
+        :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL` seconds.  This works in the
+        same way that :mod:`settings.SKIP_LIST` does, it matches in the string or
+        the dotted namespace elements.
+    :vartype MIRAGE_PERIODIC_CHECK_NAMESPACES: list
+    """
+
+- The new settings to be added for v1.2.12, if you are updating from v1.2.11
+  are:
+
+.. code-block:: python
+
+    IONOSPHERE_MAX_RUNTIME = 120
+    """
+    :var IONOSPHERE_MAX_RUNTIME: The maximum number of seconds an Ionosphere check
+        should run for.
+    :vartype IONOSPHERE_MAX_RUNTIME: int
+    """
+
+    IONOSPHERE_ECHO_ENABLED = True
+    """
+    :var IONOSPHERE_ECHO_ENABLED: This enables Ionosphere to create and test
+        features profiles for Mirage metrics but at settings.FULL_DURATION as well.
+        Features profiles will be made on the fly for any existing, validated Mirage
+        metric features profiles.  Ionosphere's matching performance is increased
+        between 30 to 50 percent when Ionosphere echo is run.
+    :vartype IONOSPHERE_ECHO_ENABLED: boolean
+    """
+
+    IONOSPHERE_ECHO_MAX_FP_CREATE_TIME = 55
+    """
+    :var IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: The maximum number of seconds an
+        Ionosphere echo process should run creating FULL_DURATION features profiles
+        for created Mirage features profiles.  This setting is specifically relevant
+        for Skyline implematations pre Ionosphere echo (v1.2.12) to prevent timeouts
+        if Ionosphere echo needs to make > 30 echo features profiles for Mirage
+        metrics with lots of existing features profiles.
+    :vartype IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: int
+    """
+
+    IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR = 2.5
+    """
+    :var IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: In terms of Ionosphere echo a
+        value of 2.0 is the default.  This default is above the normal
+        IONOSPHERE_FEATURES_PERCENT_SIMILAR due to that fact that the the resolution
+        of Ionosphere echo is at FULL_DURATION.  During testing this value was
+        tested at 1.0, 2 and 2.5, with 2.5 resulting in the most desirable results
+        in terms of matching time series that are similarly not anomalous.
+    :vartype IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: float
+    """
+
+    IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR = 3.5
+    """
+    :var IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: In terms of
+        Ionosphere echo Min-Max scaling percentage similar, a value of 3.5 is the
+        default.  This default is above the normal IONOSPHERE_FEATURES_PERCENT_SIMILAR
+        due to that fact that the the resolution of Ionosphere echo is at FULL_DURATION
+        and echo is using the normal IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE to
+        determine if Min-Max scaling should be run.  During testing this value was
+        tested at 1, 2 and 3.5, with 3.5 resulting in the most desirable results in
+        terms of matching time series that are similarly not anomalous.
+    :vartype IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: float
+    """
+
+- Stop Skyline Ionosphere and Panorama services.
+- Backup your Skyline database.
+- Apply the SQL update to your Skyline database as per described below, change
+  the below variables as appropriate to your set up.
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up)
+
+.. code-block:: bash
+
+    NEW_SKYLINE_VERSION="v1.2.13"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v1.2.11"    # Your old Skyline version
+    # OR
+    # OLD_SKYLINE_VERSION="v1.2.12"    # If you upgraded to v1.2.12
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    cp "$NEW_SKYLINE_PATH/skyline/settings.py" "$NEW_SKYLINE_PATH/skyline/settings.py.$OLD_SKYLINE_VERSION.bak"
+    cat "${CURRENT_SKYLINE_PATH}/skyline/settings.py" > "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # ADD the new IONOSPHERE_ECHO, ANALYZER_ENABLED and
+    # MIRAGE_PERIODIC_ settings to your settings.py
+    vi "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # Stop Skyline DB related services
+    SKYLINE_SERVICES="ionosphere
+    luminosity
+    panorama"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+    # And stop any service controls like monit or systemd
+
+    # BACKUP THE DB AND APPLY THE NEW SQL
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="<YOUR_MYSQL_USER>"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+
+    # Backup and update the DB (UNLESS you are ALREADY running v1.1.12)
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.v1.2.13.$MYSQL_DB.sql
+    mysql -u$MYSQL_USER -p $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/v1.2.12-stable.sql"
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.13 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv "$CURRENT_SKYLINE_PATH" "${CURRENT_SKYLINE_PATH}.${OLD_SKYLINE_VERSION}"
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done
+
+- Check the logs
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done

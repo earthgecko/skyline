@@ -65,6 +65,16 @@ try:
 except:
     DO_NOT_ALERT_ON_STALE_METRICS = []
 
+# @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
+try:
+    ANALYZER_ENABLED = settings.ANALYZER_ENABLED
+except:
+    ANALYZER_ENABLED = True
+try:
+    ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
+except:
+    ALERT_ON_STALE_METRICS = False
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 LOCAL_DEBUG = False
@@ -120,6 +130,9 @@ class Analyzer(Thread):
         # @added 20180903 - Feature #2580: illuminance
         #                   Feature #1986: flux
         self.illuminance_datapoints = Manager().list()
+        # @added 20190408 - Feature #2882: Mirage - periodic_check
+        self.mirage_periodic_check_metrics = Manager().list()
+        self.real_anomalous_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -213,6 +226,14 @@ class Analyzer(Thread):
         if LOCAL_DEBUG:
             logger.info('debug :: Memory usage spin_process after assigned_metrics: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+        # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
+        if not ANALYZER_ENABLED:
+            len_assigned_metrics = len(assigned_metrics)
+            logger.info('ANALYZER_ENABLED is set to %s removing the %s assigned_metrics' % (
+                str(ANALYZER_ENABLED), str(len_assigned_metrics)))
+            assigned_metrics = []
+            del unique_metrics
+
         # Check if this process is unnecessary
         if len(assigned_metrics) == 0:
             return
@@ -245,6 +266,121 @@ class Analyzer(Thread):
             mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
         except:
             mirage_unique_metrics = []
+
+        # @added 20190408 - Feature #2882: Mirage - periodic_check
+        # Add Mirage periodic checks so that Mirage is analysing each metric at
+        # least once per hour.
+        mirage_periodic_check_metric_list = []
+        try:
+            mirage_periodic_check_enabled = settings.MIRAGE_PERIODIC_CHECK
+        except:
+            mirage_periodic_check_enabled = False
+        try:
+            mirage_periodic_check_interval = settings.MIRAGE_PERIODIC_CHECK_INTERVAL
+        except:
+            mirage_periodic_check_interval = 3600
+        mirage_periodic_check_interval_minutes = int(int(mirage_periodic_check_interval) / 60)
+        if mirage_unique_metrics and mirage_periodic_check_enabled:
+            mirage_unique_metrics_count = len(mirage_unique_metrics)
+            # Mirage periodic checks are only done on declared namespaces as to
+            # process all Mirage metrics periodically would probably create a
+            # substantial load on Graphite and is probably not required only key
+            # metrics should be analysed by Mirage periodically.
+            periodic_check_mirage_metrics = []
+            try:
+                mirage_periodic_check_namespaces = settings.MIRAGE_PERIODIC_CHECK_NAMESPACES
+            except:
+                mirage_periodic_check_namespaces = []
+            for namespace in mirage_periodic_check_namespaces:
+                for metric_name in mirage_unique_metrics:
+                    metric_namespace_elements = metric_name.split('.')
+                    mirage_periodic_metric = False
+                    for periodic_namespace in mirage_periodic_check_namespaces:
+                        if not namespace in mirage_periodic_check_namespaces:
+                            continue
+                        periodic_namespace_namespace_elements = periodic_namespace.split('.')
+                        elements_matched = set(metric_namespace_elements) & set(periodic_namespace_namespace_elements)
+                        if len(elements_matched) == len(periodic_namespace_namespace_elements):
+                            mirage_periodic_metric = True
+                            break
+                    if mirage_periodic_metric:
+                        if not metric_name in periodic_check_mirage_metrics:
+                            periodic_check_mirage_metrics.append(metric_name)
+
+            periodic_check_mirage_metrics_count = len(periodic_check_mirage_metrics)
+            logger.info(
+                'there are %s known Mirage periodic metrics' % (
+                    str(periodic_check_mirage_metrics_count)))
+            for metric_name in periodic_check_mirage_metrics:
+                try:
+                    self.redis_conn.sadd('new.mirage.periodic_check.metrics.all', metric_name)
+                except Exception as e:
+                    logger.error('error :: could not add %s to Redis set new.mirage.periodic_check.metrics.all: %s' % (
+                        metric_name, e))
+            try:
+                self.redis_conn.rename('mirage.periodic_check.metrics.all', 'mirage.periodic_check.metrics.all.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('new.mirage.periodic_check.metrics.all', 'mirage.periodic_check.metrics.all')
+            except:
+                pass
+            try:
+                self.redis_conn.delete('mirage.periodic_check.metrics.all.old')
+            except:
+                pass
+
+            if periodic_check_mirage_metrics_count > mirage_periodic_check_interval_minutes:
+                mirage_periodic_checks_per_minute = periodic_check_mirage_metrics_count / mirage_periodic_check_interval_minutes
+            else:
+                mirage_periodic_checks_per_minute = 1
+            logger.info(
+                '%s Mirage periodic checks can be added' % (
+                    str(int(mirage_periodic_checks_per_minute))))
+            for metric_name in periodic_check_mirage_metrics:
+                if len(mirage_periodic_check_metric_list) == int(mirage_periodic_checks_per_minute):
+                    break
+                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                mirage_periodic_check_cache_key = 'mirage.periodic_check.%s' % base_name
+                mirage_periodic_check_key = False
+                try:
+                    mirage_periodic_check_key = self.redis_conn.get(mirage_periodic_check_cache_key)
+                except Exception as e:
+                    logger.error('error :: could not query Redis for cache_key: %s' % e)
+                if not mirage_periodic_check_key:
+                    try:
+                        key_created_at = int(time())
+                        self.redis_conn.setex(
+                            mirage_periodic_check_cache_key,
+                            mirage_periodic_check_interval, key_created_at)
+                        logger.info(
+                            'created Mirage periodic_check Redis key - %s' % (mirage_periodic_check_cache_key))
+                        mirage_periodic_check_metric_list.append(metric_name)
+                        try:
+                            self.redis_conn.sadd('new.mirage.periodic_check.metrics', metric_name)
+                        except Exception as e:
+                            logger.error('error :: could not add %s to Redis set new.mirage.periodic_check.metrics: %s' % (
+                                metric_name, e))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error(
+                            'error :: failed to create Mirage periodic_check Redis key - %s' % (mirage_periodic_check_cache_key))
+            try:
+                self.redis_conn.rename('mirage.periodic_check.metrics', 'mirage.periodic_check.metrics.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('new.mirage.periodic_check.metrics', 'mirage.periodic_check.metrics')
+            except:
+                pass
+            try:
+                self.redis_conn.delete('mirage.periodic_check.metrics.old')
+            except:
+                pass
+            mirage_periodic_check_metric_list_count = len(mirage_periodic_check_metric_list)
+            logger.info(
+                '%s Mirage periodic checks were added' % (
+                    str(mirage_periodic_check_metric_list_count)))
 
         try:
             ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
@@ -404,6 +540,16 @@ class Analyzer(Thread):
 
             try:
                 anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
+
+                # @added 20190408 - Feature #2882: Mirage - periodic_check
+                # Add for Mirage periodic - is really anomalous add to
+                # real_anomalous_metrics and if in mirage_periodic_check_metric_list
+                # add as anomalous
+                if anomalous:
+                    self.real_anomalous_metrics.append(base_name)
+                if metric_name in mirage_periodic_check_metric_list:
+                    self.mirage_periodic_check_metrics.append(base_name)
+                    anomalous = True
 
                 # If it's anomalous, add it to list
                 if anomalous:
@@ -1400,7 +1546,7 @@ class Analyzer(Thread):
 
                         if mirage_metric:
                             # Write anomalous metric to test at second
-                            # order resolution by crucible to the check
+                            # order resolution by Mirage to the check
                             # file
                             if LOCAL_DEBUG:
                                 logger.info(
@@ -1437,9 +1583,22 @@ class Analyzer(Thread):
                             if anomaly_check_file:
                                 anomaly_check_file_created = False
                                 try:
+                                    # @added 20190410 - Feature #2882: Mirage - periodic_check
+                                    # Allow for even non Mirage metrics to have
+                                    # periodic checks done.  If the Mirage
+                                    # SECOND_ORDER_RESOLUTION_HOURS are not set
+                                    # in the alert tuple default to 7 days, 168
+                                    # hours
+                                    try:
+                                        use_hours_to_resolve = int(alert[3])
+                                    except:
+                                        use_hours_to_resolve = 168
+
                                     with open(anomaly_check_file, 'w') as fh:
                                         # metric_name, anomalous datapoint, hours to resolve, timestamp
-                                        fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
+                                        # @modified 20190410 - Feature #2882: Mirage - periodic_check
+                                        # fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
+                                        fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
                                     anomaly_check_file_created = True
                                 except:
                                     logger.error(traceback.format_exc())
@@ -1604,18 +1763,27 @@ class Analyzer(Thread):
             # @modified 20160818 - Issue #19: Add additional exception handling to Analyzer
             anomalous_metrics_list_len = False
             try:
-                len(self.anomalous_metrics)
+                # @modified 20190408 - Feature #2882: Mirage - periodic_check
+                # Do not count Mirage periodic checks
+                # len(self.anomalous_metrics)
+                len(self.real_anomalous_metrics)
                 anomalous_metrics_list_len = True
             except:
-                logger.error('error :: failed to determine length of anomalous_metrics list')
+                logger.error('error :: failed to determine length of real_anomalous_metrics list')
 
             if anomalous_metrics_list_len:
-                if len(self.anomalous_metrics) > 0:
+                # @modified 20190408 - Feature #2882: Mirage - periodic_check
+                # Do not count Mirage periodic checks
+                # if len(self.anomalous_metrics) > 0:
+                if len(self.real_anomalous_metrics) > 0:
                     filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
                     try:
                         with open(filename, 'w') as fh:
                             # Make it JSONP with a handle_data() function
-                            anomalous_metrics = list(self.anomalous_metrics)
+                            # @modified 20190408 - Feature #2882: Mirage - periodic_check
+                            # Do not count Mirage periodic checks
+                            # anomalous_metrics = list(self.anomalous_metrics)
+                            anomalous_metrics = list(self.real_anomalous_metrics)
                             anomalous_metrics.sort(key=operator.itemgetter(1))
                             fh.write('handle_data(%s)' % anomalous_metrics)
                     except:
@@ -1732,7 +1900,10 @@ class Analyzer(Thread):
                 logger.info('debug :: Memory usage in run after algorithm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # @added 20180807 - Feature #2492: alert on stale metrics
-            if settings.ALERT_ON_STALE_METRICS:
+            # @modified 20190410 - Feature #2916: ANALYZER_ENABLED setting
+            # If Analyzer is not enabled do not alert on stale metrics
+            # if settings.ALERT_ON_STALE_METRICS:
+            if ALERT_ON_STALE_METRICS and ANALYZER_ENABLED:
                 stale_metrics_to_alert_on = []
                 alert_on_stale_metrics = []
                 try:
@@ -1796,8 +1967,21 @@ class Analyzer(Thread):
 
             run_time = time() - now
             total_metrics = str(len(unique_metrics))
-            total_analyzed = str(len(unique_metrics) - sum(exceptions.values()))
-            total_anomalies = str(len(self.anomalous_metrics))
+
+            # @modified 20190410 - Feature #2916: ANALYZER_ENABLED setting
+            # total_analyzed = str(len(unique_metrics) - sum(exceptions.values()))
+            if ANALYZER_ENABLED:
+                total_analyzed = str(len(unique_metrics) - sum(exceptions.values()))
+            else:
+                total_analyzed = '0'
+
+            # @modified 20190408 - Feature #2882: Mirage - periodic_check
+            # Do not count Mirage periodic checks
+            # total_anomalies = str(len(self.anomalous_metrics))
+            total_anomalies = str(len(self.real_anomalous_metrics))
+
+            # @added 20190408 - Feature #2882: Mirage - periodic_check
+            mirage_periodic_checks = str(len(self.mirage_periodic_check_metrics))
 
             # Log progress
             logger.info('seconds to run     :: %.2f' % run_time)
@@ -1806,6 +1990,8 @@ class Analyzer(Thread):
             logger.info('total anomalies    :: %s' % total_anomalies)
             logger.info('exception stats    :: %s' % exceptions)
             logger.info('anomaly breakdown  :: %s' % anomaly_breakdown)
+            # @added 20190408 - Feature #2882: Mirage - periodic_check
+            logger.info('mirage_periodic_checks  :: %s' % mirage_periodic_checks)
 
             # Log to Graphite
             graphite_run_time = '%.2f' % run_time
@@ -1848,6 +2034,13 @@ class Analyzer(Thread):
                 logger.info('Mirage metrics     :: %s' % mirage_unique_metrics_count_str)
                 send_metric_name = '%s.mirage_metrics' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, mirage_unique_metrics_count_str)
+
+                # @added 20190408 - Feature #2882: Mirage - periodic_check
+                logger.info('mirage_periodic_checks  :: %s' % mirage_periodic_checks)
+                mirage_periodic_checks = str(len(self.mirage_periodic_check_metrics))
+                logger.info('mirage_periodic_checks     :: %s' % mirage_periodic_checks)
+                send_metric_name = '%s.mirage_periodic_checks' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, mirage_periodic_checks)
 
             if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
                 try:
@@ -1943,6 +2136,9 @@ class Analyzer(Thread):
             self.non_smtp_alerter_metrics[:] = []
             # @added 20180903 - Feature #1986: illuminance
             self.illuminance_datapoints[:] = []
+            # @added 20190408 - Feature #2882: Mirage - periodic_check
+            self.mirage_periodic_check_metrics[:] = []
+            self.real_anomalous_metrics[:] = []
 
             unique_metrics = []
             raw_series = None

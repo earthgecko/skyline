@@ -373,6 +373,37 @@ per minute.  If a large number of metrics went anomalous, even with Mirage
 discarding :mod:`settings.MIRAGE_STALE_SECONDS` checks due to processing limit,
 signals would still be sent.
 
+Periodic Checks
+===============
+
+Due to the fact that Analyzer feeds Mirage metrics to check when Analyzer finds
+a Mirage metric anomalous, there are situations where a metric may change fairly
+substantially over a period greater than :mod:`settings.FULL_DURATION`, for
+example over 36 hours.  In these cases Analyser will not detect these changes as
+anomalous and therefore Mirage will not have a chance to check them.
+
+Periodic checks can be enabled on Mirage metric namespaces that are declared in
+:mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`.  It is not advisable to
+analyse all Mirage metrics periodically as this would probably have a
+significant impact on both Skyline and Graphite.
+
+Periodic checks should only be run on Mirage key metrics.  Periodic checks suit
+KPI metrics that are have fairly constant rate.  Periodic checks should not be
+implemented on general server and app metrics.
+
+It is important to note that the :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
+will match the exact string and dotted namespace elements as per
+documented in :mod:`settings.SKIP_LIST`.
+
+The types of metrics that suit periodic checks are total/global metrics,
+summed metrics rather than individual metrics.  The type of individual metrics
+that suit Mirage periodic checks are metrics like % disk space used on fairly
+consistent servers that are not expected to fluctuate too drastically over a
+period of days, like a DB server volume.
+
+You definitely do not what to run all your server or app metrics through Mirage
+periodic checks.
+
 What Mirage does
 ================
 
