@@ -29,6 +29,7 @@ services:
     build: 
       context: . #current dir as build context
       target: run_skyline
+    image: skyline:latest
     volumes:
       - .:/skyline
     depends_on:
