@@ -15,7 +15,7 @@ mkdir -p /tmp/skyline
 
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
 
-bash docker_scripts/configure_apache.sh
+bash docker_scripts/configure.sh
 
 /skyline/bin/horizon.d start
 /skyline/bin/analyzer.d start

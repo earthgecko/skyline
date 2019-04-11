@@ -78,3 +78,37 @@ a2enmod rewrite
 sed -i 's/.*IfModule.*//g;s/.*LoadModule.*//g' /etc/apache2/sites-available/skyline.conf
 a2ensite skyline.conf
 service apache2 restart
+
+
+
+#### Skyline settings ####
+if [ ! -f /skyline/skyline/settings.py.original ]; then
+  echo "Populating variables in the Skyline settings.py"
+  sleep 1
+  cat /skyline/skyline/settings.py > /skyline/skyline/settings.py.original
+# @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work (GH77)
+# Only requires a public IP if Grpahite is going to pickle to it, but seeing as
+# this is a test node, make it 127.0.0.1 as there are no iptables on the IP or
+# ports 2025 or 2024
+#    | sed -e "s/HORIZON_IP = .*/HORIZON_IP = '$YOUR_SERVER_IP_ADDRESS'/g" \
+  cat /skyline/skyline/settings.py.original \
+    | sed -e "s/REDIS_PASSWORD = .*/REDIS_PASSWORD = '$REDIS_PASSWORD'/g" \
+    | sed -e 's/PANORAMA_ENABLED = .*/PANORAMA_ENABLED = True/g' \
+    | sed -e "s/WEBAPP_AUTH_USER = .*/WEBAPP_AUTH_USER = '$WEBAPP_AUTH_USER'/g" \
+    | sed -e 's/PANORAMA_ENABLED = .*/PANORAMA_ENABLED = True/g' \
+    | sed -e "s/WEBAPP_AUTH_USER_PASSWORD = .*/WEBAPP_AUTH_USER_PASSWORD = '$WEBAPP_AUTH_USER_PASSWORD'/g" \
+    | sed -e "s/WEBAPP_ALLOWED_IPS = .*/WEBAPP_ALLOWED_IPS = ['127.0.0.1', '$YOUR_OTHER_IP_ADDRESS']/g" \
+    | sed -e "s/SKYLINE_URL = .*/SKYLINE_URL = 'https:\/\/$YOUR_SKYLINE_SERVER_FQDN'/g" \
+    | sed -e 's/MEMCACHE_ENABLED = .*/MEMCACHE_ENABLED = True/g' \
+    | sed -e "s/PANORAMA_DBUSER = .*/PANORAMA_DBUSER = 'skyline'/g" \
+    | sed -e "s/HORIZON_IP = .*/HORIZON_IP = '127.0.0.1'/g" \
+    | sed -e "s/PANORAMA_DBUSERPASS = .*/PANORAMA_DBUSERPASS = '$MYSQL_SKYLINE_PASSWORD'/g" > /skyline/skyline/settings.py
+  if [ $? -ne 0 ]; then
+    echo "error :: failed to populate the variables in /skyline/skyline/settings.py"
+    exit 1
+  fi
+else
+  echo "Skipping populating variables in the Skyline settings.py, already done."
+  sleep 1
+fi
+
