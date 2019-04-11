@@ -8,5 +8,5 @@ RUN sh /skyline/docker_scripts/install_environment.sh
 
 
 FROM base as run_skyline
-RUN sh /skyline/docker_scripts /init.sh
+RUN sh /skyline/docker_scripts/init.sh
 EXPOSE 1500 3306 2024
