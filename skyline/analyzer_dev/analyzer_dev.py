@@ -119,7 +119,7 @@ class Analyzer(Thread):
                 sock.settimeout(None)
             except socket.error:
                 sock.settimeout(None)
-                endpoint = '%s:%d' % (settings.GRAPHITE_HOST,
+                endpoint = '%s:%d' % (settings.CARBON_HOST,
                                       settings.CARBON_PORT)
                 logger.error("Can't connect to Graphite at %s" % endpoint)
                 return False

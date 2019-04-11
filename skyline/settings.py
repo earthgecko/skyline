@@ -163,6 +163,13 @@ GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/
     size graph sent with alerts.
 """
 
+CARBON_HOST = GRAPHITE_HOST
+"""
+:var CARBON_HOST: endpoint to send metrics that sould reach graphite.
+:vartype CARBON_PORT: int
+"""
+
+
 CARBON_PORT = 2003
 """
 :var CARBON_PORT: If you have a Graphite host set up, set its Carbon port.

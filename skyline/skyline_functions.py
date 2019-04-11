@@ -27,9 +27,9 @@ except ImportError:
 import settings
 
 try:
-    from settings import GRAPHITE_HOST
+    from settings import CARBON_HOST
 except:
-    GRAPHITE_HOST = ''
+    CARBON_HOST = ''
 try:
     from settings import CARBON_PORT
 except:
@@ -58,7 +58,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
     :rtype: boolean
 
     """
-    if GRAPHITE_HOST != '':
+    if CARBON_HOST != '':
 
         sock = socket.socket()
         sock.settimeout(10)
@@ -70,11 +70,11 @@ def send_graphite_metric(current_skyline_app, metric, value):
         # merged 1 commit into earthgecko:master from
         # mlowicki:handle_connection_error_to_graphite on 16 Mar 2015
         try:
-            sock.connect((GRAPHITE_HOST, CARBON_PORT))
+            sock.connect((CARBON_HOST, CARBON_PORT))
             sock.settimeout(None)
         except socket.error:
             sock.settimeout(None)
-            endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
+            endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(
@@ -88,7 +88,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
             sock.close()
             return True
         except:
-            endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
+            endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(
