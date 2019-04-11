@@ -1,4 +1,10 @@
+
+
+
 cd /skyline
+
+git pull
+
 echo $PWD
 mkdir -p /var/log/skyline
 mkdir -p /var/run/skyline
@@ -14,7 +20,11 @@ mkdir -p /tmp/skyline
 
 cp /skyline/etc/skyline_docker.conf /etc/skyline/skyline.conf
 
+sh docker_scripts/configure_apache.sh
+
 /skyline/bin/horizon.d start
 /skyline/bin/analyzer.d start
 /skyline/bin/webapp.d start
 
+
+tail -f /var/log/skyline/*

@@ -6,7 +6,6 @@ WORKDIR /skyline
 ENV PYTHONPATH=/usr/local/lib/python2.7/dist-packages:$PYTHONPATH
 RUN sh /skyline/docker_scripts/install_environment.sh
 
-
 FROM base as run_skyline
 RUN sh /skyline/docker_scripts/init.sh
-EXPOSE 1500 3306 2024
+EXPOSE 1500 3306 2024 443
