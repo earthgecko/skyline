@@ -114,7 +114,7 @@ class Listen(Process):
     def __init__(self, port, queue, parent_pid, type="pickle"):
         super(Listen, self).__init__()
         try:
-            self.ip = '10.42.65.16' 
+            self.ip = settings.HORIZON_IP
         except AttributeError:
             # Default for backwards compatibility
             self.ip = socket.gethostname()
