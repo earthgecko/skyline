@@ -22,4 +22,4 @@ bash docker_scripts/configure.sh
 /skyline/bin/webapp.d start
 
 
-# tail -f /var/log/skyline/*
+cat /var/log/skyline/*
