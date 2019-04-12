@@ -6,12 +6,20 @@ Build script - utils/dawn/skyline.dawn.sh
 =========================================
 
 The Skyline dawn branch adds a build script for **TESTING** only, it is not
-recommended for production use.  However seeing as it may be used by people
-for testing, it is written to try and ensure secure a set up as possible,
-with the exception of the definitions of iptables/iptables6/ufw.  It should not
-be used to deploy any other kind of environment unless the other components such
-as Graphite, iptables/iptables6/ufw are configured at the same time.  The build
-script is suitable for:
+recommended for production use.
+
+.. warning:: When running this test instance there are expected to be errors in
+  the logs as there is no real Graphite configured, no :mod:`settings.ALERTS`,
+  no alert email addresses, etc, etc.  In fact there are no real time series
+  apart from the ``metrics.horizon.test.udp`` data seeded into Redis, which goes
+  stale quickly.  The Skyline now and panorama pages are not going to display
+  graph data.
+
+However seeing as it may be used by people for testing, it is written to try and
+ensure secure a set up as possible, with the exception of the definitions of
+iptables/iptables6/ufw.  It should not be used to deploy any other kind of
+environment unless the other components such as Graphite, iptables/iptables6/ufw
+are configured at the same time.  The build script is suitable for:
 
 - CentOS 6.9
 - CentOS 7.5
@@ -42,6 +50,9 @@ following:
   metric and which creates an anomaly to be reviewed in the Skyline webapp UI
 - The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
   be run in an idempotent manner.
+
+.. warning:: remember there are expected to be errors and no time series, no
+  Graphite, no graphs, etc.
 
 Example usage:
 
