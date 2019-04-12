@@ -733,8 +733,16 @@ class Ionosphere(Thread):
             return
         try:
             check_process_start = int(time())
+            # @modified 20190412 - Task #2824: Test redis-py upgrade
+            #                      Task #2926: Update dependencies
+            # redis-py 3.x only accepts user data as bytes, strings or
+            # numbers (ints, longs and floats).  All 2.X users should
+            # make sure that the keys and values they pass into redis-py
+            # are either bytes, strings or numbers.  Added cache_key_value
+            # self.redis_conn.setex(
+                # ionosphere_check_cache_key, 300, [check_process_start])
             self.redis_conn.setex(
-                ionosphere_check_cache_key, 300, [check_process_start])
+                ionosphere_check_cache_key, 300, check_process_start)
             logger.info(
                 'added Redis check key - %s' % (ionosphere_check_cache_key))
         except:
@@ -1533,7 +1541,10 @@ class Ionosphere(Thread):
                     try:
                         key_created_at = int(time())
                         self.redis_conn.setex(
-                            create_ionosphere_echo_check_key, 300, [key_created_at])
+                            # @modified 20190412 - Task #2824: Test redis-py upgrade
+                            #                      Task #2926: Update dependencies
+                            # create_ionosphere_echo_check_key, 300, [key_created_at])
+                            create_ionosphere_echo_check_key, 300, key_created_at)
                         logger.info(
                             'created Redis check key - %s' % (create_ionosphere_echo_check_key))
                     except:
@@ -1576,6 +1587,8 @@ class Ionosphere(Thread):
                         try:
                             echo_calculated_features = get_calculated_features(echo_calculated_feature_file)
                         except:
+                            # 20190412 - just for debug
+                            logger.error(traceback.format_exc())
                             logger.error('error :: ionosphere_echo_check no echo_calculated_features were determined')
                             echo_calculated_features = False
             except:
@@ -2584,7 +2597,10 @@ class Ionosphere(Thread):
                             'LEARNT :: adding work to Redis ionosphere.learn.work set - [\'%s\', \'%s\', %s, \'%s\', %s, %s] to create a learnt features profile' % (
                                 work_deadline, str(ionosphere_job), str(metric_timestamp), base_name,
                                 str(fp_id), str(current_fp_generation)))
-                        self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])
+                        # modified 20190412 - Task #2824: Test redis-py upgrade
+                        #                     Task #2926: Update dependencies
+                        # self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])
+                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)]))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
@@ -2777,20 +2793,28 @@ class Ionosphere(Thread):
                 # Only do the cache_key if not ionosphere_learn
                 if added_by != 'ionosphere_learn':
                     cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+                    # added 20190412 - Task #2824: Test redis-py upgrade
+                    #                  Task #2926: Update dependencies
+                    # Added cache_key_value
+                    cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration]
+
                     try:
                         self.redis_conn.setex(
                             cache_key, 300,
-                            [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                            # modified 20190412 - Task #2824: Test redis-py upgrade
+                            #                     Task #2926: Update dependencies
+                            # [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                            str(cache_key_value))
                         logger.info(
-                            'add Redis alert key - %s - [%s, \'%s\', %s, %s]' %
+                            'add Redis alert key - %s - [%s, \'%s\', %s, %s, %s]' %
                             (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                                str(triggered_algorithms)))
+                                str(triggered_algorithms), str(full_duration)))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
-                            'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s]' %
+                            'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
                             (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                                str(triggered_algorithms)))
+                                str(triggered_algorithms), str(full_duration)))
 
                 # @added 20170116 - Feature #1854: Ionosphere learn
                 # Added an ionosphere_learn job for the timeseries that did not
@@ -2805,7 +2829,10 @@ class Ionosphere(Thread):
                             'adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', None, None] to make a learn features profile later' % (
                                 str(ionosphere_job), str(int(metric_timestamp)),
                                 base_name))
-                        self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
+                        # modified 20190412 - Task #2824: Test redis-py upgrade
+                        #                     Task #2926: Update dependencies
+                        #self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
+                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None]))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
