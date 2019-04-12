@@ -75,7 +75,7 @@ fi
 #### STATIC VARIABLES ####
 # @modified 20190412 - Task #2926: Update dependencies
 # Update to redis-4.0.14
-REDIS_VERSION="redis-3.2.12"
+#REDIS_VERSION="redis-3.2.12"
 REDIS_VERSION="redis-4.0.14"
 # @modified 20190412 - Task #2926: Update dependencies
 # Update to Python-2.7.16
