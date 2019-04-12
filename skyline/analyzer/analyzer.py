@@ -546,7 +546,13 @@ class Analyzer(Thread):
                 # real_anomalous_metrics and if in mirage_periodic_check_metric_list
                 # add as anomalous
                 if anomalous:
-                    self.real_anomalous_metrics.append(base_name)
+                    # @modified 20190412 - Bug #2932: self.real_anomalous_metrics not being populated correctly
+                    #                      Feature #2882: Mirage - periodic_check
+                    # self.real_anomalous_metrics.append(base_name)
+                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    metric_timestamp = timeseries[-1][0]
+                    metric = [datapoint, base_name, metric_timestamp]
+                    self.real_anomalous_metrics.append(metric)
                 if metric_name in mirage_periodic_check_metric_list:
                     self.mirage_periodic_check_metrics.append(base_name)
                     anomalous = True
