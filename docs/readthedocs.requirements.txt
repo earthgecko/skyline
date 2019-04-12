@@ -1,5 +1,6 @@
 # @modified 20180717 - Task #2446: Optimize Ionosphere
 #                      Branch #2270: luminosity
+# @modified 20190412 - Task #2926: Update dependencies
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
 setuptools
@@ -51,3 +52,4 @@ SQLAlchemy==1.3.2
 pymemcache==2.1.1
 PyJWT==1.7.1
 slackclient==1.3.1
+urllib3>=1.24.1
