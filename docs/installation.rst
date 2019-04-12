@@ -210,6 +210,17 @@ Skyline and dependencies install
   habit of always using explicit bin/pip2.7 and bin/python2.7 commands to ensure
   that it is harder for you to err.
 
+.. warning:: If you are running on CentOS 6 mysql-connector-python needs to be
+  fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
+  mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
+  handshake error.  Further to this there is a reported vulnerability with
+  mysql-connector-python-8.0.6
+  High severity vulnerability found on mysql-connector-python@8.0.6
+  desc: Improper Access Control
+  info: https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986
+  info: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435
+  You have been advised, so now you know.
+
 .. code-block:: bash
 
     PYTHON_MAJOR_VERSION="2.7"
@@ -224,6 +235,23 @@ Skyline and dependencies install
     # https://github.com/statsmodels/statsmodels/issues/4654
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
+
+    # CentOS 6 ONLY
+    # mysql-connector-python needs to be fixed to 8.0.6 on CentOS 6 as it uses
+    # MySQL 5.1 rpm from mainstream, as of mysql-connector-python 8.0.11 support
+    # for 5.1 was dropped and results in a bad handshake error.
+    if [ -f /etc/redhat-release ]; then
+      CENTOS=$(cat /etc/redhat-release | grep -c "CentOS")
+      if [ $CENTOS -eq 1 ]; then
+        CENTOS_6=$(cat /etc/redhat-release | grep -c "release 6")
+        if [ $CENTOS_6 -eq 1 ]; then
+          echo "Replacing mysql-connector-python version in requirements.txt as CentOS 6 requires mysql-connector-python==8.0.6"
+          cat /opt/skyline/github/skyline/requirements.txt > /opt/skyline/github/skyline/requirements.txt.original
+          cat /opt/skyline/github/skyline/requirements.txt.original | sed -e 's/^mysql-connector-python==.*/mysql-connector-python==8\.0\.6/g' > /opt/skyline/github/skyline/requirements.txt.centos6
+          cat /opt/skyline/github/skyline/requirements.txt.centos6 > /opt/skyline/github/skyline/requirements.txt
+        fi
+      fi
+    fi
 
     # This can take lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt

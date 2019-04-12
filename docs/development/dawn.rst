@@ -22,7 +22,7 @@ environment unless the other components such as Graphite, iptables/iptables6/ufw
 are configured at the same time.  The build script is suitable for:
 
 - CentOS 6.9
-- CentOS 7.5
+- CentOS 7.5 and 7.6
 - Ubuntu 16.04.4 LTS
 
 The build script has user defined variables that can be edited directly in the
@@ -95,3 +95,14 @@ Example usage:
   # Run it
   chmod 0755 /tmp/skyline.dawn.sh
   /tmp/skyline.dawn.sh
+
+Add an entry into your /etc/hosts file that maps the instance IP to
+YOUR_SKYLINE_SERVER_FQDN and open the reported URL in your web browser,
+accepting the self signed SSL certificate.
+
+Check the Skyline logs.
+
+.. code-block:: bash
+
+  # Check the logs
+  tail -n 60 /var/log/skyline/*.log

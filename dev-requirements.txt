@@ -316,11 +316,15 @@ pygerduty==0.38.1
 # @modified 20180910 - Task #2588: Update dependencies
 #                      Bug #2590: mysql-connector-python - use_pure
 # Use 8.0.6 due to #2590
-mysql-connector-python==8.0.6
+#mysql-connector-python==8.0.6
 #mysql-connector-python==8.0.12
-# @modified 20190411 - Task #2926: Update dependencies
-# Tested 8.0.15 same result as #2590, sticking on 8.0.6
-#mysql-connector-python==8.0.15
+# @modified 20190412 - Task #2926: Update dependencies
+#                      Bug #2590: mysql-connector-python - use_pure
+# Tested 8.0.15 on CentOS7 and Ubuntu 16.06 fine on CentOS 6 it has the same
+# result as #2590, so updating to 8.0.15 and sticking on 8.0.6 for CentOS 6 in
+# docs and dawn
+#mysql-connector-python==8.0.6
+mysql-connector-python==8.0.15
 
 # For a production WSGI HTTP Server for the Webapp
 # @modified 20170809 - Task #2138: Update deps
