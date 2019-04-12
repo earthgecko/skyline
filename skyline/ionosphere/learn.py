@@ -301,7 +301,14 @@ def remove_work_list_from_redis_set(learn_metric_list):
     logger = logging.getLogger(skyline_app_logger)
     work_set = 'ionosphere.learn.work'
     try:
-        redis_conn.srem(work_set, learn_metric_list)
+        # @modified 20190412 - Task #2824: Test redis-py upgrade
+        #                      Task #2926: Update dependencies
+        # redis-py 3.x only accepts user data as bytes, strings or
+        # numbers (ints, longs and floats).  All 2.X users should
+        # make sure that the keys and values they pass into redis-py
+        # are either bytes, strings or numbers.  Added cache_key_value
+        # redis_conn.srem(work_set, learn_metric_list)
+        redis_conn.srem(work_set, str(learn_metric_list))
         logger.info('learn :: removed work item - %s - from Redis set - %s' % (str(learn_metric_list), work_set))
     except:
         logger.error(traceback.format_exc())
