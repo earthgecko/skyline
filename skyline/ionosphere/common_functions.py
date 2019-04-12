@@ -180,8 +180,18 @@ def get_calculated_features(calculated_feature_file):
                 else:
                     feature_name = str(line[0])
                 count_id += 1
-                calc_value = float(line[1])
-                calculated_features.append([feature_name, calc_value])
+                # @modified 20190412 - Feature #2484: FULL_DURATION feature profiles
+                # This sometimes generates an error so wrapped in try with
+                # logging
+                # calc_value = float(line[1])
+                # calculated_features.append([feature_name, calc_value])
+                try:
+                    calc_value = float(line[1])
+                    calculated_features.append([feature_name, calc_value])
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('failed to determine calc_value from value of - %s - for feature_name - %s' % (
+                        str(line[1]), str(line[0])))
     return calculated_features
 
 
