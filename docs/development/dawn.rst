@@ -25,6 +25,17 @@ are configured at the same time.  The build script is suitable for:
 - CentOS 7.5 and 7.6
 - Ubuntu 16.04.4 LTS
 
+.. warning:: If you are running on CentOS 6 mysql-connector-python needs to be
+  fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
+  mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
+  handshake error.  Further to this there is a reported vulnerability with
+  mysql-connector-python-8.0.6
+  High severity vulnerability found on mysql-connector-python-8.0.6
+  desc: Improper Access Control
+  info: https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986
+  info: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435
+  You have been advised, so now you know.
+
 The build script has user defined variables that can be edited directly in the
 script or read from /etc/skyline/skyline.dawn.conf.  The build script does the
 following:
@@ -35,7 +46,7 @@ following:
 - Downloads, builds, installs, configures and starts Redis
 - Installs memcached and its dependencies, configures and starts it
 - Creates a skyline system user
-- Downloads, builds and deploys the current Skyline Python version (2.7.14) and
+- Downloads, builds and deploys the current Skyline Python version (2.7.16) and
   sets up the Skyline Python virtualenv
 - Creates the required Skyline directories
 - Clones the Skyline repo and checkouts the declared version
