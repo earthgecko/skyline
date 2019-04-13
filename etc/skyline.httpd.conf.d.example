@@ -63,7 +63,7 @@ Listen <YOUR_SERVER_IP_ADDRESS>:443
         authType Basic
         authName Restricted
         Require valid-user
-        Require <YOUR_SERVER_IP_ADDRESS>
+        Require ip <YOUR_SERVER_IP_ADDRESS>
         Require all granted
     </Directory>
 
