@@ -734,7 +734,13 @@ class Analyzer(Thread):
                             self.redis_conn.setex(
                                 ionosphere_training_data_key,
                                 settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR,
-                                ionosphere_training_data_key_data)
+                                # @modified 20190413 - Task #2824: Test redis-py upgrade
+                                #                      Task #2926: Update dependencies
+                                # redis-py 3.x only accepts user data as bytes, strings or
+                                # numbers (ints, longs and floats).  All 2.X users should
+                                # make sure that the keys and values they pass into redis-py
+                                # are either bytes, strings or numbers. Use str
+                                str(ionosphere_training_data_key_data))
                         except:
                             logger.info(traceback.format_exc())
                             logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
