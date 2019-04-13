@@ -56,18 +56,31 @@ Listen <YOUR_SERVER_IP_ADDRESS>:443
     Header always append X-Frame-Options SAMEORIGIN
 
     LimitRequestFieldSize 32768
-    <Location />
+
+    # Apache2 -version 2.4
+    <Directory "/">
+        authUserFile "<YOUR_HTPASSWD_FILE>"
         authType Basic
         authName Restricted
-#        authUserFile "/etc/httpd/conf.d/.skyline_htpasswd"
-        authUserFile "<YOUR_HTPASSWD_FILE>"
         Require valid-user
-        Order allow,deny
-        Allow from <YOUR_SERVER_IP_ADDRESS>
-        Allow from <YOUR_OTHER_IP_ADDRESS>
-        Deny from all
-        Satisfy any
-    </Location>
+        Require <YOUR_SERVER_IP_ADDRESS>
+        Require all granted
+    </Directory>
+
+
+    # Apache2 -version 2.2
+    # <Location />
+        # authType Basic
+        # authName Restricted
+        # authUserFile "/etc/httpd/conf.d/.skyline_htpasswd"
+        # authUserFile "<YOUR_HTPASSWD_FILE>"
+        # Require valid-user
+        # Order allow,deny
+        # Allow from <YOUR_SERVER_IP_ADDRESS>
+        # Allow from <YOUR_OTHER_IP_ADDRESS>
+        # Deny from all
+        # Satisfy any
+    # </Location>
 
 # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
 # Added the X-Forwarded-Proto header so that Flask can determine the original

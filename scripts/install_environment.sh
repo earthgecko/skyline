@@ -10,6 +10,11 @@ python -V
 
 cd /skyline
 echo $PWD
+
+# To suppress "You are using pip version 8.1.1, however version 19.0.3 is available."
+# TODO: check if works with newer version of pip
+sudo pip install --upgrade pip
+
 sudo pip install docutils
 sudo pip install $(cat requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
 sudo pip install $(cat requirements.txt | grep "^pandas")
