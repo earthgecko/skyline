@@ -58,16 +58,20 @@ Listen <YOUR_SERVER_IP_ADDRESS>:443
     LimitRequestFieldSize 32768
 
     # Apache2 -version 2.4
-    <Directory />
-        Require ip <YOUR_SERVER_IP_ADDRESS>
-        Require all granted
+    <Directory "/">
+        LogLevel debug trace5
+        AuthType Basic
+        AuthBasicProvider file
+        AuthUserFile "<YOUR_HTPASSWD_FILE>"
+        AuthName "Restricted"
+        <RequireAll>
+            Require valid-user
+            <RequireAny>
+                Require ip <YOUR_SERVER_IP_ADDRESS>
+                Require ip <YOUR_OTHER_IP_ADDRESS>
+            </RequireAny>
+        </RequireAll>
     </Directory>
-    <Location />
-        authUserFile "/etc/apache2/.skyline_htpasswd"
-        authType Basic
-        authName Restricted
-        Require valid-user
-    </Location>
 
 
     # Apache2 -version 2.2
