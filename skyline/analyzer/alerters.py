@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import logging
+import hashlib
 from smtplib import SMTP
 import alerters
 try:
@@ -146,7 +147,8 @@ def alert_smtp(alert, metric, context):
 
     # @added 20161229 - Feature #1830: Ionosphere alerts
     # Added Ionosphere variables
-    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    base_name = hashlib.sha224(str(metric[1]).replace(
+        settings.FULL_NAMESPACE, '', 1)).hexdigest()
     if settings.IONOSPHERE_ENABLED:
         timeseries_dir = base_name.replace('.', '/')
         training_data_dir = '%s/%s/%s' % (
