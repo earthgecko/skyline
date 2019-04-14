@@ -608,20 +608,7 @@ elements.
 """
 
 # Each alert module requires additional information.
-SMTP_OPTS = {
-    # This specifies the sender of email alerts.
-    'sender': 'skyline@your_domain.com',
-    # recipients is a dictionary mapping metric names
-    # (exactly matching those listed in ALERTS) to an array of e-mail addresses
-    'recipients': {
-        'skyline': ['you@your_domain.com', 'them@your_domain.com'],
-        'skyline_test.alerters.test': ['you@your_domain.com'],
-    },
-    # This is the default recipient which acts as a catchall for alert tuples
-    # that do not have a matching namespace defined in recipients
-    'default_recipient': ['you@your_domain.com'],
-    'embed-images': True,
-}
+SMTP_OPTS = {'sender': 'skyline@your_domain.com', 'recipients': {'skyline': ['you@your_domain.com', 'them@your_domain.com'], 'skyline_test.alerters.test': ['you@your_domain.com'], }, 'default_recipient': ['you@your_domain.com'], 'embed-images': True}
 """
 :var SMTP_OPTS: Your SMTP settings.
 :vartype SMTP_OPTS: dictionary
@@ -652,19 +639,7 @@ HIPCHAT_OPTS = {
 HipChat alerts require python-simple-hipchat
 """
 
-SLACK_OPTS = {
-    # Bot User OAuth Access Token
-    'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token',
-    # list of slack channels to notify about each anomaly
-    # (similar to SMTP_OPTS['recipients'])
-    # channel names - you can either pass the channel name (#general) or encoded
-    # ID (C024BE91L)
-    'channels': {
-        'skyline': ('#general',),
-        'skyline_test.alerters.test': ('#general',),
-    },
-    'icon_emoji': ':chart_with_upwards_trend:',
-}
+SLACK_OPTS = {'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'channels': {'skyline': ('#general',), 'skyline_test.alerters.test': ('#general',), }, 'icon_emoji': ':chart_with_upwards_trend:'}
 """
 :var SLACK_OPTS: Your slack settings.
 :vartype SLACK_OPTS: dictionary
