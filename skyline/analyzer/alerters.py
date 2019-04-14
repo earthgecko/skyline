@@ -1068,8 +1068,8 @@ def alert_slack(alert, metric, context):
     import simplejson as json
 
     logger.info('alert_slack - anomalous metric :: alert: %s, metric: %s' % (str(alert), str(metric)))
-    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
-
+    base_name = hashlib.sha224(str(metric[1]).replace(
+        settings.FULL_NAMESPACE, '', 1)).hexdigest()
     full_duration_in_hours = int(settings.FULL_DURATION) / 3600
 
     known_derivative_metric = False
