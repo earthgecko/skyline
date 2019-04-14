@@ -110,6 +110,18 @@ GRAPHITE_AUTH_HEADER = ''
 :vartype GRAPHITE_AUTH_HEADER: str
 """
 
+GRAPHITE_AUTH_HEADER = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+"""
+:var GRAPHITE_AUTH_HEADER: the Authorization header for Graphite api
+:vartype GRAPHITE_AUTH_HEADER: str
+"""
+
+GRAPHITE_CUSTOM_HEADERS = {}
+"""
+:var GRAPHITE_CUSTOM_HEADERS: Dictionary with custom headers
+:vartype GRAPHITE_CUSTOM_HEADERS: dict
+"""
+
 GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'
 """
 :var GRAPHITE_HOST: If you have a Graphite host set up, set this metric to get
@@ -159,7 +171,13 @@ TARGET_HOURS = '7'
 :vartype TARGET_HOURS: str
 """
 
-GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
+GRAPHITE_RENDER_URI = 'api/datasources/proxy/1/render/'
+"""
+:var GRAPHITE_RENDER_URI: Base URI for graphite render
+:vartype GRAPHITE_RENDER_URI: str
+"""
+
+GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/' + GRAPHITE_RENDER_URI + '?width=1400&from=-' + TARGET_HOURS + 'hour&target='
 """
 :var GRAPH_URL: The graphite URL for alert graphs will be appended with the
     relevant metric name in each alert.

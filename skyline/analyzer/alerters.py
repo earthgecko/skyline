@@ -95,6 +95,39 @@ except:
 full_duration_in_hours = full_duration_seconds / 60 / 60
 
 
+def get_graphite_port():
+    """
+    Returns graphite port based on configuration in settings.py
+    """
+    if settings.GRAPHITE_PROTOCOL == 'http':
+        graphite_port = '80'
+    else:
+        graphite_port = '443'
+    if settings.GRAPHITE_PORT != '':
+        graphite_port = str(settings.GRAPHITE_PORT)
+    return graphite_port
+
+
+def get_graphite_render_uri():
+    """
+    Returns graphite render uri based on configuration in settings.py
+    """
+    graphite_render_uri = 'render/'
+    if settings.GRAPHITE_RENDER_URI != '':
+        graphite_render_uri = str(settings.GRAPHITE_RENDER_URI)
+    return graphite_render_uri
+
+
+def get_graphite_custom_headers():
+    """
+    Returns custom http headers
+    """
+    headers = dict()
+    if settings.GRAPHITE_CUSTOM_HEADERS is not None:
+        headers = settings.GRAPHITE_CUSTOM_HEADERS
+    return headers 
+
+
 def alert_smtp(alert, metric, context):
     """
     Called by :func:`~trigger_alert` and sends an alert via smtp to the
@@ -222,10 +255,6 @@ def alert_smtp(alert, metric, context):
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
 
-    graphite_port = '80'
-    if settings.GRAPHITE_PORT != '':
-        graphite_port = str(settings.GRAPHITE_PORT)
-
     # @added 20180809 - Bug #2498: Incorrect scale in some graphs
     # If -xhours is used the scale is incorrect if x hours > than first
     # retention period, passing from and until renders the graph with the
@@ -241,18 +270,17 @@ def alert_smtp(alert, metric, context):
     until_timestamp = int(metric[2])
     from_timestamp = until_timestamp - full_duration_seconds
 
+    graphite_port = get_graphite_port()
+    graphite_render_uri = get_graphite_render_uri()
+    graphite_custom_headers = get_graphite_custom_headers()
+
     graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_from - %s' % str(graphite_from))
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
 
-    # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
-    # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
-    #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-    #     graphite_port, str(int(full_duration_in_hours)), metric[1],
-    #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-    link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+    link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri,
         str(graphite_from), str(graphite_until), metric[1],
         settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
@@ -263,9 +291,9 @@ def alert_smtp(alert, metric, context):
         #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
         #     graphite_port, str(int(full_duration_in_hours)), metric[1],
         #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, str(graphite_from), str(graphite_until), metric[1],
+            graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1],
             settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
@@ -288,7 +316,8 @@ def alert_smtp(alert, metric, context):
             try:
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                image_data = urllib2.urlopen(link).read()  # nosec
+                request = urllib2.Request(link, headers=graphite_custom_headers)
+                image_data = urllib2.urlopen(request).read()  # nosec
                 if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                     logger.info('debug :: alert_smtp - image data OK')
             except urllib2.URLError:
@@ -920,26 +949,13 @@ def alert_hipchat(alert, metric, context):
         graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
         logger.info('graphite_until - %s' % str(graphite_until))
 
-        if settings.GRAPHITE_PORT != '':
-            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
-            # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
-            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            #     settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1],
-            #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
-                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        else:
-            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
-            # link = '%s://%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
-            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            #     full_duration_in_hours, metric[1],
-            #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(graphite_from), str(graphite_until), metric[1],
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        graphite_port = get_graphite_port()
+        graphite_render_uri = get_graphite_render_uri()
+
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until),
+            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
         for room in rooms:
@@ -1110,28 +1126,22 @@ def alert_slack(alert, metric, context):
     human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%c')
     slack_time_string = '%s %s' % (human_anomaly_time, timezone)
 
-    if settings.GRAPHITE_PORT != '':
-        if known_derivative_metric:
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
-                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        else:
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
-                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    graphite_port = get_graphite_port()
+    graphite_render_uri = get_graphite_render_uri()
+    graphite_custom_headers = get_graphite_custom_headers()
+
+    if known_derivative_metric:
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            graphite_port, graphite_render_uri, str(
+                graphite_from), str(graphite_until),
+            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        if known_derivative_metric:
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(graphite_from), str(graphite_until), metric[1],
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        else:
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(graphite_from), str(graphite_until), metric[1],
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            graphite_port, graphite_render_uri, str(
+                graphite_from), str(graphite_until),
+            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # slack does not allow embedded images, nor will it fetch links behind
     # authentication so Skyline uploads a png graphite image with the message
@@ -1164,7 +1174,8 @@ def alert_slack(alert, metric, context):
     if not image_file:
         # Fetch the png from Graphite
         try:
-            image_data = urllib2.urlopen(link).read()  # nosec
+            request = urllib2.Request(link, headers=graphite_custom_headers)
+            image_data = urllib2.urlopen(request).read()  # nosec
         except urllib2.URLError:
             logger.error(traceback.format_exc())
             logger.error('error :: alert_slack - failed to get image graph')
