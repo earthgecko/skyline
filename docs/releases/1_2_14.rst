@@ -104,10 +104,10 @@ How to update from v1.2.13
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
     # This can take lots of minutes with the new pandas
-    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
     # Remove the luminol egg as it will already be installed and pip will moan
     # Remove Redis to be updated last
-    cat /opt/skyline/github/skyline/requirements.txt | grep -v "luminol\|redis" > /tmp/requirements.txt
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep -v "luminol\|redis" > /tmp/requirements.txt
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.txt
 
     # Stop all other Skyline services and any sevice controls you may have
@@ -126,7 +126,7 @@ How to update from v1.2.13
     done
 
     # Update redis-py
-    cat /opt/skyline/github/skyline/requirements.txt | grep "redis" > /tmp/redis.requirements.txt
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep "redis" > /tmp/redis.requirements.txt
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/redis.requirements.txt
     deactivate
 
