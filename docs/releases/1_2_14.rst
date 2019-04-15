@@ -92,6 +92,11 @@ How to update from v1.2.13
 - Update the pip dependencies  PLEASE USE THE APPROPRIATE Python verison for
   your install, e.g.
 
+.. warning:: If you are running on CentOS 6 and are running mainstream
+  mysql-server-5.1.x, in the example below take note of the line you need to
+  uncomment as you need to stay on mysql-python-connector==8.0.6 and NOT
+  upgrade to mysql-python-connector==8.0.15
+
 .. code-block:: bash
 
     PYTHON_MAJOR_VERSION="2.7"
@@ -108,6 +113,11 @@ How to update from v1.2.13
     # Remove the luminol egg as it will already be installed and pip will moan
     # Remove Redis to be updated last
     cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep -v "luminol\|redis" > /tmp/requirements.txt
+
+    # IF YOU ARE ON CENTOS 6 and running mainstream mysql-server-5.1 uncomment
+    # the following line and run it to fix to mysql-python-connector 8.0.6
+    #cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep -v "luminol\|redis\|mysql-connector-python" > /tmp/requirements.txt
+
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.txt
 
     # Stop all other Skyline services and any sevice controls you may have
