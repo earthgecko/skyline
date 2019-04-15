@@ -2820,7 +2820,7 @@ class Ionosphere(Thread):
                             # [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
                             str(cache_key_value))
                         logger.info(
-                            'add Redis alert key - %s - [%s, \'%s\', %s, %s, %s]' %
+                            'add Redis alert key - %s - %s' %
                             (cache_key, str(cache_key_value)))
                     except:
                         logger.error(traceback.format_exc())
