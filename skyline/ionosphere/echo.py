@@ -249,7 +249,7 @@ def ionosphere_echo(base_name, mirage_full_duration):
             # Any features profiles that were created before the introduction of
             # ionosphere_layers will not have a mirage.redis.24h.json file as the
             # creation of these resources in the training_data dir was only added at
-            # that point, so they are excluded.  Less that 20170307 1488844800 excl.
+            # that point, so they are excluded.  Less than 20170307 1488844800 excl.
             if int(row['anomaly_timestamp']) < 1488844800:
                 logger.info('ionosphere_echo :: skipping fp id %s as predates having a mirage.redis json file' % str(fp_id))
                 continue
