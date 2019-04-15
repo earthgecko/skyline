@@ -5,6 +5,7 @@
 v1.2.14 - April 15, 2019
 
 This is release includes:
+
 - Dependencies updates
 - Code changes for redis-py package update
 - mysql-connector-python notes
