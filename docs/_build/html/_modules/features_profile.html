@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>features_profile &mdash; Skyline 1.2.13 documentation</title>
+  <title>features_profile &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.13 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -239,6 +239,12 @@
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
     <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+    <span class="c1"># @added 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+    <span class="c1"># Set a default log_context, just in case it is not set if something is</span>
+    <span class="c1"># added in the future</span>
+    <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
         <span class="n">log_context</span> <span class="o">=</span> <span class="s1">&#39;training data&#39;</span>
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profiles&#39;</span><span class="p">:</span>
@@ -339,7 +345,10 @@
     <span class="n">fp_id</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">f_calc</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">):</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features profile details file exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">))</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features profile details file exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">features_profile_details_file</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">fp_details_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -348,14 +357,22 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error: failed to read from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">))</span>
+                <span class="s1">&#39;error: </span><span class="si">%s</span><span class="s1"> :: failed to read from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">features_profile_details_file</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;OK no features profile details file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">))</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - OK no features profile details file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">features_profile_details_file</span><span class="p">))</span>
 
     <span class="n">fp_created</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">):</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features profile created file exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">))</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features profile created file exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">features_profile_created_file</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">fp_created_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -365,13 +382,21 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error: failed to read fp_id from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">))</span>
+                <span class="s1">&#39;error: </span><span class="si">%s</span><span class="s1"> :: failed to read fp_id from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">features_profile_created_file</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;OK no features profile created file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">features_profile_created_file</span><span class="p">))</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: OK no features profile created file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">features_profile_created_file</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">t_fname_out</span><span class="p">):</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;transposed features already exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t_fname_out</span><span class="p">))</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: transposed features already exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">t_fname_out</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">t_fname_out</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">f_calc</span>
 
     <span class="n">start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
@@ -384,14 +409,18 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">))</span>
-            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span>
+                <span class="s1">&#39;error: </span><span class="si">%s</span><span class="s1"> :: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">anomaly_json</span><span class="p">))</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: </span><span class="si">%s</span><span class="s1"> :: failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">anomaly_json</span><span class="p">)</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
             <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">anomaly_json</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
         <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
@@ -428,15 +457,22 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">])</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;DataFrame created with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: DataFrame created with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to create a pandas DataFrame with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: </span><span class="si">%s</span><span class="s1"> :: failed to create a pandas DataFrame with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
         <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
 
@@ -459,18 +495,25 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: failed to read the pandas DataFrame created with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: </span><span class="si">%s</span><span class="s1"> :: failed to read the pandas DataFrame created with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
         <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
 
     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
 
     <span class="n">start_feature_extraction</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting extract_features with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">TSFRESH_VERSION</span><span class="p">))</span>
+    <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+    <span class="c1"># Added log_context to report the context</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: starting extract_features with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">log_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">TSFRESH_VERSION</span><span class="p">)))</span>
     <span class="n">df_features</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># @modified 20161226 - Bug #1822: tsfresh extract_features process stalling</span>
@@ -489,26 +532,37 @@
         <span class="n">df_features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span>
             <span class="n">df</span><span class="p">,</span> <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">column_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">column_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feature_extraction_settings</span><span class="o">=</span><span class="n">tsf_settings</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features extracted from </span><span class="si">%s</span><span class="s1"> data&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features extracted from </span><span class="si">%s</span><span class="s1"> data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: extracting features with tsfresh from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: </span><span class="si">%s</span><span class="s1"> :: extracting features with tsfresh from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="n">end_feature_extraction</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s1">&#39;feature extraction failed in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">end_feature_extraction</span> <span class="o">-</span> <span class="n">start_feature_extraction</span><span class="p">))</span>
+            <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: feature extraction failed in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">log_context</span><span class="p">,</span> <span class="p">(</span><span class="n">end_feature_extraction</span> <span class="o">-</span> <span class="n">start_feature_extraction</span><span class="p">)))</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
         <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
 
     <span class="n">end_feature_extraction</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
     <span class="n">feature_extraction_time</span> <span class="o">=</span> <span class="n">end_feature_extraction</span> <span class="o">-</span> <span class="n">start_feature_extraction</span>
+    <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+    <span class="c1"># Added log_context to report the context</span>
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-        <span class="s1">&#39;feature extraction took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">feature_extraction_time</span><span class="p">))</span>
+        <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: feature extraction took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">feature_extraction_time</span><span class="p">))</span>
 
     <span class="k">del</span> <span class="n">df</span>
 
@@ -520,15 +574,21 @@
     <span class="n">df_t</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">df_t</span> <span class="o">=</span> <span class="n">df_features</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features transposed&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features transposed&#39;</span> <span class="o">%</span> <span class="n">log_context</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: transposing tsfresh features from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: transposing tsfresh features from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
         <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
 
@@ -541,11 +601,15 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error: saving transposed tsfresh features from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: saving transposed tsfresh features from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+            <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1"># Added log_context to report the context</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: removed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
         <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
         <span class="k">return</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fp_created</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">f_calc</span>
 
@@ -563,29 +627,39 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create Dataframe to sum&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create Dataframe to sum&#39;</span> <span class="o">%</span> <span class="n">log_context</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">features_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to count number of features, set to 0&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to count number of features, set to 0&#39;</span> <span class="o">%</span> <span class="n">log_context</span><span class="p">)</span>
         <span class="n">features_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">features_sum</span> <span class="o">=</span> <span class="n">df_sum</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to sum feature values, set to 0&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to sum feature values, set to 0&#39;</span> <span class="o">%</span> <span class="n">log_context</span><span class="p">)</span>
         <span class="n">features_sum</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
 
-    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features saved to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fname_out</span><span class="p">))</span>
-    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;transposed features saved to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t_fname_out</span><span class="p">))</span>
+    <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+    <span class="c1"># Added log_context to report the context</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features saved to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">fname_out</span><span class="p">))</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: transposed features saved to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">log_context</span><span class="p">,</span> <span class="n">t_fname_out</span><span class="p">))</span>
     <span class="n">total_calc_time</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
     <span class="n">calc_time</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">feature_extraction_time</span><span class="p">)</span>
-    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total feature profile completed in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_calc_time</span><span class="p">))</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: total feature profile completed in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">log_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_calc_time</span><span class="p">)))</span>
 
     <span class="c1"># Create a features profile details file</span>
     <span class="k">try</span><span class="p">:</span>
@@ -599,14 +673,19 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to write </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">features_profile_details_file</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to write </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">log_context</span><span class="p">,</span> <span class="n">features_profile_details_file</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
 
     <span class="k">del</span> <span class="n">df_sum</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ts_csv</span><span class="p">)</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed the created csv - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_csv</span><span class="p">)</span>
+        <span class="c1"># @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+        <span class="c1"># Added log_context to report the context</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: removed the created csv - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">log_context</span><span class="p">,</span> <span class="n">ts_csv</span><span class="p">))</span>
 
     <span class="c1"># @added 20170112 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace</span>
     <span class="c1"># Ionosphere learn needs Redis works sets, but this was moved to</span>
@@ -646,7 +725,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.13',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

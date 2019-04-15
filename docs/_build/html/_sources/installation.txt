@@ -75,9 +75,11 @@ Steps
 -----
 
 .. note:: All the documentation and testing is based on running Skyline in a
-  Python-2.7.14 virtualenv, if you choose to deploy Skyline another way, you are
+  Python-2.7.16 virtualenv, if you choose to deploy Skyline another way, you are
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
+  Python-2.7.14 should still work as well, but all documentation has been
+  updated to use Python-2.7.16.
 
 Skyline configuration
 ~~~~~~~~~~~~~~~~~~~~~
@@ -90,8 +92,9 @@ documentation.
 Python virtualenv
 ~~~~~~~~~~~~~~~~~
 
-- Create a python-2.7.14 virtualenv for Skyline to run in see `Running in
-  Python virtualenv <running-in-python-virtualenv.html>`__
+- Create a python-2.7.16 virtualenv for Skyline to run in see `Running in
+  Python virtualenv <running-in-python-virtualenv.html>`__ (Python-2.7.14 should
+  still work as well).
 
 Firewall
 ~~~~~~~~
@@ -197,7 +200,7 @@ Skyline and dependencies install
     #cd /opt/skyline/github/skyline
     #git checkout <COMMITREF>
 
-- Once again using the Python-2.7.14 virtualenv,  install the requirements using
+- Once again using the Python-2.7.16 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
 
 .. warning:: When working with virtualenv Python versions you must always
@@ -210,11 +213,22 @@ Skyline and dependencies install
   habit of always using explicit bin/pip2.7 and bin/python2.7 commands to ensure
   that it is harder for you to err.
 
+.. warning:: If you are running on CentOS 6 mysql-connector-python needs to be
+  fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
+  mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
+  handshake error.  Further to this there is a reported vulnerability with
+  mysql-connector-python-8.0.6
+  High severity vulnerability found on mysql-connector-python-8.0.6
+  desc: Improper Access Control
+  info: https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986
+  info: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435
+  You have been advised, so now you know.
+
 .. code-block:: bash
 
     PYTHON_MAJOR_VERSION="2.7"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2714"
+    PROJECT="skyline-py2716"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -225,6 +239,23 @@ Skyline and dependencies install
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
 
+    # CentOS 6 ONLY
+    # mysql-connector-python needs to be fixed to 8.0.6 on CentOS 6 as it uses
+    # MySQL 5.1 rpm from mainstream, as of mysql-connector-python 8.0.11 support
+    # for 5.1 was dropped and results in a bad handshake error.
+    if [ -f /etc/redhat-release ]; then
+      CENTOS=$(cat /etc/redhat-release | grep -c "CentOS")
+      if [ $CENTOS -eq 1 ]; then
+        CENTOS_6=$(cat /etc/redhat-release | grep -c "release 6")
+        if [ $CENTOS_6 -eq 1 ]; then
+          echo "Replacing mysql-connector-python version in requirements.txt as CentOS 6 requires mysql-connector-python==8.0.6"
+          cat /opt/skyline/github/skyline/requirements.txt > /opt/skyline/github/skyline/requirements.txt.original
+          cat /opt/skyline/github/skyline/requirements.txt.original | sed -e 's/^mysql-connector-python==.*/mysql-connector-python==8\.0\.6/g' > /opt/skyline/github/skyline/requirements.txt.centos6
+          cat /opt/skyline/github/skyline/requirements.txt.centos6 > /opt/skyline/github/skyline/requirements.txt
+        fi
+      fi
+    fi
+
     # This can take lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
 
@@ -232,7 +263,7 @@ Skyline and dependencies install
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   set up if it is not using PATH
-  ``/opt/python_virtualenv/projects/skyline-py2714/bin/python2.7``
+  ``/opt/python_virtualenv/projects/skyline-py2716/bin/python2.7``
 
 .. code-block:: bash
 
