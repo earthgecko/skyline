@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.2.13 documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.13 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -1120,7 +1120,10 @@
                     <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">)])</span>
+                <span class="c1"># @modified 20190414 - Task #2824: Test redis-py upgrade</span>
+                <span class="c1">#                      Task #2926: Update dependencies</span>
+                <span class="c1"># redis_conn.sadd(&#39;ionosphere.learn.work&#39;, [&#39;Soft&#39;, str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])</span>
+                <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">)]))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
@@ -1274,7 +1277,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.13',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

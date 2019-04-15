@@ -952,7 +952,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
                 else:
                     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])
+                # @modified 20190414 - Task #2824: Test redis-py upgrade
+                #                      Task #2926: Update dependencies
+                # redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])
+                redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)]))
             except:
                 current_logger.error(traceback.format_exc())
                 current_logger.error(

@@ -558,7 +558,7 @@ class Ionosphere(Thread):
         # learn(timestamp)
         ionosphere_learn(timestamp)
 
-    # @added 20190326 - Feature #2484
+    # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
     def process_ionosphere_echo(self, i, metric_check_file):
         """
         Spawn a process_ionosphere_echo check to create features profiles at
@@ -610,6 +610,20 @@ class Ionosphere(Thread):
         if not metric:
             logger.error('error :: process_ionosphere_echo failed to load metric variable from check file - %s' % (metric_check_file))
             return
+
+        # @added 20190413 - Feature #2484: FULL_DURATION feature profiles
+        # Only process if it is an ionosphere enabled metric
+        try:
+            ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+            ionosphere_unique_metrics = []
+        if ionosphere_unique_metrics:
+            if not metric in ionosphere_unique_metrics:
+                logger.info('process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping %s' % metric)
+                return
+
         full_duration = None
         try:
             # metric_vars.full_duration
@@ -2806,9 +2820,8 @@ class Ionosphere(Thread):
                             # [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
                             str(cache_key_value))
                         logger.info(
-                            'add Redis alert key - %s - [%s, \'%s\', %s, %s, %s]' %
-                            (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                                str(triggered_algorithms), str(full_duration)))
+                            'add Redis alert key - %s - %s' %
+                            (cache_key, str(cache_key_value)))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(

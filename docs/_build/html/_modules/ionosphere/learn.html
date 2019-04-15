@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.learn &mdash; Skyline 1.2.13 documentation</title>
+  <title>ionosphere.learn &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.13 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -469,7 +469,14 @@
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
     <span class="n">work_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.learn.work&#39;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">work_set</span><span class="p">,</span> <span class="n">learn_metric_list</span><span class="p">)</span>
+        <span class="c1"># @modified 20190412 - Task #2824: Test redis-py upgrade</span>
+        <span class="c1">#                      Task #2926: Update dependencies</span>
+        <span class="c1"># redis-py 3.x only accepts user data as bytes, strings or</span>
+        <span class="c1"># numbers (ints, longs and floats).  All 2.X users should</span>
+        <span class="c1"># make sure that the keys and values they pass into redis-py</span>
+        <span class="c1"># are either bytes, strings or numbers.  Added cache_key_value</span>
+        <span class="c1"># redis_conn.srem(work_set, learn_metric_list)</span>
+        <span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">work_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">learn_metric_list</span><span class="p">))</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn :: removed work item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">learn_metric_list</span><span class="p">),</span> <span class="n">work_set</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1667,7 +1674,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.13',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.2.10 - the luminosity branch &mdash; Skyline 1.2.14 documentation</title>
+  <title>1.2.14 &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="Skyline 1.2.14 documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.2.9 - the luminosity branch" href="1_2_9.html"/>
-        <link rel="prev" title="1.2.11 - the luminosity branch" href="1_2_11.html"/> 
+        <link rel="next" title="1.2.13" href="1_2_13.html"/>
+        <link rel="prev" title="Release Notes" href="../releases.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -119,17 +119,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="1_2_14.html">1.2.14</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.14</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-note-on-version-changes">A note on version changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changes-in-v1-2-14">Changes in v1.2.14</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v1-2-13">How to update from v1.2.13</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_13.html">1.2.13</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_12.html">1.2.12</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_11.html">1.2.11 - the luminosity branch</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.10 - the luminosity branch</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#bug-fixes-release">Bug fixes release</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changes-from-v1-2-9">Changes from v1.2.9</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v1-2-9">How to update from v1.2.9</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_10.html">1.2.10 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_9.html">1.2.9 - the luminosity branch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_8.html">1.2.8 - the luminosity and dawn branches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_2_7.html">1.2.7 - the luminosity branch</a></li>
@@ -199,11 +199,11 @@
       
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
       
-    <li>1.2.10 - the luminosity branch</li>
+    <li>1.2.14</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/releases/1_2_10.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/releases/1_2_14.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -213,73 +213,158 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="the-luminosity-branch">
-<h1>1.2.10 - the luminosity branch<a class="headerlink" href="#the-luminosity-branch" title="Permalink to this headline">¶</a></h1>
-<p>v1.2.10-luminosity - November 19, 2018</p>
-<div class="section" id="bug-fixes-release">
-<h2>Bug fixes release<a class="headerlink" href="#bug-fixes-release" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Bug fixes are described below.</li>
-</ul>
+  <div class="section" id="id1">
+<h1>1.2.14<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>v1.2.14 - April 15, 2019</p>
+<p>This is release includes:
+- Dependencies updates
+- Code changes for redis-py package update
+- mysql-connector-python notes
+- Minor bug fixes
+- Updates on Python and Redis versions in docs and the test build script</p>
+<div class="section" id="a-note-on-version-changes">
+<h2>A note on version changes<a class="headerlink" href="#a-note-on-version-changes" title="Permalink to this headline">¶</a></h2>
+<p>The documentation has been updated to use Python 2.7.16 and Redis 4.0.14, these
+changes do not require any immediate updates of Skyline installations running
+Python 2.7.14 or an earlier version of Redis, v1.2.14 will still work on
+Python-2.7.14 and Redis 3.x.</p>
 </div>
-<div class="section" id="changes-from-v1-2-9">
-<h2>Changes from v1.2.9<a class="headerlink" href="#changes-from-v1-2-9" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="changes-in-v1-2-14">
+<h2>Changes in v1.2.14<a class="headerlink" href="#changes-in-v1-2-14" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Bumped version to v1.2.10</li>
-<li>Stop analyzer stalling if there is no stale_metrics_to_alert_on list to delete
-(2492)</li>
-<li>Remove Ionosphere check files is key exists instead of failing check file this
-was here for initially debugging, no longer needed (2680)</li>
-<li>To reduce the amount of I/O used by Mirage in this loop check and reduce the
-number of log entries for &#8216;not alerting - Ionosphere metric&#8217; a check is made
-if the metric_name has already been check, if so continue (2682)</li>
-<li>Handle if the metrics_var_file has not been set and is still False so that the
-path.isfile does not error with:
-<code class="docutils literal"><span class="pre">'TypeError:</span> <span class="pre">coercing</span> <span class="pre">to</span> <span class="pre">Unicode:</span> <span class="pre">need</span> <span class="pre">string</span> <span class="pre">or</span> <span class="pre">buffer,</span> <span class="pre">bool</span> <span class="pre">found'</span></code></li>
-<li>Handle 0.0 float in value variable (2708, 2234)</li>
-<li>Noted wget and net-tools required in dawn docs</li>
+<li>Update dependencies (2926)</li>
+<li>Note requirement of old version of mysql-connector-python if mainstream MySQL
+5.1 is used (2590)</li>
+<li>Updated skyline.conf USE_PYTHON to py2716 (2926)</li>
+<li>Update docs to Python-2.7.16 and redis-4.0.14 (2926)</li>
+<li>Corrected adding the metric list to the self.real_anomalous_metrics list
+instead of just the basename for Mirage periodic checks (2932, 2882)</li>
+<li>calc_value in get_calculated_features sometimes generates an error so wrapped
+in try with logging relating to Ionosphere echo (2484) to determine what value
+is causing:
+<cite>ValueError: could not convert string to float</cite></li>
+<li>redis-py 3.x only accepts user data as bytes, strings or numbers (ints, longs
+and floats).  All 2.X users should make sure that the keys and values they
+pass into redis-py are either bytes, strings or numbers.  Changed all key
+values that were passed as a list to a str, they are all evaluted upstream
+with literal_eval already (2824, 2926)</li>
+<li>calc_value in get_calculated_features is sometimes empty for
+autocorrelation_lag values so disabled traceback and log as info not error in
+the Ionosphere echo context (2484)</li>
+<li>Updated roadmap doc regarding NAB scoreboard update (1884, 2802)</li>
+<li>Any features profiles that were created before the introduction of (1960)
+ionosphere_layers will not have a mirage.redis.24h.json file as the
+creation of these resources in the training_data dir was only added at
+that point, so they are excluded.  Less than 20170307 1488844800 excl. (2934)</li>
+<li>Only process metric with echo if it is an ionosphere enabled metric (2484)</li>
+<li>Corrected adding the metric list to the self.real_anomalous_metrics list
+instead of just the basename (2932, 2882)</li>
 </ul>
 </div>
 <div class="section" id="update-notes">
 <h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.10</li>
-<li>You can only upgrade to v1.2.9 from v1.2.8</li>
-<li>There is no change to the DB</li>
-<li>There are no changes to settings.py</li>
+<li>These update instruction apply to upgrading from v1.2.13 to v1.2.14 only.
+However as with all Skyline updates it is possible to go through the update
+notes for each version and make your own update notes/process to take you from
+version x to version y.</li>
+<li>There are no changes to the DB in v1.2.14</li>
+<li>There are no changes to settings.py in v1.2.14</li>
 </ul>
 </div>
-<div class="section" id="how-to-update-from-v1-2-9">
-<h2>How to update from v1.2.9<a class="headerlink" href="#how-to-update-from-v1-2-9" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="how-to-update-from-v1-2-13">
+<h2>How to update from v1.2.13<a class="headerlink" href="#how-to-update-from-v1-2-13" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>There is no requirement for a full upgrade as described in previous release
-notes, but you can if you want to as per previous release notes or if you have
-some other reason related to configuration management or git referencing.</li>
-<li>To simply upgrade v.1.2.9 in-situ do</li>
+<li>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</li>
+<li>Stop all the Skyline services and ensure any service controls such as monit,
+supervisor or systemd do not start them again, (change as appropriate for
+your set up)</li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span>  <span class="c1"># Your Skyline path</span>
-<span class="nv">GITHUB_TREE_URL</span><span class="o">=</span><span class="s2">&quot;https://raw.githubusercontent.com/earthgecko/skyline/v1.2.10-stable-luminosity&quot;</span>
-<span class="nb">cd</span> <span class="nv">$CURRENT_SKYLINE_PATH</span>
-cp skyline/skyline_version.py skyline/skyline_version.py.v1.2.8.bak
-cp skyline/analyzer/analyzer.py skyline/analyzer/analyzer.py.v1.2.8.bak
-cp skyline/mirage/mirage.py skyline/mirage/mirage.py.v1.2.8.bak
-cp skyline/ionosphere/ionosphere.py skyline/ionosphere/ionosphere.py.v1.2.8.bak
-cp skyline/ionosphere/learn.py skyline/ionosphere/learn.py.v1.2.8.bak
-cp skyline/webapp/ionosphere_backend.py skyline/webapp/ionosphere_backend.py.v1.2.8.bak
-wget -O skyline/skyline_version.py <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GITHUB_TREE_URL</span><span class="si">}</span><span class="s2">/skyline/skyline_version.py&quot;</span>
-wget -O skyline/analyzer/analyzer.py <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GITHUB_TREE_URL</span><span class="si">}</span><span class="s2">/skyline/analyzer/analyzer.py&quot;</span>
-wget -O skyline/mirage/mirage.py <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GITHUB_TREE_URL</span><span class="si">}</span><span class="s2">/skyline/mirage/mirage.py&quot;</span>
-wget -O skyline/ionosphere/ionosphere.py <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GITHUB_TREE_URL</span><span class="si">}</span><span class="s2">/skyline/ionosphere/ionosphere.py&quot;</span>
-wget -O skyline/ionosphere/learn.py <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GITHUB_TREE_URL</span><span class="si">}</span><span class="s2">/skyline/ionosphere/learn.py&quot;</span>
-wget -O skyline/webapp/ionosphere_backend.py <span class="s2">&quot;</span><span class="si">${</span><span class="nv">GITHUB_TREE_URL</span><span class="si">}</span><span class="s2">/skyline/webapp/ionosphere_backend.py&quot;</span>
-<span class="c1"># Restart analyzer, mirage, ionosphere and webapp</span>
-<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;analyzer</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.14&quot;</span>    <span class="c1"># Your new Skyline version</span>
+<span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.13&quot;</span>    <span class="c1"># Your old Skyline version</span>
+
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span>                 <span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># Your new Skyline path</span>
+
+mkdir -p <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git clone https://github.com/earthgecko/skyline .
+git checkout <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+
+cp <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span> <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="nv">$OLD_SKYLINE_VERSION</span><span class="s2">.bak&quot;</span>
+cat <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span> &gt; <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Update the dependencies in you Python virtualenv (this takes a long time).
+The redis-py update is left till the very end otherwise Skyline will start to
+error.</li>
+<li>Update the pip dependencies  PLEASE USE THE APPROPRIATE Python verison for
+your install, e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="c1"># Handle 2.7.14 and 2.7.16</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2716&quot;</span>
+<span class="k">if</span> <span class="o">[</span> ! -d <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+  <span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
+<span class="k">fi</span>
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span> bin/activate
+<span class="c1"># This can take lots of minutes with the new pandas</span>
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^numpy\|^scipy\|^patsy\|^pandas&quot;</span> <span class="p">|</span> tr <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span><span class="k">)</span>
+<span class="c1"># Remove the luminol egg as it will already be installed and pip will moan</span>
+<span class="c1"># Remove Redis to be updated last</span>
+cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep -v <span class="s2">&quot;luminol\|redis&quot;</span> &gt; /tmp/requirements.txt
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /tmp/requirements.txt
+
+<span class="c1"># Stop all other Skyline services and any sevice controls you may have</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
+<span class="s2">analyzer</span>
 <span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp&quot;</span>
+<span class="k">for</span> i in <span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+  /etc/init.d/<span class="nv">$i</span> stop
+<span class="k">done</span>
+
+<span class="c1"># Update redis-py</span>
+cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;redis&quot;</span> &gt; /tmp/redis.requirements.txt
+bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /tmp/redis.requirements.txt
+deactivate
+</pre></div>
+</div>
+<ul class="simple">
+<li>Move your current Skyline directory to a backup directory and move the new
+Skyline v1.2.14 with your new settings.py from the temp location to your
+working Skyline directory, (change your paths as appropriate) e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mv <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Start the all Skyline services (change as appropriate for your set up) e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;panorama</span>
+<span class="s2">luminosity</span>
+<span class="s2">horizon</span>
+<span class="s2">analyzer</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
 <span class="s2">ionosphere</span>
 <span class="s2">webapp&quot;</span>
 <span class="k">for</span> i in <span class="nv">$SKYLINE_SERVICES</span>
 <span class="k">do</span>
-  /etc/init.d/<span class="nv">$i</span> restart
+  /etc/init.d/<span class="nv">$i</span> start
 <span class="k">done</span>
 </pre></div>
 </div>
@@ -310,10 +395,10 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_2_9.html" class="btn btn-neutral float-right" title="1.2.9 - the luminosity branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="1_2_13.html" class="btn btn-neutral float-right" title="1.2.13" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_2_11.html" class="btn btn-neutral" title="1.2.11 - the luminosity branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../releases.html" class="btn btn-neutral" title="Release Notes" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -241,8 +241,18 @@ def ionosphere_echo(base_name, mirage_full_duration):
         # features profiles if the fp has been validated
         if row['validated'] == 0:
             continue
+
         if row['full_duration'] == int(mirage_full_duration):
             fp_id = row['id']
+            # @added 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            #                   Feature #1960: ionosphere_layers
+            # Any features profiles that were created before the introduction of
+            # ionosphere_layers will not have a mirage.redis.24h.json file as the
+            # creation of these resources in the training_data dir was only added at
+            # that point, so they are excluded.  Less than 20170307 1488844800 excl.
+            if int(row['anomaly_timestamp']) < 1488844800:
+                logger.info('ionosphere_echo :: skipping fp id %s as predates having a mirage.redis json file' % str(fp_id))
+                continue
             echo_enabled_mirage_fp_ids.append(fp_id)
 
     echo_enabled_mirage_fp_ids_count = len(echo_enabled_mirage_fp_ids)
@@ -405,6 +415,7 @@ def ionosphere_echo(base_name, mirage_full_duration):
             calculated_feature_file_found = True
             fp_csv = calculated_feature_file
             logger.info('ionosphere_echo :: calculated features file is available - %s' % (calculated_feature_file))
+
         echo_json_file = '%s.mirage.redis.%sh.json' % (base_name, str(full_duration_in_hours))
         if not calculated_feature_file_found:
             logger.info('ionosphere_echo :: calculating features from mirage.redis data ts json - %s' % (echo_json_file))

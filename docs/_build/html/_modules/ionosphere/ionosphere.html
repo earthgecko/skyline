@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.2.13 documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.13 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -726,7 +726,7 @@
         <span class="c1"># learn(timestamp)</span>
         <span class="n">ionosphere_learn</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span></div>
 
-    <span class="c1"># @added 20190326 - Feature #2484</span>
+    <span class="c1"># @added 20190326 - Feature #2484: FULL_DURATION feature profiles</span>
 <div class="viewcode-block" id="Ionosphere.process_ionosphere_echo"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.process_ionosphere_echo">[docs]</a>    <span class="k">def</span> <span class="nf">process_ionosphere_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Spawn a process_ionosphere_echo check to create features profiles at</span>
@@ -778,6 +778,20 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: process_ionosphere_echo failed to load metric variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
+
+        <span class="c1"># @added 20190413 - Feature #2484: FULL_DURATION feature profiles</span>
+        <span class="c1"># Only process if it is an ionosphere enabled metric</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.unique_metrics from Redis&#39;</span><span class="p">)</span>
+            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="k">return</span>
+
         <span class="n">full_duration</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># metric_vars.full_duration</span>
@@ -901,8 +915,16 @@
             <span class="k">return</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">check_process_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+            <span class="c1"># @modified 20190412 - Task #2824: Test redis-py upgrade</span>
+            <span class="c1">#                      Task #2926: Update dependencies</span>
+            <span class="c1"># redis-py 3.x only accepts user data as bytes, strings or</span>
+            <span class="c1"># numbers (ints, longs and floats).  All 2.X users should</span>
+            <span class="c1"># make sure that the keys and values they pass into redis-py</span>
+            <span class="c1"># are either bytes, strings or numbers.  Added cache_key_value</span>
+            <span class="c1"># self.redis_conn.setex(</span>
+                <span class="c1"># ionosphere_check_cache_key, 300, [check_process_start])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
-                <span class="n">ionosphere_check_cache_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="p">[</span><span class="n">check_process_start</span><span class="p">])</span>
+                <span class="n">ionosphere_check_cache_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">check_process_start</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s1">&#39;added Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_check_cache_key</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
@@ -1701,7 +1723,10 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">key_created_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
-                            <span class="n">create_ionosphere_echo_check_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="p">[</span><span class="n">key_created_at</span><span class="p">])</span>
+                            <span class="c1"># @modified 20190412 - Task #2824: Test redis-py upgrade</span>
+                            <span class="c1">#                      Task #2926: Update dependencies</span>
+                            <span class="c1"># create_ionosphere_echo_check_key, 300, [key_created_at])</span>
+                            <span class="n">create_ionosphere_echo_check_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">key_created_at</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                             <span class="s1">&#39;created Redis check key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">create_ionosphere_echo_check_key</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
@@ -1744,6 +1769,8 @@
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">echo_calculated_features</span> <span class="o">=</span> <span class="n">get_calculated_features</span><span class="p">(</span><span class="n">echo_calculated_feature_file</span><span class="p">)</span>
                         <span class="k">except</span><span class="p">:</span>
+                            <span class="c1"># 20190412 - just for debug</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: ionosphere_echo_check no echo_calculated_features were determined&#39;</span><span class="p">)</span>
                             <span class="n">echo_calculated_features</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">except</span><span class="p">:</span>
@@ -2752,7 +2779,10 @@
                             <span class="s1">&#39;LEARNT :: adding work to Redis ionosphere.learn.work set - [</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">] to create a learnt features profile&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">work_deadline</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_fp_generation</span><span class="p">)))</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_fp_generation</span><span class="p">)])</span>
+                        <span class="c1"># modified 20190412 - Task #2824: Test redis-py upgrade</span>
+                        <span class="c1">#                     Task #2926: Update dependencies</span>
+                        <span class="c1"># self.redis_conn.sadd(&#39;ionosphere.learn.work&#39;, [&#39;Soft&#39;, str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_fp_generation</span><span class="p">)]))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
@@ -2945,20 +2975,27 @@
                 <span class="c1"># Only do the cache_key if not ionosphere_learn</span>
                 <span class="k">if</span> <span class="n">added_by</span> <span class="o">!=</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
                     <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.</span><span class="si">%s</span><span class="s1">.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">added_by</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="c1"># added 20190412 - Task #2824: Test redis-py upgrade</span>
+                    <span class="c1">#                  Task #2926: Update dependencies</span>
+                    <span class="c1"># Added cache_key_value</span>
+                    <span class="n">cache_key_value</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">anomalous_value</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">]</span>
+
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
                             <span class="n">cache_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span>
-                            <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">anomalous_value</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">])</span>
+                            <span class="c1"># modified 20190412 - Task #2824: Test redis-py upgrade</span>
+                            <span class="c1">#                     Task #2926: Update dependencies</span>
+                            <span class="c1"># [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                            <span class="s1">&#39;add Redis alert key - </span><span class="si">%s</span><span class="s1"> - [</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span>
-                            <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_value</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">triggered_algorithms</span><span class="p">)))</span>
+                            <span class="s1">&#39;add Redis alert key - </span><span class="si">%s</span><span class="s1"> - [</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span>
+                            <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">)))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="s1">&#39;error :: failed to add Redis key - </span><span class="si">%s</span><span class="s1"> - [</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span>
+                            <span class="s1">&#39;error :: failed to add Redis key - </span><span class="si">%s</span><span class="s1"> - [</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span>
                             <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_value</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">triggered_algorithms</span><span class="p">)))</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">triggered_algorithms</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">)))</span>
 
                 <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn</span>
                 <span class="c1"># Added an ionosphere_learn job for the timeseries that did not</span>
@@ -2973,7 +3010,10 @@
                             <span class="s1">&#39;adding work to Redis ionosphere.learn.work set - [</span><span class="se">\&#39;</span><span class="s1">Soft</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, None, None] to make a learn features profile later&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)),</span>
                                 <span class="n">base_name</span><span class="p">))</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span>
+                        <span class="c1"># modified 20190412 - Task #2824: Test redis-py upgrade</span>
+                        <span class="c1">#                     Task #2926: Update dependencies</span>
+                        <span class="c1">#self.redis_conn.sadd(&#39;ionosphere.learn.work&#39;, [&#39;Soft&#39;, str(ionosphere_job), int(metric_timestamp), base_name, None, None])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
@@ -3664,7 +3704,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.13',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -6,16 +6,35 @@ Build script - utils/dawn/skyline.dawn.sh
 =========================================
 
 The Skyline dawn branch adds a build script for **TESTING** only, it is not
-recommended for production use.  However seeing as it may be used by people
-for testing, it is written to try and ensure secure a set up as possible,
-with the exception of the definitions of iptables/iptables6/ufw.  It should not
-be used to deploy any other kind of environment unless the other components such
-as Graphite, iptables/iptables6/ufw are configured at the same time.  The build
-script is suitable for:
+recommended for production use.
+
+.. warning:: When running this test instance there are expected to be errors in
+  the logs as there is no real Graphite configured, no :mod:`settings.ALERTS`,
+  no alert email addresses, etc, etc.  In fact there are no real time series
+  apart from the ``metrics.horizon.test.udp`` data seeded into Redis, which goes
+  stale quickly.  The Skyline now and panorama pages are not going to display
+  graph data.
+
+However seeing as it may be used by people for testing, it is written to try and
+ensure secure a set up as possible, with the exception of the definitions of
+iptables/iptables6/ufw.  It should not be used to deploy any other kind of
+environment unless the other components such as Graphite, iptables/iptables6/ufw
+are configured at the same time.  The build script is suitable for:
 
 - CentOS 6.9
-- CentOS 7.5
+- CentOS 7.5 and 7.6
 - Ubuntu 16.04.4 LTS
+
+.. warning:: If you are running on CentOS 6 mysql-connector-python needs to be
+  fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
+  mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
+  handshake error.  Further to this there is a reported vulnerability with
+  mysql-connector-python-8.0.6
+  High severity vulnerability found on mysql-connector-python-8.0.6
+  desc: Improper Access Control
+  info: https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986
+  info: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435
+  You have been advised, so now you know.
 
 The build script has user defined variables that can be edited directly in the
 script or read from /etc/skyline/skyline.dawn.conf.  The build script does the
@@ -27,7 +46,7 @@ following:
 - Downloads, builds, installs, configures and starts Redis
 - Installs memcached and its dependencies, configures and starts it
 - Creates a skyline system user
-- Downloads, builds and deploys the current Skyline Python version (2.7.14) and
+- Downloads, builds and deploys the current Skyline Python version (2.7.16) and
   sets up the Skyline Python virtualenv
 - Creates the required Skyline directories
 - Clones the Skyline repo and checkouts the declared version
@@ -42,6 +61,9 @@ following:
   metric and which creates an anomaly to be reviewed in the Skyline webapp UI
 - The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
   be run in an idempotent manner.
+
+.. warning:: remember there are expected to be errors and no time series, no
+  Graphite, no graphs, etc.
 
 Example usage:
 
@@ -84,3 +106,14 @@ Example usage:
   # Run it
   chmod 0755 /tmp/skyline.dawn.sh
   /tmp/skyline.dawn.sh
+
+Add an entry into your /etc/hosts file that maps the instance IP to
+YOUR_SKYLINE_SERVER_FQDN and open the reported URL in your web browser,
+accepting the self signed SSL certificate.
+
+Check the Skyline logs.
+
+.. code-block:: bash
+
+  # Check the logs
+  tail -n 60 /var/log/skyline/*.log

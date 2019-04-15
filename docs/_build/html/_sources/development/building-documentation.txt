@@ -36,7 +36,7 @@ docs-requirements.txt (as per documented `Running in Python virtualenv
 
     PYTHON_MAJOR_VERSION="2.7"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2714"
+    PROJECT="skyline-py2716"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -56,7 +56,7 @@ python_site_packages_path in docs/conf.py, e.g.
 
 .. code-block:: bash
 
-  #    sys.path.insert(0, os.path.abspath('/opt/python_virtualenv/projects/skyline-py2714/lib/python2.7/site-packages'))
+  #    sys.path.insert(0, os.path.abspath('/opt/python_virtualenv/projects/skyline-py2716/lib/python2.7/site-packages'))
       sys.path.insert(0, os.path.abspath(python_site_packages_path))
 
 .rst and .md wtf?
@@ -74,7 +74,7 @@ Build
 
   PYTHON_MAJOR_VERSION="2.7"
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py2714"
+  PROJECT="skyline-py2716"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
@@ -158,7 +158,7 @@ Build
 
   # Usage: build_docs <app_dir>
   # e.g.
-  # cd /opt/python_virtualenv/projects/skyline-ionosphere-py2714/
+  # cd /opt/python_virtualenv/projects/skyline-ionosphere-py2716/
   # build_docs /home/gary/sandbox/of/github/earthgecko/skyline/ionosphere/skyline
 
 
