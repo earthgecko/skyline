@@ -228,6 +228,10 @@ functioning in multiple temporal resolutions as a whole.
 
 UPDATE 20180526 - Skyline and other parties have not been cooperative here.
 
+UPDATE 20190412 - New Skyline scores were added to NAB see:
+https://github.com/numenta/NAB#scoreboard
+https://github.com/numenta/NAB/tree/master/nab/detectors/earthgecko_skyline
+
 Machine learning
 ================
 
