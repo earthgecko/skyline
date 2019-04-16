@@ -1,0 +1,43 @@
+======
+1.2.15
+======
+
+v1.2.15 - April 16, 2019
+
+This is a minor bug fix release.
+
+Changes in v1.2.15
+------------------
+
+- Matching bug for not in list comprehension it must be an absolute match in
+  process_ionosphere_echo (2942, 2484, #100)
+
+Update notes
+------------
+
+- These update instruction apply to upgrading from v1.2.14 to v1.2.15 only.
+  However as with all Skyline updates it is possible to go through the update
+  notes for each version and make your own update notes/process to take you from
+  version x to version y.
+- There are no changes to the DB in v1.2.15
+- There are no changes to settings.py in v1.2.15
+
+How to update from v1.2.14
+--------------------------
+
+You can either deploy v1.2.15 or seeing as this in a minor bug fix, it only
+requires the replacement of the skyline/ionosphere/ionosphere.py file and an
+ionosphere restart.
+
+An example in-situ upgrade would be:
+
+.. code-block:: bash
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    cp "${CURRENT_SKYLINE_PATH}/skyline/ionosphere/ionosphere.py" "${CURRENT_SKYLINE_PATH}/skyline/ionosphere/ionosphere.py.v1.2.14.bak"
+    wget -O "${CURRENT_SKYLINE_PATH}/skyline/ionosphere/ionosphere.py" https://github.com/earthgecko/skyline/blob/v1.2.15/skyline/ionosphere/ionosphere.py
+    # Restart ionosphere
+
+    # If you want to update your reported version too then ...
+    wget -O "${CURRENT_SKYLINE_PATH}/skyline/skyline_version.py" https://github.com/earthgecko/skyline/blob/v1.2.15/skyline/skyline_version.py
+    # Restart webapp
