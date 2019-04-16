@@ -620,7 +620,13 @@ class Ionosphere(Thread):
             logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
             ionosphere_unique_metrics = []
         if ionosphere_unique_metrics:
-            if not metric in ionosphere_unique_metrics:
+            # @modified 20190413 - Bug #2942: process_ionosphere_echo metric mismatch
+            #                      Feature #2484: FULL_DURATION feature profiles
+            # Matching bug for not in list comprehension it must be an absolute
+            # match
+            # if not metric in ionosphere_unique_metrics:
+            metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric))
+            if not metric_name in ionosphere_unique_metrics:
                 logger.info('process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping %s' % metric)
                 return
 
