@@ -130,7 +130,10 @@ mock==2.0.0
 # From numpy==1.13.3 above, 1.14.2 was not implemented due to #2274
 # @modified 20190411 - Task #2926: Update dependencies
 #numpy==1.15.1
-numpy==1.16.2
+# @modified 20190426 - Task #2964: Update dependencies
+# Mitigate CVE-2019-6446 and SNYK-PYTHON-NUMPY-73513
+#numpy==1.16.2
+numpy==1.16.3
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -324,7 +327,9 @@ pygerduty==0.38.1
 # result as #2590, so updating to 8.0.15 and sticking on 8.0.6 for CentOS 6 in
 # docs and dawn
 #mysql-connector-python==8.0.6
-mysql-connector-python==8.0.15
+# @modified 20190426 - Task #2964: Update dependencies
+#mysql-connector-python==8.0.15
+mysql-connector-python==8.0.16
 
 # For a production WSGI HTTP Server for the Webapp
 # @modified 20170809 - Task #2138: Update deps
@@ -399,7 +404,9 @@ termcolor==1.1.0
 #py==1.6.0
 #pytest==3.8.0
 py==1.8.0
-pytest==4.4.0
+# @modified 20190426 - Task #2964: Update dependencies
+#pytest==4.4.0
+pytest==4.4.1
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
@@ -413,7 +420,9 @@ pytest==4.4.0
 #SQLAlchemy==1.2.6
 # @modified 20190411 - Task #2926: Update dependencies
 #SQLAlchemy==1.2.11
-SQLAlchemy==1.3.2
+# @modified 20190426 - Task #2964: Update dependencies
+#SQLAlchemy==1.3.2
+SQLAlchemy==1.3.3
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 # @modified 20180416 - Task #2272: update deps for luminosity branch
@@ -449,4 +458,7 @@ slackclient==1.3.1
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
-urllib3>=1.24.1
+# @modified 20190426 - Task #2964: Update dependencies
+# Mitigate CVE-2018-20060 and SNYK-PYTHON-URLLIB3-72681
+#urllib3>=1.24.1
+urllib3>=1.25.1

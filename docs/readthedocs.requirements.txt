@@ -1,6 +1,7 @@
 # @modified 20180717 - Task #2446: Optimize Ionosphere
 #                      Branch #2270: luminosity
 # @modified 20190412 - Task #2926: Update dependencies
+# @modified 20190426 - Task #2964: Update dependencies
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
 setuptools
@@ -25,7 +26,7 @@ unittest2==1.1.0
 funcsigs==1.0.2
 pbr==5.1.3
 mock==2.0.0
-numpy==1.16.2
+numpy==1.16.3
 scipy==1.2.1
 python-dateutil==2.8.0
 pytz==2019.1
@@ -39,7 +40,7 @@ msgpack-python==0.5.6
 requests==2.21.0
 python-simple-hipchat==0.4.0
 pygerduty==0.38.1
-mysql-connector-python==8.0.15
+mysql-connector-python==8.0.16
 gunicorn==19.9.0
 pipdeptree==0.13.2
 scikit_learn==0.20.3
@@ -47,9 +48,9 @@ future==0.17.1
 tsfresh==0.4.0
 termcolor==1.1.0
 py==1.8.0
-pytest==4.4.0
-SQLAlchemy==1.3.2
+pytest==4.4.1
+SQLAlchemy==1.3.3
 pymemcache==2.1.1
 PyJWT==1.7.1
 slackclient==1.3.1
-urllib3>=1.24.1
+urllib3>=1.25.1
