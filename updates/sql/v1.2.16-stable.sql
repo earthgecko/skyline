@@ -14,3 +14,5 @@ ALTER TABLE `ionosphere_layers_matched` MODIFY `anomalous_datapoint` DECIMAL(65,
 # @added 20190501 - Task #2980: Change DB defaults from NULL
 ALTER TABLE `ionosphere` MODIFY `enabled` tinyint(1) DEFAULT 1;
 ALTER TABLE `metrics` MODIFY `ionosphere_enabled` tinyint(1) DEFAULT 0;
+COMMIT;
+UPDATE `metrics` SET ionosphere_enabled=0 WHERE ionosphere_enabled IS NULL;
