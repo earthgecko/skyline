@@ -8,20 +8,20 @@ reviewed, a features profile has been created or learnt and validated.
 To use slack with Skyline you need to create a slack skyline app and a bot user.
 
 On slack:
-Create a Slack App
-Basic Information > Building Apps for Slack > Add features and functionality > Bots
-Bot User click Add a Bot User
-Set Display name and Default username to skyline
-And Save Changes
-In the left hand Settings menu for the skyline app, click Basic Information
-In App Credentials click Add features and functionality > Permissions
-Under OAuth Tokens & Redirect URLs click Install App to Workspace and click Authorize
-Copy the Bot User OAuth Access Token and add it to :mod:`settings.SLACK_OPTS` as the value for bot_user_oauth_access_token
-If you want to add the Skyline icon to the app, in the left hand Settings menu for the skyline app, click Basic Information
-Under Display Information > App icon & Preview and click and add:
-https://github.com/earthgecko/skyline/blob/master/docs/images/slack.skyline.app.icon.png
 
-Create a new channel called skyline and invite the skyline bot user.
+- Create a Slack App
+- Basic Information > Building Apps for Slack > Add features and functionality > Bots
+- Bot User click Add a Bot User
+- Set Display name and Default username to skyline
+- And Save Changes
+- In the left hand Settings menu for the skyline app, click Basic Information
+- In App Credentials click Add features and functionality > Permissions
+- Under OAuth Tokens & Redirect URLs click Install App to Workspace and click Authorize
+- Copy the Bot User OAuth Access Token and add it to :mod:`settings.SLACK_OPTS` as the value for bot_user_oauth_access_token
+- If you want to add the Skyline icon to the app, in the left hand Settings menu for the skyline app, click Basic Information
+  Under Display Information > App icon & Preview and click and add:
+  https://github.com/earthgecko/skyline/blob/master/docs/images/slack.skyline.app.icon.png
+- Create a new channel called skyline and invite the skyline bot user.
 
 Skyline slack settings
 ----------------------
