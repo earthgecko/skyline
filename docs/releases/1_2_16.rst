@@ -132,6 +132,30 @@ How to update from v1.2.15
     mv "$CURRENT_SKYLINE_PATH" "${CURRENT_SKYLINE_PATH}.${OLD_SKYLINE_VERSION}"
     mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
 
+- Update the dependencies
+
+.. code-block:: bash
+
+    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    # Handle 2.7.14 and 2.7.16
+    PROJECT="skyline-py2716"
+    if [ ! -d "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" ]; then
+      PROJECT="skyline-py2714"
+    fi
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+    # This can take lots of minutes with the new pandas
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
+    # Remove the luminol egg as it will already be installed and pip will moan
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep -v "luminol" > /tmp/requirements.txt
+
+    # IF YOU ARE ON CENTOS 6 and running mainstream mysql-server-5.1 uncomment
+    # the following line and run it to fix to mysql-python-connector 8.0.6
+    #cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep -v "luminol\|mysql-connector-python" > /tmp/requirements.txt
+
+    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.txt
+
 - Start the all Skyline services (change as appropriate for your set up) e.g.
 
 .. code-block:: bash
