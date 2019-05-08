@@ -146,13 +146,13 @@ How to update from v1.2.15
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
     # This can take lots of minutes with the new pandas
-    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat "${CURRENT_SKYLINE_PATH}/requirements.txt" | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
     # Remove the luminol egg as it will already be installed and pip will moan
-    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep -v "luminol" > /tmp/requirements.txt
+    cat "${CURRENT_SKYLINE_PATH}/requirements.txt" | grep -v "luminol" > /tmp/requirements.txt
 
     # IF YOU ARE ON CENTOS 6 and running mainstream mysql-server-5.1 uncomment
     # the following line and run it to fix to mysql-python-connector 8.0.6
-    #cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/requirements.txt" | grep -v "luminol\|mysql-connector-python" > /tmp/requirements.txt
+    #cat "${CURRENT_SKYLINE_PATH}/requirements.txt" | grep -v "luminol\|mysql-connector-python" > /tmp/requirements.txt
 
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.txt
 
