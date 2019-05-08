@@ -130,9 +130,12 @@ from ionosphere_backend import (
     get_metrics_with_features_profiles_to_validate,
     # @added 20181205 - Bug #2746: webapp time out - Graphs in search_features_profiles
     #                   Feature #2602: Graphs in search_features_profiles
-    ionosphere_show_graphs,)
+    ionosphere_show_graphs,
+    # @added 20190502 - Branch #2646: slack
+    webapp_update_slack_thread,
+)
 
-#from utilites import alerts_matcher
+# from utilites import alerts_matcher
 
 # @added 20170114 - Feature #1854: Ionosphere learn
 # Decoupled the create_features_profile from ionosphere_backend and moved to
@@ -152,7 +155,7 @@ skyline_app_loglock = '%s.lock' % skyline_app_logfile
 skyline_app_logwait = '%s.wait' % skyline_app_logfile
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
-# werkzeug access log
+# werkzeug access log for Python errors
 access_logger = logging.getLogger('werkzeug')
 
 python_version = int(version_info[0])
@@ -176,9 +179,11 @@ else:
 
 app = Flask(__name__)
 
-gunicorn_error_logger = logging.getLogger('gunicorn.error')
-logger.handlers.extend(gunicorn_error_logger.handlers)
-logger.setLevel(logging.DEBUG)
+# @modified 20190502 - Branch #2646: slack
+# Reduce logging, removed gunicorn
+# gunicorn_error_logger = logging.getLogger('gunicorn.error')
+# logger.handlers.extend(gunicorn_error_logger.handlers)
+# logger.setLevel(logging.DEBUG)
 
 # app.secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
 secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))
@@ -396,6 +401,9 @@ def a_500():
 
     try:
         test_errorhandler_500_internal_error = int(test_500_string)
+        logger.debug(
+            'debug :: test_errorhandler_500_internal_error tests OK with %s' % (
+                str(test_errorhandler_500_internal_error)))
     except:
         trace = traceback.format_exc()
         logger.debug('debug :: test OK')
@@ -1074,7 +1082,8 @@ def ionosphere():
             fp_validate_req = True
     if fp_validate_req:
         metric_found = False
-        timestamp = False
+        # @modified 20190503 - Branch #2646: slack - linting
+        # timestamp = False
         base_name = False
         # @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
         # Added the validate_all context and function
@@ -1217,7 +1226,32 @@ def ionosphere():
                 # metrics_with_features_profiles_to_validate
                 # [[metric_id, metric, fps_to_validate_count]]
                 metrics_with_features_profiles_to_validate, fail_msg, trace = get_metrics_with_features_profiles_to_validate()
+
+                # @added 20190501 - Feature #2430: Ionosphere validate learnt features profiles page
+                # Only add to features_profiles_to_validate if the metric is active
+                # in Redis
+                if not settings.OTHER_SKYLINE_REDIS_INSTANCES:
+                    if metrics_with_features_profiles_to_validate:
+                        active_metrics_with_features_profiles_to_validate = []
+                        try:
+                            unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                        except:
+                            logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                            logger.info(traceback.format_exc())
+                            return 'Internal Server Error', 500
+                        for i_metric_id, i_metric, fps_to_validate_count in metrics_with_features_profiles_to_validate:
+                            i_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(i_metric))
+                            if i_metric_name not in unique_metrics:
+                                continue
+                            active_metrics_with_features_profiles_to_validate.append([i_metric_id, i_metric, fps_to_validate_count])
+                        metrics_with_features_profiles_to_validate = active_metrics_with_features_profiles_to_validate
+
                 logger.info('no features_profiles_to_validate was passed so determined metrics_with_features_profiles_to_validate')
+
+            # @added 20190503 - Branch #2646: slack
+            if validated_count > 0:
+                slack_updated = webapp_update_slack_thread(base_name, 0, validated_count, 'validated')
+                logger.info('slack_updated for validated features profiles %s' % str(slack_updated))
 
             return render_template(
                 'ionosphere.html', fp_validate=fp_validate_req,
@@ -1464,7 +1498,9 @@ def ionosphere():
                 if show_graphs == 'true':
                     show_graphs = True
             if search_success and fps and show_graphs:
-                query_context = 'features_profiles'
+                # @modified 20190503 - Branch #2646: slack - linting
+                # query_context = 'features_profiles'
+
                 for fp_elements in fps:
                     # Get images
                     try:
@@ -1492,7 +1528,10 @@ def ionosphere():
                         full_duration = int(full_duration_float)
                         full_duration_in_hours = full_duration / 60 / 60
                         full_duration_in_hours_image_string = '.%sh.png' % str(int(full_duration_in_hours))
-                        show_graph_images = []
+
+                        # @modified 20190503 - Branch #2646: slack - linting
+                        # show_graph_images = []
+
                         redis_image = 'No Redis data graph'
                         full_duration_image = 'No full duration graph'
                         # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
@@ -1656,10 +1695,15 @@ def ionosphere():
         'load_derivative_graphs',
     ]
 
-    determine_metric = False
+    # @modified 20190503 - Branch #2646: slack - linting
+    # determine_metric = False
+
     dated_list = False
     td_requested_timestamp = False
-    feature_profile_view = False
+
+    # @modified 20190503 - Branch #2646: slack - linting
+    # feature_profile_view = False
+
     calculate_features = False
     create_feature_profile = False
     fp_view = False
@@ -1717,12 +1761,16 @@ def ionosphere():
                     try:
                         test_fp_id = request.args.get(str('fp_id'))
                         test_fp_id_valid = int(test_fp_id) + 1
+                        logger.info('test_fp_id_valid tests OK with %s' % str(test_fp_id_valid))
                     except:
                         logger.error('error :: invalid request argument - fp_id is not an int')
                         return 'Bad Request', 400
 
                     fp_id = request.args.get(str('fp_id'), None)
-                    metric_timestamp = 0
+
+                    # @modified 20190503 - Branch #2646: slack - linting
+                    # metric_timestamp = 0
+
                     try:
                         fp_details, fp_details_successful, fail_msg, traceback_format_exc, fp_details_object = features_profile_details(fp_id)
                         anomaly_timestamp = int(fp_details_object['anomaly_timestamp'])
@@ -1932,6 +1980,8 @@ def ionosphere():
 
                 if key == 'features_profiles':
                     fp_profiles = str(value)
+                    # @added 20190503 - Branch #2646: slack - linting
+                    logger.info('fp_profiles is %s' % fp_profiles)
 
                 # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
                 #                   Task #2002: Review and correct incorrectly defined layers
@@ -2005,6 +2055,8 @@ def ionosphere():
                     if valid_timestamp:
                         try:
                             timestamp_numeric = int(value) + 1
+                            # @added 20190503 - Branch #2646: slack - linting
+                            logger.info('timestamp_numeric tests OK with %s' % str(timestamp_numeric))
                         except:
                             valid_timestamp = False
                             logger.info('bad request argument - %s=%s not numeric' % (str(key), str(value)))
@@ -2461,12 +2513,18 @@ def ionosphere():
                 parent_id = 0
                 generation = 0
                 ionosphere_job = 'learn_fp_human'
+                # @added 20190503 - Branch #2646: slack
+                # Added slack_ionosphere_job
+                slack_ionosphere_job = ionosphere_job
                 try:
                     # @modified 20170120 -  Feature #1854: Ionosphere learn - generations
                     # Added fp_learn parameter to allow the user to not learn the
                     # use_full_duration_days
                     # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
-                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
+                    # @modified 20190503 - Branch #2646: slack
+                    # Added slack_ionosphere_job
+                    # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
+                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn, slack_ionosphere_job)
                     if create_feature_profile:
                         generation_zero = True
                 except:
@@ -2553,7 +2611,10 @@ def ionosphere():
                 fp_layers_id = int(fp_details_object['layers_id'])
             except:
                 fp_layers_id = 0
-            layer_details = None
+
+            # @modified 20190503 - Branch #2646: slack - linting
+            # layer_details = None
+
             layer_details_success = False
             if fp_layers_id:
                 try:
@@ -2756,7 +2817,10 @@ def ionosphere():
 
             # @added 20170303 - Feature #1960: ionosphere_layers
             vconds = ['<', '>', '==', '!=', '<=', '>=']
-            condition_list = ['<', '>', '==', '!=', '<=', '>=', 'in', 'not in']
+
+            # @modified 20190503 - Branch #2646: slack - linting
+            # condition_list = ['<', '>', '==', '!=', '<=', '>=', 'in', 'not in']
+
             crit_types = ['value', 'time', 'day', 'from_time', 'until_time']
 
             fp_layers = None
@@ -2783,6 +2847,8 @@ def ionosphere():
                 l_id, layer_successful, new_l_algos, new_l_algos_ids, fail_msg, trace = create_ionosphere_layers(base_name, fp_id, requested_timestamp)
                 if not layer_successful:
                     return internal_error(fail_msg, trace)
+                else:
+                    webapp_update_slack_thread(base_name, requested_timestamp, fp_id, 'layers_created')
 
             # @added 20170308 - Feature #1960: ionosphere_layers
             # To present the operator with the existing layers and algorithms for the metric
@@ -2906,6 +2972,19 @@ def ionosphere():
                             correlation_graphite_link = '%s://%s/render/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         correlations_with_graph_links.append([metric_name, coefficient, shifted, shifted_coefficient, str(correlation_graphite_link)])
 
+            # @added 20190502 - Branch #2646: slack
+            if context == 'training_data':
+                update_slack = True
+                # Do not update if a fp_id is present
+                if fp_id:
+                    update_slack = False
+                # Do not update slack when extract features is run
+                if calculate_features:
+                    update_slack = False
+                if update_slack:
+                    slack_updated = webapp_update_slack_thread(base_name, requested_timestamp, None, 'training_data_viewed')
+                    logger.info('slack_updated for training_data_viewed %s' % str(slack_updated))
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -3001,6 +3080,7 @@ def ionosphere_images():
         request_args_present = True
     except:
         request_args_len = 0
+        logger.error('error :: request arguments have no length - %s' % str(request_args_len))
 
     IONOSPHERE_REQUEST_ARGS = ['image']
 
@@ -3044,7 +3124,7 @@ def ionosphere_images():
 @app.route("/utilities")
 @requires_auth
 def utilities():
-    start = time.time()
+    # start = time.time()
     try:
         return render_template('utilities.html'), 200
     except:
@@ -3569,9 +3649,12 @@ def rebrow_key(host, port, db, key):
     Show a specific key.
     key is expected to be URL-safe base64 encoded
     """
-# @added 20160703 - Feature #1464: Webapp Redis browser
-# metrics encoded with msgpack
-    original_key = key
+    # @added 20160703 - Feature #1464: Webapp Redis browser
+    # metrics encoded with msgpack
+    # @modified 20190503 - Branch #2646: slack - linting
+    # original_key not used
+    # original_key = key
+
     msg_pack_key = False
     # if key.startswith('metrics.'):
     #     msg_packed_key = True

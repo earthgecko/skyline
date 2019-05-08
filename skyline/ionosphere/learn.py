@@ -1414,7 +1414,11 @@ def ionosphere_learn(timestamp):
                 # @added 20170129 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
                 if do_not_learn:
                     fp_learn = False
-                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn)
+                # @modified 20190503 - Branch #2646: slack
+                # Added slack_ionosphere_job
+                slack_ionosphere_job = str(work)
+                # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn)
+                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: %s :: failed to create a features profile' % profile_context)

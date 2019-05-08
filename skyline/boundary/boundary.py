@@ -645,6 +645,47 @@ class Boundary(Thread):
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
+        # @added 20190417 - Feature #2950: Report defaulted settings to log
+        # Added all the globally declared settings to enable reporting in the
+        # log the state of each setting.
+        try:
+            SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
+            if SERVER_METRIC_PATH == '.':
+                SERVER_METRIC_PATH = ''
+            logger.info('SERVER_METRIC_PATH is set from settings.py to %s' % str(SERVER_METRIC_PATH))
+        except:
+            SERVER_METRIC_PATH = ''
+            logger.info('warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to \'\'')
+        logger.info('skyline_app_graphite_namespace is set to %s' % str(skyline_app_graphite_namespace))
+        try:
+            BOUNDARY_METRICS = settings.BOUNDARY_METRICS
+            boundary_metrics_count = len(BOUNDARY_METRICS)
+            logger.info('BOUNDARY_METRICS is set from settings.py with %s Boundry metrics' % str(boundary_metrics_count))
+        except:
+            BOUNDARY_METRICS = []
+            logger.info('warning :: BOUNDARY_METRICS is not declared in settings.py, defaults to []')
+        try:
+            ENABLE_BOUNDARY_DEBUG = settings.ENABLE_BOUNDARY_DEBUG
+            logger.info('ENABLE_BOUNDARY_DEBUG is set from settings.py to %s' % str(ENABLE_BOUNDARY_DEBUG))
+        except:
+            logger.info('warning :: ENABLE_BOUNDARY_DEBUG is not declared in settings.py, defaults to False')
+            ENABLE_BOUNDARY_DEBUG = False
+        try:
+            BOUNDARY_AUTOAGGRERATION = settings.BOUNDARY_AUTOAGGRERATION
+            logger.info('BOUNDARY_AUTOAGGRERATION is set from settings.py to %s' % str(BOUNDARY_AUTOAGGRERATION))
+        except:
+            BOUNDARY_AUTOAGGRERATION = False
+            logger.info('warning :: BOUNDARY_AUTOAGGRERATION is not declared in settings.py, defaults to False')
+        try:
+            BOUNDARY_AUTOAGGRERATION_METRICS = settings.BOUNDARY_AUTOAGGRERATION_METRICS
+            logger.info('BOUNDARY_AUTOAGGRERATION_METRICS is set from settings.py')
+        except:
+            BOUNDARY_AUTOAGGRERATION_METRICS = (
+                ("auotaggeration_metrics_not_declared", 60)
+            )
+            logger.info('warning :: BOUNDARY_AUTOAGGRERATION_METRICS is not declared in settings.py, defaults to %s' % (
+                str(BOUNDARY_AUTOAGGRERATION_METRICS[0])))
+
         while 1:
             now = time()
 

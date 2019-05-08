@@ -1038,6 +1038,9 @@ class Ionosphere(Thread):
                 if metric_ionosphere_enabled == 1:
                     training_metric = False
             except:
+                # @added 20190509 - Bug #2984: Ionosphere - could not determine values from metrics_db_object
+                # Added a traceback here to debug an issue
+                logger.error(traceback.format_exc())
                 logger.error('error :: could not determine values from metrics_db_object for %s' % base_name)
                 metrics_id = None
                 metric_ionosphere_enabled = None

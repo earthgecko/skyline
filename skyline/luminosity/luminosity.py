@@ -47,13 +47,13 @@ except:
     SERVER_METRIC_PATH = ''
 
 try:
-    luminosity_processes = settings.LUMINOSITY_PROCESSES
+    LUMINOSITY_PROCESSES = settings.LUMINOSITY_PROCESSES
 except:
     logger.info('warning :: cannot determine LUMINOSITY_PROCESSES from settings' % skyline_app)
     # @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch
     # It is fast and lightweight
     # luminosity_processes = 2
-    luminosity_processes = 1
+    LUMINOSITY_PROCESSES = 1
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -394,6 +394,42 @@ class Luminosity(Thread):
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
+        # @added 20190417 - Feature #2948: LUMINOSITY_ENABLED setting
+        # If Luminosity is not enabled, do nothing
+        luminosity_enabled = True
+        try:
+            luminosity_enabled = settings.LUMINOSITY_ENABLED
+            logger.info('LUMINOSITY_ENABLED is set to %s' % str(luminosity_enabled))
+        except:
+            logger.info('warning :: LUMINOSITY_ENABLED is not declared in settings.py, defaults to True')
+
+        # @added 20190417 - Feature #2950: Report defaulted settings to log
+        # Added all the globally declared settings to enable reporting in the
+        # log the state of each setting.
+        try:
+            ENABLE_LUMINOSITY_DEBUG = settings.ENABLE_LUMINOSITY_DEBUG
+            logger.info('ENABLE_LUMINOSITY_DEBUG is set from settings.py to %s' % str(ENABLE_LUMINOSITY_DEBUG))
+        except:
+            logger.info('warning :: ENABLE_LUMINOSITY_DEBUG is not declared in settings.py, defaults to False')
+            ENABLE_LUMINOSITY_DEBUG = False
+        try:
+            SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
+            if SERVER_METRIC_PATH == '.':
+                SERVER_METRIC_PATH = ''
+            logger.info('SERVER_METRIC_PATH is set from settings.py to %s' % str(SERVER_METRIC_PATH))
+        except:
+            SERVER_METRIC_PATH = ''
+            logger.info('warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to \'\'')
+        try:
+            LUMINOSITY_PROCESSES = settings.LUMINOSITY_PROCESSES
+            logger.info('LUMINOSITY_PROCESSES is set from settings.py to %s' % str(LUMINOSITY_PROCESSES))
+        except:
+            # @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch
+            # It is fast and lightweight
+            # luminosity_processes = 2
+            LUMINOSITY_PROCESSES = 1
+            logger.info('warning :: cannot determine LUMINOSITY_PROCESSES from settings.py, defaults to %s' % str(LUMINOSITY_PROCESSES))
+
         while 1:
             now = time()
 
@@ -419,6 +455,13 @@ class Luminosity(Thread):
                 logger.info('updated Redis key for %s up' % skyline_app)
             except:
                 logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+
+            # @added 20190417 - Feature #: LUMINOSITY_ENABLED setting
+            # If Luminosity is not enabled, do nothing
+            if not luminosity_enabled:
+                logger.info('luminosity is not enabled LUMINOSITY_ENABLED set to %s, sleeping for 20 seconds' % str(settings.LUMINOSITY_ENABLED))
+                sleep(20)
+                continue
 
             """
             Determine if any new anomalies have been added
@@ -615,7 +658,7 @@ class Luminosity(Thread):
             spawned_pids = []
             pid_count = 0
             now = time()
-            for i in range(1, luminosity_processes + 1):
+            for i in range(1, LUMINOSITY_PROCESSES + 1):
                 try:
                     p = Process(target=self.spin_process, args=(i, process_anomaly_id))
                     pids.append(p)
@@ -623,7 +666,7 @@ class Luminosity(Thread):
                     logger.info(
                         'starting %s of %s spin_process/es' % (
                             str(pid_count),
-                            str(luminosity_processes)))
+                            str(LUMINOSITY_PROCESSES)))
                     p.start()
                     spawned_pids.append(p.pid)
                 except:
@@ -643,7 +686,7 @@ class Luminosity(Thread):
                     time_to_run = time() - p_starts
                     logger.info(
                         '%s spin_process completed in %.2f seconds' % (
-                            str(luminosity_processes),
+                            str(LUMINOSITY_PROCESSES),
                             time_to_run))
                     break
             else:

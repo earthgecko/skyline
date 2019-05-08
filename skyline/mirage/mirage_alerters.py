@@ -134,8 +134,8 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     # For backwards compatibility
     if '@' in alert[1]:
         sender = settings.ALERT_SENDER
-        recipient = alert[1]
-        logger.info('alert_smtp - recipient for %s are %s' % (str(alert[0]), str(recipient)))
+        recipients = alert[1]
+        logger.info('alert_smtp - recipient for %s are %s' % (str(alert[0]), str(recipients)))
     else:
         sender = settings.SMTP_OPTS['sender']
         # @modified 20160806 - Added default_recipient
@@ -207,6 +207,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         else:
             REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     except:
+        logger.error(traceback.format_exc())
         logger.error('error :: alert_smtp - redis connection failed')
     try:
         derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
@@ -1123,6 +1124,16 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
             initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
 
+        add_to_panorama = True
+        try:
+            slack_thread_updates = settings.SLACK_OPTS['thread_updates']
+        except:
+            slack_thread_updates = False
+        if not settings.SLACK_ENABLED:
+            slack_thread_updates = False
+        slack_file_upload = False
+        slack_thread_ts = 0
+
         try:
             # slack does not allow embedded images, nor links behind authentication
             # or color text, so we have jump through all the API hoops to end up
@@ -1133,6 +1144,27 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                     initial_comment=initial_comment, file=open(image_file, 'rb'))
                 if not slack_file_upload['ok']:
                     logger.error('error :: alert_slack - failed to send slack message')
+                # @added 20190501 - Branch #2646: slack
+                # The slack message id needs to be determined here so that it
+                # can be recorded against the anamoly id and so that Skyline can
+                # notify the message thread when a training_data page is
+                # reviewed, a feature profile is created and/or a layers profile
+                # is created.
+                else:
+                    logger.info('alert_slack - sent slack message')
+                    if slack_thread_updates:
+                        # This is basically the channel id of your channel, the
+                        # name could be used so that if in future it is used or
+                        # displayed in a UI
+                        try:
+                            slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                            slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                            slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                            logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                                str(slack_group), str(slack_thread_ts)))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: alert_slack - faied to determine slack_thread_ts')
             else:
                 send_text = initial_comment + '  ::  error :: there was no graph image to upload'
                 send_message = sc.api_call(
@@ -1148,6 +1180,47 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             logger.info(traceback.format_exc())
             logger.error('error :: alert_slack - could not upload file')
             return False
+
+        # No anomaly_id will be known here so Panorama has to surface the
+        # anomalies table anomaly_id that matches base_name, metric_timestamp
+        # and update the slack_thread_ts field in the anomalies table db record
+        # A Redis key is added here for Panorama
+        # [base_name, metric_timestamp, slack_thread_ts]
+        if not settings.PANORAMA_ENABLED:
+            add_to_panorama = False
+        if slack_file_upload:
+            if not slack_file_upload['ok']:
+                add_to_panorama = False
+        else:
+            add_to_panorama = False
+        if not slack_thread_updates:
+            add_to_panorama = False
+        if float(slack_thread_ts) == 0:
+            add_to_panorama = False
+        if add_to_panorama:
+            REDIS_ALERTER_CONN = None
+            try:
+                if settings.REDIS_PASSWORD:
+                    REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            except:
+                logger.error('error :: alert_slack - redis connection failed')
+            metric_timestamp = int(metric[2])
+            cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+            cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+            try:
+                REDIS_ALERTER_CONN.setex(
+                    cache_key, 86400,
+                    str(cache_key_value))
+                logger.info(
+                    'added Panorama slack_thread_ts Redis key - %s - %s' %
+                    (cache_key, str(cache_key_value)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error(
+                    'error :: failed to add Panorama slack_thread_ts Redis key - %s - %s' %
+                    (cache_key, str(cache_key_value)))
 
 
 def trigger_alert(alert, metric, second_order_resolution_seconds, context):

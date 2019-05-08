@@ -33,7 +33,7 @@ statsmodels==0.9.0
 msgpack-python==0.5.6
 requests==2.21.0
 python-simple-hipchat==0.4.0
-pygerduty==0.38.1
+pygerduty==0.38.2
 mysql-connector-python==8.0.16
 gunicorn==19.9.0
 pipdeptree==0.13.2

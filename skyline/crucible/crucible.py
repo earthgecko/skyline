@@ -220,17 +220,18 @@ class Crucible(Thread):
 
         # if len(metric_vars.algorithms) == 0:
         # if not metric_vars.algorithms:
+        algorithms = []
         try:
             metric_vars.algorithms
         except:
-            logger.error('error :: failed to read algorithms variable from check file setting to all' % (metric_check_file))
+            logger.error('error :: failed to read algorithms variable from check file setting to all')
             algorithms = ['all']
-        else:
-            algorithms = []
-            for i_algorithm in metric_vars.algorithms:
-                algorithms.append(i_algorithm)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - algorithms - %s' % algorithms)
+#        if not algorithms:
+#            algorithms = []
+#            for i_algorithm in metric_vars.algorithms:
+#                algorithms.append(i_algorithm)
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - algorithms - %s' % str(algorithms))
 
         # if len(metric_vars.anomaly_dir) == 0:
         # if not metric_vars.anomaly_dir:
@@ -596,7 +597,7 @@ class Crucible(Thread):
         # Check timeseries json exists - raw or gz
         if not os.path.isfile(anomaly_json):
             if not os.path.isfile(anomaly_json_gz):
-                logger.error('error :: no json data found' % (metric))
+                logger.error('error :: no json data found')
                 # Move metric check file
                 try:
                     shutil.move(metric_check_file, failed_check_file)
@@ -707,8 +708,8 @@ class Crucible(Thread):
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('loaded time series from - %s' % anomaly_json)
             except:
-                # logger.info(traceback.format_exc())
-                logger.error('error :: failed to load JSON - %s' % anomaly_json)
+                # logger.error(traceback.format_exc())
+                logger.info('failed to load with JSON, literal_eval will be tried - %s' % anomaly_json)
             # @added 20180715 - Task #2444: Evaluate CAD
             #                   Task #2446: Optimize Ionosphere
             #                   Branch #2270: luminosity

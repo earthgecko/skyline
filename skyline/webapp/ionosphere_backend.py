@@ -44,8 +44,12 @@ from database import (
     ionosphere_layers_table_meta, layers_algorithms_table_meta,
     # @added 20170307 - Feature #1960: ionosphere_layers
     # To present matched layers Graphite graphs
-    ionosphere_layers_matched_table_meta
+    ionosphere_layers_matched_table_meta,
+    # @added 20190502 - Branch #2646: slack
+    anomalies_table_meta,
 )
+# @added 20190502 - Branch #2646: slack
+from slack_functions import slack_post_message, slack_post_reaction
 
 skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
@@ -66,6 +70,32 @@ except:
 
 full_duration_in_hours = full_duration_seconds / 60 / 60
 exclude_redis_json = 'redis.%sh.json' % str(int(full_duration_in_hours))
+
+# @added 20190502 - Branch #2646: slack
+try:
+    SLACK_ENABLED = settings.SLACK_ENABLED
+except:
+    SLACK_ENABLED = False
+try:
+    slack_thread_updates = settings.SLACK_OPTS['thread_updates']
+except:
+    slack_thread_updates = False
+if slack_thread_updates and SLACK_ENABLED:
+    update_slack_thread = True
+else:
+    update_slack_thread = False
+if update_slack_thread:
+    try:
+        channel = settings.SLACK_OPTS['default_channel']
+        channel_id = settings.SLACK_OPTS['default_channel_id']
+    except:
+        channel = False
+        channel_id = False
+    throw_exception_on_default_channel = False
+    if channel == 'YOUR_default_slack_channel':
+        throw_exception_on_default_channel = True
+    if channel_id == 'YOUR_default_slack_channel_id':
+        throw_exception_on_default_channel = True
 
 
 def ionosphere_get_metrics_dir(requested_timestamp, context):
@@ -1511,14 +1541,14 @@ def ionosphere_search(default_query, search_query):
         if metric_like_str != 'all':
             # SQLAlchemy requires the MySQL wildcard % to be %% to prevent
             # interpreting the % as a printf-like format character
-            python_escaped_metric_like = metric_like_str.replace('%', '%%')
+            # python_escaped_metric_like = metric_like_str.replace('%', '%%')
             # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
             #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
             # Change the query
             # nosec to exclude from bandit tests
             # metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
             # logger.info('executing metrics_like_query - %s' % metrics_like_query)
-            like_string_var = str(metric_like_str)
+            # like_string_var = str(metric_like_str)
             metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
             metric_ids = ''
             try:
@@ -2096,6 +2126,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         # @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats
         # test_d_boundary_limit = int(d_boundary_limit) + 1
         test_d_boundary_limit = float(d_boundary_limit) + 1
+        logger.info('d_boundary_limit tested OK with %s' % str(test_d_boundary_limit))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -2112,6 +2143,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         return False, False, layers_algorithms, layers_added, fail_msg, trace
     try:
         test_d_boundary_times = int(d_boundary_times) + 1
+        logger.info('d_boundary_times tested OK with %s' % str(test_d_boundary_times))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -2143,6 +2175,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             return False, False, layers_algorithms, layers_added, fail_msg, trace
         try:
             test_d1_boundary_limit = float(d1_boundary_limit) + 1
+            logger.info('d1_boundary_limit tested OK with %s' % str(test_d1_boundary_limit))
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
@@ -2156,6 +2189,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             return False, False, layers_algorithms, layers_added, fail_msg, trace
         try:
             test_d1_boundary_times = int(d1_boundary_times) + 1
+            logger.info('d1_boundary_times tested OK with %s' % str(test_d1_boundary_times))
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
@@ -2185,6 +2219,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         # @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats
         # test_e_boundary_limit = int(e_boundary_limit) + 1
         test_e_boundary_limit = float(e_boundary_limit) + 1
+        logger.info('test_e_boundary_limit tested OK with %s' % str(test_e_boundary_limit))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -2200,6 +2235,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
 
     try:
         test_e_boundary_times = int(e_boundary_times) + 1
+        logger.info('test_e_boundary_times tested OK with %s' % str(test_e_boundary_times))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -2572,6 +2608,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
 
     if engine:
         engine_disposal(engine)
+
+    # @added 20190502 -
 
     return new_layer_id, True, layers_added, new_layer_algorithm_ids, fail_msg, trace
 
@@ -3028,6 +3066,7 @@ def edit_ionosphere_layers(layers_id):
 
     try:
         test_d_boundary_limit = float(d_boundary_limit) + 1
+        logger.info('test_d_boundary_limit tested OK with %s' % str(test_d_boundary_limit))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -3042,6 +3081,7 @@ def edit_ionosphere_layers(layers_id):
         return False, fail_msg, trace
     try:
         test_d_boundary_times = int(d_boundary_times) + 1
+        logger.info('test_d_boundary_times tested OK with %s' % str(test_d_boundary_times))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -3072,6 +3112,7 @@ def edit_ionosphere_layers(layers_id):
             return False, fail_msg, trace
         try:
             test_d1_boundary_limit = float(d1_boundary_limit) + 1
+            logger.info('test_d1_boundary_limit tested OK with %s' % str(test_d1_boundary_limit))
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
@@ -3085,6 +3126,7 @@ def edit_ionosphere_layers(layers_id):
             return False, fail_msg, trace
         try:
             test_d1_boundary_times = int(d1_boundary_times) + 1
+            logger.info('test_d1_boundary_times tested OK with %s' % str(test_d1_boundary_times))
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
@@ -3112,6 +3154,7 @@ def edit_ionosphere_layers(layers_id):
 
     try:
         test_e_boundary_limit = float(e_boundary_limit) + 1
+        logger.info('test_e_boundary_limit tested OK with %s' % str(test_e_boundary_limit))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -3127,6 +3170,7 @@ def edit_ionosphere_layers(layers_id):
 
     try:
         test_e_boundary_times = int(e_boundary_times) + 1
+        logger.info('test_e_boundary_times tested OK with %s' % str(test_e_boundary_times))
     except:
         trace = traceback.format_exc()
         logger.error('%s' % trace)
@@ -3134,9 +3178,9 @@ def edit_ionosphere_layers(layers_id):
         return False, fail_msg, trace
 
     # NOT IMPLEMENTED YET
-    es_layer = False
-    f1_layer = False
-    f2_layer = False
+    # es_layer = False
+    # f1_layer = False
+    # f2_layer = False
 
     update_label = False
     if 'fp_layer_label' in request.args:
@@ -3669,6 +3713,32 @@ def disable_features_profile_family_tree(fp_ids):
             engine_disposal(engine)
         raise  # to webapp to return in the UI
 
+    # @added 20190503 - Branch #2646: slack
+    message_on_features_profile_disabled = False
+    if slack_thread_updates and SLACK_ENABLED:
+        try:
+            message_on_features_profile_disabled = settings.SLACK_OPTS['message_on_features_profile_disabled']
+        except:
+            message_on_features_profile_disabled = False
+    if message_on_features_profile_disabled:
+        try:
+            metrics_table, fail_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: ionosphere_backend :: failed to get metrics_table meta for disable_features_profile_family_tree'
+            logger.error('%s' % fail_msg)
+        if channel:
+            try:
+                anomalies_table, fail_msg, trace = anomalies_table_meta(skyline_app, engine)
+                logger.info(fail_msg)
+            except:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: ionosphere_backend :: failed to get anomalies_table meta for disable_features_profile_family_tree'
+                logger.error('%s' % fail_msg)
+
     for fp_id in fp_ids:
         try:
             connection = engine.connect()
@@ -3686,6 +3756,133 @@ def disable_features_profile_family_tree(fp_ids):
             if engine:
                 engine_disposal(engine)
             raise
+
+        # @added 20190503 - Branch #2646: slack
+        if message_on_features_profile_disabled:
+            # TODO
+            # To generate a slack message with a link to the features profile,
+            # the metric name and anomaly_timestamp has to be determined
+            fp_metric_id = 0
+            fp_anomaly_timestamp = 0
+            try:
+                connection = engine.connect()
+                stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
+                result = connection.execute(stmt)
+                for row in result:
+                    fp_metric_id = int(row['metric_id'])
+                    fp_anomaly_timestamp = int(row['anomaly_timestamp'])
+                    logger.info('disable_features_profile_family_tree :: found fp metric_id %s and anomaly_timestamp %s from the DB to message disabled to slack' % (
+                        str(fp_metric_id), str(fp_anomaly_timestamp)))
+                connection.close()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: disable_features_profile_family_tree :: could not determine metric_id and anomaly_timestamp from ionosphere for fp_id %s to message disabled to slack' % str(fp_id))
+                continue
+            if fp_metric_id and fp_anomaly_timestamp:
+                base_name = None
+                try:
+                    connection = engine.connect()
+                    stmt = select([metrics_table]).where(metrics_table.c.id == fp_metric_id)
+                    result = connection.execute(stmt)
+                    for row in result:
+                        base_name = row['metric']
+                    connection.close()
+                except:
+                    trace = traceback.format_exc()
+                    logger.error(trace)
+                    fail_msg = 'error :: disable_features_profile_family_tree :: could not determine metric from metrics table to message disabled fp id %s to slack' % str(fp_id)
+                    continue
+            if base_name:
+                ionosphere_link = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (
+                    settings.SKYLINE_URL, str(fp_id), base_name)
+                message = '*DISABLED* - features profile id %s was disabled for %s via %s - %s' % (
+                    str(fp_id), str(base_name), skyline_app, ionosphere_link)
+
+                if throw_exception_on_default_channel:
+                    fail_msg = 'error :: disable_features_profile_family_tree :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
+                    logger.error('%s' % fail_msg)
+                    raise  # to webapp to return in the UI
+                if channel_id:
+                    slack_response = {'ok': False}
+                    try:
+                        slack_response = slack_post_message(skyline_app, channel_id, None, message)
+                    except:
+                        trace = traceback.format_exc()
+                        logger.error(trace)
+                        fail_msg = 'error :: disable_features_profile_family_tree :: failed to slack_post_message - %s' % message
+                        logger.error('%s' % fail_msg)
+                    if not slack_response['ok']:
+                        fail_msg = 'error :: disable_features_profile_family_tree :: failed to slack_post_message, slack dict output follows'
+                        logger.error('%s' % fail_msg)
+                        logger.error('%s' % str(slack_response))
+                    else:
+                        logger.info('disable_features_profile_family_tree :: posted slack update to %s, fp id %s disabled' % (
+                            channel_id, str(fp_id)))
+                    # Post a X reaction if there is a slack_thread_ts that is not
+                    # too old
+                    anomaly_id = None
+                    slack_thread_ts = 0
+                    try:
+                        connection = engine.connect()
+                        stmt = select([anomalies_table]).\
+                            where(anomalies_table.c.metric_id == fp_metric_id).\
+                            where(anomalies_table.c.anomaly_timestamp == int(fp_anomaly_timestamp))
+                        result = connection.execute(stmt)
+                        for row in result:
+                            anomaly_id = row['id']
+                            slack_thread_ts = row['slack_thread_ts']
+                            break
+                        connection.close()
+                        logger.info('disable_features_profile_family_tree :: determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
+                            str(anomaly_id), str(fp_metric_id),
+                            str(fp_anomaly_timestamp), str(slack_thread_ts)))
+                    except:
+                        trace = traceback.format_exc()
+                        logger.error(trace)
+                        fail_msg = 'error :: disable_features_profile_family_tree :: could not determine id of anomaly from DB for metric id %s at anomaly_timestamp %s' % (
+                            str(fp_metric_id), str(fp_anomaly_timestamp))
+                        logger.error('%s' % fail_msg)
+                    if float(slack_thread_ts) == 0:
+                        slack_thread_ts = None
+                        logger.info('disable_features_profile_family_tree :: slack_thread_ts is %s, so uknown, not posting reaction' % (
+                            str(slack_thread_ts)))
+                        continue
+                    if slack_thread_ts:
+                        slack_thread_ts_int = int(float(slack_thread_ts))
+                        time_now = int(time.time())
+                        oldest_ts = time_now - 604800
+                        if slack_thread_ts_int < oldest_ts:
+                            logger.info('disable_features_profile_family_tree :: slack_thread_ts %s is older than a week not posting reaction' % (
+                                str(slack_thread_ts)))
+                            continue
+                        slack_response = {'ok': False}
+                        try:
+                            slack_response = slack_post_message(skyline_app, channel_id, str(slack_thread_ts), message)
+                        except:
+                            trace = traceback.format_exc()
+                            logger.error(trace)
+                            fail_msg = 'error :: disable_features_profile_family_tree :: failed to slack_post_message - %s' % message
+                            logger.error('%s' % fail_msg)
+                        if not slack_response['ok']:
+                            fail_msg = 'error :: disable_features_profile_family_tree :: failed to slack_post_message, slack dict output follows'
+                            logger.error('%s' % fail_msg)
+                            logger.error('%s' % str(slack_response))
+                        else:
+                            logger.info('disable_features_profile_family_tree :: posted slack update to %s, fp id %s disabled' % (
+                                channel_id, str(fp_id)))
+                        try:
+                            reaction_emoji = settings.SLACK_OPTS['message_on_features_profile_disabled_reaction_emoji']
+                        except:
+                            reaction_emoji = 'x'
+                        slack_response = {'ok': False}
+                        try:
+                            slack_response = slack_post_reaction(skyline_app, channel_id, str(slack_thread_ts), reaction_emoji)
+                        except:
+                            trace = traceback.format_exc()
+                            logger.error(trace)
+                            fail_msg = 'error :: webapp_update_slack_thread :: failed to slack_post_reaction to channel id %s and slack_thread_ts %s with reaction %s' % (
+                                str(channel_id), str(slack_thread_ts), str(reaction_emoji))
+                            logger.error('%s' % fail_msg)
 
     if engine:
         engine_disposal(engine)
@@ -3933,6 +4130,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             if int(limit) != 0:
                 new_query_string = '%s LIMIT %s' % (query_string, str(limit))
                 query_string = new_query_string
+                logger.info('test_limit tested OK with %s' % str(test_limit))
         except:
             logger.error('error :: limit is not an integer - %s' % str(limit))
 
@@ -4710,3 +4908,255 @@ def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
             logger.error('error :: failed to get Graphite graph at %s hours for %s' % (str(target_hours), base_name))
 
     return (images, graphite_now_images)
+
+
+# @added 20190502 - Branch #2646: slack
+def webapp_update_slack_thread(base_name, metric_timestamp, value, message_context):
+    """
+    Update slack threads with enabled events.
+
+    :param base_name: metric base_name
+    :param metric_timestamp: the anomaly_timestamp
+    :param value: the features profile id, the validated_count or None
+    :param message_context: training_data_viewed or layers_created
+    :type base_name: str
+    :type metric_timestamp: str or int
+    :type value: int or None
+    :type message_context: str
+    :return: True or False
+    :rtype:  boolean
+
+    """
+    if not update_slack_thread:
+        return False
+
+    message_context_known = False
+    if message_context == 'training_data_viewed':
+        message_context_known = True
+        fp_id = value
+    if message_context == 'layers_created':
+        message_context_known = True
+        fp_id = value
+    if message_context == 'validated':
+        message_context_known = True
+        validated_count = value
+    if not message_context_known:
+        fail_msg = 'error :: webapp_update_slack_thread :: unknown message context - %s' % str(message_context)
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    update_for_message_context = True
+    message_context_not_updating_log_message = False
+    if message_context == 'training_data_viewed':
+        log_message = 'updating slack that training data was viewed'
+        message_on_training_data_viewed = False
+        try:
+            message_on_training_data_viewed = settings.SLACK_OPTS['message_on_training_data_viewed']
+        except:
+            message_on_training_data_viewed = False
+        if not message_on_training_data_viewed:
+            update_for_message_context = False
+            message_context_not_updating_log_message = 'SLACK_OPTS[\'message_on_training_data_viewed\'] is False or not defined not updating slack'
+
+    if message_context == 'layers_created':
+        log_message = 'updating slack that a features profile was created'
+        message_on_features_profile_created = False
+        try:
+            message_on_features_profile_created = settings.SLACK_OPTS['message_on_features_profile_created']
+        except:
+            message_on_features_profile_created = False
+        if not message_on_features_profile_created:
+            update_for_message_context = False
+            message_context_not_updating_log_message = 'SLACK_OPTS[\'message_on_features_profile_created\'] is False or not defined not updating slack'
+
+    if message_context == 'validated':
+        log_message = 'updating slack that %s features profiles were validated for %s' % (str(validated_count), base_name)
+        message_context_known = True
+        validated_count = value
+        try:
+            message_on_validated_features_profiles = settings.SLACK_OPTS['message_on_validated_features_profiles']
+        except:
+            message_on_validated_features_profiles = False
+        if not message_on_validated_features_profiles:
+            update_for_message_context = False
+            message_context_not_updating_log_message = 'SLACK_OPTS[\'message_on_validated_features_profiles\'] is False or not defined not updating slack'
+
+    if not update_for_message_context:
+        logger.info(message_context_not_updating_log_message)
+        return False
+
+    if throw_exception_on_default_channel:
+        fail_msg = 'error :: webapp_update_slack_thread :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    if not update_slack_thread:
+        return False
+    logger.info(log_message)
+
+    if message_context == 'validated':
+        message = '*VALIDATED* - %s features profiles were validated for %s via the webapp' % (str(validated_count), base_name)
+        slack_response = {'ok': False}
+        try:
+            if not channel:
+                fail_msg = 'error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
+                logger.error('%s' % fail_msg)
+                raise  # to webapp to return in the UI
+            slack_response = slack_post_message(skyline_app, channel, None, message)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: webapp_update_slack_thread :: failed to slack_post_message for validated'
+            logger.error('%s' % fail_msg)
+            return False
+        if not slack_response['ok']:
+            fail_msg = 'error :: webapp_update_slack_thread :: failed to slack_post_message for validated, slack dict output follows'
+            logger.error('%s' % fail_msg)
+            logger.error('%s' % str(slack_response))
+            return False
+        else:
+            logger.info('posted slack update to %s, %s features profiles were validated for %s' % (
+                channel, str(validated_count), base_name))
+        return True
+
+    use_anomaly_timestamp = int(metric_timestamp)
+
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        logger.error('%s' % fail_msg)
+        logger.error('error :: webapp_update_slack_thread :: could not get a MySQL engine to get slack_thread_ts')
+        raise  # to webapp to return in the UI
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: webapp_update_slack_thread :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    try:
+        ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+        logger.info('ionosphere_matched_table OK')
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: webapp_update_slack_thread :: failed to get ionosphere_checked_table meta for %s' % base_name)
+        # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+        # Added missing disposal
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    try:
+        metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+        logger.info('metrics_table OK')
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: webapp_update_slack_thread :: failed to get metrics_table meta for %s' % base_name)
+        raise  # to webapp to return in the UI
+    metric_id = None
+    try:
+        connection = engine.connect()
+        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        result = connection.execute(stmt)
+        for row in result:
+            metric_id = int(row['id'])
+        connection.close()
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: webapp_update_slack_thread :: could not determine metric id from metrics table')
+        raise  # to webapp to return in the UI
+    logger.info('metric id determined as %s' % str(metric_id))
+    if metric_id:
+        try:
+            anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('anomalies_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: webapp_update_slack_thread :: failed to get anomalies_table meta for %s' % base_name)
+            raise  # to webapp to return in the UI
+    anomaly_id = None
+    slack_thread_ts = 0
+    try:
+        connection = engine.connect()
+        stmt = select([anomalies_table]).\
+            where(anomalies_table.c.metric_id == metric_id).\
+            where(anomalies_table.c.anomaly_timestamp == int(use_anomaly_timestamp))
+        result = connection.execute(stmt)
+        for row in result:
+            anomaly_id = row['id']
+            slack_thread_ts = row['slack_thread_ts']
+            break
+        connection.close()
+        logger.info('determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
+            str(anomaly_id), str(metric_id),
+            str(use_anomaly_timestamp), str(slack_thread_ts)))
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: webapp_update_slack_thread :: could not determine id or slack_thread_ts of the anomaly from DB for metric id %s at anomaly_timestamp %s' % (
+            str(metric_id), str(use_anomaly_timestamp))
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    if float(slack_thread_ts) == 0:
+        # There is no known slack_thread_ts value so there is no thread to posted
+        # to
+        return False
+
+    if message_context == 'training_data_viewed':
+        message = 'The training data page has been reviewed'
+    if message_context == 'layers_created':
+        ionosphere_link = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (
+            settings.SKYLINE_URL, str(fp_id), base_name)
+        label = None
+        if 'fp_layer_label' in request.args:
+            label_arg = request.args.get('fp_layer_label')
+            label = label_arg[:255]
+        message = '*TRAINED layers* - with label - %s, layers were created on features profile id %s for %s - %s' % (
+            str(label), str(fp_id), base_name, ionosphere_link)
+
+    slack_response = {'ok': False}
+    try:
+        if not channel:
+            fail_msg = 'error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
+            logger.error('%s' % fail_msg)
+            raise  # to webapp to return in the UI
+        slack_response = slack_post_message(skyline_app, channel, str(slack_thread_ts), message)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: webapp_update_slack_thread :: failed to slack_post_message'
+        logger.error('%s' % fail_msg)
+    if not slack_response['ok']:
+        fail_msg = 'error :: webapp_update_slack_thread :: failed to slack_post_message, slack dict output follows'
+        logger.error('%s' % fail_msg)
+        logger.error('%s' % str(slack_response))
+    else:
+        logger.info('posted slack update to %s, thread %s' % (
+            channel, str(slack_thread_ts)))
+
+    try:
+        reaction_emoji = settings.SLACK_OPTS['message_on_training_data_viewed_reaction_emoji']
+    except:
+        reaction_emoji = 'eyes'
+
+    slack_response = {'ok': False}
+    try:
+        if not channel_id:
+            fail_msg = 'error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
+            logger.error('%s' % fail_msg)
+            raise  # to webapp to return in the UI
+        slack_response = slack_post_reaction(skyline_app, channel_id, str(slack_thread_ts), reaction_emoji)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: webapp_update_slack_thread :: failed to slack_post_reaction to channel id %s and slack_thread_ts %s with reaction %s' % (
+            str(channel_id), str(slack_thread_ts), str(reaction_emoji))
+        logger.error('%s' % fail_msg)
+    return True

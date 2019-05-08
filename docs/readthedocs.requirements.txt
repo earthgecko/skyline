@@ -2,6 +2,7 @@
 #                      Branch #2270: luminosity
 # @modified 20190412 - Task #2926: Update dependencies
 # @modified 20190426 - Task #2964: Update dependencies
+# @modified 20190508 - Task #2926: Update dependencies
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
 setuptools
@@ -39,7 +40,7 @@ statsmodels==0.9.0
 msgpack-python==0.5.6
 requests==2.21.0
 python-simple-hipchat==0.4.0
-pygerduty==0.38.1
+pygerduty==0.38.2
 mysql-connector-python==8.0.16
 gunicorn==19.9.0
 pipdeptree==0.13.2
