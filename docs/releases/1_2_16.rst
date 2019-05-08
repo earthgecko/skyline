@@ -24,6 +24,9 @@ Update notes
 - There are changes to the DB in v1.2.16
 - There are changes to settings.py in v1.2.16
 
+.. note: the requirements.txt specifies urllib3>=1.25.1 however requests needs
+  this fix at <=1.24.3.  Please amend the requirements.txt
+
 How to update from v1.2.15
 --------------------------
 
