@@ -639,6 +639,7 @@ HIPCHAT_OPTS = {
     'rooms': {
         'skyline': (12345,),
         'skyline_test.alerters.test': (12345,),
+        'horizon.udp.test': (12345,),
     },
     # Background color of hipchat messages
     # (One of 'yellow', 'red', 'green', 'purple', 'gray', or 'random'.)
@@ -659,10 +660,27 @@ SLACK_OPTS = {
     # channel names - you can either pass the channel name (#general) or encoded
     # ID (C024BE91L)
     'channels': {
-        'skyline': ('#general',),
-        'skyline_test.alerters.test': ('#general',),
+        'skyline': ('#skyline',),
+        'skyline_test.alerters.test': ('#skyline',),
+        'horizon.udp.test': ('#skyline',),
     },
     'icon_emoji': ':chart_with_upwards_trend:',
+    # Your default slack Skyline channel name e.g. '#skyline'
+    'default_channel': 'YOUR_default_slack_channel',
+    # Your default slack Skyline channel id e.g. 'C0XXXXXX'
+    'default_channel_id': 'YOUR_default_slack_channel_id',
+    # Whether to update slack message threads on any of the below events
+    'thread_updates': True,
+    # You can disable or enable each message_on event individually
+    'message_on_training_data_viewed': True,
+    'message_on_training_data_viewed_reaction_emoji': 'eyes',
+    'message_on_features_profile_created': True,
+    'message_on_features_profile_created_reaction_emoji': 'thumbsup',
+    'message_on_features_profile_learnt': True,
+    'message_on_features_profile_learnt_reaction_emoji': 'heavy_check_mark',
+    'message_on_features_profile_disabled': True,
+    'message_on_features_profile_disabled_reaction_emoji': 'x',
+    'message_on_validated_features_profiles': True,
 }
 """
 :var SLACK_OPTS: Your slack settings.

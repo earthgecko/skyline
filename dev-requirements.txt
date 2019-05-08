@@ -300,7 +300,9 @@ python-simple-hipchat==0.4.0
 #pygerduty==0.36.2
 # @modified 20190412 - Task #2926: Update dependencies
 #pygerduty==0.37.0
-pygerduty==0.38.1
+# @modified 20190508 - Task #2926: Update dependencies
+#pygerduty==0.38.1
+pygerduty==0.38.2
 
 # for panorama - direct from MySQL as the package has broken in the context of
 # pip and virtualenv - NOTE: once you have installed this once, if it is run in

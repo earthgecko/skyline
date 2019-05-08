@@ -68,8 +68,11 @@ except:
 # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
 try:
     ANALYZER_ENABLED = settings.ANALYZER_ENABLED
+    logger.info('ANALYZER_ENABLED is set to %s' % str(ANALYZER_ENABLED))
 except:
     ANALYZER_ENABLED = True
+    logger.info('warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True')
+
 try:
     ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
 except:
@@ -979,6 +982,38 @@ class Analyzer(Thread):
                 pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
+
+        # @added 20190417 - Feature #2950: Report defaulted settings to log
+        # Added all the globally declared settings to enable reporting in the
+        # log the state of each setting.
+        try:
+            SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
+            if SERVER_METRIC_PATH == '.':
+                SERVER_METRIC_PATH = ''
+            logger.info('SERVER_METRIC_PATH is set from settings.py to %s' % str(SERVER_METRIC_PATH))
+        except:
+            SERVER_METRIC_PATH = ''
+            logger.info('warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to \'\'')
+        logger.info('skyline_app_graphite_namespace is set to %s' % str(skyline_app_graphite_namespace))
+        try:
+            ANALYZER_ENABLED = settings.ANALYZER_ENABLED
+            logger.info('ANALYZER_ENABLED is set to %s' % str(ANALYZER_ENABLED))
+        except:
+            ANALYZER_ENABLED = True
+            logger.info('warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True')
+        try:
+            DO_NOT_ALERT_ON_STALE_METRICS = settings.DO_NOT_ALERT_ON_STALE_METRICS
+            do_not_alert_count = len(DO_NOT_ALERT_ON_STALE_METRICS)
+            logger.info('DO_NOT_ALERT_ON_STALE_METRICS is set from settings.py to not alert on %s namespaces' % str(do_not_alert_count))
+        except:
+            DO_NOT_ALERT_ON_STALE_METRICS = []
+            logger.info('warning :: DO_NOT_ALERT_ON_STALE_METRICS is not declared in settings.py, defaults to []')
+        try:
+            ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
+            logger.info('ALERT_ON_STALE_METRICS is set from settings.py to %s' % str(ALERT_ON_STALE_METRICS))
+        except:
+            ALERT_ON_STALE_METRICS = False
+            logger.info('warning :: ALERT_ON_STALE_METRICS is not declared in settings.py, defaults to %s' % str(ALERT_ON_STALE_METRICS))
 
         if not os.path.exists(settings.SKYLINE_TMP_DIR):
             # @modified 20160803 - Adding additional exception handling to Analyzer
@@ -2204,6 +2239,7 @@ class Analyzer(Thread):
             except Exception as e:
                 if LOCAL_DEBUG:
                     logger.error('error :: could not query Redis for analyzer.derivative_metrics_expiry key: %s' % str(e))
+
             if not manage_derivative_metrics:
                 try:
                     # @modified 20170901 - Bug #2154: Infrequent missing new_ Redis keys
@@ -2215,11 +2251,33 @@ class Analyzer(Thread):
                 try:
                     self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
                 except Exception as e:
-                    logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
+                    # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
+                    #                      Feature #2916: ANALYZER_ENABLED setting
+                    #                      ANALYZER_ENABLED False - rename Redis keys error #103
+                    # If Analyzer is not enabled the keys will not exist this is
+                    # expected and not an error
+                    # logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
+                    if ANALYZER_ENABLED:
+                        logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
+                    else:
+                        logger.info(
+                            'there is no Redis set new_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
+                                str(ANALYZER_ENABLED), str(e)))
                 try:
                     self.redis_conn.rename('new_non_derivative_metrics', 'non_derivative_metrics')
                 except Exception as e:
-                    logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
+                    # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
+                    #                      Feature #2916: ANALYZER_ENABLED setting
+                    #                      ANALYZER_ENABLED False - rename Redis keys error #103
+                    # If Analyzer is not enabled the keys will not exist this is
+                    # expected and not an error
+                    # logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
+                    if ANALYZER_ENABLED:
+                        logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
+                    else:
+                        logger.info(
+                            'there is no Redis set new_non_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
+                                str(ANALYZER_ENABLED), str(e)))
 
                 live_at = 'skyline_set_as_of_%s' % str(key_timestamp)
                 try:

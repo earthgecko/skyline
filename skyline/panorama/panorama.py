@@ -18,6 +18,9 @@ from sys import version_info
 import mysql.connector
 from mysql.connector import errorcode
 
+# @added 20190502 - Branch #2646: slack
+from sqlalchemy.sql import select
+
 import settings
 from skyline_functions import fail_check, mkdir_p
 
@@ -28,6 +31,9 @@ from skyline_functions import fail_check, mkdir_p
 # from settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG to the metric database
 # entry.
 from ionosphere_functions import get_ionosphere_learn_details
+
+# @added 20190502 - Branch #2646: slack
+from database import get_engine, metrics_table_meta, anomalies_table_meta
 
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
@@ -327,6 +333,129 @@ class Panorama(Thread):
         logger.info('debug :: %s' % str(metric_vars_array))
 
         return metric_vars_array
+
+    def update_slack_thread_ts(self, i, base_name, metric_timestamp, slack_thread_ts):
+        """
+        Update an anomaly record with the slack_thread_ts.
+
+        :param i: python process id
+        :param metric_check_file: full path to the metric check file
+
+        :return: returns True
+
+        """
+
+        def get_an_engine():
+            try:
+                engine, log_msg, trace = get_engine(skyline_app)
+                return engine, log_msg, trace
+            except:
+                logger.error(traceback.format_exc())
+                log_msg = 'error :: update_slack_thread_ts :: failed to get MySQL engine in update_slack_thread_ts'
+                logger.error('error :: update_slack_thread_ts :: failed to get MySQL engine in update_slack_thread_ts')
+                return None, log_msg, trace
+
+        def engine_disposal(engine):
+            if engine:
+                try:
+                    engine.dispose()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_slack_thread_ts :: calling engine.dispose()')
+            return
+
+        child_process_pid = os.getpid()
+        logger.info('update_slack_thread_ts :: child_process_pid %s, processing %s, %s, %s' % (
+            str(child_process_pid), base_name, str(metric_timestamp),
+            str(slack_thread_ts)))
+        try:
+            engine, log_msg, trace = get_an_engine()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_slack_thread_ts :: could not get a MySQL engine to update slack_thread_ts in anomalies for %s' % (base_name))
+        if not engine:
+            logger.error('error :: update_slack_thread_ts :: engine not obtained to update slack_thread_ts in anomalies for %s' % (base_name))
+            return False
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('update_slack_thread_ts :: metrics_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_slack_thread_ts :: failed to get metrics_table meta for %s' % base_name)
+        metric_id = None
+        try:
+            connection = engine.connect()
+            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            result = connection.execute(stmt)
+            for row in result:
+                metric_id = int(row['id'])
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_slack_thread_ts :: could not determine metric id from metrics table')
+        logger.info('update_slack_thread_ts :: metric id determined as %s' % str(metric_id))
+        if metric_id:
+            try:
+                anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+                logger.info('update_slack_thread_ts :: anomalies_table OK')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: failed to get anomalies_table meta for %s' % base_name)
+        anomaly_id = None
+        try:
+            connection = engine.connect()
+            stmt = select([anomalies_table]).\
+                where(anomalies_table.c.metric_id == metric_id).\
+                where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
+            result = connection.execute(stmt)
+            for row in result:
+                anomaly_id = int(row['id'])
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_slack_thread_ts :: could not determine anomaly id from anomaly table')
+        logger.info('update_slack_thread_ts :: anomaly id determined as %s' % str(anomaly_id))
+        anomaly_record_updated = False
+        if anomaly_id:
+            try:
+                connection = engine.connect()
+                connection.execute(
+                    anomalies_table.update(
+                        anomalies_table.c.id == anomaly_id).
+                    values(slack_thread_ts=slack_thread_ts))
+                connection.close()
+                logger.info('update_slack_thread_ts :: updated slack_thread_ts for anomaly id %s' % str(anomaly_id))
+                anomaly_record_updated = True
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: could not update slack_thread_ts for anomaly id %s' % str(anomaly_id))
+        if engine:
+            try:
+                engine_disposal(engine)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: could not dispose engine')
+        cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+        delete_cache_key = False
+        if anomaly_record_updated:
+            delete_cache_key = True
+        if not anomaly_record_updated:
+            # Allow for 60 seconds for an anomaly to be added
+            now = time()
+            anomaly_age = int(now) - int(metric_timestamp)
+            if anomaly_age > 60:
+                delete_cache_key = True
+        if delete_cache_key:
+            logger.info('update_slack_thread_ts :: deleting cache_key %s' % cache_key)
+            try:
+                self.redis_conn.delete(cache_key)
+                logger.info('update_slack_thread_ts :: cache_key %s deleted' % cache_key)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: failed to delete cache_key %s' % cache_key)
+        return
 
     def spin_process(self, i, metric_check_file):
         """
@@ -1096,6 +1225,80 @@ class Panorama(Thread):
 
                 if metric_var_files:
                     break
+
+                # @added 20190501 - Branch #2646: slack
+                # Check if any Redis keys exist with a slack_thread_ts to update
+                # any anomaly records
+                slack_thread_ts_updates = None
+                try:
+                    slack_thread_ts_updates = list(self.redis_conn.scan_iter(match='panorama.slack_thread_ts.*'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to scan panorama.slack_thread_ts.* from Redis')
+                    slack_thread_ts_updates = []
+
+                if not slack_thread_ts_updates:
+                    logger.info('no panorama.slack_thread_ts Redis keys to process, OK')
+
+                if slack_thread_ts_updates:
+                    for cache_key in slack_thread_ts_updates:
+                        base_name = None
+                        metric_timestamp = None
+                        try:
+                            update_on = self.redis_conn.get(cache_key)
+                            # cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+                            update_for = literal_eval(update_on)
+                            base_name = str(update_for[0])
+                            metric_timestamp = int(float(update_for[1]))
+                            slack_thread_ts = float(update_for[2])
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to get details from cache_key %s' % cache_key)
+                        update_db_record = False
+                        if base_name and metric_timestamp:
+                            update_db_record = True
+                        else:
+                            logger.info('Could not determine base_name and metric_timestamp from cache_key %s, deleting' % cache_key)
+                            try:
+                                self.redis_conn.delete(cache_key)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to delete cache_key %s' % cache_key)
+                        if update_db_record:
+                            # Spawn update_slack_thread_ts process
+                            pids = []
+                            spawned_pids = []
+                            pid_count = 0
+                            now = time()
+                            for i in range(1, 2):
+                                try:
+                                    p = Process(target=self.update_slack_thread_ts, args=(i, base_name, metric_timestamp, slack_thread_ts))
+                                    pids.append(p)
+                                    pid_count += 1
+                                    logger.info('starting update_slack_thread_ts')
+                                    p.start()
+                                    spawned_pids.append(p.pid)
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: to start update_slack_thread_ts')
+                                    continue
+                            p_starts = time()
+                            while time() - p_starts <= 2:
+                                if any(p.is_alive() for p in pids):
+                                    # Just to avoid hogging the CPU
+                                    sleep(.1)
+                                else:
+                                    # All the processes are done, break now.
+                                    time_to_run = time() - p_starts
+                                    logger.info(
+                                        '%s :: update_slack_thread_ts completed in %.2f seconds' % (
+                                            skyline_app, time_to_run))
+                                    break
+                            else:
+                                # We only enter this if we didn't 'break' above.
+                                logger.info('%s :: timed out, killing all update_slack_thread_ts processes' % (skyline_app))
+                                for p in pids:
+                                    p.terminate()
 
             metric_var_files_sorted = sorted(metric_var_files)
             metric_check_file = '%s/%s' % (settings.PANORAMA_CHECK_PATH, str(metric_var_files_sorted[0]))

@@ -56,7 +56,11 @@ CREATE TABLE IF NOT EXISTS `sources` (
 CREATE TABLE IF NOT EXISTS `metrics` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'metric unique id',
   `metric` VARCHAR(255) NOT NULL COMMENT 'metric name',
+/*
+# @modified 20190501 - Task #2980: Change DB defaults from NULL
   `ionosphere_enabled` tinyint(1) DEFAULT NULL COMMENT 'are ionosphere rules enabled 1 or not enabled 0 on the metric',
+*/
+  `ionosphere_enabled` tinyint(1) DEFAULT 0 COMMENT 'are ionosphere rules enabled 1 or not enabled 0 on the metric',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
 /*
 # @added 20170113 - Feature #1854: Ionosphere learn - generations
@@ -98,6 +102,10 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
   `algorithms_run` VARCHAR(255) NOT NULL COMMENT 'a csv list of the alogrithm ids e.g 1,2,3,4,5,6,8,9',
   `triggered_algorithms` VARCHAR(255) NOT NULL COMMENT 'a csv list of the triggered alogrithm ids e.g 1,2,4,6,8,9',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+/* @added 20190501 - Branch #2646: slack
+# Add the slack thread timestamp
+*/
+  `slack_thread_ts` DECIMAL(17,6) DEFAULT 0 COMMENT 'the slack thread ts',
   PRIMARY KEY (id),
 /*
 # Why index anomaly_timestamp and created_timestamp?  Because this is thinking
@@ -221,7 +229,11 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 # known.
 */
   `anomaly_timestamp` INT(10) DEFAULT 0 COMMENT 'anomaly unix timestamp, see notes on historic dates above',
+/*
+# @modified 20190501 - Task #2980: Change DB defaults from NULL
   `enabled` tinyint(1) DEFAULT NULL COMMENT 'the features profile is enabled 1 or not enabled 0',
+*/
+  `enabled` tinyint(1) DEFAULT 1 COMMENT 'the features profile is enabled 1 or not enabled 0',
   `tsfresh_version` VARCHAR(12) DEFAULT NULL COMMENT 'the tsfresh version on which the features profile was calculated',
   `calc_time` FLOAT DEFAULT NULL COMMENT 'the time taken in seconds to calcalute the features',
   `features_count` INT(10) DEFAULT NULL COMMENT 'the number of features calculated',
@@ -387,7 +399,11 @@ CREATE TABLE IF NOT EXISTS `ionosphere_layers_matched` (
   `fp_id` INT(11) NOT NULL COMMENT 'features profile id',
   `metric_id` INT(11) NOT NULL COMMENT 'metric id',
   `anomaly_timestamp` INT(11) NOT NULL COMMENT 'anomaly unix timestamp, see notes on historic dates above',
-  `anomalous_datapoint` DECIMAL(18,6) NOT NULL COMMENT 'anomalous datapoint',
+/* @modified 20190501 - Bug #2638: anomalies db table - anomalous_datapoint greater than DECIMAL
+# Changed DECIMAL(18,6) to DECIMAL(65,6) for really large numbers
+#  `anomalous_datapoint` DECIMAL(18,6) NOT NULL COMMENT 'anomalous datapoint',
+*/
+  `anomalous_datapoint` DECIMAL(65,6) NOT NULL COMMENT 'anomalous datapoint',
   `full_duration` INT(11) NOT NULL COMMENT 'The full duration of the timeseries which matched',
 /*
 # @added 2018075 - Task #2446: Optimize Ionosphere

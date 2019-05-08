@@ -250,7 +250,12 @@ def ionosphere_echo(base_name, mirage_full_duration):
             # ionosphere_layers will not have a mirage.redis.24h.json file as the
             # creation of these resources in the training_data dir was only added at
             # that point, so they are excluded.  Less than 20170307 1488844800 excl.
-            if int(row['anomaly_timestamp']) < 1488844800:
+            # @modified 20190508 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            #                      Feature #1960: ionosphere_layers
+            # Increased the date as some on the cusp were still erroring, move
+            # forward 2 days to 20170309
+            # if int(row['anomaly_timestamp']) < 1488844800:
+            if int(row['anomaly_timestamp']) < 1489017600:
                 logger.info('ionosphere_echo :: skipping fp id %s as predates having a mirage.redis json file' % str(fp_id))
                 continue
             echo_enabled_mirage_fp_ids.append(fp_id)
@@ -437,9 +442,17 @@ def ionosphere_echo(base_name, mirage_full_duration):
 
         # Create the new settings.FULL_DURATION features profile
         ionosphere_job = 'learn_fp_human'
+
+        # @added 20190503 - Branch #2646: slack
+        # Added slack_ionosphere_job
+        slack_ionosphere_job = ionosphere_job
+
         fp_learn = False
         try:
-            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn)
+            # @modified 20190503 - Branch #2646: slack
+            # Added slack_ionosphere_job
+            # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn)
+            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: ionosphere_echo :: failed to create a settings.FULL_DURATION features profile from fp_id %s for %s' % (str(mirage_fp_id), base_name))
