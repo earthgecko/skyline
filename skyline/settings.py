@@ -104,6 +104,18 @@ MINI_DURATION = 3600
 :vartype MINI_DURATION: str
 """
 
+GRAPHITE_AUTH_HEADER = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+"""
+:var GRAPHITE_AUTH_HEADER: the Authorization header for Graphite api
+:vartype GRAPHITE_AUTH_HEADER: str
+"""
+
+GRAPHITE_CUSTOM_HEADERS = {}
+"""
+:var GRAPHITE_CUSTOM_HEADERS: Dictionary with custom headers
+:vartype GRAPHITE_CUSTOM_HEADERS: dict
+"""
+
 GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'
 """
 :var GRAPHITE_HOST: If you have a Graphite host set up, set this metric to get
@@ -153,7 +165,13 @@ TARGET_HOURS = '7'
 :vartype TARGET_HOURS: str
 """
 
-GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
+GRAPHITE_RENDER_URI = 'api/datasources/proxy/1/render/'
+"""
+:var GRAPHITE_RENDER_URI: Base URI for graphite render
+:vartype GRAPHITE_RENDER_URI: str
+"""
+
+GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/' + GRAPHITE_RENDER_URI + '?width=1400&from=-' + TARGET_HOURS + 'hour&target='
 """
 :var GRAPH_URL: The graphite URL for alert graphs will be appended with the
     relevant metric name in each alert.
@@ -162,6 +180,13 @@ GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/
 .. note:: There is probably no neeed to change this unless you what a different
     size graph sent with alerts.
 """
+
+CARBON_HOST = GRAPHITE_HOST
+"""
+:var CARBON_HOST: endpoint to send metrics that sould reach graphite.
+:vartype CARBON_PORT: int
+"""
+
 
 CARBON_PORT = 2003
 """
@@ -595,20 +620,7 @@ elements.
 """
 
 # Each alert module requires additional information.
-SMTP_OPTS = {
-    # This specifies the sender of email alerts.
-    'sender': 'skyline@your_domain.com',
-    # recipients is a dictionary mapping metric names
-    # (exactly matching those listed in ALERTS) to an array of e-mail addresses
-    'recipients': {
-        'skyline': ['you@your_domain.com', 'them@your_domain.com'],
-        'skyline_test.alerters.test': ['you@your_domain.com'],
-    },
-    # This is the default recipient which acts as a catchall for alert tuples
-    # that do not have a matching namespace defined in recipients
-    'default_recipient': ['you@your_domain.com'],
-    'embed-images': True,
-}
+SMTP_OPTS = {'sender': 'skyline@your_domain.com', 'recipients': {'skyline': ['you@your_domain.com', 'them@your_domain.com'], 'skyline_test.alerters.test': ['you@your_domain.com'], }, 'default_recipient': ['you@your_domain.com'], 'embed-images': True}
 """
 :var SMTP_OPTS: Your SMTP settings.
 :vartype SMTP_OPTS: dictionary
@@ -639,19 +651,7 @@ HIPCHAT_OPTS = {
 HipChat alerts require python-simple-hipchat
 """
 
-SLACK_OPTS = {
-    # Bot User OAuth Access Token
-    'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token',
-    # list of slack channels to notify about each anomaly
-    # (similar to SMTP_OPTS['recipients'])
-    # channel names - you can either pass the channel name (#general) or encoded
-    # ID (C024BE91L)
-    'channels': {
-        'skyline': ('#general',),
-        'skyline_test.alerters.test': ('#general',),
-    },
-    'icon_emoji': ':chart_with_upwards_trend:',
-}
+SLACK_OPTS = {'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'channels': {'skyline': ('#general',), 'skyline_test.alerters.test': ('#general',), }, 'icon_emoji': ':chart_with_upwards_trend:'}
 """
 :var SLACK_OPTS: Your slack settings.
 :vartype SLACK_OPTS: dictionary
