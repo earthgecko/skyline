@@ -71,6 +71,12 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     base_name = str(metric)
+
+    # @added 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+    # Set a default log_context, just in case it is not set if something is
+    # added in the future
+    log_context = 'unknown'
+
     if context == 'training_data':
         log_context = 'training data'
     if context == 'features_profiles':
@@ -171,7 +177,10 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     fp_id = None
     f_calc = 'unknown'
     if os.path.isfile(features_profile_details_file):
-        current_logger.info('features profile details file exist - %s' % (features_profile_details_file))
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: features profile details file exist - %s' % (
+            log_context, features_profile_details_file))
         try:
             with open(features_profile_details_file, 'r') as f:
                 fp_details_str = f.read()
@@ -180,14 +189,22 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         except:
             trace = traceback.format_exc()
             current_logger.error(trace)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
             current_logger.error(
-                'error: failed to read from %s' % (features_profile_details_file))
+                'error: %s :: failed to read from %s' % (log_context, features_profile_details_file))
     else:
-        current_logger.info('OK no features profile details file exists - %s' % (features_profile_details_file))
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s - OK no features profile details file exists - %s' % (
+            log_context, features_profile_details_file))
 
     fp_created = None
     if os.path.isfile(features_profile_created_file):
-        current_logger.info('features profile created file exist - %s' % (features_profile_created_file))
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: features profile created file exist - %s' % (
+            log_context, features_profile_created_file))
         try:
             with open(features_profile_created_file, 'r') as f:
                 fp_created_str = f.read()
@@ -197,13 +214,21 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         except:
             trace = traceback.format_exc()
             current_logger.error(trace)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
             current_logger.error(
-                'error: failed to read fp_id from %s' % (features_profile_created_file))
+                'error: %s :: failed to read fp_id from %s' % (log_context, features_profile_created_file))
     else:
-        current_logger.info('OK no features profile created file exists - %s' % (features_profile_created_file))
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: OK no features profile created file exists - %s' % (
+            log_context, features_profile_created_file))
 
     if os.path.isfile(t_fname_out):
-        current_logger.info('transposed features already exist - %s' % (t_fname_out))
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: transposed features already exist - %s' % (
+            log_context, t_fname_out))
         return str(t_fname_out), True, fp_created, fp_id, 'none', 'none', f_calc
 
     start = timer()
@@ -216,14 +241,18 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         except:
             trace = traceback.format_exc()
             current_logger.error(trace)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
             current_logger.error(
-                'error: failed to read timeseries data from %s' % (anomaly_json))
-            fail_msg = 'error: failed to read timeseries data from %s' % anomaly_json
+                'error: %s :: failed to read timeseries data from %s' % (log_context, anomaly_json))
+            fail_msg = 'error: %s :: failed to read timeseries data from %s' % (log_context, anomaly_json)
             end = timer()
             return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
     else:
         trace = 'none'
-        fail_msg = 'error: file not found - %s' % (anomaly_json)
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        fail_msg = 'error :: %s :: file not found - %s' % (log_context, anomaly_json)
         current_logger.error(fail_msg)
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
@@ -260,15 +289,22 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     try:
         df = pd.read_csv(ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
-        current_logger.info('DataFrame created with %s' % ts_csv)
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: DataFrame created with %s' % (
+            log_context, ts_csv))
     except:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        fail_msg = 'error: failed to create a pandas DataFrame with %s' % ts_csv
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        fail_msg = 'error: %s :: failed to create a pandas DataFrame with %s' % (log_context, ts_csv)
         current_logger.error('%s' % fail_msg)
         if os.path.isfile(ts_csv):
             os.remove(ts_csv)
-            current_logger.info('removed %s' % ts_csv)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
+            current_logger.info('%s :: removed %s' % (log_context, ts_csv))
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
@@ -291,18 +327,25 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     except:
         trace = traceback.format_exc()
         current_logger.debug(trace)
-        fail_msg = 'error: failed to read the pandas DataFrame created with %s' % ts_csv
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        fail_msg = 'error: %s :: failed to read the pandas DataFrame created with %s' % (log_context, ts_csv)
         current_logger.error('%s' % fail_msg)
         if os.path.isfile(ts_csv):
             os.remove(ts_csv)
-            current_logger.info('removed %s' % ts_csv)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
+            current_logger.info('%s :: removed %s' % (log_context, ts_csv))
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     df.columns = ['metric', 'timestamp', 'value']
 
     start_feature_extraction = timer()
-    current_logger.info('starting extract_features with %s' % str(TSFRESH_VERSION))
+    # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+    # Added log_context to report the context
+    current_logger.info('%s :: starting extract_features with %s' % (
+        log_context, str(TSFRESH_VERSION)))
     df_features = False
     try:
         # @modified 20161226 - Bug #1822: tsfresh extract_features process stalling
@@ -321,26 +364,37 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         df_features = extract_features(
             df, column_id='metric', column_sort='timestamp', column_kind=None,
             column_value=None, feature_extraction_settings=tsf_settings)
-        current_logger.info('features extracted from %s data' % ts_csv)
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: features extracted from %s data' % (
+            log_context, ts_csv))
     except:
         trace = traceback.print_exc()
         current_logger.debug(trace)
-        fail_msg = 'error: extracting features with tsfresh from - %s' % ts_csv
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        fail_msg = 'error: %s :: extracting features with tsfresh from - %s' % (log_context, ts_csv)
         current_logger.error('%s' % fail_msg)
         end_feature_extraction = timer()
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
         current_logger.info(
-            'feature extraction failed in %.6f seconds' % (
-                end_feature_extraction - start_feature_extraction))
+            '%s :: feature extraction failed in %.6f seconds' % (
+                log_context, (end_feature_extraction - start_feature_extraction)))
         if os.path.isfile(ts_csv):
             os.remove(ts_csv)
-            current_logger.info('removed %s' % ts_csv)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
+            current_logger.info('%s :: removed %s' % (log_context, ts_csv))
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     end_feature_extraction = timer()
     feature_extraction_time = end_feature_extraction - start_feature_extraction
+    # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+    # Added log_context to report the context
     current_logger.info(
-        'feature extraction took %.6f seconds' % (feature_extraction_time))
+        '%s :: feature extraction took %.6f seconds' % (log_context, feature_extraction_time))
 
     del df
 
@@ -352,15 +406,21 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     df_t = False
     try:
         df_t = df_features.transpose()
-        current_logger.info('features transposed')
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: features transposed' % log_context)
     except:
         trace = traceback.print_exc()
         current_logger.debug(trace)
-        fail_msg = 'error :: transposing tsfresh features from - %s' % ts_csv
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        fail_msg = 'error :: %s :: transposing tsfresh features from - %s' % (log_context, ts_csv)
         current_logger.error('%s' % fail_msg)
         if os.path.isfile(ts_csv):
             os.remove(ts_csv)
-            current_logger.info('removed %s' % ts_csv)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
+            current_logger.info('%s :: removed %s' % (log_context, ts_csv))
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
@@ -373,11 +433,15 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     except:
         trace = traceback.print_exc()
         current_logger.debug(trace)
-        fail_msg = 'error: saving transposed tsfresh features from - %s' % ts_csv
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        fail_msg = 'error :: %s :: saving transposed tsfresh features from - %s' % (log_context, ts_csv)
         current_logger.error('%s' % fail_msg)
         if os.path.isfile(ts_csv):
             os.remove(ts_csv)
-            current_logger.info('removed %s' % ts_csv)
+            # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            # Added log_context to report the context
+            current_logger.info('%s :: removed %s' % (log_context, ts_csv))
         end = timer()
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
@@ -395,29 +459,39 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     except:
         trace = traceback.print_exc()
         current_logger.error(trace)
-        current_logger.error('error :: failed to create Dataframe to sum')
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.error('error :: %s :: failed to create Dataframe to sum' % log_context)
     try:
         features_count = len(df_sum['value'])
     except:
         trace = traceback.print_exc()
         current_logger.debug(trace)
-        current_logger.error('error :: failed to count number of features, set to 0')
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.error('error :: %s :: failed to count number of features, set to 0' % log_context)
         features_count = 0
     try:
         features_sum = df_sum['value'].sum()
     except:
         trace = traceback.print_exc()
         current_logger.debug(trace)
-        current_logger.error('error :: failed to sum feature values, set to 0')
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.error('error :: %s :: failed to sum feature values, set to 0' % log_context)
         features_sum = 0
 
     end = timer()
 
-    current_logger.info('features saved to %s' % (fname_out))
-    current_logger.info('transposed features saved to %s' % (t_fname_out))
+    # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+    # Added log_context to report the context
+    current_logger.info('%s :: features saved to %s' % (log_context, fname_out))
+    current_logger.info('%s :: transposed features saved to %s' % (
+        log_context, t_fname_out))
     total_calc_time = '%.6f' % (end - start)
     calc_time = '%.6f' % (feature_extraction_time)
-    current_logger.info('total feature profile completed in %s seconds' % str(total_calc_time))
+    current_logger.info('%s :: total feature profile completed in %s seconds' % (
+        log_context, str(total_calc_time)))
 
     # Create a features profile details file
     try:
@@ -431,14 +505,19 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
-        fail_msg = 'error :: failed to write %s' % features_profile_details_file
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        fail_msg = 'error :: %s :: failed to write %s' % (log_context, features_profile_details_file)
         current_logger.error('%s' % fail_msg)
 
     del df_sum
 
     if os.path.isfile(ts_csv):
         os.remove(ts_csv)
-        current_logger.info('removed the created csv - %s' % ts_csv)
+        # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+        # Added log_context to report the context
+        current_logger.info('%s :: removed the created csv - %s' % (
+            log_context, ts_csv))
 
     # @added 20170112 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
     # Ionosphere learn needs Redis works sets, but this was moved to

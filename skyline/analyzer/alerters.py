@@ -1247,9 +1247,21 @@ def alert_slack(alert, metric, context):
         else:
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
             initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
+
+        add_to_panorama = True
+        try:
+            slack_thread_updates = settings.SLACK_OPTS['thread_updates']
+        except:
+            slack_thread_updates = False
+        if not settings.SLACK_ENABLED:
+            slack_thread_updates = False
+        slack_file_upload = False
+        slack_thread_ts = 0
+
         try:
             # slack does not allow embedded images, nor links behind authentication
-            # so we have to upload an image with the message
+            # or color text, so we have jump through all the API hoops to end up
+            # having to upload an image with a very basic message.
             if os.path.isfile(image_file):
                 slack_file_upload = sc.api_call(
                     'files.upload', filename=filename, channels=channel,
@@ -1257,63 +1269,110 @@ def alert_slack(alert, metric, context):
                 if not slack_file_upload['ok']:
                     logger.error('error :: alert_slack - failed to send slack message')
                 # @added 20181205 - Branch #2646: slack
-                # TODO
                 # The slack message id needs to be determined here so that it
-                # can be recorded against the anamoly id and so that webapp can
+                # can be recorded against the anamoly id and so that Skyline can
                 # notify the message thread when a training_data page is
                 # reviewed, a feature profile is created and/or a layers profile
-                # is created.  A basic description of this functionally is terms
-                # of the webapp code changes and the changes required to the DB
-                # and Panorama/Redis to achieve the desired goal.
-                # TODO - Panorama workload and DB changes.
+                # is created.
                 else:
-                    try:
-                        slack_thread_updates = settings.SLACK_THREAD_UPDATES
-                    except:
-                        slack_thread_updates = False
+                    logger.info('alert_slack - sent slack message')
                     if slack_thread_updates:
+                        # @added 20190508 - Bug #2986: New slack messaging does not handle public channel
+                        #                   Issue #111: New slack messaging does not handle public channel
+                        # The sc.api_call 'files.upload' response which generates
+                        # slack_file_upload has a different structure depending
+                        # on whether a channel is private or public.  That also
+                        # goes for free or hosted slack too.
+                        slack_group = None
+                        slack_group_list = None
+
                         # This is basically the channel id of your channel, the
                         # name could be used so that if in future it is used or
-                        # displayed in a UI or just you plain looking at the
-                        # DB table data, it is human understandable, humans do
-                        # not see the channel id, they knoow the channels by
-                        # names.  Skyline could have it's own channel id name DB
-                        # mappings.  This may be important in terms of only
-                        # doing slack_thread_updates on the primary Skyline
-                        # slack channel.
+                        # displayed in a UI
+                        # @modified 20190508 - Bug #2986: New slack messaging does not handle public channel
+                        #                      Issue #111: New slack messaging does not handle public channel
+                        # This block only works for free slack workspace private
+                        # channels.  Although this should be handled in the
+                        # SLACK_OPTS as slack_account_type: 'free|hosted' and
+                        # default_channel_type = 'private|public', it is going
+                        # to be handled in the code for the time being so as not
+                        # to inconvience users to update their settings.py for
+                        # v.1.2.17 # TODO next release with settings change add
+                        # these.
+                        # try:
+                        #     slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                        #     slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                        #     slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                        #     logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                        #         str(slack_group), str(slack_thread_ts)))
+                        # except:
+                        #     logger.info(traceback.format_exc())
+                        #     logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+
+                        slack_group = None
+                        slack_group_trace_groups = None
+                        slack_group_trace_channels = None
                         try:
                             slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                            logger.info('alert_slack - slack group has been set from \'groups\' as %s' % (
+                                str(slack_group)))
                             slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
-                            # In terms of the generated Slack URLS for threads the
-                            # timestamps have no dots e.g.:
-                            # https://<an_org>.slack.com/archives/<a_channel>/p1543994173000700
-                            # However in terms of the sc.api_call the thread_ts
-                            # needs the format declared in the dict response e.g.
-                            # u'ts': u'1543994173.000700'}]} with the dot so in this
-                            # case '1543994173.000700'
                             slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
-                            logger.info('alert_slack - the slack_thread_ts is %s)' % str(slack_thread_ts))
+                            logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                                str(slack_group), str(slack_thread_ts)))
                         except:
-                            logger.info(traceback.format_exc())
-                            logger.error('error :: alert_slack - faied to determine slack_thread_ts')
-                        # Insert into Redis for Panorama to process?
-                        # No anomaly_id will be known here so it needs
-                        # metric, timestamp, slack_group, slack_thread_ts
-                        # Panorama will have to surface the anomaly_id and create a
-                        # slack_alerts table record for it:
-                        # anomaly_id, slack_group, slack_thread_ts, app, context, reason
-                        # where context is one of the following:
-                        # alerted, training_data_viewed, features_profile_created
-                        # layer_profile_created
-                        # And reason is a note e.g. daily rsync backup, the
-                        # reason being any note/s attached to the action, maybe
-                        # the profile label.  The reason is more important in
-                        # the webapp context for user notes/sharing, the reason
-                        # in the context of alerters will simply be:
-                        # reason = 'alerted'
-                        # slack_thread_updated = slack_thread_update(
-                        #    app, base_name, int(until_timestamp),
-                        #    str(slack_group), str(slack_thread_ts), str(reason))
+                            slack_group_trace_groups = traceback.format_exc()
+                            logger.info('alert_slack - failed to determine slack_group using groups')
+                        if not slack_group:
+                            # Try by channel
+                            try:
+                                slack_group = slack_file_upload['file']['channels'][0].encode('utf-8')
+                                logger.info('alert_slack - slack group has been set from \'channels\' as %s' % (
+                                    str(slack_group)))
+                            except:
+                                slack_group_trace_channels = traceback.format_exc()
+                                logger.info('alert_slack - failed to determine slack_group using channels')
+                                logger.error('error :: alert_slack - failed to determine slack_group using groups or channels')
+                                logger.error('error :: alert_slack - traceback from slack_group_trace_groups follows:')
+                                logger.error(str(slack_group_trace_groups))
+                                logger.error('error :: alert_slack - traceback from slack_group_trace_channels follows:')
+                                logger.error(str(slack_group_trace_channels))
+                                logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                        slack_group_list = None
+                        if slack_group:
+                            slack_group_list_trace_private = None
+                            slack_group_list_trace_public = None
+                            # Try private channel
+                            try:
+                                slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                                logger.info('alert_slack - slack_group_list determined from private channel and slack_group %s' % (
+                                    str(slack_group)))
+                            except:
+                                slack_group_list_trace_private = traceback.format_exc()
+                                logger.info('alert_slack - failed to determine slack_group_list using private channel')
+                            if not slack_group_list:
+                                # Try public channel
+                                try:
+                                    slack_group_list = slack_file_upload['file']['shares']['public'][slack_group]
+                                    logger.info('alert_slack - slack_group_list determined from public channel and slack_group %s' % (
+                                        str(slack_group)))
+                                except:
+                                    slack_group_list_trace_public = traceback.format_exc()
+                                    logger.info('alert_slack - failed to determine slack_group_list using public channel')
+                                    logger.info('alert_slack - failed to determine slack_group_list using private or public channel')
+                                    logger.error('error :: alert_slack - traceback from slack_group_list_trace_private follows:')
+                                    logger.error(str(slack_group_list_trace_private))
+                                    logger.error('error :: alert_slack - traceback from slack_group_list_trace_public follows:')
+                                    logger.error(str(slack_group_list_trace_public))
+                                    logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                        if slack_group_list:
+                            try:
+                                slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                                logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                                    str(slack_group), str(slack_thread_ts)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.info('alert_slack - failed to determine slack_thread_ts')
             else:
                 send_text = initial_comment + '  ::  error :: there was no graph image to upload'
                 send_message = sc.api_call(
@@ -1329,6 +1388,47 @@ def alert_slack(alert, metric, context):
             logger.info(traceback.format_exc())
             logger.error('error :: alert_slack - could not upload file')
             return False
+
+        # No anomaly_id will be known here so Panorama has to surface the
+        # anomalies table anomaly_id that matches base_name, metric_timestamp
+        # and update the slack_thread_ts field in the anomalies table db record
+        # A Redis key is added here for Panorama
+        # [base_name, metric_timestamp, slack_thread_ts]
+        if not settings.PANORAMA_ENABLED:
+            add_to_panorama = False
+        if slack_file_upload:
+            if not slack_file_upload['ok']:
+                add_to_panorama = False
+        else:
+            add_to_panorama = False
+        if not slack_thread_updates:
+            add_to_panorama = False
+        if float(slack_thread_ts) == 0:
+            add_to_panorama = False
+        if add_to_panorama:
+            REDIS_ALERTER_CONN = None
+            try:
+                if settings.REDIS_PASSWORD:
+                    REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            except:
+                logger.error('error :: alert_slack - redis connection failed')
+            metric_timestamp = int(metric[2])
+            cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+            cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+            try:
+                REDIS_ALERTER_CONN.setex(
+                    cache_key, 86400,
+                    str(cache_key_value))
+                logger.info(
+                    'added Panorama slack_thread_ts Redis key - %s - %s' %
+                    (cache_key, str(cache_key_value)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error(
+                    'error :: failed to add Panorama slack_thread_ts Redis key - %s - %s' %
+                    (cache_key, str(cache_key_value)))
 
 
 def trigger_alert(alert, metric, context):

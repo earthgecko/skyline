@@ -301,7 +301,14 @@ def remove_work_list_from_redis_set(learn_metric_list):
     logger = logging.getLogger(skyline_app_logger)
     work_set = 'ionosphere.learn.work'
     try:
-        redis_conn.srem(work_set, learn_metric_list)
+        # @modified 20190412 - Task #2824: Test redis-py upgrade
+        #                      Task #2926: Update dependencies
+        # redis-py 3.x only accepts user data as bytes, strings or
+        # numbers (ints, longs and floats).  All 2.X users should
+        # make sure that the keys and values they pass into redis-py
+        # are either bytes, strings or numbers.  Added cache_key_value
+        # redis_conn.srem(work_set, learn_metric_list)
+        redis_conn.srem(work_set, str(learn_metric_list))
         logger.info('learn :: removed work item - %s - from Redis set - %s' % (str(learn_metric_list), work_set))
     except:
         logger.error(traceback.format_exc())
@@ -1407,7 +1414,11 @@ def ionosphere_learn(timestamp):
                 # @added 20170129 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
                 if do_not_learn:
                     fp_learn = False
-                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn)
+                # @modified 20190503 - Branch #2646: slack
+                # Added slack_ionosphere_job
+                slack_ionosphere_job = str(work)
+                # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn)
+                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: %s :: failed to create a features profile' % profile_context)

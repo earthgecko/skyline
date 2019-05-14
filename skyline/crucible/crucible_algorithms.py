@@ -452,17 +452,30 @@ def run_algorithms(
     triggered_algorithms = []
     anomalous = False
 
+    check_algorithms = []
     if str(algorithms) == "['all']":
         if skyline_app == 'analyzer':
             check_algorithms = ALGORITHMS
+            logger.info('check_algorithms for analyzer - %s' % (str(check_algorithms)))
         if skyline_app == 'mirage':
             check_algorithms = MIRAGE_ALGORITHMS
+            logger.info('check_algorithms for mirage - %s' % (str(check_algorithms)))
         if skyline_app == 'boundary':
             check_algorithms = algorithms
+            logger.info('check_algorithms for boundary - %s' % (str(check_algorithms)))
         if skyline_app == 'crucible':
-            check_algorithms = ALGORITHMS.append('detect_drop_off_cliff')
+            ALGORITHMS.append('detect_drop_off_cliff')
+            check_algorithms = ALGORITHMS
+            logger.info('check_algorithms for crucible - %s' % (str(check_algorithms)))
     else:
         check_algorithms = algorithms
+        logger.info('check_algorithms specified - %s' % (str(check_algorithms)))
+
+    if not check_algorithms:
+        logger.info('check_algorithms unknown - %s' % (str(check_algorithms)))
+        ALGORITHMS.append('detect_drop_off_cliff')
+        check_algorithms = ALGORITHMS
+        logger.info('check_algorithms - %s' % (str(check_algorithms)))
 
     logger.info('checking algorithms - %s' % (str(check_algorithms)))
 

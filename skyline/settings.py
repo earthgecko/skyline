@@ -287,6 +287,18 @@ SLACK_ENABLED = False
 Analyzer settings
 """
 
+ANALYZER_ENABLED = True
+"""
+:var ANALYZER_ENABLED: This enables analysis via Analyzer.  For ADVANCED
+    configurations only.
+    If this is set to False, the Analyzer process can still be started and will
+    process the metrics in the pipeline but it will NOT analyse them, therefore
+    there will be no alerting, no feeding Mirage, etc.  Analyzer will simply run
+    as if there are 0 metrcis.  This allows for an advanced modular set up for
+    running multiple distributed Skyline instance.
+:vartype ANALYZER_ENABLED: boolean
+"""
+
 ANOMALY_DUMP = 'webapp/static/dump/anomalies.json'
 """
 :var ANOMALY_DUMP: This is the location the Skyline agent will write the
@@ -620,7 +632,20 @@ elements.
 """
 
 # Each alert module requires additional information.
-SMTP_OPTS = {'sender': 'skyline@your_domain.com', 'recipients': {'skyline': ['you@your_domain.com', 'them@your_domain.com'], 'skyline_test.alerters.test': ['you@your_domain.com'], }, 'default_recipient': ['you@your_domain.com'], 'embed-images': True}
+SMTP_OPTS = {
+    # This specifies the sender of email alerts.
+    'sender': 'skyline@your_domain.com',
+    # recipients is a dictionary mapping metric names
+    # (exactly matching those listed in ALERTS) to an array of e-mail addresses
+    'recipients': {
+        'skyline': ['you@your_domain.com', 'them@your_domain.com'],
+        'skyline_test.alerters.test': ['you@your_domain.com'],
+    },
+    # This is the default recipient which acts as a catchall for alert tuples
+    # that do not have a matching namespace defined in recipients
+    'default_recipient': ['you@your_domain.com'],
+    'embed-images': True,
+}
 """
 :var SMTP_OPTS: Your SMTP settings.
 :vartype SMTP_OPTS: dictionary
@@ -639,6 +664,7 @@ HIPCHAT_OPTS = {
     'rooms': {
         'skyline': (12345,),
         'skyline_test.alerters.test': (12345,),
+        'horizon.udp.test': (12345,),
     },
     # Background color of hipchat messages
     # (One of 'yellow', 'red', 'green', 'purple', 'gray', or 'random'.)
@@ -651,7 +677,36 @@ HIPCHAT_OPTS = {
 HipChat alerts require python-simple-hipchat
 """
 
-SLACK_OPTS = {'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'channels': {'skyline': ('#general',), 'skyline_test.alerters.test': ('#general',), }, 'icon_emoji': ':chart_with_upwards_trend:'}
+SLACK_OPTS = {
+    # Bot User OAuth Access Token
+    'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token',
+    # list of slack channels to notify about each anomaly
+    # (similar to SMTP_OPTS['recipients'])
+    # channel names - you can either pass the channel name (#general) or encoded
+    # ID (C024BE91L)
+    'channels': {
+        'skyline': ('#skyline',),
+        'skyline_test.alerters.test': ('#skyline',),
+        'horizon.udp.test': ('#skyline',),
+    },
+    'icon_emoji': ':chart_with_upwards_trend:',
+    # Your default slack Skyline channel name e.g. '#skyline'
+    'default_channel': 'YOUR_default_slack_channel',
+    # Your default slack Skyline channel id e.g. 'C0XXXXXX'
+    'default_channel_id': 'YOUR_default_slack_channel_id',
+    # Whether to update slack message threads on any of the below events
+    'thread_updates': True,
+    # You can disable or enable each message_on event individually
+    'message_on_training_data_viewed': True,
+    'message_on_training_data_viewed_reaction_emoji': 'eyes',
+    'message_on_features_profile_created': True,
+    'message_on_features_profile_created_reaction_emoji': 'thumbsup',
+    'message_on_features_profile_learnt': True,
+    'message_on_features_profile_learnt_reaction_emoji': 'heavy_check_mark',
+    'message_on_features_profile_disabled': True,
+    'message_on_features_profile_disabled_reaction_emoji': 'x',
+    'message_on_validated_features_profiles': True,
+}
 """
 :var SLACK_OPTS: Your slack settings.
 :vartype SLACK_OPTS: dictionary
@@ -1018,6 +1073,39 @@ settings block.
 
 .. warning:: Not recommended from production, will make a LOT of data files in
     the :mod:`settings.CRUCIBLE_DATA_FOLDER`
+"""
+
+MIRAGE_PERIODIC_CHECK = True
+"""
+:var MIRAGE_PERIODIC_CHECK: This enables Mirage to periodically check metrics
+    matching the namespaces in :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
+    every :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL`.  Mirage should only
+    be configured to periodically analyse key metrics.  For further in depth
+    details regarding Mirage periodic check and their impact, please see the
+    Mirage Periodic Checks documentation at:
+    https://earthgecko-skyline.readthedocs.io/en/latest/mirage.html#periodic-checks
+:vartype MIRAGE_PERIODIC_CHECK: boolean
+"""
+
+MIRAGE_PERIODIC_CHECK_INTERVAL = 3600
+"""
+:var MIRAGE_PERIODIC_CHECK_INTERVAL: This is the interval in seconds at which
+    Mirage should analyse metrics matching the namespaces in
+    :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
+:vartype MIRAGE_PERIODIC_CHECK_INTERVAL: int
+"""
+
+MIRAGE_PERIODIC_CHECK_NAMESPACES = [
+    # Check these Mirage metric namespaces periodically with Mirage
+]
+"""
+:var MIRAGE_PERIODIC_CHECK_NAMESPACES: Mirage metric namespaces to periodically
+    check with Mirage, even if Analyzer does not find them anomalous, Analyzer
+    will ensure that these Mirage metric namespaces are analyzed by Mirage every
+    :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL` seconds.  This works in the
+    same way that :mod:`settings.SKIP_LIST` does, it matches in the string or
+    the dotted namespace elements.
+:vartype MIRAGE_PERIODIC_CHECK_NAMESPACES: list
 """
 
 """

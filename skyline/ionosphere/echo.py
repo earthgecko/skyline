@@ -241,8 +241,23 @@ def ionosphere_echo(base_name, mirage_full_duration):
         # features profiles if the fp has been validated
         if row['validated'] == 0:
             continue
+
         if row['full_duration'] == int(mirage_full_duration):
             fp_id = row['id']
+            # @added 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            #                   Feature #1960: ionosphere_layers
+            # Any features profiles that were created before the introduction of
+            # ionosphere_layers will not have a mirage.redis.24h.json file as the
+            # creation of these resources in the training_data dir was only added at
+            # that point, so they are excluded.  Less than 20170307 1488844800 excl.
+            # @modified 20190508 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
+            #                      Feature #1960: ionosphere_layers
+            # Increased the date as some on the cusp were still erroring, move
+            # forward 2 days to 20170309
+            # if int(row['anomaly_timestamp']) < 1488844800:
+            if int(row['anomaly_timestamp']) < 1489017600:
+                logger.info('ionosphere_echo :: skipping fp id %s as predates having a mirage.redis json file' % str(fp_id))
+                continue
             echo_enabled_mirage_fp_ids.append(fp_id)
 
     echo_enabled_mirage_fp_ids_count = len(echo_enabled_mirage_fp_ids)
@@ -270,6 +285,21 @@ def ionosphere_echo(base_name, mirage_full_duration):
     echo_create_fd_fp_for_count = len(echo_create_fd_fp_for)
     logger.info('ionosphere_echo :: %s FULL_DURATION features profiles to be created for %s' % (str(echo_create_fd_fp_for_count), base_name))
     echo_created_fp_count = 0
+
+    # @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+    #                   Feature #2484: FULL_DURATION feature profiles
+    # Rate limit the creation of ionosphere_echo FULL_DURATION features profiles
+    # this only effects managing the creation of lots of features profiles if
+    # Ionosphere echo is enabled on a Skyline instance with lots of existing
+    # features profiles for Mirage metrics.  Only create 5 FULL_DURATION
+    # features profiles from the latest Mirage based features profiles, which
+    # takes around 10 seconds
+    if echo_create_fd_fp_for_count > 5:
+        logger.info('ionosphere_echo :: rate limiting and only creating the 5 least FULL_DURATION features profiles for %s' % (base_name))
+        # Reverse, newest first, using slicing to produce a reversed copy
+        reverse_echo_create_fd_fp_for = echo_create_fd_fp_for[::-1]
+        rate_limit_echo_create_fd_fp_for = reverse_echo_create_fd_fp_for[0:5]
+        echo_create_fd_fp_for = rate_limit_echo_create_fd_fp_for
 
     last_created_fp = int(time())
     for mirage_fp_id in echo_create_fd_fp_for:
@@ -390,6 +420,7 @@ def ionosphere_echo(base_name, mirage_full_duration):
             calculated_feature_file_found = True
             fp_csv = calculated_feature_file
             logger.info('ionosphere_echo :: calculated features file is available - %s' % (calculated_feature_file))
+
         echo_json_file = '%s.mirage.redis.%sh.json' % (base_name, str(full_duration_in_hours))
         if not calculated_feature_file_found:
             logger.info('ionosphere_echo :: calculating features from mirage.redis data ts json - %s' % (echo_json_file))
@@ -411,9 +442,17 @@ def ionosphere_echo(base_name, mirage_full_duration):
 
         # Create the new settings.FULL_DURATION features profile
         ionosphere_job = 'learn_fp_human'
+
+        # @added 20190503 - Branch #2646: slack
+        # Added slack_ionosphere_job
+        slack_ionosphere_job = ionosphere_job
+
         fp_learn = False
         try:
-            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn)
+            # @modified 20190503 - Branch #2646: slack
+            # Added slack_ionosphere_job
+            # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn)
+            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: ionosphere_echo :: failed to create a settings.FULL_DURATION features profile from fp_id %s for %s' % (str(mirage_fp_id), base_name))

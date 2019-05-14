@@ -14,9 +14,16 @@ import traceback
 from datetime import datetime
 
 from redis import StrictRedis
+# @modified 20190503 - Branch #2646: slack - linting
+# from sqlalchemy import (
+#     create_engine, Column, Table, Integer, String, MetaData, DateTime)
 from sqlalchemy import (
-    create_engine, Column, Table, Integer, String, MetaData, DateTime)
-from sqlalchemy.dialects.mysql import DOUBLE, TINYINT
+    Column, Table, Integer, MetaData)
+
+# @modified 20190503 - Branch #2646: slack - linting
+# from sqlalchemy.dialects.mysql import DOUBLE, TINYINT
+from sqlalchemy.dialects.mysql import DOUBLE
+
 from sqlalchemy.sql import select
 # import json
 from tsfresh import __version__ as tsfresh_version
@@ -30,7 +37,12 @@ from tsfresh_feature_names import TSFRESH_FEATURES
 from database import (
     get_engine, ionosphere_table_meta, metrics_table_meta,
     # @added 20180414 - Branch #2270: luminosity
-    luminosity_table_meta)
+    luminosity_table_meta,
+    # @added 20190501 - Branch #2646: slack
+    anomalies_table_meta,
+)
+# @added 20190502 - Branch #2646: slack
+from slack_functions import slack_post_message, slack_post_reaction
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -176,7 +188,10 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
     return use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin
 
 
-def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn):
+# @modified 20190503 - Branch #2646: slack
+# Added slack_ionosphere_job
+#def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn):
+def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn, slack_ionosphere_job):
     """
     Add a features_profile to the Skyline ionosphere database table.
 
@@ -194,6 +209,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         human generated features profile, 0 being an original human generated
         features profile.
     :param fp_learn: Whether Ionosphere should learn at use_full_duration_days
+    :param slack_ionosphere_job: The originating ionosphere_job name
     :type current_skyline_app: str
     :type requested_timestamp: int
     :type data_for_metric: str
@@ -202,6 +218,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     :type fp_parent_id: int
     :type fp_generation: int
     :type fp_learn: boolean
+    :type slack_ionosphere_job: str
     :return: fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc
     :rtype: str, boolean, boolean, str, str
 
@@ -898,6 +915,210 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     else:
         current_logger.error('error :: create_features_profile :: fp_id - %s - training data not copied to %s' % (str(new_fp_id), ts_features_profile_dir))
 
+    # @added 20190501 - Branch #2646: slack
+    try:
+        SLACK_ENABLED = settings.SLACK_ENABLED
+    except:
+        SLACK_ENABLED = False
+    try:
+        slack_thread_updates = settings.SLACK_OPTS['thread_updates']
+    except:
+        slack_thread_updates = False
+    try:
+        message_on_features_profile_created = settings.SLACK_OPTS['message_on_features_profile_created']
+    except:
+        message_on_features_profile_created = False
+    try:
+        message_on_features_profile_learnt = settings.SLACK_OPTS['message_on_features_profile_learnt']
+    except:
+        message_on_features_profile_learnt = False
+    update_slack_thread = False
+    if context == 'training_data':
+        if echo_fp_value == 0 and slack_thread_updates and SLACK_ENABLED:
+            update_slack_thread = True
+        if not message_on_features_profile_created:
+            update_slack_thread = False
+    if context == 'ionosphere_learn':
+        if echo_fp_value == 0 and slack_thread_updates and SLACK_ENABLED:
+            update_slack_thread = True
+        if not message_on_features_profile_learnt:
+            update_slack_thread = False
+    if update_slack_thread:
+        current_logger.info('create_features_profile :: updating slack')
+        # Determine the anomaly id and then the slack_thread_ts
+        try:
+            anomalies_table, fail_msg, trace = anomalies_table_meta(current_skyline_app, engine)
+            current_logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            current_logger.error('%s' % trace)
+            fail_msg = 'error :: create_features_profile :: failed to get anomalies_table meta'
+            current_logger.error('%s' % fail_msg)
+        anomaly_id = None
+        slack_thread_ts = 0
+        try:
+            connection = engine.connect()
+            stmt = select([anomalies_table]).\
+                where(anomalies_table.c.metric_id == metrics_id).\
+                where(anomalies_table.c.anomaly_timestamp == int(use_anomaly_timestamp))
+            result = connection.execute(stmt)
+            for row in result:
+                anomaly_id = row['id']
+                slack_thread_ts = row['slack_thread_ts']
+                break
+            connection.close()
+            current_logger.info('create_features_profile :: determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
+                str(anomaly_id), str(metrics_id),
+                str(use_anomaly_timestamp), str(slack_thread_ts)))
+        except:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            fail_msg = 'error :: create_features_profile :: could not determine id of anomaly from DB for metric id %s at anomaly_timestamp %s' % (
+                str(metrics_id), str(use_anomaly_timestamp))
+            current_logger.error('%s' % fail_msg)
+        try:
+            if float(slack_thread_ts) == 0:
+                slack_thread_ts = None
+        except:
+            slack_thread_ts = None
+
+        try:
+            ionosphere_link = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (
+                settings.SKYLINE_URL, str(new_fp_id), base_name)
+        except:
+            trace = traceback.format_exc()
+            current_logger.error(traceback.format_exc())
+            current_logger.error('failed to interpolated the ionosphere_link')
+            ionosphere_link = 'URL link failed to build'
+
+        if not fp_learn:
+            message = '*TRAINED - not anomalous* - features profile id %s was created for %s via %s - %s' % (
+                str(new_fp_id), base_name, current_skyline_app, ionosphere_link)
+        else:
+            message = '*TRAINED - not anomalous* - features profile id %s was created for %s via %s - %s AND set to *LEARN* at %s days' % (
+                str(new_fp_id), base_name, current_skyline_app, ionosphere_link,
+                str(learn_full_duration_days))
+
+        if context == 'ionosphere_learn':
+            if slack_ionosphere_job != 'learn_fp_human':
+                message = '*LEARNT - not anomalous* - features profile id %s was created for %s via %s - %s' % (
+                    str(new_fp_id), base_name, current_skyline_app, ionosphere_link)
+            else:
+                message = '*LEARNING - not anomalous at %s days* - features profile id %s was created using %s days data for %s via %s - %s' % (
+                    str(learn_full_duration_days), str(new_fp_id),
+                    str(learn_full_duration_days), base_name,
+                    current_skyline_app, ionosphere_link)
+
+        channel = None
+        try:
+            channel = settings.SLACK_OPTS['default_channel']
+            channel_id = settings.SLACK_OPTS['default_channel_id']
+        except:
+            channel = False
+            channel_id = False
+            fail_msg = 'error :: create_features_profile :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart ionosphere and webapp'
+            current_logger.error('%s' % fail_msg)
+        throw_exception_on_default_channel = False
+        if channel == 'YOUR_default_slack_channel':
+            throw_exception_on_default_channel = True
+            channel = False
+        if channel_id == 'YOUR_default_slack_channel_id':
+            throw_exception_on_default_channel = True
+            channel_id = False
+        if throw_exception_on_default_channel:
+            fail_msg = 'error :: create_features_profile :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
+            current_logger.error('%s' % fail_msg)
+
+        slack_response = {'ok': False}
+        if channel:
+            try:
+                slack_response = slack_post_message(current_skyline_app, channel, str(slack_thread_ts), message)
+            except:
+                trace = traceback.format_exc()
+                current_logger.error(trace)
+                fail_msg = 'error :: create_features_profile :: failed to slack_post_message'
+                current_logger.error('%s' % fail_msg)
+            if not slack_response['ok']:
+                fail_msg = 'error :: create_features_profile :: failed to slack_post_message, slack dict output follows'
+                current_logger.error('%s' % fail_msg)
+                current_logger.error('%s' % str(slack_response))
+            else:
+                current_logger.info('create_features_profile :: posted slack update to %s, thread %s' % (
+                    channel, str(slack_thread_ts)))
+        if channel_id:
+            if slack_thread_ts:
+                try:
+                    reaction_emoji = settings.SLACK_OPTS['message_on_features_profile_created_reaction_emoji']
+                except:
+                    reaction_emoji = 'thumbsup'
+                slack_response = {'ok': False}
+                try:
+                    slack_response = slack_post_reaction(current_skyline_app, channel_id, str(slack_thread_ts), reaction_emoji)
+                except:
+                    trace = traceback.format_exc()
+                    current_logger.error(trace)
+                    fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction'
+                    current_logger.error('%s' % fail_msg)
+                if not slack_response['ok']:
+                    if str(slack_response['error']) == 'already_reacted':
+                        current_logger.info(
+                            'slack_post_reaction :: already_reacted to channel %s, thread %s, ok' % (
+                                channel, str(slack_thread_ts)))
+                    else:
+                        fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction, slack dict output follows'
+                        current_logger.error('%s' % fail_msg)
+                        current_logger.error('%s' % str(slack_response))
+                if context == 'ionosphere_learn':
+                    try:
+                        reaction_emoji = settings.SLACK_OPTS['message_on_features_profile_learnt_reaction_emoji']
+                    except:
+                        reaction_emoji = 'heavy_check_mark'
+                    slack_response = {'ok': False}
+                    try:
+                        slack_response = slack_post_reaction(current_skyline_app, channel_id, str(slack_thread_ts), reaction_emoji)
+                    except:
+                        trace = traceback.format_exc()
+                        current_logger.error(trace)
+                        fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction'
+                        current_logger.error('%s' % fail_msg)
+                    if not slack_response['ok']:
+                        if str(slack_response['error']) == 'already_reacted':
+                            current_logger.info(
+                                'slack_post_reaction :: already_reacted to channel %s, thread %s, ok' % (
+                                    channel, str(slack_thread_ts)))
+                        else:
+                            fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction, slack dict output follows'
+                            current_logger.error('%s' % fail_msg)
+                            current_logger.error('%s' % str(slack_response))
+
+            if context == 'ionosphere_learn':
+                try:
+                    validate_link = '%s/ionosphere?fp_validate=true&metric=%s&validated_equals=false&limit=0&order=DESC' % (
+                        settings.SKYLINE_URL, base_name)
+                except:
+                    trace = traceback.format_exc()
+                    current_logger.error(traceback.format_exc())
+                    current_logger.error('failed to interpolated the validate_link')
+                    validate_link = 'validate URL link failed to build'
+                message = '*Skyline Ionosphere LEARNT* - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
+                    str(new_fp_id), base_name, current_skyline_app, ionosphere_link, validate_link)
+                if slack_ionosphere_job != 'learn_fp_human':
+                    slack_response = {'ok': False}
+                    try:
+                        slack_response = slack_post_message(current_skyline_app, channel, None, message)
+                    except:
+                        trace = traceback.format_exc()
+                        current_logger.error(trace)
+                        fail_msg = 'error :: create_features_profile :: failed to slack_post_message'
+                        current_logger.error('%s' % fail_msg)
+                    if not slack_response['ok']:
+                        fail_msg = 'error :: create_features_profile :: failed to slack_post_message, slack dict output follows'
+                        current_logger.error('%s' % fail_msg)
+                        current_logger.error('%s' % str(slack_response))
+                    else:
+                        current_logger.info('create_features_profile :: posted slack update to %s, thread %s' % (
+                            channel, str(slack_thread_ts)))
+
     current_logger.info('create_features_profile :: disposing of any engine')
     try:
         if engine:
@@ -952,7 +1173,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
                 else:
                     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])
+                # @modified 20190414 - Task #2824: Test redis-py upgrade
+                #                      Task #2926: Update dependencies
+                # redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])
+                redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)]))
             except:
                 current_logger.error(traceback.format_exc())
                 current_logger.error(

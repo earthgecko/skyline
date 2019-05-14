@@ -47,9 +47,12 @@ from tsfresh.feature_extraction import (
 
 import settings
 from skyline_functions import (
-    fail_check, mysql_select, write_data_to_file, send_graphite_metric, mkdir_p,
+    fail_check, mysql_select, write_data_to_file, send_graphite_metric,
     # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
-    get_memcache_metric_object)
+    # @modified 20190408 - Feature #2484: FULL_DURATION feature profiles
+    # Moved to common_functions
+    # get_memcache_metric_object)
+    mkdir_p)
 
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
@@ -59,7 +62,11 @@ from features_profile import calculate_features_profile
 # @modified 20170107 - Feature #1844: ionosphere_matched DB table
 # Added ionosphere_matched_meta
 from database import (
-    get_engine, ionosphere_table_meta, metrics_table_meta,
+    get_engine, ionosphere_table_meta,
+    # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
+    # @modified 20190408 - Feature #2484: FULL_DURATION feature profiles
+    # Moved to common_functions
+    # metrics_table_meta,
     ionosphere_matched_table_meta)
 from tsfresh_feature_names import TSFRESH_FEATURES
 
@@ -551,7 +558,7 @@ class Ionosphere(Thread):
         # learn(timestamp)
         ionosphere_learn(timestamp)
 
-    # @added 20190326 - Feature #2484
+    # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
     def process_ionosphere_echo(self, i, metric_check_file):
         """
         Spawn a process_ionosphere_echo check to create features profiles at
@@ -603,6 +610,26 @@ class Ionosphere(Thread):
         if not metric:
             logger.error('error :: process_ionosphere_echo failed to load metric variable from check file - %s' % (metric_check_file))
             return
+
+        # @added 20190413 - Feature #2484: FULL_DURATION feature profiles
+        # Only process if it is an ionosphere enabled metric
+        try:
+            ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+            ionosphere_unique_metrics = []
+        if ionosphere_unique_metrics:
+            # @modified 20190413 - Bug #2942: process_ionosphere_echo metric mismatch
+            #                      Feature #2484: FULL_DURATION feature profiles
+            # Matching bug for not in list comprehension it must be an absolute
+            # match
+            # if not metric in ionosphere_unique_metrics:
+            metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric))
+            if not metric_name in ionosphere_unique_metrics:
+                logger.info('process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping %s' % metric)
+                return
+
         full_duration = None
         try:
             # metric_vars.full_duration
@@ -620,14 +647,21 @@ class Ionosphere(Thread):
         logger.info('process_ionosphere_echo :: processing - %s' % (metric))
         ionosphere_echo(metric, full_duration)
 
-    def spin_process(self, i, metric_check_file):
+    # @modified 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+    #                      Feature #2484: FULL_DURATION feature profiles
+    # Added the ionosphere_busy parameter
+    # def spin_process(self, i, metric_check_file):
+    def spin_process(self, i, metric_check_file, ionosphere_busy):
         """
         Assign an anomalous metric to check against features profiles.
 
         :param i: python process id
         :param metric_check_file: full path to the metric check file
+        :param ionosphere_busy: whether to Ionosphere manage and alternate
+            between normal Ionosphere and echo analysis
         :type i: object
         :type metric_check_file: str
+        :type ionosphere_busy: boolen
         :return: int
         :rtype: int or boolean
 
@@ -656,10 +690,9 @@ class Ionosphere(Thread):
         logger.info('child_process_pid - %s' % str(child_process_pid))
 
         try:
-            max_ionosphere_runtime = settings.IONOSPHERE_MAX_RUNTIME
+            ionosphere_max_runtime = settings.IONOSPHERE_MAX_RUNTIME
         except:
-            max_ionosphere_runtime = 120
-
+            ionosphere_max_runtime = 120
 
         if settings.ENABLE_IONOSPHERE_DEBUG:
             logger.info('debug :: processing metric check - %s' % metric_check_file)
@@ -669,6 +702,7 @@ class Ionosphere(Thread):
             return
 
         engine = None
+        anomalous_timeseries = False
 
         check_file_name = os.path.basename(str(metric_check_file))
         if settings.ENABLE_IONOSPHERE_DEBUG:
@@ -719,8 +753,16 @@ class Ionosphere(Thread):
             return
         try:
             check_process_start = int(time())
+            # @modified 20190412 - Task #2824: Test redis-py upgrade
+            #                      Task #2926: Update dependencies
+            # redis-py 3.x only accepts user data as bytes, strings or
+            # numbers (ints, longs and floats).  All 2.X users should
+            # make sure that the keys and values they pass into redis-py
+            # are either bytes, strings or numbers.  Added cache_key_value
+            # self.redis_conn.setex(
+                # ionosphere_check_cache_key, 300, [check_process_start])
             self.redis_conn.setex(
-                ionosphere_check_cache_key, 300, [check_process_start])
+                ionosphere_check_cache_key, 300, check_process_start)
             logger.info(
                 'added Redis check key - %s' % (ionosphere_check_cache_key))
         except:
@@ -986,20 +1028,32 @@ class Ionosphere(Thread):
         # Moved get_metrics_db_object block to common_functions.py
         metrics_db_object = get_metrics_db_object(base_name)
         if metrics_db_object:
+            metrics_id = None
             try:
                 metrics_id = int(metrics_db_object['id'])
-                metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
+            except:
+                # @added 20190509 - Bug #2984: Ionosphere - could not determine values from metrics_db_object
+                # Added a traceback here to debug an issue
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not determine id from metrics_db_object for %s' % base_name)
+                metrics_id = None
+                metric_ionosphere_enabled = None
+                training_metric = True
+            if metrics_id:
+                # @modified 20190510 - Bug #2984: Ionosphere - could not determine values from metrics_db_object
+                # metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
+                metric_ionosphere_enabled = None
+                try:
+                    metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not determine ionosphere_enabled from metrics_db_object for %s' % base_name)
                 if metric_ionosphere_enabled is not None:
                     training_metric = False
                 else:
                     training_metric = True
                 if metric_ionosphere_enabled == 1:
                     training_metric = False
-            except:
-                logger.error('error :: could not determine values from metrics_db_object for %s' % base_name)
-                metrics_id = None
-                metric_ionosphere_enabled = None
-                training_metric = True
         else:
             metrics_id = None
             metric_ionosphere_enabled = None
@@ -1456,6 +1510,80 @@ class Ionosphere(Thread):
                 echo_enabled = False
             if echo_enabled:
                 echo_check = True
+
+        # @added 20190403 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+        #                   Feature #2484: FULL_DURATION feature profiles
+        # If there are more than 4 metric check files, alternate between normal
+        # Ionosphere Mirage features profile checks and Ionosphere echo features
+        # profile checks.
+        if echo_check:
+            if ionosphere_busy:
+                # Check the ionosphere_echo metric Redis keys to see which check
+                # to run, ionosphere or ionosphere_echo.  If Ionosphere is busy,
+                # Ionosphere will alternate between normal Ionosphere features
+                # profiles (Mirage duration) and Ionosphere echo features
+                # profiles (FULL_DURATION) comparison.
+                echo_ionosphere_check_cache_key = 'ionosphere_echo.ionosphere.check.%s' % base_name
+                echo_ionosphere_check_key = False
+                try:
+                    echo_ionosphere_check_key = self.redis_conn.get(echo_ionosphere_check_cache_key)
+                except Exception as e:
+                    logger.error('error :: could not query Redis for cache_key: %s' % e)
+                echo_ionosphere_echo_check_cache_key = 'ionosphere_echo.echo.check.%s' % base_name
+                echo_ionosphere_echo_check_key = False
+                try:
+                    echo_ionosphere_echo_check_key = self.redis_conn.get(echo_ionosphere_echo_check_cache_key)
+                except Exception as e:
+                    logger.error('error :: could not query Redis for cache_key: %s' % e)
+
+                create_ionosphere_echo_check_key = False
+                remove_ionosphere_echo_check_key = False
+                # If neither the ionosphere or the ionosphere_echo key exist do
+                # only check ionosphere
+                if not echo_ionosphere_check_key:
+                    if not echo_ionosphere_echo_check_key:
+                        echo_check = False
+                        logger.info('ionosphere_busy - only running normal Mirage feature profiles checks, skipping ionosphere_echo checks')
+                        create_ionosphere_echo_check_key = echo_ionosphere_check_cache_key
+                # If the ionosphere_echo key exists only check ionosphere
+                if echo_ionosphere_echo_check_key:
+                    echo_check = False
+                    logger.info('ionosphere_busy - only running normal Mirage feature profiles checks, skipping ionosphere_echo checks')
+                    create_ionosphere_echo_check_key = echo_ionosphere_check_cache_key
+                    remove_ionosphere_echo_check_key = echo_ionosphere_echo_check_cache_key
+                # If ionosphere_echo key exists only check ionosphere
+                if echo_ionosphere_check_key:
+                    echo_check = True
+                    logger.info('ionosphere_busy - skipping the normal Mirage feature profiles checks as run last time and running ionosphere_echo checks this time')
+                    # Remove the Mirage features profiles from the
+                    fp_ids = []
+                    logger.info('ionosphere_busy - removed %s Mirage feature profile ids from fp_ids' % str(fp_count))
+                    create_ionosphere_echo_check_key = echo_ionosphere_echo_check_cache_key
+                    remove_ionosphere_echo_check_key = echo_ionosphere_check_cache_key
+                if remove_ionosphere_echo_check_key:
+                    try:
+                        self.redis_conn.delete(remove_ionosphere_echo_check_key)
+                        logger.info(
+                            'deleted Redis check key - %s' % (remove_ionosphere_echo_check_key))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error(
+                            'error :: failed to delete Redis check key - %s' % (remove_ionosphere_echo_check_key))
+                if create_ionosphere_echo_check_key:
+                    try:
+                        key_created_at = int(time())
+                        self.redis_conn.setex(
+                            # @modified 20190412 - Task #2824: Test redis-py upgrade
+                            #                      Task #2926: Update dependencies
+                            # create_ionosphere_echo_check_key, 300, [key_created_at])
+                            create_ionosphere_echo_check_key, 300, key_created_at)
+                        logger.info(
+                            'created Redis check key - %s' % (create_ionosphere_echo_check_key))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error(
+                            'error :: failed to create Redis check key - %s' % (create_ionosphere_echo_check_key))
+
         if echo_check:
             try:
                 if fps_db_object:
@@ -1491,6 +1619,8 @@ class Ionosphere(Thread):
                         try:
                             echo_calculated_features = get_calculated_features(echo_calculated_feature_file)
                         except:
+                            # 20190412 - just for debug
+                            logger.error(traceback.format_exc())
                             logger.error('error :: ionosphere_echo_check no echo_calculated_features were determined')
                             echo_calculated_features = False
             except:
@@ -1507,6 +1637,18 @@ class Ionosphere(Thread):
                     if engine:
                         engine_disposal(engine)
                     return False
+
+                # @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                #                   Feature #2484: FULL_DURATION feature profiles
+                # If the Ionosphere features profile checks are approaching the
+                # ionosphere_max_runtime, skip the remaining checks.
+                time_now_check = int(time())
+                # Allow 5 seconds for layers checks to be done
+                max_runtime_tolereance = ionosphere_max_runtime - 5
+                running_for = time_now_check - check_process_start
+                if running_for >= max_runtime_tolereance:
+                    logger.info('features profile checks have been running for %s seconds, the ionosphere_max_runtime is about to be breached, skipping remaining features profile checks' % str(running_for))
+                    break
 
                 # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
                 check_type = 'ionosphere'
@@ -1844,7 +1986,6 @@ class Ionosphere(Thread):
                             test_anomalous_timeseries = anomalous_timeseries
                             if len(test_anomalous_timeseries) > 0:
                                 anomalous_timeseries_not_defined = False
-                                ionosphere_anomalous_timeseries = test_anomalous_timeseries
                         except:
                             logger.info('anomalous_timeseries is not defined loading from anomaly json')
 
@@ -1888,7 +2029,6 @@ class Ionosphere(Thread):
                                 del timeseries_array_str
                                 if len(anomalous_timeseries) > 0:
                                     logger.info('anomalous_timeseries was populated from anomaly json %s with %s data points from for creating the minmax_anomalous_ts' % (anomaly_json, str(len(anomalous_timeseries))))
-                                    ionosphere_anomalous_timeseries = anomalous_timeseries
                                 else:
                                     logger.error('error :: anomalous_timeseries for minmax_anomalous_ts is not populated from anomaly json - %s' % anomaly_json)
                             except:
@@ -2489,7 +2629,10 @@ class Ionosphere(Thread):
                             'LEARNT :: adding work to Redis ionosphere.learn.work set - [\'%s\', \'%s\', %s, \'%s\', %s, %s] to create a learnt features profile' % (
                                 work_deadline, str(ionosphere_job), str(metric_timestamp), base_name,
                                 str(fp_id), str(current_fp_generation)))
-                        self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])
+                        # modified 20190412 - Task #2824: Test redis-py upgrade
+                        #                     Task #2926: Update dependencies
+                        # self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])
+                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)]))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
@@ -2682,20 +2825,27 @@ class Ionosphere(Thread):
                 # Only do the cache_key if not ionosphere_learn
                 if added_by != 'ionosphere_learn':
                     cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+                    # added 20190412 - Task #2824: Test redis-py upgrade
+                    #                  Task #2926: Update dependencies
+                    # Added cache_key_value
+                    cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration]
+
                     try:
                         self.redis_conn.setex(
                             cache_key, 300,
-                            [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                            # modified 20190412 - Task #2824: Test redis-py upgrade
+                            #                     Task #2926: Update dependencies
+                            # [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                            str(cache_key_value))
                         logger.info(
-                            'add Redis alert key - %s - [%s, \'%s\', %s, %s]' %
-                            (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                                str(triggered_algorithms)))
+                            'add Redis alert key - %s - %s' %
+                            (cache_key, str(cache_key_value)))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
-                            'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s]' %
+                            'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
                             (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                                str(triggered_algorithms)))
+                                str(triggered_algorithms), str(full_duration)))
 
                 # @added 20170116 - Feature #1854: Ionosphere learn
                 # Added an ionosphere_learn job for the timeseries that did not
@@ -2710,7 +2860,10 @@ class Ionosphere(Thread):
                             'adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', None, None] to make a learn features profile later' % (
                                 str(ionosphere_job), str(int(metric_timestamp)),
                                 base_name))
-                        self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
+                        # modified 20190412 - Task #2824: Test redis-py upgrade
+                        #                     Task #2926: Update dependencies
+                        #self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
+                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None]))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
@@ -3085,9 +3238,23 @@ class Ionosphere(Thread):
                 if learn_job:
                     break
 
+            # @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+            #                   Feature #2484: FULL_DURATION feature profiles
+            # Do not run an Ionosphere and echo checks on a metrics when a lot of
+            # checks are being done.  Manage the Ionosphere load and increased
+            # runtime in general that Ionosphere echo has introduced, especially
+            # when Ionosphere is issued lots of checks, if lots of metrics suddenly
+            # become anomalous.
+            metric_var_files_count = 0
+            ionosphere_busy = False
+
             if ionosphere_job:
                 metric_var_files_sorted = sorted(metric_var_files)
                 metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, str(metric_var_files_sorted[0]))
+                # @added 20190403 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                #                   Feature #2484: FULL_DURATION feature profiles
+                # Added a count of the number of checks to be done
+                metric_var_files_count = len(metric_var_files)
 
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics
@@ -3139,7 +3306,27 @@ class Ionosphere(Thread):
                     ionosphere_echo_enabled = settings.IONOSPHERE_ECHO_ENABLED
                 except:
                     ionosphere_echo_enabled = False
-                if ionosphere_echo_enabled:
+
+                # @added 20190403 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                #                   Feature #2484: FULL_DURATION feature profiles
+                # If there are more than 2 metric check files, do not run
+                # process_ionosphere_echo to create echo features profiles
+                run_process_ionosphere_echo = True
+                if metric_var_files_count > 2:
+                    run_process_ionosphere_echo = False
+                    logger.info(
+                        'not running process_ionosphere_echo as there are %s metric check files to be checked' % (
+                            str(metric_var_files_count)))
+                # If there are more than 4 metric check files set Ionosphere to
+                # busy so that Ionosphere alternates between checking the normal
+                # Ionosphere Mirage features profiles and the Ionosphere echo
+                # features profiles on subsequent checks of a metric so that
+                # when Ionosphere is busy it is not checking both sets of
+                # features profiles on every run.
+                if metric_var_files_count > 4:
+                    ionosphere_busy = True
+
+                if ionosphere_echo_enabled and run_process_ionosphere_echo:
                     # Spawn a single process_ionosphere_echo process
                     function_name = 'process_ionosphere_echo'
                     pids = []
@@ -3219,7 +3406,16 @@ class Ionosphere(Thread):
             for i in range(1, ionosphere_processes + 1):
                 if ionosphere_job:
                     try:
-                        p = Process(target=self.spin_process, args=(i, metric_check_file))
+                        # @modified 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                        #                      Feature #2484: FULL_DURATION feature profiles
+                        # Added ionosphere_busy if there are queued checks
+                        # to ensure that Ionosphere echo is rate limited if a
+                        # lot of metrics become anomalous and that Ionosphere
+                        # alternates between normal Mirage features profiles
+                        # comparisons and Ionosphere echo features profiles
+                        # during busy times.
+                        # p = Process(target=self.spin_process, args=(i, metric_check_file))
+                        p = Process(target=self.spin_process, args=(i, metric_check_file, ionosphere_busy))
                         pids.append(p)
                         pid_count += 1
                         logger.info(
@@ -3266,10 +3462,10 @@ class Ionosphere(Thread):
             # Added ionosphere_echo which takes more time
             # while time() - p_starts <= 55:
             try:
-                max_ionosphere_runtime = settings.IONOSPHERE_MAX_RUNTIME
+                ionosphere_max_runtime = settings.IONOSPHERE_MAX_RUNTIME
             except:
-                max_ionosphere_runtime = 120
-            while time() - p_starts <= max_ionosphere_runtime:
+                ionosphere_max_runtime = 120
+            while time() - p_starts <= ionosphere_max_runtime:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)

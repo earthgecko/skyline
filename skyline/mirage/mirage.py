@@ -821,6 +821,28 @@ class Mirage(Thread):
             except:
                 logger.error('error :: failed to rmtree %s' % metric_data_dir)
 
+        # @added 20190408 - Feature #2882: Mirage - periodic_check
+        # Remove the training_dir for mirage_periodic_check_metrics if not
+        # anomalous
+        if not anomalous:
+            try:
+                mirage_periodic_check_metrics = list(self.redis_conn.smembers('mirage.periodic_check.metrics'))
+            except:
+                logger.error('error :: failed to get mirage_periodic_check_metrics from Redis')
+                mirage_periodic_check_metrics = []
+            if metric in mirage_periodic_check_metrics:
+                timeseries_dir = base_name.replace('.', '/')
+                training_dir = '%s/%s/%s' % (
+                    settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
+                    str(timeseries_dir))
+                if os.path.exists(training_dir):
+                    try:
+                        rmtree(training_dir)
+                        logger.info('removed Mirage periodic check training_data dir - %s' % training_dir)
+                    except:
+                        logger.error('error :: failed to rmtree  Mirage periodic check training_dir - %s' % training_dir)
+            del mirage_periodic_check_metrics
+
     def run(self):
         """
         Called when the process intializes.
@@ -950,7 +972,7 @@ class Mirage(Thread):
                 continue
 
             """
-            Determine if any metric to analyze
+            Determine if any metric to analyze or Ionosphere alerts to be sent
             """
             while True:
 
@@ -965,22 +987,38 @@ class Mirage(Thread):
                 ionosphere_alerts_returned = False
 
                 metric_var_files = [f for f in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f))]
-                if len(metric_var_files) == 0:
+                # @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                #                      Feature #2484: FULL_DURATION feature profiles
+                # Do not pospone the Ionosphere alerts check on based on whether
+                # there are checks on not
+                # if len(metric_var_files) == 0:
+                if not ionosphere_alerts_returned:
                     # @modified 20161228 - Feature #1830: Ionosphere alerts
-                    ionosphere_alerts = []
-                    ionosphere_alerts_returned = False
                     try:
                         ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
                         ionosphere_alerts_returned = True
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to scan ionosphere.mirage.alert.* from Redis')
+                        ionosphere_alerts = []
 
                     if len(ionosphere_alerts) == 0:
                         ionosphere_alerts_returned = False
                     else:
                         logger.info('Ionosphere alert requested :: %s' % str(ionosphere_alerts))
 
+                    # @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                    #                      Feature #2484: FULL_DURATION feature profiles
+                    # Do not pospone the Ionosphere alerts check
+                    # if not ionosphere_alerts_returned:
+                    #     logger.info('sleeping no metrics...')
+                    #     sleep(10)
+
+                # @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                #                      Feature #2484: FULL_DURATION feature profiles
+                # Move this len(metric_var_files) from above and apply the
+                # appropriatte sleep
+                if len(metric_var_files) == 0:
                     if not ionosphere_alerts_returned:
                         logger.info('sleeping no metrics...')
                         sleep(10)
@@ -1208,6 +1246,11 @@ class Mirage(Thread):
             # so continue
             not_alerting_for_ionosphere = 'none'
 
+            # @added 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+            #                   Feature #2484: FULL_DURATION feature profiles
+            # Only check Ionosphere is up once per cycle
+            ionosphere_up = False
+
             for alert in settings.ALERTS:
                 # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
                 not_an_ionosphere_metric_check_done = 'none'
@@ -1219,23 +1262,29 @@ class Mirage(Thread):
                     # metrics if Ionosphere is up
                     metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
                     if metric_name in ionosphere_unique_metrics:
-
                         # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
                         if not_alerting_for_ionosphere == metric_name:
                             continue
 
-                        ionosphere_up = False
-                        try:
-                            ionosphere_up = self.redis_conn.get('ionosphere')
-                        except Exception as e:
-                            logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
+                        # @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                        #                      Feature #2484: FULL_DURATION feature profiles
+                        # Only check Ionosphere is up once per cycle
+                        # ionosphere_up = False
+                        if not ionosphere_up:
+                            try:
+                                ionosphere_up = self.redis_conn.get('ionosphere')
+                            except Exception as e:
+                                logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
                         if ionosphere_up:
-                            logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
-
-                            # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
-                            not_alerting_for_ionosphere = metric_name
-
-                            continue
+                            # @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+                            #                      Feature #2484: FULL_DURATION feature profiles
+                            # Wrapped this block up on conditional based on
+                            # ionosphere_alerts_returned
+                            if not ionosphere_alerts_returned:
+                                logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                                # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
+                                not_alerting_for_ionosphere = metric_name
+                                continue
                         else:
                             logger.error('error :: Ionosphere not report up')
                             logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
@@ -1246,8 +1295,9 @@ class Mirage(Thread):
                             # Do not log multiple times for this either
                             not_an_ionosphere_metric_check_done = metric_name
                         else:
-                            logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
-                            not_an_ionosphere_metric_check_done = metric_name
+                            if not ionosphere_alerts_returned:
+                                logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+                                not_an_ionosphere_metric_check_done = metric_name
 
                     ALERT_MATCH_PATTERN = alert[0]
                     METRIC_PATTERN = metric[1]
@@ -1268,13 +1318,21 @@ class Mirage(Thread):
                             last_alert = self.redis_conn.get(cache_key)
                             if not last_alert:
                                 if ionosphere_alerts_returned:
+                                    # @modified 20190410 - Feature #2882: Mirage - periodic_check
+                                    # Only set if not set
                                     try:
-                                        second_order_resolution_seconds = metric[3]
+                                        second_order_resolution_seconds + 1
+                                        set_second_order_resolution_seconds = False
                                     except:
-                                        logger.error(traceback.format_exc())
-                                        logger.error('error :: failed to determine full_duration from the Ionosphere alert for %s' % (metric[1]))
-                                        logger.info('using settings.FULL_DURATION - %s' % (str(settings.FULL_DURATION)))
-                                        second_order_resolution_seconds = settings.FULL_DURATION
+                                        set_second_order_resolution_seconds = True
+                                    if set_second_order_resolution_seconds:
+                                        try:
+                                            second_order_resolution_seconds = int(metric[3]) * 3600
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: failed to determine full_duration from the Ionosphere alert for %s' % (metric[1]))
+                                            logger.info('using settings.FULL_DURATION - %s' % (str(settings.FULL_DURATION)))
+                                            second_order_resolution_seconds = settings.FULL_DURATION
                                 self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
 
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)

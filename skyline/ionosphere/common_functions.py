@@ -180,8 +180,24 @@ def get_calculated_features(calculated_feature_file):
                 else:
                     feature_name = str(line[0])
                 count_id += 1
-                calc_value = float(line[1])
-                calculated_features.append([feature_name, calc_value])
+                # @modified 20190412 - Feature #2484: FULL_DURATION feature profiles
+                # This sometimes generates an error so wrapped in try with
+                # logging.
+                # calc_value = float(line[1])
+                # calculated_features.append([feature_name, calc_value])
+                try:
+                    calc_value = float(line[1])
+                    calculated_features.append([feature_name, calc_value])
+                except:
+                    # @modified 20190412 - Feature #2484: FULL_DURATION feature profiles
+                    # This logging determineed that at times no value as in empty,
+                    # is some times encountered with autocorrelation_lag values
+                    # so disabled traceback and log as info not error
+                    # logger.error(traceback.format_exc())
+                    # logger.error('failed to determine calc_value from value of - %s - for feature_name - %s' % (
+                    #     str(line[1]), str(line[0])))
+                    logger.info('get_calculated_features :: empty calc_value for feature_name - %s, not added to calculated_features' % (
+                        str(line[0])))
     return calculated_features
 
 

@@ -664,7 +664,9 @@ you need to try and be quicker next time.
 	  </div>
 
   {% endif %}
-      <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span></span> {{ for_metric }}</h4>
+<!-- # @modified 20190510 - Feature #2990: Add metrics id to relevant Ionosphere pages
+# Added the metric id -->
+      <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span></span> {{ for_metric }} with metrics id {{ metric_id }}</h4>
       {{ metric_vars }}<br>
   {% if panorama_anomaly_id != False %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>

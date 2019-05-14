@@ -101,9 +101,9 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     # The alerters did send an individual email to each recipient. This would be
     # more useful if one email was sent with the first smtp recipient being the
     # to recipient and the subsequent recipients were add in cc.
+    primary_recipient = False
+    cc_recipients = False
     if recipients:
-        primary_recipient = False
-        cc_recipients = False
         for i_recipient in recipients:
             if not primary_recipient:
                 primary_recipient = str(i_recipient)
