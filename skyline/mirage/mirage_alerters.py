@@ -1153,18 +1153,101 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                 else:
                     logger.info('alert_slack - sent slack message')
                     if slack_thread_updates:
+                        # @added 20190508 - Bug #2986: New slack messaging does not handle public channel
+                        #                   Issue #111: New slack messaging does not handle public channel
+                        # The sc.api_call 'files.upload' response which generates
+                        # slack_file_upload has a different structure depending
+                        # on whether a channel is private or public.  That also
+                        # goes for free or hosted slack too.
+                        slack_group = None
+                        slack_group_list = None
+
                         # This is basically the channel id of your channel, the
                         # name could be used so that if in future it is used or
                         # displayed in a UI
+                        # @modified 20190508 - Bug #2986: New slack messaging does not handle public channel
+                        #                      Issue #111: New slack messaging does not handle public channel
+                        # This block only works for free slack workspace private
+                        # channels.  Although this should be handled in the
+                        # SLACK_OPTS as slack_account_type: 'free|hosted' and
+                        # default_channel_type = 'private|public', it is going
+                        # to be handled in the code for the time being so as not
+                        # to inconvience users to update their settings.py for
+                        # v.1.2.17 # TODO next release with settings change add
+                        # these.
+                        # try:
+                        #     slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                        #     slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                        #     slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                        #     logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                        #         str(slack_group), str(slack_thread_ts)))
+                        # except:
+                        #     logger.info(traceback.format_exc())
+                        #     logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                        slack_group = None
+                        slack_group_trace_groups = None
+                        slack_group_trace_channels = None
                         try:
                             slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                            logger.info('alert_slack - slack group has been set from \'groups\' as %s' % (
+                                str(slack_group)))
                             slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
                             slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
                             logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
                                 str(slack_group), str(slack_thread_ts)))
                         except:
-                            logger.info(traceback.format_exc())
-                            logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                            slack_group_trace_groups = traceback.format_exc()
+                            logger.info('alert_slack - failed to determine slack_group using groups')
+                        if not slack_group:
+                            # Try by channel
+                            try:
+                                slack_group = slack_file_upload['file']['channels'][0].encode('utf-8')
+                                logger.info('alert_slack - slack group has been set from \'channels\' as %s' % (
+                                    str(slack_group)))
+                            except:
+                                slack_group_trace_channels = traceback.format_exc()
+                                logger.info('alert_slack - failed to determine slack_group using channels')
+                                logger.error('error :: alert_slack - failed to determine slack_group using groups or channels')
+                                logger.error('error :: alert_slack - traceback from slack_group_trace_groups follows:')
+                                logger.error(str(slack_group_trace_groups))
+                                logger.error('error :: alert_slack - traceback from slack_group_trace_channels follows:')
+                                logger.error(str(slack_group_trace_channels))
+                                logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                        slack_group_list = None
+                        if slack_group:
+                            slack_group_list_trace_private = None
+                            slack_group_list_trace_public = None
+                            # Try private channel
+                            try:
+                                slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                                logger.info('alert_slack - slack_group_list determined from private channel and slack_group %s' % (
+                                    str(slack_group)))
+                            except:
+                                slack_group_list_trace_private = traceback.format_exc()
+                                logger.info('alert_slack - failed to determine slack_group_list using private channel')
+                            if not slack_group_list:
+                                # Try public channel
+                                try:
+                                    slack_group_list = slack_file_upload['file']['shares']['public'][slack_group]
+                                    logger.info('alert_slack - slack_group_list determined from public channel and slack_group %s' % (
+                                        str(slack_group)))
+                                except:
+                                    slack_group_list_trace_public = traceback.format_exc()
+                                    logger.info('alert_slack - failed to determine slack_group_list using public channel')
+                                    logger.info('alert_slack - failed to determine slack_group_list using private or public channel')
+                                    logger.error('error :: alert_slack - traceback from slack_group_list_trace_private follows:')
+                                    logger.error(str(slack_group_list_trace_private))
+                                    logger.error('error :: alert_slack - traceback from slack_group_list_trace_public follows:')
+                                    logger.error(str(slack_group_list_trace_public))
+                                    logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                        if slack_group_list:
+                            try:
+                                slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                                logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                                    str(slack_group), str(slack_thread_ts)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.info('alert_slack - failed to determine slack_thread_ts')
             else:
                 send_text = initial_comment + '  ::  error :: there was no graph image to upload'
                 send_message = sc.api_call(
