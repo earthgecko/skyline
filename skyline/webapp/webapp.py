@@ -90,6 +90,8 @@ from skyline_functions import (
     in_list,
     # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
     set_metric_as_derivative,
+    # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
+    get_memcache_metric_object,
 )
 
 from backend import (
@@ -1072,6 +1074,8 @@ def ionosphere():
     # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
     # Added ionosphere_echo
     echo_hdate = False
+
+    metric_id = False
 
     # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
     features_profiles_to_validate = []
@@ -2972,6 +2976,28 @@ def ionosphere():
                             correlation_graphite_link = '%s://%s/render/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         correlations_with_graph_links.append([metric_name, coefficient, shifted, shifted_coefficient, str(correlation_graphite_link)])
 
+            # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
+            # By this point in the request the previous function calls will have
+            # populated memcache with the metric details
+            if not metric_id:
+                metric_id = 0
+                try:
+                    cache_key = 'panorama.mysql_ids.metrics.metric.%s' % base_name
+                    metric_id_msg_pack = None
+                    metric_id_msg_pack = REDIS_CONN.get(cache_key)
+                    if metric_id_msg_pack:
+                        unpacker = Unpacker(use_list=False)
+                        unpacker.feed(metric_id_msg_pack)
+                        metric_id = [item for item in unpacker][0]
+                        logger.info('metrics id is %s from Redis key -%s' % (str(metric_id), cache_key))
+                    else:
+                        logger.info('Webapp could not get metric id from Redis key - %s' % cache_key)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: Webapp could not get metric id from Redis key - %s' % cache_key)
+            else:
+                logger.info('metrics id is %s' % str(metric_id))
+
             # @added 20190502 - Branch #2646: slack
             if context == 'training_data':
                 update_slack = True
@@ -3052,6 +3078,8 @@ def ionosphere():
                 # Added ionosphere_echo
                 echo_fp=echo_fp_value, echo_human_date=echo_hdate,
                 metric_full_duration_in_hours_image_str=m_fd_in_hours_img_str,
+                # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
+                metric_id=metric_id,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
