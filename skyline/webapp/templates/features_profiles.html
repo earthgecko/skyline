@@ -570,7 +570,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>0 learnt profiles</h4>
   {% endif %}
 
-      <h4><span class="logo"><span class="sky">Anomaly ::</span> <span class="re">details ::</span></span></span> {{ for_metric }}</h4>
+      <h4><span class="logo"><span class="sky">Anomaly ::</span> <span class="re">details ::</span></span></span> {{ for_metric }} with metrics id {{ metric_id }}</h4>
       {{ metric_vars }}<br>
   {% if panorama_anomaly_id != False %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>

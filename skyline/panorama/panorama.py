@@ -1283,7 +1283,11 @@ class Panorama(Thread):
                                     logger.error('error :: to start update_slack_thread_ts')
                                     continue
                             p_starts = time()
-                            while time() - p_starts <= 2:
+                            # @modified 20190509 - Branch #2646: slack
+                            # If the Skyline MySQL database is on a remote host
+                            # 2 seconds here is sometimes not sufficient so
+                            # increased to 10
+                            while time() - p_starts <= 10:
                                 if any(p.is_alive() for p in pids):
                                     # Just to avoid hogging the CPU
                                     sleep(.1)

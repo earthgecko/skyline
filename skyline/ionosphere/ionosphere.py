@@ -1028,23 +1028,32 @@ class Ionosphere(Thread):
         # Moved get_metrics_db_object block to common_functions.py
         metrics_db_object = get_metrics_db_object(base_name)
         if metrics_db_object:
+            metrics_id = None
             try:
                 metrics_id = int(metrics_db_object['id'])
-                metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
+            except:
+                # @added 20190509 - Bug #2984: Ionosphere - could not determine values from metrics_db_object
+                # Added a traceback here to debug an issue
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not determine id from metrics_db_object for %s' % base_name)
+                metrics_id = None
+                metric_ionosphere_enabled = None
+                training_metric = True
+            if metrics_id:
+                # @modified 20190510 - Bug #2984: Ionosphere - could not determine values from metrics_db_object
+                # metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
+                metric_ionosphere_enabled = None
+                try:
+                    metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not determine ionosphere_enabled from metrics_db_object for %s' % base_name)
                 if metric_ionosphere_enabled is not None:
                     training_metric = False
                 else:
                     training_metric = True
                 if metric_ionosphere_enabled == 1:
                     training_metric = False
-            except:
-                # @added 20190509 - Bug #2984: Ionosphere - could not determine values from metrics_db_object
-                # Added a traceback here to debug an issue
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not determine values from metrics_db_object for %s' % base_name)
-                metrics_id = None
-                metric_ionosphere_enabled = None
-                training_metric = True
         else:
             metrics_id = None
             metric_ionosphere_enabled = None

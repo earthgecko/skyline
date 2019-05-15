@@ -194,6 +194,16 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
             anomaly_ts.append((int(ts), value))
         if int(ts) > anomaly_timestamp:
             break
+
+    # @added 20190515 - Bug #3008: luminosity - do not analyse short time series
+    # Only return a time series sample if the sample has sufficient data points
+    # otherwise get_anomalies() will throw and error
+    len_anomaly_ts = len(anomaly_ts)
+    if len_anomaly_ts <= 9:
+        logger.info('%s insufficient data not retrieved, only %s data points surfaced, not correlating' % (
+            str(base_name), str(len_anomaly_ts)))
+        return []
+
     return anomaly_ts
 
 
