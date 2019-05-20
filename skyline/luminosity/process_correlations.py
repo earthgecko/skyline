@@ -194,6 +194,16 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
             anomaly_ts.append((int(ts), value))
         if int(ts) > anomaly_timestamp:
             break
+
+    # @added 20190515 - Bug #3008: luminosity - do not analyse short time series
+    # Only return a time series sample if the sample has sufficient data points
+    # otherwise get_anomalies() will throw and error
+    len_anomaly_ts = len(anomaly_ts)
+    if len_anomaly_ts <= 9:
+        logger.info('%s insufficient data not retrieved, only %s data points surfaced, not correlating' % (
+            str(base_name), str(len_anomaly_ts)))
+        return []
+
     return anomaly_ts
 
 
@@ -272,8 +282,21 @@ def get_remote_assigned(anomaly_timestamp):
         # can be mulitple megabytes
         url = '%s/luminosity_remote_data?anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
         response_ok = False
+
+        # @added 20190519 - Branch #3002: docker
+        # Handle self signed certificate on Docker
+        verify_ssl = True
         try:
-            r = requests.get(url, timeout=15, auth=(remote_user, remote_password))
+            running_on_docker = settings.DOCKER
+        except:
+            running_on_docker = False
+        if running_on_docker:
+            verify_ssl = False
+
+        try:
+            # @modified 20190519 - Branch #3002: docker
+            # r = requests.get(url, timeout=15, auth=(remote_user, remote_password))
+            r = requests.get(url, timeout=15, auth=(remote_user, remote_password), verify=verify_ssl)
             if int(r.status_code) == 200:
                 logger.info('get_remote_assigned :: time series data retrieved from %s' % remote_url)
                 response_ok = True
