@@ -159,14 +159,26 @@ class Mirage(Thread):
         # timeseries data is still surfaced relevant to the anomalous datapoint
         # timestamp
         if settings.GRAPHITE_PORT != '':
-            url = '%s://%s:%s/render/?from=%s&until=%s&target=%s&format=json' % (
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # url = '%s://%s:%s/render/?from=%s&until=%s&target=%s&format=json' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     str(settings.GRAPHITE_PORT), graphite_from, graphite_until,
+            #     metric_name)
+            url = '%s://%s:%s/%s/?from=%s&until=%s&target=%s&format=json' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(settings.GRAPHITE_PORT), graphite_from, graphite_until,
-                metric_name)
-        else:
-            url = '%s://%s/render/?from=%s&until=%s&target=%s&format=json' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                settings.GRAPHITE_RENDER_URI, str(settings.GRAPHITE_PORT),
                 graphite_from, graphite_until, metric_name)
+        else:
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # url = '%s://%s/render/?from=%s&until=%s&target=%s&format=json' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     graphite_from, graphite_until, metric_name)
+            url = '%s://%s/%s/?from=%s&until=%s&target=%s&format=json' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
+                metric_name)
         r = requests.get(url)
         js = r.json()
         datapoints = js[0]['datapoints']

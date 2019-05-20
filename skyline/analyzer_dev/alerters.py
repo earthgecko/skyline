@@ -60,9 +60,19 @@ def alert_smtp(alert, metric):
     graph_title = '&title=skyline%%20analyzer%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (str(int(full_duration_in_hours)), metric[1], metric[0])
 
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20190520 - Branch #3002: docker
+        # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
+            settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)), metric[1],
+            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20190520 - Branch #3002: docker
+        # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)),
+            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     content_id = metric[1]
     image_data = None
@@ -121,9 +131,19 @@ def alert_hipchat(alert, metric):
 
     graph_title = '&title=skyline%%20analyzer%%20ALERT%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (str(int(full_duration_in_hours)), metric[1], metric[0])
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20190520 - Branch #3002: docker
+        # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
+            settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)), metric[1],
+            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20190520 - Branch #3002: docker
+        # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)), metric[1],
+            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
     for room in rooms:
