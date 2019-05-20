@@ -17,7 +17,7 @@ REDIS_SOCKET_PATH = '/tmp/redis.sock'
 :vartype REDIS_SOCKET_PATH: str
 """
 
-#REDIS_PASSWORD = 'DO.PLEASE.set.A.VERY.VERY.LONG.REDIS.password-time(now-1+before_you_forget)'
+# REDIS_PASSWORD = 'DO.PLEASE.set.A.VERY.VERY.LONG.REDIS.password-time(now-1+before_you_forget)'
 REDIS_PASSWORD = None
 """
 :var REDIS_PASSWORD: The password for Redis, even though Skyline uses socket it
@@ -104,7 +104,7 @@ MINI_DURATION = 3600
 :vartype MINI_DURATION: str
 """
 
-GRAPHITE_AUTH_HEADER = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+GRAPHITE_AUTH_HEADER = False
 """
 :var GRAPHITE_AUTH_HEADER: the Authorization header for Graphite api
 :vartype GRAPHITE_AUTH_HEADER: str
@@ -118,9 +118,9 @@ GRAPHITE_CUSTOM_HEADERS = {}
 
 GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'
 """
-:var GRAPHITE_HOST: If you have a Graphite host set up, set this metric to get
-    graphs on Skyline and Horizon. Don't include http:// since this is used for
-    carbon host as well.
+:var GRAPHITE_HOST: If you have a Graphite host set up, set this variable to get
+    graphs on Skyline and Horizon. Don't include http:// since this can be used
+    for CARBON_HOST as well.
 :vartype GRAPHITE_HOST: str
 """
 
@@ -165,9 +165,11 @@ TARGET_HOURS = '7'
 :vartype TARGET_HOURS: str
 """
 
-GRAPHITE_RENDER_URI = 'api/datasources/proxy/1/render/'
+GRAPHITE_RENDER_URI = 'render'
 """
-:var GRAPHITE_RENDER_URI: Base URI for graphite render
+:var GRAPHITE_RENDER_URI: Base URI for graphite render, this can generally be
+    render, api/datasources/1/render,  api/datasources/proxy/1/render, etc,
+    depending on how your Graphite (or grafana proxy) is set up.
 :vartype GRAPHITE_RENDER_URI: str
 """
 
@@ -186,7 +188,6 @@ CARBON_HOST = GRAPHITE_HOST
 :var CARBON_HOST: endpoint to send metrics that sould reach graphite.
 :vartype CARBON_PORT: int
 """
-
 
 CARBON_PORT = 2003
 """
@@ -522,6 +523,7 @@ ANALYZER_CRUCIBLE_ENABLED = False
 """
 
 ALERTS = (
+    ('horizon.udp.test', 'smtp', 30),
     ('skyline', 'smtp', 1800),
     ('skyline_test.alerters.test', 'smtp', 1800),
     ('skyline_test.alerters.test', 'hipchat', 1800),
@@ -2043,4 +2045,21 @@ LUMINOL_CROSS_CORRELATION_THRESHOLD = 0.9
     This can be a value between 0.0 and 1.00000 - 1.0 being STRONGEST cross
     correlation
 :vartype LUMINOL_CROSS_CORRELATION_THRESHOLD: float
+"""
+
+"""
+Docker settings
+"""
+
+DOCKER = False
+"""
+:var DOCKER: Whether Skyline is running on Docker or not
+:vartype DOCKER: boolean
+"""
+
+DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW = False
+"""
+:var DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW: Whether to show the Redis password
+    in the webapp Rebrow login page
+:vartype DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW: boolean
 """
