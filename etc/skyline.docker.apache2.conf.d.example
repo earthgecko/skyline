@@ -1,4 +1,4 @@
-####    skyline.httpd.conf.d.example    ####
+####    skyline.docker.apache2.conf.d.example    ####
 #
 #
 #  THIS IS AN EXAMPLE
@@ -20,8 +20,8 @@
   LoadModule headers_module modules/mod_headers.so
 </IfModule>
 
-Listen <YOUR_SERVER_IP_ADDRESS>:443
-<VirtualHost <YOUR_SERVER_IP_ADDRESS>:443>
+Listen 443
+<VirtualHost _default_:443>
     ServerName "<YOUR_SKYLINE_SERVER_FQDN>"
     ServerAdmin "<YOUR_EMAIL>"
     ServerSignature Off
@@ -56,18 +56,22 @@ Listen <YOUR_SERVER_IP_ADDRESS>:443
     Header always append X-Frame-Options SAMEORIGIN
 
     LimitRequestFieldSize 32768
-    <Location />
-        authType Basic
-        authName Restricted
-#        authUserFile "/etc/httpd/conf.d/.skyline_htpasswd"
-        authUserFile "<YOUR_HTPASSWD_FILE>"
-        Require valid-user
-        Order allow,deny
-        Allow from <YOUR_SERVER_IP_ADDRESS>
-        Allow from <YOUR_OTHER_IP_ADDRESS>
-        Deny from all
-        Satisfy any
-    </Location>
+
+    # Apache2 -version 2.4
+    <Directory "/">
+        LogLevel debug trace5
+        AuthType Basic
+        AuthBasicProvider file
+        AuthUserFile "<YOUR_HTPASSWD_FILE>"
+        AuthName "Restricted"
+        <RequireAll>
+            Require valid-user
+            <RequireAny>
+                Require ip <YOUR_SERVER_IP_ADDRESS>
+                Require ip <YOUR_OTHER_IP_ADDRESS>
+            </RequireAny>
+        </RequireAll>
+    </Directory>
 
 # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
 # Added the X-Forwarded-Proto header so that Flask can determine the original
