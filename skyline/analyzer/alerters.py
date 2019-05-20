@@ -113,9 +113,11 @@ def get_graphite_render_uri():
     """
     Returns graphite render uri based on configuration in settings.py
     """
-    graphite_render_uri = 'render/'
-    if settings.GRAPHITE_RENDER_URI != '':
+    try:
         graphite_render_uri = str(settings.GRAPHITE_RENDER_URI)
+    except:
+        log.info('get_graphite_render_uri :: GRAPHITE_RENDER_URI is not declared in settings.py, using default of \'render\'')
+        graphite_render_uri = 'render'
     return graphite_render_uri
 
 
@@ -124,9 +126,12 @@ def get_graphite_custom_headers():
     Returns custom http headers
     """
     headers = dict()
-    if settings.GRAPHITE_CUSTOM_HEADERS is not None:
+    try:
         headers = settings.GRAPHITE_CUSTOM_HEADERS
-    return headers 
+    except:
+        log.info('get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}')
+        headers = dict()
+    return headers
 
 
 def alert_smtp(alert, metric, context):
@@ -214,6 +219,15 @@ def alert_smtp(alert, metric, context):
         logger.info(
             'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
             (str(primary_recipient), str(cc_recipients)))
+
+    # @added 20190517 - Branch #3002: docker
+    # Do not try to alert if the settings are default
+    if 'your_domain.com' in str(sender):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        return False
+    if 'your_domain.com' in str(primary_recipient):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        return False
 
     # @modified 20161229 - Feature #1830: Ionosphere alerts
     # Ionosphere alerts
@@ -1020,6 +1034,15 @@ def alert_stale_digest(alert, metric, context):
         logger.error('error :: alert_stale_digest - no known default_recipient')
         return False
 
+    # @added 20190517 - Branch #3002: docker
+    # Do not try to alert if the settings are default
+    if 'your_domain.com' in str(sender):
+        logger.info('alert_stale_digest - sender is not configured, not sending alert')
+        return False
+    if 'your_domain.com' in str(recipient):
+        logger.info('alert_stale_digest - sender is not configured, not sending alert')
+        return False
+
     try:
         body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
         body += '<font color="black"><b>Stale metrics (no data sent for ~%s seconds):</b></font><br>' % str(settings.ALERT_ON_STALE_PERIOD)
@@ -1062,6 +1085,17 @@ def alert_stale_digest(alert, metric, context):
 def alert_slack(alert, metric, context):
 
     if not settings.SLACK_ENABLED:
+        return False
+
+    # @modified 20190517 - Branch #3002: docker
+    # Do not try to alert if the settings are default
+    try:
+        bot_user_oauth_access_token = settings.SLACK_OPTS['bot_user_oauth_access_token']
+    except:
+        logger.error('error :: alert_slack - could not determine bot_user_oauth_access_token')
+        return False
+    if bot_user_oauth_access_token == 'YOUR_slack_bot_user_oauth_access_token':
+        logger.info('alert_slack - bot_user_oauth_access_token is not configured, not sending alert')
         return False
 
     from slackclient import SlackClient

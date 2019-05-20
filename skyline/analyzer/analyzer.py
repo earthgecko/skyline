@@ -1114,6 +1114,54 @@ class Analyzer(Thread):
                 sleep(10)
                 continue
 
+            # @modified 20190518 - Bug #3020: Newly installed analyzer on docker not flushing and recreating analyzer algorithm exception Redis sets
+            # The management of the analyzer Redis algorithm exception sets
+            # was previously handled in the if settings.ENABLE_MIRAGE
+            # block below.  This meant that if there are no mirage metrics, the
+            # sets were not managed.
+            manage_analyzer_algorithm_exception_sets = False
+            try:
+                manage_analyzer_algorithm_exception_sets_in_seconds = self.redis_conn.get('analyzer.algorithm.exception.metric.sets')
+                if str(manage_analyzer_algorithm_exception_sets_in_seconds) == 'None':
+                    manage_analyzer_algorithm_exception_sets = True
+            except Exception as e:
+                logger.error('error :: could not query Redis for analyzer.algorithm.exception.metric.sets: %s' % e)
+                manage_analyzer_algorithm_exception_sets = True
+            if manage_analyzer_algorithm_exception_sets:
+                try:
+                    key_timestamp = int(time())
+                    self.redis_conn.setex('analyzer.algorithm.exception.metric.sets', 300, key_timestamp)
+                except:
+                    logger.error('error :: failed to set key :: analyzer.algorithm.exception.metric.sets')
+                # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+                # Added Redis sets for Boring, TooShort and Stale
+                try:
+                    self.redis_conn.delete('analyzer.boring')
+                    logger.info('deleted Redis analyzer.boring set to refresh')
+                except:
+                    logger.info('no Redis set to delete - analyzer.boring')
+                try:
+                    self.redis_conn.delete('analyzer.too_short')
+                    logger.info('deleted Redis analyzer.too_short set to refresh')
+                except:
+                    logger.info('no Redis set to delete - analyzer.too_short')
+                try:
+                    stale_metrics = list(self.redis_conn.smembers('analyzer.stale'))
+                except:
+                    stale_metrics = []
+                if stale_metrics:
+                    try:
+                        self.redis_conn.delete('analyzer.stale')
+                        logger.info('deleted Redis analyzer.stale set to refresh')
+                    except:
+                        logger.info('no Redis set to delete - analyzer.stale')
+                # @added 20180807 - Feature #2492: alert on stale metrics
+                try:
+                    self.redis_conn.delete('analyzer.alert_on_stale_metrics')
+                    logger.info('deleted Redis analyzer.alert_on_stale_metrics set to refresh')
+                except:
+                    logger.info('no Redis set to delete - analyzer.alert_on_stale_metrics')
+
             # @added 20160922 - Branch #922: Ionosphere
             # Add a Redis set of mirage.unique_metrics
             if settings.ENABLE_MIRAGE:
@@ -1153,34 +1201,6 @@ class Analyzer(Thread):
                         mirage_unique_metrics = []
                     except:
                         logger.error('error :: could not query Redis to delete mirage.unique_metric set')
-                    # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                    # Added Redis sets for Boring, TooShort and Stale
-                    try:
-                        self.redis_conn.delete('analyzer.boring')
-                        logger.info('deleted Redis analyzer.boring set to refresh')
-                    except:
-                        logger.info('no Redis set to delete - analyzer.boring')
-                    try:
-                        self.redis_conn.delete('analyzer.too_short')
-                        logger.info('deleted Redis analyzer.too_short set to refresh')
-                    except:
-                        logger.info('no Redis set to delete - analyzer.too_short')
-                    try:
-                        stale_metrics = list(self.redis_conn.smembers('analyzer.stale'))
-                    except:
-                        stale_metrics = []
-                    if stale_metrics:
-                        try:
-                            self.redis_conn.delete('analyzer.stale')
-                            logger.info('deleted Redis analyzer.stale set to refresh')
-                        except:
-                            logger.info('no Redis set to delete - analyzer.stale')
-                    # @added 20180807 - Feature #2492: alert on stale metrics
-                    try:
-                        self.redis_conn.delete('analyzer.alert_on_stale_metrics')
-                        logger.info('deleted Redis analyzer.alert_on_stale_metrics set to refresh')
-                    except:
-                        logger.info('no Redis set to delete - analyzer.alert_on_stale_metrics')
 
                 for alert in settings.ALERTS:
                     for metric in unique_metrics:
@@ -2131,6 +2151,13 @@ class Analyzer(Thread):
                 raw_series = None
 
             projected = None
+
+            # @added 20190517 - Branch #3002: docker
+            # Declare these variables so that errors are not thrown when they
+            # are deleted later
+            timeseries = []
+            time_human = 0
+
             if raw_series is not None:
                 try:
                     unpacker = Unpacker(use_list=False)
@@ -2163,7 +2190,10 @@ class Analyzer(Thread):
             send_metric_name = '%s.illuminance' % skyline_app_graphite_namespace
             # @modified 20181017 - Feature #2580: illuminance
             # Disabled for now as in concept phase
-            # send_graphite_metric(skyline_app, send_metric_name, illuminance)
+            # @modified 20190519 - Feature #2580: illuminance
+            #                      Branch #3002: docker
+            # Re-enabled
+            send_graphite_metric(skyline_app, send_metric_name, illuminance)
 
             # Reset counters
             self.anomalous_metrics[:] = []
@@ -2248,8 +2278,15 @@ class Analyzer(Thread):
                     logger.info('set analyzer.derivative_metrics_expiry Redis key')
                 except:
                     logger.error('error :: failed to set key :: analyzer.analyzer.derivative_metrics_expiry')
+
+                # @added 20190517 - Branch #3002: docker
+                # Declare and test if derivative_metrics exists
+                derivative_metrics = None
+
                 try:
-                    self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
+                    # @modified 20190517 - Branch #3002: docker
+                    # self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
+                    derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
                 except Exception as e:
                     # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
                     #                      Feature #2916: ANALYZER_ENABLED setting
@@ -2263,21 +2300,40 @@ class Analyzer(Thread):
                         logger.info(
                             'there is no Redis set new_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
                                 str(ANALYZER_ENABLED), str(e)))
-                try:
-                    self.redis_conn.rename('new_non_derivative_metrics', 'non_derivative_metrics')
-                except Exception as e:
-                    # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
-                    #                      Feature #2916: ANALYZER_ENABLED setting
-                    #                      ANALYZER_ENABLED False - rename Redis keys error #103
-                    # If Analyzer is not enabled the keys will not exist this is
-                    # expected and not an error
-                    # logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
-                    if ANALYZER_ENABLED:
-                        logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
-                    else:
-                        logger.info(
-                            'there is no Redis set new_non_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
-                                str(ANALYZER_ENABLED), str(e)))
+
+                # @modified 20190517 - Branch #3002: docker
+                # Wrapped in if derivative_metrics
+                if derivative_metrics:
+                    try:
+                        self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
+                    except Exception as e:
+                        # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
+                        #                      Feature #2916: ANALYZER_ENABLED setting
+                        #                      ANALYZER_ENABLED False - rename Redis keys error #103
+                        # If Analyzer is not enabled the keys will not exist this is
+                        # expected and not an error
+                        # logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
+                        if ANALYZER_ENABLED:
+                            logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
+                        else:
+                            logger.info(
+                                'there is no Redis set new_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
+                                    str(ANALYZER_ENABLED), str(e)))
+                    try:
+                        self.redis_conn.rename('new_non_derivative_metrics', 'non_derivative_metrics')
+                    except Exception as e:
+                        # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
+                        #                      Feature #2916: ANALYZER_ENABLED setting
+                        #                      ANALYZER_ENABLED False - rename Redis keys error #103
+                        # If Analyzer is not enabled the keys will not exist this is
+                        # expected and not an error
+                        # logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
+                        if ANALYZER_ENABLED:
+                            logger.error('error :: could not rename Redis set new_non_derivative_metrics: %s' % str(e))
+                        else:
+                            logger.info(
+                                'there is no Redis set new_non_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
+                                    str(ANALYZER_ENABLED), str(e)))
 
                 live_at = 'skyline_set_as_of_%s' % str(key_timestamp)
                 try:
