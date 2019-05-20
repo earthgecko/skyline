@@ -20,7 +20,10 @@
 					<div class="form-group">
 						<label for="host" class="col-sm-3">Host:</label>
 						<div class="col-sm-9">
-							<input id="host" name="host" value="localhost" class="form-control" />
+              <!-- # @modified 20190519 - Branch #3002: docker
+							<input id="host" name="host" value="localhost" class="form-control" /> -->
+							<input id="host" name="host" value="{{ host_input_value }}" class="form-control" />
+							<p class="help-block">Set host to unix_socket if Skyline is running on docker</p>
 						</div>
 					</div>
 
@@ -42,7 +45,13 @@
 					<div class="form-group">
 						<label for="password" class="col-sm-3">Password:</label>
 						<div class="col-sm-9">
+              <!-- # @modified 20190519 - Branch #3002: docker -->
+  {% if display_redis_password == True %}
+							<input type="password" id="password" name="password" value="{{ rebrow_redis_password }}" class="form-control" />
+							<p class="help-block">The Redis password to connect to the unix socket is {{ rebrow_redis_password }}</p>
+  {% else %}
 							<input type="password" id="password" name="password" value="" class="form-control" />
+  {% endif %}
 						</div>
 					</div>
 

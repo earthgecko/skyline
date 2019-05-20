@@ -2971,9 +2971,21 @@ def ionosphere():
                         graph_title_string = quote(unencoded_graph_title, safe='')
                         graph_title = '&title=%s' % graph_title_string
                         if settings.GRAPHITE_PORT != '':
-                            correlation_graphite_link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                            # @modified 20190520 - Branch #3002: docker
+                            # correlation_graphite_link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                            correlation_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (
+                                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                                settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                                str(graphite_from), str(graphite_until), metric_name,
+                                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         else:
-                            correlation_graphite_link = '%s://%s/render/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                            # @modified 20190520 - Branch #3002: docker
+                            # correlation_graphite_link = '%s://%s/render/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                            correlation_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (
+                                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                                settings.GRAPHITE_RENDER_URI, str(graphite_from),
+                                str(graphite_until), metric_name,
+                                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         correlations_with_graph_links.append([metric_name, coefficient, shifted, shifted_coefficient, str(correlation_graphite_link)])
 
             # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
@@ -2983,11 +2995,15 @@ def ionosphere():
                 metric_id = 0
                 try:
                     cache_key = 'panorama.mysql_ids.metrics.metric.%s' % base_name
+                    metric_id_msg_pack = None
                     metric_id_msg_pack = REDIS_CONN.get(cache_key)
-                    unpacker = Unpacker(use_list=False)
-                    unpacker.feed(metric_id_msg_pack)
-                    metric_id = [item for item in unpacker][0]
-                    logger.info('metrics id is %s from Redis key -%s' % (str(metric_id), cache_key))
+                    if metric_id_msg_pack:
+                        unpacker = Unpacker(use_list=False)
+                        unpacker.feed(metric_id_msg_pack)
+                        metric_id = [item for item in unpacker][0]
+                        logger.info('metrics id is %s from Redis key -%s' % (str(metric_id), cache_key))
+                    else:
+                        logger.info('Webapp could not get metric id from Redis key - %s' % cache_key)
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: Webapp could not get metric id from Redis key - %s' % cache_key)
@@ -3270,10 +3286,17 @@ serverinfo_meta = {
 # elky84
 def get_redis(host, port, db, password):
     if password == "":
-        return redis.StrictRedis(host=host, port=port, db=db)
+        # @modified 20190517 - Branch #3002: docker
+        # Allow rebrow to connect to Redis on the socket too
+        if host == 'unix_socket':
+            return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
+        else:
+            return redis.StrictRedis(host=host, port=port, db=db)
     else:
-        return redis.StrictRedis(host=host, port=port, db=db, password=password)
-
+        if host == 'unix_socket':
+            return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
+        else:
+            return redis.StrictRedis(host=host, port=port, db=db, password=password)
 
 # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
 # Added token, client_id and salt to replace password parameter and determining
@@ -3517,6 +3540,24 @@ def rebrow():
         # Added client message to give relevant messages on the login page
         client_message = False
 
+        # @added 20190519 - Branch #3002: docker
+        display_redis_password = False
+        host_input_value = 'localhost'
+        rebrow_redis_password = False
+        try:
+            running_on_docker = settings.DOCKER
+        except:
+            running_on_docker = False
+            logger.info('rebrow access :: set Redis key - %s' % (key))
+        if running_on_docker:
+            host_input_value = 'unix_socket'
+            try:
+                display_redis_password = settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW
+            except:
+                display_redis_password = False
+            if display_redis_password:
+                rebrow_redis_password = settings.REDIS_PASSWORD
+
         return render_template(
             'rebrow_login.html',
             # @modified 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
@@ -3525,8 +3566,12 @@ def rebrow():
             # redis_password=redis_password,
             protocol=protocol, proxied=proxied, client_message=client_message,
             version=skyline_version,
+            # @added 20190519 - Branch #3002: docker
+            running_on_docker=running_on_docker,
+            rebrow_redis_password=rebrow_redis_password,
+            display_redis_password=display_redis_password,
+            host_input_value=host_input_value,
             duration=(time.time() - start))
-
 
 @app.route("/rebrow_server_db/<host>:<int:port>/<int:db>/")
 @requires_auth
