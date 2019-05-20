@@ -488,7 +488,13 @@ class Luminosity(Thread):
                     logger.info('last_processed_anomaly_id found in memcache - %s' % str(last_processed_anomaly_id))
                     memcache_last_processed_anomaly_id_data = True
                 else:
-                    logger.info('last_processed_anomaly_id key was NOT found in memcache - %s' % str(last_processed_anomaly_id))
+                    # @modified 20190517 - Bug #3016: Handle no anomaly ids in luminosity
+                    #                      Branch #3002: docker
+                    # Log appropriate to whether memcache is enabled or not
+                    if settings.MEMCACHE_ENABLED:
+                        logger.info('last_processed_anomaly_id key was NOT found in memcache - %s' % str(last_processed_anomaly_id))
+                    else:
+                        logger.info('memcache not enabled not checking for last_processed_anomaly_id key')
 
                 if not last_processed_anomaly_id:
                     query = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
@@ -535,6 +541,13 @@ class Luminosity(Thread):
                         last_processed_anomaly_id = process_anomaly_id - 1
                     else:
                         logger.info('no new anomalies in the anomalies table')
+
+                # @added 20190517 - Bug #3016: Handle no anomaly ids in luminosity
+                #                   Branch #3002: docker
+                # When Skyline is first installed, if luminosity is enabled it
+                # reports errors as there are no anomaly ids
+                if str(last_processed_anomaly_id) == 'None':
+                    last_processed_anomaly_id = 0
 
                 query = 'SELECT * FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
                 results = None
