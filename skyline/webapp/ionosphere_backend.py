@@ -671,6 +671,17 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (settings.SKYLINE_URL, str(base_name), str(grace_from_timestamp), str(grace_until_timestamp))
     panorama_resp = None
     logger.info('getting anomaly id from panorama: %s' % str(url))
+
+    # @added 20190519 - Branch #3002: docker
+    # Handle self signed certificate on Docker
+    verify_ssl = True
+    try:
+        running_on_docker = settings.DOCKER
+    except:
+        running_on_docker = False
+    if running_on_docker:
+        verify_ssl = False
+
     if settings.WEBAPP_AUTH_ENABLED:
         user = str(settings.WEBAPP_AUTH_USER)
         password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
@@ -678,11 +689,17 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         if settings.WEBAPP_AUTH_ENABLED:
             # @modified 20181106 - Bug #2668: Increase timeout on requests panorama id
             # r = requests.get(url, timeout=2, auth=(user, password))
-            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password))
+            # @modified 20190519 - Branch #3002: docker
+            # Handle self signed certificate on Docker
+            # r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password))
+            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password), verify=verify_ssl)
         else:
             # @modified 20181106 - Bug #2668: Increase timeout on requests panorama id
             # r = requests.get(url, timeout=2)
-            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT)
+            # @modified 20190519 - Branch #3002: docker
+            # Handle self signed certificate on Docker
+            # r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT)
+            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, verify=verify_ssl)
         panorama_resp = True
     except:
         logger.error(traceback.format_exc())
