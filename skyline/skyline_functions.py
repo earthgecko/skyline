@@ -27,8 +27,12 @@ except ImportError:
 import settings
 
 try:
+	# @modified 20190518 - Branch #3002: docker
+    # from settings import GRAPHITE_HOST
     from settings import CARBON_HOST
 except:
+	# @modified 20190518 - Branch #3002: docker
+    # GRAPHITE_HOST = ''
     CARBON_HOST = ''
 try:
     from settings import CARBON_PORT
@@ -58,8 +62,19 @@ def send_graphite_metric(current_skyline_app, metric, value):
     :rtype: boolean
 
     """
-    if CARBON_HOST != '':
+	# @added 20190518 - Branch #3002: docker
+    # If the CARBON_HOST is set to the default do not send_graphite_metric
+    if CARBON_HOST == 'YOUR_GRAPHITE_HOST.example.com':
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.info('CARBON_HOST is not configure is settings.py no CARBON_HOST to send metrics to')
+        return False
 
+	# @modified 20190518 - Branch #3002: docker
+	# Use the CARBON_HOST rather than GRAPHITE_HOST to allow for the 2 to be
+    # on different hosts
+    # if GRAPHITE_HOST != '':
+    if CARBON_HOST != '':
         sock = socket.socket()
         sock.settimeout(10)
 
@@ -70,10 +85,14 @@ def send_graphite_metric(current_skyline_app, metric, value):
         # merged 1 commit into earthgecko:master from
         # mlowicki:handle_connection_error_to_graphite on 16 Mar 2015
         try:
+	        # @modified 20190518 - Branch #3002: docker
+            # sock.connect((GRAPHITE_HOST, CARBON_PORT))
             sock.connect((CARBON_HOST, CARBON_PORT))
             sock.settimeout(None)
         except socket.error:
             sock.settimeout(None)
+	        # @modified 20190518 - Branch #3002: docker
+            # endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
             endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
@@ -88,6 +107,8 @@ def send_graphite_metric(current_skyline_app, metric, value):
             sock.close()
             return True
         except:
+	        # @modified 20190518 - Branch #3002: docker
+            # endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
             endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
@@ -456,7 +477,10 @@ def get_graphite_metric(
     graphite_port = '80'
     if settings.GRAPHITE_PORT != '':
         graphite_port = str(settings.GRAPHITE_PORT)
-    image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/api/datasources/proxy/1/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
+    # @modified 20190520 - Branch #3002: docker
+    # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/render?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
+    # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/api/datasources/proxy/1/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
+    image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/' + GRAPHITE_RENDER_URI + '?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     url = image_url + '&format=' + output_format
 
     if settings.ENABLE_DEBUG:
