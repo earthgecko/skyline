@@ -5,7 +5,11 @@ except:
     from queue import Empty
 from time import time, sleep
 from threading import Thread
-from multiprocessing import Process, Manager
+# @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# Use Redis sets in place of Manager().list() to reduce memory and number of
+# processes
+# from multiprocessing import Process, Manager
+from multiprocessing import Process
 import os
 from os import kill, getpid, listdir
 from os.path import join, isfile
@@ -61,6 +65,12 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+# @added 20190523 - Branch #2646: slack
+try:
+    SLACK_ENABLED = settings.SLACK_ENABLED
+except:
+    SLACK_ENABLED = False
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 failed_checks_dir = '%s_failed' % settings.PANORAMA_CHECK_PATH
@@ -98,7 +108,7 @@ class Panorama(Thread):
         """
         Initialize Panorama
 
-        Create the :obj:`self.anomalous_metrics` list
+        Create the :obj:`mysql_conn`
 
         """
         super(Panorama, self).__init__()
@@ -110,8 +120,16 @@ class Panorama(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.anomalous_metrics = Manager().list()
-        self.metric_variables = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        #                      Task #3032: Debug number of Python processes and memory use
+        #                      Branch #3002: docker
+        # Reduce amount of Manager instances that are used as each requires a
+        # copy of entire memory to be copied into each subprocess so this
+        # results in a python process per Manager instance, using as much
+        # memory as the parent.  OK on a server, not so much in a container.
+        # Disabled all the Manager().list() below and replaced with Redis sets
+        # self.anomalous_metrics = Manager().list()
+        # self.metric_variables = Manager().list()
         self.mysql_conn = mysql.connector.connect(**config)
 
     def check_if_parent_is_alive(self):
@@ -1230,15 +1248,19 @@ class Panorama(Thread):
                 # Check if any Redis keys exist with a slack_thread_ts to update
                 # any anomaly records
                 slack_thread_ts_updates = None
-                try:
-                    slack_thread_ts_updates = list(self.redis_conn.scan_iter(match='panorama.slack_thread_ts.*'))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to scan panorama.slack_thread_ts.* from Redis')
-                    slack_thread_ts_updates = []
+                # @added 20190523 - Branch #3002: docker
+                #                   Branch #2646: slack
+                # Only check if slack is enabled
+                if SLACK_ENABLED:
+                    try:
+                        slack_thread_ts_updates = list(self.redis_conn.scan_iter(match='panorama.slack_thread_ts.*'))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to scan panorama.slack_thread_ts.* from Redis')
+                        slack_thread_ts_updates = []
 
-                if not slack_thread_ts_updates:
-                    logger.info('no panorama.slack_thread_ts Redis keys to process, OK')
+                    if not slack_thread_ts_updates:
+                        logger.info('no panorama.slack_thread_ts Redis keys to process, OK')
 
                 if slack_thread_ts_updates:
                     for cache_key in slack_thread_ts_updates:
