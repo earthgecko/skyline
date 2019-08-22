@@ -333,8 +333,8 @@ def alert_smtp(alert, metric, context):
         #     graphite_port, str(graphite_from), str(graphite_until), metric[1],
         #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, graphite_render_uri, str(graphite_from),
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+            graphite_render_uri, str(graphite_from),
             str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
