@@ -8,7 +8,11 @@ from redis import StrictRedis
 from time import time, sleep, strftime, gmtime
 from threading import Thread
 from collections import defaultdict
-from multiprocessing import Process, Manager, Queue
+# @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# Use Redis sets in place of Manager().list to reduce memory and number of
+# processes
+# from multiprocessing import Process, Manager, Queue
+from multiprocessing import Process, Queue
 from msgpack import Unpacker, packb
 import os
 from os import path, kill, getpid
@@ -65,6 +69,22 @@ try:
 except:
     DO_NOT_ALERT_ON_STALE_METRICS = []
 
+# @modified 20190524 - Feature #2882: Mirage - periodic_check
+#                      Branch #3002: docker
+# Moved the interpolation of the MIRAGE_PERIODIC_ variables to the top
+# of the file out of spawn_process so they can be accessed in run too
+# @added 20190408 - Feature #2882: Mirage - periodic_check
+# Add Mirage periodic checks so that Mirage is analysing each metric at
+# least once per hour.
+try:
+    MIRAGE_PERIODIC_CHECK = settings.MIRAGE_PERIODIC_CHECK
+except:
+    MIRAGE_PERIODIC_CHECK = False
+try:
+    MIRAGE_PERIODIC_CHECK_INTERVAL = settings.MIRAGE_PERIODIC_CHECK_INTERVAL
+except:
+    MIRAGE_PERIODIC_CHECK_INTERVAL = 3600
+
 # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
 try:
     ANALYZER_ENABLED = settings.ANALYZER_ENABLED
@@ -77,6 +97,13 @@ try:
     ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
 except:
     ALERT_ON_STALE_METRICS = False
+
+# @added 20190522 - Feature #2580: illuminance
+# Disabled for now as in concept phase.  This would work better if
+# the illuminance_datapoint was determined from the time series
+# after min max scaling was applied to it.  That way each metric
+# would have the same weight.  txBytes for instance would not have
+calculate_illuminance = False
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -92,10 +119,7 @@ class Analyzer(Thread):
         """
         Initialize the Analyzer
 
-        Create the :obj:`self.anomalous_metrics` list
-
         Create the :obj:`self.exceptions_q` queue
-
         Create the :obj:`self.anomaly_breakdown_q` queue
 
         """
@@ -108,34 +132,42 @@ class Analyzer(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.anomalous_metrics = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        #                      Task #3032: Debug number of Python processes and memory use
+        #                      Branch #3002: docker
+        # Reduce amount of Manager instances that are used as each requires a
+        # copy of entire memory to be copied into each subprocess so this
+        # results in a python process per Manager instance, using as much
+        # memory as the parent.  OK on a server, not so much in a container.
+        # Disabled all the Manager() lists below and replaced with Redis sets
+        # self.anomalous_metrics = Manager().list()
         self.exceptions_q = Queue()
         self.anomaly_breakdown_q = Queue()
         # @modified 20160813 - Bug #1558: Memory leak in Analyzer
         # Not used
         # self.mirage_metrics = Manager().list()
         # @added 20160923 - Branch #922: Ionosphere
-        self.mirage_metrics = Manager().list()
-        self.ionosphere_metrics = Manager().list()
+        # self.mirage_metrics = Manager().list()
+        # self.ionosphere_metrics = Manager().list()
         # @added 20161119 - Branch #922: ionosphere
         #                   Task #1718: review.tsfresh
         # Send a breakdown of what metrics were sent to other apps
-        self.sent_to_mirage = Manager().list()
-        self.sent_to_crucible = Manager().list()
-        self.sent_to_panorama = Manager().list()
-        self.sent_to_ionosphere = Manager().list()
+        # self.sent_to_mirage = Manager().list()
+        # self.sent_to_crucible = Manager().list()
+        # self.sent_to_panorama = Manager().list()
+        # self.sent_to_ionosphere = Manager().list()
         # @added 20161229 - Feature #1830: Ionosphere alerts
-        self.all_anomalous_metrics = Manager().list()
+        # self.all_anomalous_metrics = Manager().list()
         # @added 20170108 - Feature #1830: Ionosphere alerts
         # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
-        self.smtp_alerter_metrics = Manager().list()
-        self.non_smtp_alerter_metrics = Manager().list()
+        # self.smtp_alerter_metrics = Manager().list()
+        # self.non_smtp_alerter_metrics = Manager().list()
         # @added 20180903 - Feature #2580: illuminance
         #                   Feature #1986: flux
-        self.illuminance_datapoints = Manager().list()
+        # self.illuminance_datapoints = Manager().list()
         # @added 20190408 - Feature #2882: Mirage - periodic_check
-        self.mirage_periodic_check_metrics = Manager().list()
-        self.real_anomalous_metrics = Manager().list()
+        # self.mirage_periodic_check_metrics = Manager().list()
+        # self.real_anomalous_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -181,7 +213,7 @@ class Analyzer(Thread):
         - unpack the `raw_timeseries` for the metric.
         - Analyse each timeseries against `ALGORITHMS` to determine if it is
           anomalous.
-        - If anomalous add it to the :obj:`self.anomalous_metrics` list
+        - If anomalous add it to the Redis set analyzer.anomalous_metrics
         - Add what algorithms triggered to the :obj:`self.anomaly_breakdown_q`
           queue
         - If :mod:`settings.ENABLE_CRUCIBLE` is ``True``:
@@ -274,17 +306,16 @@ class Analyzer(Thread):
         # Add Mirage periodic checks so that Mirage is analysing each metric at
         # least once per hour.
         mirage_periodic_check_metric_list = []
-        try:
-            mirage_periodic_check_enabled = settings.MIRAGE_PERIODIC_CHECK
-        except:
-            mirage_periodic_check_enabled = False
-        try:
-            mirage_periodic_check_interval = settings.MIRAGE_PERIODIC_CHECK_INTERVAL
-        except:
-            mirage_periodic_check_interval = 3600
-        mirage_periodic_check_interval_minutes = int(int(mirage_periodic_check_interval) / 60)
-        if mirage_unique_metrics and mirage_periodic_check_enabled:
-            mirage_unique_metrics_count = len(mirage_unique_metrics)
+        # @modified 20190524 - Feature #2882: Mirage - periodic_check
+        #                      Branch #3002: docker
+        # Moved the interpolation of the MIRAGE_PERIODIC_ variables to the top
+        # of the file out of spawn_process so they can be accessed in run too
+        mirage_periodic_check_interval_minutes = int(int(MIRAGE_PERIODIC_CHECK_INTERVAL) / 60)
+        if mirage_unique_metrics and MIRAGE_PERIODIC_CHECK:
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # mirage_unique_metrics_count is unused so commented out
+            # mirage_unique_metrics_count = len(mirage_unique_metrics)
+
             # Mirage periodic checks are only done on declared namespaces as to
             # process all Mirage metrics periodically would probably create a
             # substantial load on Graphite and is probably not required only key
@@ -292,14 +323,22 @@ class Analyzer(Thread):
             periodic_check_mirage_metrics = []
             try:
                 mirage_periodic_check_namespaces = settings.MIRAGE_PERIODIC_CHECK_NAMESPACES
+            # @modified 20190524 - Feature #2882: Mirage - periodic_check
+            #                      Branch #3002: docker
+            # Added log output to except
             except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: MIRAGE_PERIODIC_CHECK is True but no MIRAGE_PERIODIC_CHECK_NAMESPACES are defined in settings.py')
                 mirage_periodic_check_namespaces = []
             for namespace in mirage_periodic_check_namespaces:
                 for metric_name in mirage_unique_metrics:
                     metric_namespace_elements = metric_name.split('.')
                     mirage_periodic_metric = False
                     for periodic_namespace in mirage_periodic_check_namespaces:
-                        if not namespace in mirage_periodic_check_namespaces:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # test for membership should be 'not in'
+                        # if not namespace in mirage_periodic_check_namespaces:
+                        if namespace not in mirage_periodic_check_namespaces:
                             continue
                         periodic_namespace_namespace_elements = periodic_namespace.split('.')
                         elements_matched = set(metric_namespace_elements) & set(periodic_namespace_namespace_elements)
@@ -307,7 +346,10 @@ class Analyzer(Thread):
                             mirage_periodic_metric = True
                             break
                     if mirage_periodic_metric:
-                        if not metric_name in periodic_check_mirage_metrics:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # test for membership should be 'not in'
+                        # if not metric_name in periodic_check_mirage_metrics:
+                        if metric_name not in periodic_check_mirage_metrics:
                             periodic_check_mirage_metrics.append(metric_name)
 
             periodic_check_mirage_metrics_count = len(periodic_check_mirage_metrics)
@@ -340,22 +382,43 @@ class Analyzer(Thread):
             logger.info(
                 '%s Mirage periodic checks can be added' % (
                     str(int(mirage_periodic_checks_per_minute))))
+
+            # @added 20190524 - Feature #2882: Mirage - periodic_check
+            #                   Branch #3002: docker
+            # Fetch all the mirage.periodic_check. keys into a list to check
+            # against rather than checking each metric name for a key below
+            mirage_periodic_check_keys = []
+            try:
+                mirage_periodic_check_keys = list(self.redis_conn.scan_iter(match='mirage.periodic_check.*'))
+                logger.info('detemined %s mirage.periodic_check. keys from Redis scan_iter' % (
+                    str(len(mirage_periodic_check_keys))))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to scan mirage.periodic_check.* from Redis')
+
             for metric_name in periodic_check_mirage_metrics:
                 if len(mirage_periodic_check_metric_list) == int(mirage_periodic_checks_per_minute):
                     break
                 base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
                 mirage_periodic_check_cache_key = 'mirage.periodic_check.%s' % base_name
                 mirage_periodic_check_key = False
-                try:
-                    mirage_periodic_check_key = self.redis_conn.get(mirage_periodic_check_cache_key)
-                except Exception as e:
-                    logger.error('error :: could not query Redis for cache_key: %s' % e)
+                # @modified 20190524 - Feature #2882: Mirage - periodic_check
+                #                      Branch #3002: docker
+                # Check the added mirage_periodic_check_keys list rather than
+                # checking each and every metric name key
+                # try:
+                #     mirage_periodic_check_key = self.redis_conn.get(mirage_periodic_check_cache_key)
+                # except Exception as e:
+                #    logger.error('error :: could not query Redis for cache_key: %s' % e)
+                if mirage_periodic_check_cache_key in mirage_periodic_check_keys:
+                    mirage_periodic_check_key = True
+
                 if not mirage_periodic_check_key:
                     try:
                         key_created_at = int(time())
                         self.redis_conn.setex(
                             mirage_periodic_check_cache_key,
-                            mirage_periodic_check_interval, key_created_at)
+                            MIRAGE_PERIODIC_CHECK_INTERVAL, key_created_at)
                         logger.info(
                             'created Mirage periodic_check Redis key - %s' % (mirage_periodic_check_cache_key))
                         mirage_periodic_check_metric_list.append(metric_name)
@@ -439,6 +502,16 @@ class Analyzer(Thread):
         # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         # Added Redis sets for Boring, TooShort and Stale
         redis_set_errors = 0
+
+        # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        # Use Redis set analyzer.non_smtp_alerter_metrics in place of Manager.list
+        non_smtp_alerter_metrics = []
+        try:
+            non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
+            non_smtp_alerter_metrics = []
 
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
@@ -534,12 +607,29 @@ class Analyzer(Thread):
 
             # @added 20180903 - Feature #2580: illuminance
             #                   Feature #1986: flux
-            try:
-                illuminance_datapoint = timeseries[-1][1]
-                if '.illuminance' not in metric_name:
-                    self.illuminance_datapoints.append(illuminance_datapoint)
-            except:
-                pass
+            # Disabled for now as in concept phase.  This would work better if
+            # the illuminance_datapoint was determined from the time series
+            # after min max scaling wass applied to it.  That way each metric
+            # would have the same weight.  txBytes for instance would not have
+            # a far greater weight than a low range metric.
+            if calculate_illuminance:
+                try:
+                    illuminance_datapoint = timeseries[-1][1]
+                    if '.illuminance' not in metric_name:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # Use Redis set instead of Manager() list to reduce memory
+                        # and number of Python processes
+                        # self.illuminance_datapoints.append(illuminance_datapoint)
+                        redis_set = 'analyzer.illuminance_datapoints'
+                        data = illuminance_datapoint
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except Exception as e:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s: %s' % (
+                                str(data), str(redis_set), str(e)))
+                except:
+                    pass
 
             try:
                 anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
@@ -555,9 +645,33 @@ class Analyzer(Thread):
                     base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
                     metric_timestamp = timeseries[-1][0]
                     metric = [datapoint, base_name, metric_timestamp]
-                    self.real_anomalous_metrics.append(metric)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis set instead of Manager() list to reduce memory
+                    # and number of Python processes
+                    # self.real_anomalous_metrics.append(metric)
+                    redis_set = 'analyzer.real_anomalous_metrics'
+                    data = str(metric)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+
                 if metric_name in mirage_periodic_check_metric_list:
-                    self.mirage_periodic_check_metrics.append(base_name)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis set instead of Manager() list to reduce memory
+                    # and number of Python processes
+                    # self.mirage_periodic_check_metrics.append(base_name)
+                    redis_set = 'analyzer.mirage_periodic_check_metrics'
+                    data = str(base_name)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+
                     anomalous = True
 
                 # If it's anomalous, add it to list
@@ -565,7 +679,16 @@ class Analyzer(Thread):
                     base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
                     metric_timestamp = timeseries[-1][0]
                     metric = [datapoint, base_name, metric_timestamp]
-                    self.anomalous_metrics.append(metric)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.anomalous_metrics.append(metric)
+                    redis_set = 'analyzer.anomalous_metrics'
+                    data = str(metric)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
 
                     # Get the anomaly breakdown - who returned True?
                     triggered_algorithms = []
@@ -630,7 +753,11 @@ class Analyzer(Thread):
                     # @added 20170108 - Feature #1830: Ionosphere alerts
                     # Only send smtp_alerter_metrics to Ionosphere
                     smtp_alert_enabled_metric = True
-                    if base_name in self.non_smtp_alerter_metrics:
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis set analyzer.non_smtp_alerter_metrics in place of
+                    # self.non_smtp_alerter_metrics Manager.list
+                    # if base_name in self.non_smtp_alerter_metrics:
+                    if base_name in non_smtp_alerter_metrics:
                         smtp_alert_enabled_metric = False
 
                     if ionosphere_enabled:
@@ -708,10 +835,22 @@ class Analyzer(Thread):
                                 from_timestamp, triggered_algorithms,
                                 timeseries, str(settings.FULL_DURATION),
                                 str(ionosphere_parent_id))
-                            self.sent_to_ionosphere.append(base_name)
+                            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                            # Moved to Redis key block below
+                            # self.sent_to_ionosphere.append(base_name)
                         except:
                             logger.info(traceback.format_exc())
                             logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
+
+                        # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        redis_set = 'analyzer.sent_to_ionosphere'
+                        data = str(base_name)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
 
                         # @added 20170403 - Feature #1994: Ionosphere training_dir keys
                         #                   Feature #2000: Ionosphere - validated
@@ -790,11 +929,22 @@ class Analyzer(Thread):
                                 skyline_app, panaroma_anomaly_file, 'w',
                                 panaroma_anomaly_data)
                             logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
-                            self.sent_to_panorama.append(base_name)
-
+                            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                            # Moved to Redis set block below
+                            # self.sent_to_panorama.append(base_name)
                         except:
-                            logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                             logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
+
+                        # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        redis_set = 'analyzer.sent_to_panorama'
+                        data = str(base_name)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
                     else:
                         # @modified 20160207 - Branch #922: Ionosphere
                         # Handle if all other apps are not enabled
@@ -868,10 +1018,22 @@ class Analyzer(Thread):
                                 skyline_app, crucible_check_file, 'w',
                                 crucible_anomaly_data)
                             logger.info('added crucible check :: %s,%s' % (base_name, metric_timestamp))
-                            self.sent_to_crucible.append(base_name)
+                            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                            # Move to Redis set block below
+                            # self.sent_to_crucible.append(base_name)
                         except:
-                            logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
                             logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
+
+                        # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        redis_set = 'analyzer.sent_to_crucible'
+                        data = str(base_name)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
 
             # It could have been deleted by the Roomba
             except TypeError:
@@ -1279,7 +1441,19 @@ class Analyzer(Thread):
             # END Redis mirage.unique_metrics_set
 
             if LOCAL_DEBUG:
-                logger.info('debug :: Memory usage in run after unique_metrics: %s (kb), using blah %s' % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss), str(blah))
+                logger.info('debug :: Memory usage in run after unique_metrics: %s (kb), using blah %s' % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, str(blah)))
+
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # The Redis analyzer.smtp_alerter_metrics list is created here to
+            # replace the self.smtp_alerter_metrics Manager.list in the below
+            # section
+            smtp_alerter_metrics = []
+            try:
+                smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the analyzer.smtp_alerter_metrics Redis set')
+                smtp_alerter_metrics = []
 
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
@@ -1298,29 +1472,92 @@ class Analyzer(Thread):
                             pattern_match = alert_match_pattern.match(METRIC_PATTERN)
                             if pattern_match:
                                 pattern_match = True
-                                if base_name not in self.smtp_alerter_metrics:
-                                    self.smtp_alerter_metrics.append(base_name)
+                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                # if base_name not in self.smtp_alerter_metrics:
+                                #     self.smtp_alerter_metrics.append(base_name)
+                                if base_name not in smtp_alerter_metrics:
+                                    redis_set = 'analyzer.smtp_alerter_metrics'
+                                    data = str(base_name)
+                                    try:
+                                        self.redis_conn.sadd(redis_set, data)
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to add %s to Redis set %s' % (
+                                            str(data), str(redis_set)))
                         except:
                             pattern_match = False
 
                         if not pattern_match:
                             # Match by substring
                             if alert[0] in base_name:
-                                if base_name not in self.smtp_alerter_metrics:
-                                    self.smtp_alerter_metrics.append(base_name)
+                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                # if base_name not in self.smtp_alerter_metrics:
+                                #     self.smtp_alerter_metrics.append(base_name)
+                                if base_name not in smtp_alerter_metrics:
+                                    redis_set = 'analyzer.smtp_alerter_metrics'
+                                    data = str(base_name)
+                                    try:
+                                        self.redis_conn.sadd(redis_set, data)
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to add %s to Redis set %s' % (
+                                            str(data), str(redis_set)))
 
-                if base_name not in self.smtp_alerter_metrics:
-                    if base_name not in self.smtp_alerter_metrics:
-                        self.non_smtp_alerter_metrics.append(base_name)
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Use Redis set analyzer.smtp_alerter_metrics in place of
+                # self.smtp_alerter_metrics Manager.list
+                # if base_name not in self.smtp_alerter_metrics:
+                #     if base_name not in self.smtp_alerter_metrics:
+                #         self.non_smtp_alerter_metrics.append(base_name)
+                present_in_smtp_alerter_metrics = False
+                try:
+                    present_in_smtp_alerter_metrics = self.redis_conn.sismember('analyzer.smtp_alerter_metrics', base_name)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to determine if %s is in analyzer.smtp_alerter_metrics Redis set' % base_name)
+                    present_in_smtp_alerter_metrics = False
+                if not present_in_smtp_alerter_metrics:
+                    redis_set = 'analyzer.non_smtp_alerter_metrics'
+                    data = str(base_name)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
 
-            logger.info('smtp_alerter_metrics     :: %s' % str(len(self.smtp_alerter_metrics)))
-            logger.info('non_smtp_alerter_metrics :: %s' % str(len(self.non_smtp_alerter_metrics)))
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Define variables from the Redis set which has replaced the Manager
+            # lists
+            smtp_alerter_metrics = []
+            try:
+                smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set')
+                smtp_alerter_metrics = []
+            non_smtp_alerter_metrics = []
+            try:
+                non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
+                non_smtp_alerter_metrics = []
+
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # logger.info('smtp_alerter_metrics     :: %s' % str(len(self.smtp_alerter_metrics)))
+            # logger.info('non_smtp_alerter_metrics :: %s' % str(len(self.non_smtp_alerter_metrics)))
+            logger.info('smtp_alerter_metrics     :: %s' % str(len(smtp_alerter_metrics)))
+            logger.info('non_smtp_alerter_metrics :: %s' % str(len(non_smtp_alerter_metrics)))
 
             # @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
             #                   Branch #2270: luminosity
             # Add a Redis set of smtp_alerter_metrics for Luminosity to only
             # cross correlate on metrics with an alert setting
-            for metric in self.smtp_alerter_metrics:
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use variable from the Redis set which replaced Manager.list
+            # for metric in self.smtp_alerter_metrics:
+            for metric in smtp_alerter_metrics:
                 self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', metric)
             try:
                 self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
@@ -1493,14 +1730,39 @@ class Analyzer(Thread):
             ionosphere_unique_metrics_count = len(ionosphere_unique_metrics)
             logger.info('ionosphere.unique_metrics Redis set count - %s' % str(ionosphere_unique_metrics_count))
 
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis set instead of Manager() list
+            analyzer_anomalous_metrics = []
+            try:
+                literal_analyzer_anomalous_metrics = list(self.redis_conn.smembers('analyzer.anomalous_metrics'))
+                for metric_list_string in literal_analyzer_anomalous_metrics:
+                    metric = literal_eval(metric_list_string)
+                    analyzer_anomalous_metrics.append(metric)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate list from Redis set analyzer.anomalous_metrics')
+
             # @added 20161229 - Feature #1830: Ionosphere alerts
             # Determine if Ionosphere added any alerts to be sent
             try:
-                for metric in self.anomalous_metrics:
-                    self.all_anomalous_metrics.append(metric)
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # for metric in self.anomalous_metrics:
+                for metric in analyzer_anomalous_metrics:
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.all_anomalous_metrics.append(metric)
+                    redis_set = 'analyzer.all_anomalous_metrics'
+                    data = str(metric)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to add to self.all_anomalous_metrics')
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # logger.error('error :: failed to add to self.all_anomalous_metrics')
+                logger.error('error :: failed to add to analyzer.all_anomalous_metrics Redis set')
             ionosphere_alerts = []
             context = 'Analyzer'
             try:
@@ -1527,7 +1789,17 @@ class Analyzer(Thread):
                         metric_timestamp = int(float(send_alert_for[2]))
                         triggered_algorithms = send_alert_for[3]
                         anomalous_metric = [value, base_name, metric_timestamp]
-                        self.all_anomalous_metrics.append(anomalous_metric)
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # self.all_anomalous_metrics.append(anomalous_metric)
+                        redis_set = 'analyzer.all_anomalous_metrics'
+                        data = str(anomalous_metric)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
+
                         # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
                         ionosphere_anomalous_metrics.append(anomalous_metric)
 
@@ -1550,7 +1822,12 @@ class Analyzer(Thread):
                     # @modified 20161229 - Feature #1830: Ionosphere alerts
                     # Handle alerting for Ionosphere
                     # for metric in self.anomalous_metrics:
-                    for metric in self.all_anomalous_metrics:
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # for metric in self.all_anomalous_metrics:
+                    all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
+                    for metric_list_string in all_anomalous_metrics:
+                        metric = literal_eval(metric_list_string)
+
                         # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
                         # Set each metric to the default Analyzer context
                         context = 'Analyzer'
@@ -1687,11 +1964,26 @@ class Analyzer(Thread):
 
                             logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
                             try:
-                                self.sent_to_mirage.append(metric[1])
+                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                #                      Task #3032: Debug number of Python processes and memory use
+                                #                      Branch #3002: docker
+                                # Replace Manager.list instances with Redis sets
+                                # self.sent_to_mirage.append(metric[1])
+                                redis_set = 'analyzer.sent_to_mirage'
+                                data = str(metric[1])
+                                try:
+                                    self.redis_conn.sadd(redis_set, data)
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: failed to add %s to Redis set %s' % (
+                                        str(data), str(redis_set)))
                             except:
                                 logger.info(traceback.format_exc())
+                                # logger.error(
+                                #     'error :: failed add to self.sent_to_mirage.append with %s' %
+                                #     metric[1])
                                 logger.error(
-                                    'error :: failed update self.sent_to_mirage.append with %s' %
+                                    'error :: failed add %s to analyzer.sent_to_mirage Redis set' %
                                     metric[1])
 
                             # Alert for analyzer if enabled
@@ -1829,20 +2121,26 @@ class Analyzer(Thread):
             # Write anomalous_metrics to static webapp directory
             # @modified 20160818 - Issue #19: Add additional exception handling to Analyzer
             anomalous_metrics_list_len = False
+            real_anomalous_metrics_count = 0
             try:
                 # @modified 20190408 - Feature #2882: Mirage - periodic_check
                 # Do not count Mirage periodic checks
                 # len(self.anomalous_metrics)
-                len(self.real_anomalous_metrics)
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # len(self.real_anomalous_metrics)
+                real_anomalous_metrics_count = len(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
                 anomalous_metrics_list_len = True
             except:
+                logger.info(traceback.format_exc())
                 logger.error('error :: failed to determine length of real_anomalous_metrics list')
 
             if anomalous_metrics_list_len:
                 # @modified 20190408 - Feature #2882: Mirage - periodic_check
                 # Do not count Mirage periodic checks
                 # if len(self.anomalous_metrics) > 0:
-                if len(self.real_anomalous_metrics) > 0:
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # if len(self.real_anomalous_metrics) > 0:
+                if real_anomalous_metrics_count > 0:
                     filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
                     try:
                         with open(filename, 'w') as fh:
@@ -1850,9 +2148,19 @@ class Analyzer(Thread):
                             # @modified 20190408 - Feature #2882: Mirage - periodic_check
                             # Do not count Mirage periodic checks
                             # anomalous_metrics = list(self.anomalous_metrics)
-                            anomalous_metrics = list(self.real_anomalous_metrics)
-                            anomalous_metrics.sort(key=operator.itemgetter(1))
-                            fh.write('handle_data(%s)' % anomalous_metrics)
+                            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                            # anomalous_metrics = list(self.real_anomalous_metrics)
+                            real_anomalous_metrics = []
+                            try:
+                                literal_real_anomalous_metrics = list(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                                for metric_list_string in literal_real_anomalous_metrics:
+                                    metric = literal_eval(metric_list_string)
+                                    real_anomalous_metrics.append(metric)
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to generate list from Redis set analyzer.real_anomalous_metrics')
+                            real_anomalous_metrics.sort(key=operator.itemgetter(1))
+                            fh.write('handle_data(%s)' % real_anomalous_metrics)
                     except:
                         logger.info(traceback.format_exc())
                         logger.error(
@@ -2045,10 +2353,34 @@ class Analyzer(Thread):
             # @modified 20190408 - Feature #2882: Mirage - periodic_check
             # Do not count Mirage periodic checks
             # total_anomalies = str(len(self.anomalous_metrics))
-            total_anomalies = str(len(self.real_anomalous_metrics))
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis set instead of Manager() list
+            # total_anomalies = str(len(self.real_anomalous_metrics))
+            real_anomalous_metrics = []
+            try:
+                literal_real_anomalous_metrics = list(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                for metric_list_string in literal_real_anomalous_metrics:
+                    metric = literal_eval(metric_list_string)
+                    real_anomalous_metrics.append(metric)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate list from Redis set analyzer.real_anomalous_metrics to calculate total_anomalies')
+            total_anomalies = str(len(real_anomalous_metrics))
 
             # @added 20190408 - Feature #2882: Mirage - periodic_check
-            mirage_periodic_checks = str(len(self.mirage_periodic_check_metrics))
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # mirage_periodic_checks = str(len(self.mirage_periodic_check_metrics))
+            mirage_periodic_checks = '0'
+            # @modified 20190524 - Feature #2882: Mirage - periodic_check
+            #                      Branch #3002: docker
+            # Only check Redis set if MIRAGE_PERIODIC_CHECK is True
+            if MIRAGE_PERIODIC_CHECK:
+                try:
+                    mirage_periodic_checks = str(len(list(self.redis_conn.smembers('analyzer.mirage_periodic_check_metrics'))))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to generate a list from analyzer.mirage_periodic_check_metrics Redis set')
+                    mirage_periodic_checks = '0'
 
             # Log progress
             logger.info('seconds to run     :: %.2f' % run_time)
@@ -2086,9 +2418,13 @@ class Analyzer(Thread):
             # @added 20161119 - Branch #922: ionosphere
             #                   Task #1718: review.tsfresh
             # Send a breakdown of what metrics were sent to other apps
+            sent_to_mirage = 0
             if settings.ENABLE_MIRAGE:
                 try:
-                    sent_to_mirage = str(len(self.sent_to_mirage))
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Replace Manager.list instances with Redis sets
+                    # sent_to_mirage = str(len(self.sent_to_mirage))
+                    sent_to_mirage = str(len(list(self.redis_conn.smembers('analyzer.sent_to_mirage'))))
                 except:
                     sent_to_mirage = '0'
                 logger.info('sent_to_mirage     :: %s' % sent_to_mirage)
@@ -2104,32 +2440,43 @@ class Analyzer(Thread):
 
                 # @added 20190408 - Feature #2882: Mirage - periodic_check
                 logger.info('mirage_periodic_checks  :: %s' % mirage_periodic_checks)
-                mirage_periodic_checks = str(len(self.mirage_periodic_check_metrics))
-                logger.info('mirage_periodic_checks     :: %s' % mirage_periodic_checks)
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Already defined above
+                # mirage_periodic_checks = str(len(self.mirage_periodic_check_metrics))
+                # logger.info('mirage_periodic_checks     :: %s' % mirage_periodic_checks)
                 send_metric_name = '%s.mirage_periodic_checks' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, mirage_periodic_checks)
 
+            sent_to_crucible = 0
             if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
                 try:
-                    sent_to_crucible = str(len(self.sent_to_crucible))
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # sent_to_crucible = str(len(self.sent_to_crucible))
+                    sent_to_crucible = str(len(list(self.redis_conn.smembers('analyzer.sent_to_crucible'))))
                 except:
                     sent_to_crucible = '0'
                 logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
                 send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
 
+            sent_to_panorama = 0
             if settings.PANORAMA_ENABLED:
                 try:
-                    sent_to_panorama = str(len(self.sent_to_panorama))
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # sent_to_panorama = str(len(self.sent_to_panorama))
+                    sent_to_panorama = str(len(list(self.redis_conn.smembers('analyzer.sent_to_panorama'))))
                 except:
                     sent_to_panorama = '0'
                 logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
                 send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
 
+            sent_to_ionosphere = 0
             if settings.IONOSPHERE_ENABLED:
                 try:
-                    sent_to_ionosphere = str(len(self.sent_to_ionosphere))
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # sent_to_ionosphere = str(len(self.sent_to_ionosphere))
+                    sent_to_ionosphere = str(len(list(self.redis_conn.smembers('analyzer.sent_to_ionosphere'))))
                 except:
                     sent_to_ionosphere = '0'
                 logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
@@ -2179,43 +2526,168 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage before reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
-            # @added 20180903 - Feature #2580: illuminance
-            #                   Feature #1986: flux
-            try:
-                illuminance_sum = sum(self.illuminance_datapoints)
-                illuminance = str(illuminance_sum)
-            except:
-                illuminance = 0
-            logger.info('illuminance        :: %s' % illuminance)
-            send_metric_name = '%s.illuminance' % skyline_app_graphite_namespace
-            # @modified 20181017 - Feature #2580: illuminance
-            # Disabled for now as in concept phase
-            # @modified 20190519 - Feature #2580: illuminance
-            #                      Branch #3002: docker
-            # Re-enabled
-            send_graphite_metric(skyline_app, send_metric_name, illuminance)
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis key set instead of self.illuminance_datapoints Manager()
+            # list
+            # Disabled for now as in concept phase.
+            if calculate_illuminance:
+                illuminance_datapoints = []
+                try:
+                    illuminance_datapoints_strings = list(self.redis_conn.smembers('analyzer.illuminance_datapoints'))
+                    for datapoint in illuminance_datapoints_strings:
+                        illuminance_datapoints.append(float(datapoint))
+                    logger.info('%s datapoints in list from analyzer.illuminance_datapoints Redis set' % str(len(illuminance_datapoints)))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to generate a list from analyzer.illuminance_datapoints Redis set')
+                    illuminance_datapoints = []
+
+                # @added 20180903 - Feature #2580: illuminance
+                #                   Feature #1986: flux
+                illuminance_sum = 0
+                try:
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # illuminance_sum = sum(self.illuminance_datapoints)
+                    illuminance_sum = sum(illuminance_datapoints)
+                    illuminance = str(illuminance_sum)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to sum list from analyzer.illuminance_datapoints Redis set')
+                    illuminance = '0'
+                logger.info('illuminance        :: %s' % str(illuminance))
+                send_metric_name = '%s.illuminance' % skyline_app_graphite_namespace
+                # @modified 20181017 - Feature #2580: illuminance
+                # Disabled for now as in concept phase.  This would work better if
+                # the illuminance_datapoint was determined from the time series
+                # after min max scaling wass applied to it.  That way each metric
+                # would have the same weight.  txBytes for instance would not have
+                # a far greater weight than a low range metric.
+                # send_graphite_metric(skyline_app, send_metric_name, illuminance)
+
+                # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                try:
+                    self.redis_conn.delete('analyzer.illuminance_datapoints')
+                except:
+                    logger.info('failed to delete analyzer.illuminance_datapoints Redis set')
+                    pass
 
             # Reset counters
-            self.anomalous_metrics[:] = []
-            self.mirage_metrics[:] = []
-            self.ionosphere_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.anomalous_metrics[:] = []
+            try:
+                self.redis_conn.delete('analyzer.anomalous_metrics')
+            except:
+                logger.info('failed to delete analyzer.anomalous_metrics Redis set')
+                pass
+
+            # @modified 20190522 - Branch #3002: docker
+            #                      Task #3032: Debug number of Python processes and memory use
+            # Reduce amount of Manager instances that are used as ech requires an
+            # a copy of entire memory to be copied into each subprocess so this
+            # results in a python process per Manager instance
+            # self.mirage_metrics[:] = []
+            # self.ionosphere_metrics[:] = []
+
             # @added 20161119 - Branch #922: ionosphere
             #                   Task #1718: review.tsfresh
-            self.sent_to_mirage[:] = []
-            self.sent_to_crucible[:] = []
-            self.sent_to_panorama[:] = []
-            self.sent_to_ionosphere[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Replace Manager.list instances with Redis sets
+            # self.sent_to_mirage[:] = []
+            if int(sent_to_mirage) > 0:
+                try:
+                    self.redis_conn.delete('analyzer.sent_to_mirage')
+                except:
+                    logger.info('failed to delete analyzer.sent_to_mirage Redis set')
+                    pass
+            # self.sent_to_crucible[:] = []
+            if int(sent_to_crucible) > 0:
+                try:
+                    self.redis_conn.delete('analyzer.sent_to_crucible')
+                except:
+                    logger.info('failed to delete analyzer.sent_to_crucible Redis set')
+                    pass
+            # self.sent_to_panorama[:] = []
+            if int(sent_to_panorama) > 0:
+                try:
+                    self.redis_conn.delete('analyzer.sent_to_panorama')
+                except:
+                    logger.info('failed to delete analyzer.sent_to_panorama Redis set')
+                    pass
+            # self.sent_to_ionosphere[:] = []
+            if int(sent_to_ionosphere) > 0:
+                try:
+                    self.redis_conn.delete('analyzer.sent_to_ionosphere')
+                except:
+                    logger.info('failed to delete analyzer.sent_to_ionosphere Redis set')
+                    pass
+
             # @added 20161229 - Feature #1830: Ionosphere alerts
-            self.all_anomalous_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Replace Manager.list instances with Redis sets
+            # self.all_anomalous_metrics[:] = []
+            all_anomalous_metrics_count = 0
+            try:
+                all_anomalous_metrics_count = len(list(self.redis_conn.smembers('analyzer.all_anomalous_metrics')))
+            except:
+                pass
+            if all_anomalous_metrics_count > 0:
+                try:
+                    self.redis_conn.delete('analyzer.all_anomalous_metrics')
+                except:
+                    logger.info('failed to delete analyzer.all_anomalous_metrics Redis set')
+                    pass
+
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
-            self.smtp_alerter_metrics[:] = []
-            self.non_smtp_alerter_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Replace Manager.list instances with Redis sets
+            # self.smtp_alerter_metrics[:] = []
+            try:
+                self.redis_conn.delete('analyzer.smtp_alerter_metrics')
+            except:
+                logger.info('failed to delete analyzer.smtp_alerter_metrics Redis set')
+                pass
+            # self.non_smtp_alerter_metrics[:] = []
+            try:
+                self.redis_conn.delete('analyzer.non_smtp_alerter_metrics')
+            except:
+                logger.info('failed to delete analyzer.non_smtp_alerter_metrics Redis set')
+                pass
+
             # @added 20180903 - Feature #1986: illuminance
-            self.illuminance_datapoints[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Replace Manager.list instances with Redis sets
+            # self.illuminance_datapoints[:] = []
+            # @modified 20190522 - Feature #2580: illuminance
+            #                      Feature #1986: flux
+            # Disabled for now as in concept phase.
+            if calculate_illuminance:
+                try:
+                    self.redis_conn.delete('analyzer.illuminance_datapoints')
+                except:
+                    logger.info('failed to delete analyzer.illuminance_datapoints Redis set')
+                    pass
+
             # @added 20190408 - Feature #2882: Mirage - periodic_check
-            self.mirage_periodic_check_metrics[:] = []
-            self.real_anomalous_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.mirage_periodic_check_metrics[:] = []
+            # @modified 20190524 - Feature #2882: Mirage - periodic_check
+            #                      Branch #3002: docker
+            # Only check Redis set if MIRAGE_PERIODIC_CHECK is True
+            if MIRAGE_PERIODIC_CHECK:
+                try:
+                    self.redis_conn.delete('analyzer.mirage_periodic_check_metrics')
+                except:
+                    logger.info('failed to delete analyzer.mirage_periodic_check_metrics Redis set')
+                    pass
+
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.real_anomalous_metrics[:] = []
+            try:
+                self.redis_conn.delete('analyzer.real_anomalous_metrics')
+            except:
+                logger.info('failed to delete analyzer.real_anomalous_metrics Redis set')
+                pass
 
             unique_metrics = []
             raw_series = None
@@ -2248,14 +2720,17 @@ class Analyzer(Thread):
 
             # @added 20180903 - Feature #2580: illuminance
             #                   Feature #1986: flux
-            try:
-                del illuminance_sum
-            except:
-                logger.error('error :: failed to del illuminance_sum')
-            try:
-                del illuminance
-            except:
-                logger.error('error :: failed to del illuminance')
+            # @modified 20190522 - Feature #2580: illuminance
+            # Disabled for now as in concept phase.
+            if calculate_illuminance:
+                try:
+                    del illuminance_sum
+                except:
+                    logger.error('error :: failed to del illuminance_sum')
+                try:
+                    del illuminance
+                except:
+                    logger.error('error :: failed to del illuminance')
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage after reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -2339,7 +2814,7 @@ class Analyzer(Thread):
                 try:
                     self.redis_conn.sadd('derivative_metrics', live_at)
                 except Exception as e:
-                    logger.error('error :: could not add live at to Redis set derivative_metrics: %s' % str(e))
+                    logger.error('error :: could not add live_at to Redis set derivative_metrics: %s' % str(e))
                 try:
                     non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
                 except:

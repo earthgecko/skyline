@@ -95,6 +95,12 @@ except:
     full_duration_seconds = 86400
 full_duration_in_hours = full_duration_seconds / 60 / 60
 
+# @added 20190523 - Branch #3002: docker
+try:
+    DOCKER_FAKE_EMAIL_ALERTS = settings.DOCKER_FAKE_EMAIL_ALERTS
+except:
+    DOCKER_FAKE_EMAIL_ALERTS = False
+
 
 def get_graphite_port():
     """
@@ -116,7 +122,7 @@ def get_graphite_render_uri():
     try:
         graphite_render_uri = str(settings.GRAPHITE_RENDER_URI)
     except:
-        log.info('get_graphite_render_uri :: GRAPHITE_RENDER_URI is not declared in settings.py, using default of \'render\'')
+        logger.info('get_graphite_render_uri :: GRAPHITE_RENDER_URI is not declared in settings.py, using default of \'render\'')
         graphite_render_uri = 'render'
     return graphite_render_uri
 
@@ -129,7 +135,7 @@ def get_graphite_custom_headers():
     try:
         headers = settings.GRAPHITE_CUSTOM_HEADERS
     except:
-        log.info('get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}')
+        logger.info('get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}')
         headers = dict()
     return headers
 
@@ -152,8 +158,14 @@ def alert_smtp(alert, metric, context):
 
     # @added 20161229 - Feature #1830: Ionosphere alerts
     # Added Ionosphere variables
-    base_name = hashlib.sha224(str(metric[1]).replace(
-        settings.FULL_NAMESPACE, '', 1)).hexdigest()
+    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20190520 - Branch #3002: docker
+    # wix-playground added a hashlib hexdigest method which has not been
+    # verified so using the originaly method useless the base_name is longer
+    # than 254 chars
+    if len(base_name) > 254:
+        base_name = hashlib.sha224(str(metric[1]).replace(
+            settings.FULL_NAMESPACE, '', 1)).hexdigest()
     if settings.IONOSPHERE_ENABLED:
         timeseries_dir = base_name.replace('.', '/')
         training_data_dir = '%s/%s/%s' % (
@@ -220,15 +232,6 @@ def alert_smtp(alert, metric, context):
             'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
             (str(primary_recipient), str(cc_recipients)))
 
-    # @added 20190517 - Branch #3002: docker
-    # Do not try to alert if the settings are default
-    if 'your_domain.com' in str(sender):
-        logger.info('alert_smtp - sender is not configured, not sending alert')
-        return False
-    if 'your_domain.com' in str(primary_recipient):
-        logger.info('alert_smtp - sender is not configured, not sending alert')
-        return False
-
     # @modified 20161229 - Feature #1830: Ionosphere alerts
     # Ionosphere alerts
     unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
@@ -286,6 +289,7 @@ def alert_smtp(alert, metric, context):
     until_timestamp = int(metric[2])
     from_timestamp = until_timestamp - full_duration_seconds
 
+    # @added 20190518 - Branch #3002: docker
     graphite_port = get_graphite_port()
     graphite_render_uri = get_graphite_render_uri()
     graphite_custom_headers = get_graphite_custom_headers()
@@ -295,10 +299,21 @@ def alert_smtp(alert, metric, context):
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
 
+    # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
+    # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
+    #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+    #     graphite_port, str(int(full_duration_in_hours)), metric[1],
+    #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    # @modified 20190518 - Branch #3002: docker
+    # Use GRAPHITE_RENDER_URI
+    # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+    #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+    #     str(graphite_from), str(graphite_until), metric[1],
+    #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri,
-        str(graphite_from), str(graphite_until), metric[1],
-        settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+        settings.GRAPHITE_RENDER_URI, str(graphite_from), str(graphite_until),
+        metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # @added 20170603 - Feature #2034: analyse_derivatives
     if known_derivative_metric:
@@ -307,10 +322,17 @@ def alert_smtp(alert, metric, context):
         #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
         #     graphite_port, str(int(full_duration_in_hours)), metric[1],
         #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20190518 - Branch #3002: docker
+        # Use GRAPHITE_RENDER_URI
+        # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+        #     graphite_port, str(graphite_from), str(graphite_until), metric[1],
+        #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1],
-            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            graphite_port, settings.GRAPHITE_RENDER_URI, str(graphite_from),
+            str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            graph_title)
 
     content_id = metric[1]
     image_data = None
@@ -332,7 +354,12 @@ def alert_smtp(alert, metric, context):
             try:
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                request = urllib2.Request(link, headers=graphite_custom_headers)
+                # @modified 20190520 - Branch #3002: docker
+                # image_data = urllib2.urlopen(link).read()  # nosec
+                if graphite_custom_headers:
+                    request = urllib2.Request(link, headers=graphite_custom_headers)
+                else:
+                    request = urllib2.Request(link)
                 image_data = urllib2.urlopen(request).read()  # nosec
                 if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                     logger.info('debug :: alert_smtp - image data OK')
@@ -843,28 +870,55 @@ def alert_smtp(alert, metric, context):
             logger.error('error :: alert_smtp - could not attach')
             logger.info(traceback.format_exc())
 
-        s = SMTP('127.0.0.1')
-        try:
-            # @modified 20180524 - Task #2384: Change alerters to cc other recipients
-            # Send to primary_recipient and cc_recipients
-            # s.sendmail(sender, recipient, msg.as_string())
-            if cc_recipients:
-                s.sendmail(sender, [primary_recipient, cc_recipients], msg.as_string())
-            else:
-                s.sendmail(sender, primary_recipient, msg.as_string())
-            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                # logger.info('debug :: alert_smtp - message sent to %s OK' % str(recipient))
-                logger.info(
-                    'debug :: alert_smtp - message sent OK to primary_recipient :: %s, cc_recipients :: %s' %
-                    (str(primary_recipient), str(cc_recipients)))
-        except:
-            logger.info(traceback.format_exc())
-            # logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
-            logger.error(
-                'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
-                (str(primary_recipient), str(cc_recipients)))
+        # @added 20190517 - Branch #3002: docker
+        # Do not try to alert if the settings are default
+        send_email_alert = True
+        if 'your_domain.com' in str(sender):
+            logger.info('alert_smtp - sender is not configured, not sending alert')
+            send_email_alert = False
+        if 'your_domain.com' in str(primary_recipient):
+            logger.info('alert_smtp - recipient is not configured, not sending alert')
+            send_email_alert = False
+        if 'example.com' in str(sender):
+            logger.info('alert_smtp - sender is not configured, not sending alert')
+            send_email_alert = False
+        if 'example.com' in str(primary_recipient):
+            logger.info('alert_smtp - recipient is not configured, not sending alert')
+            send_email_alert = False
+        if DOCKER_FAKE_EMAIL_ALERTS:
+            logger.info('alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to %s, not executing SMTP command' % str(DOCKER_FAKE_EMAIL_ALERTS))
+            send_email_alert = False
 
-        s.quit()
+        # @modified 20190517 - Branch #3002: docker
+        # Wrap the smtp block based on whether to actually send mail or not.
+        # This allows for all the steps to be processed in the testing or docker
+        # context without actually sending the email.
+        if send_email_alert:
+            try:
+                s = SMTP('127.0.0.1')
+                # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+                # Send to primary_recipient and cc_recipients
+                # s.sendmail(sender, recipient, msg.as_string())
+                if cc_recipients:
+                    s.sendmail(sender, [primary_recipient, cc_recipients], msg.as_string())
+                else:
+                    s.sendmail(sender, primary_recipient, msg.as_string())
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    # logger.info('debug :: alert_smtp - message sent to %s OK' % str(recipient))
+                    logger.info(
+                        'debug :: alert_smtp - message sent OK to primary_recipient :: %s, cc_recipients :: %s' %
+                        (str(primary_recipient), str(cc_recipients)))
+            except:
+                logger.info(traceback.format_exc())
+                # logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
+                logger.error(
+                    'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
+                    (str(primary_recipient), str(cc_recipients)))
+            s.quit()
+        else:
+            logger.info(
+                'alert_smtp - send_email_alert was set to %s message was not sent to primary_recipient :: %s, cc_recipients :: %s' % (
+                    str(send_email_alert), str(primary_recipient), str(cc_recipients)))
 
     if LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - Memory usage after email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -1034,15 +1088,6 @@ def alert_stale_digest(alert, metric, context):
         logger.error('error :: alert_stale_digest - no known default_recipient')
         return False
 
-    # @added 20190517 - Branch #3002: docker
-    # Do not try to alert if the settings are default
-    if 'your_domain.com' in str(sender):
-        logger.info('alert_stale_digest - sender is not configured, not sending alert')
-        return False
-    if 'your_domain.com' in str(recipient):
-        logger.info('alert_stale_digest - sender is not configured, not sending alert')
-        return False
-
     try:
         body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
         body += '<font color="black"><b>Stale metrics (no data sent for ~%s seconds):</b></font><br>' % str(settings.ALERT_ON_STALE_PERIOD)
@@ -1070,14 +1115,42 @@ def alert_stale_digest(alert, metric, context):
         logger.error('error :: alert_smtp - could not attach')
         logger.info(traceback.format_exc())
 
-    s = SMTP('127.0.0.1')
-    try:
-        s.sendmail(sender, recipient, msg.as_string())
-        logger.info('alert_stale_digest - sent email to recipient :: %s' % str(recipient))
-    except:
-        logger.info(traceback.format_exc())
-        logger.error('error :: alert_stale_digest - could not send email to recipient :: %s' % str(recipient))
-    s.quit()
+    # @added 20190517 - Branch #3002: docker
+    # Do not try to alert if the settings are default
+    send_email_alert = True
+    if 'your_domain.com' in str(sender):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        send_email_alert = False
+    if 'your_domain.com' in str(recipient):
+        logger.info('alert_smtp - recipient is not configured, not sending alert')
+        send_email_alert = False
+    if 'example.com' in str(sender):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        send_email_alert = False
+    if 'example.com' in str(recipient):
+        logger.info('alert_smtp - recipient is not configured, not sending alert')
+        send_email_alert = False
+    if DOCKER_FAKE_EMAIL_ALERTS:
+        logger.info('alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to %s, not sending email alert' % str(DOCKER_FAKE_EMAIL_ALERTS))
+        send_email_alert = False
+
+    # @modified 20190517 - Branch #3002: docker
+    # Wrap the smtp block based on whether to actually send mail or not.
+    # This allows for all the steps to be processed in the testing or docker
+    # context without actually sending the email.
+    if send_email_alert:
+        try:
+            s = SMTP('127.0.0.1')
+            s.sendmail(sender, recipient, msg.as_string())
+            logger.info('alert_stale_digest - sent email to recipient :: %s' % str(recipient))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: alert_stale_digest - could not send email to recipient :: %s' % str(recipient))
+        s.quit()
+    else:
+        logger.info(
+            'alert_smtp - send_email_alert was set to %s message was not sent to recipient :: %s' % (
+                str(send_email_alert), str(recipient)))
     return
 
 
@@ -1085,6 +1158,8 @@ def alert_stale_digest(alert, metric, context):
 def alert_slack(alert, metric, context):
 
     if not settings.SLACK_ENABLED:
+        logger.info('alert_slack - SLACK_ENABLED is False, not slack alerting for anomalous metric :: alert: %s, metric: %s' % (
+            str(alert), str(metric)))
         return False
 
     # @modified 20190517 - Branch #3002: docker
@@ -1102,10 +1177,23 @@ def alert_slack(alert, metric, context):
     import simplejson as json
 
     logger.info('alert_slack - anomalous metric :: alert: %s, metric: %s' % (str(alert), str(metric)))
-    base_name = hashlib.sha224(str(metric[1]).replace(
-        settings.FULL_NAMESPACE, '', 1)).hexdigest()
+    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20190520 - Branch #3002: docker
+    # wix-playground added a hashlib hexdigest method which has not been
+    # verified so using the original method useless the base_name is longer
+    # than 254 chars
+    if len(base_name) > 254:
+        base_name = hashlib.sha224(str(metric[1]).replace(
+            settings.FULL_NAMESPACE, '', 1)).hexdigest()
+
     full_duration_in_hours = int(settings.FULL_DURATION) / 3600
 
+    # The known_derivative_metric state is determine in case we need to surface
+    # the png image from Graphite if the Ionosphere image is not available for
+    # some reason.  This will result in Skyline at least still sending an alert
+    # to slack, even if some gear fails in Ionosphere or slack alerting is used
+    # without Ionosphere enabled. Yes not DRY but multiprocessing and spawn
+    # safe.
     known_derivative_metric = False
     try:
         if settings.REDIS_PASSWORD:
@@ -1210,7 +1298,12 @@ def alert_slack(alert, metric, context):
     if not image_file:
         # Fetch the png from Graphite
         try:
-            request = urllib2.Request(link, headers=graphite_custom_headers)
+            # @modified 20190520 - Branch #3002: docker
+            # image_data = urllib2.urlopen(link).read()  # nosec
+            if graphite_custom_headers:
+                request = urllib2.Request(link, headers=graphite_custom_headers)
+            else:
+                request = urllib2.Request(link)
             image_data = urllib2.urlopen(request).read()  # nosec
         except urllib2.URLError:
             logger.error(traceback.format_exc())
@@ -1262,6 +1355,9 @@ def alert_slack(alert, metric, context):
     ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
         settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
 
+    # This block is not used but left here as it is the pattern for sending
+    # messages using the chat.postMessage methods and could possibly be the
+    # failover for a files.upload error or future messages.
     message_payload = json.dumps([{
         "fallback": slack_title + ' - ' + link,
         "title": slack_title,
@@ -1270,8 +1366,25 @@ def alert_slack(alert, metric, context):
         "text": 'Ionosphere training data :: ' + ionosphere_link,
         "color": "#764FA5"
     }])
+    send_slack_message = False
 
     for channel in channels:
+        if send_slack_message:
+            try:
+                send_message = sc.api_call(
+                    'chat.postMessage',
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    attachments=message_payload)
+                if not send_message['ok']:
+                    logger.error('error :: alert_slack - failed to send slack message')
+                else:
+                    logger.info('alert_slack - sent slack message')
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: alert_slack - could not send_message')
+                return False
+
         if settings.IONOSPHERE_ENABLED:
             # @modified 20181025 - Feature #2618: alert_slack
             # Added date and time info so you do not have to mouseover the slack
@@ -1450,19 +1563,35 @@ def alert_slack(alert, metric, context):
                 logger.error('error :: alert_slack - redis connection failed')
             metric_timestamp = int(metric[2])
             cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
-            cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+
+            # @added 20190719 - Bug #3110: webapp - slack_response boolean object
+            # When there are multiple channels declared Skyline only wants to
+            # update the panorama.slack_thread_ts Redis key once for the
+            # primary Skyline channel, so if the cache key exists do not update
+            key_exists = False
             try:
-                REDIS_ALERTER_CONN.setex(
-                    cache_key, 86400,
-                    str(cache_key_value))
-                logger.info(
-                    'added Panorama slack_thread_ts Redis key - %s - %s' %
-                    (cache_key, str(cache_key_value)))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error(
-                    'error :: failed to add Panorama slack_thread_ts Redis key - %s - %s' %
-                    (cache_key, str(cache_key_value)))
+                key_exists = REDIS_ALERTER_CONN.get(cache_key)
+            except Exception as e:
+                logger.error('error :: could not query Redis for cache_key: %s' % e)
+            if key_exists:
+                logger.info('cache key exists for previous channel, not updating %s' % str(cache_key))
+            else:
+                # @modified 20190719 - Bug #3110: webapp - slack_response boolean object
+                # Wrapped in if key_exists, only add a Panorama Redis key if one
+                # has not been added.
+                cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+                try:
+                    REDIS_ALERTER_CONN.setex(
+                        cache_key, 86400,
+                        str(cache_key_value))
+                    logger.info(
+                        'added Panorama slack_thread_ts Redis key - %s - %s' %
+                        (cache_key, str(cache_key_value)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: failed to add Panorama slack_thread_ts Redis key - %s - %s' %
+                        (cache_key, str(cache_key_value)))
 
 
 def trigger_alert(alert, metric, context):
