@@ -75,7 +75,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
     if CARBON_HOST == 'YOUR_GRAPHITE_HOST.example.com':
         current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
-        current_logger.info('CARBON_HOST is not configure is settings.py no CARBON_HOST to send metrics to')
+        current_logger.info('CARBON_HOST is not configured in settings.py no CARBON_HOST to send metrics to')
         return False
 
     # @modified 20190518 - Branch #3002: docker

@@ -330,6 +330,10 @@ if [ ! -f /tmp/skyline.dawn.redis.make.txt ]; then
   sleep 1
   if [ "$OS" == "CentOS" ]; then
     yum -y install wget make gcc
+    # @added 20190822 - Branch #3002: docker
+    if [ "$OS_MAJOR_VERSION" == "7" ]; then
+      yum -y install gcc-c++ kernel-devel
+    fi
   else
     apt-get -y install wget make gcc
   fi
