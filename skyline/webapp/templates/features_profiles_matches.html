@@ -92,6 +92,16 @@
   		        <td>until_timestamp</td>
   		        <td><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
   		      </tr>
+<!-- # @added 20190619 - Feature #3084: Ionosphere - validated matches -->
+  		      <tr>
+  		        <td>validated</td>
+  		        <td><select name="validated_equals">
+                <option value="any">any</option>
+                <option value="false">false</option>
+                <option value="true">true</option>
+                <option value="true">invalid</option>
+              </select></td>
+  		      </tr>
   		      <tr>
                 <td>limit</td>
                 <td><input type="number" name="limit" min="0" max="100" value="100" /> use 0 for unlimited</td>
@@ -127,14 +137,17 @@ count
 			<table class="table table-hover">
 				<thead>
 					<tr>
-<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page] -->
+<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated] -->
             <th>date</th>
             <th>metric</th>
             <th>match id</th>
             <th>matched by</th>
             <th>fp_id</th>
             <th>layer_id</th>
-            <th>uri_to_matched_page</th>
+<!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
+# Changed to validated
+            <th>uri_to_matched_page</th> -->
+            <th>validated</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -143,9 +156,24 @@ count
             <td>{{ item[0] }}</td>
             <td>{{ item[5] }}</td>
       {% if 'features profile' in item[2]  %}
+<!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
+            </td>  -->
+        {% if item[7] == 2 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
+            </td>
+        {% elif item[7] == 1 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
+            </td>
+        {% else %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
+        {% endif %}
+
 <!-- # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
      # Added ionosphere_echo -->
         {% if 'echo' in item[2]  %}
@@ -158,9 +186,24 @@ count
             <td><span class="logo"><span class="sky">{{ item[2] }}</span></span></td>
         {% endif %}
       {% else %}
+<!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
+-->
+        {% if item[7] == 2 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
+            </td>
+        {% elif item[7] == 1 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
+            </td>
+        {% else %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>
+            </td>
+        {% endif %}
             <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
       {% endif %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
@@ -173,7 +216,16 @@ count
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[4] }}</a>
             </td>
       {% endif %}
-            <td>{{ item[6] }}</td>
+<!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
+# Changed to validated
+            <td>{{ item[6] }}</td> -->
+      {% if item[7] == 2 %}
+            <td><span class="logo"><span class="re">INVALIDATED</span></span></td>
+      {% elif item[7] == 1 %}
+            <td><span class="logo"><span class="sky">True</span></span></td>
+      {% else %}
+            <td><span class="logo"><span class="re">False</span></span></td>
+      {% endif %}
           </tr>
     {% endfor %}
 				</tbody>

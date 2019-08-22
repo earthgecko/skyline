@@ -332,6 +332,7 @@ you need to try and be quicker next time.
     {% endif %}
       <br>
   {% endif %}
+
   {% if matched_layer_id %}
       <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">layers ::</span> ionosphere_layers_matched id - {{ matched_layer_id }}</span></span></span></h4></center>
 <!-- # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers -->
@@ -339,6 +340,16 @@ you need to try and be quicker next time.
       <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is an approximately_close match</span></span></span></h4></center>
     {% endif %}
       <br>
+  {% endif %}
+
+  {% if matched_fp_id or matched_layer_id %}
+    {% if match_validated_db_value == 0 %}
+      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">not validated yet</span></span></span></h4></center>
+    {% elif match_validated_db_value == 1 %}
+      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">VALID</span></span></span></h4></center>
+    {% else %}
+      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID</span></span></span></h4></center>
+    {% endif %}
   {% endif %}
 
   	  <h4><span class="logo"><span class="sky">Calculated ::</span> <span class="re">features ::</span></span></span> features profile id {{ features_profile_id }}</h4>
@@ -544,14 +555,74 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
     <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
     {% endif %}
     <br>
+
+<!-- # @added 20190601 - Feature #3084: Ionosphere - validated matches -->
+    {% if match_validated_db_value == 0 %}
+  	  <h4><span class="logo"><span class="sky">Match ::</span> <span class="re">not validated</span></span></span></h4>
+	   <div class="alert alert-warning">
+      This match has not been validated, please review it and validate or invalidate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_fp_id={{ matched_fp_id }}&match_validation=1">
+      <button type="button">Validate match</button></a>
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_fp_id={{ matched_fp_id }}&match_validation=2">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+    {% elif match_validated_db_value == 1 %}
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">validated ::</span></span></span> <code>True</code></h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly validated, you can invalidate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_fp_id={{ matched_fp_id }}&match_validation=2">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+    {% else %}
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID ::</span></span></span> True</h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly invalidated, you can validate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_fp_id={{ matched_fp_id }}&match_validation=1">
+      <button type="button">Validate match</button></a>
+	   </div>
+    {% endif %}
   {% endif %}
+
   {% if matched_layer_id %}
     <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_layers_matched id ::</span></span></span> {{ matched_layer_id }}</h4>
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
     <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
     {% endif %}
+
+<!-- # @added 20190601 - Feature #3084: Ionosphere - validated matches -->
+    {% if match_validated_db_value == 0 %}
+  	  <h4><span class="logo"><span class="sky">Match ::</span> <span class="re">not validated</span></span></span></h4>
+	   <div class="alert alert-warning">
+      This match has not been validated, please review it and validate or invalidate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_layer_id={{ matched_layer_id }}&match_validation=1">
+      <button type="button">Validate match</button></a>
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_layer_id={{ matched_layer_id }}&match_validation=2">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+    {% elif match_validated_db_value == 1 %}
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">validated ::</span></span></span> <code>True</code></h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly validated, you can invalidate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_layer_id={{ matched_layer_id }}&match_validation=2">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+    {% else %}
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID ::</span></span></span> True</h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly invalidated, you can validate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_layer_id={{ matched_layer_id }}&match_validation=1">
+      <button type="button">Validate match</button></a>
+	   </div>
+    {% endif %}
+
     <br>
+  {% endif %}
+
+  {% if validated_match_successful %}
+	  <div class="alert alert-success">
+	    <strong>Success!</strong> The match has now been validated<br>
+	  </div>
   {% endif %}
 
 <!-- # @added 20170908 - Feature #2056: ionosphere - disabled_features_profiles -->
@@ -651,7 +722,7 @@ Image file: {{ image }}<br><br>
 <!-- # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
      # Added ionosphere_echo -->
     {% if echo_fp == 1 %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ echo_human_date }}</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ echo_human_date }} - these graphs may be aggregated due the the echo features profile being made at a later date than the parent</strong></h4>
 	  <div class="alert alert-warning">
     The <b><span class="logo"><span class="sky">ionosphere_echo ::</span> <span class="re">features profile ::</span></span></span></b> was created based on the <b>Graphite NOW graph at {{ redis_full_duration_in_hours }} hours</b> graph below
 	  </div>
@@ -732,21 +803,41 @@ Image file: {{ image }}<br><br>
 	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>0 learnt profiles</h4>
   {% endif %}
 
+<!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
+# Wrapped up in if matched_layer_id present layers matches first -->
+  {% if matched_layer_id %}
+<!-- # @added 20170308 - Feature #1960: ionosphere_layers
+# To present the operator with the matched layers Graphite graphs -->
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">layers MATCHED ::</span></span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
+      Only one graph is displayed per 10 minute period, a layer could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
+    {% for gmimage in graphite_layers_matched_images %}
+        <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+    {% endfor %}
+        <p style="clear: both;">
+
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">profile MATCHED ::</span></span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
       Only one graph is displayed per 10 minute period, a profile could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
-  {% for gmimage in graphite_matched_images %}
+    {% for gmimage in graphite_matched_images %}
         <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
-  {% endfor %}
+    {% endfor %}
+        <p style="clear: both;">
+  {% else %}
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">profile MATCHED ::</span></span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
+      Only one graph is displayed per 10 minute period, a profile could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
+    {% for gmimage in graphite_matched_images %}
+        <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+    {% endfor %}
         <p style="clear: both;">
 
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the matched layers Graphite graphs -->
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">layers MATCHED ::</span></span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
       Only one graph is displayed per 10 minute period, a layer could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
-  {% for gmimage in graphite_layers_matched_images %}
+    {% for gmimage in graphite_layers_matched_images %}
         <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
-  {% endfor %}
+    {% endfor %}
         <p style="clear: both;">
+  {% endif %}
 
   {% for image in metric_images %}
     {% if '.redis.plot' in image %}

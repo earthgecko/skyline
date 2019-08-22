@@ -835,7 +835,6 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             for row in result:
                 matched_timestamp = row['metric_timestamp']
                 matched_timestamps.append(int(matched_timestamp))
-                logger.info('found matched_timestamp %s' % (str(matched_timestamp)))
             connection.close()
         except:
             logger.error(traceback.format_exc())
@@ -2028,7 +2027,12 @@ def ionosphere_search(default_query, search_query):
         # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
         # enabled_list = None
         if not enabled_list:
-            enabled_list = None
+            # @modified 20190816 - Bug #3190: webapp error - search_features_profiles_block when all features profiles are disabled
+            # If all features profiles have been disabled this needs to be
+            # passed as a empty list to be iterated in search_features_profiles
+            # template because type 'NoneType' is not iterable
+            # enabled_list = None
+            enabled_list = []
         tsfresh_version_list = None
         generation_list = None
         if engine:
@@ -4094,6 +4098,9 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                         engine_disposal(engine)
                     return False, fail_msg, trace
         needs_and = True
+        # @added 20190524 - Branch #3002: docker
+        if str(get_fp_id) == '0':
+            needs_and = False
 
     if 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
@@ -4102,6 +4109,16 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 import datetime
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
                 from_timestamp = str(int(new_from_timestamp))
+
+            # @added 20190530 - Branch #3002: docker
+            # Fix search so that if timestamps are passed and there is a list of
+            # fp ids the SQL does not break
+            try:
+                if len(fp_ids) > 0:
+                    needs_and = True
+            except:
+                logger.info('fp_ids length unknown, OK')
+
             if needs_and:
                 new_query_string = '%s AND metric_timestamp >= %s' % (query_string, from_timestamp)
                 query_string = new_query_string
@@ -4125,6 +4142,31 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 needs_and = True
             else:
                 new_query_string = '%s WHERE metric_timestamp <= %s' % (query_string, until_timestamp)
+                query_string = new_query_string
+                needs_and = True
+
+    # @added 20190619 - Feature #3084: Ionosphere - validated matches
+    if 'validated_equals' in request.args:
+        filter_matches = False
+        validated_equals = request.args.get('validated_equals', None)
+        if validated_equals == 'any':
+            filter_matches = False
+        if validated_equals == 'true':
+            filter_match_validation = 1
+            filter_matches = True
+        if validated_equals == 'false':
+            filter_match_validation = 0
+            filter_matches = True
+        if validated_equals == 'invalid':
+            filter_match_validation = 2
+            filter_matches = True
+        if filter_matches:
+            if needs_and:
+                new_query_string = '%s AND validated = %s' % (query_string, str(filter_match_validation))
+                query_string = new_query_string
+                needs_and = True
+            else:
+                new_query_string = '%s WHERE validated = %s' % (query_string, str(filter_match_validation))
                 query_string = new_query_string
                 needs_and = True
 
@@ -4238,6 +4280,14 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
 # ionosphere_layers_matched table layout
 # | id    | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration |
 # | 25069 |       24 |  1108 |       195 |        1505561823 |            2.000000 |         86400 |
+# @modified 20190601 - Feature #3084: Ionosphere - validated matches
+# Added validated
+# ionosphere_matched table layout
+# | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version | minmax | minmax_fp_features_sum | minmax_fp_features_count | minmax_anomalous_features_sum | minmax_anomalous_features_count | fp_count | fp_checked | validated |
+# | 26946 |  2925 |       1529664909 |      -214679719261.15 |                     210 | -214680153882.557 |                   150 | 0.4.0           |      1 |       4162.60829454032 |                      210 |              4196.51947426028 |                             210 |        0 |          0 |         0 |
+# ionosphere_layers_matched table layout
+# | id | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration | layers_count | layers_checked | approx_close | validated |
+# |  1 |       27 |  1114 |        34 |        1488971471 |           10.000000 |         86400 |            0 |              0 |            0 |         0 |
 
     matches = []
 # matches list elements - where id is the ionosphere_matched or the
@@ -4278,6 +4328,9 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 matched_by = 'features profile - minmax'
             fp_id = int(row['fp_id'])
 
+            # @added 20190601 - Feature #3084: Ionosphere - validated matches
+            validated = int(row['validated'])
+
             # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
             # Added ionosphere_echo
             if settings.IONOSPHERE_ECHO_ENABLED:
@@ -4296,7 +4349,11 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             except:
                 metric = 'UNKNOWN'
             uri_to_matched_page = 'None'
-            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
+
+            # @modified 20190601 - Feature #3084: Ionosphere - validated matches
+            # Added validated
+            # matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
+            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated])
 
     if get_layers_matched:
         # layers matches
@@ -4335,6 +4392,9 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             else:
                 matched_by = 'layers - approx_close'
 
+            # @added 20190601 - Feature #3084: Ionosphere - validated matches
+            validated = int(row['validated'])
+
             fp_id = int(row['fp_id'])
             layer_id = int(row['layer_id'])
             # Get metric name, first get metric id from the features profile
@@ -4346,7 +4406,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 metric = 'UNKNOWN'
             uri_to_matched_page = 'None'
 
-            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
+            # @modified 20190601 - Feature #3084: Ionosphere - validated matches
+            # Added validated
+            # matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
+            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated])
 
     sorted_matches = sorted(matches, key=lambda x: x[0])
     matches = sorted_matches
@@ -4586,6 +4649,7 @@ metric_timestamp    :: %s     | human_date :: %s
 
 
 # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
+# @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
 def get_features_profiles_to_validate(base_name):
     """
     Get the details for Ionosphere features profiles that need to be validated
@@ -4596,7 +4660,7 @@ def get_features_profiles_to_validate(base_name):
         fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,
         fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,
         fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,
-        maximum_full_duration]]
+        maximum_full_duration, generation]]
 
     :param base_name: metric base_name
     :type base_name: str
@@ -4784,10 +4848,16 @@ def get_features_profiles_to_validate(base_name):
             # str(parent_fp_data_dir), base_name, str(int(parent_full_duration_in_hours)))
             str(parent_fp_data_dir), base_name, get_hours)
 
+        # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
+        # Added parent_fp_generation
+        parent_fp_generation = parent_fp_details_object['generation']
+
         # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
         # Only add to features_profiles_to_validate if fp_id in enabled_list
+        # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
+        # Added fp_generation and parent_fp_generation
         if fp_id in enabled_list:
-            features_profiles_to_validate.append([fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration, maximum_full_duration])
+            features_profiles_to_validate.append([fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp, fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date, fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id, fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration, maximum_full_duration, fp_generation, parent_fp_generation])
 
     logger.info('%s :: features_profiles_to_validate - %s' % (
         function_str, str(features_profiles_to_validate)))
@@ -5176,4 +5246,99 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         fail_msg = 'error :: webapp_update_slack_thread :: failed to slack_post_reaction to channel id %s and slack_thread_ts %s with reaction %s' % (
             str(channel_id), str(slack_thread_ts), str(reaction_emoji))
         logger.error('%s' % fail_msg)
+    return True
+
+
+# @added 20190601 - Feature #3084: Ionosphere - validated matches
+def validate_ionosphere_match(match_id, validate_context, match_validated):
+    """
+    Update the validated value in the DB for the match.
+
+    :param match_id: the match id
+    :param validate_context: the context to validate either ionosphere_matched
+        or ionosphere_layers_matched
+    :param match_validated: 1 for valid or 2 for invalid
+    :type match_id: str
+    :type validate_context: str
+    :type match_validated: int
+    :return: True or False
+    :rtype:  boolean
+
+    """
+
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        logger.error('%s' % fail_msg)
+        logger.error('error :: validate_ionosphere_match :: could not get a MySQL engine to get slack_thread_ts')
+        raise  # to webapp to return in the UI
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: validate_ionosphere_match :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    if validate_context == 'ionosphere_matched':
+        try:
+            ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('ionosphere_matched_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for %s' % base_name)
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        try:
+            connection = engine.connect()
+            connection.execute(
+                ionosphere_matched_table.update(
+                    ionosphere_matched_table.c.id == match_id).
+                values(validated=match_validated))
+            connection.close()
+            logger.info('updated validated for %s' % str(match_id))
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: could not update validated for %s ' % str(match_id)
+            logger.error(fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise
+
+    if validate_context == 'ionosphere_layers_matched':
+        try:
+            ionosphere_layers_matched_table, log_msg, trace = ionosphere_layers_matched_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('ionosphere_layers_matched_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for %s' % base_name)
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        try:
+            connection = engine.connect()
+            connection.execute(
+                ionosphere_layers_matched_table.update(
+                    ionosphere_layers_matched_table.c.id == match_id).
+                values(validated=match_validated))
+            connection.close()
+            logger.info('updated validated for %s' % str(match_id))
+        except:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: could not update validated for %s ' % str(match_id)
+            logger.error(fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise
+
+    if engine:
+        engine_disposal(engine)
+
     return True

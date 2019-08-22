@@ -135,6 +135,8 @@ from ionosphere_backend import (
     ionosphere_show_graphs,
     # @added 20190502 - Branch #2646: slack
     webapp_update_slack_thread,
+    # @added 20190601 - Feature #3084: Ionosphere - validated matches
+    validate_ionosphere_match,
 )
 
 # from utilites import alerts_matcher
@@ -200,7 +202,7 @@ app.config.update(
 )
 
 graph_url_string = str(settings.GRAPH_URL)
-PANORAMA_GRAPH_URL = re.sub('\/render\/.*', '', graph_url_string)
+PANORAMA_GRAPH_URL = re.sub('\/render.*', '', graph_url_string)
 
 # @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
 # Defaults for momentjs to work if the setttings.py was not updated
@@ -216,6 +218,12 @@ try:
     WEBAPP_JAVASCRIPT_DEBUG = settings.WEBAPP_JAVASCRIPT_DEBUG
 except:
     WEBAPP_JAVASCRIPT_DEBUG = False
+
+# @added 20190520 - Branch #3002: docker
+try:
+    GRAPHITE_RENDER_URI = settings.GRAPHITE_RENDER_URI
+except:
+    GRAPHITE_RENDER_URI = 'render'
 
 
 @app.before_request
@@ -742,7 +750,15 @@ def panorama():
             key = str(i)
             if key not in REQUEST_ARGS:
                 logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
-                return 'Bad Request', 400
+                # @modified 20190524 - Branch #3002: docker
+                # Return data
+                # return 'Bad Request', 400
+                error_string = 'error :: invalid request argument - %s=%s' % (key, str(i))
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
 
@@ -794,7 +810,7 @@ def panorama():
                         error_string = 'error :: no metric - %s - exists in Redis' % metric_name
                         logger.error(error_string)
                         resp = json.dumps(
-                            {'results': error_string})
+                            {'404 Not Found': error_string})
                         # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
                         #                      Bug #2816: Cross-Site Scripting Security Vulnerability
                         # return resp, 404
@@ -807,9 +823,14 @@ def panorama():
                 if value == 'true':
                     count_by_metric_invalid = False
                 if count_by_metric_invalid:
-                    error_string = 'error :: invalid %s value passed %s' % (key, value)
-                    logger.error('error :: invalid %s value passed %s' % (key, value))
-                    return 'Bad Request', 400
+                    error_string = 'error :: invalid %s value passed %s' % (key, str(value))
+                    logger.error(error_string)
+                    # @modified 20190524 - Branch #3002: docker
+                    # Return data
+                    # return 'Bad Request', 400
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
 
             if key == 'metric_like':
                 if value == 'all':
@@ -851,7 +872,12 @@ def panorama():
                 if timestamp_format_invalid:
                     error_string = 'error :: invalid %s value passed %s' % (key, value)
                     logger.error('error :: invalid %s value passed %s' % (key, value))
-                    return 'Bad Request', 400
+                    # @modified 20190524 - Branch #3002: docker
+                    # Return data
+                    # return 'Bad Request', 400
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
 
             if key == 'app':
                 if value != 'all':
@@ -1339,8 +1365,16 @@ def ionosphere():
         for i in request.args:
             key = str(i)
             if key not in REQUEST_ARGS:
-                logger.error('error :: invalid request argument - %s' % (key))
-                return 'Bad Request', 400
+                # @modified 20190524 - Branch #3002: docker
+                # Return data
+                # logger.error('error :: invalid request argument - %s' % (key))
+                # return 'Bad Request', 400
+                error_string = 'error :: invalid request argument - %s' % (key)
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
 
@@ -1375,7 +1409,23 @@ def ionosphere():
                 if timestamp_format_invalid:
                     error_string = 'error :: invalid %s value passed %s' % (key, value)
                     logger.error('error :: invalid %s value passed %s' % (key, value))
-                    return 'Bad Request', 400
+                    # @modified 20190524 - Branch #3002: docker
+                    # Return data
+                    # return 'Bad Request', 400
+                    error_string = 'error :: invalid request argument - %s' % (key)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
+
+                # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
+                #                   Branch #3002: docker
+                # Added the missing definition of these 2 variables in the
+                # fp_matches context
+                if key == 'from_timestamp':
+                    from_timestamp = value
+                if key == 'until_timestamp':
+                    until_timestamp = value
 
             if key == 'count_by_metric':
                 count_by_metric = request.args.get(str('count_by_metric'), None)
@@ -1401,9 +1451,9 @@ def ionosphere():
 
                 # @added 20180423 - Feature #2034: analyse_derivatives
                 #                   Branch #2270: luminosity
+                metric_found_in_other_redis = False
                 other_unique_metrics = []
                 if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
-                    metric_found_in_other_redis = False
                     # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
                     # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
                     for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
@@ -1607,28 +1657,42 @@ def ionosphere():
         # Added by fp_id or layer_id as well
         fp_id = None
         layer_id = None
+        # @added 20190619 - Feature #3084: Ionosphere - validated matches
+        validated_equals = None
         for i in request.args:
             key = str(i)
             value = request.args.get(key, None)
             if key == 'fp_id':
                 logger.info('request key %s set to %s' % (key, str(value)))
                 try:
-                    test_fp_id = int(value) + 0
-                    if test_fp_id > 0:
-                        fp_id = str(test_fp_id)
+                    # @modified 20190524 - Branch #3002: docker
+                    # test_fp_id = int(value) + 0
+                    # if test_fp_id > 0:
+                    #     fp_id = str(test_fp_id)
+                    test_fp_id = int(value) + 1
+                    if test_fp_id > -1:
+                        fp_id = str(value)
                     else:
                         # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
                         #                      Bug #2816: Cross-Site Scripting Security Vulnerability
                         # Test that the fp_id is an int first
                         # fp_id = None
                         logger.error('error :: invalid request argument - fp_id is not an int')
-                        return 'Bad Request', 400
+                        # @modified 20190524 - Branch #3002: docker
+                        # Return data
+                        # return 'Bad Request', 400
+                        error_string = 'error :: invalid request argument - fp_id is not an int'
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'400 Bad Request': error_string})
+                        return flask_escape(resp), 200
+
                     logger.info('fp_id now set to %s' % (str(fp_id)))
                 except:
                     error_string = 'error :: the fp_id argument was passed but not as an int - %s' % str(value)
                     logger.error(error_string)
                     resp = json.dumps(
-                        {'results': error_string})
+                        {'400 Bad Request': error_string})
                     # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
                     #                      Bug #2816: Cross-Site Scripting Security Vulnerability
                     # return resp, 404
@@ -1646,11 +1710,15 @@ def ionosphere():
                     error_string = 'error :: the layer_id argument was passed but not as an int - %s' % str(value)
                     logger.error(error_string)
                     resp = json.dumps(
-                        {'results': error_string})
+                        {'400 Bad Request': error_string})
                     # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
                     #                      Bug #2816: Cross-Site Scripting Security Vulnerability
                     # return resp, 404
                     return flask_escape(resp), 404
+
+            # @added 20190619 - Feature #3084: Ionosphere - validated matches
+            if key == 'validated_equals':
+                validated_equals = str(value)
 
         logger.info('get_fp_matches with arguments :: %s, %s, %s, %s, %s, %s, %s, %s' % (
             str(metric), str(metric_like), str(fp_id), str(layer_id),
@@ -1660,6 +1728,22 @@ def ionosphere():
         matches, fail_msg, trace = get_fp_matches(metric, metric_like, fp_id, layer_id, from_timestamp, until_timestamp, limited_by, ordered_by)
         if not matches:
             return internal_error(fail_msg, trace)
+
+        # @added 20190619 - Feature #3084: Ionosphere - validated matches
+        if validated_equals:
+            filter_matches = True
+            if validated_equals == 'any':
+                filter_matches = False
+            if validated_equals == 'true':
+                filter_match_validation = 1
+            if validated_equals == 'false':
+                filter_match_validation = 0
+            if validated_equals == 'invalid':
+                filter_match_validation = 2
+            if filter_matches:
+                logger.info('matches filtered by validated = %s' % (
+                    str(filter_match_validation)))
+
         return render_template(
             'ionosphere.html', fp_matches=fp_matches_req, for_metric=metric,
             fp_matches_results=matches, order=ordered_by, limit=limited_by,
@@ -1697,6 +1781,8 @@ def ionosphere():
         'matched_fp_id', 'matched_layer_id',
         # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
         'load_derivative_graphs',
+        # @added 20190601 - Feature #3084: Ionosphere - validated matches
+        'match_validation',
     ]
 
     # @modified 20190503 - Branch #2646: slack - linting
@@ -1736,6 +1822,8 @@ def ionosphere():
     # @added 20170917 - Feature #1996: Ionosphere - matches page
     matched_fp_id = False
     matched_layer_id = False
+    # @added 20190601 - Feature #3084: Ionosphere - validated matches
+    match_validated = 0
 
     try:
         if request_args_present:
@@ -1755,6 +1843,18 @@ def ionosphere():
                     matched_fp_id = request.args.get(str('matched_fp_id'), None)
                 if 'matched_layer_id' in request.args:
                     matched_layer_id = request.args.get(str('matched_layer_id'), None)
+                # @added 20190601 - Feature #3084: Ionosphere - validated matches
+                if 'match_validation' in request.args:
+                    match_validated_str = request.args.get(str('match_validation'), None)
+                    if match_validated_str:
+                        try:
+                            match_validated = int(match_validated_str)
+                        except:
+                            error_string = 'error :: invalid request argument - match_validation is not an int - %s' % str(match_validated_str)
+                            logger.error(error_string)
+                            resp = json.dumps(
+                                {'results': error_string})
+                            return flask_escape(resp), 400
 
                 # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
                 # Determine the features profile dir path for a fp_id
@@ -1768,7 +1868,14 @@ def ionosphere():
                         logger.info('test_fp_id_valid tests OK with %s' % str(test_fp_id_valid))
                     except:
                         logger.error('error :: invalid request argument - fp_id is not an int')
-                        return 'Bad Request', 400
+                        # @modified 20190524 - Branch #3002: docker
+                        # Return data
+                        # return 'Bad Request', 400
+                        error_string = 'error :: the fp_id argument was passed but not as an int - %s' % str(value)
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        return flask_escape(resp), 400
 
                     fp_id = request.args.get(str('fp_id'), None)
 
@@ -1910,6 +2017,14 @@ def ionosphere():
                                 settings.SKYLINE_URL, str(use_timestamp), base_name,
                                 str(matched_layer_id))
 
+                    # @added 20190601 - Feature #3084: Ionosphere - validated matches
+                    if matched_fp_id or matched_layer_id:
+                        if 'match_validation' in request.args:
+                            if match_validated > 0:
+                                validate_matched_redirect_url = '%s&match_validation=%s' % (
+                                    redirect_url, str(match_validated))
+                                redirect_url = validate_matched_redirect_url
+
                     # @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers
                     #                      Task #2002: Review and correct incorrectly defined layers
                     # Build the query string from the previous parameters
@@ -1933,7 +2048,15 @@ def ionosphere():
                 key = str(i)
                 if key not in IONOSPHERE_REQUEST_ARGS:
                     logger.error('error :: invalid request argument - %s' % (key))
-                    return 'Bad Request', 400
+                    # @modified 20190524 - Branch #3002: docker
+                    # Return data
+                    # return 'Bad Request', 400
+                    error_string = 'error :: invalid request argument - %s' % (key)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
+
                 value = request.args.get(key, None)
                 logger.info('request argument - %s=%s' % (key, str(value)))
 
@@ -2752,6 +2875,9 @@ def ionosphere():
             # Added ionosphere_echo
             echo_fp_value = 0
 
+            # @added 20190619 - Feature #2990: Add metrics id to relevant web pages
+            metric_id = False
+
             # Determine the parent_id and generation as they were added to the
             # fp_details_object
             if fp_details:
@@ -2769,6 +2895,12 @@ def ionosphere():
                         echo_fp_value = int(fp_details_object['echo_fp'])
                     except:
                         pass
+
+                    # @added 20190619 - Feature #2990: Add metrics id to relevant web pages
+                    # Determine the metric_id from the fp_details_object
+                    if not metric_id:
+                        metric_id = int(fp_details_object['metric_id'])
+
                 except:
                     trace = traceback.format_exc()
                     message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
@@ -2939,6 +3071,42 @@ def ionosphere():
                 minmax = int(matched_details_object['minmax'])
                 logger.info('the fp match has minmax set to %s' % str(minmax))
 
+            # @added 20190601 - Feature #3084: Ionosphere - validated matches
+            # Update the DB that the match has been validated or invalidated
+            validated_match_successful = None
+            match_validated_db_value = None
+            if matched_fp_id or matched_layer_id:
+                match_validated_db_value = matched_details_object['validated']
+                logger.info('the match_validated_db_value is set to %s' % str(match_validated_db_value))
+                logger.info('the match_validated is set to %s' % str(match_validated))
+                # Only update if the value in the DB is different from the value
+                # in the argument, due to there being a difficulty in the
+                # removal of the match_validation argument due to the
+                # redirect_url function being applied earlier ^^ in the process.
+                # Unfortunately without the redirect_url function being applied
+                # this match_validation and match_validated would not work as
+                # the matched context the redirect_url function is used.  Hence
+                # more F.
+                if int(match_validated_db_value) != int(match_validated):
+                    if 'match_validation' in request.args:
+                        if match_validated > 0:
+                            logger.info('validating match')
+                            if matched_fp_id:
+                                match_id = matched_fp_id
+                                validate_context = 'ionosphere_matched'
+                            if matched_layer_id:
+                                match_id = matched_layer_id
+                                validate_context = 'ionosphere_layers_matched'
+                            try:
+                                validated_match_successful = validate_ionosphere_match(match_id, validate_context, match_validated)
+                                logger.info('validated match')
+                                match_validated_db_value = match_validated
+                            except:
+                                trace = traceback.format_exc()
+                                fail_msg = 'error :: Webapp error with search_ionosphere'
+                                logger.error(fail_msg)
+                                return internal_error(fail_msg, trace)
+
             # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
             approx_close = 0
             if matched_layer_id:
@@ -2975,7 +3143,7 @@ def ionosphere():
                             # correlation_graphite_link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                             correlation_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                                settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                                settings.GRAPHITE_PORT, GRAPHITE_RENDER_URI,
                                 str(graphite_from), str(graphite_until), metric_name,
                                 settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         else:
@@ -2983,7 +3151,7 @@ def ionosphere():
                             # correlation_graphite_link = '%s://%s/render/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                             correlation_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                                settings.GRAPHITE_RENDER_URI, str(graphite_from),
+                                GRAPHITE_RENDER_URI, str(graphite_from),
                                 str(graphite_until), metric_name,
                                 settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         correlations_with_graph_links.append([metric_name, coefficient, shifted, shifted_coefficient, str(correlation_graphite_link)])
@@ -3092,6 +3260,10 @@ def ionosphere():
                 metric_full_duration_in_hours_image_str=m_fd_in_hours_img_str,
                 # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
                 metric_id=metric_id,
+                # @added 20190601 - Feature #3084: Ionosphere - validated matches
+                match_validated=match_validated,
+                match_validated_db_value=match_validated_db_value,
+                validated_match_successful=validated_match_successful,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -3129,7 +3301,15 @@ def ionosphere_images():
             key = str(i)
             if key not in IONOSPHERE_REQUEST_ARGS:
                 logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
-                return 'Bad Request', 400
+                # @modified 20190524 - Branch #3002: docker
+                # Return data
+                # return 'Bad Request', 400
+                error_string = 'error :: invalid request argument - %s=%s' % (key, str(i))
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+
             value = request.args.get(key, None)
             logger.info('request argument - %s=%s' % (key, str(value)))
 
@@ -3297,6 +3477,7 @@ def get_redis(host, port, db, password):
             return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
         else:
             return redis.StrictRedis(host=host, port=port, db=db, password=password)
+
 
 # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
 # Added token, client_id and salt to replace password parameter and determining
@@ -3548,7 +3729,6 @@ def rebrow():
             running_on_docker = settings.DOCKER
         except:
             running_on_docker = False
-            logger.info('rebrow access :: set Redis key - %s' % (key))
         if running_on_docker:
             host_input_value = 'unix_socket'
             try:
@@ -3572,6 +3752,7 @@ def rebrow():
             display_redis_password=display_redis_password,
             host_input_value=host_input_value,
             duration=(time.time() - start))
+
 
 @app.route("/rebrow_server_db/<host>:<int:port>/<int:db>/")
 @requires_auth
