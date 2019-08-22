@@ -9,6 +9,7 @@
 # @modified 20180915 - Feature #2550: skyline.dawn.sh - added skyline user
 #                      Task #2596: Build Skyline on nodes at v1.2.8
 # @modified 20181018 - Task #2596: Build Skyline on nodes at v1.2.8
+# @modified 20190412 - Task #2926: Update dependencies
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -36,16 +37,16 @@
 # Please replace the values here and populate these variables as appropriate
 # with the values of YOUR set up or write them to /etc/skyline/skyline.dawn.conf
 # to be sourced.
-YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep -o "inet.*" | cut -d " " -f2)"                         # YOUR Skyline server public IP address
-YOUR_SKYLINE_SERVER_FQDN="$(hostname -f)"        # YOUR Skyline server FQDN
-YOUR_EMAIL="skyline@wix.com"                                # YOUR email address for the httpd server admin
-YOUR_OTHER_IP_ADDRESS="0.0.0.0"                          # YOUR current public IP address that you will be connecting from
+YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep "inet addr" | cut -d ':' -f2)"  # YOUR Skyline server public IP address
+YOUR_SKYLINE_SERVER_FQDN="skyline-test.example.com"        # YOUR Skyline server FQDN
+YOUR_EMAIL="me@example.com"                                # YOUR email address for the httpd server admin
+YOUR_OTHER_IP_ADDRESS="127.0.0.1"                          # YOUR current public IP address that you will be connecting from
 WEBAPP_AUTH_USER="admin"                                   # The username you want to use for http authentication
 WEBAPP_AUTH_USER_PASSWORD="$(echo {$HOSTNAME}_skyline)"    # The password you want to use for http authentication
-MYSQL_ROOT_PASSWORD="XXXXXXXXX"     # The MySQL root user password
-MYSQL_SKYLINE_PASSWORD="XXXXXXXXX"  # The Skyline DB user password
-REDIS_PASSWORD="XXXXXXXXX"       # The Redis password
-SKYLINE_RELEASE="v1.2.121"                 # The Skyline release to deploy
+MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user password
+MYSQL_SKYLINE_PASSWORD="set_the-skyline-user-db-password"  # The Skyline DB user password
+REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
+SKYLINE_RELEASE="v1.2.18"                                  # The Skyline release to deploy
 
 STARTED=$(date)
 #### Check if the user added variables in /etc/skyline/skyline.dawn.conf ####
@@ -72,11 +73,19 @@ if [ -n "$1" ]; then
 fi
 
 #### STATIC VARIABLES ####
-REDIS_VERSION="redis-3.2.12"
-PYTHON_VERSION="2.7.14"
+# @modified 20190412 - Task #2926: Update dependencies
+# Update to redis-4.0.14
+#REDIS_VERSION="redis-3.2.12"
+REDIS_VERSION="redis-4.0.14"
+# @modified 20190412 - Task #2926: Update dependencies
+# Update to Python-2.7.16
+#PYTHON_VERSION="2.7.14"
+PYTHON_VERSION="2.7.16"
 PYTHON_MAJOR_VERSION="2.7"
 PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-PROJECT="skyline-py2714"
+# @modified 20190412 - Task #2926: Update dependencies
+#PROJECT="skyline-py2714"
+PROJECT="skyline-py2716"
 VIRTUALENV_VERSION="15.2.0"
 
 #### Check USER DEFINED VARIABLES ####
@@ -211,20 +220,25 @@ if [ "$OS" == "CentOS" ]; then
     #fi
   fi
   if [ "$OS_MAJOR_VERSION" == "7" ]; then
-    if [ ! -f /tmp/skyline.dawn.yum.mysql-server.install.run.txt ]; then
-      echo "Installing mysql-community-server"
+    if [ ! -f /tmp/skyline.dawn.yum.mariadb-server.install.run.txt ]; then
+      echo "Installing mariadb-server"
       sleep 1
-      yum -y install mysql-community-server
-      systemctl start mysqld
+      yum -y install mariadb-server
+# @modified 20180915 - Feature #2550: skyline.dawn.sh - added skyline user
+#                      Task #2596: Build Skyline on nodes at v1.2.8
+# Added innodb_file_per_table
+#      sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1/g' /etc/my.cnf.d/server.cnf
+      sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1\ninnodb_file_per_table=1/g' /etc/my.cnf.d/server.cnf
+      systemctl start mariadb
       MYSQL_START_EXIT_CODE=$?
       if [ $MYSQL_START_EXIT_CODE -ne 0 ]; then
         echo "error :: mysqld failed to start"
         exit 1
       fi
-      systemctl enable mysqld
-      echo "True" > /tmp/skyline.dawn.yum.mysql-server.install.run.txt
+      systemctl enable mariadb
+      echo "True" > /tmp/skyline.dawn.yum.mariadb-server.install.run.txt
     else
-      echo "Skipping installing mysqld-server, already done"
+      echo "Skipping installing mariadb-server, already done"
       sleep 1
     fi
   fi
@@ -239,7 +253,7 @@ if [ "$OS" == "Ubuntu" ]; then
       systemctl start mysql
       MYSQL_START_EXIT_CODE=$?
       if [ $MYSQL_START_EXIT_CODE -ne 0 ]; then
-        echo "error :: mysqld failed to start"
+        echo "error :: mysql failed to start"
         exit 1
       fi
     fi
@@ -255,16 +269,55 @@ if [ ! -f /tmp/skyline.dawn.secure.mysql.txt ]; then
     # MySQL 5.1 method
     mysql -e "UPDATE mysql.user SET Password = PASSWORD('$MYSQL_ROOT_PASSWORD') WHERE User = 'root'"
   else
-    MYSQL_TEMPORARY_PASSWORD=$(grep "temporary password" /var/log/mysqld.log | grep -o "root@localhost.*" | cut -d " " -f2)
-    mysql -uroot -p$MYSQL_TEMPORARY_PASSWORD --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+    mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$MYSQL_ROOT_PASSWORD');"
   fi
   MYSQL_EXIT_CODE=$?
   if [ $MYSQL_EXIT_CODE -ne 0 ]; then
     echo "error :: failed to set MySQL root password"
     exit 1
   fi
+  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "6" ]]; then
+    # MySQL 5.1 method
+    MYSQL_COMMAND="mysql -e"
+  else
+    MYSQL_COMMAND="mysql -u root -p$MYSQL_ROOT_PASSWORD -e"
+  fi
 
+  if [ "$OS" == "CentOS" ]; then
+    echo "Dropping anonymous MySQL user at localhost"
+    $MYSQL_COMMAND "DROP USER ''@'localhost'"
+    MYSQL_EXIT_CODE=$?
+    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
+      echo "error :: failed to drop anonymous MySQL user from localhost"
+      exit 1
+    fi
+  fi
+
+  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "6" ]]; then
+    echo "Dropping anonymous MySQL user at $HOSTNAME"
+    $MYSQL_COMMAND "DROP USER ''@'$(hostname)'"
+    MYSQL_EXIT_CODE=$?
+    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
+      echo "error :: failed to drop anonymous MySQL user from $HOSTNAME"
+      exit 1
+    fi
+  fi
+  if [ "$OS" == "CentOS" ]; then
+    echo "Dropping test MySQL database"
+    $MYSQL_COMMAND "DROP DATABASE test"
+    MYSQL_EXIT_CODE=$?
+    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
+      echo "error :: failed to drop test MySQL database"
+      exit 1
+    fi
+  fi
+  echo "flushing MySQL privileges"
+  $MYSQL_COMMAND "FLUSH PRIVILEGES"
+  MYSQL_EXIT_CODE=$?
+  if [ $MYSQL_EXIT_CODE -ne 0 ]; then
+    echo "error :: failed flush MySQL privileges"
+    exit 1
+  fi
   echo "True" > /tmp/skyline.dawn.secure.mysql.txt
 else
   echo "Skipping securing MySQL, already done."
@@ -546,7 +599,7 @@ if [ ! -d /opt/skyline/github/skyline/.git ]; then
   sleep 1
   mkdir -p /opt/skyline/github
   cd /opt/skyline/github || exit 1
-  git clone https://github.com/wix-playground/skyline.git
+  git clone https://github.com/earthgecko/skyline.git
 # @added 20180915 - Feature #2550: skyline.dawn.sh
 # Added permissions for skyline user
   chown skyline:skyline -R /opt/skyline/github
@@ -602,6 +655,20 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
   # https://github.com/statsmodels/statsmodels/issues/4654
   bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
   bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
+
+  # @added 20190412 - Task #2926: Update dependencies
+  #                   Bug #2590: mysql-connector-python - use_pure
+  # mysql-connector-python needs to be fixed to 8.0.6 on CentOS 6 as it uses
+  # MySQL 5.1 rpm from mainstream, as of mysql-connector-python 8.0.11 support
+  # for 5.1 was dropped and results in a bad handshake error.
+  if [ "$OS" == "CentOS" ]; then
+    if [ "$OS_MAJOR_VERSION" == "6" ]; then
+      echo "Replacing mysql-connector-python version in requirements.txt as CentOS 6 requires mysql-connector-python==8.0.6"
+      cat /opt/skyline/github/skyline/requirements.txt > /opt/skyline/github/skyline/requirements.txt.original
+      cat /opt/skyline/github/skyline/requirements.txt.original | sed -e 's/^mysql-connector-python==.*/mysql-connector-python==8\.0\.6/g' > /opt/skyline/github/skyline/requirements.txt.centos6
+      cat /opt/skyline/github/skyline/requirements.txt.centos6 > /opt/skyline/github/skyline/requirements.txt
+    fi
+  fi
 
   # This can take lots of minutes...
   bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
@@ -889,4 +956,17 @@ echo ""
 echo "NOT FOR PRODUCTION"
 echo ""
 echo ""
-
+# @added 20190412 - Task #2926: Update dependencies
+#                   Bug #2590: mysql-connector-python - use_pure
+# Report known mysql-connector-python 8.0.6 vulnerablity on CentOS 6
+if [ "$OS" == "CentOS" ]; then
+  if [ "$OS_MAJOR_VERSION" == "6" ]; then
+    echo "NOTE - on CentOS 6 mysql-connector-python has to be fixed on version 8.0.6 due to the drop of support"
+    echo "       for MySQL 5.1.  mysql-connector-python-8.0.6 has reported vulnerablities"
+    echo "       High severity vulnerability found on mysql-connector-python@8.0.6"
+    echo "       desc: Improper Access Control"
+    echo "       info: https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986"
+    echo "       info: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435"
+    echo "       You have been advised, so now you know"
+  fi
+fi
