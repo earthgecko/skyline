@@ -350,6 +350,10 @@ Added fp_count and fp_checked
 */
   `fp_count` INT(10) DEFAULT 0 COMMENT 'the total number of features profiles for the metric which were valid to check',
   `fp_checked` INT(10) DEFAULT 0 COMMENT 'the number of features profiles checked until the match was made',
+/*
+# @added 20190601 - Feature #3084: Ionosphere - validated matches
+*/
+  `validated` TINYINT(4) DEFAULT 0 COMMENT 'whether the match has been validated, 0 being no, 1 validated, 2 invalid',
   PRIMARY KEY (id),
   INDEX `features_profile_matched` (`id`,`fp_id`))
   ENGINE=InnoDB;
@@ -416,6 +420,10 @@ Added layers_count and layers_checked
 # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
 */
   `approx_close` TINYINT(4) DEFAULT 0 COMMENT 'whether the match was made using approximately_close, 0 being no',
+/*
+# @added 20190601 - Feature #3084: Ionosphere - validated matches
+*/
+  `validated` TINYINT(4) DEFAULT 0 COMMENT 'whether the match has been validated, 0 being no, 1 validated, 2 invalid',
   PRIMARY KEY (id),
   INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`))
   ENGINE=InnoDB;

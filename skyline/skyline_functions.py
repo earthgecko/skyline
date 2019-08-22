@@ -27,11 +27,11 @@ except ImportError:
 import settings
 
 try:
-	# @modified 20190518 - Branch #3002: docker
+    # @modified 20190518 - Branch #3002: docker
     # from settings import GRAPHITE_HOST
     from settings import CARBON_HOST
 except:
-	# @modified 20190518 - Branch #3002: docker
+    # @modified 20190518 - Branch #3002: docker
     # GRAPHITE_HOST = ''
     CARBON_HOST = ''
 try:
@@ -62,16 +62,24 @@ def send_graphite_metric(current_skyline_app, metric, value):
     :rtype: boolean
 
     """
-	# @added 20190518 - Branch #3002: docker
-    # If the CARBON_HOST is set to the default do not send_graphite_metric
+
+    # @added 20190805 - Task #2828: Skyline - Python 3.7
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
+# @added 20190518 - Branch #3002: docker
+# If the CARBON_HOST is set to the default do not send_graphite_metric
     if CARBON_HOST == 'YOUR_GRAPHITE_HOST.example.com':
         current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.info('CARBON_HOST is not configure is settings.py no CARBON_HOST to send metrics to')
         return False
 
-	# @modified 20190518 - Branch #3002: docker
-	# Use the CARBON_HOST rather than GRAPHITE_HOST to allow for the 2 to be
+    # @modified 20190518 - Branch #3002: docker
+    # Use the CARBON_HOST rather than GRAPHITE_HOST to allow for the 2 to be
     # on different hosts
     # if GRAPHITE_HOST != '':
     if CARBON_HOST != '':
@@ -85,13 +93,13 @@ def send_graphite_metric(current_skyline_app, metric, value):
         # merged 1 commit into earthgecko:master from
         # mlowicki:handle_connection_error_to_graphite on 16 Mar 2015
         try:
-	        # @modified 20190518 - Branch #3002: docker
+            # @modified 20190518 - Branch #3002: docker
             # sock.connect((GRAPHITE_HOST, CARBON_PORT))
             sock.connect((CARBON_HOST, CARBON_PORT))
             sock.settimeout(None)
         except socket.error:
             sock.settimeout(None)
-	        # @modified 20190518 - Branch #3002: docker
+            # @modified 20190518 - Branch #3002: docker
             # endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
             endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
@@ -103,11 +111,16 @@ def send_graphite_metric(current_skyline_app, metric, value):
         # For the same reason as above
         # sock.sendall('%s %s %i\n' % (name, value, time()))
         try:
-            sock.sendall('%s %s %i\n' % (metric, value, time()))
+            # @modified 20190805 - Task #2828: Skyline - Python 3.7
+            if python_version == 2:
+                sock.sendall('%s %s %i\n' % (metric, value, time()))
+            if python_version == 3:
+                message = '%s %s %i\n' % (metric, value, time())
+                sock.sendall(message.encode())
             sock.close()
             return True
         except:
-	        # @modified 20190518 - Branch #3002: docker
+            # @modified 20190518 - Branch #3002: docker
             # endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
             endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
@@ -244,7 +257,7 @@ def write_data_to_file(current_skyline_app, write_to_file, mode, data):
         with open(write_to_file, mode) as fh:
             fh.write(data)
         if python_version == 2:
-            os.chmod(write_to_file, 0644)
+            os.chmod(write_to_file, 0o644)
         if python_version == 3:
             os.chmod(write_to_file, mode=0o644)
 
@@ -306,7 +319,7 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
     try:
         shutil.move(check_file_to_fail, failed_check_file)
         if python_version == 2:
-            os.chmod(failed_check_file, 0644)
+            os.chmod(failed_check_file, 0o644)
         if python_version == 3:
             os.chmod(failed_check_file, mode=0o644)
 
@@ -480,7 +493,7 @@ def get_graphite_metric(
     # @modified 20190520 - Branch #3002: docker
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/render?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/api/datasources/proxy/1/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
-    image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/' + GRAPHITE_RENDER_URI + '?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
+    image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/' + settings.GRAPHITE_RENDER_URI + '?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     url = image_url + '&format=' + output_format
 
     if settings.ENABLE_DEBUG:
@@ -586,7 +599,7 @@ def get_graphite_metric(
                 f.write(image_data)
             current_logger.info('retrieved - %s' % (graphite_image_file))
             if python_version == 2:
-                os.chmod(graphite_image_file, 0644)
+                os.chmod(graphite_image_file, 0o644)
             if python_version == 3:
                 os.chmod(graphite_image_file, mode=0o644)
         else:
@@ -653,7 +666,7 @@ def get_graphite_metric(
             with open(output_object, 'w') as f:
                 f.write(json.dumps(converted))
             if python_version == 2:
-                os.chmod(output_object, 0644)
+                os.chmod(output_object, 0o644)
             if python_version == 3:
                 os.chmod(output_object, mode=0o644)
             if settings.ENABLE_DEBUG:
@@ -1272,7 +1285,7 @@ def move_file(current_skyline_app, dest_dir, file_to_move):
     try:
         shutil.move(file_to_move, moved_file)
         if python_version == 2:
-            os.chmod(moved_file, 0644)
+            os.chmod(moved_file, 0o644)
         if python_version == 3:
             os.chmod(moved_file, mode=0o644)
 
@@ -1368,6 +1381,7 @@ def is_derivative_metric(current_skyline_app, base_name):
         return True
 
     return False
+
 
 # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
 def set_metric_as_derivative(current_skyline_app, base_name):
