@@ -27,7 +27,7 @@ logger = logging.getLogger(skyline_app_logger)
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
 
-class AnalyzerAgent():
+class AnalyzerDevAgent():
     def __init__(self):
         self.stdin_path = '/dev/null'
         self.stdout_path = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
@@ -85,11 +85,11 @@ def run():
     Start the logger.
     """
     if not isdir(settings.PID_PATH):
-        print 'pid directory does not exist at %s' % settings.PID_PATH
+        print('pid directory does not exist at %s' % settings.PID_PATH)
         sys.exit(1)
 
     if not isdir(settings.LOG_PATH):
-        print 'log directory does not exist at %s' % settings.LOG_PATH
+        print('log directory does not exist at %s' % settings.LOG_PATH)
         sys.exit(1)
 
     if len(sys.argv) > 1 and sys.argv[1] == 'stop':
@@ -149,16 +149,18 @@ def run():
             logger.info('Tested algorithms OK')
             logger.info('ensemble: %s' % str(ensemble))
         except KeyError as e:
-            print "Algorithm %s deprecated or not defined; check settings.ALGORITHMS" % e
+            print('Algorithm %s deprecated or not defined; check settings.ALGORITHMS' % e)
             sys.exit(1)
         except Exception as e:
-            print "Algorithm test run failed."
+            print('Algorithm test run failed.')
             traceback.print_exc()
             sys.exit(1)
 
         logger.info('Tested algorithms')
+        del timeseries
+        del ensemble
 
-    analyzer = AnalyzerAgent()
+    analyzer = AnalyzerDevAgent()
 
     if len(sys.argv) > 1 and sys.argv[1] == 'stop':
         do_not_overwrite_log = True
