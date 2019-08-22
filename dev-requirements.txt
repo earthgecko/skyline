@@ -8,7 +8,9 @@ wheel
 #                      Task #2926: Update dependencies
 #redis==2.10.6
 #hiredis==0.2.0
-redis==3.2.1
+# @modified 20190822 - Task #3060: Update dependencies
+#redis==3.2.1
+redis==3.3.8
 hiredis==1.0.0
 
 ## python-daemon and deps
@@ -16,7 +18,10 @@ hiredis==1.0.0
 #docutils==0.12
 # @modified 20170809 - Task #2138: Update deps
 #docutils==0.13.1
-docutils==0.14
+# @modified 20190822 - Task #3060: Update dependencies
+#docutils==0.14
+docutils==0.15.2
+
 lockfile==0.12.2
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -54,7 +59,11 @@ MarkupSafe==1.1.1
 #Werkzeug==0.12.2
 # @modified 20190412 - Task #2926: Update dependencies
 #Werkzeug==0.14.1
-Werkzeug==0.15.2
+# @modified 20190529 - Task #3060: Update dependencies
+#Werkzeug==0.15.2
+# @modified 20190822 - Task #3060: Update dependencies
+#Werkzeug==0.15.4
+Werkzeug==0.15.5
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #click==6.6
@@ -68,7 +77,11 @@ click==7.0
 #Flask==0.12
 # @modified 20180910 - Task #2588: Update dependencies
 #Flask==0.12.2
-Flask==1.0.2
+# @modified 20190529 - Task #3060: Update dependencies
+#Flask==1.0.2
+# @modified 20190822 - Task #3060: Update dependencies
+#Flask==1.0.3
+Flask==1.1.1
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -103,9 +116,15 @@ funcsigs==1.0.2
 #pbr==4.0.2
 # @modified 20190412 - Task #2926: Update dependencies
 #pbr==4.2.0
-pbr==5.1.3
+# @modified 20190529 - Task #3060: Update dependencies
+#pbr==5.1.3
+# @modified 20190822 - Task #3060: Update dependencies
+#pbr==5.2.0
+pbr==5.4.2
 
-mock==2.0.0
+# @modified 20190529 - Task #3060: Update dependencies
+#mock==2.0.0
+mock==3.0.5
 
 # If python-2.6 is being used, distribute is probably still required
 #distribute
@@ -133,7 +152,9 @@ mock==2.0.0
 # @modified 20190426 - Task #2964: Update dependencies
 # Mitigate CVE-2019-6446 and SNYK-PYTHON-NUMPY-73513
 #numpy==1.16.2
-numpy==1.16.3
+# @modified 20190529 - Task #3060: Update dependencies
+#numpy==1.16.3
+numpy==1.16.4
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -151,7 +172,9 @@ numpy==1.16.3
 #scipy==1.0.1
 # @modified 20190412 - Task #2926: Update dependencies
 #scipy==1.1.0
-scipy==1.2.1
+# @modified 20190822 - Task #3060: Update dependencies
+#scipy==1.2.1
+scipy==1.2.2
 
 ## matplotlib and co
 # @modified 20161119 - Branch #922: ionosphere
@@ -184,7 +207,9 @@ python-dateutil==2.8.0
 #pytz==2018.4
 # @modified 20190412 - Task #2926: Update dependencies
 #pytz==2018.5
-pytz==2019.1
+# @modified 20190822 - Task #3060: Update dependencies
+#pytz==2019.1
+pytz==2019.2
 
 cycler==0.10.0
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -196,7 +221,9 @@ cycler==0.10.0
 #pyparsing==2.1.10
 # @modified 20190412 - Task #2926: Update dependencies
 #pyparsing==2.2.0
-pyparsing==2.4.0
+# @modified 20190822 - Task #3060: Update dependencies
+#pyparsing==2.4.0
+pyparsing==2.4.2
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
@@ -258,7 +285,9 @@ patsy==0.5.1
 # @modified 20190411 - Task #2926: Update dependencies
 #statsmodels==0.8.0; python_version < '2.8'
 #statsmodels==0.9.0; python_version >= '3.6'
-statsmodels==0.9.0
+# @modified 20190822 - Task #3060: Update dependencies
+#statsmodels==0.9.0
+statsmodels==0.10.1
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #msgpack-python==0.4.7
@@ -284,7 +313,9 @@ msgpack-python==0.5.6
 #requests==2.19.1
 # @modified 20190411 - Task #2926: Update dependencies
 #requests==2.20.0
-requests==2.21.0
+# @modified 20190529 - Task #3060: Update dependencies
+#requests==2.21.0
+requests==2.22.0
 
 # ALERTERS - uncomment any alerters you want to enable
 python-simple-hipchat==0.4.0
@@ -408,7 +439,11 @@ termcolor==1.1.0
 py==1.8.0
 # @modified 20190426 - Task #2964: Update dependencies
 #pytest==4.4.0
-pytest==4.4.1
+# @modified 20190529 - Task #3060: Update dependencies
+#pytest==4.4.1
+# @modified 20190822 - Task #3060: Update dependencies
+#pytest==4.5.0
+pytest==4.6.5
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
@@ -424,14 +459,20 @@ pytest==4.4.1
 #SQLAlchemy==1.2.11
 # @modified 20190426 - Task #2964: Update dependencies
 #SQLAlchemy==1.3.2
-SQLAlchemy==1.3.3
+# @modified 20190529 - Task #3060: Update dependencies
+#SQLAlchemy==1.3.3
+# @modified 20190822 - Task #3060: Update dependencies
+#SQLAlchemy==1.3.4
+SQLAlchemy==1.3.7
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 # @modified 20180416 - Task #2272: update deps for luminosity branch
 #pymemcache==1.4.3
 # @modified 20190412 - Task #2926: Update dependencies
 #pymemcache==1.4.4
-pymemcache==2.1.1
+# @modified 20190822 - Task #3060: Update dependencies
+#pymemcache==2.1.1
+pymemcache==2.2.2
 
 # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
 # pycrypto replaced with pycryptodome
@@ -456,7 +497,9 @@ git+git://github.com/earthgecko/luminol@d429044#egg=luminol
 # @modified 20190412 - Task #2926: Update dependencies
 # Fixes websocket-client at 0.54.0 but is now at 0.56.0
 #slackclient==1.3.0
-slackclient==1.3.1
+# @modified 20190822 - Task #3060: Update dependencies
+#slackclient==1.3.1
+slackclient==1.3.2
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
@@ -466,4 +509,10 @@ slackclient==1.3.1
 # @modified 20190509 - Task #2964: Update dependencies
 # requests requires <= 1.24.3
 #urllib3>=1.25.1
-urllib3==1.24.3
+# @modified 20190529 - Task #3060: Update dependencies
+#urllib3==1.24.3
+urllib3==1.25.3
+
+# @added 201906025 - Branch #956: flux
+graphyte==1.6.0
+statsd==3.3.0
