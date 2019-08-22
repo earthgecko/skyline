@@ -101,19 +101,6 @@ try:
 except:
     DOCKER_FAKE_EMAIL_ALERTS = False
 
-# @added 20190820 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
-main_alert_title = 'Skyline',
-analyzer_alert_heading = 'Analyzer',
-append_environment = '',
-try:
-    if settings.CUSTOM_ALERT_OPTS:
-        main_alert_title = settings.CUSTOM_ALERT_OPTS['main_alert_title']
-        analyzer_alert_heading = settings.CUSTOM_ALERT_OPTS['analyzer_alert_heading']
-        append_environment = settings.CUSTOM_ALERT_OPTS['append_environment']
-except:
-    logger.error(traceback.format_exc())
-    logger.error('error :: alerters - failed to determine CUSTOM_ALERT_OPTS')
-
 
 def get_graphite_port():
     """
@@ -346,8 +333,8 @@ def alert_smtp(alert, metric, context):
         #     graphite_port, str(graphite_from), str(graphite_until), metric[1],
         #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, graphite_render_uri, str(graphite_from),
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+            graphite_render_uri, str(graphite_from),
             str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
