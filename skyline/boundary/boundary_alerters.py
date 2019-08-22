@@ -186,7 +186,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     #     graphite_graph_line_color)
     link = '%s://%s:%s/%s/?from=%s&until=%s&%s%s%s&colorList=%s' % (
         settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-        settings.GRAPHITE_RENDER_URI, graphite_port, str(graphite_from),
+        graphite_port, settings.GRAPHITE_RENDER_URI, str(graphite_from),
         str(graphite_until), graphite_target, settings.GRAPHITE_GRAPH_SETTINGS,
         graph_title, graphite_graph_line_color)
 

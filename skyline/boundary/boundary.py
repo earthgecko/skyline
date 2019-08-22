@@ -8,7 +8,11 @@ from redis import StrictRedis
 from time import time, sleep
 from threading import Thread
 from collections import defaultdict
-from multiprocessing import Process, Manager, Queue
+# @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# Use Redis sets in place of Manager().list to reduce memory and number of
+# processes
+# from multiprocessing import Process, Manager, Queue
+from multiprocessing import Process, Queue
 from msgpack import Unpacker, packb
 from os import path, kill, getpid
 from math import ceil
@@ -17,9 +21,12 @@ import operator
 import re
 import os
 import errno
-
 import sys
 import os.path
+# @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# literal_eval required to evaluate Redis sets
+from ast import literal_eval
+
 import settings
 # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
 # Added move_file
@@ -82,12 +89,21 @@ class Boundary(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.boundary_metrics = Manager().list()
-        self.anomalous_metrics = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        #                      Task #3032: Debug number of Python processes and memory use
+        #                      Branch #3002: docker
+        # Reduce amount of Manager instances that are used as each requires a
+        # copy of entire memory to be copied into each subprocess so this
+        # results in a python process per Manager instance, using as much
+        # memory as the parent.  OK on a server, not so much in a container.
+        # Disabled all the Manager() lists below and replaced with Redis sets
+        # self.boundary_metrics = Manager().list()
+        # self.anomalous_metrics = Manager().list()
         self.exceptions_q = Queue()
         self.anomaly_breakdown_q = Queue()
         # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
-        self.not_anomalous_metrics = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        # self.not_anomalous_metrics = Manager().list()
 
     def check_if_parent_is_alive(self):
         """
@@ -435,7 +451,13 @@ class Boundary(Thread):
                     # If it's not anomalous, add it to list
                     if not anomalous:
                         not_anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
-                        self.not_anomalous_metrics.append(not_anomalous_metric)
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # self.not_anomalous_metrics.append(not_anomalous_metric)
+                        try:
+                            self.redis_conn.sadd('boundary.not_anomalous_metrics', str(not_anomalous_metric))
+                        except Exception as e:
+                            logger.error('error :: could not add %s to Redis set boundary.not_anomalous_metrics: %s' % (
+                                str(not_anomalous_metric), e))
                 else:
                     anomalous = False
                     if ENABLE_BOUNDARY_DEBUG:
@@ -444,7 +466,14 @@ class Boundary(Thread):
                 # If it's anomalous, add it to list
                 if anomalous:
                     anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
-                    self.anomalous_metrics.append(anomalous_metric)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.anomalous_metrics.append(anomalous_metric)
+                    try:
+                        self.redis_conn.sadd('boundary.anomalous_metrics', str(anomalous_metric))
+                    except Exception as e:
+                        logger.error('error :: could not add %s to Redis set boundary.anomalous_metrics: %s' % (
+                            str(anomalous_metric), e))
+
                     # Get the anomaly breakdown - who returned True?
                     triggered_algorithms = []
                     for index, value in enumerate(ensemble):
@@ -783,10 +812,25 @@ class Boundary(Thread):
                 except Empty:
                     break
 
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis set instead of Manager() list
+            boundary_not_anomalous_metrics = []
+            try:
+                literal_boundary_not_anomalous_metrics = list(self.redis_conn.smembers('boundary.not_anomalous_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate list from Redis set boundary.not_anomalous_metrics')
+                literal_boundary_not_anomalous_metrics = []
+            for metric_list_string in literal_boundary_not_anomalous_metrics:
+                metric = literal_eval(metric_list_string)
+                boundary_not_anomalous_metrics.append(metric)
+
             # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
             # Expire keys
             if settings.BOUNDARY_ENABLE_ALERTS:
-                for not_anomalous_metric in self.not_anomalous_metrics:
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # for not_anomalous_metric in self.not_anomalous_metrics:
+                for not_anomalous_metric in boundary_not_anomalous_metrics:
                     metric_name = not_anomalous_metric[1]
                     base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
                     algorithm = not_anomalous_metric[8]
@@ -831,9 +875,24 @@ class Boundary(Thread):
                                 logger.info('debug :: error removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                             pass
 
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis set instead of Manager() list
+            boundary_anomalous_metrics = []
+            try:
+                literal_boundary_anomalous_metrics = list(self.redis_conn.smembers('boundary.anomalous_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate list from Redis set boundary.anomalous_metrics')
+                literal_boundary_anomalous_metrics = []
+            for metric_list_string in literal_boundary_anomalous_metrics:
+                metric = literal_eval(metric_list_string)
+                boundary_anomalous_metrics.append(metric)
+
             # Send alerts
             if settings.BOUNDARY_ENABLE_ALERTS:
-                for anomalous_metric in self.anomalous_metrics:
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # for anomalous_metric in self.anomalous_metrics:
+                for anomalous_metric in boundary_anomalous_metrics:
                     datapoint = str(anomalous_metric[0])
                     metric_name = anomalous_metric[1]
                     base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
@@ -1073,18 +1132,24 @@ class Boundary(Thread):
                             pass
 
             # Write anomalous_metrics to static webapp directory
-            if len(self.anomalous_metrics) > 0:
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # if len(self.anomalous_metrics) > 0:
+            if len(boundary_anomalous_metrics) > 0:
                 filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
                 with open(filename, 'w') as fh:
                     # Make it JSONP with a handle_data() function
-                    anomalous_metrics = list(self.anomalous_metrics)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # anomalous_metrics = list(self.anomalous_metrics)
+                    anomalous_metrics = boundary_anomalous_metrics
                     anomalous_metrics.sort(key=operator.itemgetter(1))
                     fh.write('handle_data(%s)' % anomalous_metrics)
 
             run_time = time() - now
             total_metrics = str(len(boundary_metrics))
             total_analyzed = str(len(boundary_metrics) - sum(exceptions.values()))
-            total_anomalies = str(len(self.anomalous_metrics))
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # total_anomalies = str(len(self.anomalous_metrics))
+            total_anomalies = str(len(boundary_anomalous_metrics))
 
             # Log progress
             logger.info('seconds to run    :: %.2f' % run_time)
@@ -1131,9 +1196,22 @@ class Boundary(Thread):
                 send_graphite_metric(skyline_app, send_metric_name, str(projected))
 
             # Reset counters
-            self.anomalous_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.anomalous_metrics[:] = []
+            try:
+                self.redis_conn.delete('boundary.anomalous_metrics')
+            except:
+                logger.info('failed to delete boundary.anomalous_metrics Redis set')
+                pass
+
             # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
-            self.not_anomalous_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.not_anomalous_metrics[:] = []
+            try:
+                self.redis_conn.delete('boundary.not_anomalous_metrics')
+            except:
+                logger.info('failed to delete boundary.not_anomalous_metrics Redis set')
+                pass
 
             # Only run once per
             process_runtime = time() - now
