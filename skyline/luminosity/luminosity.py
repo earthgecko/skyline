@@ -9,14 +9,19 @@ except:
     from queue import Empty
 from time import time, sleep
 from threading import Thread
-from multiprocessing import Process, Manager
+# @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# Use Redis sets in place of Manager().list() to reduce memory and number of
+# processes
+# from multiprocessing import Process, Manager
+from multiprocessing import Process
 from redis import StrictRedis
 import traceback
 import mysql.connector
 from pymemcache.client.base import Client as pymemcache_Client
 
 import settings
-from skyline_functions import (mysql_select, send_graphite_metric)
+from skyline_functions import (
+    mysql_select, send_graphite_metric)
 from database import get_engine
 # from process_correlations import *
 
@@ -132,10 +137,18 @@ class Luminosity(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.correlations = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        #                      Task #3032: Debug number of Python processes and memory use
+        #                      Branch #3002: docker
+        # Reduce amount of Manager instances that are used as each requires a
+        # copy of entire memory to be copied into each subprocess so this
+        # results in a python process per Manager instance, using as much
+        # memory as the parent.  OK on a server, not so much in a container.
+        # Disabled all the Manager().list() below and replaced with Redis sets
+        # self.correlations = Manager().list()
         # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
-        self.metrics_checked_for_correlation = Manager().list()
-        self.runtimes = Manager().list()
+        # self.metrics_checked_for_correlation = Manager().list()
+        # self.runtimes = Manager().list()
         self.mysql_conn = mysql.connector.connect(**config)
         if settings.MEMCACHE_ENABLED:
             self.memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
@@ -274,8 +287,25 @@ class Luminosity(Thread):
                 str(len(correlated_metrics)), base_name, str(anomaly_id)))
 
         # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
-        self.metrics_checked_for_correlation.append(metrics_checked_for_correlation)
-        self.runtimes.append(runtime)
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        # self.metrics_checked_for_correlation.append(metrics_checked_for_correlation)
+        # self.runtimes.append(runtime)
+        redis_set = 'luminosity.correlations'
+        data = str(metrics_checked_for_correlation)
+        try:
+            self.redis_conn.sadd(redis_set, data)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to add %s to Redis set %s' % (
+                str(data), str(redis_set)))
+        redis_set = 'luminosity.runtimes'
+        data = str(runtime)
+        try:
+            self.redis_conn.sadd(redis_set, data)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to add %s to Redis set %s' % (
+                str(data), str(redis_set)))
 
         metrics_str = ''
         for metric_name in correlated_metrics:
@@ -323,10 +353,21 @@ class Luminosity(Thread):
             for anomaly_id, metric_id, coefficient, shifted, shifted_coefficient in luminosity_correlations:
                 if coefficient:
                     values_present = True
-                # @added 20170720 - Task #2462: Implement useful metrics for Luminosity
-                # Populate the self.correlations list to send a count to Graphite
-                    self.correlations.append(coefficient)
+                    # @added 20170720 - Task #2462: Implement useful metrics for Luminosity
+                    # Populate the self.correlations list to send a count to Graphite
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.correlations.append(coefficient)
+                    redis_set = 'luminosity.correlations'
+                    data = str(coefficient)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+
                     number_of_correlations_in_insert += 1
+
                 ins_values = '(%s,%s,%s,%s,%s)' % (str(anomaly_id),
                                                    str(metric_id),
                                                    str(round(coefficient, 5)),
@@ -593,29 +634,44 @@ class Luminosity(Thread):
                 # Flush metrics to Graphite
                 if not redis_sent_graphite_metrics:
                     try:
-                        correlations = str(len(self.correlations))
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # correlations = str(len(self.correlations))
+                        correlations = str(len(list(self.redis_conn.smembers('luminosity.correlations'))))
                     except:
                         correlations = '0'
                     logger.info('correlations       :: %s' % correlations)
                     send_metric_name = '%s.correlations' % skyline_app_graphite_namespace
                     send_graphite_metric(skyline_app, send_metric_name, correlations)
 
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    try:
+                        runtimes = list(self.redis_conn.smembers('luminosity.runtimes'))
+                    except:
+                        runtimes = []
+
                     # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
                     #                   Branch #2270: luminosity
                     # runtime metric to monitor the time it takes to process
                     # correlations
                     try:
-                        if len(self.runtimes) > 1:
-                            avg_runtime = sum(self.runtimes) / len(self.runtimes)
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # if len(self.runtimes) > 1:
+                        #     avg_runtime = sum(self.runtimes) / len(self.runtimes)
+                        # else:
+                        #     avg_runtime = sum(self.runtimes)
+                        if len(runtimes) > 1:
+                            avg_runtime = sum(runtimes) / len(runtimes)
                         else:
-                            avg_runtime = sum(self.runtimes)
+                            avg_runtime = sum(runtimes)
                     except:
                         avg_runtime = '0'
                     logger.info('avg_runtime       :: %s' % str(avg_runtime))
                     send_metric_name = '%s.avg_runtime' % skyline_app_graphite_namespace
                     send_graphite_metric(skyline_app, send_metric_name, str(avg_runtime))
                     try:
-                        metrics_checked_for_correlation = str(sum(self.metrics_checked_for_correlation))
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # metrics_checked_for_correlation = str(sum(self.metrics_checked_for_correlation))
+                        metrics_checked_for_correlation = str(len(list(self.redis_conn.smembers('luminosity.metrics_checked_for_correlation'))))
                     except:
                         metrics_checked_for_correlation = '0'
                     logger.info('metrics_checked_for_correlation   :: %s' % metrics_checked_for_correlation)
@@ -629,10 +685,28 @@ class Luminosity(Thread):
                         logger.error('error :: failed to update Redis key - %s up' % cache_key)
 
                     # Reset lists
-                    self.correlations[:] = []
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.correlations[:] = []
                     # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
-                    self.runtimes[:] = []
-                    self.metrics_checked_for_correlation[:] = []
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.runtimes[:] = []
+                    # self.metrics_checked_for_correlation[:] = []
+
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis sets instead of Manager().list()
+                    delete_redis_sets = [
+                        'luminosity.correlations',
+                        'luminosity.runtimes',
+                        'luminosity.metrics_checked_for_correlation'
+                    ]
+                    for i_redis_set in delete_redis_sets:
+                        redis_set_to_delete = i_redis_set
+                        try:
+                            self.redis_conn.delete(redis_set_to_delete)
+                            logger.info('deleted Redis set - %s' % redis_set_to_delete)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
 
                 # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
                 #                   Feature #2464: luminosity_remote_data
