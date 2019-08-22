@@ -73,7 +73,7 @@ skyline_version = skyline_version.__absolute_version__
 Create any alerter you want here. The function will be invoked from
 trigger_alert.
 
-Three arguments will be passed, two of them tuples: alert and metric.
+Three arguments will be passed, two of them tuples: alert and metric, and context
 
 alert: the tuple specified in your settings:\n
     alert[0]: The matched substring of the anomalous metric\n
@@ -234,8 +234,12 @@ def alert_smtp(alert, metric, context):
 
     # @modified 20161229 - Feature #1830: Ionosphere alerts
     # Ionosphere alerts
-    unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
-        context, str(int(full_duration_in_hours)), str(metric[0]))
+    # @modified 20190820 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
+    #     context, str(int(full_duration_in_hours)), str(metric[0]))
+    unencoded_graph_title = '%s %s - ALERT at %s hours - %s' % (
+        main_alert_title, context, str(int(full_duration_in_hours)),
+        str(metric[0]))
     # @modified 20170603 - Feature #2034: analyse_derivatives
     # Added deriative functions to convert the values of metrics strictly
     # increasing monotonically to their deriative products in alert graphs and
@@ -312,7 +316,7 @@ def alert_smtp(alert, metric, context):
     #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
         settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
-        settings.GRAPHITE_RENDER_URI, str(graphite_from), str(graphite_until),
+        graphite_render_uri, str(graphite_from), str(graphite_until),
         metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # @added 20170603 - Feature #2034: analyse_derivatives
@@ -330,7 +334,7 @@ def alert_smtp(alert, metric, context):
         #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-            graphite_port, settings.GRAPHITE_RENDER_URI, str(graphite_from),
+            graphite_port, graphite_render_uri, str(graphite_from),
             str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
