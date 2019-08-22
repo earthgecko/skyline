@@ -10,7 +10,11 @@ except:
     from queue import Empty
 from time import time, sleep
 from threading import Thread
-from multiprocessing import Process, Manager
+# @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# Use Redis sets in place of Manager().list to reduce memory and number of
+# processes
+# from multiprocessing import Process, Manager
+from multiprocessing import Process
 import re
 from shutil import rmtree
 # import csv
@@ -121,11 +125,29 @@ except:
 # and currently it is hard coded to be 1
 # (https://github.com/earthgecko/skyline/issues/69)
 try:
-    ionosphere_processes = settings.IONOSPHERE_PROCESSES
-    if ionosphere_processes != 1:
-        ionosphere_processes = 1
+    IONOSPHERE_PROCESSES = settings.IONOSPHERE_PROCESSES
+    if IONOSPHERE_PROCESSES != 1:
+        IONOSPHERE_PROCESSES = 1
 except:
-    ionosphere_processes = 1
+    IONOSPHERE_PROCESSES = 1
+
+# @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
+# Do not run checks if namespace has matched multiple times in the
+# last 10 minutes.  However determining which Skyline related metrics
+# are feeding back are quite difficult to ascetain.  So use the
+# ionosphere_busy logic again and use or find the skyline host namespace
+# and if busy do not analyse the Skyline host namespace while
+# ionosphere is busy.
+try:
+    SKYLINE_FEEDBACK_NAMESPACES = settings.SKYLINE_FEEDBACK_NAMESPACES
+except:
+    # Let us take a guess
+    try:
+        graphite_host = settings.GRAPHITE_HOST
+        graphite_hostname = graphite_host.split('.', -1)[0]
+        SKYLINE_FEEDBACK_NAMESPACES = [settings.SERVER_METRICS_NAME, graphite_hostname]
+    except:
+        SKYLINE_FEEDBACK_NAMESPACES = [this_host]
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -155,7 +177,7 @@ class Ionosphere(Thread):
         """
         Initialize Ionosphere
 
-        Create the :obj:`self.anomalous_metrics` list
+        Define Redis and memcached connections
 
         """
         super(Ionosphere, self).__init__()
@@ -168,18 +190,26 @@ class Ionosphere(Thread):
         self.parent_pid = parent_pid
         self.current_pid = getpid()
         self.mysql_conn = mysql.connector.connect(**config)
-        self.anomalous_metrics = Manager().list()
-        self.not_anomalous = Manager().list()
-        self.features_profiles_checked = Manager().list()
-        self.training_metrics = Manager().list()
-        self.sent_to_panorama = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        #                      Task #3032: Debug number of Python processes and memory use
+        #                      Branch #3002: docker
+        # Reduce amount of Manager instances that are used as each requires a
+        # copy of entire memory to be copied into each subprocess so this
+        # results in a python process per Manager instance, using as much
+        # memory as the parent.  OK on a server, not so much in a container.
+        # Disabled all the Manager().list() below and replaced with Redis sets
+        # self.anomalous_metrics = Manager().list()
+        # self.not_anomalous = Manager().list()
+        # self.features_profiles_checked = Manager().list()
+        # self.training_metrics = Manager().list()
+        # self.sent_to_panorama = Manager().list()
         # @added 20170108 - Feature #1830: Ionosphere alerts
         # Added lists of ionosphere_smtp_alerter_metrics and
         # ionosphere_non_smtp_alerter_metrics
-        self.ionosphere_smtp_alerter_metrics = Manager().list()
-        self.ionosphere_non_smtp_alerter_metrics = Manager().list()
+        # self.ionosphere_smtp_alerter_metrics = Manager().list()
+        # self.ionosphere_non_smtp_alerter_metrics = Manager().list()
         # @added 20170306 - Feature #1960: ionosphere_layers
-        self.layers_checked = Manager().list()
+        # self.layers_checked = Manager().list()
         # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
         if settings.MEMCACHE_ENABLED:
             self.memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
@@ -394,6 +424,10 @@ class Ionosphere(Thread):
         ionosphere_metrics_count = len(ionosphere_enabled_metrics)
         logger.info('db has %s ionosphere_enabled metrics' % (str(ionosphere_metrics_count)))
 
+        # @added 20190528 - Branch #3002: docker
+        if ionosphere_metrics_count == 0:
+            ionosphere_enabled_metrics = ['none']
+
         if manage_ionosphere_unique_metrics:
             # Testing the query was fine and Ionosphere metrics can go to 0 if
             # all were disabled
@@ -420,7 +454,10 @@ class Ionosphere(Thread):
                 manage_ionosphere_unique_metrics = False
                 ionosphere_unique_metrics = []
             except Exception as e:
-                logger.error('error :: could not delete Redis set ionosphere.unique_metrics: %s' % str(e))
+                if str(e) == 'no such key':
+                    logger.info('could not rename Redis set ionosphere.new_unique_metrics to ionosphere.unique_metrics: %s' % str(e))
+                else:
+                    logger.error('error :: could not rename Redis set ionosphere.new_unique_metrics to ionosphere.unique_metrics: %s' % str(e))
             try:
                 self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
             except:
@@ -626,7 +663,9 @@ class Ionosphere(Thread):
             # match
             # if not metric in ionosphere_unique_metrics:
             metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric))
-            if not metric_name in ionosphere_unique_metrics:
+            # @modified 20190522: Task #3034: Reduce multiprocessing Manager list usage
+            # if not metric_name in ionosphere_unique_metrics:
+            if metric_name not in ionosphere_unique_metrics:
                 logger.info('process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping %s' % metric)
                 return
 
@@ -760,7 +799,7 @@ class Ionosphere(Thread):
             # make sure that the keys and values they pass into redis-py
             # are either bytes, strings or numbers.  Added cache_key_value
             # self.redis_conn.setex(
-                # ionosphere_check_cache_key, 300, [check_process_start])
+            #   ionosphere_check_cache_key, 300, [check_process_start])
             self.redis_conn.setex(
                 ionosphere_check_cache_key, 300, check_process_start)
             logger.info(
@@ -1026,7 +1065,12 @@ class Ionosphere(Thread):
 
         # @modified 20190325 - Feature #2484: FULL_DURATION feature profiles
         # Moved get_metrics_db_object block to common_functions.py
-        metrics_db_object = get_metrics_db_object(base_name)
+        try:
+            metrics_db_object = get_metrics_db_object(base_name)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine metrics_db_object from get_metrics_db_object for %s' % base_name)
+
         if metrics_db_object:
             metrics_id = None
             try:
@@ -1054,6 +1098,8 @@ class Ionosphere(Thread):
                     training_metric = True
                 if metric_ionosphere_enabled == 1:
                     training_metric = False
+                if metric_ionosphere_enabled == 0:
+                    training_metric = True
         else:
             metrics_id = None
             metric_ionosphere_enabled = None
@@ -1061,6 +1107,35 @@ class Ionosphere(Thread):
             logger.error('error :: could not determine metric id from memcache or metrics tables for %s' % base_name)
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
+
+        # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
+        # Do not run checks if namespace has matched multiple times in the
+        # last 10 minutes.  However determining which Skyline related metrics
+        # are feeding back are quite difficult to ascetain.  So use the
+        # ionosphere_busy logic again and use or find the skyline host namespace
+        # and if busy do not analyse the Skyline host namespace while
+        # ionosphere is busy.
+        feedback_metric = False
+        if ionosphere_busy:
+            metric_namespace_elements = base_name.split('.')
+            for to_skip in SKYLINE_FEEDBACK_NAMESPACES:
+                if to_skip in base_name:
+                    feedback_metric = True
+                    break
+                to_skip_namespace_elements = to_skip.split('.')
+                elements_matched = set(metric_namespace_elements) & set(to_skip_namespace_elements)
+                if len(elements_matched) == len(to_skip_namespace_elements):
+                    feedback_metric = True
+                    break
+            if feedback_metric:
+                cache_key = 'ionosphere.feedback_metric.checked.%s' % (base_name)
+                logger.info('feedback metric identified adding Redis key with 600 TTL - %s' % cache_key)
+                try:
+                    self.redis_conn.setex(cache_key, 600, int(time()))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s key to Redis' % (
+                        str(cache_key)))
 
         # @added 20170116 - Feature #1854: Ionosphere learn - generations
         # If this is added_by ionosphere_learn the id is only
@@ -1083,17 +1158,40 @@ class Ionosphere(Thread):
                     engine_disposal(engine)
                 return
 
+        # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        # The Redis ionosphere.ionosphere_non_smtp_alerter_metrics list is created here to
+        # replace the self.ionosphere_non_smtp_alerter_metrics Manager.list in the below
+        # section
+        ionosphere_non_smtp_alerter_metrics = []
+        try:
+            ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to generate a list from the ionosphere.ionosphere_non_smtp_alerter_metrics Redis set')
+            ionosphere_non_smtp_alerter_metrics = []
+
         # @added 20170108 - Feature #1830: Ionosphere alerts
         # Only process smtp_alerter_metrics
         if training_metric:
-            if base_name in self.ionosphere_non_smtp_alerter_metrics:
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # if base_name in self.ionosphere_non_smtp_alerter_metrics:
+            if base_name in ionosphere_non_smtp_alerter_metrics:
                 logger.error('error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for %s' % (base_name))
                 self.remove_metric_check_file(str(metric_check_file))
                 if engine:
                     engine_disposal(engine)
                 return
             else:
-                self.training_metrics.append(base_name)
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # self.training_metrics.append(base_name)
+                redis_set = 'ionosphere.training_metrics'
+                data = str(base_name)
+                try:
+                    self.redis_conn.sadd(redis_set, data)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s to Redis set %s' % (
+                        str(data), str(redis_set)))
 
         logger.info(
             'ionosphere_enabled is %s for metric id %s - %s' % (
@@ -1664,7 +1762,18 @@ class Ionosphere(Thread):
                 #                  Branch #2270: luminosity
                 fp_checked += 1
 
-                self.features_profiles_checked.append(fp_id)
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Use Redis set instead of Manager().list to reduce memory
+                # self.features_profiles_checked.append(fp_id)
+                redis_set = 'ionosphere.features_profiles_checked'
+                data = str(fp_id)
+                try:
+                    self.redis_conn.sadd(redis_set, data)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s to Redis set %s' % (
+                        str(data), str(redis_set)))
+
                 features_count = None
                 fp_features = []
                 # Get features for fp_id from z_fp_<metric_id> table where the
@@ -2419,7 +2528,17 @@ class Ionosphere(Thread):
                 # END - Feature #2404: Ionosphere - fluid approximation
 
                 if not_anomalous:
-                    self.not_anomalous.append(base_name)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.not_anomalous.append(base_name)
+                    redis_set = 'ionosphere.not_anomalous'
+                    data = base_name
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+
                     # update matched_count in ionosphere_table
                     matched_timestamp = int(time())
                     # @added 20170804 - Bug #2130: MySQL - Aborted_clients
@@ -2709,11 +2828,27 @@ class Ionosphere(Thread):
                         # layers_checked += 1
                         layers_checked_count += 1
 
+                        # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # Added to Redis set here and commented out the
+                        # self.layers_checked.append in the try below this
+                        redis_set = 'ionosphere.layers_checked'
+                        data = layers_id
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
+
                         # Get the layers algorithms and run then on the timeseries
                         # @modified 20170307 - Feature #1960: ionosphere_layers
                         # Use except on everything, remember how fast Skyline can iterate
                         try:
-                            self.layers_checked.append(layers_id)
+                            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                            # Added to the ionosphere.layers_checked Redis set
+                            # above
+                            # self.layers_checked.append(layers_id)
+
                             # @added 2018075 - Task #2446: Optimize Ionosphere
                             #                  Branch #2270: luminosity
                             # not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries)
@@ -2772,7 +2907,17 @@ class Ionosphere(Thread):
                         engine_disposal(engine)
                     return
 
-                self.anomalous_metrics.append(base_name)
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # self.anomalous_metrics.append(base_name)
+                redis_set = 'ionosphere.anomalous_metrics'
+                data = base_name
+                try:
+                    self.redis_conn.sadd(redis_set, data)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s to Redis set %s' % (
+                        str(data), str(redis_set)))
+
                 # Send to panorama as Analyzer and Mirage will only alert on the
                 # anomaly, they will not push it to Panorama
                 if settings.PANORAMA_ENABLED:
@@ -2812,10 +2957,21 @@ class Ionosphere(Thread):
                             skyline_app, panaroma_anomaly_file, 'w',
                             panaroma_anomaly_data)
                         logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
-                        self.sent_to_panorama.append(base_name)
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # Moved to the Redis set function below
+                        # self.sent_to_panorama.append(base_name)
                     except:
                         logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                         logger.info(traceback.format_exc())
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    redis_set = 'ionosphere.sent_to_panorama'
+                    data = base_name
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
 
             #     alert ... hmmm the harder part, maybe not all the resources
             #     are already created, so just determining ALERTS and firing a
@@ -2862,7 +3018,7 @@ class Ionosphere(Thread):
                                 base_name))
                         # modified 20190412 - Task #2824: Test redis-py upgrade
                         #                     Task #2926: Update dependencies
-                        #self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
+                        # self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
                         self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None]))
                     except:
                         logger.error(traceback.format_exc())
@@ -2916,6 +3072,9 @@ class Ionosphere(Thread):
                 pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
+
+        # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
+        logger.info('SKYLINE_FEEDBACK_NAMESPACES is set to %s' % str(SKYLINE_FEEDBACK_NAMESPACES))
 
         while 1:
             now = time()
@@ -3144,7 +3303,9 @@ class Ionosphere(Thread):
                 # Flush metrics to Graphite
                 if not redis_sent_graphite_metrics:
                     try:
-                        not_anomalous = str(len(self.not_anomalous))
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # not_anomalous = str(len(self.not_anomalous))
+                        not_anomalous = str(len(list(self.redis_conn.smembers('ionosphere.not_anomalous'))))
                     except:
                         not_anomalous = '0'
                     logger.info('not_anomalous      :: %s' % not_anomalous)
@@ -3152,7 +3313,10 @@ class Ionosphere(Thread):
                     send_graphite_metric(skyline_app, send_metric_name, not_anomalous)
 
                     try:
-                        total_anomalies = str(len(self.anomalous_metrics))
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # Use Redis set instead of Manager() list
+                        # total_anomalies = str(len(self.anomalous_metrics))
+                        total_anomalies = str(len(list(self.redis_conn.smembers('ionosphere.anomalous_metrics'))))
                     except:
                         total_anomalies = '0'
                     logger.info('total_anomalies    :: %s' % total_anomalies)
@@ -3160,7 +3324,9 @@ class Ionosphere(Thread):
                     send_graphite_metric(skyline_app, send_metric_name, total_anomalies)
 
                     try:
-                        training_metrics = str(len(self.training_metrics))
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # training_metrics = str(len(self.training_metrics))
+                        training_metrics = str(len(list(self.redis_conn.smembers('ionosphere.training_metrics'))))
                     except:
                         training_metrics = '0'
                     logger.info('training metrics   :: %s' % training_metrics)
@@ -3168,7 +3334,9 @@ class Ionosphere(Thread):
                     send_graphite_metric(skyline_app, send_metric_name, training_metrics)
 
                     try:
-                        features_profiles_checked = str(len(self.features_profiles_checked))
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # features_profiles_checked = str(len(self.features_profiles_checked))
+                        features_profiles_checked = str(len(list(self.redis_conn.smembers('ionosphere.features_profiles_checked'))))
                     except:
                         features_profiles_checked = '0'
                     logger.info('fps checked count  :: %s' % features_profiles_checked)
@@ -3182,7 +3350,9 @@ class Ionosphere(Thread):
                     try:
                         # @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page
                         # layers_checked = str(len(self.layers_checked))
-                        str_layers_checked = str(len(self.layers_checked))
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # str_layers_checked = str(len(self.layers_checked))
+                        str_layers_checked = str(len(list(self.redis_conn.smembers('ionosphere.layers_checked'))))
                     except:
                         str_layers_checked = '0'
                     logger.info('layers checked count  :: %s' % str_layers_checked)
@@ -3191,7 +3361,9 @@ class Ionosphere(Thread):
 
                     if settings.PANORAMA_ENABLED:
                         try:
-                            sent_to_panorama = str(len(self.sent_to_panorama))
+                            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                            # sent_to_panorama = str(len(self.sent_to_panorama))
+                            sent_to_panorama = str(len(list(self.redis_conn.smembers('ionosphere.sent_to_panorama'))))
                         except:
                             sent_to_panorama = '0'
                         logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
@@ -3206,16 +3378,98 @@ class Ionosphere(Thread):
                         logger.error('error :: failed to update Redis key - %s up' % cache_key)
 
                     # Reset lists
-                    self.anomalous_metrics[:] = []
-                    self.not_anomalous[:] = []
-                    self.features_profiles_checked[:] = []
-                    self.training_metrics[:] = []
-                    self.sent_to_panorama[:] = []
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis sets instead of Manager().list()
+                    # self.anomalous_metrics[:] = []
+                    # self.not_anomalous[:] = []
+                    # self.features_profiles_checked[:] = []
+                    # self.training_metrics[:] = []
+                    # self.sent_to_panorama[:] = []
+
                     # @added 20170306 - Feature #1960: ionosphere_layers
-                    self.layers_checked[:] = []
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis sets instead of Manager().list()
+                    # self.layers_checked[:] = []
+
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis sets instead of Manager().list()
+                    delete_redis_sets = [
+                        'ionosphere.anomalous_metrics',
+                        'ionosphere.not_anomalous',
+                        'ionosphere.features_profiles_checked',
+                        'ionosphere.training_metrics',
+                        'ionosphere.sent_to_panorama',
+                        'ionosphere.layers_checked',
+                    ]
+                    for i_redis_set in delete_redis_sets:
+                        redis_set_to_delete = i_redis_set
+                        try:
+                            self.redis_conn.delete(redis_set_to_delete)
+                            logger.info('deleted Redis set - %s' % redis_set_to_delete)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
 
                 ionosphere_job = False
                 learn_job = False
+
+                # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
+                # Do not run checks if the namespace is a declared SKYLINE_FEEDBACK_NAMESPACES
+                # namespace that has been checked in the last 10 minutes if
+                # there are multiple checks to do.
+                rate_limit_feedback_metrics = False
+                if metric_var_files:
+                    metric_var_files_sorted = sorted(metric_var_files)
+                    metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, str(metric_var_files_sorted[0]))
+                    metric_var_files_count = len(metric_var_files_sorted)
+                    if metric_var_files_count > 2:
+                        rate_limit_feedback_metrics = True
+                if rate_limit_feedback_metrics:
+                    for i_metric_check_file in metric_var_files_sorted:
+                        feedback_metric = False
+                        check_metric_file_list = i_metric_check_file.split('.', -1)[1:]
+                        last_name_element = len(check_metric_file_list) - 1
+                        base_name = '.'.join(check_metric_file_list[0:last_name_element])
+                        metric_namespace_elements = base_name.split('.')
+                        for to_skip in SKYLINE_FEEDBACK_NAMESPACES:
+                            if to_skip in base_name:
+                                feedback_metric = True
+                                logger.info('SKYLINE_FEEDBACK_NAMESPACES matched on to_skip %s in base_name %s' % (to_skip, base_name))
+                                break
+                            to_skip_namespace_elements = to_skip.split('.')
+                            elements_matched = set(metric_namespace_elements) & set(to_skip_namespace_elements)
+                            if len(elements_matched) == len(to_skip_namespace_elements):
+                                feedback_metric = True
+                                logger.info('SKYLINE_FEEDBACK_NAMESPACES matched elements in %s' % base_name)
+                                break
+                        if feedback_metric:
+                            remove_feedback_metric_check = False
+                            if metric_var_files_count > 4:
+                                logger.info('rate limiting feedback metric, removing check for %s as Ionosphere has %s pending checks, not checking feedback metric' % (
+                                    base_name, str(metric_var_files_count)))
+                                remove_feedback_metric_check = True
+                            cache_key = 'ionosphere.feedback_metric.checked.%s' % (base_name)
+                            check_done = False
+                            try:
+                                check_done = self.redis_conn.get(cache_key)
+                            except Exception as e:
+                                logger.error('error :: could not query Redis for cache_key: %s' % e)
+                            if not check_done:
+                                logger.info('not removing feedback metric as no check has been done in last 600 seconds on %s' % base_name)
+                            else:
+                                logger.info('rate limiting feedback metric, removing check as %s has been checked in the last 600 seconds' % (
+                                    base_name))
+                                remove_feedback_metric_check = True
+                            if remove_feedback_metric_check:
+                                metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, i_metric_check_file)
+                                self.remove_metric_check_file(str(metric_check_file))
+                    # Determine metric_var_files after possible feedback metric removals
+                    metric_var_files = False
+                    try:
+                        metric_var_files = [f for f in listdir(settings.IONOSPHERE_CHECK_PATH) if isfile(join(settings.IONOSPHERE_CHECK_PATH, f))]
+                    except:
+                        logger.error('error :: failed to list files in check dir')
+                        logger.info(traceback.format_exc())
 
                 if metric_var_files:
                     ionosphere_job = True
@@ -3256,6 +3510,15 @@ class Ionosphere(Thread):
                 # Added a count of the number of checks to be done
                 metric_var_files_count = len(metric_var_files)
 
+                # If there are more than 4 metric check files set Ionosphere to
+                # busy so that Ionosphere alternates between checking the normal
+                # Ionosphere Mirage features profiles and the Ionosphere echo
+                # features profiles on subsequent checks of a metric so that
+                # when Ionosphere is busy it is not checking both sets of
+                # features profiles on every run.
+                if metric_var_files_count > 4:
+                    ionosphere_busy = True
+
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics
             # Timed this takes 0.013319 seconds on 689 unique_metrics
@@ -3266,6 +3529,33 @@ class Ionosphere(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: could not get the unique_metrics list from Redis')
                 unique_metrics = []
+
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # The Redis analyzer.smtp_alerter_metrics list is created here to
+            # replace the self.ionosphere_smtp_alerter_metrics Manager.list in the below
+            # section
+            ionosphere_smtp_alerter_metrics = []
+            try:
+                ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
+                ionosphere_smtp_alerter_metrics = []
+            redis_sets_to_rename = [
+                'ionosphere.ionosphere_smtp_alerter_metrics',
+                'ionosphere.ionosphere_non_smtp_alerter_metrics'
+            ]
+            for current_redis_set in redis_sets_to_rename:
+                new_redis_set = '%s.old' % current_redis_set
+                try:
+                    self.redis_conn.rename(current_redis_set, new_redis_set)
+                except Exception as e:
+                    if str(e) == 'no such key':
+                        logger.info('could not rename Redis set %s to %s: %s' % (
+                            current_redis_set, new_redis_set, str(e)))
+                    else:
+                        logger.error('error :: could not rename Redis set %s to %s: %s' % (
+                            current_redis_set, new_redis_set, str(e)))
 
             for metric_name in unique_metrics:
                 base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
@@ -3281,22 +3571,74 @@ class Ionosphere(Thread):
                             pattern_match = alert_match_pattern.match(METRIC_PATTERN)
                             if pattern_match:
                                 pattern_match = True
-                                if base_name not in self.ionosphere_smtp_alerter_metrics:
-                                    self.ionosphere_smtp_alerter_metrics.append(base_name)
+                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                # if base_name not in self.ionosphere_smtp_alerter_metrics:
+                                if base_name not in ionosphere_smtp_alerter_metrics:
+                                    # self.ionosphere_smtp_alerter_metrics.append(base_name)
+                                    redis_set = 'ionosphere.ionosphere_smtp_alerter_metrics'
+                                    data = base_name
+                                    try:
+                                        self.redis_conn.sadd(redis_set, data)
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to add %s to Redis set %s' % (
+                                            str(data), str(redis_set)))
                         except:
                             pattern_match = False
 
                         if not pattern_match:
                             # Match by substring
                             if alert[0] in base_name:
-                                if base_name not in self.ionosphere_smtp_alerter_metrics:
-                                    self.ionosphere_smtp_alerter_metrics.append(base_name)
+                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                # if base_name not in self.ionosphere_smtp_alerter_metrics:
+                                #     self.ionosphere_smtp_alerter_metrics.append(base_name)
+                                if base_name not in ionosphere_smtp_alerter_metrics:
+                                    redis_set = 'ionosphere.ionosphere_smtp_alerter_metrics'
+                                    data = base_name
+                                    try:
+                                        self.redis_conn.sadd(redis_set, data)
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to add %s to Redis set %s' % (
+                                            str(data), str(redis_set)))
 
-                if base_name not in self.ionosphere_smtp_alerter_metrics:
-                    if base_name not in self.ionosphere_smtp_alerter_metrics:
-                        self.ionosphere_non_smtp_alerter_metrics.append(base_name)
-            logger.info('smtp_alerter_metrics     :: %s' % str(len(self.ionosphere_smtp_alerter_metrics)))
-            logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # if base_name not in self.ionosphere_smtp_alerter_metrics:
+                #     if base_name not in self.ionosphere_smtp_alerter_metrics:
+                #         self.ionosphere_non_smtp_alerter_metrics.append(base_name)
+                if base_name not in ionosphere_smtp_alerter_metrics:
+                    redis_set = 'ionosphere.ionosphere_non_smtp_alerter_metrics'
+                    data = base_name
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # The Redis lists are used here to replace the self.ionosphere_
+            # Manager().list()
+            ionosphere_smtp_alerter_metrics = []
+            try:
+                ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
+                ionosphere_smtp_alerter_metrics = []
+            ionosphere_non_smtp_alerter_metrics = []
+            try:
+                ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set')
+                ionosphere_non_smtp_alerter_metrics = []
+
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # logger.info('smtp_alerter_metrics     :: %s' % str(len(self.ionosphere_smtp_alerter_metrics)))
+            # logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
+            logger.info('smtp_alerter_metrics     :: %s' % str(len(ionosphere_smtp_alerter_metrics)))
+            logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(ionosphere_non_smtp_alerter_metrics)))
 
             if ionosphere_job:
 
@@ -3317,6 +3659,22 @@ class Ionosphere(Thread):
                     logger.info(
                         'not running process_ionosphere_echo as there are %s metric check files to be checked' % (
                             str(metric_var_files_count)))
+
+                # @added 20190527 - Feature #2484: FULL_DURATION feature profiles
+                #                   Branch #3002: docker
+                # Only process if there is a ionosphere.unique_metrics Redis set
+                if run_process_ionosphere_echo:
+                    ionosphere_unique_metrics = []
+                    try:
+                        ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get Redis smembers ionosphere.unique_metrics')
+                        ionosphere_unique_metrics = []
+                    # @added 20190527 - Feature #2484: FULL_DURATION feature profiles
+                    if not ionosphere_unique_metrics:
+                        logger.info('there are metrics in the Redis ionosphere.unique_metrics set, skipping process_ionosphere_echo')
+
                 # If there are more than 4 metric check files set Ionosphere to
                 # busy so that Ionosphere alternates between checking the normal
                 # Ionosphere Mirage features profiles and the Ionosphere echo
@@ -3333,14 +3691,14 @@ class Ionosphere(Thread):
                     spawned_pids = []
                     pid_count = 0
                     now = time()
-                    for i in range(1, ionosphere_processes + 1):
+                    for i in range(1, IONOSPHERE_PROCESSES + 1):
                         try:
                             p = Process(target=self.process_ionosphere_echo, args=(i, metric_check_file))
                             pids.append(p)
                             pid_count += 1
                             logger.info(
                                 'starting %s of %s %s' % (
-                                    str(pid_count), str(ionosphere_processes),
+                                    str(pid_count), str(IONOSPHERE_PROCESSES),
                                     function_name))
                             p.start()
                             spawned_pids.append(p.pid)
@@ -3364,7 +3722,7 @@ class Ionosphere(Thread):
                             time_to_run = time() - p_starts
                             logger.info(
                                 '%s %s completed in %.2f seconds' % (
-                                    str(ionosphere_processes),
+                                    str(IONOSPHERE_PROCESSES),
                                     function_name, time_to_run))
                             break
                     else:
@@ -3403,7 +3761,7 @@ class Ionosphere(Thread):
             now = time()
             # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
             # for i in range(1, settings.IONOSPHERE_PROCESSES + 1):
-            for i in range(1, ionosphere_processes + 1):
+            for i in range(1, IONOSPHERE_PROCESSES + 1):
                 if ionosphere_job:
                     try:
                         # @modified 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
@@ -3423,7 +3781,7 @@ class Ionosphere(Thread):
                                 str(pid_count),
                                 # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
                                 # str(settings.IONOSPHERE_PROCESSES),
-                                str(ionosphere_processes),
+                                str(IONOSPHERE_PROCESSES),
                                 function_name))
                         p.start()
                         spawned_pids.append(p.pid)
@@ -3443,7 +3801,7 @@ class Ionosphere(Thread):
                                 str(pid_count),
                                 # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
                                 # str(settings.IONOSPHERE_PROCESSES),
-                                str(ionosphere_processes),
+                                str(IONOSPHERE_PROCESSES),
                                 function_name))
                         p.start()
                         spawned_pids.append(p.pid)
@@ -3476,7 +3834,7 @@ class Ionosphere(Thread):
                         '%s %s completed in %.2f seconds' % (
                             # @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1
                             # str(settings.IONOSPHERE_PROCESSES),
-                            str(ionosphere_processes),
+                            str(IONOSPHERE_PROCESSES),
                             function_name, time_to_run))
                     break
             else:
@@ -3519,5 +3877,25 @@ class Ionosphere(Thread):
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Reset added lists of ionospehere_smtp_alerter_metrics and
             # ionosphere_non_smtp_alerter_metrics
-            self.ionosphere_smtp_alerter_metrics[:] = []
-            self.ionosphere_non_smtp_alerter_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.ionosphere_smtp_alerter_metrics[:] = []
+            # self.ionosphere_non_smtp_alerter_metrics[:] = []
+
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis sets instead of Manager().list()
+            # delete_redis_sets = [
+            #     'ionosphere.ionosphere_smtp_alerter_metrics',
+            #     'ionosphere.ionosphere_non_smtp_alerter_metrics',
+            # ]
+            delete_redis_sets = [
+                'ionosphere.ionosphere_smtp_alerter_metrics.old',
+                'ionosphere.ionosphere_non_smtp_alerter_metrics.old',
+            ]
+            for i_redis_set in delete_redis_sets:
+                redis_set_to_delete = i_redis_set
+                try:
+                    self.redis_conn.delete(redis_set_to_delete)
+                    logger.info('deleted Redis set - %s' % redis_set_to_delete)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
