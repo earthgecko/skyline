@@ -81,9 +81,7 @@ metric: information about the anomaly itself\n
     metric[0]: the anomalous value\n
     metric[1]: The full name of the anomalous metric\n
     metric[2]: anomaly timestamp\n
-
 second_order_resolution_seconds: int
-
 context: the app name
 
 """
@@ -95,6 +93,12 @@ try:
 except:
     full_duration_seconds = 86400
 full_duration_in_hours = full_duration_seconds / 60 / 60
+
+# @added 20190523 - Branch #3002: docker
+try:
+    DOCKER_FAKE_EMAIL_ALERTS = settings.DOCKER_FAKE_EMAIL_ALERTS
+except:
+    DOCKER_FAKE_EMAIL_ALERTS = False
 
 
 def alert_smtp(alert, metric, second_order_resolution_seconds, context):
@@ -718,8 +722,8 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         more_body += '<br>'
         more_body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
     except:
-        logger.error('error :: alert_smtp - could not build body')
         logger.info(traceback.format_exc())
+        logger.error('error :: alert_smtp - could not build body')
 
     # @modified 20180524 - Task #2384: Change alerters to cc other recipients
     # Do not send to each recipient, send to primary_recipient and cc the other
@@ -789,28 +793,55 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             logger.error('error :: alert_smtp - could not attach')
             logger.info(traceback.format_exc())
 
-        s = SMTP('127.0.0.1')
-        try:
-            # @modified 20180524 - Task #2384: Change alerters to cc other recipients
-            # Send to primary_recipient and cc_recipients
-            # s.sendmail(sender, recipient, msg.as_string())
-            if cc_recipients:
-                s.sendmail(sender, [primary_recipient, cc_recipients], msg.as_string())
-            else:
-                s.sendmail(sender, primary_recipient, msg.as_string())
-            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                # logger.info('debug :: alert_smtp - message sent to %s OK' % str(recipient))
-                logger.info(
-                    'debug :: alert_smtp - message sent OK to primary_recipient :: %s, cc_recipients :: %s' %
-                    (str(primary_recipient), str(cc_recipients)))
-        except:
-            logger.info(traceback.format_exc())
-            # logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
-            logger.error(
-                'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
-                (str(primary_recipient), str(cc_recipients)))
+        # @added 20190523 - Branch #3002: docker
+        # Do not try to alert if the settings are default
+        send_email_alert = True
+        if 'your_domain.com' in str(sender):
+            logger.info('alert_smtp - sender is not configured, not sending alert')
+            send_email_alert = False
+        if 'your_domain.com' in str(primary_recipient):
+            logger.info('alert_smtp - sender is not configured, not sending alert')
+            send_email_alert = False
+        if 'example.com' in str(sender):
+            logger.info('alert_smtp - sender is not configured, not sending alert')
+            send_email_alert = False
+        if 'example.com' in str(primary_recipient):
+            logger.info('alert_smtp - sender is not configured, not sending alert')
+            send_email_alert = False
+        if DOCKER_FAKE_EMAIL_ALERTS:
+            logger.info('alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to %s, not executing SMTP command' % str(DOCKER_FAKE_EMAIL_ALERTS))
+            send_email_alert = False
 
-        s.quit()
+        # @modified 20190523 - Branch #3002: docker
+        # Wrap the smtp block based on whether to actually send mail or not.
+        # This allows for all the steps to be processed in the testing or docker
+        # context without actually sending the email.
+        if send_email_alert:
+            try:
+                s = SMTP('127.0.0.1')
+                # @modified 20180524 - Task #2384: Change alerters to cc other recipients
+                # Send to primary_recipient and cc_recipients
+                # s.sendmail(sender, recipient, msg.as_string())
+                if cc_recipients:
+                    s.sendmail(sender, [primary_recipient, cc_recipients], msg.as_string())
+                else:
+                    s.sendmail(sender, primary_recipient, msg.as_string())
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    # logger.info('debug :: alert_smtp - message sent to %s OK' % str(recipient))
+                    logger.info(
+                        'debug :: alert_smtp - message sent OK to primary_recipient :: %s, cc_recipients :: %s' %
+                        (str(primary_recipient), str(cc_recipients)))
+            except:
+                logger.info(traceback.format_exc())
+                # logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
+                logger.error(
+                    'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
+                    (str(primary_recipient), str(cc_recipients)))
+            s.quit()
+        else:
+            logger.info(
+                'alert_smtp - send_email_alert was set to %s message was not sent to primary_recipient :: %s, cc_recipients :: %s' % (
+                str(send_email_alert), str(primary_recipient), str(cc_recipients)))
 
         if LOCAL_DEBUG:
             logger.info('debug :: alert_smtp - Memory usage after email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -907,6 +938,19 @@ def alert_syslog(alert, metric, second_order_resolution_seconds, context):
 def alert_slack(alert, metric, second_order_resolution_seconds, context):
 
     if not settings.SLACK_ENABLED:
+        logger.info('alert_slack - SLACK_ENABLED is False, not slack alerting for anomalous metric :: alert: %s, metric: %s' % (
+            str(alert), str(metric)))
+        return False
+
+    # @modified 20190517 - Branch #3002: docker
+    # Do not try to alert if the settings are default
+    try:
+        bot_user_oauth_access_token = settings.SLACK_OPTS['bot_user_oauth_access_token']
+    except:
+        logger.error('error :: alert_slack - could not determine bot_user_oauth_access_token')
+        return False
+    if bot_user_oauth_access_token == 'YOUR_slack_bot_user_oauth_access_token':
+        logger.info('alert_slack - bot_user_oauth_access_token is not configured, not sending alert')
         return False
 
     from slackclient import SlackClient
@@ -1184,6 +1228,7 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                         # except:
                         #     logger.info(traceback.format_exc())
                         #     logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+
                         slack_group = None
                         slack_group_trace_groups = None
                         slack_group_trace_channels = None
@@ -1291,19 +1336,34 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                 logger.error('error :: alert_slack - redis connection failed')
             metric_timestamp = int(metric[2])
             cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
-            cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+            # @added 20190719 - Bug #3110: webapp - slack_response boolean object
+            # When there are multiple channels declared Skyline only wants to
+            # update the panorama.slack_thread_ts Redis key once for the
+            # primary Skyline channel, so if the cache key exists do not update
+            key_exists = False
             try:
-                REDIS_ALERTER_CONN.setex(
-                    cache_key, 86400,
-                    str(cache_key_value))
-                logger.info(
-                    'added Panorama slack_thread_ts Redis key - %s - %s' %
-                    (cache_key, str(cache_key_value)))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error(
-                    'error :: failed to add Panorama slack_thread_ts Redis key - %s - %s' %
-                    (cache_key, str(cache_key_value)))
+                key_exists = REDIS_ALERTER_CONN.get(cache_key)
+            except Exception as e:
+                logger.error('error :: could not query Redis for cache_key: %s' % e)
+            if key_exists:
+                logger.info('cache key exists for previous channel, not updating %s' % str(cache_key))
+            else:
+                # @modified 20190719 - Bug #3110: webapp - slack_response boolean object
+                # Wrapped in if key_exists, only add a Panorama Redis key if one
+                # has not been added.
+                cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+                try:
+                    REDIS_ALERTER_CONN.setex(
+                        cache_key, 86400,
+                        str(cache_key_value))
+                    logger.info(
+                        'added Panorama slack_thread_ts Redis key - %s - %s' %
+                        (cache_key, str(cache_key_value)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: failed to add Panorama slack_thread_ts Redis key - %s - %s' %
+                        (cache_key, str(cache_key_value)))
 
 
 def trigger_alert(alert, metric, second_order_resolution_seconds, context):
