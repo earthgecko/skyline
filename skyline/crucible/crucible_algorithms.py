@@ -32,7 +32,10 @@ from settings import (
     ALGORITHMS,
     MIRAGE_ALGORITHMS,
     PANDAS_VERSION,
+    # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
+    CONSENSUS,
 )
+from skyline_functions import write_data_to_file
 
 skyline_app = 'crucible'
 skyline_app_logger = '%sLog' % skyline_app
@@ -479,6 +482,10 @@ def run_algorithms(
 
     logger.info('checking algorithms - %s' % (str(check_algorithms)))
 
+    # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
+    # Plot Skyline anomalies if CONSENSUS is achieved
+    anomalies = []
+
     for algorithm in check_algorithms:
         detected = ''
         try:
@@ -497,6 +504,10 @@ def run_algorithms(
                 if anomaly:
                     plt.plot([index], [sliced[-1][1]], 'ro')
                     detected = "DETECTED"
+                    # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
+                    # Add the anomaly to the anomalies list to plot Skyline
+                    # anomalies if CONSENSUS is achieved
+                    anomalies.append([sliced[-1][0], sliced[-1][1], algorithm])
 
             if detected == "DETECTED":
                 results_filename = join(results_dir + "/" + algorithm + "." + detected + ".png")
@@ -522,5 +533,77 @@ def run_algorithms(
 #    logger.info(
 #        'analysis of %s at a full duration of %s took %s seconds' %
 #        (timeseries_name, str(full_duration), str(seconds_to_run)))
+
+    # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
+    # Plot Skyline anomalies where CONSENSUS achieved and create file resources
+    # skyline.anomalies_score.txt and skyline.anomalies.csv
+    anomalies_score = []
+    if anomalies:
+        for ts, value, algo in anomalies:
+            processed = False
+            algorithms_triggered = []
+            if anomalies_score:
+                for i in anomalies_score:
+                    if i[0] == ts:
+                        processed = True
+                        continue
+            if processed:
+                continue
+            for w_ts, w_value, w_algo in anomalies:
+                if w_ts == ts:
+                    algorithms_triggered.append(w_algo)
+            if algorithms_triggered:
+                consensus = len(algorithms_triggered)
+                anomalies_score.append([ts, value, consensus, algorithms_triggered])
+        try:
+            logger.info('info :: plotting skyline.consensus.anomalies.png')
+            x_vals = np.arange(len(timeseries))
+            y_vals = np.array([y[1] for y in timeseries])
+            # Match default graphite graph size
+            plt.figure(figsize=(5.86, 3.08), dpi=100)
+            plt.plot(x_vals, y_vals)
+            for index in range(10, len(timeseries)):
+                anomaly = False
+                sliced = timeseries[:index]
+                for i in anomalies_score:
+                    if sliced[-1][0] == i[0]:
+                        if i[2] >= CONSENSUS:
+                            anomaly = True
+                # Point out the datapoint if it is anomalous according to
+                # Skyline CONSENSUS
+                if anomaly:
+                    plt.plot([index], [sliced[-1][1]], 'ro')
+            results_filename = join(results_dir + "/skyline.consensus.anomalies.png")
+            plt.savefig(results_filename, dpi=100)
+            if python_version == 2:
+                os.chmod(results_filename, 0644)
+            if python_version == 3:
+                os.chmod(results_filename, mode=0o644)
+        except:
+            logger.error('error :: %s' % (traceback.format_exc()))
+            logger.error('error :: falied plotting skyline.consensus.anomalies.png')
+        anomalies_filename = join(results_dir + "/skyline.anomalies_score.txt")
+        write_data_to_file(skyline_app, anomalies_filename, 'w', str(anomalies_score))
+        anomalies_csv = join(results_dir + "/skyline.anomalies.csv")
+        try:
+            with open(anomalies_csv, 'w') as fh:
+                fh.write('timstamp,value,consensus_count,triggered_algorithms\n')
+            for ts, value, consensus, algorithms_triggered in anomalies_score:
+                try:
+                    algos_str = str(algorithms_triggered)
+                    triggered_algorithms = algos_str.replace(',', ' ')
+                    line = '%s,%s,%s,%s\n' % (str(ts), str(value), str(consensus), str(triggered_algorithms))
+                    with open(anomalies_csv, 'a') as fh:
+                        fh.write(line)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not write to file %s' % (anomalies_csv))
+            if python_version == 2:
+                os.chmod(anomalies_csv, 0644)
+            if python_version == 3:
+                os.chmod(anomalies_csv, mode=0o644)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not write to file %s' % (anomalies_csv))
 
     return anomalous, triggered_algorithms
