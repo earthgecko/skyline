@@ -37,7 +37,7 @@
 # Please replace the values here and populate these variables as appropriate
 # with the values of YOUR set up or write them to /etc/skyline/skyline.dawn.conf
 # to be sourced.
-YOUR_SERVER_IP_ADDRESS="127.0.0.1"                         # YOUR Skyline server public IP address
+YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep "inet addr" | cut -d ':' -f2)"  # YOUR Skyline server public IP address
 YOUR_SKYLINE_SERVER_FQDN="skyline-test.example.com"        # YOUR Skyline server FQDN
 YOUR_EMAIL="me@example.com"                                # YOUR email address for the httpd server admin
 YOUR_OTHER_IP_ADDRESS="127.0.0.1"                          # YOUR current public IP address that you will be connecting from
@@ -46,7 +46,7 @@ WEBAPP_AUTH_USER_PASSWORD="$(echo {$HOSTNAME}_skyline)"    # The password you wa
 MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user password
 MYSQL_SKYLINE_PASSWORD="set_the-skyline-user-db-password"  # The Skyline DB user password
 REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
-SKYLINE_RELEASE="v1.2.16"                 # The Skyline release to deploy
+SKYLINE_RELEASE="v1.2.18"                                  # The Skyline release to deploy
 
 STARTED=$(date)
 #### Check if the user added variables in /etc/skyline/skyline.dawn.conf ####
@@ -253,7 +253,7 @@ if [ "$OS" == "Ubuntu" ]; then
       systemctl start mysql
       MYSQL_START_EXIT_CODE=$?
       if [ $MYSQL_START_EXIT_CODE -ne 0 ]; then
-        echo "error :: mysqld failed to start"
+        echo "error :: mysql failed to start"
         exit 1
       fi
     fi
@@ -330,6 +330,10 @@ if [ ! -f /tmp/skyline.dawn.redis.make.txt ]; then
   sleep 1
   if [ "$OS" == "CentOS" ]; then
     yum -y install wget make gcc
+    # @added 20190822 - Branch #3002: docker
+    if [ "$OS_MAJOR_VERSION" == "7" ]; then
+      yum -y install gcc-c++ kernel-devel
+    fi
   else
     apt-get -y install wget make gcc
   fi
@@ -958,7 +962,7 @@ echo ""
 echo ""
 # @added 20190412 - Task #2926: Update dependencies
 #                   Bug #2590: mysql-connector-python - use_pure
-# Report known mysql-connector-python 8.0.6 vulnerablit on CentOS 6
+# Report known mysql-connector-python 8.0.6 vulnerablity on CentOS 6
 if [ "$OS" == "CentOS" ]; then
   if [ "$OS_MAJOR_VERSION" == "6" ]; then
     echo "NOTE - on CentOS 6 mysql-connector-python has to be fixed on version 8.0.6 due to the drop of support"

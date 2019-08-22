@@ -7,7 +7,11 @@ from redis import StrictRedis
 from time import time, sleep
 from threading import Thread
 from collections import defaultdict
-from multiprocessing import Process, Manager, Queue
+# @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# Use Redis sets in place of Manager().list() to reduce memory and number of
+# processes
+# from multiprocessing import Process, Manager, Queue
+from multiprocessing import Process, Queue
 from msgpack import packb
 from os import kill, getpid
 import traceback
@@ -103,15 +107,23 @@ class Mirage(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.anomalous_metrics = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        #                      Task #3032: Debug number of Python processes and memory use
+        #                      Branch #3002: docker
+        # Reduce amount of Manager instances that are used as each requires a
+        # copy of entire memory to be copied into each subprocess so this
+        # results in a python process per Manager instance, using as much
+        # memory as the parent.  OK on a server, not so much in a container.
+        # Disabled all the Manager().list() below and replaced with Redis sets
+        # self.anomalous_metrics = Manager().list()
         self.mirage_exceptions_q = Queue()
         self.mirage_anomaly_breakdown_q = Queue()
-        self.not_anomalous_metrics = Manager().list()
-        self.metric_variables = Manager().list()
-        self.ionosphere_metrics = Manager().list()
-        self.sent_to_crucible = Manager().list()
-        self.sent_to_panorama = Manager().list()
-        self.sent_to_ionosphere = Manager().list()
+        # self.not_anomalous_metrics = Manager().list()
+        # self.metric_variables = Manager().list()
+        # self.ionosphere_metrics = Manager().list()
+        # self.sent_to_crucible = Manager().list()
+        # self.sent_to_panorama = Manager().list()
+        # self.sent_to_ionosphere = Manager().list()
         # @added 20170603 - Feature #2034: analyse_derivatives
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         if settings.REDIS_PASSWORD:
@@ -155,21 +167,38 @@ class Mirage(Thread):
         metric_namespace = new_metric_namespace.replace('(', '\(')
         metric_name = metric_namespace.replace(')', '\)')
 
-        # We use absolute time so that if there is a lag in mirage the correct
-        # timeseries data is still surfaced relevant to the anomalous datapoint
-        # timestamp
-        if settings.GRAPHITE_PORT != '':
-            url = '%s://%s:%s/render/?from=%s&until=%s&target=%s&format=json' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(settings.GRAPHITE_PORT), graphite_from, graphite_until,
-                metric_name)
-        else:
-            url = '%s://%s/render/?from=%s&until=%s&target=%s&format=json' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                graphite_from, graphite_until, metric_name)
-        r = requests.get(url)
-        js = r.json()
-        datapoints = js[0]['datapoints']
+        try:
+            # We use absolute time so that if there is a lag in mirage the correct
+            # timeseries data is still surfaced relevant to the anomalous datapoint
+            # timestamp
+            if settings.GRAPHITE_PORT != '':
+                # @modified 20190520 - Branch #3002: docker
+                # Use GRAPHITE_RENDER_URI
+                # url = '%s://%s:%s/render/?from=%s&until=%s&target=%s&format=json' % (
+                #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                #     str(settings.GRAPHITE_PORT), graphite_from, graphite_until,
+                #     metric_name)
+                url = '%s://%s:%s/%s/?from=%s&until=%s&target=%s&format=json' % (
+                    settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                    str(settings.GRAPHITE_PORT), settings.GRAPHITE_RENDER_URI,
+                    graphite_from, graphite_until, metric_name)
+            else:
+                # @modified 20190520 - Branch #3002: docker
+                # Use GRAPHITE_RENDER_URI
+                # url = '%s://%s/render/?from=%s&until=%s&target=%s&format=json' % (
+                #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                #     graphite_from, graphite_until, metric_name)
+                url = '%s://%s/%s/?from=%s&until=%s&target=%s&format=json' % (
+                    settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                    settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
+                    metric_name)
+            r = requests.get(url)
+            js = r.json()
+            datapoints = js[0]['datapoints']
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: surface_graphite_metric_data :: failed to get data from Graphite')
+            return False
 
         converted = []
         for datapoint in datapoints:
@@ -364,14 +393,25 @@ class Mirage(Thread):
 #            metric_name = ['metric_name', metric_vars.metric]
 #            self.metric_variables.append(metric_name)
 #            logger.info('debug :: added metric_name %s from check file - %s' % (metric_name, metric_check_file))
+
         metric = None
         try:
             key = 'metric'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             metric = str(value_list[0])
             metric_name = ['metric_name', metric]
-            self.metric_variables.append(metric_name)
-            logger.info('debug :: added metric_name %s from check file - %s' % (metric_name, metric_check_file))
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.metric_variables.append(metric_name)
+            redis_set = 'mirage.metric_variables'
+            data = str(metric_name)
+            try:
+                self.redis_conn.sadd(redis_set, data)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis set %s' % (
+                    str(data), str(redis_set)))
+
+            logger.info('debug :: added metric_name %s from check file - %s' % (str(metric_name), metric_check_file))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to read metric variable from check file - %s' % (metric_check_file))
@@ -391,7 +431,16 @@ class Mirage(Thread):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             value = float(value_list[0])
             metric_value = ['metric_value', value]
-            self.metric_variables.append(metric_value)
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.metric_variables.append(metric_value)
+            redis_set = 'mirage.metric_variables'
+            data = str(metric_value)
+            try:
+                self.redis_conn.sadd(redis_set, data)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis set %s' % (
+                    str(data), str(redis_set)))
         except:
             logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
             return
@@ -415,7 +464,16 @@ class Mirage(Thread):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             hours_to_resolve = int(value_list[0])
             hours_to_resolve_list = ['hours_to_resolve', hours_to_resolve]
-            self.metric_variables.append(hours_to_resolve_list)
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.metric_variables.append(hours_to_resolve_list)
+            redis_set = 'mirage.metric_variables'
+            data = str(hours_to_resolve_list)
+            try:
+                self.redis_conn.sadd(redis_set, data)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis set %s' % (
+                    str(data), str(redis_set)))
         except:
             logger.error('error :: failed to read hours_to_resolve variable from check file - %s' % (metric_check_file))
             return
@@ -434,7 +492,16 @@ class Mirage(Thread):
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             metric_timestamp = int(value_list[0])
             metric_timestamp_list = ['metric_timestamp', metric_timestamp]
-            self.metric_variables.append(metric_timestamp_list)
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.metric_variables.append(metric_timestamp_list)
+            redis_set = 'mirage.metric_variables'
+            data = str(metric_timestamp_list)
+            try:
+                self.redis_conn.sadd(redis_set, data)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis set %s' % (
+                    str(data), str(redis_set)))
         except:
             logger.error('error :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
             return
@@ -594,7 +661,17 @@ class Mirage(Thread):
         if not anomalous:
             base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
             not_anomalous_metric = [datapoint, base_name]
-            self.not_anomalous_metrics.append(not_anomalous_metric)
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.not_anomalous_metrics.append(not_anomalous_metric)
+            redis_set = 'mirage.not_anomalous_metrics'
+            data = str(not_anomalous_metric)
+            try:
+                self.redis_conn.sadd(redis_set, data)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis set %s' % (
+                    str(data), str(redis_set)))
+
             logger.info('not anomalous     :: %s with %s' % (metric, value))
 
         # If it's anomalous, add it to list
@@ -603,7 +680,17 @@ class Mirage(Thread):
             # metric_timestamp = int(timeseries[-1][0])
             metric_timestamp = int_metric_timestamp
             anomalous_metric = [datapoint, base_name, metric_timestamp]
-            self.anomalous_metrics.append(anomalous_metric)
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.anomalous_metrics.append(anomalous_metric)
+            redis_set = 'mirage.anomalous_metrics'
+            data = str(anomalous_metric)
+            try:
+                self.redis_conn.sadd(redis_set, data)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to mirage.anomalous_metrics Redis set' % (
+                    str(data), str(redis_set)))
+
             logger.info('anomaly detected  :: %s with %s' % (metric, str(value)))
             # It runs so fast, this allows us to process 30 anomalies/min
             sleep(2)
@@ -700,10 +787,22 @@ class Mirage(Thread):
                         skyline_app, panaroma_anomaly_file, 'w',
                         panaroma_anomaly_data)
                     logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
-                    self.sent_to_panorama.append(base_name)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Move to Redis set block below
+                    # self.sent_to_panorama.append(base_name)
                 except:
                     logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
                     logger.info(traceback.format_exc())
+                # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Moved from the above self.sent_to_panorama
+                redis_set = 'mirage.sent_to_panorama'
+                data = str(base_name)
+                try:
+                    self.redis_conn.sadd(redis_set, data)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s to Redis set %s' % (
+                        str(data), str(redis_set)))
 
             # If crucible is enabled - save timeseries and create a
             # crucible check
@@ -746,10 +845,22 @@ class Mirage(Thread):
                         skyline_app, crucible_anomaly_file, 'w',
                         crucible_anomaly_data)
                     logger.info('added crucible anomaly file :: %s' % (crucible_anomaly_file))
-                    self.sent_to_crucible.append(base_name)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.sent_to_crucible.append(base_name)
                 except:
                     logger.error('error :: failed to add crucible anomaly file :: %s' % (crucible_anomaly_file))
                     logger.info(traceback.format_exc())
+
+                # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Moved from the above self.sent_to_crucible
+                redis_set = 'mirage.sent_to_crucible'
+                data = str(base_name)
+                try:
+                    self.redis_conn.sadd(redis_set, data)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s to Redis set %s' % (
+                        str(data), str(redis_set)))
 
                 # Create timeseries json file with the timeseries
                 json_file = '%s/%s.json' % (crucible_anomaly_dir, base_name)
@@ -790,9 +901,23 @@ class Mirage(Thread):
                         str(int_metric_timestamp), base_name, str(datapoint),
                         from_timestamp, triggered_algorithms, timeseries,
                         full_duration, str(ionosphere_parent_id))
-                    self.sent_to_ionosphere.append(base_name)
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Moved to the mirage.sent_to_ionosphere Redis set Redis set
+                    # block below
+                    # self.sent_to_ionosphere.append(base_name)
                 else:
                     logger.info('alert expiry key exists not sending to Ionosphere :: %s' % base_name)
+                # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Moved from the above self.sent_to_ionosphere
+                if not last_alert:
+                    redis_set = 'mirage.sent_to_ionosphere'
+                    data = str(base_name)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
 
         # Add values to the queue so the parent process can collate
         for key, value in anomaly_breakdown.items():
@@ -1161,7 +1286,17 @@ class Mirage(Thread):
                     except Empty:
                         break
 
-                for metric_variable in self.metric_variables:
+                # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Use Redis set and not self.metric_variables
+                metric_variables = []
+                literal_metric_variables = list(self.redis_conn.smembers('mirage.metric_variables'))
+                for item_list_string in literal_metric_variables:
+                    list_item = literal_eval(item_list_string)
+                    metric_variables.append(list_item)
+
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # for metric_variable in self.metric_variables:
+                for metric_variable in metric_variables:
                     if metric_variable[0] == 'metric_name':
                         metric_name = metric_variable[1]
                     if metric_variable[0] == 'metric_value':
@@ -1218,8 +1353,16 @@ class Mirage(Thread):
                 ionosphere_unique_metrics = []
                 logger.info('Ionosphere alerts requested emptying ionosphere_unique_metrics so Mirage will alert')
                 exceptions = dict()
-                run_timestamp = int(time())
-                ionosphere_alert_on = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                # @modified 20190524 - Branch #3002
+                # Wrapped in try except
+                try:
+                    run_timestamp = int(time())
+                    ionosphere_alert_on = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get ionosphere.mirage.alert.* from Redis key scan')
+                    ionosphere_alert_on = []
+
                 for cache_key in ionosphere_alert_on:
                     try:
                         alert_on = self.redis_conn.get(cache_key)
@@ -1230,7 +1373,17 @@ class Mirage(Thread):
                         triggered_algorithms = send_alert_for[3]
                         second_order_resolution_seconds = int(send_alert_for[4])
                         anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
-                        self.anomalous_metrics.append(anomalous_metric)
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # self.anomalous_metrics.append(anomalous_metric)
+                        redis_set = 'mirage.anomalous_metrics'
+                        data = str(anomalous_metric)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
+
                         anomaly_breakdown = dict()
                         for algorithm in triggered_algorithms:
                             anomaly_breakdown[algorithm] = 1
@@ -1251,11 +1404,24 @@ class Mirage(Thread):
             # Only check Ionosphere is up once per cycle
             ionosphere_up = False
 
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            mirage_anomalous_metrics = []
+            try:
+                literal_mirage_anomalous_metrics = list(self.redis_conn.smembers('mirage.anomalous_metrics'))
+                for metric_list_string in literal_mirage_anomalous_metrics:
+                    metric = literal_eval(metric_list_string)
+                    mirage_anomalous_metrics.append(metric)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to determine list from mirage.anomalous_metrics Redis set')
+                mirage_anomalous_metrics = []
+
             for alert in settings.ALERTS:
                 # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
                 not_an_ionosphere_metric_check_done = 'none'
-
-                for metric in self.anomalous_metrics:
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # for metric in self.anomalous_metrics:
+                for metric in mirage_anomalous_metrics:
                     # @added 20161228 - Feature #1830: Ionosphere alerts
                     #                   Branch #922: Ionosphere
                     # Bringing Ionosphere online - do alert on Ionosphere
@@ -1333,8 +1499,14 @@ class Mirage(Thread):
                                             logger.error('error :: failed to determine full_duration from the Ionosphere alert for %s' % (metric[1]))
                                             logger.info('using settings.FULL_DURATION - %s' % (str(settings.FULL_DURATION)))
                                             second_order_resolution_seconds = settings.FULL_DURATION
-                                self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-
+                                # @modified 20190524 - Branch #3002
+                                # Wrapped in try except
+                                try:
+                                    self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to set Redis key %s for %s' % (
+                                        str(cache_key), metric[1]))
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)
                                 try:
                                     if alert[1] != 'smtp':
@@ -1344,13 +1516,32 @@ class Mirage(Thread):
                                     logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
                                 except Exception as e:
                                     logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
+                            else:
+                                logger.info('alert Redis key %s exists not alerting for %s' % (str(cache_key), metric[1]))
+
                         except Exception as e:
                             logger.error('error :: could not query Redis for cache_key')
 
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            mirage_not_anomalous_metrics = []
+            try:
+                literal_mirage_not_anomalous_metrics = list(self.redis_conn.smembers('mirage.not_anomalous_metrics'))
+                for metric_list_string in literal_mirage_not_anomalous_metrics:
+                    metric = literal_eval(metric_list_string)
+                    mirage_not_anomalous_metrics.append(metric)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to determine list from mirage.not_anomalous_metrics Redis set')
+                mirage_not_anomalous_metrics = []
+
             if settings.NEGATE_ANALYZER_ALERTS:
-                if len(self.anomalous_metrics) == 0:
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # if len(self.anomalous_metrics) == 0:
+                if len(mirage_anomalous_metrics) == 0:
                     for negate_alert in settings.ALERTS:
-                        for not_anomalous_metric in self.not_anomalous_metrics:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # for not_anomalous_metric in self.not_anomalous_metrics:
+                        for not_anomalous_metric in mirage_not_anomalous_metrics:
                             NEGATE_ALERT_MATCH_PATTERN = negate_alert[0]
                             NOT_ANOMALOUS_METRIC_PATTERN = not_anomalous_metric[1]
                             alert_match_pattern = re.compile(NEGATE_ALERT_MATCH_PATTERN)
@@ -1363,9 +1554,13 @@ class Mirage(Thread):
                                     logger.error('error :: could not send alert: %s' % e)
 
             # Log progress
-            if len(self.anomalous_metrics) > 0:
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # if len(self.anomalous_metrics) > 0:
+            if len(mirage_anomalous_metrics) > 0:
                 logger.info('seconds since last anomaly :: %.2f' % (time() - now))
-                logger.info('total anomalies    :: %d' % len(self.anomalous_metrics))
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # logger.info('total anomalies    :: %d' % len(self.anomalous_metrics))
+                logger.info('total anomalies    :: %d' % len(mirage_anomalous_metrics))
                 logger.info('exception stats    :: %s' % exceptions)
                 logger.info('anomaly breakdown  :: %s' % anomaly_breakdown)
 
@@ -1378,7 +1573,9 @@ class Mirage(Thread):
 
             if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
                 try:
-                    sent_to_crucible = str(len(self.sent_to_crucible))
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # sent_to_crucible = str(len(self.sent_to_crucible))
+                    sent_to_crucible = str(len(list(self.redis_conn.smembers('mirage.sent_to_crucible'))))
                 except:
                     sent_to_crucible = '0'
                 logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
@@ -1387,7 +1584,9 @@ class Mirage(Thread):
 
             if settings.PANORAMA_ENABLED:
                 try:
-                    sent_to_panorama = str(len(self.sent_to_panorama))
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # sent_to_panorama = str(len(self.sent_to_panorama))
+                    sent_to_panorama = str(len(list(self.redis_conn.smembers('mirage.sent_to_panorama'))))
                 except:
                     sent_to_panorama = '0'
                 logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
@@ -1396,23 +1595,48 @@ class Mirage(Thread):
 
             if settings.IONOSPHERE_ENABLED:
                 try:
-                    sent_to_ionosphere = str(len(self.sent_to_ionosphere))
-                except:
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # sent_to_ionosphere = str(len(self.sent_to_ionosphere))
+                    sent_to_ionosphere = str(len(list(self.redis_conn.smembers('mirage.sent_to_ionosphere'))))
+                except Exception as e:
+                    logger.error('error :: could not determine sent_to_ionosphere: %s' % e)
                     sent_to_ionosphere = '0'
                 logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
                 send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
 
             # Reset counters
-            self.anomalous_metrics[:] = []
-            self.not_anomalous_metrics[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis sets instead of Manager().list()
+            # self.anomalous_metrics[:] = []
+            # self.not_anomalous_metrics[:] = []
 
             # Reset metric_variables
-            self.metric_variables[:] = []
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis sets instead of Manager().list()
+            # self.metric_variables[:] = []
+            # self.sent_to_crucible[:] = []
+            # self.sent_to_panorama[:] = []
+            # self.sent_to_ionosphere[:] = []
 
-            self.sent_to_crucible[:] = []
-            self.sent_to_panorama[:] = []
-            self.sent_to_ionosphere[:] = []
+            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # Use Redis sets instead of Manager().list()
+            delete_redis_sets = [
+                'mirage.anomalous_metrics',
+                'mirage.not_anomalous_metrics',
+                'mirage.metric_variables',
+                'mirage.sent_to_crucible',
+                'mirage.sent_to_panorama',
+                'mirage.sent_to_ionosphere',
+            ]
+            for i_redis_set in delete_redis_sets:
+                redis_set_to_delete = i_redis_set
+                try:
+                    self.redis_conn.delete(redis_set_to_delete)
+                    logger.info('deleted Redis set - %s' % redis_set_to_delete)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
 
             """
             DEVELOPMENT ONLY
