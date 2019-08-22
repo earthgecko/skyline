@@ -17,7 +17,7 @@ REDIS_SOCKET_PATH = '/tmp/redis.sock'
 :vartype REDIS_SOCKET_PATH: str
 """
 
-#REDIS_PASSWORD = 'DO.PLEASE.set.A.VERY.VERY.LONG.REDIS.password-time(now-1+before_you_forget)'
+# REDIS_PASSWORD = 'DO.PLEASE.set.A.VERY.VERY.LONG.REDIS.password-time(now-1+before_you_forget)'
 REDIS_PASSWORD = None
 """
 :var REDIS_PASSWORD: The password for Redis, even though Skyline uses socket it
@@ -104,11 +104,23 @@ MINI_DURATION = 3600
 :vartype MINI_DURATION: str
 """
 
+GRAPHITE_AUTH_HEADER = False
+"""
+:var GRAPHITE_AUTH_HEADER: the Authorization header for Graphite api
+:vartype GRAPHITE_AUTH_HEADER: str
+"""
+
+GRAPHITE_CUSTOM_HEADERS = {}
+"""
+:var GRAPHITE_CUSTOM_HEADERS: Dictionary with custom headers
+:vartype GRAPHITE_CUSTOM_HEADERS: dict
+"""
+
 GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'
 """
-:var GRAPHITE_HOST: If you have a Graphite host set up, set this metric to get
-    graphs on Skyline and Horizon. Don't include http:// since this is used for
-    carbon host as well.
+:var GRAPHITE_HOST: If you have a Graphite host set up, set this variable to get
+    graphs on Skyline and Horizon. Don't include http:// since this can be used
+    for CARBON_HOST as well.
 :vartype GRAPHITE_HOST: str
 """
 
@@ -153,7 +165,15 @@ TARGET_HOURS = '7'
 :vartype TARGET_HOURS: str
 """
 
-GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
+GRAPHITE_RENDER_URI = 'render'
+"""
+:var GRAPHITE_RENDER_URI: Base URI for graphite render, this can generally be
+    render, api/datasources/1/render,  api/datasources/proxy/1/render, etc,
+    depending on how your Graphite (or grafana proxy) is set up.
+:vartype GRAPHITE_RENDER_URI: str
+"""
+
+GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/' + GRAPHITE_RENDER_URI + '?width=1400&from=-' + TARGET_HOURS + 'hour&target='
 """
 :var GRAPH_URL: The graphite URL for alert graphs will be appended with the
     relevant metric name in each alert.
@@ -161,6 +181,13 @@ GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/
 
 .. note:: There is probably no neeed to change this unless you what a different
     size graph sent with alerts.
+"""
+
+CARBON_HOST = GRAPHITE_HOST
+"""
+:var CARBON_HOST: endpoint to send metrics that sould reach graphite if
+    the CARBON_HOST is a different host to the GRAPHITE_HOST set it here.
+:vartype CARBON_PORT: int
 """
 
 CARBON_PORT = 2003
@@ -188,6 +215,29 @@ SERVER_METRICS_NAME = 'YOUR_HOSTNAME'
   instance on the Skyline namespace sharded by this setting, like carbon.relays.
   If you want multiple Skyline hosts, set the hostname of the skyline here and
   metrics will be as e.g. ``skyline.analyzer.skyline-01.run_time``
+"""
+
+SKYLINE_FEEDBACK_NAMESPACES = [SERVER_METRICS_NAME, GRAPHITE_HOST]
+"""
+:var SKYLINE_FEEDBACK_NAMESPACES: This is a list of namespaces that can cause
+    feedback in Skyline.  If you are analysing the system metrics of the Skyline
+    host (server or container), then if a lot of metrics become anomalous, the
+    Skyline host/s are going to be working much more and pulling more data from
+    the GRAPHITE_HOST, the Skyline mysql database metrics and Redis queries
+    will all change substantially too.  Although Skyline can be trained and
+    learn them, when Skyline is in a known busy state, the monitoring of its
+    own metrics and related metrics should take 2md priority.  In fact when the
+    ionosphere_busy state is determined, Skyline will rate limit the analysis of
+    any metrics in the namespaces declared here.
+    This list works in the same way that Horizon SKIP_LIST does, it matches in
+    the string or dotted namespace elements.
+    For example:
+    SKYLINE_FEEDBACK_NAMESPACES = [
+        SERVER_METRICS_NAME,
+        'stats.skyline-docker-graphite-statsd-1',
+        'stats.skyline-mysql']
+
+:vartype SKYLINE_FEEDBACK_NAMESPACES: list
 """
 
 MIRAGE_CHECK_PATH = '/opt/skyline/mirage/check'
@@ -497,6 +547,7 @@ ANALYZER_CRUCIBLE_ENABLED = False
 """
 
 ALERTS = (
+    ('horizon.udp.test', 'smtp', 30),
     ('skyline', 'smtp', 1800),
     ('skyline_test.alerters.test', 'smtp', 1800),
     ('skyline_test.alerters.test', 'hipchat', 1800),
@@ -707,13 +758,30 @@ SYSLOG_OPTS = {
     'ident': 'skyline',
 }
 """
-:var SYSLOG_OPTS: Your SMTP settings.
+:var SYSLOG_OPTS: Your syslog settings.
 :vartype SYSLOG_OPTS: dictionary
 
 syslog alerts requires an ident this adds a LOG_WARNING message to the
 LOG_LOCAL4 which will ship to any syslog or rsyslog down the line.  The
 ``EXPIRATION_TIME`` for the syslog alert method should be set to 1 to fire
 every anomaly into the syslog.
+"""
+
+CUSTOM_ALERT_OPTS = {
+    'main_alert_title': 'Skyline',
+    'analyzer_alert_heading': 'Analyzer',
+    'mirage_alert_heading': 'Mirage',
+    'boundary_alert_heading': 'Boundary',
+    'ionosphere_alert_heading': 'Ionosphere',
+    'append_environment': '',
+}
+"""
+:var CUSTOM_ALERT_OPTS: Any custom alert headings you want to use
+:vartype CUSTOM_ALERT_OPTS: dictionary
+
+Here you can specify any custom alert titles and headings you want for each
+alerting app.  You also can use the append_environment option to append the
+environment from which the alert originated.
 """
 
 """
@@ -2019,3 +2087,31 @@ LUMINOL_CROSS_CORRELATION_THRESHOLD = 0.9
     correlation
 :vartype LUMINOL_CROSS_CORRELATION_THRESHOLD: float
 """
+
+"""
+Docker settings
+"""
+
+DOCKER = False
+"""
+:var DOCKER: Whether Skyline is running on Docker or not
+:vartype DOCKER: boolean
+"""
+
+DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW = False
+"""
+:var DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW: Whether to show the Redis password
+    in the webapp Rebrow login page
+:vartype DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW: boolean
+"""
+
+DOCKER_FAKE_EMAIL_ALERTS = False
+"""
+:var DOCKER_FAKE_EMAIL_ALERTS: Whether to make docker fake email alerts.  At the
+    moment docker has no support to send email alerts, however an number of
+    Ionosphere resources are created when a email alert is sent.  Therefore in
+    the docker context email alerts are processed only the SMTP action is not
+    run.  If Skyline is running on docker, this must be set to True.
+:vartype DOCKER_FAKE_EMAIL_ALERTS: boolean
+"""
+

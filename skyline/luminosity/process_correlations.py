@@ -282,8 +282,21 @@ def get_remote_assigned(anomaly_timestamp):
         # can be mulitple megabytes
         url = '%s/luminosity_remote_data?anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
         response_ok = False
+
+        # @added 20190519 - Branch #3002: docker
+        # Handle self signed certificate on Docker
+        verify_ssl = True
         try:
-            r = requests.get(url, timeout=15, auth=(remote_user, remote_password))
+            running_on_docker = settings.DOCKER
+        except:
+            running_on_docker = False
+        if running_on_docker:
+            verify_ssl = False
+
+        try:
+            # @modified 20190519 - Branch #3002: docker
+            # r = requests.get(url, timeout=15, auth=(remote_user, remote_password))
+            r = requests.get(url, timeout=15, auth=(remote_user, remote_password), verify=verify_ssl)
             if int(r.status_code) == 200:
                 logger.info('get_remote_assigned :: time series data retrieved from %s' % remote_url)
                 response_ok = True

@@ -177,11 +177,18 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     graphite_target = 'target=cactiStyle(%s)'
     if known_derivative_metric:
         graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s))'
-    link = '%s://%s:%s/render/?from=%s&until=%s&%s%s%s&colorList=%s' % (
-        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
-        str(graphite_from), str(graphite_until), graphite_target,
-        settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
-        graphite_graph_line_color)
+    # @modified 20190520 - Branch #3002: docker
+    # Use GRAPHITE_RENDER_URI
+    # link = '%s://%s:%s/render/?from=%s&until=%s&%s%s%s&colorList=%s' % (
+    #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+    #     str(graphite_from), str(graphite_until), graphite_target,
+    #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
+    #     graphite_graph_line_color)
+    link = '%s://%s:%s/%s/?from=%s&until=%s&%s%s%s&colorList=%s' % (
+        settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+        graphite_port, settings.GRAPHITE_RENDER_URI, str(graphite_from),
+        str(graphite_until), graphite_target, settings.GRAPHITE_GRAPH_SETTINGS,
+        graph_title, graphite_graph_line_color)
 
     content_id = metric_name
     image_data = None
@@ -304,15 +311,29 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
             # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=%s' % (
                 # settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
                 # graphite_previous_hours, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
+            #     graphite_from, graphite_until, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
+            #     graph_title, graphite_graph_line_color)
+            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
-                graphite_from, graphite_until, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
-                graph_title, graphite_graph_line_color)
+                settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
+                metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
+                graphite_graph_line_color)
         else:
             # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=%s' % (
                 # settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_previous_hours,
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_from, graphite_until,
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_from, graphite_until,
+            #     metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
+            #     graphite_graph_line_color)
+            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
                 metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
                 graphite_graph_line_color)
 
@@ -422,26 +443,54 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
 
     if settings.GRAPHITE_PORT != '':
         if known_derivative_metric:
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+            #     metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+                settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                str(graphite_from), str(graphite_until),
                 metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         else:
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
+            #     metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
-                metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                str(graphite_from), str(graphite_until), metric,
+                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
         if known_derivative_metric:
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     str(graphite_from), str(graphite_until), metric,
+            #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(graphite_from), str(graphite_until), metric,
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                settings.GRAPHITE_RENDER_URI, str(graphite_from),
+                str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
+                graph_title)
         else:
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            # @modified 20190520 - Branch #3002: docker
+            # Use GRAPHITE_RENDER_URI
+            # link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            #     str(graphite_from), str(graphite_until), metric,
+            #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(graphite_from), str(graphite_until), metric,
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                settings.GRAPHITE_RENDER_URI, str(graphite_from),
+                str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
+                graph_title)
 
     # slack does not allow embedded images, nor will it fetch links behind
     # authentication so Skyline uploads a png graphite image with the message

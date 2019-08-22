@@ -191,13 +191,16 @@
       combination of the Crtl + - keys.
 				<thead>
 					<tr>
-<!-- [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
+<!-- # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
+     # Added fp_generation and parent_fp_generation
+      [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
       fp_parent_id5, parent_full_duration6, parent_anomaly_timestamp7,
       fp_date8, fp_graph_uri9, parent_fp_date10, parent_fp_graph_uri11,
       parent_parent_fp_id12, fp_learn_graph_uri13,
       parent_fp_learn_fp_graph_uri14, minimum_full_duration15,
-      maximum_full_duration16] -->
+      maximum_full_duration16, fp_generation17, parent_fp_generation18] -->
             <th>fp id</th>
+            <th>generation</th>
             <th>parent fp id</th>
             <th>parent's parent fp id</th>
             <th>metric</th>
@@ -214,8 +217,19 @@
             <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
               <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[0] }}</a>
             </td>
+<!-- # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
+# Added generation -->
+    {% if item[17] > 1 %}
+            <td>{{ item[17] }}<br><span class="logo"><span class="re">learnt</span></span></td>
+    {% else %}
+            <td>{{ item[17] }}<br><span class="logo"><span class="sky">trained</span></span></td>
+    {% endif %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[5] }}&metric={{ item[2] }}'">
-              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ item[2] }}">{{ item[5] }}</a>
+    {% if item[18] > 1 %}
+              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ item[2] }}">{{ item[5] }}<br><span class="logo"><span class="re">learnt</span></span></a>
+    {% else %}
+              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ item[2] }}">{{ item[5] }}<br><span class="logo"><span class="sky">trained</span></span></a>
+    {% endif %}
             </td>
     {% if item[12] != 'none' %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[12] }}&metric={{ item[2] }}'">

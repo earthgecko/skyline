@@ -94,10 +94,12 @@ dygraph-1.1.1 */
 // timeseries.  So we timeshit 5 percent
 //        from_date = strftime('%H:%M_%Y%m%d', new Date(from_timestamp * 1000));
 //        until_date = strftime('%H:%M_%Y%m%d', new Date(until_timestamp * 1000));
-        from_date = strftime('%H:%M_%Y%m%d', new Date(fetch_from_timestamp * 1000));
-        until_date = strftime('%H:%M_%Y%m%d', new Date(fetch_until_timestamp * 1000));
 
-        var src = PANORAMA_GRAPH_URL + '/render/?width=1400&from=' + from_date + '&until=' + until_date + '&target=' + name
+// Comment out below lines and use timestamps instead of '%H:%M_%Y%m%d format for Graphite Image Url. Otherwise, renders "No Data"
+//        from_date = strftime('%H:%M_%Y%m%d', new Date(fetch_from_timestamp * 1000));
+//        until_date = strftime('%H:%M_%Y%m%d', new Date(fetch_until_timestamp * 1000));
+
+        var src = PANORAMA_GRAPH_URL + '/render/?width=1400&from=' + fetch_from_timestamp + '&until=' + fetch_until_timestamp + '&target=' + name
 
         // Add a space after the metric name to make each unique
         to_append = "<div class='sub'><a target='_blank' href='" + src + "'><div class='anomaly_id'>" + anomaly_id + " </div></a>&nbsp;&nbsp;"

@@ -55,11 +55,11 @@ def run():
     Start the logger.
     """
     if not isdir(settings.PID_PATH):
-        print ('pid directory does not exist at %s' % settings.PID_PATH)
+        print('pid directory does not exist at %s' % settings.PID_PATH)
         sys.exit(1)
 
     if not isdir(settings.LOG_PATH):
-        print ('log directory does not exist at %s' % settings.LOG_PATH)
+        print('log directory does not exist at %s' % settings.LOG_PATH)
         sys.exit(1)
 
     logger.setLevel(logging.DEBUG)

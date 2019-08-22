@@ -94,4 +94,13 @@ def alerts_matcher(base_name, pattern, alerter, second_order_resolution_hours):
         else:
             print('not matched in substring')
 
+    if not pattern_match:
+        print('not matched by %s in %s' % (base_name, alert[0]))
+        if base_name == alert[0]:
+            pattern_match = True
+            matched_by = 'absolute_match'
+            print('%s' % matched_by)
+        else:
+            print('not matched in substring')
+
     return matched_by

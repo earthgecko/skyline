@@ -45,6 +45,16 @@ LOCAL_DEBUG = False
 
 
 def get_metrics_db_object(base_name):
+    """
+    Returns the data of a metric from metrics table as an object and populates
+    memcached with a dict of the object
+
+    :param base_name: the metric base_name
+    :type base_name: str
+    :return: metrics_db_object
+    :rtype: object
+
+    """
 
     def get_an_engine():
         try:
@@ -65,6 +75,7 @@ def get_metrics_db_object(base_name):
                 logger.error('error :: calling engine.dispose()')
         return
 
+    metrics_db_object = None
     memcache_metrics_db_object = None
     metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
     memcache_metric_dict = None

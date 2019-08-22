@@ -7,7 +7,11 @@ from redis import StrictRedis
 import time
 from time import time, sleep
 from threading import Thread
-from multiprocessing import Process, Manager
+# @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+# Use Redis sets in place of Manager().list to reduce memory and number of
+# processes
+# from multiprocessing import Process, Manager
+from multiprocessing import Process
 from msgpack import packb
 import os
 from os.path import join, isfile
@@ -77,8 +81,16 @@ class Crucible(Thread):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.process_list = Manager().list()
-        self.metric_variables = Manager().list()
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        #                      Task #3032: Debug number of Python processes and memory use
+        #                      Branch #3002: docker
+        # Reduce amount of Manager instances that are used as each requires a
+        # copy of entire memory to be copied into each subprocess so this
+        # results in a python process per Manager instance, using as much
+        # memory as the parent.  OK on a server, not so much in a container.
+        # Disabled all the Manager() lists below and replaced with Redis sets
+        # self.process_list = Manager().list()
+        # self.metric_variables = Manager().list()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         if settings.REDIS_PASSWORD:
             self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
@@ -111,7 +123,8 @@ class Crucible(Thread):
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('child_process_pid - %s' % str(child_process_pid))
 
-        self.process_list.append(child_process_pid)
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        # self.process_list.append(child_process_pid)
 
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('processing metric check - %s' % metric_check_file)
@@ -291,6 +304,20 @@ class Crucible(Thread):
             run_script = str(metric_vars.run_script)
             if settings.ENABLE_CRUCIBLE_DEBUG:
                 logger.info('metric variable - run_script - %s' % run_script)
+
+        # @added 20190612 - Feature #3108: crucible - graphite_override_uri_parameters_specific_url
+        # This metric variable is used to to declare absolute graphite uri
+        # parameters
+        try:
+            metric_vars.graphite_override_uri_parameters
+        except:
+            logger.info('failed to read graphite_override_uri_parameters variable from check file setting to False')
+            # yes this is a string
+            graphite_override_uri_parameters = False
+        else:
+            graphite_override_uri_parameters = str(metric_vars.graphite_override_uri_parameters)
+            if settings.ENABLE_CRUCIBLE_DEBUG:
+                logger.info('metric variable - graphite_override_uri_parameters - %s' % graphite_override_uri_parameters)
 
         # Only check if the metric does not a EXPIRATION_TIME key set, crucible
         # uses the alert EXPIRATION_TIME for the relevant alert setting contexts
@@ -496,6 +523,18 @@ class Crucible(Thread):
                 url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + settings.GRAPHITE_PORT + '/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + metric + '&format=json'
             else:
                 url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + '/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + metric + '&format=json'
+
+            # @added 20190612 - Feature #3108: crucible - graphite_override_uri_parameters
+            # This metric variable is used to to declare absolute graphite uri
+            # parameters
+            #from=00%3A00_20190527&until=23%3A59_20190612&target=movingMedian(nonNegativeDerivative(stats.zpf-watcher-prod-1-30g-doa2.vda.readTime)%2C24)
+            if graphite_override_uri_parameters:
+                if settings.GRAPHITE_PORT != '':
+                    url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + settings.GRAPHITE_PORT + '/render/?' + graphite_override_uri_parameters + '&format=json'
+                else:
+                    url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + '/render/?' + graphite_override_uri_parameters + '&format=json'
+                logger.info('graphite url set from graphite_override_uri_parameters - %s' % (url))
+
             if settings.ENABLE_CRUCIBLE_DEBUG:
                 logger.info('graphite url - %s' % (url))
 
@@ -552,7 +591,6 @@ class Crucible(Thread):
                         use_timeout = int(connect_timeout)
                     if settings.ENABLE_CRUCIBLE_DEBUG:
                         logger.info('use_timeout - %s' % (str(use_timeout)))
-
                     try:
                         r = requests.get(url, timeout=use_timeout)
                         js = r.json()
@@ -922,10 +960,11 @@ class Crucible(Thread):
             logger.info('assigning check for processing - %s' % str(metric_var_files_sorted[0]))
 
             # Reset process_list
-            try:
-                self.process_list[:] = []
-            except:
-                logger.error('error :: failed to reset self.process_list')
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # try:
+            #     self.process_list[:] = []
+            # except:
+            #     logger.error('error :: failed to reset self.process_list')
 
             # Spawn processes
             pids = []

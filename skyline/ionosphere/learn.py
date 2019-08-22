@@ -1315,11 +1315,28 @@ def ionosphere_learn(timestamp):
             if settings.WEBAPP_AUTH_ENABLED:
                 user = str(settings.WEBAPP_AUTH_USER)
                 password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
+
+            # @added 20190519 - Branch #3002: docker
+            # Handle self signed certificate on Docker
+            verify_ssl = True
+            try:
+                running_on_docker = settings.DOCKER
+            except:
+                running_on_docker = False
+            if running_on_docker:
+                verify_ssl = False
+
             try:
                 if settings.WEBAPP_AUTH_ENABLED:
-                    r = requests.get(url, timeout=10, auth=(user, password))
+                    # @modified 20190519 - Branch #3002: docker
+                    # r = requests.get(url, timeout=10, auth=(user, password))
+                    r = requests.get(
+                        url, timeout=10, auth=(user, password),
+                        verify=verify_ssl)
                 else:
-                    r = requests.get(url, timeout=10)
+                    # @modified 20190519 - Branch #3002: docker
+                    # r = requests.get(url, timeout=10)
+                    r = requests.get(url, timeout=10, verify=verify_ssl)
                 if int(r.status_code) == 200:
                     # @modified 20170308 - Feature #1960: ionosphere_layers
                     # Not currently used
