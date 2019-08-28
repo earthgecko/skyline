@@ -126,6 +126,8 @@ def seed():
             # sent via UDP is consistently missing the last 10 data points sent,
             # reason unknown, however to below method works for testing.
             if initial >= (end_timestamp - 14):
+                # sleep a little so UDP does not drop the anomalous data points
+                time.sleep(0.4)
                 # Send an anomalous data point
                 add_random = random.randint(500,2000)
                 original_value = int(datapoint[1])
