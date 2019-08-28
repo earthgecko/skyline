@@ -1,0 +1,133 @@
+version: '3.4'
+services:
+  skyline-docker-busybox-1:
+    image: busybox
+    restart: always
+    # Set up a /tmp/docker to share between the containers for the Redis
+    # unix_socket /tmp/docker/redis.sock
+    command:
+      - /bin/sh
+      - -c
+      - |
+          mkdir -p -m 0777 /tmp/docker
+          tail -f /dev/null
+    container_name: skyline-docker-busybox-1
+    hostname: skyline-docker-busybox-1
+    volumes:
+      - /tmp/docker/
+    networks:
+      skylinenetwork:
+        ipv4_address: 172.118.0.2
+  skyline-docker-mysql-1:
+    # image: mysql:latest - cannot be used as it is MySQL 8 and there is new a
+    # authentication method that is not supported in the debian:latest (stretch)
+    image: mysql:5.7
+    restart: always
+    container_name: skyline-docker-mysql-1
+    hostname: skyline-docker-mysql-1
+    expose:
+      - "3306"
+    environment:
+      MYSQL_USER: 'root'
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+    volumes:
+      - /opt/skyline/docker/skyline-docker-mysql-1/var/lib/mysql:/var/lib/mysql
+    networks:
+      skylinenetwork:
+        ipv4_address: 172.118.0.3
+  skyline-docker-redis-1:
+    restart: always
+    image: redis:4.0
+    container_name: skyline-docker-redis-1
+    hostname: skyline-docker-redis-1
+    command: /bin/bash -c 'mkdir -p /etc/redis && redis-server /etc/redis/redis.conf --appendonly yes || tail -f /dev/null'
+    sysctls:
+      - net.core.somaxconn=65535
+    expose:
+      - "6379"
+    volumes:
+      - /opt/skyline/docker/skyline-docker-redis-1/var/lib/redis:/var/lib/redis
+      - /opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/redis/etc/redis:/etc/redis
+      - skyline-docker-busybox-1:/tmp/docker
+    depends_on:
+      - skyline-docker-busybox-1
+    networks:
+      skylinenetwork:
+        ipv4_address: 172.118.0.4
+  skyline-docker-memcached-1:
+    container_name: skyline-docker-memcached-1
+    hostname: skyline-docker-memcached-1
+    image: memcached:latest
+    restart: always
+    expose:
+        - "11211"
+    networks:
+      skylinenetwork:
+        ipv4_address: 172.118.0.5
+  skyline-docker-graphite-statsd-1:
+    image: graphiteapp/graphite-statsd:latest  # 1.1.5-11
+    restart: always
+    container_name: skyline-docker-graphite-statsd-1
+    hostname: skyline-docker-graphite-statsd-1
+    expose:
+      - "80"
+      - "2003-2004"
+      - "2023-2024"
+      - "8125-8126"
+    environment:
+      RELAY: 1
+    volumes:
+      - /opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/opt/graphite/conf:/opt/graphite/conf
+      - /opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/opt/statsd/config:/opt/statsd/config
+      - /opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/etc/nginx:/etc/nginx
+      - /opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/etc/logrotate.d:/etc/logrotate.d
+      - /opt/skyline/docker/skyline-docker-graphite-statsd-1/opt/graphite/storage:/opt/graphite/storage
+      - /opt/skyline/docker/skyline-docker-graphite-statsd-1/var/log:/var/log
+    depends_on:
+      - skyline-docker-memcached-1
+    networks:
+      skylinenetwork:
+        ipv4_address: 172.118.0.6
+  skyline-docker-skyline-1:
+    build:
+      context: . #current dir as build context
+      target: skyline-docker-skyline-1
+      args:
+        docker_build: 1
+    image: skyline:latest
+    restart: always
+    hostname: skyline-docker-skyline-1
+    command: /bin/bash -c 'chmod 0755 /skyline/utils/docker/init.sh && /skyline/utils/docker/init.sh || tail -f /dev/null'
+    expose:
+      - "443"
+    stdin_open: true
+    tty: true
+    volumes:
+      #- .:/skyline  # a convenience directory
+      - .:/opt/github/skyline
+      - /opt/skyline/docker/skyline-docker-skyline-1/opt/skyline/ionosphere:/opt/skyline/ionosphere
+      - /opt/skyline/docker/skyline-docker-skyline-1/var/log/skyline:/var/log/skyline
+      - /opt/skyline/docker/skyline-docker-skyline-1/var/log/apache2:/var/log/apache2
+      - skyline-docker-busybox-1:/tmp/docker
+    depends_on:
+      - skyline-docker-busybox-1
+      - skyline-docker-mysql-1
+      - skyline-docker-redis-1
+      - skyline-docker-memcached-1
+    networks:
+      skylinenetwork:
+        ipv4_address: 172.118.0.7
+volumes:
+  skyline-docker-busybox-1:
+  skyline-docker-mysql-1:
+    driver: local
+  skyline-docker-redis-1:
+    driver: local
+networks:
+  skylinenetwork:
+    # driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.118.0.0/16

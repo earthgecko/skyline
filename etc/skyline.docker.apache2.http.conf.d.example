@@ -1,0 +1,62 @@
+####    skyline.docker.apache2.http.conf.d.example    ####
+#
+#
+#  THIS IS AN EXAMPLE
+#  User variables are all prefixed with <YOUR_
+#  This example assumes you only have this Skyline vhost binding to port 80
+#  and serving SSL on the machine
+#
+
+<VirtualHost <YOUR_SERVER_IP_ADDRESS>:80>
+    ServerName "<YOUR_SKYLINE_SERVER_FQDN>"
+    ServerAdmin "<YOUR_EMAIL>"
+    ServerSignature Off
+
+    # Logging examples
+    # ErrorLog "|rotatelogs -c -L /var/log/httpd/skyline-http.error.log /var/log/httpd/skyline-http.error.log 86400"
+    # CustomLog "|rotatelogs -c -L /var/log/httpd/skyline-http.access.log /var/log/httpd/skyline-http.access.log 86400" combined
+
+    ErrorLog "<YOUR_ERROR_LOG>"
+    CustomLog "<YOUR_CUSTOM_LOG>"
+
+    # Mitigate httpoxy vulnerability
+    RequestHeader unset Proxy early
+
+    Header always append X-Frame-Options SAMEORIGIN
+
+    LimitRequestFieldSize 32768
+
+    # Apache2 -version 2.4
+    <Directory "/">
+        LogLevel debug trace5
+        AuthType Basic
+        AuthBasicProvider file
+        AuthUserFile "<YOUR_HTPASSWD_FILE>"
+        AuthName "Restricted"
+        <RequireAll>
+            Require valid-user
+            <RequireAny>
+                Require ip <YOUR_SERVER_IP_ADDRESS>
+                Require ip <YOUR_OTHER_IP_ADDRESS>
+            </RequireAny>
+        </RequireAll>
+    </Directory>
+
+    # Proxy https requests to gunicorn on your settings.WEBAPP_IP and
+    # settings.WEBAPP_PORT, defaults are used here
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:1500/
+    ProxyPassReverse / http://127.0.0.1:1500/
+
+    # Set CORS (cross-origin resource sharing) headers d3.js, jquery and ajax
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS, DELETE, PUT"
+    Header always set Access-Control-Max-Age "1000"
+    Header always set Access-Control-Allow-Headers "x-requested-with, Content-Type, origin, authorization, accept, client-security-token"
+
+    # Added a rewrite to respond with a 200 SUCCESS on every OPTIONS request.
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+
+</VirtualHost>
