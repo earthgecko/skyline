@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.echo &mdash; Skyline 1.2.11 documentation</title>
+  <title>ionosphere.echo &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -409,8 +409,18 @@
         <span class="c1"># features profiles if the fp has been validated</span>
         <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span>
+
         <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">mirage_full_duration</span><span class="p">):</span>
             <span class="n">fp_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="c1"># @added 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file</span>
+            <span class="c1">#                   Feature #1960: ionosphere_layers</span>
+            <span class="c1"># Any features profiles that were created before the introduction of</span>
+            <span class="c1"># ionosphere_layers will not have a mirage.redis.24h.json file as the</span>
+            <span class="c1"># creation of these resources in the training_data dir was only added at</span>
+            <span class="c1"># that point, so they are excluded.  Less than 20170307 1488844800 excl.</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">1488844800</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: skipping fp id </span><span class="si">%s</span><span class="s1"> as predates having a mirage.redis json file&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                <span class="k">continue</span>
             <span class="n">echo_enabled_mirage_fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
 
     <span class="n">echo_enabled_mirage_fp_ids_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">echo_enabled_mirage_fp_ids</span><span class="p">)</span>
@@ -438,6 +448,21 @@
     <span class="n">echo_create_fd_fp_for_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">echo_create_fd_fp_for</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: </span><span class="si">%s</span><span class="s1"> FULL_DURATION features profiles to be created for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_create_fd_fp_for_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
     <span class="n">echo_created_fp_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+    <span class="c1">#                   Feature #2484: FULL_DURATION feature profiles</span>
+    <span class="c1"># Rate limit the creation of ionosphere_echo FULL_DURATION features profiles</span>
+    <span class="c1"># this only effects managing the creation of lots of features profiles if</span>
+    <span class="c1"># Ionosphere echo is enabled on a Skyline instance with lots of existing</span>
+    <span class="c1"># features profiles for Mirage metrics.  Only create 5 FULL_DURATION</span>
+    <span class="c1"># features profiles from the latest Mirage based features profiles, which</span>
+    <span class="c1"># takes around 10 seconds</span>
+    <span class="k">if</span> <span class="n">echo_create_fd_fp_for_count</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: rate limiting and only creating the 5 least FULL_DURATION features profiles for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+        <span class="c1"># Reverse, newest first, using slicing to produce a reversed copy</span>
+        <span class="n">reverse_echo_create_fd_fp_for</span> <span class="o">=</span> <span class="n">echo_create_fd_fp_for</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">rate_limit_echo_create_fd_fp_for</span> <span class="o">=</span> <span class="n">reverse_echo_create_fd_fp_for</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">echo_create_fd_fp_for</span> <span class="o">=</span> <span class="n">rate_limit_echo_create_fd_fp_for</span>
 
     <span class="n">last_created_fp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
     <span class="k">for</span> <span class="n">mirage_fp_id</span> <span class="ow">in</span> <span class="n">echo_create_fd_fp_for</span><span class="p">:</span>
@@ -558,6 +583,7 @@
             <span class="n">calculated_feature_file_found</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">fp_csv</span> <span class="o">=</span> <span class="n">calculated_feature_file</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: calculated features file is available - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">))</span>
+
         <span class="n">echo_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">calculated_feature_file_found</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_echo :: calculating features from mirage.redis data ts json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">echo_json_file</span><span class="p">))</span>
@@ -613,7 +639,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -635,7 +661,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.2.11 documentation</title>
+  <title>skyline package &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -1008,6 +1008,25 @@ by Panorama and this is the desired default.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Slack alerter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.ANALYZER_ENABLED">
+<code class="descname">ANALYZER_ENABLED</code><em class="property"> = True</em><a class="headerlink" href="#settings.ANALYZER_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.ANALYZER_ENABLED" title="settings.ANALYZER_ENABLED"><strong>ANALYZER_ENABLED</strong></a> (<em>boolean</em>) &#8211; This enables analysis via Analyzer.  For ADVANCED
+configurations only.
+If this is set to False, the Analyzer process can still be started and will
+process the metrics in the pipeline but it will NOT analyse them, therefore
+there will be no alerting, no feeding Mirage, etc.  Analyzer will simply run
+as if there are 0 metrcis.  This allows for an advanced modular set up for
+running multiple distributed Skyline instance.</td>
 </tr>
 </tbody>
 </table>
@@ -2093,6 +2112,58 @@ settings block.</p>
 <p class="last">Not recommended from production, will make a LOT of data files in
 the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="settings.CRUCIBLE_DATA_FOLDER"><code class="xref py py-mod docutils literal"><span class="pre">settings.CRUCIBLE_DATA_FOLDER</span></code></a></p>
 </div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.MIRAGE_PERIODIC_CHECK">
+<code class="descname">MIRAGE_PERIODIC_CHECK</code><em class="property"> = True</em><a class="headerlink" href="#settings.MIRAGE_PERIODIC_CHECK" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK" title="settings.MIRAGE_PERIODIC_CHECK"><strong>MIRAGE_PERIODIC_CHECK</strong></a> (<em>boolean</em>) &#8211; This enables Mirage to periodically check metrics
+matching the namespaces in <a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a>
+every <a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="settings.MIRAGE_PERIODIC_CHECK_INTERVAL"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_INTERVAL</span></code></a>.  Mirage should only
+be configured to periodically analyse key metrics.  For further in depth
+details regarding Mirage periodic check and their impact, please see the
+Mirage Periodic Checks documentation at:
+<a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/mirage.html#periodic-checks">https://earthgecko-skyline.readthedocs.io/en/latest/mirage.html#periodic-checks</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.MIRAGE_PERIODIC_CHECK_INTERVAL">
+<code class="descname">MIRAGE_PERIODIC_CHECK_INTERVAL</code><em class="property"> = 3600</em><a class="headerlink" href="#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="settings.MIRAGE_PERIODIC_CHECK_INTERVAL"><strong>MIRAGE_PERIODIC_CHECK_INTERVAL</strong></a> (<em>int</em>) &#8211; This is the interval in seconds at which
+Mirage should analyse metrics matching the namespaces in
+<a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES">
+<code class="descname">MIRAGE_PERIODIC_CHECK_NAMESPACES</code><em class="property"> = []</em><a class="headerlink" href="#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><strong>MIRAGE_PERIODIC_CHECK_NAMESPACES</strong></a> (<em>list</em>) &#8211; Mirage metric namespaces to periodically
+check with Mirage, even if Analyzer does not find them anomalous, Analyzer
+will ensure that these Mirage metric namespaces are analyzed by Mirage every
+<a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="settings.MIRAGE_PERIODIC_CHECK_INTERVAL"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_INTERVAL</span></code></a> seconds.  This works in the
+same way that <a class="reference internal" href="#settings.SKIP_LIST" title="settings.SKIP_LIST"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKIP_LIST</span></code></a> does, it matches in the string or
+the dotted namespace elements.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="data">
@@ -3851,7 +3922,7 @@ settings.py are valid</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -3873,7 +3944,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1.2.12 &mdash; Skyline 1.2.11 documentation</title>
+  <title>1.2.12 &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,10 +35,10 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../index.html"/>
         <link rel="up" title="Release Notes" href="../releases.html"/>
         <link rel="next" title="1.2.11 - the luminosity branch" href="1_2_11.html"/>
-        <link rel="prev" title="Release Notes" href="../releases.html"/> 
+        <link rel="prev" title="1.2.13" href="1_2_13.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -119,8 +119,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_2_14.html">1.2.14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_13.html">1.2.13</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.12</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#new-functionality-release">New functionality release</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#downgraded-to-a-pre-release-as-an-update">DOWNGRADED to a pre-release as an update</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-functionality">New functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixes">Fixes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#changes-from-v1-2-11">Changes from v1.2.11</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v1-2-11">How to update from v1.2.11</a></li>
@@ -214,13 +218,29 @@
   <div class="section" id="id1">
 <h1>1.2.12<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <p>v1.2.12 - April 3, 2019</p>
-<div class="section" id="new-functionality-release">
-<h2>New functionality release<a class="headerlink" href="#new-functionality-release" title="Permalink to this headline">¶</a></h2>
+<p>Stable for new installs.  Beta if upgrading.</p>
+<div class="section" id="downgraded-to-a-pre-release-as-an-update">
+<h2>DOWNGRADED to a pre-release as an update<a class="headerlink" href="#downgraded-to-a-pre-release-as-an-update" title="Permalink to this headline">¶</a></h2>
+<p>Downgrade to a pre-release - April 4, 2019</p>
+<p>To add a mechanism that reduces to initial load on Ionosphere when Ionosphere
+echo is enabled if there are a lot of existing Mirage feature profiles and to
+add some self load management to Ionosphere in general under the new Ionosphere
+echo paradigm.</p>
+</div>
+<div class="section" id="new-functionality">
+<h2>New functionality<a class="headerlink" href="#new-functionality" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Adds the ability for Skyline Boundary to handle very short time series.</li>
 <li>Adds the new Ionosphere echo functionality related to improving the matching
 of Mirage based features profiles by between 30-50% depending on the metric.
 See <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html">https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html</a></li>
+</ul>
+</div>
+<div class="section" id="fixes">
+<h2>Fixes<a class="headerlink" href="#fixes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Adds the ability for Skyline Boundary to handle very short time series.</li>
+<li>Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
+decimal values introduced by numpy==1.15.1 pandas==0.24.3</li>
 </ul>
 </div>
 <div class="section" id="changes-from-v1-2-11">
@@ -229,6 +249,8 @@ See <a class="reference external" href="https://earthgecko-skyline.readthedocs.i
 <li>Allow Boundary to analyse short time series (#88, #2862)</li>
 <li>Bifurcate dependencies for py3 testing (#2588, #2828)</li>
 <li>Added functionality and changes to implement Ionosphere echo (#2484)</li>
+<li>Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
+decimal values introduced by numpy==1.15.1 pandas==0.24.3 (2902)</li>
 </ul>
 </div>
 <div class="section" id="update-notes">
@@ -247,29 +269,69 @@ ready to be deployed.</li>
 <li>Diff your current running version skyline/settings.py with the new version of
 skyline/settings.py and create a new settings.py in the temp location
 appropriate for Skyline v1.2.12 and your set up with the new IONOSPHERE_ECHO
-settings, ready to be deployed.</li>
+settings, ready to be deployed.  New settings to be added are:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">IONOSPHERE_MAX_RUNTIME</span> <span class="o">=</span> <span class="mi">120</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_MAX_RUNTIME: The maximum number of seconds an Ionosphere check</span>
+<span class="sd">    should run for.</span>
+<span class="sd">:vartype IONOSPHERE_MAX_RUNTIME: int</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_ENABLED</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_ENABLED: This enables Ionosphere to create and test</span>
+<span class="sd">    features profiles for Mirage metrics but at settings.FULL_DURATION as well.</span>
+<span class="sd">    Features profiles will be made on the fly for any existing, validated Mirage</span>
+<span class="sd">    metric features profiles.  Ionosphere&#39;s matching performance is increased</span>
+<span class="sd">    between 30 to 50 percent when Ionosphere echo is run.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_ENABLED: boolean</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_MAX_FP_CREATE_TIME</span> <span class="o">=</span> <span class="mi">55</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: The maximum number of seconds an</span>
+<span class="sd">    Ionosphere echo process should run creating FULL_DURATION features profiles</span>
+<span class="sd">    for created Mirage features profiles.  This setting is specifically relevant</span>
+<span class="sd">    for Skyline implematations pre Ionosphere echo (v1.2.12) to prevent timeouts</span>
+<span class="sd">    if Ionosphere echo needs to make &gt; 30 echo features profiles for Mirage</span>
+<span class="sd">    metrics with lots of existing features profiles.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: int</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: In terms of Ionosphere echo a</span>
+<span class="sd">    value of 2.0 is the default.  This default is above the normal</span>
+<span class="sd">    IONOSPHERE_FEATURES_PERCENT_SIMILAR due to that fact that the the resolution</span>
+<span class="sd">    of Ionosphere echo is at FULL_DURATION.  During testing this value was</span>
+<span class="sd">    tested at 1.0, 2 and 2.5, with 2.5 resulting in the most desirable results</span>
+<span class="sd">    in terms of matching time series that are similarly not anomalous.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: float</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR</span> <span class="o">=</span> <span class="mf">3.5</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: In terms of</span>
+<span class="sd">    Ionosphere echo Min-Max scaling percentage similar, a value of 3.5 is the</span>
+<span class="sd">    default.  This default is above the normal IONOSPHERE_FEATURES_PERCENT_SIMILAR</span>
+<span class="sd">    due to that fact that the the resolution of Ionosphere echo is at FULL_DURATION</span>
+<span class="sd">    and echo is using the normal IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE to</span>
+<span class="sd">    determine if Min-Max scaling should be run.  During testing this value was</span>
+<span class="sd">    tested at 1, 2 and 3.5, with 3.5 resulting in the most desirable results in</span>
+<span class="sd">    terms of matching time series that are similarly not anomalous.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: float</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
 <li>Stop Skyline Ionosphere and Panorama services.</li>
 <li>Backup your Skyline database.</li>
 <li>Apply the SQL update to your Skyline database as per described below, change
 the below variables as appropriate to your set up.</li>
-</ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span>  <span class="c1"># Where you want to backup the DB to</span>
-<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;&lt;YOUR_MYSQL_USER&gt;&quot;</span>
-<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Your MySQL IP</span>
-<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>  <span class="c1"># Your MySQL Skyline DB name</span>
-
-<span class="c1"># Backup DB</span>
-mkdir -p <span class="nv">$BACKUP_DIR</span>
-mysqldump -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &gt; <span class="nv">$BACKUP_DIR</span>/pre.v1.2.12.<span class="nv">$MYSQL_DB</span>.sql
-
-<span class="c1"># Update DB</span>
-mysql -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &lt; <span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/updates/sql/v1.2.12-stable.sql</span>
-</pre></div>
-</div>
-<ul class="simple">
 <li>Stop all the Skyline services and ensure any service controls such as monit,
 supervisor or systemd do not start them again, (change as appropriate for
-your set up) e.g.</li>
+your set up)</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.12&quot;</span>    <span class="c1"># Your new Skyline version</span>
 <span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.11&quot;</span>    <span class="c1"># Your old Skyline version</span>
@@ -281,6 +343,35 @@ mkdir -p <span class="s2">&quot;</span><span class="si">${</span><span class="nv
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
 git clone https://github.com/earthgecko/skyline .
 git checkout <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+
+cp <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span> <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.v1.2.12.bak&quot;</span>
+cat <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span> &gt; <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># ADD the new IONOSPHERE_ECHO to settings</span>
+vi <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># Stop Skyline DB related services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama&quot;</span>
+<span class="k">for</span> i in <span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+  /etc/init.d/<span class="nv">$i</span> stop
+<span class="k">done</span>
+<span class="c1"># And stop any service controls like monit or systemd</span>
+
+<span class="c1"># BACKUP THE DB AND APPLY THE NEW SQL</span>
+<span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span>  <span class="c1"># Where you want to backup the DB to</span>
+<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;&lt;YOUR_MYSQL_USER&gt;&quot;</span>
+<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Your MySQL IP</span>
+<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>  <span class="c1"># Your MySQL Skyline DB name</span>
+
+<span class="c1"># Backup DB</span>
+mkdir -p <span class="nv">$BACKUP_DIR</span>
+mysqldump -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &gt; <span class="nv">$BACKUP_DIR</span>/pre.v1.2.12.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Update DB</span>
+mysql -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &lt; <span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/updates/sql/v1.2.12-stable.sql&quot;</span>
 
 <span class="c1"># Stop all other Skyline services</span>
 <span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
@@ -356,7 +447,7 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
         <a href="1_2_11.html" class="btn btn-neutral float-right" title="1.2.11 - the luminosity branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../releases.html" class="btn btn-neutral" title="Release Notes" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_2_13.html" class="btn btn-neutral" title="1.2.13" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -365,7 +456,7 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -387,7 +478,7 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

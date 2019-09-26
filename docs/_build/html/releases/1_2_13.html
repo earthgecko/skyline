@@ -1,0 +1,580 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>1.2.13 &mdash; Skyline 1.2.14 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../index.html"/>
+        <link rel="up" title="Release Notes" href="../releases.html"/>
+        <link rel="next" title="1.2.12" href="1_2_12.html"/>
+        <link rel="prev" title="1.2.14" href="1_2_14.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_2_14.html">1.2.14</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.2.13</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#incorporates-v1-2-12-and-v1-2-13">Incorporates v1.2.12 and v1.2.13</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-functionality">New functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixes-introduced-in-pre-release-v1-2-12">Fixes introduced in pre-release v1.2.12</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixes-introduced-in-release-v1-2-13">Fixes introduced in release v1.2.13</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v1-2-11-and-v1-2-12">How to update from v1.2.11 (and v1.2.12)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_12.html">1.2.12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_11.html">1.2.11 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_10.html">1.2.10 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_9.html">1.2.9 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_8.html">1.2.8 - the luminosity and dawn branches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_7.html">1.2.7 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_6.html">1.2.6 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_5.html">1.2.5 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_4.html">1.2.4 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_3.html">1.2.3 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_2.html">1.2.2 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_1.html">1.2.1 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_0.html">1.2.0 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_11.html">1.1.11 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_10.html">1.1.10 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_9.html">1.1.9 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_8.html">1.1.8 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_7.html">1.1.7 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_6.html">1.1.6 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_5.html">1.1.5 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_4.html">1.1.4 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_3.html">1.1.3 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_2.html">1.1.2 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_1.html">1.1.1 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_0.html">1.1.0 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_8.html">1.0.8 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_7.html">1.0.7 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_6.html">1.0.6 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_5.html">1.0.5 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../releases.html">Release Notes</a> &raquo;</li>
+      
+    <li>1.2.13</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/releases/1_2_13.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="id1">
+<h1>1.2.13<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>v1.2.13 - April 10, 2019</p>
+<div class="section" id="incorporates-v1-2-12-and-v1-2-13">
+<h2>Incorporates v1.2.12 and v1.2.13<a class="headerlink" href="#incorporates-v1-2-12-and-v1-2-13" title="Permalink to this headline">¶</a></h2>
+<p>These release notes describe how to update from v1.2.11 (and v1.2.12) to v1.2.13.
+Although v1.2.12 was released, it was a pre-release therefore in terms of the
+&#8220;How to update&#8221; section, the documentation is written to update from v1.2.11.
+If you did update or installed v1.2.12 then please take note of the specific
+notes in the &#8220;How to update&#8221; section below.</p>
+</div>
+<div class="section" id="new-functionality">
+<h2>New functionality<a class="headerlink" href="#new-functionality" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Adds the new Ionosphere echo functionality related to improving the matching
+of Mirage based features profiles by between 30-50% depending on the metric.
+See <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html">https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html</a>
+(v1.2.12) (2484, 2904)</li>
+<li>Add Mirage periodic checks for key metrics declared in
+MIRAGE_PERIODIC_CHECK_NAMESPACES so that Mirage is analysing each metric
+more frequently and not only reliant on Analyzer at FULL_DURATION so that
+substantial changes that over a period somewhat longer than FULL_DURATION are
+detected by Mirage (2882).</li>
+<li>Added an ANALYZER_ENABLED setting to allow to disable Analyzer analysis if
+desired multiple Skyline instances are implemented, allows for hot standby
+(2916).</li>
+</ul>
+</div>
+<div class="section" id="fixes-introduced-in-pre-release-v1-2-12">
+<h2>Fixes introduced in pre-release v1.2.12<a class="headerlink" href="#fixes-introduced-in-pre-release-v1-2-12" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Adds the ability for Skyline Boundary to handle very short time series.</li>
+<li>Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
+decimal values introduced by numpy==1.15.1 pandas==0.24.3</li>
+</ul>
+</div>
+<div class="section" id="fixes-introduced-in-release-v1-2-13">
+<h2>Fixes introduced in release v1.2.13<a class="headerlink" href="#fixes-introduced-in-release-v1-2-13" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Do not run an Ionosphere and echo checks on a metrics when a lot of
+checks are being done.  Manage the Ionosphere load and increased
+runtime in general that Ionosphere echo has introduced, especially
+when Ionosphere is issued lots of checks, if lots of metrics suddenly
+become anomalous, using the ionosphere_busy parameter. (2904, 2484)</li>
+<li>If there are more than 4 Ionosphere metric check files, alternate between
+normal Ionosphere Mirage features profile checks and Ionosphere echo features
+profile checks. (2904, 2484)</li>
+<li>Rate limit the creation of ionosphere_echo FULL_DURATION features profiles
+this only effects managing the creation of lots of features profiles if
+Ionosphere echo is enabled on a Skyline instance with lots of existing
+features profiles for Mirage metrics.  Only create 5 FULL_DURATION
+features profiles from the latest Mirage based features profiles, which
+takes around 10 seconds.  (2904, 2484)</li>
+<li>Do not postpone Ionosphere Mirage alerts if there Mirage checks to be done
+alert first (2904)</li>
+</ul>
+</div>
+<div class="section" id="update-notes">
+<h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>You can only upgrade to v1.2.13 from v1.2.11 and v1.2.12</li>
+<li>There are changes to the DB (if you are not running v1.2.12)</li>
+<li>There are some changes to settings.py</li>
+</ul>
+</div>
+<div class="section" id="how-to-update-from-v1-2-11-and-v1-2-12">
+<h2>How to update from v1.2.11 (and v1.2.12)<a class="headerlink" href="#how-to-update-from-v1-2-11-and-v1-2-12" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</li>
+<li>Diff your current running version skyline/settings.py with the new version of
+skyline/settings.py and create a new settings.py in the temp location
+appropriate for Skyline v1.2.13 and your set up with the new v1.2.12
+<a href="#id2"><span class="problematic" id="id3">IONOSPHERE_ECHO_</span></a> settings (if updating from v1.2.11) and the new
+ANALYZER_ENABLED and <a href="#id4"><span class="problematic" id="id5">MIRAGE_PERIODIC_</span></a> settings from v1.2.13 ready to be
+deployed.  The new settings to be added for v1.2.13 are:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ANALYZER_ENABLED</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var ANALYZER_ENABLED: This enables analysis via Analyzer.  For ADVANCED</span>
+<span class="sd">    configurations only.</span>
+<span class="sd">    If this is set to False, the Analyzer process can still be started and will</span>
+<span class="sd">    process the metrics in the pipeline but it will NOT analyse them, therefore</span>
+<span class="sd">    there will be no alerting, no feeding Mirage, etc.  Analyzer will simply run</span>
+<span class="sd">    as if there are 0 metrcis.  This allows for an advanced modular set up for</span>
+<span class="sd">    running multiple distributed Skyline instance.</span>
+<span class="sd">:vartype ANALYZER_ENABLED: boolean</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var MIRAGE_PERIODIC_CHECK: This enables Mirage to periodically check metrics</span>
+<span class="sd">    matching the namespaces in :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`</span>
+<span class="sd">    every :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL`.  Mirage should only</span>
+<span class="sd">    be configured to periodically analyse key metrics.  For further in depth</span>
+<span class="sd">    details regarding Mirage periodic check and their impact, please see the</span>
+<span class="sd">    Mirage Periodic Checks documentation at:</span>
+<span class="sd">    https://earthgecko-skyline.readthedocs.io/en/latest/mirage.html#periodic-checks</span>
+<span class="sd">:vartype MIRAGE_PERIODIC_CHECK: boolean</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">MIRAGE_PERIODIC_CHECK_INTERVAL</span> <span class="o">=</span> <span class="mi">3600</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var MIRAGE_PERIODIC_CHECK_INTERVAL: This is the interval in seconds at which</span>
+<span class="sd">    Mirage should analyse metrics matching the namespaces in</span>
+<span class="sd">    :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`</span>
+<span class="sd">:vartype MIRAGE_PERIODIC_CHECK_INTERVAL: int</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">MIRAGE_PERIODIC_CHECK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Check these Mirage metric namespaces periodically with Mirage</span>
+<span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var MIRAGE_PERIODIC_CHECK_NAMESPACES: Mirage metric namespaces to periodically</span>
+<span class="sd">    check with Mirage, even if Analyzer does not find them anomalous, Analyzer</span>
+<span class="sd">    will ensure that these Mirage metric namespaces are analyzed by Mirage every</span>
+<span class="sd">    :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL` seconds.  This works in the</span>
+<span class="sd">    same way that :mod:`settings.SKIP_LIST` does, it matches in the string or</span>
+<span class="sd">    the dotted namespace elements.</span>
+<span class="sd">:vartype MIRAGE_PERIODIC_CHECK_NAMESPACES: list</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>The new settings to be added for v1.2.12, if you are updating from v1.2.11
+are:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">IONOSPHERE_MAX_RUNTIME</span> <span class="o">=</span> <span class="mi">120</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_MAX_RUNTIME: The maximum number of seconds an Ionosphere check</span>
+<span class="sd">    should run for.</span>
+<span class="sd">:vartype IONOSPHERE_MAX_RUNTIME: int</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_ENABLED</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_ENABLED: This enables Ionosphere to create and test</span>
+<span class="sd">    features profiles for Mirage metrics but at settings.FULL_DURATION as well.</span>
+<span class="sd">    Features profiles will be made on the fly for any existing, validated Mirage</span>
+<span class="sd">    metric features profiles.  Ionosphere&#39;s matching performance is increased</span>
+<span class="sd">    between 30 to 50 percent when Ionosphere echo is run.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_ENABLED: boolean</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_MAX_FP_CREATE_TIME</span> <span class="o">=</span> <span class="mi">55</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: The maximum number of seconds an</span>
+<span class="sd">    Ionosphere echo process should run creating FULL_DURATION features profiles</span>
+<span class="sd">    for created Mirage features profiles.  This setting is specifically relevant</span>
+<span class="sd">    for Skyline implematations pre Ionosphere echo (v1.2.12) to prevent timeouts</span>
+<span class="sd">    if Ionosphere echo needs to make &gt; 30 echo features profiles for Mirage</span>
+<span class="sd">    metrics with lots of existing features profiles.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_MAX_FP_CREATE_TIME: int</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: In terms of Ionosphere echo a</span>
+<span class="sd">    value of 2.0 is the default.  This default is above the normal</span>
+<span class="sd">    IONOSPHERE_FEATURES_PERCENT_SIMILAR due to that fact that the the resolution</span>
+<span class="sd">    of Ionosphere echo is at FULL_DURATION.  During testing this value was</span>
+<span class="sd">    tested at 1.0, 2 and 2.5, with 2.5 resulting in the most desirable results</span>
+<span class="sd">    in terms of matching time series that are similarly not anomalous.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_FEATURES_PERCENT_SIMILAR: float</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR</span> <span class="o">=</span> <span class="mf">3.5</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:var IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: In terms of</span>
+<span class="sd">    Ionosphere echo Min-Max scaling percentage similar, a value of 3.5 is the</span>
+<span class="sd">    default.  This default is above the normal IONOSPHERE_FEATURES_PERCENT_SIMILAR</span>
+<span class="sd">    due to that fact that the the resolution of Ionosphere echo is at FULL_DURATION</span>
+<span class="sd">    and echo is using the normal IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE to</span>
+<span class="sd">    determine if Min-Max scaling should be run.  During testing this value was</span>
+<span class="sd">    tested at 1, 2 and 3.5, with 3.5 resulting in the most desirable results in</span>
+<span class="sd">    terms of matching time series that are similarly not anomalous.</span>
+<span class="sd">:vartype IONOSPHERE_ECHO_MINMAX_SCALING_FEATURES_PERCENT_SIMILAR: float</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Stop Skyline Ionosphere and Panorama services.</li>
+<li>Backup your Skyline database.</li>
+<li>Apply the SQL update to your Skyline database as per described below, change
+the below variables as appropriate to your set up.</li>
+<li>Stop all the Skyline services and ensure any service controls such as monit,
+supervisor or systemd do not start them again, (change as appropriate for
+your set up)</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.13&quot;</span>    <span class="c1"># Your new Skyline version</span>
+<span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.11&quot;</span>    <span class="c1"># Your old Skyline version</span>
+<span class="c1"># OR</span>
+<span class="c1"># OLD_SKYLINE_VERSION=&quot;v1.2.12&quot;    # If you upgraded to v1.2.12</span>
+
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span>                 <span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># Your new Skyline path</span>
+
+mkdir -p <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git clone https://github.com/earthgecko/skyline .
+git checkout <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+
+cp <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span> <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="nv">$OLD_SKYLINE_VERSION</span><span class="s2">.bak&quot;</span>
+cat <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span> &gt; <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># ADD the new IONOSPHERE_ECHO, ANALYZER_ENABLED and</span>
+<span class="c1"># MIRAGE_PERIODIC_ settings to your settings.py</span>
+vi <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># Stop Skyline DB related services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama&quot;</span>
+<span class="k">for</span> i in <span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+  /etc/init.d/<span class="nv">$i</span> stop
+<span class="k">done</span>
+<span class="c1"># And stop any service controls like monit or systemd</span>
+
+<span class="c1"># BACKUP THE DB AND APPLY THE NEW SQL</span>
+<span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span>  <span class="c1"># Where you want to backup the DB to</span>
+<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;&lt;YOUR_MYSQL_USER&gt;&quot;</span>
+<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Your MySQL IP</span>
+<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>  <span class="c1"># Your MySQL Skyline DB name</span>
+
+<span class="c1"># Backup and update the DB (UNLESS you are ALREADY running v1.1.12)</span>
+mkdir -p <span class="nv">$BACKUP_DIR</span>
+mysqldump -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &gt; <span class="nv">$BACKUP_DIR</span>/pre.v1.2.13.<span class="nv">$MYSQL_DB</span>.sql
+mysql -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span> &lt; <span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/updates/sql/v1.2.12-stable.sql&quot;</span>
+
+<span class="c1"># Stop all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
+<span class="s2">analyzer</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp&quot;</span>
+<span class="k">for</span> i in <span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+  /etc/init.d/<span class="nv">$i</span> stop
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Move your current Skyline directory to a backup directory and move the new
+Skyline v1.2.13 with your new settings.py from the temp location to your
+working Skyline directory, (change your paths as appropriate) e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mv <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Start the all Skyline services (change as appropriate for your set up) e.g.</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;panorama</span>
+<span class="s2">luminosity</span>
+<span class="s2">horizon</span>
+<span class="s2">analyzer</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">webapp&quot;</span>
+<span class="k">for</span> i in <span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+  /etc/init.d/<span class="nv">$i</span> start
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check the logs</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+tail -n <span class="m">20</span> /var/log/skyline/*.log
+
+<span class="c1"># Any errors - each app</span>
+find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> skyline_logfile
+<span class="k">do</span>
+  <span class="nb">echo</span> <span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+  cat <span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span> <span class="p">|</span> grep -B2 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n <span class="m">60</span>
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="1_2_12.html" class="btn btn-neutral float-right" title="1.2.12" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="1_2_14.html" class="btn btn-neutral" title="1.2.14" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.2.14',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

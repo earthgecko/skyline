@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.ionosphere package &mdash; Skyline 1.2.11 documentation</title>
+  <title>skyline.ionosphere package &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.luminosity package" href="skyline.luminosity.html"/>
         <link rel="prev" title="skyline.horizon package" href="skyline.horizon.html"/> 
@@ -425,7 +425,7 @@ settings.FULL_DURATION for Mirage metrics</p>
 
 <dl class="method">
 <dt id="ionosphere.ionosphere.Ionosphere.spin_process">
-<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>metric_check_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spin_process" title="Permalink to this definition">¶</a></dt>
+<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>metric_check_file</em>, <em>ionosphere_busy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spin_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign an anomalous metric to check against features profiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -434,6 +434,8 @@ settings.FULL_DURATION for Mirage metrics</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>i</strong> (<em>object</em>) &#8211; python process id</li>
 <li><strong>metric_check_file</strong> (<em>str</em>) &#8211; full path to the metric check file</li>
+<li><strong>ionosphere_busy</strong> (<em>boolen</em>) &#8211; whether to Ionosphere manage and alternate
+between normal Ionosphere and echo analysis</li>
 </ul>
 </td>
 </tr>
@@ -657,7 +659,7 @@ at use_full_duration via learn.
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -679,7 +681,7 @@ at use_full_duration via learn.
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

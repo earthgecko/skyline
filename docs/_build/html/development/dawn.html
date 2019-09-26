@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Development - dawn &mdash; Skyline 1.2.11 documentation</title>
+  <title>Development - dawn &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../index.html"/>
         <link rel="up" title="Development" href="index.html"/>
         <link rel="next" title="Development - Webapp" href="webapp.html"/>
         <link rel="prev" title="Building documentation" href="building-documentation.html"/> 
@@ -188,17 +188,39 @@
 <div class="section" id="build-script-utils-dawn-skyline-dawn-sh">
 <h2>Build script - utils/dawn/skyline.dawn.sh<a class="headerlink" href="#build-script-utils-dawn-skyline-dawn-sh" title="Permalink to this headline">¶</a></h2>
 <p>The Skyline dawn branch adds a build script for <strong>TESTING</strong> only, it is not
-recommended for production use.  However seeing as it may be used by people
-for testing, it is written to try and ensure secure a set up as possible,
-with the exception of the definitions of iptables/iptables6/ufw.  It should not
-be used to deploy any other kind of environment unless the other components such
-as Graphite, iptables/iptables6/ufw are configured at the same time.  The build
-script is suitable for:</p>
+recommended for production use.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">When running this test instance there are expected to be errors in
+the logs as there is no real Graphite configured, no <a class="reference internal" href="../skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a>,
+no alert email addresses, etc, etc.  In fact there are no real time series
+apart from the <code class="docutils literal"><span class="pre">metrics.horizon.test.udp</span></code> data seeded into Redis, which goes
+stale quickly.  The Skyline now and panorama pages are not going to display
+graph data.</p>
+</div>
+<p>However seeing as it may be used by people for testing, it is written to try and
+ensure secure a set up as possible, with the exception of the definitions of
+iptables/iptables6/ufw.  It should not be used to deploy any other kind of
+environment unless the other components such as Graphite, iptables/iptables6/ufw
+are configured at the same time.  The build script is suitable for:</p>
 <ul class="simple">
 <li>CentOS 6.9</li>
-<li>CentOS 7.5</li>
+<li>CentOS 7.5 and 7.6</li>
 <li>Ubuntu 16.04.4 LTS</li>
 </ul>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If you are running on CentOS 6 mysql-connector-python needs to be
+fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
+mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
+handshake error.  Further to this there is a reported vulnerability with
+mysql-connector-python-8.0.6
+High severity vulnerability found on mysql-connector-python-8.0.6
+desc: Improper Access Control
+info: <a class="reference external" href="https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986">https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986</a>
+info: <a class="reference external" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435</a>
+You have been advised, so now you know.</p>
+</div>
 <p>The build script has user defined variables that can be edited directly in the
 script or read from /etc/skyline/skyline.dawn.conf.  The build script does the
 following:</p>
@@ -209,7 +231,7 @@ following:</p>
 <li>Downloads, builds, installs, configures and starts Redis</li>
 <li>Installs memcached and its dependencies, configures and starts it</li>
 <li>Creates a skyline system user</li>
-<li>Downloads, builds and deploys the current Skyline Python version (2.7.14) and
+<li>Downloads, builds and deploys the current Skyline Python version (2.7.16) and
 sets up the Skyline Python virtualenv</li>
 <li>Creates the required Skyline directories</li>
 <li>Clones the Skyline repo and checkouts the declared version</li>
@@ -225,6 +247,11 @@ metric and which creates an anomaly to be reviewed in the Skyline webapp UI</li>
 <li>The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
 be run in an idempotent manner.</li>
 </ul>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">remember there are expected to be errors and no time series, no
+Graphite, no graphs, etc.</p>
+</div>
 <p>Example usage:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Fetch</span>
 wget -O /tmp/skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
@@ -265,6 +292,14 @@ chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
 /tmp/skyline.dawn.sh
 </pre></div>
 </div>
+<p>Add an entry into your /etc/hosts file that maps the instance IP to
+YOUR_SKYLINE_SERVER_FQDN and open the reported URL in your web browser,
+accepting the self signed SSL certificate.</p>
+<p>Check the Skyline logs.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Check the logs</span>
+tail -n <span class="m">60</span> /var/log/skyline/*.log
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -287,7 +322,7 @@ chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -309,7 +344,7 @@ chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -22,9 +22,7 @@ analysis and the layers analysis, so the analysis pipeline with Ionosphere echo
 enabled is as follows:
 
 - Ionosphere comparison to Mirage ``SECOND_ORDER_RESOLUTION_SECONDS`` features
-  profiles
-- Ionosphere comparison to Mirage ``SECOND_ORDER_RESOLUTION_SECONDS`` minmax
-  scaled features profiles
+  profiles and minmax scaled features profiles
 - Ionosphere echo comparison to Mirage :mod:`settings.FULL_DURATION` features
   profiles
 - Ionosphere comparison to Mirage :mod:`settings.FULL_DURATION` minmax scaled

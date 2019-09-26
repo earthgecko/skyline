@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Running Skyline in a Python virtualenv &mdash; Skyline 1.2.11 documentation</title>
+  <title>Running Skyline in a Python virtualenv &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
         <link rel="next" title="Installation" href="installation.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -231,11 +231,16 @@ for more details.</p>
 </div>
 <div class="section" id="python-version">
 <h2>Python version<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Python-2.7.14 should still work as well, but all documentation has
+been updated to use Python-2.7.16.</p>
+</div>
 <p>Below we use the path <code class="docutils literal"><span class="pre">/opt/python_virtualenv</span></code>, which you can substitute
-with any path you choose.  We are going to use the Python-2.7.14 source and
-build and install an isolated Python-2.7.14, this has no effect on your system
+with any path you choose.  We are going to use the Python-2.7.16 source and
+build and install an isolated Python-2.7.16, this has no effect on your system
 Python:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7.14&quot;</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7.16&quot;</span>
 <span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
 
@@ -256,8 +261,8 @@ make
 make altinstall
 </pre></div>
 </div>
-<p>You will now have a Python-2.7.14 environment with the Python
-executable: <code class="docutils literal"><span class="pre">/opt/python_virtualenv/versions/2.7.14/bin/python2.7</span></code></p>
+<p>You will now have a Python-2.7.16 environment with the Python
+executable: <code class="docutils literal"><span class="pre">/opt/python_virtualenv/versions/2.7.16/bin/python2.7</span></code></p>
 </div>
 <div class="section" id="create-a-skyline-python-virtualenv">
 <h2>Create a Skyline Python virtualenv<a class="headerlink" href="#create-a-skyline-python-virtualenv" title="Permalink to this headline">¶</a></h2>
@@ -271,11 +276,11 @@ virtualenv context:</p>
 <li>pip must be &gt;=8.1.0</li>
 <li>setuptools must be &gt;=20.2.2</li>
 </ul>
-<p>Once again using Python-2.7.14:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7.14&quot;</span>
+<p>Once again using Python-2.7.16:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7.16&quot;</span>
 <span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2714&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2716&quot;</span>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
 virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
@@ -305,7 +310,7 @@ virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span c
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -327,7 +332,7 @@ virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span c
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

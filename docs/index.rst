@@ -20,6 +20,7 @@ Contents:
   upgrading/index.rst
   getting-data-into-skyline
   alert-testing
+  slack
   monotonic-metrics
   horizon
   analyzer

@@ -31,8 +31,8 @@ Boundary currently has 3 defined algorithms:
 
 Boundary is run as a separate process just like Analyzer, horizon and
 mirage. It was not envisaged to analyze all your metrics, but rather
-your key metrics in an additional dimension/s. If it was run across all
-of your metrics it would probably be:
+your key metrics in additional dimension/s. If it was run across all of your
+metrics it would probably be:
 
 - VERY noisy
 - CPU intensive
