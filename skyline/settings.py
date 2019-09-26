@@ -2115,3 +2115,92 @@ DOCKER_FAKE_EMAIL_ALERTS = False
 :vartype DOCKER_FAKE_EMAIL_ALERTS: boolean
 """
 
+"""
+Flux settings
+"""
+
+FLUX_IP = '127.0.0.1'
+"""
+:var FLUX_IP: The IP to bind the gunicorn flux server on.
+:vartype FLUX_IP: str
+"""
+
+FLUX_PORT = 8000
+"""
+:var FLUX_PORT: The port for the gunicorn flux server to listen on.
+:vartype FLUX_PORT: int
+"""
+
+FLUX_WORKERS = 1
+"""
+:var FLUX_WORKERS: The number of gunicorn flux workers
+:vartype FLUX_WORKERS: int
+"""
+
+FLUX_SELF_API_KEY = 'YOURown32charSkylineAPIkeySecret'
+"""
+:var FLUX_SELF_API_KEY: this is a 32 alphanumeric string that is used to
+    validate direct requests to Flux. Vista uses it and connects directly to
+    Flux and bypass the reverse proxy and authenticates itself.  It can only be
+    digits and letters e.g. [0-9][a-Z]
+:vartype FLUX_SELF_API_KEY: str
+"""
+
+FLUX_BACKLOG = 254
+"""
+:var FLUX_BACKLOG: The maximum number of pending connections.  This refers to
+    the number of clients that can be waiting to be served. Exceeding this number
+    results in the client getting an error when attempting to connect. It should
+    only affect servers under significant load.  As per
+    http://docs.gunicorn.org/en/stable/settings.html#backlog
+:vartype FLUX_WORKERS: int
+"""
+
+FLUX_SEND_TO_CARBON = False
+"""
+:var FLUX_SEND_TO_CARBON: Whether to send metrics recieved by flux to
+    Graphite.
+:vartype FLUX_SEND_TO_CARBON: boolean
+"""
+
+FLUX_CARBON_HOST = CARBON_HOST
+"""
+:var FLUX_CARBON_HOST: The carbon host that flux should send metrics to if
+    FLUX_SEND_TO_CARBON is enabled.
+:vartype FLUX_CARBON_HOST: str
+"""
+
+FLUX_CARBON_PORT = CARBON_PORT
+"""
+:var FLUX_CARBON_PORT: The carbon host port that flux should send metrics via
+    FLUX_SEND_TO_CARBON is enabled.
+:vartype FLUX_CARBON_PORT: int
+"""
+
+FLUX_CARBON_PICKLE_PORT = 2004
+"""
+:var FLUX_CARBON_PICKLE_PORT: The port for the Carbon PICKLE_RECEIVER_PORT on
+    Graphite as per defined in Graphite's carbon.conf
+:vartype FLUX_CARBON_PICKLE_PORT: int
+"""
+
+FLUX_SEND_TO_STATSD = False
+"""
+:var FLUX_SEND_TO_STATSD: Whether to send metrics recieved by flux to statsd.
+:vartype FLUX_SEND_TO_STATSD: boolean
+"""
+
+FLUX_STATSD_HOST = None
+"""
+:var FLUX_STATSD_HOST: The statsd host that flux should send metrics to if
+    FLUX_SEND_TO_STATSD is enabled.
+:vartype FLUX_STATSD_HOST: str
+"""
+
+FLUX_STATSD_PORT = 8125
+"""
+:var FLUX_STATSD_PORT: The statsd host port that flux should send metrics via
+    FLUX_SEND_TO_STATSD is enabled.
+:vartype FLUX_STATSD_PORT: int
+"""
+
