@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage &mdash; Skyline 1.2.11 documentation</title>
+  <title>mirage.mirage &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -987,7 +987,29 @@
                 <span class="n">rmtree</span><span class="p">(</span><span class="n">metric_data_dir</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span></div>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span>
+
+        <span class="c1"># @added 20190408 - Feature #2882: Mirage - periodic_check</span>
+        <span class="c1"># Remove the training_dir for mirage_periodic_check_metrics if not</span>
+        <span class="c1"># anomalous</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mirage_periodic_check_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.periodic_check.metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get mirage_periodic_check_metrics from Redis&#39;</span><span class="p">)</span>
+                <span class="n">mirage_periodic_check_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">mirage_periodic_check_metrics</span><span class="p">:</span>
+                <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="n">training_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">training_dir</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">rmtree</span><span class="p">(</span><span class="n">training_dir</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed Mirage periodic check training_data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree  Mirage periodic check training_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">mirage_periodic_check_metrics</span></div>
 
 <div class="viewcode-block" id="Mirage.run"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1118,7 +1140,7 @@
                 <span class="k">continue</span>
 
             <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Determine if any metric to analyze</span>
+<span class="sd">            Determine if any metric to analyze or Ionosphere alerts to be sent</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
 
@@ -1133,22 +1155,38 @@
                 <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">False</span>
 
                 <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Do not pospone the Ionosphere alerts check on based on whether</span>
+                <span class="c1"># there are checks on not</span>
+                <span class="c1"># if len(metric_var_files) == 0:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
                     <span class="c1"># @modified 20161228 - Feature #1830: Ionosphere alerts</span>
-                    <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;ionosphere.mirage.alert.*&#39;</span><span class="p">))</span>
                         <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to scan ionosphere.mirage.alert.* from Redis&#39;</span><span class="p">)</span>
+                        <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="p">[]</span>
 
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_alerts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Ionosphere alert requested :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_alerts</span><span class="p">))</span>
 
+                    <span class="c1"># @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                    <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+                    <span class="c1"># Do not pospone the Ionosphere alerts check</span>
+                    <span class="c1"># if not ionosphere_alerts_returned:</span>
+                    <span class="c1">#     logger.info(&#39;sleeping no metrics...&#39;)</span>
+                    <span class="c1">#     sleep(10)</span>
+
+                <span class="c1"># @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1"># Move this len(metric_var_files) from above and apply the</span>
+                <span class="c1"># appropriatte sleep</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping no metrics...&#39;</span><span class="p">)</span>
                         <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -1376,6 +1414,11 @@
             <span class="c1"># so continue</span>
             <span class="n">not_alerting_for_ionosphere</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
+            <span class="c1"># @added 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+            <span class="c1">#                   Feature #2484: FULL_DURATION feature profiles</span>
+            <span class="c1"># Only check Ionosphere is up once per cycle</span>
+            <span class="n">ionosphere_up</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
                 <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
                 <span class="n">not_an_ionosphere_metric_check_done</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
@@ -1387,23 +1430,29 @@
                     <span class="c1"># metrics if Ionosphere is up</span>
                     <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                     <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
-
                         <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
                         <span class="k">if</span> <span class="n">not_alerting_for_ionosphere</span> <span class="o">==</span> <span class="n">metric_name</span><span class="p">:</span>
                             <span class="k">continue</span>
 
-                        <span class="n">ionosphere_up</span> <span class="o">=</span> <span class="kc">False</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="n">ionosphere_up</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere&#39;</span><span class="p">)</span>
-                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for ionosphere key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                        <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+                        <span class="c1"># Only check Ionosphere is up once per cycle</span>
+                        <span class="c1"># ionosphere_up = False</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_up</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">ionosphere_up</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere&#39;</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for ionosphere key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
                         <span class="k">if</span> <span class="n">ionosphere_up</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not alerting - Ionosphere metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-
-                            <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
-                            <span class="n">not_alerting_for_ionosphere</span> <span class="o">=</span> <span class="n">metric_name</span>
-
-                            <span class="k">continue</span>
+                            <span class="c1"># @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
+                            <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+                            <span class="c1"># Wrapped this block up on conditional based on</span>
+                            <span class="c1"># ionosphere_alerts_returned</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not alerting - Ionosphere metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
+                                <span class="n">not_alerting_for_ionosphere</span> <span class="o">=</span> <span class="n">metric_name</span>
+                                <span class="k">continue</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Ionosphere not report up&#39;</span><span class="p">)</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;taking over alerting from Ionosphere if alert is matched on - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
@@ -1414,8 +1463,9 @@
                             <span class="c1"># Do not log multiple times for this either</span>
                             <span class="n">not_an_ionosphere_metric_check_done</span> <span class="o">=</span> <span class="n">metric_name</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not an Ionosphere metric checking whether to alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                            <span class="n">not_an_ionosphere_metric_check_done</span> <span class="o">=</span> <span class="n">metric_name</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not an Ionosphere metric checking whether to alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                <span class="n">not_an_ionosphere_metric_check_done</span> <span class="o">=</span> <span class="n">metric_name</span>
 
                     <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -1436,13 +1486,21 @@
                             <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">last_alert</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
+                                    <span class="c1"># @modified 20190410 - Feature #2882: Mirage - periodic_check</span>
+                                    <span class="c1"># Only set if not set</span>
                                     <span class="k">try</span><span class="p">:</span>
-                                        <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                                        <span class="n">second_order_resolution_seconds</span> <span class="o">+</span> <span class="mi">1</span>
+                                        <span class="n">set_second_order_resolution_seconds</span> <span class="o">=</span> <span class="kc">False</span>
                                     <span class="k">except</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine full_duration from the Ionosphere alert for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using settings.FULL_DURATION - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)))</span>
-                                        <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
+                                        <span class="n">set_second_order_resolution_seconds</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="k">if</span> <span class="n">set_second_order_resolution_seconds</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="mi">3600</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine full_duration from the Ionosphere alert for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using settings.FULL_DURATION - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)))</span>
+                                            <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
                                 <span class="c1"># trigger_alert(alert, metric, second_order_resolution_seconds, context)</span>
@@ -1574,7 +1632,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -1596,7 +1654,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

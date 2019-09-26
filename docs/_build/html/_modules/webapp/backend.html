@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.backend &mdash; Skyline 1.2.11 documentation</title>
+  <title>webapp.backend &mdash; Skyline 1.2.14 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.11 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -725,6 +725,7 @@
 
     <span class="k">return</span> <span class="n">luminosity_data</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">message</span></div>
 
+
 <span class="c1"># @added 20181119 - Feature #2714: webapp - now - preprocess time series</span>
 <span class="c1"># Allow for the time series to be aggregated by median or sum per interval</span>
 <span class="c1"># period</span>
@@ -748,12 +749,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
     <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
     <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
+    <span class="n">started_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">aggregated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># logger.info(&#39;aggregate_timeseries :: aggregating time series for %s by %s at a %s second interval&#39; % (</span>
+    <span class="c1">#    base_name, aggregate_by, str(aggregation_interval)))</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;aggregate_timeseries :: aggregating time series for </span><span class="si">%s</span><span class="s1"> by </span><span class="si">%s</span><span class="s1"> at a </span><span class="si">%s</span><span class="s1"> second interval&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">base_name</span><span class="p">,</span> <span class="n">aggregate_by</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">aggregation_interval</span><span class="p">)))</span>
+        <span class="n">base_name</span><span class="p">,</span> <span class="n">aggregate_by</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;aggregate_timeseries :: time series for </span><span class="si">%s</span><span class="s1"> less than 60 datapoints, too short&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
@@ -768,7 +773,7 @@
         <span class="k">del</span> <span class="n">timeseries</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">epoch_timeseries</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">],</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
         <span class="n">aggregate_by</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span>
         <span class="k">if</span> <span class="n">aggregate_by</span> <span class="o">==</span> <span class="s1">&#39;median&#39;</span><span class="p">:</span>
             <span class="n">aggregated_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;1T&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;ts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
@@ -779,9 +784,9 @@
         <span class="n">value_aggregated_df</span> <span class="o">=</span> <span class="n">aggregated_df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
         <span class="k">del</span> <span class="n">aggregated_df</span>
         <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">new_epoch_aggregated_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">epoch_aggregated_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
             <span class="n">timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">del</span> <span class="n">new_epoch_aggregated_df</span>
+        <span class="k">del</span> <span class="n">epoch_aggregated_df</span>
         <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value_aggregated_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
             <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -812,7 +817,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2018, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
 
     </p>
   </div>
@@ -834,7 +839,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.11',
+            VERSION:'1.2.14',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
