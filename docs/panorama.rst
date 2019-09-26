@@ -49,6 +49,11 @@ access the database with the user and password you configure in ``settings.py``
   requirements any time soon.  It appears and it is hoped anyway, time and
   really big data sets may invalidate this in the future, Gaia DR1 MySQL say :)
 
+.. warning:: It is assumed that the database is not running with an offset and
+  the database increments ids by 1.  If you are running an offset please review
+  all SQL updates to determine if you need to change anything in the SQL when
+  you apply Skyline SQL updates.
+
 - See ``skyline.sql`` in your cloned Skyline repo for the schema creation script
   and create the skyline database (also create a user with permissions on the
   database, e.g.

@@ -39,5 +39,7 @@ else
   /skyline/bin/ionosphere.d start
   /skyline/bin/luminosity.d start
   /skyline/bin/crucible.d start
+  /skyline/bin/flux.d start
+  /skyline/bin/vista.d start
   tail -f /var/log/skyline/*.log
 fi

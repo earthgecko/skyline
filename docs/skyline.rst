@@ -10,12 +10,14 @@ Subpackages
     skyline.analyzer_dev
     skyline.boundary
     skyline.crucible
+    skyline.flux
     skyline.horizon
     skyline.ionosphere
     skyline.luminosity
     skyline.mirage
     skyline.panorama
     skyline.tsfresh_features
+    skyline.vista
     skyline.webapp
 
 Submodules
@@ -73,6 +75,14 @@ skyline.skyline_version module
 ------------------------------
 
 .. automodule:: skyline_version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.slack_functions module
+------------------------------
+
+.. automodule:: slack_functions
     :members:
     :undoc-members:
     :show-inheritance:
