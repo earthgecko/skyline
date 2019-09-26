@@ -365,6 +365,14 @@ you need to try and be quicker next time.
   		<pre>No features_profile_details were passed, which is not ideal</pre>
   {% endif %}
 
+<!-- # @added 20190922 - Feature #2516: Add label to features profile -->
+  	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">label ::</span></span></span> features profile id {{ features_profile_id }}</h4>
+  {% if fp_label %}
+  		<pre>{{ fp_label }}</pre>
+  {% else %}
+  		<pre>None</pre>
+  {% endif %}
+
 <!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
   {% if validated %}
   	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span></span> True</h4>
@@ -871,14 +879,24 @@ Image file: {{ image }}<br><br>
       <br><p>
 <!-- # @modified 20170309 - Feature #1960: ionosphere_layers
       <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>-->
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]]</span></h4>
+<!-- # @modified 20190922 - Feature #2516: Add label to features profile
+# Only display the last 30 data points
+      <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]]</span></h4>
       {{ last_ts_json }}
+ -->
+      <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points</span></h4>
+      {{ last_ts_json[-30:] }}
 <!-- # @added 20170309 - Feature #1960: ionosphere_layers
 Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
 based features profile -->
     {% if ionosphere_json %}
+<!-- # @modified 20190922 - Feature #2516: Add label to features profile
+# Only display the last 30 data points
       <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]]</span></h4>
       {{ last_i_ts_json }}
+-->
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points</span></h4>
+      {{ last_i_ts_json[-30:] }}
     {% endif %}
   {% endif %}
   </div>

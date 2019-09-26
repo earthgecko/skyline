@@ -1358,6 +1358,14 @@ class Ionosphere(Thread):
             # profiles need to be created for ionosphere_echo
             fps_db_object = None
 
+            # @added 20190919 - Feature #2484: FULL_DURATION feature profiles
+            # Set both fp_count_with_echo and fp_count to 0 initially so that
+            # if the are echo fps, then the database can be updated with the
+            # fp_count_with_echo value for fp_count in the ionosphere_matched
+            # table
+            fp_count = 0
+            fp_count_with_echo = 0
+
             try:
                 connection = engine.connect()
                 # @modified 2018075 - Task #2446: Optimize Ionosphere
@@ -2604,6 +2612,13 @@ class Ionosphere(Thread):
                         minmax_fp_features_count = 0
                         minmax_anomalous_features_sum = 0
                         minmax_anomalous_features_count = 0
+
+                    # @added 20190919 - Feature #2484: FULL_DURATION feature profiles
+                    # If there are additional echo fps then the database can be
+                    # updated with the fp_count_with_echo value for fp_count in
+                    # the ionosphere_matched table
+                    if fp_count_with_echo > fp_count:
+                        fp_count = fp_count_with_echo
 
                     try:
                         connection = engine.connect()
