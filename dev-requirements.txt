@@ -516,3 +516,4 @@ urllib3==1.25.3
 # @added 201906025 - Branch #956: flux
 graphyte==1.6.0
 statsd==3.3.0
+falcon==2.0.0
