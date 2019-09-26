@@ -92,7 +92,8 @@ FULL_DURATION = 86400
     Be sure to pick a value that suits your memory capacity, your CPU capacity
     and your overall metrics count. Longer durations take a longer to analyze,
     but they can help the algorithms reduce the noise and provide more accurate
-    anomaly detection.
+    anomaly detection.  However, Mirage handles longer durations so ideally this
+    should be 86400.
 :vartype FULL_DURATION: str
 """
 
@@ -231,11 +232,12 @@ SKYLINE_FEEDBACK_NAMESPACES = [SERVER_METRICS_NAME, GRAPHITE_HOST]
     any metrics in the namespaces declared here.
     This list works in the same way that Horizon SKIP_LIST does, it matches in
     the string or dotted namespace elements.
-    For example:
-    SKYLINE_FEEDBACK_NAMESPACES = [
-        SERVER_METRICS_NAME,
-        'stats.skyline-docker-graphite-statsd-1',
-        'stats.skyline-mysql']
+    **For example**::
+
+        SKYLINE_FEEDBACK_NAMESPACES = [
+            SERVER_METRICS_NAME,
+            'stats.skyline-docker-graphite-statsd-1',
+            'stats.skyline-mysql']
 
 :vartype SKYLINE_FEEDBACK_NAMESPACES: list
 """
@@ -2058,10 +2060,11 @@ REMOTE_SKYLINE_INSTANCES = []
     population.
 :vartype REMOTE_SKYLINE_INSTANCES: list
 
-For example, the IP or FQDN, the username and password as a strings str:
-REMOTE_SKYLINE_INSTANCES = [
-    ['http://skyline-na.example.com:8080','remote_WEBAPP_AUTH_USER','remote_WEBAPP_AUTH_USER_PASSWORD'],
-    ['http://skyline-eu.example.com', 'another_remote_WEBAPP_AUTH_USER','another_WEBAPP_AUTH_USER_PASSWORD']]
+**For example**, the IP or FQDN, the username and password as a strings str::
+
+    REMOTE_SKYLINE_INSTANCES = [
+        ['http://skyline-na.example.com:8080','remote_WEBAPP_AUTH_USER','remote_WEBAPP_AUTH_USER_PASSWORD'],
+        ['http://skyline-eu.example.com', 'another_remote_WEBAPP_AUTH_USER','another_WEBAPP_AUTH_USER_PASSWORD']]
 
 """
 
@@ -2204,3 +2207,115 @@ FLUX_STATSD_PORT = 8125
 :vartype FLUX_STATSD_PORT: int
 """
 
+"""
+Vista settings
+"""
+
+VISTA_ENABLED = False
+"""
+:var VISTA_ENABLED: Enables Skyline vista
+:vartype VISTA_ENABLED: boolean
+"""
+
+VISTA_FETCHER_PROCESSES = 1
+"""
+:var VISTA_FETCHER_PROCESSES: the number of Vista fetcher processes to run.
+    In all circumstances 1 process should be sufficient as the process runs
+    asynchronous requests.
+:vartype VISTA_FETCHER_PROCESSES: int
+"""
+
+VISTA_FETCHER_PROCESS_MAX_RUNTIME = 50
+"""
+:var VISTA_FETCHER_PROCESS_MAX_RUNTIME: the maximum number of seconds Vista
+    fetcher process/es should run before being terminated.
+:vartype VISTA_FETCHER_PROCESS_MAX_RUNTIME: int
+"""
+
+VISTA_WORKER_PROCESSES = 1
+"""
+:var VISTA_WORKER_PROCESSES: the number of Vista worker processes to run to
+    validate and submit the metrics to Flux and Graphite.
+:vartype VISTA_WORKER_PROCESSES: int
+"""
+
+VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE = True
+"""
+:var VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE: Do not resample or send data that falls
+    into the current minute bin to Graphite.  This means that Skyline will only
+    analyse data 60 seconds behind.  In terms of fetching high frequency data
+    this should always be the default, so that Skyline is analysing the last
+    complete data point for a minute and is not analysing a partially populated
+    data point which will result in false positives.
+:vartype VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE: boolean
+"""
+
+VISTA_FETCH_GRAPHITE_METRICS = ()
+"""
+:var VISTA_FETCH_METRICS: Enables Skyline vista
+:vartype VISTA_FETCH_METRICS: tuple
+
+This is the config where metrics that need to be fetched are defined.
+
+- **Tuple schema example**::
+
+    VISTA_FETCH_METRICS = (
+        # (remote_host, remote_host_type, frequency, remote_target, graphite_target, uri, namespace_prefix, api_key, token, user, password, (populate_at_resolution_1, populate_at_resolution_2, ...)),
+        # Example with no authentication
+        ('https://graphite.example.org', 'graphite', 60, 'stats.web01.cpu.user', 'stats.web01.cpu.user', '/render/?from=-10minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
+        ('https://graphite.example.org', 'graphite', 60, 'sumSeries(stats.*.cpu.user)', 'stats.cumulative.cpu.user', '/render/?from=-10minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
+        ('https://graphite.example.org', 'graphite', 3600, 'swell.tar.hm0', 'swell.tar.hm0', '/render/?from=-120minutes&format=json&target=', 'graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
+        ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_load1', 'node_load1', 'default', 'vista.prometheus_example_org', None, None, None, None, , ('15d',))
+        ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_network_transmit_bytes_total{device="eth0"}', 'node_network_transmit_bytes_total.eth0', '/api/v1/query?query=node_network_transmit_bytes_total%7Bdevice%3D%22eth0%22%7D%5B5m%5D', 'vista.prometheus_example_org', None, None, None, None, , ('15d',))
+    )
+
+- All the fetch tuple parameters are required to be present in each fetch tuple.
+
+:param remote_host: the remote metric host base URL, including the protocol and
+    port.
+:param remote_host_type: the type of remote host, valid options are graphite and
+    prometheus.
+:param frequency: the frequency with which to fetch data in seconds.
+:param remote_target: the remote target to fetch, this can be a single metric,
+    a single metric with function/s applied or a series of metrics with
+    function/s applied which result is a single derived time series.
+:param graphite_target: the absolute metric name to be used to store in Graphite
+    this excludes the namespace_prefix set by the namespace_prefix param below.
+:param uri: the metric host endpoint URI used to retrieve the metric.
+    FOR GRAPHITE: valid Graphite URIs are only in the form of
+    `from=-<period><minutes|hours|days>``, only minutes, hours and days can be
+    passed otherwise the regexs for back filling any missing data will not work.
+    FOR PROMETHEUS: the uri can be passed a 'default', this will dynamically
+    generate a URI in terms of the URLENCODED_TARGET, start=
+    and end= parameters that are passed to query_range, based on the current
+    time.  A Prometheus API URI can be passed, but the query should be URL
+    encoded and cannot have any dynamic date based parameters.
+:param namespace_prefix: the Graphite namespace prefix to use for submitting
+    metrics to, can be passed as `''` if you do not want to prefix the metric
+    names.  The namespace_prefix must NOT have a trailing dot.
+:param api_key: an API key if one is required, otherwise pass the boolean None
+:param token: a token if one is required, otherwise pass the boolean None
+:param user: a username if one is required, otherwise pass the boolean None
+:param password: a password if one is required, otherwise pass the boolean None
+:param populate_at_resolutions: if you want Vista to populate the metric with
+    historic data this tuple allows you to declare at what resolutions to
+    populate the data with.  If you do not want to pre-populated then do not
+    declare a tuple and simply pass an empty tuple (). For a detailed
+    description of this functionality please see the Vista documentation page
+    at:
+    https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#pre-populating-metrics-with-historic-data
+    https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#populate_at_resolutions
+:type remote_host: str
+:type remote_host_type: str
+:type frequency: int
+:type remote_target: str
+:type graphite_target: str
+:type uri: str
+:type namespace_prefix: str
+:type api_key:
+:type token: str
+:type user: str
+:type password: str
+:type populate_with_resolutions: tuple (with trailing comma if a single
+    resolution is declared)
+"""
